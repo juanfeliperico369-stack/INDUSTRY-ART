@@ -1,0 +1,21 @@
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  const errores = [];
+  page.on('pageerror', e => errores.push('pageerror: ' + e.message));
+  page.on('console', m => { if (m.type() === 'error') errores.push('console: ' + m.text()); });
+  await page.goto('file://' + __dirname + '/ia.html');
+  await page.click('[data-a="nuevaPartida"]');
+  await page.click('[data-a="empezar"]');
+  await page.click('#modal [data-a="cerrarModal"]');
+  await page.evaluate(() => IA.ui.ajuste('ritmo', 'auto'));
+  await page.evaluate(() => IA.ui.renderBarra());
+  await page.click('[data-a="avanzar"]');
+  await page.waitForFunction(() => IA.n.semana() >= 13 || (IA.n.semana() >= 10 && !IA.ui.estado.auto), null, { timeout: 40000 });
+  await page.waitForTimeout(300);
+  const info = await page.evaluate(() => ({ semana: IA.n.semana(), anio: IA.n.anio(), premios: IA.n.S.premios.length, modal: IA.ui.modalAbierto(), avisos: Array.from(document.querySelectorAll('.aviso')).map(a => a.textContent) }));
+  console.log(JSON.stringify(info));
+  console.log(errores.join('\n'));
+  await browser.close();
+})();

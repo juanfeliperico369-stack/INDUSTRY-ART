@@ -37,7 +37,8 @@ IA.rivales = (function () {
       famId = fams[N.ponderado(fams.map(function (f) { return Math.exp(2 * (S.mundo.tendencias[f] || 0)); }))];
     }
     const fam = D.familia(famId);
-    const gen = [N.elegir(fam.generos)];
+    const permitidos = fam.generos.filter(function (g) { return !O.validarGeneros([g]); });
+    const gen = [N.elegir(permitidos.length ? permitidos : ['Drama'])];
     if (N.probabilidad(0.45)) {
       const otra = D.familias[N.entero(0, D.familias.length - 1)];
       const g2 = N.elegir(otra.generos);
@@ -59,7 +60,7 @@ IA.rivales = (function () {
     O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4), prestigio ? 2 : 4);
     if (!O.equipoCompleto(b)) return null;
     const costo = O.costoTalento(b) + b.pp;
-    if (est.caja < costo * 0.6) return null;
+    if (est.caja < costo * 0.9) return null;
     return P.iniciar(b, ctx);
   }
   // Cada mes: decide qué producir
@@ -87,9 +88,10 @@ IA.rivales = (function () {
     for (let i = 1; i < S.estudios.length; i++) {
       const est = S.estudios[i];
       const base = D.rivales[i - 1].tam;
-      if (est.caja < tipico * 0.5) {
+      // Rescate solo si de verdad quedó en rojo (no por tener la caja invertida en producciones)
+      if (est.caja < 0) {
         est.tam = N.redondear(Math.max(base * 0.4, est.tam * 0.85), 3);
-        const aporte = Math.round(tipico * 2 * est.tam);
+        const aporte = Math.round(-est.caja + tipico * est.tam);
         est.caja += aporte;
         est.rescates++;
         N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' recibe dinero de inversionistas para seguir filmando.' });

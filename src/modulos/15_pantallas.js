@@ -13,7 +13,7 @@ IA.pantallas = (function () {
   function titulo(texto, ayuda, extra) {
     return '<div class="titulo-sec"><h2>' + esc(texto) + '</h2><div class="fila">' + (extra || '') + (ayuda ? '<button class="ayuda-i" data-a="ayuda" data-v="' + ayuda + '" aria-label="' + t('ayuda') + '">i</button>' : '') + '</div></div>';
   }
-  function kpi(nombre, valor, clase) { return '<div class="kpi"><span>' + esc(nombre) + '</span><b class="cifra ' + (clase || '') + '">' + valor + '</b></div>'; }
+  function kpi(nombre, valor, clase) { return '<div class="kpi"><span>' + esc(nombre) + '</span><b class="cifra ' + (clase || '') + '">' + esc(valor) + '</b></div>'; }
   function pestanas(sec, lista, actual) {
     return '<div class="pestanas" role="tablist">' + lista.map(function (p) {
       return '<button class="pestana' + (p[0] === actual ? ' on' : '') + '" role="tab" aria-selected="' + (p[0] === actual) + '" data-a="sub" data-s="' + sec + '" data-v="' + p[0] + '">' + esc(p[1]) + '</button>';
@@ -290,7 +290,7 @@ IA.pantallas = (function () {
   // ---------- Ficha de obra ----------
   function fichaObra(id) {
     const o = O.porId(id);
-    if (!o) return '';
+    if (!o) return '<p class="tenue">Esta obra pasó al resumen histórico del año: ya no tiene ficha propia.</p>';
     const est = N.S.estudios[o.est];
     const estrenada = o.et === 'cartelera' || o.et === 'terminada';
     let h = '<div class="fila" style="align-items:flex-start"><canvas class="poster grande" data-poster="' + o.id + '"></canvas><div class="col crece">' +
@@ -348,11 +348,23 @@ IA.pantallas = (function () {
 
   // ---------- Crear obra (modo rápido) ----------
   const cr = { b: null, paso: 0, rol: null };
+  // Mirar o preparar una obra no es una decisión: la interfaz usa su propio azar para que abrir "Crear obra"
+  // no cambie el mundo (la misma semilla con las mismas decisiones da la misma partida).
+  let azarUI = null;
+  function conAzarUI(fn) {
+    const S = N.S;
+    if (!azarUI) azarUI = N.estadoNuevo(S.semilla + '|interfaz|' + S.t);
+    const real = S.rng;
+    S.rng = azarUI;
+    try { return fn(); } finally { azarUI = S.rng; S.rng = real; }
+  }
   const PASOS = ['paso_generos', 'paso_tono', 'paso_escala', 'paso_equipo', 'paso_titulo'];
   function nuevoBorrador(gen) {
-    const b = O.borrador(0, { gen: gen || [recomendarGenero()], escala: 2 });
-    O.equipoRecomendado(b, 1);
-    return b;
+    return conAzarUI(function () {
+      const b = O.borrador(0, { gen: gen || [recomendarGenero()], escala: 2 });
+      O.equipoRecomendado(b, 1);
+      return b;
+    });
   }
   function recomendarGenero() {
     const S = N.S;
@@ -403,7 +415,7 @@ IA.pantallas = (function () {
           f.generos.map(function (g) {
             const on = b.gen.indexOf(g) >= 0;
             const prueba = on ? null : b.gen.concat([g]);
-            const bloqueado = !on && (b.gen.length >= 3 || O.validarGeneros(prueba));
+            const bloqueado = !on && (b.gen.length >= 3 || O.validarGeneros(prueba, N.anio()));
             return '<button class="chip' + (on ? ' on' : '') + '" data-a="crGen" data-v="' + esc(g) + '"' + (bloqueado ? ' disabled' : '') + ' aria-pressed="' + on + '">' + esc(g) + '</button>';
           }).join('') + '</div><p class="nota">' + esc(f.temporada) + ' · costo ' + (f.costo >= 1.3 ? 'alto' : f.costo <= 0.6 ? 'bajo' : 'medio') + ' · inclina a ' + (f.inclina === 'pub' ? 'el público' : f.inclina === 'crit' ? 'la crítica' : 'ambos') + '</p>';
       });
@@ -418,7 +430,7 @@ IA.pantallas = (function () {
         const ok = disp.indexOf(c.id) >= 0;
         return '<button class="chip' + (b.clas === c.id ? ' on' : '') + '" data-a="crClas" data-v="' + c.id + '"' + (ok ? '' : ' disabled') + '>' + c.id + (c.id === rec ? ' ★' : '') + '</button>';
       }).join('') + '</div>';
-      const cl = D.clasificacion(b.clas);
+      const cl = D.clasificacion(b.clas) || D.clasificacion('PG-13');
       const acc = E.accesoClasificacion(Object.assign({}, b), N.S.estudios[0].reg, N.anio());
       h += '<p class="nota">' + esc(cl.desc) + '. Público que puede verla en tu región: ' + Math.round(Math.min(1.5, acc) * 100) + ' % de lo normal.' + (N.anio() < D.ANIO_CLASIFICACION_POR_EDADES ? ' Antes de 1968 la censura de la época no deja estrenar NC-17, 18, R ni X.' : '') + '</p>';
     } else if (cr.paso === 2) {
@@ -491,7 +503,7 @@ IA.pantallas = (function () {
   ac('crTono', function (v) { if (!cr.b) return; cr.b.tono = v; ajustarBorrador(cr.b); refrescarCrear(); });
   ac('crClas', function (v) { if (!cr.b) return; cr.b.clas = v; refrescarCrear(); });
   ac('crEscala', function (v) { if (!cr.b) return; cr.b.esc = +v; ajustarBorrador(cr.b); refrescarCrear(); });
-  ac('crEquipoRec', function () { if (!cr.b) return; cr.b.eq = { int: [] }; O.equipoRecomendado(cr.b, 1); cr.rol = null; refrescarCrear(); });
+  ac('crEquipoRec', function () { if (!cr.b) return; cr.b.eq = { int: [] }; conAzarUI(function () { O.equipoRecomendado(cr.b, 1); }); cr.rol = null; refrescarCrear(); });
   ac('crRol', function (v) { if (!cr.b) return; cr.rol = cr.rol === v ? null : v; refrescarCrear(); });
   ac('crElegir', function (v) { if (!cr.b) return;
     const b = cr.b, id = +v;
@@ -500,11 +512,11 @@ IA.pantallas = (function () {
     cr.rol = null; refrescarCrear();
   });
   ac('crTitulo', function (v) { if (!cr.b) return; cr.b.tit = v.slice(0, 48); });
-  ac('crOtroTitulo', function () { if (!cr.b) return; cr.b.tit = O.tituloNuevo(cr.b.gen); refrescarCrear(); });
+  ac('crOtroTitulo', function () { if (!cr.b) return; cr.b.tit = conAzarUI(function () { return O.tituloNuevo(cr.b.gen); }); refrescarCrear(); });
   ac('crPaso', function (v) { if (!cr.b) return; cr.paso = N.limitar(cr.paso + (+v), 0, PASOS.length - 1); cr.rol = null; refrescarCrear(); });
   ac('crIniciar', function () { if (!cr.b) return;
     const b = cr.b;
-    b.tit = (b.tit || '').trim() || O.tituloNuevo(b.gen);
+    b.tit = (b.tit || '').trim() || conAzarUI(function () { return O.tituloNuevo(b.gen); });
     const r = J.iniciarObra(b);
     if (r.error) { U.aviso(r.error, 'mal'); refrescarCrear(); return; }
     IA.arte.sonido('exito');
@@ -535,13 +547,13 @@ IA.pantallas = (function () {
     h += '</div><h3>' + t('marketing') + '</h3><p class="nota">' + t('marketing_ayuda') + '</p><div class="col">';
     const fe = E.famaEstrellas(o, T.porId), fam = N.S.estudios[0].fama;
     D.nivelesMarketing.forEach(function (n, i) {
-      const cm = E.marketingTipico(N.anio()) * n.mult;
-      const con = E.conocimiento({ cm: cm }, N.anio(), fam, fe, NG.bonoMarketing(0));
+      const cm = E.marketingTipico(N.anio(pg.t)) * n.mult;
+      const con = E.conocimiento({ cm: cm }, N.anio(pg.t), fam, fe, NG.bonoMarketing(0));
       h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.nivM === i ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="pgMarketing" data-v="' + i + '"><b>' + n.nombre + '</b><span class="chico">' + dinero(cm) + ' · llega a ' + Math.round(con * 100) + ' %</span></button>';
     });
     const canales = E.canalesDe(N.anio()).map(function (c) { return c.nombre; }).join(', ');
     h += '</div><p class="nota">Canales de la época: ' + esc(canales) + '.</p>';
-    h += '<button class="btn primario bloque" data-a="pgConfirmar">' + t('confirmar') + ' · ' + dinero(E.marketingTipico(N.anio()) * D.nivelesMarketing[pg.nivM].mult) + '</button>';
+    h += '<button class="btn primario bloque" data-a="pgConfirmar">' + t('confirmar') + ' · ' + dinero(E.marketingTipico(N.anio(pg.t)) * D.nivelesMarketing[pg.nivM].mult) + '</button>';
     return h;
   }
   ac('programar', function (v) { pg.id = +v; pg.t = 0; pg.nivM = 2; U.abrirFicha(fichaProgramar(), 'programar'); });
@@ -748,7 +760,7 @@ IA.pantallas = (function () {
         const css = getComputedStyle(document.documentElement);
         IA.arte.linea(cv, [{ nombre: 'Caja en dólares de hoy', color: css.getPropertyValue('--acento').trim(), valores: hist.map(function (x) { return x.caja2025; }) },
           { nombre: 'Utilidad del año (hoy)', color: css.getPropertyValue('--dorado').trim(), valores: hist.map(function (x) { return M.aHoy(x.util, x.anio); }) }],
-          hist.map(function (x) { return String(x.anio); }), { formato: function (v) { const a = U.ajustes().dineroHoy; U.ajuste('dineroHoy', false); const s = U.dinero(v, 2025); U.ajuste('dineroHoy', a); return s; } });
+          hist.map(function (x) { return String(x.anio); }), { formato: function (v) { return U.dinero(v, 2025); } });
       });
       h += '<h3>Historial (en dólares de hoy)</h3><canvas class="lienzo" style="height:200px" data-grafica="' + g1 + '"></canvas>';
       h += '<div class="desliza"><table class="tabla"><tr><th>Año</th><th class="n">' + t('ingresos') + '</th><th class="n">' + t('gastos') + '</th><th class="n">' + t('utilidad') + '</th><th class="n">' + t('impuestos') + '</th><th class="n">' + t('caja') + '</th><th class="n">Cuota</th></tr>' +
@@ -819,7 +831,11 @@ IA.pantallas = (function () {
     U.ajuste(k, val);
     if (N.S) U.refrescar();
   });
-  ac('salir', function () { detenerAuto(); IA.guardado.autoguardar().then(function () { N.S = null; U.cerrarModal(); U.cerrarFicha(); U.render(); }); });
+  ac('salir', function () {
+    detenerAuto();
+    const fin = function () { N.S = null; U.cerrarModal(); U.cerrarFicha(); U.render(); };
+    if (N.S && !N.S.quiebra && U.ajustes().autoguardado !== 'no') IA.guardado.autoguardar().then(fin); else fin();
+  });
   function guardado(lista) {
     let h = '<div class="fila entre"><h2>' + t('gua_titulo') + '</h2><button class="ico" data-a="cerrarModal" aria-label="' + t('cerrar') + '">' + icono('cerrar') + '</button></div>';
     h += lista.map(function (x, i) {
@@ -907,8 +923,10 @@ IA.pantallas = (function () {
     return { r: r, nuevas: nuevas };
   }
   function autoguardarSiToca(anioAntes, mesAntes) {
-    const modo = U.ajustes().autoguardado;
+    let modo = U.ajustes().autoguardado;
     if (modo === 'no') return;
+    // Sin compresión nativa (navegadores viejos) comprimir cuesta: se autoguarda cada año y al salir
+    if (modo === 'mes' && !IA.guardado.hayGzip()) modo = 'anio';
     if ((modo === 'mes' && N.mes() !== mesAntes) || N.anio() !== anioAntes) {
       IA.guardado.autoguardar().then(function (g) { if (!g.ok) U.aviso(t('gua_error', { e: g.error }), 'mal'); });
     }
@@ -917,8 +935,8 @@ IA.pantallas = (function () {
     if (!res) return;
     const r = res.r;
     U.refrescar();
-    res.nuevas.filter(function (n) { return n.imp; }).slice(0, 2).forEach(function (n) { U.aviso(textoNoticia(n).replace(/<[^>]+>/g, '')); });
-    if (N.S.quiebra) { detenerAuto(); U.modal('<h2>' + t('quiebra_titulo') + '</h2><p>' + t('quiebra_texto') + '</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + t('cargar') + '</button><button class="btn" data-a="salir">' + t('aj_salir') + '</button></div>'); IA.arte.sonido('fracaso'); return; }
+    res.nuevas.filter(function (n) { return n.imp; }).slice(0, 2).forEach(function (n) { U.aviso(n.texto.split('{$}').join(n.monto !== undefined ? dinero(n.monto, N.anio(n.t)) : '')); });
+    if (N.S.quiebra) { detenerAuto(); modalQuiebra(); IA.arte.sonido('fracaso'); return; }
     if (r && r.motivo === 'premios' && N.S.premios.length) mostrarPremios();
     else if (mostrarResumen && r && r.semanas > 1) {
       U.modal('<h2>' + t('resumen_titulo', { n: r.semanas }) + '</h2><div class="kpis">' + kpi(t('ingresos'), dinero(r.ingresos), 'bien') + kpi(t('gastos'), dinero(r.gastos), 'mal') + kpi('Cambio de caja', dinero(r.caja), r.caja >= 0 ? 'bien' : 'mal') + kpi(t('caja'), dinero(est0().caja)) + '</div>' +
@@ -928,26 +946,31 @@ IA.pantallas = (function () {
   }
   function mostrarPremios() {
     const res = N.S.premios[N.S.premios.length - 1];
+    if (!res) return;
     const tuyos = res.categorias.filter(function (c) { return c.ganador.est === 0; }).length;
     if (tuyos) IA.arte.sonido('premio');
     U.modal('<h2>' + t('premios_titulo', { nombre: D.premios.nombre, anio: res.anio + 1 }) + '</h2>' + res.categorias.map(function (c) {
       return '<p style="margin:6px 0"><span class="tenue chico">' + esc(c.nombre) + '</span><br><b class="' + (c.ganador.est === 0 ? 'oro' : '') + '">«' + esc(c.ganador.titulo) + '»' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + '</b> · ' + esc(nombreEstudio(c.ganador.est)) + '</p>';
     }).join('') + '<button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
   }
+  function modalQuiebra() {
+    U.modal('<h2>' + t('quiebra_titulo') + '</h2><p>' + t('quiebra_texto') + '</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + t('cargar') + '</button><button class="btn" data-a="salir">' + t('aj_salir') + '</button></div>');
+  }
   ac('avanzar', function () {
     if (U.estado.auto) { detenerAuto(); U.renderBarra(); return; }
+    if (N.S && N.S.quiebra) { modalQuiebra(); return; }
     const ritmo = U.ajustes().ritmo;
     if (ritmo === 'auto') {
       U.estado.auto = true;
       U.renderBarra();
       autoTimer = setInterval(function () {
-        if (U.modalAbierto()) return;
+        if (U.modalAbierto() || U.fichaAbierta() || document.hidden) return;
         const res = avanzarCon('semana');
-        const ev = N.S ? J.hayEvento() : 'quiebra';
+        if (!res) { detenerAuto(); U.renderBarra(); return; }
+        const ev = N.S.quiebra ? 'quiebra' : res.r && res.r.motivo === 'premios' ? 'premios' : J.hayEvento();
         despuesDeAvanzar(res, false);
         if (ev === 'lista' || ev === 'quiebra' || ev === 'premios') {
           detenerAuto(); U.renderBarra();
-          if (ev === 'premios') mostrarPremios();
           if (ev === 'lista') U.aviso('Tienes una obra lista para estrenar');
         }
       }, U.ajustes().movimiento ? 600 : 420);
@@ -956,9 +979,14 @@ IA.pantallas = (function () {
     IA.arte.sonido('avance');
     despuesDeAvanzar(avanzarCon(ritmo), true);
   });
+  let cerrarRitmo = null;
+  function quitarMenuRitmo() {
+    const m = document.querySelector('.menu-ritmo');
+    if (m) m.remove();
+    if (cerrarRitmo) { document.removeEventListener('click', cerrarRitmo, true); cerrarRitmo = null; }
+  }
   ac('menuRitmo', function (v, el) {
-    const viejo = document.querySelector('.menu-ritmo');
-    if (viejo) { viejo.remove(); return; }
+    if (document.querySelector('.menu-ritmo')) { quitarMenuRitmo(); return; }
     const r = el.getBoundingClientRect();
     const m = document.createElement('div');
     m.className = 'menu-ritmo';
@@ -970,10 +998,11 @@ IA.pantallas = (function () {
     }).join('');
     document.body.appendChild(m);
     setTimeout(function () {
-      document.addEventListener('click', function cerrar(ev) { if (!ev.target.closest('.menu-ritmo')) { m.remove(); document.removeEventListener('click', cerrar, true); } }, true);
+      cerrarRitmo = function (ev) { if (!ev.target.closest('.menu-ritmo') && !ev.target.closest('[data-a="menuRitmo"]')) quitarMenuRitmo(); };
+      document.addEventListener('click', cerrarRitmo, true);
     }, 0);
   });
-  ac('ritmo', function (v) { U.ajuste('ritmo', v); const m = document.querySelector('.menu-ritmo'); if (m) m.remove(); detenerAuto(); U.renderBarra(); });
+  ac('ritmo', function (v) { U.ajuste('ritmo', v); quitarMenuRitmo(); detenerAuto(); U.renderBarra(); });
 
   // Refresco de la ficha abierta cuando avanza el tiempo
   function refrescarFicha(clave) {

@@ -74,6 +74,7 @@ IA.juego = (function () {
     if (conectado) return;
     conectado = true;
     N.on('noticia', noticia);
+    N.on('aviso', function (a) { noticia({ tipo: a.tipo, texto: a.texto, importante: true }); });
     N.on('obraLista', function (o) {
       if (o.est !== 0) R.alQuedarLista(o, NG.contextoDe(o.est));
     });
@@ -121,6 +122,7 @@ IA.juego = (function () {
   }
   function programarEstreno(o, t, nivM) {
     if (o.et !== 'lista' || o.est !== 0) return 'La obra no está lista.';
+    if (o.prog) return 'La obra ya tiene fecha de estreno.';
     const cm = E.marketingTipico(N.anio(t)) * D.nivelesMarketing[nivM].mult;
     if (N.S.estudios[0].caja < cm) return 'No alcanza la caja para esa campaña.';
     L.programar(o, t, nivM, NG.contexto());
@@ -168,7 +170,6 @@ IA.juego = (function () {
     const listas = O.activas().filter(function (o) { return o.est === 0 && o.et === 'lista' && !o.prog; });
     if (listas.length) return 'lista';
     if (O.activas().some(function (o) { return o.est === 0 && o.et === 'lista' && o.prog && o.fe === S.t; })) return 'estreno';
-    if (N.semana() === D.premios.semana) return 'premios';
     if (N.semana() === 1) return 'anio';
     return '';
   }
@@ -183,8 +184,9 @@ IA.juego = (function () {
     while (n < tope) {
       const anioAntes = N.anio();
       const ingA = NG.total(S.fin.anio, 'ing'), gasA = NG.total(S.fin.anio, 'gas');
-      avanzarSemana();
+      const rs = avanzarSemana();
       n++;
+      const huboCeremonia = !!(rs && rs.ceremonia);
       if (N.anio() !== anioAntes) {
         const h = S.fin.hist[S.fin.hist.length - 1];
         ingAcum += h ? h.ing - ingA : 0;
@@ -195,6 +197,7 @@ IA.juego = (function () {
       }
       if (modo === 'mes' && N.mes(S.t) !== N.mes(t0) && n >= 3) break;
       if (S.quiebra) { motivo = 'quiebra'; break; }
+      if (huboCeremonia) { motivo = 'premios'; if (modo === 'evento' || modo === 'semana') break; }
       if (modo === 'evento') { motivo = hayEvento(); if (motivo) break; }
     }
     void ing0; void gas0;

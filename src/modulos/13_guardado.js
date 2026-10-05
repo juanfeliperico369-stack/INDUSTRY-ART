@@ -325,7 +325,7 @@ IA.guardado = (function () {
   }
 
   return {
-    MANUALES: MANUALES, AUTOS: AUTOS, suma: suma, comprimir: comprimir, descomprimir: descomprimir,
+    MANUALES: MANUALES, AUTOS: AUTOS, suma: suma, hayGzip: hayGzip, comprimir: comprimir, descomprimir: descomprimir,
     lzwComprimir: lzwComprimir, lzwDescomprimir: lzwDescomprimir, migrar: migrar, listar: listar,
     guardar: guardar, autoguardar: autoguardar, cargar: cargar, borrar: borrar, masReciente: masReciente,
     exportarTexto: exportarTexto, exportarArchivo: exportarArchivo, importarTexto: importarTexto, medir: medir, activar: activar,

@@ -50,7 +50,7 @@ a { color: var(--acento); }
 :focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
 
 /* ---------- Estructura ---------- */
-#app { position: fixed; inset: 0; display: grid; grid-template-rows: var(--barra) 1fr var(--menu); grid-template-columns: 1fr; grid-template-areas: "barra" "vista" "menu"; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+#app { position: fixed; top: 0; right: 0; bottom: 0; left: 0; display: grid; grid-template-rows: var(--barra) 1fr var(--menu); grid-template-columns: 1fr; grid-template-areas: "barra" "vista" "menu"; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
 #barra { grid-area: barra; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--panel); border-bottom: 1px solid var(--borde); min-width: 0; }
 #menu { grid-area: menu; display: flex; background: var(--panel); border-top: 1px solid var(--borde); }
 #vista { grid-area: vista; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding: 10px 10px 24px; outline: none; }
@@ -146,12 +146,12 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 #ficha { position: fixed; left: 0; right: 0; bottom: 0; max-height: 88vh; z-index: 30; background: var(--panel); border-top: 1px solid var(--borde); border-radius: 20px 20px 0 0; box-shadow: var(--sombra); transform: translateY(105%); transition: transform .25s ease; overflow-y: auto; padding: 8px 14px calc(18px + env(safe-area-inset-bottom)); }
 #ficha.abierta { transform: none; }
 #ficha .tirador { width: 48px; height: 5px; border-radius: 3px; background: var(--borde); margin: 4px auto 8px; }
-#velo { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); z-index: 25; display: none; }
+#velo { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, .45); z-index: 25; display: none; }
 #velo.on { display: block; }
-#modal { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 8, 20, .7); }
+#modal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 40; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 8, 20, .7); }
 #modal.on { display: flex; }
 #modal .caja { width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--borde); border-radius: 18px; padding: 16px; box-shadow: var(--sombra); }
-#avisos { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--menu) + 12px + env(safe-area-inset-bottom)); z-index: 50; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(92vw, 520px); }
+#avisos { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--menu) + 12px + env(safe-area-inset-bottom)); z-index: 50; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: 92vw; max-width: 520px; }
 .aviso { background: var(--dorado); color: #201a00; padding: 10px 14px; border-radius: 20px; font-weight: 700; box-shadow: var(--sombra); pointer-events: auto; text-align: center; }
 .aviso.mal { background: var(--mal); color: #fff; }
 .menu-ritmo { position: fixed; z-index: 45; background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra); padding: 6px; display: flex; flex-direction: column; min-width: 230px; }
@@ -172,7 +172,7 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
   .nav.on { box-shadow: none; background: var(--panel2); }
   .dos { grid-template-columns: 1fr 1fr; align-items: start; }
   .kpis { grid-template-columns: repeat(4, 1fr); }
-  #ficha { left: auto; top: 0; width: min(440px, 92vw); max-height: none; border-radius: 20px 0 0 20px; border-left: 1px solid var(--borde); border-top: 0; transform: translateX(105%); padding-top: calc(12px + env(safe-area-inset-top)); }
+  #ficha { left: auto; top: 0; width: 440px; max-width: 92vw; max-height: none; border-radius: 20px 0 0 20px; border-left: 1px solid var(--borde); border-top: 0; transform: translateX(105%); padding-top: calc(12px + env(safe-area-inset-top)); }
   #ficha.abierta { transform: none; }
   #ficha .tirador { display: none; }
   #avisos { bottom: 16px; }

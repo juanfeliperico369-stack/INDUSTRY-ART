@@ -60,7 +60,7 @@ a { color: var(--acento); }
 :focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
 
 /* ---------- Estructura ---------- */
-#app { position: fixed; inset: 0; display: grid; grid-template-rows: var(--barra) 1fr var(--menu); grid-template-columns: 1fr; grid-template-areas: "barra" "vista" "menu"; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+#app { position: fixed; top: 0; right: 0; bottom: 0; left: 0; display: grid; grid-template-rows: var(--barra) 1fr var(--menu); grid-template-columns: 1fr; grid-template-areas: "barra" "vista" "menu"; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
 #barra { grid-area: barra; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--panel); border-bottom: 1px solid var(--borde); min-width: 0; }
 #menu { grid-area: menu; display: flex; background: var(--panel); border-top: 1px solid var(--borde); }
 #vista { grid-area: vista; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding: 10px 10px 24px; outline: none; }
@@ -156,12 +156,12 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 #ficha { position: fixed; left: 0; right: 0; bottom: 0; max-height: 88vh; z-index: 30; background: var(--panel); border-top: 1px solid var(--borde); border-radius: 20px 20px 0 0; box-shadow: var(--sombra); transform: translateY(105%); transition: transform .25s ease; overflow-y: auto; padding: 8px 14px calc(18px + env(safe-area-inset-bottom)); }
 #ficha.abierta { transform: none; }
 #ficha .tirador { width: 48px; height: 5px; border-radius: 3px; background: var(--borde); margin: 4px auto 8px; }
-#velo { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); z-index: 25; display: none; }
+#velo { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, .45); z-index: 25; display: none; }
 #velo.on { display: block; }
-#modal { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 8, 20, .7); }
+#modal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 40; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 8, 20, .7); }
 #modal.on { display: flex; }
 #modal .caja { width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--borde); border-radius: 18px; padding: 16px; box-shadow: var(--sombra); }
-#avisos { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--menu) + 12px + env(safe-area-inset-bottom)); z-index: 50; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(92vw, 520px); }
+#avisos { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--menu) + 12px + env(safe-area-inset-bottom)); z-index: 50; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: 92vw; max-width: 520px; }
 .aviso { background: var(--dorado); color: #201a00; padding: 10px 14px; border-radius: 20px; font-weight: 700; box-shadow: var(--sombra); pointer-events: auto; text-align: center; }
 .aviso.mal { background: var(--mal); color: #fff; }
 .menu-ritmo { position: fixed; z-index: 45; background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra); padding: 6px; display: flex; flex-direction: column; min-width: 230px; }
@@ -182,7 +182,7 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
   .nav.on { box-shadow: none; background: var(--panel2); }
   .dos { grid-template-columns: 1fr 1fr; align-items: start; }
   .kpis { grid-template-columns: repeat(4, 1fr); }
-  #ficha { left: auto; top: 0; width: min(440px, 92vw); max-height: none; border-radius: 20px 0 0 20px; border-left: 1px solid var(--borde); border-top: 0; transform: translateX(105%); padding-top: calc(12px + env(safe-area-inset-top)); }
+  #ficha { left: auto; top: 0; width: 440px; max-width: 92vw; max-height: none; border-radius: 20px 0 0 20px; border-left: 1px solid var(--borde); border-top: 0; transform: translateX(105%); padding-top: calc(12px + env(safe-area-inset-top)); }
   #ficha.abierta { transform: none; }
   #ficha .tirador { display: none; }
   #avisos { bottom: 16px; }
@@ -1153,7 +1153,7 @@ IA.economia = (function () {
     LOCAL: 0.25,         // ventaja en la región de la sede del estudio
     TENDENCIA: 0.3,      // peso de la tendencia de la familia
     PARTICIPACION: 0.88, // parte del público posible que va al cine con una cartelera típica
-    MULT_TIPICO: 2.0,   // bruto medio ÷ costo de una película típica (fija el presupuesto típico)
+    MULT_TIPICO: 1.85,   // bruto medio ÷ costo de una película típica (fija el presupuesto típico)
     U_TIPICA: -0.2,      // atractivo de estreno de una película típica de otras productoras
     CORTE: 0.025,        // la obra sale de cartelera bajo este % de su mejor semana
     MAX_SEMANAS: 30,
@@ -1554,7 +1554,7 @@ IA.talentos = (function () {
       const cambio = N.limitar(0.05 * Math.log(Math.max(0.2, rendimiento)) + (obra.crit - 60) / 800, -0.06, 0.12) * peso;
       t.fama = N.redondear(N.limitar(t.fama + cambio, 0, 1), 3);
       if (rendimiento >= 2) t.exitos++;
-      t.hab = Math.min(t.pot + 3, t.hab + 0.5);
+      t.hab = Math.max(t.hab, Math.min(t.pot + 3, t.hab + 0.5));
     });
   }
   // Una vez al año: edades, crecimiento, retiro (entre 70 y 100; pueden volver en la V18) y nuevas generaciones
@@ -1579,7 +1579,8 @@ IA.talentos = (function () {
     }
     Object.keys(D.poblacionTalentos).forEach(function (of) {
       const falta = D.poblacionTalentos[of] - (conteo[of] || 0);
-      for (let i = 0; i < falta + N.entero(0, 2); i++) S.talentos.push(crear(of, N.entero(18, 26), anio));
+      const extra = N.entero(0, 2);
+      for (let i = 0; i < falta + extra; i++) S.talentos.push(crear(of, N.entero(18, 26), anio));
     });
     // Historial compacto: se borran los retirados hace más de 25 años (sus nombres quedan en los créditos)
     S.talentos = S.talentos.filter(function (t) { return !t.ret || anio - t.ret < 25 || t.premios > 0; });
@@ -1651,15 +1652,17 @@ IA.obras = (function () {
   function clasificacionRecomendada(gen, anio) {
     const fam = D.familia(D.familiaDe[gen[0]] || 'DR');
     const disp = clasificacionesDisponibles(anio, gen);
-    if (gen.indexOf('Erótico') >= 0) return disp.indexOf('18') >= 0 ? '18' : disp[0];
-    return disp.indexOf(fam.clas) >= 0 ? fam.clas : disp.indexOf('PG-13') >= 0 ? 'PG-13' : disp[0];
+    if (gen.indexOf('Erótico') >= 0 && disp.indexOf('18') >= 0) return '18';
+    return disp.indexOf(fam.clas) >= 0 ? fam.clas : disp.indexOf('PG-13') >= 0 ? 'PG-13' : (disp[0] || 'PG-13');
   }
   // Reglas de la combinación de géneros. Devuelve un texto de error o ''.
-  function validarGeneros(gen) {
+  function validarGeneros(gen, anio) {
     if (!gen.length) return 'Elige al menos un género.';
     if (gen.length > 3) return 'Máximo tres géneros.';
     const fams = gen.map(function (g) { return D.familiaDe[g]; });
     if (gen.indexOf('Erótico') >= 0 && fams.indexOf('FJ') >= 0) return 'Lo erótico nunca va con públicos infantiles, familiares o adolescentes.';
+    const a = anio === undefined ? (N.S ? N.anio() : 2000) : anio;
+    if (gen.indexOf('Erótico') >= 0 && a < D.ANIO_CLASIFICACION_POR_EDADES) return 'Antes de 1968 la censura de la época no deja estrenar obras eróticas (solo existen con clasificación de adultos).';
     return '';
   }
 
@@ -1667,7 +1670,9 @@ IA.obras = (function () {
   function borrador(est, opciones) {
     const anio = N.anio();
     const o = opciones || {};
-    const gen = (o.gen || ['Drama']).slice(0, 3);
+    let gen = (o.gen || ['Drama']).slice(0, 3);
+    if (validarGeneros(gen, anio)) gen = gen.filter(function (g) { return g !== 'Erótico'; });
+    if (!gen.length) gen = ['Romance'];
     const fam = D.familiaDe[gen[0]] || 'DR';
     const escala = o.escala === undefined ? 2 : o.escala;
     const tono = o.tono || 'Realista';
@@ -1740,7 +1745,8 @@ IA.obras = (function () {
     const q = E.calidadBase(o, T.porId, bonos || {});
     const ct = costoTalento(o);
     const cm = E.marketingTipico(N.anio()) * D.nivelesMarketing[o.nivM === undefined ? 2 : o.nivM].mult;
-    return { calidad: Math.round(N.limitar(q, 1, 99)), talento: ct, produccion: o.pp, marketing: cm, total: ct + o.pp + cm };
+    const pp = Math.round(o.pp * (1 - IA.negocio.ahorro(o.est)));
+    return { calidad: Math.round(N.limitar(q, 1, 99)), talento: ct, produccion: pp, marketing: cm, total: ct + pp + cm };
   }
   // Convierte el borrador en obra real (la producción la mueve cada semana)
   function crear(b) {
@@ -1791,6 +1797,10 @@ IA.obras = (function () {
       if (o.est !== 0 && t - (o.fe || 0) > 52 * 4 && o.eq) {
         BORRAR.forEach(function (k) { delete o[k]; });
         if (o.cr) o.cr = { direccion: o.cr.direccion, reparto: o.cr.reparto, sx: o.cr.sx };
+      }
+      // Tus obras de hace más de 25 años quedan con su ficha, créditos e informe, sin el detalle técnico
+      if (o.est === 0 && t - (o.fe || 0) > 52 * 25 && o.dur) {
+        ['acc', 'u', 'delta', 'dur', 'sr', 'semProd', 'sobre', 't0', 'tLista', 'prog', 'anioPlan', 'max', 'eq'].forEach(function (k) { delete o[k]; });
       }
     });
     // Las obras de rivales muy viejas y sin premios se resumen por año para que el guardado no crezca sin fin
@@ -1948,6 +1958,7 @@ IA.lanzamiento = (function () {
       N.emit('estreno', o);
     });
     N.S.mercado.fe52 = N.S.mercado.fe52.filter(function (t) { return t > N.S.t - 52; });
+    N.S.mercado.estrenos52 = N.S.mercado.fe52.length;
     const cartelera = O.enCartelera();
     const res = E.semanaCartelera(cartelera, ctx);
     const m = N.S.mercado;
@@ -2034,7 +2045,8 @@ IA.rivales = (function () {
       famId = fams[N.ponderado(fams.map(function (f) { return Math.exp(2 * (S.mundo.tendencias[f] || 0)); }))];
     }
     const fam = D.familia(famId);
-    const gen = [N.elegir(fam.generos)];
+    const permitidos = fam.generos.filter(function (g) { return !O.validarGeneros([g]); });
+    const gen = [N.elegir(permitidos.length ? permitidos : ['Drama'])];
     if (N.probabilidad(0.45)) {
       const otra = D.familias[N.entero(0, D.familias.length - 1)];
       const g2 = N.elegir(otra.generos);
@@ -2056,7 +2068,7 @@ IA.rivales = (function () {
     O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4), prestigio ? 2 : 4);
     if (!O.equipoCompleto(b)) return null;
     const costo = O.costoTalento(b) + b.pp;
-    if (est.caja < costo * 0.6) return null;
+    if (est.caja < costo * 0.9) return null;
     return P.iniciar(b, ctx);
   }
   // Cada mes: decide qué producir
@@ -2084,9 +2096,10 @@ IA.rivales = (function () {
     for (let i = 1; i < S.estudios.length; i++) {
       const est = S.estudios[i];
       const base = D.rivales[i - 1].tam;
-      if (est.caja < tipico * 0.5) {
+      // Rescate solo si de verdad quedó en rojo (no por tener la caja invertida en producciones)
+      if (est.caja < 0) {
         est.tam = N.redondear(Math.max(base * 0.4, est.tam * 0.85), 3);
-        const aporte = Math.round(tipico * 2 * est.tam);
+        const aporte = Math.round(-est.caja + tipico * est.tam);
         est.caja += aporte;
         est.rescates++;
         N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' recibe dinero de inversionistas para seguir filmando.' });
@@ -5409,6 +5422,7 @@ IA.juego = (function () {
     if (conectado) return;
     conectado = true;
     N.on('noticia', noticia);
+    N.on('aviso', function (a) { noticia({ tipo: a.tipo, texto: a.texto, importante: true }); });
     N.on('obraLista', function (o) {
       if (o.est !== 0) R.alQuedarLista(o, NG.contextoDe(o.est));
     });
@@ -5456,6 +5470,7 @@ IA.juego = (function () {
   }
   function programarEstreno(o, t, nivM) {
     if (o.et !== 'lista' || o.est !== 0) return 'La obra no está lista.';
+    if (o.prog) return 'La obra ya tiene fecha de estreno.';
     const cm = E.marketingTipico(N.anio(t)) * D.nivelesMarketing[nivM].mult;
     if (N.S.estudios[0].caja < cm) return 'No alcanza la caja para esa campaña.';
     L.programar(o, t, nivM, NG.contexto());
@@ -5503,7 +5518,6 @@ IA.juego = (function () {
     const listas = O.activas().filter(function (o) { return o.est === 0 && o.et === 'lista' && !o.prog; });
     if (listas.length) return 'lista';
     if (O.activas().some(function (o) { return o.est === 0 && o.et === 'lista' && o.prog && o.fe === S.t; })) return 'estreno';
-    if (N.semana() === D.premios.semana) return 'premios';
     if (N.semana() === 1) return 'anio';
     return '';
   }
@@ -5518,8 +5532,9 @@ IA.juego = (function () {
     while (n < tope) {
       const anioAntes = N.anio();
       const ingA = NG.total(S.fin.anio, 'ing'), gasA = NG.total(S.fin.anio, 'gas');
-      avanzarSemana();
+      const rs = avanzarSemana();
       n++;
+      const huboCeremonia = !!(rs && rs.ceremonia);
       if (N.anio() !== anioAntes) {
         const h = S.fin.hist[S.fin.hist.length - 1];
         ingAcum += h ? h.ing - ingA : 0;
@@ -5530,6 +5545,7 @@ IA.juego = (function () {
       }
       if (modo === 'mes' && N.mes(S.t) !== N.mes(t0) && n >= 3) break;
       if (S.quiebra) { motivo = 'quiebra'; break; }
+      if (huboCeremonia) { motivo = 'premios'; if (modo === 'evento' || modo === 'semana') break; }
       if (modo === 'evento') { motivo = hayEvento(); if (motivo) break; }
     }
     void ing0; void gas0;
@@ -5871,7 +5887,7 @@ IA.guardado = (function () {
   }
 
   return {
-    MANUALES: MANUALES, AUTOS: AUTOS, suma: suma, comprimir: comprimir, descomprimir: descomprimir,
+    MANUALES: MANUALES, AUTOS: AUTOS, suma: suma, hayGzip: hayGzip, comprimir: comprimir, descomprimir: descomprimir,
     lzwComprimir: lzwComprimir, lzwDescomprimir: lzwDescomprimir, migrar: migrar, listar: listar,
     guardar: guardar, autoguardar: autoguardar, cargar: cargar, borrar: borrar, masReciente: masReciente,
     exportarTexto: exportarTexto, exportarArchivo: exportarArchivo, importarTexto: importarTexto, medir: medir, activar: activar,
@@ -6158,8 +6174,9 @@ IA.ui = (function () {
     document.addEventListener('keydown', function (ev) {
       if (ev.key === 'Escape') { if (modalAbierto()) cerrarModal(); else if (fichaAbierta()) cerrarFicha(); return; }
       if (!N.S || ev.target.tagName === 'INPUT' || ev.target.tagName === 'SELECT' || ev.target.tagName === 'TEXTAREA') return;
+      if (ev.target.closest && ev.target.closest('button, a, [data-a], label')) return;
       // Atajos de teclado en PC
-      if (ev.key === ' ' || ev.key === 'Enter') { if (!modalAbierto() && !fichaAbierta()) { ev.preventDefault(); acciones.avanzar(); } }
+      if (ev.key === ' ' || ev.key === 'Enter') { if (!modalAbierto() && !fichaAbierta()) { ev.preventDefault(); try { acciones.avanzar(); } catch (e) { console.error(e); aviso('Error: ' + e.message, 'mal'); } } }
       const n = '12345'.indexOf(ev.key);
       if (n >= 0 && !modalAbierto()) irA(SECCIONES[n]);
     });
@@ -6202,7 +6219,7 @@ IA.pantallas = (function () {
   function titulo(texto, ayuda, extra) {
     return '<div class="titulo-sec"><h2>' + esc(texto) + '</h2><div class="fila">' + (extra || '') + (ayuda ? '<button class="ayuda-i" data-a="ayuda" data-v="' + ayuda + '" aria-label="' + t('ayuda') + '">i</button>' : '') + '</div></div>';
   }
-  function kpi(nombre, valor, clase) { return '<div class="kpi"><span>' + esc(nombre) + '</span><b class="cifra ' + (clase || '') + '">' + valor + '</b></div>'; }
+  function kpi(nombre, valor, clase) { return '<div class="kpi"><span>' + esc(nombre) + '</span><b class="cifra ' + (clase || '') + '">' + esc(valor) + '</b></div>'; }
   function pestanas(sec, lista, actual) {
     return '<div class="pestanas" role="tablist">' + lista.map(function (p) {
       return '<button class="pestana' + (p[0] === actual ? ' on' : '') + '" role="tab" aria-selected="' + (p[0] === actual) + '" data-a="sub" data-s="' + sec + '" data-v="' + p[0] + '">' + esc(p[1]) + '</button>';
@@ -6479,7 +6496,7 @@ IA.pantallas = (function () {
   // ---------- Ficha de obra ----------
   function fichaObra(id) {
     const o = O.porId(id);
-    if (!o) return '';
+    if (!o) return '<p class="tenue">Esta obra pasó al resumen histórico del año: ya no tiene ficha propia.</p>';
     const est = N.S.estudios[o.est];
     const estrenada = o.et === 'cartelera' || o.et === 'terminada';
     let h = '<div class="fila" style="align-items:flex-start"><canvas class="poster grande" data-poster="' + o.id + '"></canvas><div class="col crece">' +
@@ -6537,11 +6554,23 @@ IA.pantallas = (function () {
 
   // ---------- Crear obra (modo rápido) ----------
   const cr = { b: null, paso: 0, rol: null };
+  // Mirar o preparar una obra no es una decisión: la interfaz usa su propio azar para que abrir "Crear obra"
+  // no cambie el mundo (la misma semilla con las mismas decisiones da la misma partida).
+  let azarUI = null;
+  function conAzarUI(fn) {
+    const S = N.S;
+    if (!azarUI) azarUI = N.estadoNuevo(S.semilla + '|interfaz|' + S.t);
+    const real = S.rng;
+    S.rng = azarUI;
+    try { return fn(); } finally { azarUI = S.rng; S.rng = real; }
+  }
   const PASOS = ['paso_generos', 'paso_tono', 'paso_escala', 'paso_equipo', 'paso_titulo'];
   function nuevoBorrador(gen) {
-    const b = O.borrador(0, { gen: gen || [recomendarGenero()], escala: 2 });
-    O.equipoRecomendado(b, 1);
-    return b;
+    return conAzarUI(function () {
+      const b = O.borrador(0, { gen: gen || [recomendarGenero()], escala: 2 });
+      O.equipoRecomendado(b, 1);
+      return b;
+    });
   }
   function recomendarGenero() {
     const S = N.S;
@@ -6592,7 +6621,7 @@ IA.pantallas = (function () {
           f.generos.map(function (g) {
             const on = b.gen.indexOf(g) >= 0;
             const prueba = on ? null : b.gen.concat([g]);
-            const bloqueado = !on && (b.gen.length >= 3 || O.validarGeneros(prueba));
+            const bloqueado = !on && (b.gen.length >= 3 || O.validarGeneros(prueba, N.anio()));
             return '<button class="chip' + (on ? ' on' : '') + '" data-a="crGen" data-v="' + esc(g) + '"' + (bloqueado ? ' disabled' : '') + ' aria-pressed="' + on + '">' + esc(g) + '</button>';
           }).join('') + '</div><p class="nota">' + esc(f.temporada) + ' · costo ' + (f.costo >= 1.3 ? 'alto' : f.costo <= 0.6 ? 'bajo' : 'medio') + ' · inclina a ' + (f.inclina === 'pub' ? 'el público' : f.inclina === 'crit' ? 'la crítica' : 'ambos') + '</p>';
       });
@@ -6607,7 +6636,7 @@ IA.pantallas = (function () {
         const ok = disp.indexOf(c.id) >= 0;
         return '<button class="chip' + (b.clas === c.id ? ' on' : '') + '" data-a="crClas" data-v="' + c.id + '"' + (ok ? '' : ' disabled') + '>' + c.id + (c.id === rec ? ' ★' : '') + '</button>';
       }).join('') + '</div>';
-      const cl = D.clasificacion(b.clas);
+      const cl = D.clasificacion(b.clas) || D.clasificacion('PG-13');
       const acc = E.accesoClasificacion(Object.assign({}, b), N.S.estudios[0].reg, N.anio());
       h += '<p class="nota">' + esc(cl.desc) + '. Público que puede verla en tu región: ' + Math.round(Math.min(1.5, acc) * 100) + ' % de lo normal.' + (N.anio() < D.ANIO_CLASIFICACION_POR_EDADES ? ' Antes de 1968 la censura de la época no deja estrenar NC-17, 18, R ni X.' : '') + '</p>';
     } else if (cr.paso === 2) {
@@ -6680,7 +6709,7 @@ IA.pantallas = (function () {
   ac('crTono', function (v) { if (!cr.b) return; cr.b.tono = v; ajustarBorrador(cr.b); refrescarCrear(); });
   ac('crClas', function (v) { if (!cr.b) return; cr.b.clas = v; refrescarCrear(); });
   ac('crEscala', function (v) { if (!cr.b) return; cr.b.esc = +v; ajustarBorrador(cr.b); refrescarCrear(); });
-  ac('crEquipoRec', function () { if (!cr.b) return; cr.b.eq = { int: [] }; O.equipoRecomendado(cr.b, 1); cr.rol = null; refrescarCrear(); });
+  ac('crEquipoRec', function () { if (!cr.b) return; cr.b.eq = { int: [] }; conAzarUI(function () { O.equipoRecomendado(cr.b, 1); }); cr.rol = null; refrescarCrear(); });
   ac('crRol', function (v) { if (!cr.b) return; cr.rol = cr.rol === v ? null : v; refrescarCrear(); });
   ac('crElegir', function (v) { if (!cr.b) return;
     const b = cr.b, id = +v;
@@ -6689,11 +6718,11 @@ IA.pantallas = (function () {
     cr.rol = null; refrescarCrear();
   });
   ac('crTitulo', function (v) { if (!cr.b) return; cr.b.tit = v.slice(0, 48); });
-  ac('crOtroTitulo', function () { if (!cr.b) return; cr.b.tit = O.tituloNuevo(cr.b.gen); refrescarCrear(); });
+  ac('crOtroTitulo', function () { if (!cr.b) return; cr.b.tit = conAzarUI(function () { return O.tituloNuevo(cr.b.gen); }); refrescarCrear(); });
   ac('crPaso', function (v) { if (!cr.b) return; cr.paso = N.limitar(cr.paso + (+v), 0, PASOS.length - 1); cr.rol = null; refrescarCrear(); });
   ac('crIniciar', function () { if (!cr.b) return;
     const b = cr.b;
-    b.tit = (b.tit || '').trim() || O.tituloNuevo(b.gen);
+    b.tit = (b.tit || '').trim() || conAzarUI(function () { return O.tituloNuevo(b.gen); });
     const r = J.iniciarObra(b);
     if (r.error) { U.aviso(r.error, 'mal'); refrescarCrear(); return; }
     IA.arte.sonido('exito');
@@ -6724,13 +6753,13 @@ IA.pantallas = (function () {
     h += '</div><h3>' + t('marketing') + '</h3><p class="nota">' + t('marketing_ayuda') + '</p><div class="col">';
     const fe = E.famaEstrellas(o, T.porId), fam = N.S.estudios[0].fama;
     D.nivelesMarketing.forEach(function (n, i) {
-      const cm = E.marketingTipico(N.anio()) * n.mult;
-      const con = E.conocimiento({ cm: cm }, N.anio(), fam, fe, NG.bonoMarketing(0));
+      const cm = E.marketingTipico(N.anio(pg.t)) * n.mult;
+      const con = E.conocimiento({ cm: cm }, N.anio(pg.t), fam, fe, NG.bonoMarketing(0));
       h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.nivM === i ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="pgMarketing" data-v="' + i + '"><b>' + n.nombre + '</b><span class="chico">' + dinero(cm) + ' · llega a ' + Math.round(con * 100) + ' %</span></button>';
     });
     const canales = E.canalesDe(N.anio()).map(function (c) { return c.nombre; }).join(', ');
     h += '</div><p class="nota">Canales de la época: ' + esc(canales) + '.</p>';
-    h += '<button class="btn primario bloque" data-a="pgConfirmar">' + t('confirmar') + ' · ' + dinero(E.marketingTipico(N.anio()) * D.nivelesMarketing[pg.nivM].mult) + '</button>';
+    h += '<button class="btn primario bloque" data-a="pgConfirmar">' + t('confirmar') + ' · ' + dinero(E.marketingTipico(N.anio(pg.t)) * D.nivelesMarketing[pg.nivM].mult) + '</button>';
     return h;
   }
   ac('programar', function (v) { pg.id = +v; pg.t = 0; pg.nivM = 2; U.abrirFicha(fichaProgramar(), 'programar'); });
@@ -6937,7 +6966,7 @@ IA.pantallas = (function () {
         const css = getComputedStyle(document.documentElement);
         IA.arte.linea(cv, [{ nombre: 'Caja en dólares de hoy', color: css.getPropertyValue('--acento').trim(), valores: hist.map(function (x) { return x.caja2025; }) },
           { nombre: 'Utilidad del año (hoy)', color: css.getPropertyValue('--dorado').trim(), valores: hist.map(function (x) { return M.aHoy(x.util, x.anio); }) }],
-          hist.map(function (x) { return String(x.anio); }), { formato: function (v) { const a = U.ajustes().dineroHoy; U.ajuste('dineroHoy', false); const s = U.dinero(v, 2025); U.ajuste('dineroHoy', a); return s; } });
+          hist.map(function (x) { return String(x.anio); }), { formato: function (v) { return U.dinero(v, 2025); } });
       });
       h += '<h3>Historial (en dólares de hoy)</h3><canvas class="lienzo" style="height:200px" data-grafica="' + g1 + '"></canvas>';
       h += '<div class="desliza"><table class="tabla"><tr><th>Año</th><th class="n">' + t('ingresos') + '</th><th class="n">' + t('gastos') + '</th><th class="n">' + t('utilidad') + '</th><th class="n">' + t('impuestos') + '</th><th class="n">' + t('caja') + '</th><th class="n">Cuota</th></tr>' +
@@ -7008,7 +7037,11 @@ IA.pantallas = (function () {
     U.ajuste(k, val);
     if (N.S) U.refrescar();
   });
-  ac('salir', function () { detenerAuto(); IA.guardado.autoguardar().then(function () { N.S = null; U.cerrarModal(); U.cerrarFicha(); U.render(); }); });
+  ac('salir', function () {
+    detenerAuto();
+    const fin = function () { N.S = null; U.cerrarModal(); U.cerrarFicha(); U.render(); };
+    if (N.S && !N.S.quiebra && U.ajustes().autoguardado !== 'no') IA.guardado.autoguardar().then(fin); else fin();
+  });
   function guardado(lista) {
     let h = '<div class="fila entre"><h2>' + t('gua_titulo') + '</h2><button class="ico" data-a="cerrarModal" aria-label="' + t('cerrar') + '">' + icono('cerrar') + '</button></div>';
     h += lista.map(function (x, i) {
@@ -7096,8 +7129,10 @@ IA.pantallas = (function () {
     return { r: r, nuevas: nuevas };
   }
   function autoguardarSiToca(anioAntes, mesAntes) {
-    const modo = U.ajustes().autoguardado;
+    let modo = U.ajustes().autoguardado;
     if (modo === 'no') return;
+    // Sin compresión nativa (navegadores viejos) comprimir cuesta: se autoguarda cada año y al salir
+    if (modo === 'mes' && !IA.guardado.hayGzip()) modo = 'anio';
     if ((modo === 'mes' && N.mes() !== mesAntes) || N.anio() !== anioAntes) {
       IA.guardado.autoguardar().then(function (g) { if (!g.ok) U.aviso(t('gua_error', { e: g.error }), 'mal'); });
     }
@@ -7106,8 +7141,8 @@ IA.pantallas = (function () {
     if (!res) return;
     const r = res.r;
     U.refrescar();
-    res.nuevas.filter(function (n) { return n.imp; }).slice(0, 2).forEach(function (n) { U.aviso(textoNoticia(n).replace(/<[^>]+>/g, '')); });
-    if (N.S.quiebra) { detenerAuto(); U.modal('<h2>' + t('quiebra_titulo') + '</h2><p>' + t('quiebra_texto') + '</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + t('cargar') + '</button><button class="btn" data-a="salir">' + t('aj_salir') + '</button></div>'); IA.arte.sonido('fracaso'); return; }
+    res.nuevas.filter(function (n) { return n.imp; }).slice(0, 2).forEach(function (n) { U.aviso(n.texto.split('{$}').join(n.monto !== undefined ? dinero(n.monto, N.anio(n.t)) : '')); });
+    if (N.S.quiebra) { detenerAuto(); modalQuiebra(); IA.arte.sonido('fracaso'); return; }
     if (r && r.motivo === 'premios' && N.S.premios.length) mostrarPremios();
     else if (mostrarResumen && r && r.semanas > 1) {
       U.modal('<h2>' + t('resumen_titulo', { n: r.semanas }) + '</h2><div class="kpis">' + kpi(t('ingresos'), dinero(r.ingresos), 'bien') + kpi(t('gastos'), dinero(r.gastos), 'mal') + kpi('Cambio de caja', dinero(r.caja), r.caja >= 0 ? 'bien' : 'mal') + kpi(t('caja'), dinero(est0().caja)) + '</div>' +
@@ -7117,26 +7152,31 @@ IA.pantallas = (function () {
   }
   function mostrarPremios() {
     const res = N.S.premios[N.S.premios.length - 1];
+    if (!res) return;
     const tuyos = res.categorias.filter(function (c) { return c.ganador.est === 0; }).length;
     if (tuyos) IA.arte.sonido('premio');
     U.modal('<h2>' + t('premios_titulo', { nombre: D.premios.nombre, anio: res.anio + 1 }) + '</h2>' + res.categorias.map(function (c) {
       return '<p style="margin:6px 0"><span class="tenue chico">' + esc(c.nombre) + '</span><br><b class="' + (c.ganador.est === 0 ? 'oro' : '') + '">«' + esc(c.ganador.titulo) + '»' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + '</b> · ' + esc(nombreEstudio(c.ganador.est)) + '</p>';
     }).join('') + '<button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
   }
+  function modalQuiebra() {
+    U.modal('<h2>' + t('quiebra_titulo') + '</h2><p>' + t('quiebra_texto') + '</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + t('cargar') + '</button><button class="btn" data-a="salir">' + t('aj_salir') + '</button></div>');
+  }
   ac('avanzar', function () {
     if (U.estado.auto) { detenerAuto(); U.renderBarra(); return; }
+    if (N.S && N.S.quiebra) { modalQuiebra(); return; }
     const ritmo = U.ajustes().ritmo;
     if (ritmo === 'auto') {
       U.estado.auto = true;
       U.renderBarra();
       autoTimer = setInterval(function () {
-        if (U.modalAbierto()) return;
+        if (U.modalAbierto() || U.fichaAbierta() || document.hidden) return;
         const res = avanzarCon('semana');
-        const ev = N.S ? J.hayEvento() : 'quiebra';
+        if (!res) { detenerAuto(); U.renderBarra(); return; }
+        const ev = N.S.quiebra ? 'quiebra' : res.r && res.r.motivo === 'premios' ? 'premios' : J.hayEvento();
         despuesDeAvanzar(res, false);
         if (ev === 'lista' || ev === 'quiebra' || ev === 'premios') {
           detenerAuto(); U.renderBarra();
-          if (ev === 'premios') mostrarPremios();
           if (ev === 'lista') U.aviso('Tienes una obra lista para estrenar');
         }
       }, U.ajustes().movimiento ? 600 : 420);
@@ -7145,9 +7185,14 @@ IA.pantallas = (function () {
     IA.arte.sonido('avance');
     despuesDeAvanzar(avanzarCon(ritmo), true);
   });
+  let cerrarRitmo = null;
+  function quitarMenuRitmo() {
+    const m = document.querySelector('.menu-ritmo');
+    if (m) m.remove();
+    if (cerrarRitmo) { document.removeEventListener('click', cerrarRitmo, true); cerrarRitmo = null; }
+  }
   ac('menuRitmo', function (v, el) {
-    const viejo = document.querySelector('.menu-ritmo');
-    if (viejo) { viejo.remove(); return; }
+    if (document.querySelector('.menu-ritmo')) { quitarMenuRitmo(); return; }
     const r = el.getBoundingClientRect();
     const m = document.createElement('div');
     m.className = 'menu-ritmo';
@@ -7159,10 +7204,11 @@ IA.pantallas = (function () {
     }).join('');
     document.body.appendChild(m);
     setTimeout(function () {
-      document.addEventListener('click', function cerrar(ev) { if (!ev.target.closest('.menu-ritmo')) { m.remove(); document.removeEventListener('click', cerrar, true); } }, true);
+      cerrarRitmo = function (ev) { if (!ev.target.closest('.menu-ritmo') && !ev.target.closest('[data-a="menuRitmo"]')) quitarMenuRitmo(); };
+      document.addEventListener('click', cerrarRitmo, true);
     }, 0);
   });
-  ac('ritmo', function (v) { U.ajuste('ritmo', v); const m = document.querySelector('.menu-ritmo'); if (m) m.remove(); detenerAuto(); U.renderBarra(); });
+  ac('ritmo', function (v) { U.ajuste('ritmo', v); quitarMenuRitmo(); detenerAuto(); U.renderBarra(); });
 
   // Refresco de la ficha abierta cuando avanza el tiempo
   function refrescarFicha(clave) {
@@ -7193,6 +7239,11 @@ IA.pruebas = (function () {
     agresiva: { escala: [2, 3], marketing: 3, ambicion: 1.4, colchon: 1.2, construir: 3.5, pisos: 10 },
   };
   const ORDEN_PISOS = ['plato', 'guion', 'edicion', 'plato', 'sonido', 'efectos', 'casting', 'plato', 'marketing', 'archivo'];
+  // Registro de cada obra al terminar (las métricas no dependen de lo que la compactación borra después)
+  let registro = null;
+  N.on('obraTerminada', function (o) {
+    if (registro) registro.push({ est: o.est, mult: O.multiplicador(o), neto: O.neto(o) });
+  });
   const ORDEN_TERRENOS = ['backlot', 'foso', 'captura', 'backlot'];
 
   // ---------- Decisiones del bot ----------
@@ -7283,6 +7334,7 @@ IA.pruebas = (function () {
     const est = ESTRATEGIAS[op.estrategia];
     const errores = [];
     const reloj = typeof performance !== 'undefined' ? function () { return performance.now(); } : function () { return Date.now(); };
+    registro = [];
     IA.juego.nuevaPartida({ semilla: op.semilla, anio: op.desde, nombre: 'Bot ' + op.estrategia, bot: true });
     const S = N.S;
     const semanas = (op.hasta - op.desde) * 52;
@@ -7324,11 +7376,12 @@ IA.pruebas = (function () {
   // ---------- Metas de balance ----------
   function medir(op, errores, rend) {
     const S = N.S;
-    const terminadas = S.obras.filter(function (o) { return o.et === 'terminada' && O.costoTotal(o) > 0; });
-    const mults = terminadas.map(O.multiplicador);
-    const pierden = terminadas.filter(function (o) { return O.neto(o) < 0; }).length;
-    const jug = terminadas.filter(function (o) { return o.est === 0; });
-    const multJug = jug.map(O.multiplicador);
+    const terminadas = (registro || []).filter(function (r) { return isFinite(r.mult) && r.mult > 0; });
+    registro = null;
+    const mults = terminadas.map(function (r) { return r.mult; });
+    const pierden = terminadas.filter(function (r) { return r.neto < 0; }).length;
+    const jug = terminadas.filter(function (r) { return r.est === 0; });
+    const multJug = jug.map(function (r) { return r.mult; });
     const hist = S.fin.hist;
     // Crecimiento real de la caja (dólares de hoy): tasa anual compuesta entre el año 10 y el año 40 de la
     // partida, ya pasado el arranque (el primer decenio parte de casi nada y siempre da tasas enormes).
@@ -7348,7 +7401,7 @@ IA.pruebas = (function () {
       multMediano: mediana(mults), sobre5: mults.filter(function (m) { return m > 5; }).length / Math.max(1, mults.length),
       pierden: pierden / Math.max(1, terminadas.length),
       multMedianoJugador: mediana(multJug),
-      pierdenJugador: jug.filter(function (o) { return O.neto(o) < 0; }).length / Math.max(1, jug.length),
+      pierdenJugador: jug.filter(function (r) { return r.neto < 0; }).length / Math.max(1, jug.length),
       crecimiento30: crec30, crecimientoArranque: tasa(-1, 9), crecimientoTotal: tasa(9, hist.length - 1),
       crecimientoMediano: mediana(hist.slice(1).map(function (h, i) { return hist[i].caja2025 > 0 ? h.caja2025 / hist[i].caja2025 - 1 : 0; })),
       premiosJugador: premios.parte, premiosTotal: premios.total,
@@ -7400,7 +7453,8 @@ IA.pruebas = (function () {
     IA.ui.render();
     // Guardado automático al ocultar la app (sin avisos de "cambios sin guardar")
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden && IA.n.S && !IA.n.S.bot && IA.ui.ajustes().autoguardado !== 'no') IA.guardado.autoguardar();
+      if (document.hidden && IA.pantallas.detenerAuto) { IA.pantallas.detenerAuto(); if (IA.n.S) IA.ui.renderBarra(); }
+      if (document.hidden && IA.n.S && !IA.n.S.bot && !IA.n.S.quiebra && IA.ui.ajustes().autoguardado !== 'no') IA.guardado.autoguardar();
     });
     window.addEventListener('error', function (e) {
       if (IA.ui && IA.ui.aviso) IA.ui.aviso('Error: ' + (e.message || 'desconocido'), 'mal');

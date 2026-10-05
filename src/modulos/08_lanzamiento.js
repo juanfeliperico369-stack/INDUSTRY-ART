@@ -46,6 +46,7 @@ IA.lanzamiento = (function () {
       N.emit('estreno', o);
     });
     N.S.mercado.fe52 = N.S.mercado.fe52.filter(function (t) { return t > N.S.t - 52; });
+    N.S.mercado.estrenos52 = N.S.mercado.fe52.length;
     const cartelera = O.enCartelera();
     const res = E.semanaCartelera(cartelera, ctx);
     const m = N.S.mercado;

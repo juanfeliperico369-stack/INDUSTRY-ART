@@ -8,7 +8,8 @@
     IA.ui.render();
     // Guardado automático al ocultar la app (sin avisos de "cambios sin guardar")
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden && IA.n.S && !IA.n.S.bot && IA.ui.ajustes().autoguardado !== 'no') IA.guardado.autoguardar();
+      if (document.hidden && IA.pantallas.detenerAuto) { IA.pantallas.detenerAuto(); if (IA.n.S) IA.ui.renderBarra(); }
+      if (document.hidden && IA.n.S && !IA.n.S.bot && !IA.n.S.quiebra && IA.ui.ajustes().autoguardado !== 'no') IA.guardado.autoguardar();
     });
     window.addEventListener('error', function (e) {
       if (IA.ui && IA.ui.aviso) IA.ui.aviso('Error: ' + (e.message || 'desconocido'), 'mal');

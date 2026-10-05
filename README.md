@@ -16,8 +16,8 @@ Abre **`INDUSTRY_ART_v16.html`** en cualquier navegador (celular o PC). Es un so
 | `src/` | El código separado por módulos (ver `src/LEEME.md`) |
 | `tools/armar.py`, `tools/desarmar.py` | Unen los módulos en el HTML y lo vuelven a separar (solo Python 3, sin npm) |
 | `tools/bot.js`, `tools/capturas.js` | Bot de pruebas y capturas automáticas en un navegador real (usan Playwright) |
-| `pruebas/` | Informe del bot, capturas en 3 tamaños y los scripts de la auditoría de la V15 |
-| `docs/` | Plan Maestro y auditoría de la V15 |
+| `pruebas/` | Informe del bot, capturas en 3 tamaños y los scripts de la auditoría de la V15 y de la revisión de la V16 |
+| `docs/` | Plan Maestro, auditoría de la V15 y revisión independiente de la V16 |
 | `legado/` | La V15 original (sigue jugable aparte) y su código desarmado |
 
 ## Para programar la siguiente versión

@@ -278,8 +278,9 @@ IA.ui = (function () {
     document.addEventListener('keydown', function (ev) {
       if (ev.key === 'Escape') { if (modalAbierto()) cerrarModal(); else if (fichaAbierta()) cerrarFicha(); return; }
       if (!N.S || ev.target.tagName === 'INPUT' || ev.target.tagName === 'SELECT' || ev.target.tagName === 'TEXTAREA') return;
+      if (ev.target.closest && ev.target.closest('button, a, [data-a], label')) return;
       // Atajos de teclado en PC
-      if (ev.key === ' ' || ev.key === 'Enter') { if (!modalAbierto() && !fichaAbierta()) { ev.preventDefault(); acciones.avanzar(); } }
+      if (ev.key === ' ' || ev.key === 'Enter') { if (!modalAbierto() && !fichaAbierta()) { ev.preventDefault(); try { acciones.avanzar(); } catch (e) { console.error(e); aviso('Error: ' + e.message, 'mal'); } } }
       const n = '12345'.indexOf(ev.key);
       if (n >= 0 && !modalAbierto()) irA(SECCIONES[n]);
     });

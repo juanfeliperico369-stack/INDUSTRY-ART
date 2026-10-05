@@ -1,0 +1,14 @@
+const fs=require('fs'), vm=require('vm');
+const IA=require('/tmp/claude-0/-home-user-INDUSTRY-ART/ac5eb68c-dcc6-5eb3-9f6d-306ee635abc6/scratchpad/sim/carga.js');
+const ctx={IA, Math, JSON, Object, Array, String, Number, Map, Set, Uint8Array, Error, Promise, TextDecoder, console};
+vm.createContext(ctx); vm.runInContext(fs.readFileSync('/home/user/INDUSTRY-ART/src/modulos/13_guardado.js','utf8'), ctx);
+const t0=Date.now();
+const r=IA.pruebas.jugar({estrategia:'normal',desde:1900,hasta:2150,semilla:'bot-normal-1900'});
+console.log('bot 250 años en', ((Date.now()-t0)/1000).toFixed(1),'s; quiebra', r.quiebra, 'errores', r.errores.length);
+const txt=JSON.stringify(IA.n.S);
+global.gc && global.gc();
+const m0=process.memoryUsage().heapUsed;
+const a=Date.now(); const c=IA.guardado.lzwComprimir(txt); const b=Date.now();
+const m1=process.memoryUsage().heapUsed;
+console.log('JSON', (txt.length/1e6).toFixed(2),'M chars -> LZW', (c.length/1e6).toFixed(2),'MB en', b-a,'ms; heap +', ((m1-m0)/1e6).toFixed(0),'MB');
+console.log('obras', IA.n.S.obras.length, 'talentos', IA.n.S.talentos.length, 'hist', IA.n.S.fin.hist.length);

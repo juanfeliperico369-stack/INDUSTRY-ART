@@ -55,15 +55,17 @@ IA.obras = (function () {
   function clasificacionRecomendada(gen, anio) {
     const fam = D.familia(D.familiaDe[gen[0]] || 'DR');
     const disp = clasificacionesDisponibles(anio, gen);
-    if (gen.indexOf('Erótico') >= 0) return disp.indexOf('18') >= 0 ? '18' : disp[0];
-    return disp.indexOf(fam.clas) >= 0 ? fam.clas : disp.indexOf('PG-13') >= 0 ? 'PG-13' : disp[0];
+    if (gen.indexOf('Erótico') >= 0 && disp.indexOf('18') >= 0) return '18';
+    return disp.indexOf(fam.clas) >= 0 ? fam.clas : disp.indexOf('PG-13') >= 0 ? 'PG-13' : (disp[0] || 'PG-13');
   }
   // Reglas de la combinación de géneros. Devuelve un texto de error o ''.
-  function validarGeneros(gen) {
+  function validarGeneros(gen, anio) {
     if (!gen.length) return 'Elige al menos un género.';
     if (gen.length > 3) return 'Máximo tres géneros.';
     const fams = gen.map(function (g) { return D.familiaDe[g]; });
     if (gen.indexOf('Erótico') >= 0 && fams.indexOf('FJ') >= 0) return 'Lo erótico nunca va con públicos infantiles, familiares o adolescentes.';
+    const a = anio === undefined ? (N.S ? N.anio() : 2000) : anio;
+    if (gen.indexOf('Erótico') >= 0 && a < D.ANIO_CLASIFICACION_POR_EDADES) return 'Antes de 1968 la censura de la época no deja estrenar obras eróticas (solo existen con clasificación de adultos).';
     return '';
   }
 
@@ -71,7 +73,9 @@ IA.obras = (function () {
   function borrador(est, opciones) {
     const anio = N.anio();
     const o = opciones || {};
-    const gen = (o.gen || ['Drama']).slice(0, 3);
+    let gen = (o.gen || ['Drama']).slice(0, 3);
+    if (validarGeneros(gen, anio)) gen = gen.filter(function (g) { return g !== 'Erótico'; });
+    if (!gen.length) gen = ['Romance'];
     const fam = D.familiaDe[gen[0]] || 'DR';
     const escala = o.escala === undefined ? 2 : o.escala;
     const tono = o.tono || 'Realista';
@@ -144,7 +148,8 @@ IA.obras = (function () {
     const q = E.calidadBase(o, T.porId, bonos || {});
     const ct = costoTalento(o);
     const cm = E.marketingTipico(N.anio()) * D.nivelesMarketing[o.nivM === undefined ? 2 : o.nivM].mult;
-    return { calidad: Math.round(N.limitar(q, 1, 99)), talento: ct, produccion: o.pp, marketing: cm, total: ct + o.pp + cm };
+    const pp = Math.round(o.pp * (1 - IA.negocio.ahorro(o.est)));
+    return { calidad: Math.round(N.limitar(q, 1, 99)), talento: ct, produccion: pp, marketing: cm, total: ct + pp + cm };
   }
   // Convierte el borrador en obra real (la producción la mueve cada semana)
   function crear(b) {
@@ -195,6 +200,10 @@ IA.obras = (function () {
       if (o.est !== 0 && t - (o.fe || 0) > 52 * 4 && o.eq) {
         BORRAR.forEach(function (k) { delete o[k]; });
         if (o.cr) o.cr = { direccion: o.cr.direccion, reparto: o.cr.reparto, sx: o.cr.sx };
+      }
+      // Tus obras de hace más de 25 años quedan con su ficha, créditos e informe, sin el detalle técnico
+      if (o.est === 0 && t - (o.fe || 0) > 52 * 25 && o.dur) {
+        ['acc', 'u', 'delta', 'dur', 'sr', 'semProd', 'sobre', 't0', 'tLista', 'prog', 'anioPlan', 'max', 'eq'].forEach(function (k) { delete o[k]; });
       }
     });
     // Las obras de rivales muy viejas y sin premios se resumen por año para que el guardado no crezca sin fin

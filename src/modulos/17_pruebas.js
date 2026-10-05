@@ -12,6 +12,11 @@ IA.pruebas = (function () {
     agresiva: { escala: [2, 3], marketing: 3, ambicion: 1.4, colchon: 1.2, construir: 3.5, pisos: 10 },
   };
   const ORDEN_PISOS = ['plato', 'guion', 'edicion', 'plato', 'sonido', 'efectos', 'casting', 'plato', 'marketing', 'archivo'];
+  // Registro de cada obra al terminar (las métricas no dependen de lo que la compactación borra después)
+  let registro = null;
+  N.on('obraTerminada', function (o) {
+    if (registro) registro.push({ est: o.est, mult: O.multiplicador(o), neto: O.neto(o) });
+  });
   const ORDEN_TERRENOS = ['backlot', 'foso', 'captura', 'backlot'];
 
   // ---------- Decisiones del bot ----------
@@ -102,6 +107,7 @@ IA.pruebas = (function () {
     const est = ESTRATEGIAS[op.estrategia];
     const errores = [];
     const reloj = typeof performance !== 'undefined' ? function () { return performance.now(); } : function () { return Date.now(); };
+    registro = [];
     IA.juego.nuevaPartida({ semilla: op.semilla, anio: op.desde, nombre: 'Bot ' + op.estrategia, bot: true });
     const S = N.S;
     const semanas = (op.hasta - op.desde) * 52;
@@ -143,11 +149,12 @@ IA.pruebas = (function () {
   // ---------- Metas de balance ----------
   function medir(op, errores, rend) {
     const S = N.S;
-    const terminadas = S.obras.filter(function (o) { return o.et === 'terminada' && O.costoTotal(o) > 0; });
-    const mults = terminadas.map(O.multiplicador);
-    const pierden = terminadas.filter(function (o) { return O.neto(o) < 0; }).length;
-    const jug = terminadas.filter(function (o) { return o.est === 0; });
-    const multJug = jug.map(O.multiplicador);
+    const terminadas = (registro || []).filter(function (r) { return isFinite(r.mult) && r.mult > 0; });
+    registro = null;
+    const mults = terminadas.map(function (r) { return r.mult; });
+    const pierden = terminadas.filter(function (r) { return r.neto < 0; }).length;
+    const jug = terminadas.filter(function (r) { return r.est === 0; });
+    const multJug = jug.map(function (r) { return r.mult; });
     const hist = S.fin.hist;
     // Crecimiento real de la caja (dólares de hoy): tasa anual compuesta entre el año 10 y el año 40 de la
     // partida, ya pasado el arranque (el primer decenio parte de casi nada y siempre da tasas enormes).
@@ -167,7 +174,7 @@ IA.pruebas = (function () {
       multMediano: mediana(mults), sobre5: mults.filter(function (m) { return m > 5; }).length / Math.max(1, mults.length),
       pierden: pierden / Math.max(1, terminadas.length),
       multMedianoJugador: mediana(multJug),
-      pierdenJugador: jug.filter(function (o) { return O.neto(o) < 0; }).length / Math.max(1, jug.length),
+      pierdenJugador: jug.filter(function (r) { return r.neto < 0; }).length / Math.max(1, jug.length),
       crecimiento30: crec30, crecimientoArranque: tasa(-1, 9), crecimientoTotal: tasa(9, hist.length - 1),
       crecimientoMediano: mediana(hist.slice(1).map(function (h, i) { return hist[i].caja2025 > 0 ? h.caja2025 / hist[i].caja2025 - 1 : 0; })),
       premiosJugador: premios.parte, premiosTotal: premios.total,

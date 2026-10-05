@@ -113,7 +113,7 @@ IA.talentos = (function () {
       const cambio = N.limitar(0.05 * Math.log(Math.max(0.2, rendimiento)) + (obra.crit - 60) / 800, -0.06, 0.12) * peso;
       t.fama = N.redondear(N.limitar(t.fama + cambio, 0, 1), 3);
       if (rendimiento >= 2) t.exitos++;
-      t.hab = Math.min(t.pot + 3, t.hab + 0.5);
+      t.hab = Math.max(t.hab, Math.min(t.pot + 3, t.hab + 0.5));
     });
   }
   // Una vez al año: edades, crecimiento, retiro (entre 70 y 100; pueden volver en la V18) y nuevas generaciones
@@ -138,7 +138,8 @@ IA.talentos = (function () {
     }
     Object.keys(D.poblacionTalentos).forEach(function (of) {
       const falta = D.poblacionTalentos[of] - (conteo[of] || 0);
-      for (let i = 0; i < falta + N.entero(0, 2); i++) S.talentos.push(crear(of, N.entero(18, 26), anio));
+      const extra = N.entero(0, 2);
+      for (let i = 0; i < falta + extra; i++) S.talentos.push(crear(of, N.entero(18, 26), anio));
     });
     // Historial compacto: se borran los retirados hace más de 25 años (sus nombres quedan en los créditos)
     S.talentos = S.talentos.filter(function (t) { return !t.ret || anio - t.ret < 25 || t.premios > 0; });

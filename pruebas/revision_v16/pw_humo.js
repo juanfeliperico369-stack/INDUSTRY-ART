@@ -1,0 +1,30 @@
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 420, height: 860 } });
+  const errores = [];
+  page.on('pageerror', e => errores.push('pageerror: ' + e.message));
+  await page.goto('file://' + __dirname + '/ia.html');
+  const r = await page.evaluate(() => {
+    const out = [];
+    IA.pruebas.jugar({ estrategia: 'normal', desde: 1900, hasta: 1960, semilla: 'humo' });
+    IA.n.S.bot = false;
+    IA.ui.render();
+    const prueba = (n, fn) => { try { fn(); } catch (e) { out.push(n + ': ' + e.message); } };
+    const subs = { estudio: [null], obras: ['marcha', 'listas', 'cartelera', 'catalogo'], talento: [null], mundo: ['cartelera', 'calendario', 'premios', 'rivales', 'periodico', 'tendencias', 'poblacion'], negocio: ['finanzas', 'estudio', 'mercado'] };
+    Object.keys(subs).forEach(s => subs[s].forEach(sb => prueba(s + '/' + sb, () => { IA.ui.irA(s, sb); })));
+    let compactadas = 0, n = 0;
+    IA.n.S.obras.forEach(o => { if (!o.eq) compactadas++; if (n++ % 7 === 0 || !o.eq) prueba('fichaObra ' + o.id, () => IA.ui.acciones.verObra(String(o.id))); });
+    IA.n.S.talentos.slice(0, 200).forEach(t => prueba('fichaTalento ' + t.id, () => IA.ui.acciones.verTalento(String(t.id))));
+    prueba('ficha talento inexistente', () => IA.ui.acciones.verTalento('123456789'));
+    prueba('crear', () => { IA.ui.cerrarFicha(); IA.ui.acciones.crearObra(); for (let k = 0; k < 4; k++) IA.ui.acciones.crPaso('1'); });
+    prueba('ajustes', () => IA.ui.acciones.abrirAjustes());
+    prueba('tema', () => ['claro', 'epoca', 'contraste', 'oscuro'].forEach(v => IA.ui.ajuste('tema', v)));
+    IA.ui.cerrarModal();
+    return { out, obras: IA.n.S.obras.length, compactadas, anio: IA.n.anio() };
+  });
+  await page.waitForTimeout(500);
+  console.log(JSON.stringify(r, null, 1));
+  console.log(errores.join('\n'));
+  await browser.close();
+})();

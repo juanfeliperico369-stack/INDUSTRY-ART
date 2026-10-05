@@ -18,7 +18,7 @@ IA.economia = (function () {
     LOCAL: 0.25,         // ventaja en la región de la sede del estudio
     TENDENCIA: 0.3,      // peso de la tendencia de la familia
     PARTICIPACION: 0.88, // parte del público posible que va al cine con una cartelera típica
-    MULT_TIPICO: 2.0,   // bruto medio ÷ costo de una película típica (fija el presupuesto típico)
+    MULT_TIPICO: 1.85,   // bruto medio ÷ costo de una película típica (fija el presupuesto típico)
     U_TIPICA: -0.2,      // atractivo de estreno de una película típica de otras productoras
     CORTE: 0.025,        // la obra sale de cartelera bajo este % de su mejor semana
     MAX_SEMANAS: 30,
