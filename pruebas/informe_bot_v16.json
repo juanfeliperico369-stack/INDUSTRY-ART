@@ -1,0 +1,610 @@
+{
+ "fecha": "2026-10-05",
+ "hasta": 2150,
+ "resultados": [
+  {
+   "estrategia": "prudente",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "bot-prudente-1900",
+   "obras": 7788,
+   "obrasJugador": 5360,
+   "multMediano": 2.142176827599874,
+   "sobre5": 0.020159219311761685,
+   "pierden": 0.2975089881869543,
+   "multMedianoJugador": 2.0899818129757906,
+   "pierdenJugador": 0.29197761194029853,
+   "crecimiento30": 0.15687379254253475,
+   "crecimientoArranque": 0.6469296890357736,
+   "crecimientoTotal": 0.02360414123110144,
+   "crecimientoMediano": 0.01192900330205604,
+   "premiosJugador": 0.0024096385542168677,
+   "premiosTotal": 1245,
+   "aniosAMajor": 53,
+   "cuotaMax": 0.0848,
+   "cuotaMedia": 0.056793999999999956,
+   "cajaFinal2025": 9916965831,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 761,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 1.0854692307695424,
+    "peorSemana": 23.4000000001397,
+    "sAnio": 0.0564444000000162,
+    "peorAnio": 0.13329999999981373,
+    "guardado150": 5016882,
+    "guardadoFinal": 8178033
+   },
+   "guardado150": {
+    "json": 5016882,
+    "comprimido": 867169
+   },
+   "guardadoFinal": {
+    "json": 8178033,
+    "comprimido": 1383176,
+    "comp": "gzip"
+   },
+   "memoria": 97400000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "prudente",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "bot-prudente-2000",
+   "obras": 5357,
+   "obrasJugador": 3173,
+   "multMediano": 2.000851906964871,
+   "sobre5": 0.014373716632443531,
+   "pierden": 0.3464625723352623,
+   "multMedianoJugador": 1.9922470849498353,
+   "pierdenJugador": 0.33249290891900407,
+   "crecimiento30": 0.07684510548699519,
+   "crecimientoArranque": 0.13342457616225234,
+   "crecimientoTotal": 0.023850289365891397,
+   "crecimientoMediano": 0.01037775036424482,
+   "premiosJugador": 0,
+   "premiosTotal": 745,
+   "aniosAMajor": 19,
+   "cuotaMax": 0.0747,
+   "cuotaMedia": 0.05501733333333334,
+   "cajaFinal2025": 9484846001,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 402,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 0.9096410256409301,
+    "peorSemana": 15.199999999953434,
+    "sAnio": 0.047301333333328366,
+    "peorAnio": 0.15210000000009313,
+    "guardado150": 5390828,
+    "guardadoFinal": 5390828
+   },
+   "guardado150": {
+    "json": 5390828,
+    "comprimido": 956682
+   },
+   "guardadoFinal": {
+    "json": 5390828,
+    "comprimido": 956682,
+    "comp": "gzip"
+   },
+   "memoria": 68000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "bot-normal-1900",
+   "obras": 7899,
+   "obrasJugador": 5591,
+   "multMediano": 2.085024253051312,
+   "sobre5": 0.0189897455374098,
+   "pierden": 0.3332067350297506,
+   "multMedianoJugador": 2.0519958060407886,
+   "pierdenJugador": 0.32910033983187265,
+   "crecimiento30": 0.14878730470794643,
+   "crecimientoArranque": 0.6965971964534703,
+   "crecimientoTotal": 0.02188477777006792,
+   "crecimientoMediano": 0.018260650249607657,
+   "premiosJugador": 0.033734939759036145,
+   "premiosTotal": 1245,
+   "aniosAMajor": 30,
+   "cuotaMax": 0.1196,
+   "cuotaMedia": 0.0775224,
+   "cajaFinal2025": 8916422165,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 851,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 1.1944769230767762,
+    "peorSemana": 21.199999999953434,
+    "sAnio": 0.06211279999999236,
+    "peorAnio": 0.15810000000009314,
+    "guardado150": 5138090,
+    "guardadoFinal": 8485943
+   },
+   "guardado150": {
+    "json": 5138090,
+    "comprimido": 884985
+   },
+   "guardadoFinal": {
+    "json": 8485943,
+    "comprimido": 1429164,
+    "comp": "gzip"
+   },
+   "memoria": 60300000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "bot-normal-2000",
+   "obras": 919,
+   "obrasJugador": 165,
+   "multMediano": 1.8068522578226522,
+   "sobre5": 0.011969532100108813,
+   "pierden": 0.43307943416757344,
+   "multMedianoJugador": 2.1494081140938337,
+   "pierdenJugador": 0.26666666666666666,
+   "crecimiento30": -0.8816415244536377,
+   "crecimientoArranque": 0.0817342321867609,
+   "crecimientoTotal": -0.8816415244536377,
+   "crecimientoMediano": 0.13950582757716123,
+   "premiosJugador": 0,
+   "premiosTotal": 95,
+   "aniosAMajor": null,
+   "cuotaMax": 0.0638,
+   "cuotaMedia": 0.024210526315789474,
+   "cajaFinal2025": -47239396,
+   "investigaciones": 0,
+   "quiebra": 2019,
+   "rescatesRivales": 32,
+   "errores": [
+    "Quiebra del bot en 2019 (no es un error del juego, pero la estrategia no debería quebrar)"
+   ],
+   "rendimiento": {
+    "msSemana": 0.8954228855715833,
+    "peorSemana": 13.5,
+    "sAnio": 0.047363157894707436,
+    "peorAnio": 0.11400000000023283,
+    "guardado150": null,
+    "guardadoFinal": 962424
+   },
+   "guardado150": null,
+   "guardadoFinal": {
+    "json": 962424,
+    "comprimido": 182949,
+    "comp": "gzip"
+   },
+   "memoria": 10600000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "bot-agresiva-1900",
+   "obras": 7662,
+   "obrasJugador": 5362,
+   "multMediano": 2.3246540127751922,
+   "sobre5": 0.02988775776559645,
+   "pierden": 0.25632993996345604,
+   "multMedianoJugador": 2.426500679940329,
+   "pierdenJugador": 0.20458784035807534,
+   "crecimiento30": 0.15587965291561634,
+   "crecimientoArranque": 0.8233181241180754,
+   "crecimientoTotal": 0.024294539491372058,
+   "crecimientoMediano": 0.007976069343816228,
+   "premiosJugador": 0.15100401606425704,
+   "premiosTotal": 1245,
+   "aniosAMajor": 4,
+   "cuotaMax": 0.1871,
+   "cuotaMedia": 0.11962719999999992,
+   "cajaFinal2025": 32250043048,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 905,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 1.139676923076855,
+    "peorSemana": 19,
+    "sAnio": 0.059263199999996456,
+    "peorAnio": 0.1630999999998603,
+    "guardado150": 5148399,
+    "guardadoFinal": 8525168
+   },
+   "guardado150": {
+    "json": 5148399,
+    "comprimido": 868983
+   },
+   "guardadoFinal": {
+    "json": 8525168,
+    "comprimido": 1408512,
+    "comp": "gzip"
+   },
+   "memoria": 103000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "bot-agresiva-2000",
+   "obras": 5225,
+   "obrasJugador": 3375,
+   "multMediano": 2.163992351554599,
+   "sobre5": 0.01799043062200957,
+   "pierden": 0.3004784688995215,
+   "multMedianoJugador": 2.264855727944348,
+   "pierdenJugador": 0.23792592592592593,
+   "crecimiento30": 0.09461857247983274,
+   "crecimientoArranque": 0.23124119752724037,
+   "crecimientoTotal": 0.02876645381585785,
+   "crecimientoMediano": 0.011297005858165399,
+   "premiosJugador": 0.10335570469798658,
+   "premiosTotal": 745,
+   "aniosAMajor": 8,
+   "cuotaMax": 0.1564,
+   "cuotaMedia": 0.11956000000000001,
+   "cajaFinal2025": 42440704411,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 508,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 0.949602564102582,
+    "peorSemana": 16.199999999953434,
+    "sAnio": 0.04937933333333427,
+    "peorAnio": 0.14020000000018626,
+    "guardado150": 5676938,
+    "guardadoFinal": 5676938
+   },
+   "guardado150": {
+    "json": 5676938,
+    "comprimido": 974159
+   },
+   "guardadoFinal": {
+    "json": 5676938,
+    "comprimido": 974159,
+    "comp": "gzip"
+   },
+   "memoria": 47400000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "prudente",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "b2-prudente-1900",
+   "obras": 7740,
+   "obrasJugador": 5341,
+   "multMediano": 2.0847227861817057,
+   "sobre5": 0.019896640826873386,
+   "pierden": 0.3161498708010336,
+   "multMedianoJugador": 2.04283866542288,
+   "pierdenJugador": 0.31211383636023216,
+   "crecimiento30": 0.1605813257479387,
+   "crecimientoArranque": 0.6396354877887427,
+   "crecimientoTotal": 0.02166383596935928,
+   "crecimientoMediano": 0.013636478983759304,
+   "premiosJugador": 0.001606425702811245,
+   "premiosTotal": 1245,
+   "aniosAMajor": 61,
+   "cuotaMax": 0.0844,
+   "cuotaMedia": 0.05536960000000002,
+   "cajaFinal2025": 6016419457,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 831,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 1.1030000000001612,
+    "peorSemana": 20.800000000046566,
+    "sAnio": 0.05735600000000838,
+    "peorAnio": 0.12689999999990687,
+    "guardado150": 5065649,
+    "guardadoFinal": 8156908
+   },
+   "guardado150": {
+    "json": 5065649,
+    "comprimido": 878367
+   },
+   "guardadoFinal": {
+    "json": 8156908,
+    "comprimido": 1390482,
+    "comp": "gzip"
+   },
+   "memoria": 56800000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "prudente",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "b2-prudente-2000",
+   "obras": 5202,
+   "obrasJugador": 3264,
+   "multMediano": 1.9952041923277197,
+   "sobre5": 0.016147635524798153,
+   "pierden": 0.3492887351018839,
+   "multMedianoJugador": 1.9605774740950443,
+   "pierdenJugador": 0.34068627450980393,
+   "crecimiento30": 0.08592985399209274,
+   "crecimientoArranque": 0.14573165498961682,
+   "crecimientoTotal": 0.023152465459588933,
+   "crecimientoMediano": 0.013062875794252582,
+   "premiosJugador": 0.004026845637583893,
+   "premiosTotal": 745,
+   "aniosAMajor": 13,
+   "cuotaMax": 0.0747,
+   "cuotaMedia": 0.056597333333333354,
+   "cajaFinal2025": 9604590109,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 396,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 0.9053461538459687,
+    "peorSemana": 22.399999999906868,
+    "sAnio": 0.04707799999999038,
+    "peorAnio": 0.11459999999962747,
+    "guardado150": 5351518,
+    "guardadoFinal": 5351518
+   },
+   "guardado150": {
+    "json": 5351518,
+    "comprimido": 937781
+   },
+   "guardadoFinal": {
+    "json": 5351518,
+    "comprimido": 937781,
+    "comp": "gzip"
+   },
+   "memoria": 76600000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "b2-normal-1900",
+   "obras": 7910,
+   "obrasJugador": 5551,
+   "multMediano": 2.124147225683069,
+   "sobre5": 0.02376738305941846,
+   "pierden": 0.31946902654867254,
+   "multMedianoJugador": 2.1007941891397173,
+   "pierdenJugador": 0.3107548189515403,
+   "crecimiento30": 0.14874870113367256,
+   "crecimientoArranque": 0.7102396345540927,
+   "crecimientoTotal": 0.022397919738521344,
+   "crecimientoMediano": 0.010791385609040027,
+   "premiosJugador": 0.023293172690763052,
+   "premiosTotal": 1245,
+   "aniosAMajor": 30,
+   "cuotaMax": 0.1134,
+   "cuotaMedia": 0.07889920000000007,
+   "cajaFinal2025": 10896810455,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 798,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 1.0875461538460178,
+    "peorSemana": 55.5,
+    "sAnio": 0.056552399999992925,
+    "peorAnio": 0.1559000000001397,
+    "guardado150": 5103660,
+    "guardadoFinal": 8469751
+   },
+   "guardado150": {
+    "json": 5103660,
+    "comprimido": 880162
+   },
+   "guardadoFinal": {
+    "json": 8469751,
+    "comprimido": 1426008,
+    "comp": "gzip"
+   },
+   "memoria": 56800000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "b2-normal-2000",
+   "obras": 5443,
+   "obrasJugador": 3519,
+   "multMediano": 2.044281844203305,
+   "sobre5": 0.014146610325188316,
+   "pierden": 0.3476024251331986,
+   "multMedianoJugador": 2.0460293827881157,
+   "pierdenJugador": 0.3302074452969594,
+   "crecimiento30": 0.10835968404437413,
+   "crecimientoArranque": 0.1264867334031854,
+   "crecimientoTotal": 0.025607978182608626,
+   "crecimientoMediano": 0.012271796523973144,
+   "premiosJugador": 0.01879194630872483,
+   "premiosTotal": 745,
+   "aniosAMajor": 10,
+   "cuotaMax": 0.1183,
+   "cuotaMedia": 0.08154866666666663,
+   "cajaFinal2025": 11341108150,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 473,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 0.9329102564098624,
+    "peorSemana": 13,
+    "sAnio": 0.04851133333331284,
+    "peorAnio": 0.09879999999981373,
+    "guardado150": 5710263,
+    "guardadoFinal": 5710263
+   },
+   "guardado150": {
+    "json": 5710263,
+    "comprimido": 999584
+   },
+   "guardadoFinal": {
+    "json": 5710263,
+    "comprimido": 999584,
+    "comp": "gzip"
+   },
+   "memoria": 35100000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "b2-agresiva-1900",
+   "obras": 7615,
+   "obrasJugador": 5368,
+   "multMediano": 2.295419512886143,
+   "sobre5": 0.03177938279711096,
+   "pierden": 0.267892317793828,
+   "multMedianoJugador": 2.386055791201904,
+   "pierdenJugador": 0.21385991058122206,
+   "crecimiento30": 0.1532777940230634,
+   "crecimientoArranque": 0.8368610696624976,
+   "crecimientoTotal": 0.02506512536118688,
+   "crecimientoMediano": 0.012320039601981803,
+   "premiosJugador": 0.11726907630522089,
+   "premiosTotal": 1245,
+   "aniosAMajor": 4,
+   "cuotaMax": 0.1737,
+   "cuotaMedia": 0.1190859999999999,
+   "cajaFinal2025": 41596145499,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 927,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 1.061546153846179,
+    "peorSemana": 33.699999999953434,
+    "sAnio": 0.0552004000000013,
+    "peorAnio": 0.17579999999981374,
+    "guardado150": 5146124,
+    "guardadoFinal": 8467033
+   },
+   "guardado150": {
+    "json": 5146124,
+    "comprimido": 871142
+   },
+   "guardadoFinal": {
+    "json": 8467033,
+    "comprimido": 1396919,
+    "comp": "gzip"
+   },
+   "memoria": 86400000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "b2-agresiva-2000",
+   "obras": 5193,
+   "obrasJugador": 3377,
+   "multMediano": 2.158852034235383,
+   "sobre5": 0.016753321779318313,
+   "pierden": 0.29578278451761986,
+   "multMedianoJugador": 2.2709077495343077,
+   "pierdenJugador": 0.23038199585430855,
+   "crecimiento30": 0.08942855038534092,
+   "crecimientoArranque": 0.27742485366458935,
+   "crecimientoTotal": 0.023825366800573455,
+   "crecimientoMediano": 0.0104860953030943,
+   "premiosJugador": 0.11409395973154363,
+   "premiosTotal": 745,
+   "aniosAMajor": 7,
+   "cuotaMax": 0.1584,
+   "cuotaMedia": 0.12115866666666669,
+   "cajaFinal2025": 31259181737,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 530,
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 0.9687179487178293,
+    "peorSemana": 19.5,
+    "sAnio": 0.05037333333332712,
+    "peorAnio": 0.13220000000018625,
+    "guardado150": 5682690,
+    "guardadoFinal": 5682690
+   },
+   "guardado150": {
+    "json": 5682690,
+    "comprimido": 971733
+   },
+   "guardadoFinal": {
+    "json": 5682690,
+    "comprimido": 971733,
+    "comp": "gzip"
+   },
+   "memoria": 76600000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  }
+ ],
+ "lento": {
+  "abrir": 0.482,
+  "semanaConPantalla": 69.60000000009313,
+  "anioSinPantalla": 0.1405999999998603
+ }
+}

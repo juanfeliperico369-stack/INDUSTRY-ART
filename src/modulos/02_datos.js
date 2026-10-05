@@ -1,0 +1,376 @@
+/* ==== módulo: datos ==== */
+// Listas y tablas del juego, separadas de la lógica para que el Editor (V34) y las traducciones las cambien
+// sin tocar el código. Rescatado de la V15: nombres por región (NMR), países (CY), rasgos (TRA),
+// personalidades (TI), tonos (TO), prioridades (PR), clasificaciones (AG), rivales (RV), temas (DX.tm).
+IA.datos = (function () {
+  'use strict';
+  const sp = function (s) { return s.split(','); };
+
+  // ---------- Regiones y países ----------
+  // hemisferio: N, S o M (mixto: las estaciones pesan menos)
+  const regiones = [
+    { id: 'nam', nombre: 'Norteamérica', hemisferio: 'N' },
+    { id: 'lat', nombre: 'Latinoamérica', hemisferio: 'M' },
+    { id: 'eur', nombre: 'Europa', hemisferio: 'N' },
+    { id: 'afr', nombre: 'África', hemisferio: 'M' },
+    { id: 'asi', nombre: 'Asia', hemisferio: 'N' },
+    { id: 'oce', nombre: 'Oceanía', hemisferio: 'S' },
+  ];
+  // costo: índice de costo de rodaje frente a EE. UU.; peso: parte aproximada del mercado de su región.
+  // Se agregan Rusia y Hong Kong (decisión del 5 de octubre de 2026), con nombres modernos.
+  const paises = [
+    { id: 'us', nombre: 'Estados Unidos', region: 'nam', idioma: 'Inglés', costo: 1.0, peso: 0.89 },
+    { id: 'ca', nombre: 'Canadá', region: 'nam', idioma: 'Inglés y francés', costo: 0.9, peso: 0.11 },
+    { id: 'mx', nombre: 'México', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.24 },
+    { id: 'br', nombre: 'Brasil', region: 'lat', idioma: 'Portugués', costo: 0.5, peso: 0.3 },
+    { id: 'ar', nombre: 'Argentina', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.1 },
+    { id: 'co', nombre: 'Colombia', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.09 },
+    { id: 'cl', nombre: 'Chile', region: 'lat', idioma: 'Español', costo: 0.5, peso: 0.06 },
+    { id: 'pe', nombre: 'Perú', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.05 },
+    { id: 'cu', nombre: 'Cuba', region: 'lat', idioma: 'Español', costo: 0.35, peso: 0.03 },
+    { id: 'pa', nombre: 'Panamá', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.01 },
+    { id: 'gb', nombre: 'Reino Unido', region: 'eur', idioma: 'Inglés', costo: 1.0, peso: 0.18 },
+    { id: 'fr', nombre: 'Francia', region: 'eur', idioma: 'Francés', costo: 0.95, peso: 0.17 },
+    { id: 'de', nombre: 'Alemania', region: 'eur', idioma: 'Alemán', costo: 0.95, peso: 0.19 },
+    { id: 'es', nombre: 'España', region: 'eur', idioma: 'Español', costo: 0.75, peso: 0.12 },
+    { id: 'it', nombre: 'Italia', region: 'eur', idioma: 'Italiano', costo: 0.8, peso: 0.12 },
+    { id: 'ru', nombre: 'Rusia', region: 'eur', idioma: 'Ruso', costo: 0.6, peso: 0.15 },
+    { id: 'ng', nombre: 'Nigeria', region: 'afr', idioma: 'Inglés y yoruba', costo: 0.35, peso: 0.26 },
+    { id: 'eg', nombre: 'Egipto', region: 'afr', idioma: 'Árabe', costo: 0.35, peso: 0.22 },
+    { id: 'za', nombre: 'Sudáfrica', region: 'afr', idioma: 'Inglés y zulú', costo: 0.5, peso: 0.22 },
+    { id: 'ma', nombre: 'Marruecos', region: 'afr', idioma: 'Árabe y francés', costo: 0.4, peso: 0.12 },
+    { id: 'ke', nombre: 'Kenia', region: 'afr', idioma: 'Suajili e inglés', costo: 0.35, peso: 0.08 },
+    { id: 'in', nombre: 'India', region: 'asi', idioma: 'Hindi', costo: 0.3, peso: 0.3 },
+    { id: 'cn', nombre: 'China', region: 'asi', idioma: 'Mandarín', costo: 0.5, peso: 0.34 },
+    { id: 'jp', nombre: 'Japón', region: 'asi', idioma: 'Japonés', costo: 0.95, peso: 0.15 },
+    { id: 'kr', nombre: 'Corea del Sur', region: 'asi', idioma: 'Coreano', costo: 0.8, peso: 0.08 },
+    { id: 'th', nombre: 'Tailandia', region: 'asi', idioma: 'Tailandés', costo: 0.45, peso: 0.04 },
+    { id: 'hk', nombre: 'Hong Kong', region: 'asi', idioma: 'Cantonés e inglés', costo: 0.9, peso: 0.03 },
+    { id: 'au', nombre: 'Australia', region: 'oce', idioma: 'Inglés', costo: 0.95, peso: 0.8 },
+    { id: 'nz', nombre: 'Nueva Zelanda', region: 'oce', idioma: 'Inglés y maorí', costo: 0.85, peso: 0.12 },
+    { id: 'fj', nombre: 'Fiyi', region: 'oce', idioma: 'Fiyiano e inglés', costo: 0.4, peso: 0.03 },
+    { id: 'ws', nombre: 'Samoa', region: 'oce', idioma: 'Samoano', costo: 0.4, peso: 0.01 },
+    { id: 'pg', nombre: 'Papúa Nueva Guinea', region: 'oce', idioma: 'Tok Pisin', costo: 0.35, peso: 0.04 },
+  ];
+
+  // ---------- Nombres por región (V15 NMR, más nombres de Rusia y Hong Kong) ----------
+  const nombres = {
+    nam: {
+      f: sp('Emily,Grace,Olivia,Madison,Hannah,Chloe,Valeria,Ximena,Camila,Abigail,Harper,Lily,Ruth,Evelyn,June,Dorothy'),
+      m: sp('James,Michael,Ethan,Noah,Logan,Mateo,Santiago,Diego,Jackson,Owen,Caleb,Lucas,Walter,Henry,Frank,Arthur'),
+      a: sp('Smith,Johnson,Miller,Brooks,Carter,Hughes,Hernández,García,López,Morgan,Reed,Hayes,Bennett,Parker,Dawson,Fletcher,Tremblay,Gagnon'),
+    },
+    lat: {
+      f: sp('Valentina,Isabella,Camila,Mariana,Gabriela,Daniela,Luciana,Paula,Renata,Antonella,Juliana,Catalina,Ximena,Lupita,Rosa,Beatriz'),
+      m: sp('Santiago,Sebastián,Matías,Nicolás,Juan,Andrés,Felipe,Tomás,Gabriel,Thiago,Joaquín,Emiliano,Rodrigo,Alonso,Mauricio,Ernesto'),
+      a: sp('Rodríguez,Gómez,Fernández,Pérez,Martínez,Rojas,Castro,Moreno,Vargas,Silva,Souza,Alves,Ramírez,Torres,Cárdenas,Quispe,Ortega,Salazar'),
+    },
+    eur: {
+      f: sp('Sophie,Emma,Clara,Lucía,Chiara,Ingrid,Anna,Marta,Elena,Charlotte,Freya,Amélie,Anastasia,Daria,Olga,Greta'),
+      m: sp('Lukas,Mateo,Luca,Hugo,Oliver,Pierre,Jonas,Matteo,Pablo,Henrik,Louis,Viktor,Dmitri,Alexéi,Iván,Klaus'),
+      a: sp('Müller,Dubois,Rossi,Navarro,Novak,Larsson,Moreau,Bianchi,Weber,Kowalski,Jensen,Fischer,Romano,Lindqvist,Petrov,Sokolov,Smirnov,Volkov'),
+    },
+    afr: {
+      f: sp('Amara,Zainab,Nia,Imani,Ayana,Fatima,Chiamaka,Zola,Thandi,Aisha,Makena,Nala,Yasmin,Folake,Wanjiru,Salma'),
+      m: sp('Kwame,Tunde,Kofi,Jabari,Sipho,Chinedu,Omar,Youssef,Bakari,Tendai,Ayo,Moussa,Karim,Thabo,Emeka,Hassan'),
+      a: sp('Okafor,Mensah,Diallo,Ndlovu,Adeyemi,Kamau,Haddad,Mbeki,Traoré,Okonkwo,Abara,Ouma,Keita,Nkosi,El Amrani,Mahmoud,Otieno,Bello'),
+    },
+    asi: {
+      f: sp('Aiko,Mei,Yuna,Priya,Ananya,Hana,Lin,Sakura,Jiwoo,Ayesha,Mai,Xinyi,Ka Yan,Wing,Deepa,Suda'),
+      m: sp('Kenji,Hiroshi,Arjun,Wei,Minho,Ravi,Haruto,Jun,Rahul,Takumi,Hao,Seojun,Ka Ho,Chun,Somchai,Vikram'),
+      a: sp('Tanaka,Kim,Wang,Li,Sato,Patel,Singh,Chen,Park,Nakamura,Zhang,Kumar,Yamamoto,Nguyen,Chan,Wong,Leung,Cheung'),
+    },
+    oce: {
+      f: sp('Charlotte,Olivia,Mia,Ruby,Isla,Aroha,Ava,Matilda,Kaia,Leilani,Zoe,Ella,Mere,Sina,Talia,Hine'),
+      m: sp('Jack,Oliver,William,Lachlan,Cooper,Tane,Liam,Mason,Kai,Nikau,Harrison,Riley,Sione,Wiremu,Losa,Rawiri'),
+      a: sp('Wilson,Taylor,Brown,Walker,White,Thompson,Ngata,Tui,Kelly,Harris,Martin,Anderson,Clarke,Young,Fonoti,Tamatea,Leota,Kauri'),
+    },
+  };
+
+  // ---------- Oficios (departamentos) ----------
+  // dep: departamento que nota en la obra. base: fracción del presupuesto típico de la época que cobra un
+  // talento de habilidad 50 y fama 0 (la tarifa sale del mercado, nunca del presupuesto de tu obra).
+  const oficios = [
+    { id: 'guion', nombre: 'Escritor', dep: 'Guion', base: 0.015 },
+    { id: 'direccion', nombre: 'Director', dep: 'Dirección', base: 0.025 },
+    { id: 'produccion', nombre: 'Productor', dep: 'Producción', base: 0.015 },
+    { id: 'fotografia', nombre: 'Fotografía', dep: 'Fotografía', base: 0.008 },
+    { id: 'musica', nombre: 'Compositor', dep: 'Música', base: 0.006 },
+    { id: 'edicion', nombre: 'Editor', dep: 'Edición', base: 0.006 },
+    { id: 'arte', nombre: 'Diseñador de arte y tecnología', dep: 'Arte y efectos', base: 0.008 },
+    { id: 'interprete', nombre: 'Intérprete', dep: 'Actuación', base: 0.022 },
+  ];
+  // Cuántos talentos de cada oficio hay en el mundo (se mantiene con nuevas generaciones)
+  const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 90, interprete: 380 };
+
+  // ---------- Familias y géneros del cine (pestaña Taxonomía del plan) ----------
+  // edades: afinidad de cada grupo [niños 0-12, adolescentes 13-17, jóvenes 18-34, adultos 35-59, mayores 60+]
+  // inclina: 'pub' (público), 'crit' (crítica) o 'eq' (equilibrio). costo: producción típica relativa.
+  // semanas: temporada favorable (bono de género). pesos: reparto ideal de los departamentos.
+  const familias = [
+    {
+      id: 'AA', nombre: 'Acción y aventura', generos: sp('Acción,Aventura,Bélico,Catástrofes,Deportivo,Épico,Espionaje,Superhéroes,Western'),
+      edades: [0.5, 1.1, 1.3, 1.0, 0.5], inclina: 'pub', costo: 1.4, clas: 'PG-13', temporada: 'Verano', semanas: [[22, 35]],
+      pesos: { guion: 0.10, direccion: 0.16, interprete: 0.16, fotografia: 0.14, musica: 0.07, edicion: 0.14, arte: 0.17, produccion: 0.06 },
+    },
+    {
+      id: 'IM', nombre: 'Imaginación', generos: sp('Ciencia ficción,Fantasía,Folklórico,Monstruos,Surrealista'),
+      edades: [0.9, 1.2, 1.2, 0.8, 0.4], inclina: 'pub', costo: 1.4, clas: 'PG-13', temporada: 'Verano y fin de año', semanas: [[22, 35], [49, 52]],
+      pesos: { guion: 0.14, direccion: 0.16, interprete: 0.12, fotografia: 0.12, musica: 0.08, edicion: 0.10, arte: 0.22, produccion: 0.06 },
+    },
+    {
+      id: 'SM', nombre: 'Suspenso y miedo', generos: sp('Crimen,Misterio,Noir,Policial,Terror,Thriller'),
+      edades: [0.1, 0.9, 1.3, 1.0, 0.6], inclina: 'eq', costo: 0.75, clas: '16', temporada: 'Octubre', semanas: [[40, 44]],
+      pesos: { guion: 0.20, direccion: 0.18, interprete: 0.15, fotografia: 0.13, musica: 0.10, edicion: 0.13, arte: 0.06, produccion: 0.05 },
+    },
+    {
+      id: 'DR', nombre: 'Drama y realidad', generos: sp('Biográfico,Drama,Histórico,Judicial,Melodrama,Político,Religioso,Social'),
+      edades: [0.2, 0.5, 0.8, 1.2, 1.3], inclina: 'crit', costo: 1.0, clas: 'PG-13', temporada: 'Temporada de premios', semanas: [[45, 52], [1, 8]],
+      pesos: { guion: 0.25, direccion: 0.19, interprete: 0.26, fotografia: 0.09, musica: 0.06, edicion: 0.07, arte: 0.04, produccion: 0.04 },
+    },
+    {
+      id: 'HM', nombre: 'Humor y música', generos: sp('Comedia,Festivo,Musical,Parodia'),
+      edades: [0.9, 1.0, 1.0, 1.0, 0.9], inclina: 'pub', costo: 0.8, clas: 'PG', temporada: 'Navidad y verano', semanas: [[50, 52], [26, 33]],
+      pesos: { guion: 0.24, direccion: 0.15, interprete: 0.24, fotografia: 0.06, musica: 0.15, edicion: 0.10, arte: 0.03, produccion: 0.03 },
+    },
+    {
+      id: 'FJ', nombre: 'Familia y juventud', generos: sp('Adolescentes,Familiar,Infantil'),
+      edades: [1.5, 1.2, 0.6, 0.9, 0.6], inclina: 'pub', costo: 1.0, clas: 'G', temporada: 'Vacaciones escolares', semanas: [[24, 34], [51, 52], [1, 1]],
+      pesos: { guion: 0.18, direccion: 0.14, interprete: 0.16, fotografia: 0.08, musica: 0.14, edicion: 0.08, arte: 0.17, produccion: 0.05 },
+    },
+    {
+      id: 'AV', nombre: 'Arte y vanguardia', generos: sp('Artes,Experimental,Falso documental'),
+      edades: [0.1, 0.3, 0.9, 1.1, 0.8], inclina: 'crit', costo: 0.5, clas: 'N', temporada: 'Festivales', semanas: [[19, 21], [35, 37]],
+      pesos: { guion: 0.20, direccion: 0.26, interprete: 0.14, fotografia: 0.16, musica: 0.08, edicion: 0.10, arte: 0.04, produccion: 0.02 },
+    },
+    {
+      id: 'RD', nombre: 'Romance y deseo', generos: sp('Erótico,Romance'),
+      edades: [0.0, 0.6, 1.3, 1.0, 0.6], inclina: 'pub', costo: 0.6, clas: 'PG-13', temporada: 'San Valentín', semanas: [[6, 7]],
+      pesos: { guion: 0.22, direccion: 0.15, interprete: 0.30, fotografia: 0.10, musica: 0.09, edicion: 0.07, arte: 0.03, produccion: 0.04 },
+    },
+  ];
+  const familiaDe = {};
+  familias.forEach(function (f) { f.generos.forEach(function (g) { familiaDe[g] = f.id; }); });
+  // Encaje entre familias (++ suma 3, + suma 1, 0 neutro, − resta 2, null = no se permite)
+  const ORDEN_FAM = ['AA', 'IM', 'SM', 'DR', 'HM', 'FJ', 'AV', 'RD'];
+  const ENCAJE = [
+    //  AA  IM  SM  DR  HM  FJ  AV  RD
+    [0, 3, 1, 1, 1, 1, -2, 0],
+    [3, 0, 1, 0, 1, 3, 1, 0],
+    [1, 1, 0, 1, 0, -2, 1, 0],
+    [1, 0, 1, 0, 1, 0, 3, 3],
+    [1, 1, 0, 1, 0, 3, 0, 3],
+    [1, 3, -2, 0, 3, 0, -2, 0],
+    [-2, 1, 1, 3, 0, -2, 0, 1],
+    [0, 0, 0, 3, 3, 0, 1, 0],
+  ];
+  function encaje(famA, famB) {
+    const i = ORDEN_FAM.indexOf(famA), j = ORDEN_FAM.indexOf(famB);
+    if (i < 0 || j < 0) return 0;
+    return ENCAJE[i][j];
+  }
+
+  // ---------- Clasificaciones (las del documento, intactas) ----------
+  // acceso: parte de cada grupo de edad que puede entrar [niños, adolescentes, jóvenes, adultos, mayores]
+  // NC-17 es para 17 años y se queda en el grupo de adolescentes (decidido). Las de adultos dicen "siempre sugerido".
+  const clasificaciones = [
+    { id: 'G', desc: 'Para todo público', acceso: [1, 1, 1, 1, 1], gusto: [1.1, 0.7, 0.8, 0.9, 1.0], adultos: false, desde: 1850 },
+    { id: 'PG', desc: 'Guía de los padres', acceso: [0.9, 1, 1, 1, 1], gusto: [1.0, 0.85, 0.9, 1, 1], adultos: false, desde: 1850 },
+    { id: 'PG-13', desc: 'Mayores de 13; los menores, acompañados', acceso: [0.45, 1, 1, 1, 1], gusto: [1, 1, 1, 1, 1], adultos: false, desde: 1850 },
+    { id: '16', desc: 'Mayores de 16', acceso: [0, 0.4, 1, 1, 1], gusto: [1, 1, 1, 1, 0.95], adultos: false, desde: 1850 },
+    { id: 'NC-17', desc: 'Desde los 17 años (grupo adolescente)', acceso: [0, 0.2, 1, 1, 1], gusto: [1, 1, 1, 0.97, 0.9], adultos: false, desde: 1968 },
+    { id: '18', desc: 'Solo adultos: violencia y amor intensos, siempre sugerido', acceso: [0, 0, 1, 1, 1], gusto: [1, 1, 0.95, 0.95, 0.85], adultos: true, desde: 1968 },
+    { id: 'R', desc: 'Restringida: violencia gráfica y amor explícito, siempre sugerido', acceso: [0, 0, 0.9, 0.9, 0.85], gusto: [1, 1, 0.92, 0.9, 0.8], adultos: true, desde: 1968 },
+    { id: 'X', desc: 'Contenido extremo para adultos, siempre sugerido', acceso: [0, 0, 0.5, 0.45, 0.3], gusto: [1, 1, 0.8, 0.75, 0.6], adultos: true, desde: 1968 },
+    { id: 'N', desc: 'Sin clasificar: circuito de arte y festivales', acceso: [0, 0, 0.6, 0.6, 0.5], gusto: [1, 1, 1, 1, 1], adultos: true, desde: 1850 },
+  ];
+  // Antes de 1968 la censura de la época (Código de Producción en Norteamérica) no deja estrenar lo más fuerte.
+  const ANIO_CLASIFICACION_POR_EDADES = 1968;
+
+  // ---------- Tonos (V15 TO: efecto en crítica y público) ----------
+  const tonos = [
+    { id: 'Surrealista', crit: 3, pub: -2 }, { id: 'Oscuro', crit: 3, pub: -2 }, { id: 'Caótico', crit: 0, pub: 0 },
+    { id: 'Reflexivo', crit: 3, pub: -3 }, { id: 'Realista', crit: 1, pub: 0 }, { id: 'Poético', crit: 3, pub: -3 },
+    { id: 'Esperanzador', crit: 0, pub: 2 }, { id: 'Alegre', crit: -1, pub: 3 }, { id: 'Colorido', crit: -1, pub: 3 },
+    { id: 'Épico', crit: 1, pub: 3, costo: 1.15 },
+  ];
+
+  // ---------- Rasgos de talento (V15 TRA: calidad, sobrecosto, tarifa) y personalidades (TI) ----------
+  const rasgos = {
+    Eficiente: [0, -0.05, 1], Perfeccionista: [2, 0.05, 1.1], Obsesivo: [1, 0.04, 1], Visionario: [3, 0.03, 1.15],
+    Ambicioso: [1, 0, 1.1], Diva: [1, 0.04, 1.3], Comercial: [0, -0.02, 0.95], Amable: [0, -0.02, 0.95],
+    Innovador: [2, 0.02, 1.05], Colaborativo: [1, -0.03, 1], Experimental: [1, 0.03, 1], Autor: [2, 0.03, 1.05],
+    Filosófico: [1, 0.02, 1], Reflexivo: [1, 0, 1], Torpe: [-2, 0.06, 0.85], Intolerante: [-1, 0.03, 0.9],
+    Terco: [-1, 0.03, 0.9], Inflexible: [-1, 0.02, 0.9], Temperamental: [0, 0.05, 0.95], Esnob: [-1, 0.01, 1.05],
+  };
+  const personalidades = [
+    { id: 'Pretencioso', valor: 20, rasgos: sp('Torpe,Intolerante,Terco,Inflexible,Temperamental,Esnob') },
+    { id: 'Antiposer', valor: 40, rasgos: sp('Experimental,Autor,Filosófico,Reflexivo') },
+    { id: 'Normal', valor: 50, rasgos: ['Normal'] },
+    { id: 'Poser', valor: 70, rasgos: sp('Comercial,Amable,Innovador,Colaborativo') },
+    { id: 'Rockstar', valor: 90, rasgos: sp('Eficiente,Perfeccionista,Obsesivo,Visionario,Ambicioso,Diva') },
+  ];
+
+  // ---------- Estudio: tipo, visión, público (V15 IT, VI, PU) ----------
+  const tiposEstudio = sp('Corporación,Compañía,Productora,Estudio,Independiente,Colectivo');
+  const visiones = sp('Boutique de Culto,Prestigio de Industria,Alcance Comercial,Alcance Global,Alcance Tecnológico');
+  const publicos = sp('General,Familiar,Joven,Adulto,Cultos');
+
+  // ---------- Rivales (nombres de la V15) ----------
+  // tam: tamaño inicial relativo; calidad: tendencia de calidad; riesgo: cuánto se arriesgan con el presupuesto.
+  const rivales = [
+    { nombre: 'Aurora Films', pais: 'us', familia: 'DR', tam: 1.4, calidad: 4, riesgo: 0.4, logo: 3 },
+    { nombre: 'Nova Pictures', pais: 'us', familia: 'AA', tam: 1.6, calidad: 0, riesgo: 0.7, logo: 11 },
+    { nombre: 'Kappa Studios', pais: 'gb', familia: 'SM', tam: 1.0, calidad: 2, riesgo: 0.5, logo: 22 },
+    { nombre: 'Lumen Corp', pais: 'fr', familia: 'AV', tam: 0.7, calidad: 5, riesgo: 0.3, logo: 37 },
+    { nombre: 'Tigre Media', pais: 'mx', familia: 'HM', tam: 0.8, calidad: -1, riesgo: 0.5, logo: 45 },
+    { nombre: 'Órbita Games', pais: 'kr', familia: 'IM', tam: 0.9, calidad: 1, riesgo: 0.8, logo: 58 },
+    { nombre: 'Sol Naciente', pais: 'jp', familia: 'FJ', tam: 1.0, calidad: 2, riesgo: 0.4, logo: 66 },
+    { nombre: 'Ágora Colectivo', pais: 'ar', familia: 'RD', tam: 0.6, calidad: 1, riesgo: 0.4, logo: 79 },
+  ];
+
+  // ---------- Títulos (V15 T1 y T2, ampliados) ----------
+  const titulo1 = sp('Noche,Eco,Frontera,Aurora,Sombra,Vértigo,Marea,Cenizas,Reflejo,Horizonte,Umbral,Cometa,Silencio,Laberinto,Faro,Destello,Tormenta,Jardín,Carnaval,Espejismo,Relámpago,Abismo,Brújula,Linterna,Hierro,Ceniza,Selva,Oasis,Péndulo,Rastro');
+  const titulo2 = sp('de cristal,final,eterno,sin nombre,perdido,del norte,en llamas,de invierno,secreto,imposible,de medianoche,del sur,salvaje,prohibido,de plata,sin regreso,dorado,de papel,en la niebla,del fin del mundo');
+  const temas = ['Actuación', 'Adolescencia', 'Adultez', 'Aislamiento', 'Alquimia', 'Ambición', 'América', 'Amistad', 'Amor', 'Anarquismo', 'Antiguo Egipto', 'Arte', 'Artes', 'Asesinos', 'Ateísmo', 'Bien y mal', 'Bombas nucleares', 'Búsqueda', 'Caballeros', 'Capitalismo', 'Carrera espacial', 'Caza', 'China imperial', 'Cibernética', 'Ciencia', 'Cine', 'Civilización y barbarie', 'Civilizaciones precolombinas', 'Clase social', 'Clonación', 'Codicia', 'Colonialismo', 'Cómics', 'Comunismo', 'Conciencia', 'Conocimiento', 'Corrupción', 'Cruzadas', 'Culpa', 'Culpabilidad', 'Culturas indígenas', 'Depresión', 'Descubrimientos', 'Deshumanización', 'Desigualdad', 'Destino', 'Dictadura', 'Dictaduras', 'Dinero', 'Dios', 'Dioses', 'Discriminación', 'Drogas', 'Dudas', 'Duelo', 'Elegancia', 'Elfos', 'Empatía', 'Enanos', 'Entrenamiento', 'Era digital', 'Era victoriana', 'Esclavitud', 'Espacio', 'Esparta', 'Esperanza', 'Evolución', 'Exclusión', 'Exilio', 'Existencia', 'Existencialismo', 'Éxito', 'Explotación', 'Fama', 'Familia', 'Fascismo', 'Fe', 'Fiebre del oro', 'Filosofía', 'Fracaso', 'Gánsteres', 'Genética', 'Gladiadores', 'Globalización', 'Gran Depresión', 'Grecia clásica', 'Guerra', 'Guerra de trincheras', 'Guerra Fría', 'Guerras napoleónicas', 'Hackers', 'Hechiceros', 'Hermanos', 'Héroes', 'Historietas', 'Holocausto', 'Honor', 'Humanidad', 'Humanidad y máquinas', 'Humildad', 'Humor', 'IA', 'Identidad', 'Ilustración', 'Imperialismo', 'Imperio mongol', 'Imperio romano', 'Imprenta', 'Incas', 'Independencias', 'India antigua', 'Infancia', 'Informática', 'Injusticia', 'Inmortalidad', 'Inquisición', 'Islámico', 'Japón feudal', 'Justicia', 'Las pirámides', 'Lealtad', 'Libertad', 'Literatura', 'Lo prohibido', 'Locura', 'Mafia', 'Magia', 'Magos', 'Mangas', 'Mayas', 'Medieval', 'Memoria', 'Mentiras', 'Mesopotamia', 'Miedo', 'Migración', 'Minería', 'Moda', 'Monarquías', 'Moralidad', 'Mortalidad', 'Muerte', 'Muro de Berlín', 'Música', 'Naturaleza', 'Nazismo', 'Negocios', 'Nihilismo', 'Obsesión', 'Ocultismo', 'Olímpicos', 'Orcos', 'Orden y caos', 'Paz', 'Peloponeso', 'Perdón', 'Peste negra', 'Piratas', 'Planetas', 'Pobreza', 'Poder', 'Política', 'Prehistoria', 'Primera Guerra Mundial', 'Progreso', 'Propaganda', 'Racismo', 'Radicalización', 'Realidad virtual', 'Rebelión', 'Redención', 'Reinado del Terror', 'Religión', 'Renacimiento', 'Resistencia', 'Revolución', 'Revolución francesa', 'Revolución industrial', 'Revolución rusa', 'Revoluciones artísticas', 'Revoluciones tecnológicas', 'Reyes', 'Riqueza', 'Rivalidad', 'Robos', 'Ruta de la Seda', 'Sacrificio', 'Salvaje oeste', 'Secretos', 'Segunda Guerra Mundial', 'Ser humano', 'Siglo XIX', 'Socialismo', 'Sociedad', 'Soledad', 'Sueños', 'Superhéroes', 'Supervivencia', 'Tecnología', 'Templarios', 'Tenochtitlan', 'Terrorismo', 'Tiempo', 'Traición', 'Trauma', 'Vejez', 'Venganza', 'Verdad', 'Videojuegos', 'Vigilancia', 'Vikingos', 'Villanos', 'Xenofobia'];
+
+  // ---------- Marketing: canales que aparecen en su época ----------
+  // peso: parte del gasto que se lleva el canal; alcance: eficiencia; edades: a quién llega mejor
+  const canales = [
+    { id: 'prensa', nombre: 'Prensa', desde: 1850, hasta: 9999, peso: 1.0, alcance: 0.8, edades: [0.2, 0.5, 0.8, 1.2, 1.3] },
+    { id: 'carteles', nombre: 'Carteles y vallas', desde: 1880, hasta: 9999, peso: 1.0, alcance: 0.9, edades: [1, 1, 1, 1, 1] },
+    { id: 'revistas', nombre: 'Revistas de cine', desde: 1911, hasta: 2015, peso: 0.6, alcance: 0.7, edades: [0.3, 1.1, 1.2, 0.9, 0.6] },
+    { id: 'trailer', nombre: 'Tráiler en cines', desde: 1913, hasta: 9999, peso: 1.2, alcance: 1.1, edades: [0.8, 1.3, 1.3, 1.0, 0.6] },
+    { id: 'radio', nombre: 'Radio', desde: 1922, hasta: 9999, peso: 1.0, alcance: 1.0, edades: [0.6, 1.0, 1.0, 1.1, 1.1] },
+    { id: 'tv', nombre: 'Televisión', desde: 1948, hasta: 9999, peso: 1.8, alcance: 1.3, edades: [1.2, 1.1, 1.0, 1.1, 1.2] },
+    { id: 'internet', nombre: 'Internet', desde: 1995, hasta: 9999, peso: 1.0, alcance: 1.0, edades: [0.5, 1.2, 1.3, 1.0, 0.5] },
+    { id: 'redes', nombre: 'Redes sociales', desde: 2006, hasta: 9999, peso: 1.4, alcance: 1.3, edades: [0.4, 1.5, 1.4, 0.9, 0.4] },
+    { id: 'influencers', nombre: 'Creadores de contenido', desde: 2012, hasta: 9999, peso: 0.9, alcance: 1.1, edades: [0.8, 1.6, 1.3, 0.6, 0.2] },
+    { id: 'inmersiva', nombre: 'Publicidad inmersiva', desde: 2038, hasta: 9999, peso: 1.2, alcance: 1.3, edades: [0.8, 1.4, 1.3, 1.0, 0.6] },
+    { id: 'neural', nombre: 'Anuncios sensoriales', desde: 2088, hasta: 9999, peso: 1.2, alcance: 1.4, edades: [0.5, 1.2, 1.3, 1.1, 0.8] },
+  ];
+  // Niveles de marketing del modo rápido: múltiplo del marketing típico de la época
+  const nivelesMarketing = [
+    { id: 'ninguno', nombre: 'Sin campaña', mult: 0 },
+    { id: 'bajo', nombre: 'Bajo', mult: 0.5 },
+    { id: 'medio', nombre: 'Medio', mult: 1 },
+    { id: 'alto', nombre: 'Alto', mult: 2 },
+    { id: 'masivo', nombre: 'Masivo', mult: 4 },
+  ];
+  // Escala de producción del modo rápido: múltiplo de la producción típica de la época
+  const escalas = [
+    { id: 'minima', nombre: 'Mínima', mult: 0.25, semanas: 0.75 },
+    { id: 'baja', nombre: 'Baja', mult: 0.5, semanas: 0.85 },
+    { id: 'media', nombre: 'Media', mult: 1, semanas: 1 },
+    { id: 'alta', nombre: 'Alta', mult: 2, semanas: 1.15 },
+    { id: 'epica', nombre: 'Épica', mult: 4, semanas: 1.3 },
+  ];
+
+  // ---------- Construcciones del estudio (base de la V16; las 30 llegan en la V28) ----------
+  // costo: en presupuestos típicos de la época. capacidad: proyectos a la vez. bono: departamento que mejora.
+  const pisos = [
+    { id: 'oficinas', nombre: 'Oficinas', desde: 1850, costo: 0.3, capacidad: 1, efecto: 'Base del estudio: 1 proyecto a la vez' },
+    { id: 'plato', nombre: 'Plató de rodaje', desde: 1895, costo: 0.9, capacidad: 2, efecto: '+2 proyectos a la vez' },
+    { id: 'guion', nombre: 'Sala de guionistas', desde: 1895, costo: 0.35, bono: { guion: 4 }, efecto: '+4 al guion y desarrollo 1 semana más rápido', rapidez: 1 },
+    { id: 'casting', nombre: 'Casting', desde: 1910, costo: 0.35, bono: { interprete: 3 }, efecto: '+3 a la actuación y más fama para tus estrenos', fama: 0.04 },
+    { id: 'edicion', nombre: 'Sala de edición', desde: 1900, costo: 0.35, bono: { edicion: 4 }, efecto: '+4 a la edición y posproducción 1 semana más rápida', rapidez: 1 },
+    { id: 'sonido', nombre: 'Estudio de sonido', desde: 1927, costo: 0.45, bono: { musica: 4 }, efecto: '+4 a la música y al sonido' },
+    { id: 'efectos', nombre: 'Taller de efectos', desde: 1925, costo: 0.6, bono: { arte: 5 }, efecto: '+5 al arte y los efectos' },
+    { id: 'marketing', nombre: 'Departamento de marketing', desde: 1915, costo: 0.35, marketing: 0.15, efecto: 'Tus campañas rinden 15 % más' },
+    { id: 'archivo', nombre: 'Archivo y bóveda', desde: 1900, costo: 0.25, fijo: -0.1, efecto: 'Ordena el estudio: −10 % de gastos fijos' },
+  ];
+  const terrenos = [
+    { id: 'backlot', nombre: 'Backlot (calles y sets)', desde: 1910, costo: 1.4, capacidad: 2, ahorro: 0.08, efecto: '+2 proyectos a la vez y −8 % en producción' },
+    { id: 'foso', nombre: 'Foso de agua', desde: 1920, costo: 0.5, bono: { arte: 3 }, familias: ['AA', 'IM'], efecto: '+3 en acción e imaginación' },
+    { id: 'captura', nombre: 'Estudio de captura', desde: 1995, costo: 0.7, bono: { arte: 4 }, familias: ['IM', 'AA', 'FJ'], efecto: '+4 en imaginación, acción y familia' },
+  ];
+  const MAX_PISOS = 10, MAX_TERRENOS = 4;
+
+  // ---------- Premios básicos de la V16 (la versión completa llega en la V22) ----------
+  const premios = {
+    nombre: 'Premios Quimera', semana: 10,
+    categorias: [
+      { id: 'pelicula', nombre: 'Mejor película' },
+      { id: 'direccion', nombre: 'Mejor dirección' },
+      { id: 'guion', nombre: 'Mejor guion' },
+      { id: 'actriz', nombre: 'Mejor actriz' },
+      { id: 'actor', nombre: 'Mejor actor' },
+    ],
+  };
+
+  // ---------- Cronología real 1850-2026 y eras de ficción hasta 2150 (pestaña Datos del mundo) ----------
+  // Sin personas reales ni marcas. Cada fecha se verifica con fuentes en la V27.
+  const cronologia = [
+    [1850, 'Teatro, libros y folletines por entregas dominan el entretenimiento'],
+    [1877, 'Se inventa el fonógrafo: aparece la música grabada en cilindros'],
+    [1887, 'Se inventa el disco plano'],
+    [1895, 'Nace el cine mudo: primera proyección pública con entrada pagada, en París'],
+    [1905, 'Salas baratas de cine en Norteamérica: el público crece rápido'],
+    [1912, 'Llegan los largometrajes y el sistema de estrellas'],
+    [1914, 'Primera Guerra Mundial: Europa produce menos y crecen los estudios de Norteamérica'],
+    [1920, 'Primeras emisoras de radio comerciales: compiten y sirven de marketing'],
+    [1927, 'Llega el cine sonoro: suben los costos'],
+    [1929, 'Crisis de 1929 y Gran Depresión: menos dinero, entradas baratas'],
+    [1932, 'Primer festival de cine, en Venecia'],
+    [1934, 'Se aplica el Código de Producción: censura en Norteamérica hasta 1968'],
+    [1935, 'Primer largometraje en color de tres bandas: color caro y llamativo'],
+    [1936, 'Primeras emisiones regulares de televisión, en el Reino Unido'],
+    [1939, 'Segunda Guerra Mundial: propaganda, racionamiento y mercados cerrados'],
+    [1946, 'Récord de asistencia al cine y primer festival de Cannes'],
+    [1948, 'Fallo antimonopolio contra los grandes estudios: venden sus cines'],
+    [1951, 'Primer festival de Berlín'],
+    [1953, 'La televisión llega a los hogares; el cine responde con pantalla ancha y 3D'],
+    [1954, 'Primeras emisiones de televisión en color'],
+    [1968, 'Termina el Código y nace la clasificación por edades'],
+    [1972, 'Nacen los videojuegos: arcades y primera consola doméstica'],
+    [1975, 'El estreno amplio de verano con anuncios en TV se vuelve estrategia'],
+    [1976, 'Llega el video doméstico en cinta'],
+    [1977, 'Efectos especiales de nueva generación'],
+    [1981, 'Canal de TV de videos musicales: el videoclip como marketing'],
+    [1982, 'Disco compacto'],
+    [1991, 'La web se abre al público'],
+    [1995, 'Primer largometraje animado por completo en computadora'],
+    [1997, 'Llega el DVD'],
+    [1999, 'Piratería por internet'],
+    [2005, 'Plataformas de video en línea'],
+    [2007, 'Streaming de video por suscripción y teléfonos inteligentes'],
+    [2009, 'Auge del 3D digital en salas'],
+    [2019, 'Guerra del streaming: las plataformas compiten por catálogo'],
+    [2020, 'Pandemia: cines cerrados y estrenos directos a streaming'],
+    [2022, 'IA generativa al alcance del público'],
+    [2023, 'Huelgas de guionistas y actores'],
+    [2026, 'Presente: termina la historia real; empieza la ficción basada en predicciones'],
+    [2026, 'Era «IA en todas partes»: guion, efectos y doblaje con IA; huelgas y reglas nuevas'],
+    [2035, 'Era de la inmersión: realidad mixta y salas inmersivas'],
+    [2050, 'Era del clima y las megaciudades: eventos climáticos cierran rodajes; sets virtuales'],
+    [2065, 'Pico de población: el mercado llega a su máximo y envejece'],
+    [2085, 'Interfaces neuronales: obras que se sienten; debates éticos y censura nueva'],
+    [2100, 'Era orbital: rodajes en órbita y pequeños públicos en colonias'],
+    [2125, 'Arte posthumano: talentos sintéticos con derechos y obras eternas'],
+    [2150, 'Después de 2150: el mundo sigue con eventos generados por tu partida'],
+  ];
+  // Tecnologías del cine que cambian la calidad esperada (el estudio las adopta solo en la V16)
+  const tecnologias = [
+    { anio: 1895, nombre: 'Cine mudo' }, { anio: 1927, nombre: 'Cine sonoro' }, { anio: 1935, nombre: 'Color' },
+    { anio: 1953, nombre: 'Pantalla ancha' }, { anio: 1977, nombre: 'Efectos de nueva generación' },
+    { anio: 1995, nombre: 'Animación 3D' }, { anio: 2009, nombre: '3D digital' }, { anio: 2022, nombre: 'IA generativa' },
+    { anio: 2040, nombre: 'Salas inmersivas' }, { anio: 2090, nombre: 'Cine sensorial' },
+  ];
+
+  return {
+    regiones: regiones, paises: paises, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
+    familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
+    clasificaciones: clasificaciones, ANIO_CLASIFICACION_POR_EDADES: ANIO_CLASIFICACION_POR_EDADES,
+    tonos: tonos, rasgos: rasgos, personalidades: personalidades,
+    tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, rivales: rivales,
+    titulo1: titulo1, titulo2: titulo2, temas: temas,
+    canales: canales, nivelesMarketing: nivelesMarketing, escalas: escalas,
+    pisos: pisos, terrenos: terrenos, MAX_PISOS: MAX_PISOS, MAX_TERRENOS: MAX_TERRENOS,
+    premios: premios, cronologia: cronologia, tecnologias: tecnologias,
+    region: function (id) { return regiones.filter(function (r) { return r.id === id; })[0]; },
+    pais: function (id) { return paises.filter(function (p) { return p.id === id; })[0]; },
+    familia: function (id) { return familias.filter(function (f) { return f.id === id; })[0]; },
+    clasificacion: function (id) { return clasificaciones.filter(function (c) { return c.id === id; })[0]; },
+    oficio: function (id) { return oficios.filter(function (o) { return o.id === id; })[0]; },
+  };
+})();

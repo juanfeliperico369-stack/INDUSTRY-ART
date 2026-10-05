@@ -1,0 +1,302 @@
+/* ==== módulo: economia ==== */
+// La nueva economía del cine. El dinero sale de personas que compran entradas, no del tamaño del presupuesto:
+//   Público(r) = Población(r) × Acceso(r) × Frecuencia(r)
+//   Cuota(i)   = e^U(i) / (e^U0 + e^Uotras + Σ e^U(j))       (competencia real cada semana)
+//   Entradas   = Público/52 × Temporada × Cuota;  Taquilla = Entradas × Precio de la entrada
+//   U(s+1)     = U(s) − δ + β (Público − Expectativa)          (desgaste y boca a boca)
+// Reemplaza la fórmula de la V15 que convertía presupuesto en taquilla (el dinero infinito).
+IA.economia = (function () {
+  'use strict';
+  const N = IA.n, D = IA.datos, M = IA.mundo;
+
+  // ---------- Parámetros (el bot los revisa en cada versión) ----------
+  const P = {
+    AQ: 0.05,            // utilidad por punto de calidad percibida
+    DELTA: 0.30,         // desgaste semanal de la novedad
+    BETA: 0.008,         // fuerza del boca a boca por punto de diferencia
+    ESTRELLAS: 0.55,     // utilidad por fama media de los protagonistas (0 a 1)
+    LOCAL: 0.25,         // ventaja en la región de la sede del estudio
+    TENDENCIA: 0.3,      // peso de la tendencia de la familia
+    PARTICIPACION: 0.88, // parte del público posible que va al cine con una cartelera típica
+    MULT_TIPICO: 2.0,   // bruto medio ÷ costo de una película típica (fija el presupuesto típico)
+    U_TIPICA: -0.2,      // atractivo de estreno de una película típica de otras productoras
+    CORTE: 0.025,        // la obra sale de cartelera bajo este % de su mejor semana
+    MAX_SEMANAS: 30,
+    ANIMO: 0.28,         // azar del ánimo del público en cada estreno
+    IMPUESTO: 0.25,      // impuesto sobre utilidades
+    ANTIMONOPOLIO: 0.35, // cuota que abre investigación
+  };
+  // Parte de la taquilla que recibe el estudio según la semana en cartelera (más alta al principio)
+  function parteEstudio(semanaEnCartelera) {
+    if (semanaEnCartelera <= 2) return 0.7;
+    if (semanaEnCartelera <= 4) return 0.6;
+    if (semanaEnCartelera <= 6) return 0.5;
+    return 0.4;
+  }
+  // Grupos de edad: cuánto va al cine cada uno [niños, adolescentes, jóvenes, adultos, mayores]
+  const PROPENSION = [0.9, 1.3, 1.4, 0.8, 0.45];
+  // Películas que compiten por año en todo el mundo (las de los estudios simulados más las otras productoras)
+  // En los primeros años se hacían miles de cortos; cada uno era una parte pequeña del mercado
+  const PELICULAS_ANIO = [[1895, 200], [1900, 450], [1910, 900], [1920, 650], [1930, 480], [1940, 450], [1950, 400], [1960, 300], [1970, 250], [1980, 250], [1990, 280], [2000, 320], [2010, 350], [2020, 300], [2025, 320], [2050, 350], [2150, 350]];
+
+  // ---------- Mercado del año (con caché) ----------
+  const cache = { semilla: null, escenario: null, anio: {} };
+  function datosAnio(anio) {
+    const S = N.S;
+    const sem = S ? S.semilla : '', esc = S ? S.escenario : '';
+    if (cache.semilla !== sem || cache.escenario !== esc) { cache.semilla = sem; cache.escenario = esc; cache.anio = {}; }
+    let d = cache.anio[anio];
+    if (d) return d;
+    d = { regiones: {}, mercado2025: 0, entradas: 0 };
+    D.regiones.forEach(function (r) {
+      const pub = M.publicoCine(r.id, anio);
+      const precio2025 = M.precioEntrada2025(r.id, anio);
+      const ed = M.edades(r.id, anio);
+      let base = 0;
+      for (let g = 0; g < 5; g++) base += ed[g] * PROPENSION[g];
+      d.regiones[r.id] = { publico: pub, precio2025: precio2025, precio: M.aEpoca(precio2025, anio), edades: ed, baseEdad: base };
+      d.mercado2025 += pub * precio2025;
+      d.entradas += pub;
+    });
+    d.peliculas = N.interp(PELICULAS_ANIO, anio);
+    // Presupuesto típico de la época (dólares de 2025): lo que puede pagar una película típica de ese mercado
+    d.tipico2025 = Math.max(2000, d.mercado2025 * P.PARTICIPACION / d.peliculas / P.MULT_TIPICO);
+    d.tipico = M.aEpoca(d.tipico2025, anio);
+    cache.anio[anio] = d;
+    return d;
+  }
+  function presupuestoTipico(anio) { return datosAnio(anio).tipico; }
+  // Presupuesto típico suavizado (promedio de los últimos 6 años, en dólares del año): los sueldos y el
+  // mantenimiento no saltan con cada auge o caída del mercado del cine.
+  function tipicoSuavizado(anio) {
+    let s = 0;
+    for (let k = 0; k < 6; k++) s += presupuestoTipico2025(anio - k);
+    return IA.mundo.aEpoca(s / 6, anio);
+  }
+  function presupuestoTipico2025(anio) { return datosAnio(anio).tipico2025; }
+  // Reparto de una película típica: 55 % producción, 20 % talento, 25 % marketing
+  function produccionTipica(anio, famId) {
+    const fam = D.familia(famId);
+    return presupuestoTipico(anio) * 0.55 * (fam ? fam.costo : 1);
+  }
+  function marketingTipico(anio) { return presupuestoTipico(anio) * 0.25; }
+
+  // ---------- Talentos: tarifa de mercado ----------
+  // Tarifa = Base(oficio) × IPC × (Habilidad/50)² × (1 + Fama)^1,5 × Demanda. La Demanda incluye el tamaño
+  // del mercado de la época; nunca depende del presupuesto de tu obra (fallo 2 de la V15).
+  // Demanda: las estrellas famosas y los talentos excepcionales están muy pedidos y cobran mucho más
+  function demandaTalento(t) {
+    const r = D.rasgos[t.rasgo];
+    const excepcional = Math.max(0, (t.hab - 65) / 35);
+    return (1 + 1.6 * t.fama * t.fama + 3 * excepcional * excepcional) * (r ? r[2] : 1);
+  }
+  function tarifa(t, anio) {
+    const of = D.oficio(t.of);
+    const demanda = demandaTalento(t);
+    const v = of.base * presupuestoTipico(anio) * Math.pow(Math.max(5, t.hab) / 50, 2) * Math.pow(1 + t.fama, 1.5) * demanda;
+    return Math.max(10, Math.round(v));
+  }
+
+  // ---------- Calidad, crítica y público ----------
+  // Q = Σ w(familia)·S + 6·log2(Presupuesto/Típico) + Encaje + Rasgos + ε
+  function familiaPrincipal(obra) { return D.familiaDe[obra.gen[0]] || 'DR'; }
+  function familiasDe(obra) {
+    const out = [];
+    obra.gen.forEach(function (g) { const f = D.familiaDe[g]; if (f && out.indexOf(f) < 0) out.push(f); });
+    return out;
+  }
+  function encajeObra(obra) {
+    const fams = obra.gen.map(function (g) { return D.familiaDe[g]; });
+    let s = 0;
+    for (let i = 0; i < fams.length; i++) {
+      for (let j = i + 1; j < fams.length; j++) if (fams[i] !== fams[j]) s += D.encaje(fams[i], fams[j]);
+    }
+    return s;
+  }
+  function habilidadDep(obra, dep, talentos, bonos) {
+    const eq = obra.eq;
+    let h;
+    if (dep === 'interprete') {
+      const a = talentos(eq.int[0]), b = talentos(eq.int[1]);
+      h = a && b ? a.hab * 0.6 + b.hab * 0.4 : a ? a.hab : 35;
+    } else {
+      const t = talentos(eq[dep]);
+      h = t ? t.hab : 35;
+    }
+    return Math.min(100, h + (bonos[dep] || 0));
+  }
+  // Calcula la calidad base sin azar (para mostrar estimaciones) y con azar al terminar la producción
+  function calidadBase(obra, talentos, bonos) {
+    const fam = D.familia(familiaPrincipal(obra));
+    let q = 0;
+    Object.keys(fam.pesos).forEach(function (dep) { q += fam.pesos[dep] * habilidadDep(obra, dep, talentos, bonos || {}); });
+    const tipica = produccionTipica(obra.anioPlan || N.anio(), fam.id) * escalaTono(obra);
+    q += N.limitar(6 * Math.log2(Math.max(1, obra.pp) / tipica), -18, 12);
+    q += encajeObra(obra);
+    // Tres géneros sin un líder de 90 o más es un desastre
+    if (obra.gen.length >= 3) {
+      let mejor = 0;
+      Object.keys(obra.eq).forEach(function (k) {
+        const ids = k === 'int' ? obra.eq.int : [obra.eq[k]];
+        ids.forEach(function (id) { const t = talentos(id); if (t && t.hab > mejor) mejor = t.hab; });
+      });
+      if (mejor < 90) q -= 8;
+    }
+    // Rasgos del equipo (V15 TRA)
+    let rq = 0;
+    eachTalento(obra, talentos, function (t) { const r = D.rasgos[t.rasgo]; if (r) rq += r[0]; });
+    q += rq / 3;
+    return q;
+  }
+  function eachTalento(obra, talentos, fn) {
+    Object.keys(obra.eq).forEach(function (k) {
+      const ids = k === 'int' ? obra.eq.int : [obra.eq[k]];
+      ids.forEach(function (id) { const t = talentos(id); if (t) fn(t, k); });
+    });
+  }
+  function escalaTono(obra) { const to = D.tonos.filter(function (x) { return x.id === obra.tono; })[0]; return to && to.costo ? to.costo : 1; }
+  function famaEstrellas(obra, talentos) {
+    const a = talentos(obra.eq.int[0]), b = talentos(obra.eq.int[1]);
+    return (a ? a.fama * 0.6 : 0) + (b ? b.fama * 0.4 : 0);
+  }
+  // Notas finales al terminar la posproducción (con el azar acotado de ±4)
+  function calificar(obra, talentos, bonos) {
+    const fam = D.familia(familiaPrincipal(obra));
+    const to = D.tonos.filter(function (x) { return x.id === obra.tono; })[0] || { crit: 0, pub: 0 };
+    const q = N.limitar(calidadBase(obra, talentos, bonos) + (N.azar() * 8 - 4), 1, 99);
+    const dir = talentos(obra.eq.direccion);
+    let crit = q + to.crit + (fam.inclina === 'crit' ? 3 : fam.inclina === 'pub' ? -2 : 0) + (dir && dir.hab >= 85 ? 2 : 0) + (N.azar() * 6 - 3);
+    let pub = q + to.pub + (fam.inclina === 'pub' ? 3 : fam.inclina === 'crit' ? -3 : 0) + famaEstrellas(obra, talentos) * 4 + (N.azar() * 6 - 3);
+    const esc = obra.pp / produccionTipica(obra.anioPlan || N.anio(), fam.id);
+    if ((fam.id === 'AA' || fam.id === 'IM') && esc >= 1.8) pub += esc >= 3.5 ? 3 : 2; // efectos que el público disfruta
+    obra.q = Math.round(q);
+    obra.crit = Math.round(N.limitar(crit, 1, 99));
+    obra.pub = Math.round(N.limitar(pub, 1, 99));
+  }
+
+  // ---------- Expectativa y marketing ----------
+  // Conocimiento = 1 − Π(1 − Alcance de cada canal); Expectativa = Conocimiento × Deseo
+  function canalesDe(anio) { return D.canales.filter(function (c) { return c.desde <= anio && c.hasta >= anio; }); }
+  function alcanceMedio(anio) {
+    const cs = canalesDe(anio);
+    let p = 0, a = 0;
+    cs.forEach(function (c) { p += c.peso; a += c.peso * c.alcance; });
+    return p > 0 ? a / p : 0.8;
+  }
+  function conocimiento(obra, anio, famaEstudio, famaEst, bonoMarketing) {
+    const base = N.limitar(0.06 + 0.25 * famaEstudio + 0.2 * famaEst, 0.03, 0.6);
+    const gasto = (obra.cm || 0) * (1 + (bonoMarketing || 0));
+    const rel = gasto / Math.max(1, marketingTipico(anio));
+    const resto = (1 - base) * Math.exp(-alcanceMedio(anio) * rel * 0.9);
+    return N.limitar(1 - resto, 0.02, 0.995);
+  }
+  function deseo(obra, famaEst, tendencia) {
+    const promesa = [0, 1, 2, 4, 6][obra.nivM || 0];
+    return N.limitar(0.5 * obra.pub + 0.5 * 55 + promesa + famaEst * 8 + tendencia * 4, 1, 99);
+  }
+
+  // ---------- Atractivo por región (clasificación, edades, sede) ----------
+  function accesoClasificacion(obra, reg, anio) {
+    const d = datosAnio(anio).regiones[reg];
+    const fam = D.familia(familiaPrincipal(obra));
+    const cl = D.clasificacion(obra.clas) || D.clasificacion('PG-13');
+    let s = 0;
+    for (let g = 0; g < 5; g++) s += d.edades[g] * PROPENSION[g] * fam.edades[g] * cl.acceso[g] * cl.gusto[g];
+    return Math.max(0.02, s / d.baseEdad);
+  }
+
+  // ---------- Inicio del estreno ----------
+  function iniciarCartelera(obra, ctx) {
+    const anio = N.anio();
+    const tend = N.S.mundo.tendencias[familiaPrincipal(obra)] || 0;
+    const fe = famaEstrellas(obra, ctx.talento);
+    obra.con = N.redondear(conocimiento(obra, anio, ctx.famaDe(obra.est), fe, ctx.bonoMarketingDe(obra.est)), 3);
+    // El tráiler no siempre dice la verdad: la expectativa tiene su propio azar
+    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + N.normal(0, 4), 1, 99));
+    obra.exp = N.redondear(obra.con * obra.des / 100, 3);
+    // El ánimo del público: algo que nadie controla hace que una obra prenda o no
+    obra.animo = N.redondear(N.normal(0, P.ANIMO), 3);
+    obra.u = N.redondear(P.AQ * (obra.des - 60) + Math.log(obra.con) + P.ESTRELLAS * fe + obra.animo, 4);
+    obra.sc = 0; obra.bruto = obra.bruto || 0; obra.parte = obra.parte || 0; obra.ent = 0; obra.max = 0; obra.hs = [];
+    obra.acc = {};
+    D.regiones.forEach(function (r) { obra.acc[r.id] = N.redondear(accesoClasificacion(obra, r.id, anio), 4); });
+    obra.delta = P.DELTA + (obra.fam === 'AA' ? 0.06 : obra.fam === 'DR' || obra.fam === 'AV' ? -0.06 : obra.fam === 'FJ' ? -0.04 : 0);
+  }
+
+  // ---------- Semana de cartelera ----------
+  // Reparte el público de cada región entre las obras en cartelera, las otras productoras y quedarse en casa.
+  function semanaCartelera(obras, ctx) {
+    const S = N.S, anio = N.anio(), sem = N.semana();
+    const da = datosAnio(anio);
+    const tendencias = S.mundo.tendencias;
+    // Otras productoras: las películas del mundo que no simulamos una por una
+    const estrenosSim = Math.max(0, S.mercado.estrenos52 || 0);
+    const otras = Math.max(da.peliculas * 0.3, da.peliculas - estrenosSim);
+    const uTipica = P.U_TIPICA;
+    const vidaTipica = 1 / (1 - Math.exp(-P.DELTA));
+    const pesoOtras = otras * Math.exp(uTipica) * vidaTipica / 52;
+    const pesoTipicoTotal = da.peliculas * Math.exp(uTipica) * vidaTipica / 52;
+    const pesoCasa = pesoTipicoTotal * (1 / P.PARTICIPACION - 1) * (1 + 0.3 * M.ocioEnCasa(anio));
+    const res = { bruto: 0, brutoOtras: 0, porEstudio: {}, entradas: 0 };
+    D.regiones.forEach(function (r) {
+      const dr = da.regiones[r.id];
+      if (dr.publico <= 0) return;
+      const mercado = dr.publico / 52 * M.temporada(r.id, sem);
+      const pesos = [];
+      let suma = pesoOtras + pesoCasa;
+      for (let i = 0; i < obras.length; i++) {
+        const o = obras[i];
+        let u = o.u + Math.log(o.acc[r.id] || 0.02) + P.TENDENCIA * (tendencias[o.fam] || 0) + Math.log(M.bonoGenero(o.fam, sem));
+        if (ctx.regionEstudio(o.est) === r.id) u += P.LOCAL;
+        const w = Math.exp(u);
+        pesos.push(w);
+        suma += w;
+      }
+      for (let i = 0; i < obras.length; i++) {
+        const ent = mercado * pesos[i] / suma;
+        const g = ent * dr.precio;
+        const o = obras[i];
+        o._g = (o._g || 0) + g;
+        o._e = (o._e || 0) + ent;
+      }
+      const gOtras = mercado * pesoOtras / suma * dr.precio;
+      res.brutoOtras += gOtras;
+    });
+    for (let i = 0; i < obras.length; i++) {
+      const o = obras[i];
+      const g = o._g || 0, e = o._e || 0;
+      delete o._g; delete o._e;
+      o.sc += 1;
+      const parte = g * parteEstudio(o.sc);
+      o.bruto += g; o.parte += parte; o.ent += e;
+      if (g > o.max) o.max = g;
+      o.hs.push(Math.round(g));
+      res.bruto += g;
+      res.entradas += e;
+      res.porEstudio[o.est] = (res.porEstudio[o.est] || 0) + g;
+      ctx.cobrar(o, parte, g);
+      // Boca a boca: si la obra decepciona frente a lo prometido cae rápido; si sorprende, dura
+      o.u = N.redondear(o.u - o.delta + P.BETA * (o.pub - o.des), 4);
+      if (o.sc >= P.MAX_SEMANAS || (o.sc >= 2 && g < o.max * P.CORTE) || (o.sc >= 1 && g < 1)) ctx.terminar(o);
+    }
+    res.bruto += res.brutoOtras;
+    return res;
+  }
+
+  // ---------- Pronóstico (sin gastar azar): para la interfaz y el bot ----------
+  function pronosticoSemana(semanaX, famId) {
+    const regs = D.regiones;
+    let t = 0;
+    regs.forEach(function (r) { t += M.temporada(r.id, semanaX); });
+    return (t / regs.length) * M.bonoGenero(famId, semanaX);
+  }
+
+  return {
+    P: P, PROPENSION: PROPENSION, datosAnio: datosAnio, presupuestoTipico: presupuestoTipico, tipicoSuavizado: tipicoSuavizado,
+    presupuestoTipico2025: presupuestoTipico2025, produccionTipica: produccionTipica, marketingTipico: marketingTipico,
+    parteEstudio: parteEstudio, tarifa: tarifa, demanda: demandaTalento, familiaPrincipal: familiaPrincipal, familiasDe: familiasDe,
+    encajeObra: encajeObra, calidadBase: calidadBase, calificar: calificar, famaEstrellas: famaEstrellas,
+    canalesDe: canalesDe, conocimiento: conocimiento, deseo: deseo, accesoClasificacion: accesoClasificacion,
+    iniciarCartelera: iniciarCartelera, semanaCartelera: semanaCartelera, pronosticoSemana: pronosticoSemana,
+  };
+})();

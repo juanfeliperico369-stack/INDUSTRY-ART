@@ -1,0 +1,54 @@
+# Capturas automáticas · INDUSTRY ART V16
+
+| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |
+|---|---|---|---|---|
+| 390x844 | 01_portada | 0 | 0 | no |
+| 390x844 | 02_nueva_partida | 0 | 0 | no |
+| 390x844 | 03_estudio | 0 | 0 | no |
+| 390x844 | 04_obras | 0 | 0 | no |
+| 390x844 | 05_crear_obra | 0 | 0 | no |
+| 390x844 | 06_crear_equipo | 0 | 0 | no |
+| 390x844 | 07_catalogo | 0 | 0 | no |
+| 390x844 | 08_ficha_obra | 0 | 0 | no |
+| 390x844 | 09_talento | 1 (INPUT 24x24) | 0 | no |
+| 390x844 | 10_ficha_talento | 1 (INPUT 24x24) | 0 | no |
+| 390x844 | 11_mundo_cartelera | 0 | 15 | no |
+| 390x844 | 12_mundo_poblacion | 0 | 0 | no |
+| 390x844 | 13_mundo_premios | 0 | 0 | no |
+| 390x844 | 14_negocio_finanzas | 0 | 0 | no |
+| 390x844 | 15_negocio_construcciones | 0 | 0 | no |
+| 390x844 | 16_ajustes | 4 (INPUT 24x24, INPUT 24x24, INPUT 24x24) | 0 | no |
+| 844x390 | 01_portada | 0 | 0 | no |
+| 844x390 | 02_nueva_partida | 0 | 0 | no |
+| 844x390 | 03_estudio | 0 | 0 | no |
+| 844x390 | 04_obras | 0 | 0 | no |
+| 844x390 | 05_crear_obra | 0 | 0 | no |
+| 844x390 | 06_crear_equipo | 0 | 0 | no |
+| 844x390 | 07_catalogo | 0 | 0 | no |
+| 844x390 | 08_ficha_obra | 0 | 0 | no |
+| 844x390 | 09_talento | 1 (INPUT 24x24) | 0 | no |
+| 844x390 | 10_ficha_talento | 1 (INPUT 24x24) | 0 | no |
+| 844x390 | 11_mundo_cartelera | 0 | 15 | no |
+| 844x390 | 12_mundo_poblacion | 0 | 0 | no |
+| 844x390 | 13_mundo_premios | 0 | 0 | no |
+| 844x390 | 14_negocio_finanzas | 0 | 0 | no |
+| 844x390 | 15_negocio_construcciones | 0 | 0 | no |
+| 844x390 | 16_ajustes | 0 | 0 | no |
+| 1366x768 | 01_portada | 0 | 0 | no |
+| 1366x768 | 02_nueva_partida | 0 | 0 | no |
+| 1366x768 | 03_estudio | 0 | 0 | no |
+| 1366x768 | 04_obras | 0 | 0 | no |
+| 1366x768 | 05_crear_obra | 0 | 0 | no |
+| 1366x768 | 06_crear_equipo | 0 | 0 | no |
+| 1366x768 | 07_catalogo | 0 | 0 | no |
+| 1366x768 | 08_ficha_obra | 0 | 0 | no |
+| 1366x768 | 09_talento | 1 (INPUT 24x24) | 0 | no |
+| 1366x768 | 10_ficha_talento | 1 (INPUT 24x24) | 0 | no |
+| 1366x768 | 11_mundo_cartelera | 0 | 15 | no |
+| 1366x768 | 12_mundo_poblacion | 0 | 0 | no |
+| 1366x768 | 13_mundo_premios | 0 | 0 | no |
+| 1366x768 | 14_negocio_finanzas | 0 | 0 | no |
+| 1366x768 | 15_negocio_construcciones | 0 | 0 | no |
+| 1366x768 | 16_ajustes | 4 (INPUT 24x24, INPUT 24x24, INPUT 24x24) | 0 | no |
+
+Errores de página: ninguno
