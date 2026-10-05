@@ -6,9 +6,9 @@ IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
   const INGRESOS = ['taquilla'];
-  const GASTOS = ['talento', 'produccion', 'marketing', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas'];
+  const GASTOS = ['talento', 'derechos', 'produccion', 'marketing', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas'];
   const NOMBRES = {
-    taquilla: 'Taquilla (parte del estudio)', talento: 'Contratos de talento', produccion: 'Producción', marketing: 'Marketing',
+    taquilla: 'Taquilla (parte del estudio)', talento: 'Contratos de talento', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
     personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas',
   };
   function libroVacio() { return { ing: {}, gas: {} }; }

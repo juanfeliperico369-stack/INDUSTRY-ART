@@ -1,10 +1,11 @@
 /* ==== módulo: pruebas ==== */
 // Bot de partidas: juega solo con tres estrategias (prudente, normal, agresiva), desde 1900 y desde 2000 hasta
 // 2150 con semillas fijas, y revisa las metas de balance, los errores, el tiempo por semana y el tamaño del
-// guardado. Ninguna versión se entrega si el bot falla. Usa solo la API del juego, nunca la pantalla.
+// guardado. Desde la V17 crea sus obras con la fábrica de ideas (historia, personajes, material, guiones
+// comprados, efectos e IA) y hay pruebas de reglas. Ninguna versión se entrega si el bot falla.
 IA.pruebas = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, T = IA.talentos, L = IA.lanzamiento, NG = IA.negocio;
+  const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, T = IA.talentos, L = IA.lanzamiento, NG = IA.negocio, X = IA.taxonomia;
 
   const ESTRATEGIAS = {
     prudente: { escala: [1, 2], marketing: 2, ambicion: 1.0, colchon: 1.7, construir: 8, pisos: 5 },
@@ -73,21 +74,71 @@ IA.pruebas = (function () {
       let escala = N.entero(est.escala[0], est.escala[1]) + (est.grande && N.probabilidad(est.grande) ? 1 : 0);
       let b = null, costo = 0, ok = false;
       const tono = N.elegir(D.tonos).id;
+      const idea = ideaDelBot(S, gen);
       // Si no alcanza, baja la escala y después la ambición del equipo
       [est.ambicion, 0.6].forEach(function (amb) {
         for (let e = escala; e >= 0 && !ok; e--) {
-          b = O.borrador(0, { gen: gen, escala: e, tono: tono });
+          b = O.borrador(0, Object.assign({ gen: idea.gen || gen, escala: e, tono: tono, completa: true }, idea.campos));
           O.equipoRecomendado(b, amb);
-          costo = O.costoTalento(b) + b.pp + E.marketingTipico(N.anio()) * D.nivelesMarketing[Math.min(2, est.marketing)].mult * 0.5;
+          detallar(b, idea);
+          costo = O.costoTalento(b) + b.pp + (b.derechos || 0) + E.marketingTipico(N.anio()) * D.nivelesMarketing[Math.min(2, est.marketing)].mult * 0.5;
           if (NG.cajaLibre(0) > costo * est.colchon) ok = true;
         }
       });
       if (!ok || !b) break;
       const r = IA.juego.iniciarObra(b);
-      if (r.error) break;
+      if (r.error) { if (registroErrores) registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error); break; }
     }
   }
   function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x) c++; }); return c; }
+  // La idea del bot (V17): a veces adapta un material, a veces produce un guion comprado, y si no, una idea propia
+  function ideaDelBot(S, gen) {
+    const anio = N.anio();
+    const r = { campos: {} };
+    if ((S.guionesPropios || []).length) {
+      const g = S.guionesPropios[0];
+      r.gen = g.idea.gen; r.guion = g;
+      return r;
+    }
+    // Solo compra guiones o derechos con la caja holgada (nunca en los primeros años)
+    const holgado = NG.cajaLibre(0) > E.presupuestoTipico(anio) * 4;
+    const guiones = (S.guiones || []).filter(function (g) { return g.calif >= 70 && g.precio < NG.cajaLibre(0) * 0.05; });
+    if (holgado && guiones.length && N.probabilidad(0.25)) {
+      if (!IA.juego.comprarGuion(guiones[0].id)) { r.gen = guiones[0].idea.gen; r.guion = guiones[0]; return r; }
+    }
+    if (N.probabilidad(0.1)) {
+      const libres = IA.ideas.materialesDisponibles(anio).filter(function (m) { return IA.ideas.esLibre(m, anio) || (holgado && IA.ideas.costoDerechos(m, anio) < NG.cajaLibre(0) * 0.03); });
+      if (libres.length) { r.mat = N.elegir(libres).id; return r; }
+    }
+    return r;
+  }
+  // Completa la historia, los personajes y algunas decisiones del modo detallado
+  function detallar(b, idea) {
+    const anio = N.anio();
+    if (idea.mat) IA.ideas.usarMaterial(b, idea.mat, anio);
+    if (idea.guion) {
+      IA.ideas.aplicarIdea(b, idea.guion.idea);
+      b.guionC = idea.guion.calif; b.guionId = idea.guion.id;
+      if (T.disponible(T.porId(idea.guion.autor))) { b.eq.guion = idea.guion.autor; b.guionPagado = 1; }
+    }
+    if (!(b.prob && b.prob.length)) {
+      const tit = b.tit, epo = b.epo;
+      IA.ideas.recomendarHistoria(b, anio);
+      if (idea.mat) { b.tit = tit; b.epo = epo; }
+    }
+    if (!b.arco) b.arco = IA.ideas.arcoRecomendado(b.fam);
+    IA.ideas.generarPersonajes(b);
+    const dir = T.porId(b.eq.direccion), arte = T.porId(b.eq.arte);
+    // Efectos grandes solo si el equipo da la talla; IA solo si el equipo creativo es bueno
+    if ((b.fam === 'AA' || b.fam === 'IM') && dir && arte && (dir.hab + arte.hab) / 2 >= 64 && N.probabilidad(0.4) && X.efectos[3].desde <= anio) b.fx = 3;
+    if (anio >= IA.ideas.ANIO_IA && IA.ideas.equipoCreativo(b) >= 62 && N.probabilidad(0.3)) b.ia = N.entero(10, 40);
+    if (N.probabilidad(0.2)) b.cx = N.entero(1, 4);
+    if (N.probabilidad(0.2)) b.rit = N.entero(1, 4);
+    O.recalcular(b);
+    IA.ideas.asignarReparto(b);
+    return b;
+  }
+  let registroErrores = null;
 
   // ---------- Revisión de errores (invariantes) ----------
   function revisar(errores) {
@@ -98,6 +149,13 @@ IA.pruebas = (function () {
       if (o.et === 'cartelera' && !isFinite(o.u)) errores.push('Atractivo no finito en obra ' + o.id);
     });
     if (!(IA.mundo.poblacionMundial(N.anio()) > 0)) errores.push('Población no positiva en ' + N.anio());
+    // Reglas de la fábrica de ideas en las obras del jugador
+    O.activas().forEach(function (o) {
+      if (o.est !== 0 || !o.cont) return;
+      if (IA.ideas.clasificar(o, o.anioPlan) !== o.clas) errores.push('La clasificación de «' + o.tit + '» no sale de su contenido');
+      if (o.gen.indexOf('Erótico') >= 0 && ((o.pj || []).some(function (p) { return p.e < 18; }) || ['18', 'R', 'X'].indexOf(o.clas) < 0)) errores.push('Regla del Erótico rota en «' + o.tit + '»');
+      if (IA.ideas.hayMenores(o) && o.cont.amor > 1) errores.push('Contenido no permitido con menores en «' + o.tit + '»');
+    });
     if (errores.length > 50) errores.length = 50;
   }
 
@@ -108,6 +166,7 @@ IA.pruebas = (function () {
     const errores = [];
     const reloj = typeof performance !== 'undefined' ? function () { return performance.now(); } : function () { return Date.now(); };
     registro = [];
+    registroErrores = errores;
     IA.juego.nuevaPartida({ semilla: op.semilla, anio: op.desde, nombre: 'Bot ' + op.estrategia, bot: true });
     const S = N.S;
     const semanas = (op.hasta - op.desde) * 52;
@@ -138,6 +197,7 @@ IA.pruebas = (function () {
       }
     }
     const guardadoFinal = op.medirGuardado ? op.medirGuardado(S) : null;
+    registroErrores = null;
     return medir(op, errores, { msSemana: totalMs / Math.max(1, S.t), peorSemana: peorSemana, sAnio: (totalMs / Math.max(1, tiemposAnio.length)) / 1000, peorAnio: peorAnio / 1000, guardado150: guardado150, guardadoFinal: guardadoFinal });
   }
   function mediana(v) {
@@ -184,6 +244,7 @@ IA.pruebas = (function () {
       cajaFinal2025: hist.length ? hist[hist.length - 1].caja2025 : 0,
       investigaciones: S.investigaciones, quiebra: S.quiebra ? S.quiebra.anio : null,
       rescatesRivales: S.estudios.slice(1).reduce(function (a, e) { return a + e.rescates; }, 0),
+      ideas: resumenIdeas(S),
       errores: errores, rendimiento: rend,
     };
     return res;
@@ -198,6 +259,71 @@ IA.pruebas = (function () {
     { id: 'cuotaMax', nombre: 'Cuota de mercado', objetivo: 'menos de 35 %', ok: function (r) { return r.cuotaMax < 0.35; }, ver: function (r) { return pct(r.cuotaMax) + ' máx.'; } },
   ];
   function pct(x) { return (Math.round(x * 1000) / 10).toString().replace('.', ',') + ' %'; }
+  // Qué usó el bot de la fábrica de ideas (para el informe)
+  function resumenIdeas(S) {
+    const mias = S.obras.filter(function (o) { return o.est === 0; });
+    const c = function (f) { return mias.filter(f).length; };
+    return {
+      obras: mias.length, material: c(function (o) { return o.mat; }), guion: c(function (o) { return o.guionC; }),
+      ia: c(function (o) { return o.ia; }), efectos: c(function (o) { return o.fx >= 3; }),
+      aplaudidos: c(function (o) { return o.fxr === 'aplaudidos'; }), repudiados: c(function (o) { return o.fxr === 'repudiados'; }),
+      clasificaciones: mias.reduce(function (a, o) { a[o.clas] = (a[o.clas] || 0) + 1; return a; }, {}),
+      adaptacionesRivales: S.obras.filter(function (o) { return o.est !== 0 && o.mat; }).length,
+    };
+  }
+
+  // ---------- Pruebas de reglas (plan: clasificación, dominio público, Erótico, inflación y población) ----------
+  function reglas() {
+    const X = IA.taxonomia, I = IA.ideas, M = IA.mundo;
+    const r = [];
+    const prueba = function (nombre, ok, detalle) { r.push({ nombre: nombre, ok: !!ok, detalle: detalle || '' }); };
+    const idea = function (gen, cont, extra) { return Object.assign({ gen: gen, cont: Object.assign({ violencia: 0, lenguaje: 0, amor: 0, consumo: 0, terror: 0 }, cont) }, extra || {}); };
+    // Clasificación desde el contenido
+    prueba('Contenido nulo da G', I.clasificar(idea(['Drama'], {}), 2000) === 'G');
+    prueba('Violencia leve da PG', I.clasificar(idea(['Drama'], { violencia: 1 }), 2000) === 'PG');
+    prueba('Violencia moderada da PG-13', I.clasificar(idea(['Acción'], { violencia: 2 }), 2000) === 'PG-13');
+    prueba('Lenguaje rudo da 16', I.clasificar(idea(['Drama'], { lenguaje: 2 }), 2000) === '16');
+    prueba('Amor candente da NC-17 (17 años)', I.clasificar(idea(['Romance'], { amor: 3 }), 2000) === 'NC-17');
+    prueba('Violencia gráfica da 18', I.clasificar(idea(['Terror'], { violencia: 4 }), 2000) === '18');
+    prueba('Violencia sangrienta da R', I.clasificar(idea(['Terror'], { violencia: 5 }), 2000) === 'R');
+    prueba('Amor explícito da X', I.clasificar(idea(['Romance'], { amor: 4 }), 2000) === 'X');
+    prueba('La parte más fuerte manda', I.clasificar(idea(['Drama'], { violencia: 1, lenguaje: 3, terror: 2 }), 2000) === 'NC-17');
+    prueba('Contenido moderado puede ir como N', I.clasificar(idea(['Experimental'], { lenguaje: 1 }, { clasN: true }), 2000) === 'N');
+    prueba('N no admite contenido fuerte', I.clasificar(idea(['Experimental'], { lenguaje: 2 }, { clasN: true }), 2000) === '16');
+    prueba('Lo de adultos dice «siempre sugerido»', I.describirContenido(idea(['Drama'], { amor: 4 })).indexOf('explícito, siempre sugerido') >= 0);
+    // Censura de la época
+    const b1950 = idea(['Terror'], { violencia: 6, amor: 4 });
+    I.normalizar(b1950, 1950);
+    prueba('Antes de 1968 la censura limita a 16', b1950.clas === '16' && I.clasificar(b1950, 1950) === '16', b1950.clas);
+    prueba('Gore sube la clasificación a R', (function () { const b = idea(['Terror'], {}, { sub: ['Gore'] }); I.normalizar(b, 2000); return b.clas === 'R'; })());
+    // Regla del Erótico
+    prueba('Erótico es siempre de adultos', ['18', 'R', 'X'].indexOf(I.clasificar(idea(['Erótico'], {}), 2000)) >= 0);
+    prueba('Erótico no existe antes de 1968', !!O.validarGeneros(['Erótico'], 1960));
+    prueba('Erótico nunca con familia y juventud', !!O.validarGeneros(['Erótico', 'Familiar'], 2000));
+    prueba('Erótico nunca con públicos infantiles', !!I.validar(idea(['Erótico'], { amor: 3 }, { pubs: ['Adolescentes'] }), 2000));
+    prueba('Erótico solo con personajes adultos', !!I.validar(idea(['Erótico'], { amor: 3 }, { pj: [{ n: 'A', e: 16, s: 'F', i: 'protagonista', a: 'Amante' }], prob: ['Amor'], arco: 'pozo', nat: 'f', tipo: 'real' }), 2000));
+    prueba('Con menores el amor no pasa de romántico', (function () { const b = idea(['Drama'], { amor: 4 }, { pj: [{ n: 'A', e: 14, s: 'F', i: 'protagonista', a: 'Héroe' }] }); I.normalizar(b, 2000); return b.cont.amor <= 1; })());
+    // Dominio público: vida del autor + 70
+    const dracula = X.dominio.filter(function (m) { return m.tit === 'Drácula'; })[0];
+    prueba('Drácula no es libre en 1982', !I.esLibre(dracula, 1982));
+    prueba('Drácula es libre desde 1983', I.esLibre(dracula, 1983));
+    prueba('Comprar los derechos antes de liberarse cuesta', I.costoDerechos(dracula, 1950) > 0 && I.costoDerechos(dracula, 1990) === 0);
+    prueba('La Odisea es libre siempre', I.esLibre(X.dominio[0], 1850));
+    prueba('Hay 82 obras de dominio público', X.dominio.length === 82, X.dominio.length);
+    const libre = dracula.libre - 70 + 50;
+    prueba('La regla es ajustable (vida + 50 libera antes)', (function () { const S = N.S, antes = S ? S.reglaDominio : 0; if (S) S.reglaDominio = 50; const ok = I.esLibre(dracula, libre) && !I.esLibre(dracula, libre - 1); if (S) S.reglaDominio = antes || 70; return ok; })());
+    // Inflación y población contra las tablas del plan
+    prueba('Inflación: ida y vuelta a dólares de hoy', Math.abs(M.aHoy(M.aEpoca(1000, 1930), 1930) - 1000) < 1);
+    prueba('Inflación: un dólar de 1900 vale más de 25 de hoy', M.aHoy(1, 1900) > 25 && M.aHoy(1, 1900) < 45, M.aHoy(1, 1900).toFixed(1));
+    const p = function (a) { return M.poblacionMundial(a) / 1e9; };
+    prueba('Población 1900 ≈ 1.650 millones', Math.abs(p(1900) - 1.65) < 0.15, p(1900).toFixed(2));
+    prueba('Población 2000 ≈ 6.150 millones', Math.abs(p(2000) - 6.15) < 0.3, p(2000).toFixed(2));
+    prueba('Población 2024 ≈ 8.100 millones', Math.abs(p(2024) - 8.1) < 0.3, p(2024).toFixed(2));
+    // Listas completas
+    const cnt = X.contar();
+    prueba('Listas completas: 227 temas, 85 subgéneros, 53 problemáticas, 34 ficciones', cnt.temas === 227 && cnt.subgeneros === 85 && cnt.problematicas === 53 && cnt.ficcion === 34, JSON.stringify(cnt));
+    return r;
+  }
 
   // Corre la batería completa: 3 estrategias × (1900 y 2000) hasta 2150
   function bateria(op) {
@@ -213,5 +339,5 @@ IA.pruebas = (function () {
     return res;
   }
 
-  return { ESTRATEGIAS: ESTRATEGIAS, METAS: METAS, decidir: decidir, jugar: jugar, bateria: bateria, pct: pct, mediana: mediana };
+  return { ESTRATEGIAS: ESTRATEGIAS, METAS: METAS, decidir: decidir, jugar: jugar, bateria: bateria, pct: pct, mediana: mediana, reglas: reglas };
 })();

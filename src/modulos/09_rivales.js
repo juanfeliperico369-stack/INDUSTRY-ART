@@ -54,14 +54,37 @@ IA.rivales = (function () {
     const gen = prestigio ? [N.elegir(D.familia(N.probabilidad(0.6) ? 'DR' : est.familia).generos.filter(function (g) { return g !== 'Erótico'; }))] : elegirGeneros(est);
     const escala = prestigio ? N.entero(2, 3) : N.limitar(Math.round(N.normal(2 + (est.tam - 1) * 0.3, 0.45 + est.riesgo * 0.35)), 0, 3);
     const tono = prestigio ? N.elegir(['Reflexivo', 'Realista', 'Poético', 'Oscuro', 'Épico']) : N.elegir(D.tonos).id;
-    const b = O.borrador(est.id, { gen: gen, escala: escala, tono: tono });
+    const anio = N.anio();
+    const op = { gen: gen, escala: escala, tono: tono };
+    // A veces adaptan una obra libre de derechos (V17) y, desde 2022, algunos usan IA para abaratar
+    if (!prestigio && N.probabilidad(0.07)) {
+      const libres = IA.ideas.materialesDisponibles(anio).filter(function (m) { return IA.ideas.esLibre(m, anio); });
+      if (libres.length) {
+        const m = IA.ideas.usarMaterial({ est: est.id }, N.elegir(libres).id, anio);
+        op.gen = m.gen; op.mat = m.mat; op.tit = m.tit; op.epo = m.epo;
+        if (m.cont) op.cont = m.cont;
+      }
+    }
+    if (anio >= IA.ideas.ANIO_IA && N.probabilidad(0.3)) op.ia = N.entero(10, 60);
+    // La historia: los estudios con buen ojo (y los proyectos de prestigio) eligen lo que encaja con su género
+    const famIdea = D.familiaDe[op.gen[0]] || 'DR';
+    const buenOjo = N.probabilidad(N.limitar(0.45 + est.calidad / 20 + (prestigio ? 0.3 : 0), 0.2, 0.92));
+    op.tem = [buenOjo ? IA.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
+    op.prob = [buenOjo ? IA.ideas.problemaRecomendado(famIdea) : IA.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
+    op.arco = buenOjo ? IA.ideas.arcoRecomendado(famIdea) : N.elegir(IA.taxonomia.arcos).id;
+    const b = O.borrador(est.id, op);
     b.prest = prestigio ? 1 : 0;
     // La calidad de su equipo depende de su estilo más que de su tamaño (evita la espiral del más chico)
     O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4), prestigio ? 2 : 4);
     if (!O.equipoCompleto(b)) return null;
     const costo = O.costoTalento(b) + b.pp;
     if (est.caja < costo * 0.9) return null;
-    return P.iniciar(b, ctx);
+    const o = P.iniciar(b, ctx);
+    if (o.mat) {
+      IA.ideas.registrarUso(o.mat, anio);
+      N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' adapta «' + IA.taxonomia.material(o.mat).tit + '».' });
+    }
+    return o;
   }
   // Cada mes: decide qué producir
   function mensual(ctx) {

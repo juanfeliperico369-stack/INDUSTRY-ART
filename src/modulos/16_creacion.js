@@ -1,0 +1,837 @@
+/* ==== módulo: creacion ==== */
+// La fábrica de ideas en pantalla (V17): tres caminos (idea nueva, comprar un guion, usar material), idea automática
+// con IA desde 2022, modo rápido (5 decisiones con "recomendado" y dado) y modo detallado con todas las listas y los
+// deslizadores de tu documento (contenido, duración, complejidad, ritmo, efectos, presupuesto, época e IA), personajes
+// con nombre, edad, sexo, importancia, arquetipo e intérprete, y la pestaña Taxonomía para ver las listas de todos los
+// medios. Totales en vivo antes de confirmar.
+IA.creacion = (function () {
+  'use strict';
+  const N = IA.n, D = IA.datos, X = IA.taxonomia, I = IA.ideas, E = IA.economia, O = IA.obras, T = IA.talentos;
+  const NG = IA.negocio, J = IA.juego, U = IA.ui, t = IA.t, esc = N.esc;
+  const dinero = U.dinero, icono = U.icono, ac = U.accion;
+
+  // ---------- Estado de la pantalla ----------
+  const cr = { b: null, etapa: 'camino', paso: 0, rol: null, picker: null, q: '', abiertas: { obra: 1, generos: 1, historia: 1 }, grupoMat: 'todos', qMat: '', taxMedio: 'cine' };
+  let modo = 'rapido';
+  try { modo = localStorage.getItem('ia.modoCrear') || 'rapido'; } catch (e) { modo = 'rapido'; }
+  function anio() { return N.anio(); }
+  // Mirar o preparar una obra no es una decisión: la interfaz usa su propio azar para que abrir "Crear obra"
+  // no cambie el mundo (la misma semilla con las mismas decisiones da la misma partida).
+  let azarUI = null;
+  function conAzarUI(fn) {
+    const S = N.S;
+    if (!azarUI) azarUI = N.estadoNuevo(S.semilla + '|interfaz|' + S.t);
+    const real = S.rng;
+    S.rng = azarUI;
+    try { return fn(); } finally { azarUI = S.rng; S.rng = real; }
+  }
+  // Campos que quedan fijos cuando la idea viene de la IA o de un guion comprado
+  const BLOQUEO_IA = ['gen', 'sub', 'tem', 'prob', 'arco', 'sarc', 'fic', 'tono', 'epo'];
+  const BLOQUEO_GUION = ['gen', 'sub', 'tem', 'prob', 'arco', 'sarc'];
+  function bloqueado(b, k) { return (b.ideaIA && BLOQUEO_IA.indexOf(k) >= 0) || (b.guionC && BLOQUEO_GUION.indexOf(k) >= 0); }
+  function candado(b, k) { return bloqueado(b, k) ? ' <span class="etiqueta">' + (b.ideaIA ? 'fijado por la IA' : 'del guion') + '</span>' : ''; }
+
+  // ---------- Borradores ----------
+  function recomendarGenero() {
+    const S = N.S;
+    let mejor = 'DR', v = -9;
+    D.ORDEN_FAM.forEach(function (f) {
+      const x = (S.mundo.tendencias[f] || 0) + (E.pronosticoSemana(N.semana(S.t + 25), f) - 1) + (f === 'AV' ? -0.4 : 0);
+      if (x > v) { v = x; mejor = f; }
+    });
+    const gens = D.familia(mejor).generos.filter(function (g) { return g !== 'Erótico'; });
+    return gens[N.hash(S.t + mejor) % gens.length];
+  }
+  function nuevoBorrador(gen, preparar) {
+    return conAzarUI(function () {
+      const b = O.borrador(0, { gen: gen || [recomendarGenero()], escala: 2, completa: true });
+      O.equipoRecomendado(b, 1);
+      if (preparar) preparar(b);
+      if (!(b.prob && b.prob.length)) I.recomendarHistoria(b, anio());
+      I.generarPersonajes(b);
+      O.recalcular(b);
+      return b;
+    });
+  }
+  // Rehace lo que depende de las decisiones (familia, contenido por defecto, clasificación y costo)
+  function ajustar(b) {
+    const fam = D.familiaDe[b.gen[0]] || 'DR';
+    if (!b.contTocado) b.cont = Object.assign({}, X.contenidoFamilia[fam]);
+    if (!b.clasTocada) b.clasN = fam === 'AV';
+    O.recalcular(b);
+    if (!b.sinEditada) b.sin = I.sinopsis(b);
+    return b;
+  }
+  // El reparto sigue a los personajes: protagonistas y secundarios con intérprete, invitados y cameos aparte
+  function sincronizar(b) {
+    if (!b.pj) return;
+    const con = function (imp) { return b.pj.filter(function (p) { return p.i === imp && p.t !== null && p.t !== undefined; }).map(function (p) { return p.t; }); };
+    b.pj.forEach(function (p) { if (p.i === 'extra') p.t = null; });
+    b.eq.int = con('protagonista').concat(con('secundario'));
+    b.eq.inv = con('invitado');
+    b.eq.cam = con('cameo');
+    ajustar(b);
+  }
+
+  // ---------- Piezas ----------
+  function chip(txt, accion, valor, on, deshab, extra) {
+    return '<button class="chip' + (on ? ' on' : '') + '" data-a="' + accion + '" data-v="' + esc(valor) + '"' + (deshab ? ' disabled' : '') + ' aria-pressed="' + !!on + '"' + (extra || '') + '>' + esc(txt) + '</button>';
+  }
+  function rango(k, min, max, val, etiqueta, texto, paso) {
+    return '<label class="campo rango"><span>' + esc(etiqueta) + ': <b id="rv-' + k.replace(':', '-') + '">' + esc(texto) + '</b></span>' +
+      '<input type="range" min="' + min + '" max="' + max + '" step="' + (paso || 1) + '" value="' + val + '" data-i="crRango" data-c="crRangoFin" data-k="' + k + '" aria-label="' + esc(etiqueta) + '"></label>';
+  }
+  function sel(k, opciones, actual, deshab) {
+    return '<select data-c="crSel" data-k="' + k + '"' + (deshab ? ' disabled' : '') + '>' + opciones.map(function (o) {
+      return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(actual) ? ' selected' : '') + (o[2] ? ' disabled' : '') + '>' + esc(o[1]) + '</option>';
+    }).join('') + '</select>';
+  }
+  function estrellasTxt(n) { let s = ''; for (let i = 1; i <= 5; i++) s += i <= n ? '★' : '☆'; return s; }
+  function estrellasCalif(c) { return estrellasTxt(Math.max(1, Math.min(5, Math.round(c / 20)))); }
+  function textoEncaje(b) {
+    const e = I.estrellas(b);
+    if (e.n === null) return t('encaje') + ': <span class="tenue">? (' + e.nuevas + (e.nuevas > 1 ? ' nuevas' : ' nueva') + ')</span>';
+    return t('encaje') + ': <span class="encaje oro">' + estrellasTxt(e.n) + '</span>';
+  }
+  function presDeSlider(v) { return N.redondear(0.25 * Math.pow(16, v / 100), 3); }
+  function sliderDePres(m) { return Math.round(Math.log(m / 0.25) / Math.log(16) * 100); }
+  function maxNivel(b, c) {
+    const tope = I.nivelMaximoEpoca(anio());
+    let k = 0;
+    c.niveles.forEach(function (n, i) { if (n[1] <= tope) k = i; });
+    if (c.id === 'amor' && I.hayMenores(b)) k = Math.min(k, 1);
+    return k;
+  }
+  function textoNivel(c, v) { const n = c.niveles[v] || c.niveles[0]; return n[0] + (n[1] >= 5 ? ' (siempre sugerido)' : '') + ' · ' + X.ORDEN_CLAS[n[1]]; }
+  function textoRango(b, k) {
+    if (k.indexOf('c:') === 0) { const c = X.contenido.filter(function (x) { return x.id === k.slice(2); })[0]; return textoNivel(c, b.cont[c.id]); }
+    if (k === 'cx') return X.complejidad[b.cx];
+    if (k === 'rit') return X.ritmo[b.rit].id + (X.ritmo[b.rit].crit ? ' (crítica ' + signo(X.ritmo[b.rit].crit) + ', público ' + signo(X.ritmo[b.rit].pub) + ')' : '');
+    if (k === 'fx') return X.efectos[b.fx].nombre;
+    if (k === 'ia') return b.ia + ' %' + (b.ia ? ' · producción ' + Math.round(40 * b.ia / 100) + ' % más barata' : '');
+    if (k === 'min') return b.min + ' min · ' + X.categoriaDuracion(b.min) + ' (lo normal en ' + anio() + ': ' + I.duracionTipica(anio()) + ')';
+    if (k === 'pres') return dinero(b.pp) + ' · ×' + U.decimal(b.presM, 2) + ' de lo típico · clase ' + I.clase(b);
+    if (k === 'epo') return X.epoca(b.epo).nombre;
+    return '';
+  }
+  function signo(x) { return (x > 0 ? '+' : '') + x; }
+  function textoClas(b) {
+    const cl = D.clasificacion(b.clas) || D.clasificacion('PG-13');
+    const acc = E.accesoClasificacion(Object.assign({}, b), N.S.estudios[0].reg, anio());
+    return '<b>' + t('clasificacion') + ': ' + esc(b.clas) + '</b> · ' + esc(cl.desc) + '<br><span class="nota">' + esc(I.describirContenido(b)) + ' · público que puede verla en tu región: ' + Math.round(Math.min(1.5, acc) * 100) + ' % de lo normal' +
+      (anio() < D.ANIO_CLASIFICACION_POR_EDADES ? '. Antes de 1968 la censura de la época no deja estrenar NC-17, 18, R ni X: lo más fuerte se vuelve guiño' : '') + '.</span>';
+  }
+
+  // ---------- Totales en vivo ----------
+  function piezaPie(b) {
+    const est = O.estimar(b, NG.bonos(0, b.fam));
+    const libre = NG.cajaLibre(0);
+    const err = J.puedeIniciar(b);
+    // Dos líneas siempre a la vista; el desglose se abre tocando "Detalle"
+    return '<div class="fila entre"><span>' + t('costo_total') + ' <b class="cifra ' + (est.total > libre ? 'mal' : '') + '">' + dinero(est.total) + '</b></span><span>' + t('calidad_esperada').split(' ')[0] + ' <b>' + Math.max(1, est.calidad - 6) + '–' + Math.min(99, est.calidad + 6) + '</b></span><span title="Retorno orientativo">×' + U.decimal(est.retorno[0], 1) + '–×' + U.decimal(est.retorno[1], 1) + '</span></div>' +
+      '<div class="fila entre chico"><span>' + textoEncaje(b) + '</span><span>' + esc(b.clas) + ' · ' + O.semanasTotales(b, NG.rapidez(0)) + ' sem. <button class="btn" style="padding:2px 10px" data-a="crPieDetalle">' + (cr.pieAbierto ? 'Menos' : 'Detalle') + '</button></span></div>' +
+      (cr.pieAbierto ? '<div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + (est.derechos ? ' · derechos ' + dinero(est.derechos) : '') + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · retorno orientativo ×' + U.decimal(est.retorno[0], 1) + ' a ×' + U.decimal(est.retorno[1], 1) + ' (multiplicador de lo invertido)</div>' : '') +
+      (err && (modo === 'detallado' || cr.paso === 4) ? '<p class="mal chico" style="margin:4px 0 0">' + esc(err) + '</p>' : '');
+  }
+  function pie(b) { return '<div id="crPie" class="tarjeta totales" style="position:sticky;bottom:0;margin-top:12px;padding:8px 10px">' + piezaPie(b) + '</div>'; }
+  function refrescarPie() {
+    const p = document.getElementById('crPie');
+    if (p && cr.b) p.innerHTML = piezaPie(cr.b);
+  }
+
+  // =====================================================================
+  // CAMINO: idea nueva, comprar un guion, usar material o idea con IA
+  // =====================================================================
+  function tarjetaCamino(id, titulo, texto, deshab) {
+    return '<button class="tarjeta toque" style="text-align:left;width:100%" data-a="crCamino" data-v="' + id + '"' + (deshab ? ' disabled' : '') + '><b>' + esc(titulo) + '</b><br><span class="chico">' + esc(texto) + '</span></button>';
+  }
+  function vistaCamino() {
+    const S = N.S, a = anio();
+    let h = '<h2>' + t('crear_obra') + '</h2><p class="nota">Primero, de dónde sale la idea. Todo se puede cambiar antes de empezar.</p>';
+    h += '<h3>Medio</h3><div class="chips">' + X.medios.map(function (m) {
+      return '<button class="chip' + (m.activo ? ' on' : '') + '"' + (m.activo ? '' : ' disabled') + '>' + esc(m.nombre) + (m.activo ? '' : ' · ' + m.version) + '</button>';
+    }).join('') + '</div><p class="nota">En esta versión se produce cine. Las listas de los demás medios ya están completas en Mundo › Taxonomía y llegan con su economía.</p>';
+    h += '<h3>Modo</h3><div class="chips">' + chip('Rápido · 5 decisiones', 'crModo', 'rapido', modo === 'rapido') + chip('Detallado · todas las listas', 'crModo', 'detallado', modo === 'detallado') + '</div>';
+    const nG = (S.guiones || []).length, nP = (S.guionesPropios || []).length;
+    h += '<div class="col" style="margin-top:12px;gap:8px">' +
+      tarjetaCamino('nueva', 'Idea nueva', 'Tú decides todo, con «recomendado» y dado en cada paso.') +
+      tarjetaCamino('guion', 'Comprar un guion', nG + ' guiones en venta' + (nP ? ' · ' + nP + ' tuyos sin producir' : '') + '. Ya están escritos, con su calificación y su precio.') +
+      tarjetaCamino('material', 'Usar material', I.materialesDisponibles(a).length + ' obras de dominio público y derechos que se compran: clásicos, subidas de tono y tradiciones del mundo.') +
+      (a >= I.ANIO_IA ? tarjetaCamino('ia', 'Idea automática con IA', 'Un botón: la IA arma y bloquea la historia. Su calidad depende de tu guionista.') : '<p class="nota">La idea automática con IA llega en ' + I.ANIO_IA + '.</p>') + '</div>';
+    return h;
+  }
+  function cabecera(titulo, ayuda) {
+    return '<div class="fila entre"><h2>' + esc(titulo) + '</h2><button class="btn" data-a="crVolverCamino">' + t('atras') + '</button></div>' + (ayuda ? '<p class="nota">' + esc(ayuda) + '</p>' : '');
+  }
+  function vistaGuiones() {
+    const S = N.S;
+    let h = cabecera('Comprar un guion', 'Guiones ya escritos. La calificación es la de su primera lectura: un guion mejor sube la calidad de la obra. Llegan nuevos cada tres meses; el precio incluye al escritor.');
+    const propios = S.guionesPropios || [];
+    if (propios.length) h += '<h3>Tus guiones</h3>' + propios.map(function (g) { return tarjetaGuion(g, true); }).join('');
+    h += '<h3>En venta</h3>' + ((S.guiones || []).length ? S.guiones.map(function (g) { return tarjetaGuion(g, false); }).join('') : '<p class="tenue">No hay guiones en venta ahora.</p>');
+    return h;
+  }
+  function tarjetaGuion(g, propio) {
+    const sin = I.sinopsis({ gen: g.idea.gen, tem: g.idea.tem, prob: g.idea.prob, arco: g.idea.arco, epo: g.idea.epo || 'actualidad' });
+    return '<div class="tarjeta"><div class="fila entre"><b>' + esc(g.idea.tit) + '</b><span class="oro">' + estrellasCalif(g.calif) + ' ' + g.calif + '</span></div>' +
+      '<span class="chico">' + esc(g.idea.gen.join(' · ')) + ' · ' + esc((g.idea.tem || []).join(', ')) + '</span><br><span class="tenue chico">De ' + esc(g.nomAutor) + (propio ? '' : ' · en venta hasta ' + esc(U.fechaCorta(g.vence))) + '</span>' +
+      '<p class="nota">' + esc(sin) + '</p>' +
+      (propio ? '<button class="btn primario" data-a="crProducirGuion" data-v="' + g.id + '">Producir</button>' : '<button class="btn primario" data-a="crComprarGuion" data-v="' + g.id + '">Comprar · ' + dinero(g.precio) + '</button>') + '</div>';
+  }
+  const GRUPOS_MAT = [['todos', 'Todas'], ['clasico', 'Clásicos'], ['tono', 'Subidas de tono'], ['tradicion', 'Tradiciones del mundo']];
+  function mini(v) { return '<span class="mini"><i style="width:' + Math.round(N.limitar(v / 1.5, 0, 1) * 100) + '%"></i></span>'; }
+  function listaMaterial() {
+    const a = anio(), q = cr.qMat.toLowerCase();
+    const lista = I.materialesDisponibles(a).filter(function (m) {
+      return (cr.grupoMat === 'todos' || m.grupo === cr.grupoMat) && (!q || (m.tit + ' ' + m.autor + ' ' + m.gen.join(' ')).toLowerCase().indexOf(q) >= 0);
+    }).sort(function (x, y) { return y.fama - x.fama; });
+    if (!lista.length) return '<p class="tenue">Nada coincide con la búsqueda.</p>';
+    const EDADES = ['Niños', 'Adolesc.', 'Jóvenes', 'Adultos', 'Mayores'];
+    return lista.map(function (m) {
+      const libre = I.esLibre(m, a), der = I.costoDerechos(m, a), at = I.atractivo(m), usos = I.usosRecientes(m.id, a);
+      return '<div class="tarjeta"><div class="fila entre"><b>' + esc(m.tit) + '</b>' + (libre ? '<span class="etiqueta bien">Libre</span>' : '<span class="etiqueta">Derechos ' + dinero(der) + '</span>') + '</div>' +
+        '<span class="chico">' + esc(m.autor) + ' · ' + esc(m.anio) + ' · ' + esc(m.gen.join(', ')) + '</span>' +
+        (libre ? '' : '<br><span class="tenue chico">Queda libre en ' + I.anioLibre(m) + ' (vida del autor + ' + I.reglaDominio() + ' años)</span>') +
+        '<div class="chico" style="margin-top:4px">Fama ' + mini(m.fama * 1.5) + ' · ' + EDADES.map(function (e, i) { return e + ' ' + mini(at.edades[i]); }).join(' ') + ' · Hombres ' + mini(at.sexo[0]) + ' Mujeres ' + mini(at.sexo[1]) + '</div>' +
+        (usos ? '<span class="mal chico">Adaptada ' + usos + ' ' + (usos > 1 ? 'veces' : 'vez') + ' en los últimos 15 años: el público está cansado.</span><br>' : '') +
+        (m.grupo === 'tono' ? '<span class="nota">Subida de tono: se adapta con guiños, la clasificación sube y nada es explícito.</span><br>' : '') +
+        '<button class="btn primario" data-a="crAdaptar" data-v="' + m.id + '">Adaptar</button></div>';
+    }).join('');
+  }
+  function vistaMaterial() {
+    let h = cabecera('Usar material', 'Obras de dominio público: quedan libres el 1 de enero del año 71 tras la muerte del autor; las antiguas y las tradiciones, siempre. Antes de liberarse, sus derechos se compran.');
+    h += '<div class="chips">' + GRUPOS_MAT.map(function (g) { return chip(g[1], 'crMatGrupo', g[0], cr.grupoMat === g[0]); }).join('') + '</div>';
+    h += '<input type="search" placeholder="Buscar por título, autor o género" value="' + esc(cr.qMat) + '" data-i="crMatBuscar" style="margin:8px 0">';
+    return h + '<div id="crMatLista">' + listaMaterial() + '</div>';
+  }
+
+  // =====================================================================
+  // BLOQUES DE LA IDEA (los usan el modo rápido y el detallado)
+  // =====================================================================
+  function bloqueGeneros(b) {
+    const lock = bloqueado(b, 'gen');
+    let h = '<p class="nota">' + t('generos_ayuda') + ' El primero es el líder.' + candado(b, 'gen') + '</p>';
+    if (!lock) h += '<div class="fila envolver" style="margin-bottom:8px"><button class="btn" data-a="crGenRec">' + icono('varita') + t('recomendado') + '</button><button class="btn" data-a="crGenDado">' + icono('dado') + t('dado') + '</button></div>';
+    D.familias.forEach(function (f) {
+      const tend = N.S.mundo.tendencias[f.id] || 0;
+      h += '<h4 style="margin:10px 0 4px">' + esc(f.nombre) + ' <span class="chico ' + (tend > 0.2 ? 'bien' : tend < -0.2 ? 'mal' : 'tenue') + '">' + (tend > 0.2 ? 'en alza' : tend < -0.2 ? 'en baja' : 'estable') + '</span></h4><div class="chips">' +
+        f.generos.slice().sort(function (x, y) { return x.localeCompare(y, 'es'); }).map(function (g) {
+          const on = b.gen.indexOf(g) >= 0;
+          const bloq = lock || (!on && (b.gen.length >= 3 || O.validarGeneros(b.gen.concat([g]), anio())));
+          return chip(g + (on && b.gen[0] === g ? ' ★' : ''), 'crGen', g, on, bloq);
+        }).join('') + '</div><p class="nota" style="margin:2px 0">' + esc(f.temporada) + ' · costo ' + (f.costo >= 1.3 ? 'alto' : f.costo <= 0.6 ? 'bajo' : 'medio') + ' · inclina a ' + (f.inclina === 'pub' ? 'el público' : f.inclina === 'crit' ? 'la crítica' : 'ambos') + ' · clasificación usual ' + esc(f.clas) + '</p>';
+    });
+    return h;
+  }
+  // Sugerencias de una lista grande: lo elegido más lo que mejor encaja con la familia
+  function sugeridosTemas(b) {
+    const fam = b.fam, out = (b.tem || []).slice();
+    X.familiasTema.filter(function (f) { return f.afin[fam] >= 3; }).forEach(function (f) {
+      f.items.slice().sort(function (x, y) { return N.hash(x + N.S.t) - N.hash(y + N.S.t); }).slice(0, 5).forEach(function (x) { if (out.indexOf(x) < 0) out.push(x); });
+    });
+    return out.slice(0, 12);
+  }
+  function sugeridosProblemas(b) {
+    const fam = b.fam, out = (b.prob || []).slice();
+    const pref = { AA: ['CL', 'VB'], IM: ['VB', 'DS'], SM: ['ME', 'CL'], DR: ['AC', 'VI'], HM: ['VI', 'TR'], FJ: ['VB', 'VI'], AV: ['DS', 'AC'], RD: ['VI', 'AC'] }[fam] || ['CL'];
+    X.familiasProblema.filter(function (f) { return pref.indexOf(f.id) >= 0; }).forEach(function (f) { Object.keys(f.items).forEach(function (x) { if (out.indexOf(x) < 0) out.push(x); }); });
+    return out.slice(0, 12);
+  }
+  function bloqueHistoria(b, completo) {
+    if (cr.picker === 'tem' || cr.picker === 'sub' || cr.picker === 'prob' || cr.picker === 'fic') return bloquePicker(b);
+    const lockT = bloqueado(b, 'tem'), lockP = bloqueado(b, 'prob'), lockA = bloqueado(b, 'arco');
+    let h = '';
+    if (!lockT || !lockP) h += '<div class="fila envolver" style="margin-bottom:6px"><button class="btn" data-a="crHistRec">' + icono('varita') + t('recomendado') + '</button><button class="btn" data-a="crHistDado">' + icono('dado') + t('dado') + '</button></div>';
+    if (completo) {
+      h += '<h4>Naturaleza</h4><div class="chips">' + chip('Ficción', 'crNat', 'f', b.nat !== 'r') + chip('Realidad', 'crNat', 'r', b.nat === 'r') + '</div>';
+      h += '<h4>Subgéneros (' + (b.sub || []).length + '/' + I.LIMITES.sub + ', opcional)' + candado(b, 'sub') + '</h4><p class="chico">' + esc((b.sub || []).join(' · ') || '—') + '</p>' + (bloqueado(b, 'sub') ? '' : '<button class="btn" data-a="crPicker" data-v="sub">Elegir subgéneros</button>');
+    }
+    h += '<h4>Temas (' + (b.tem || []).length + '/' + I.LIMITES.tem + ')' + candado(b, 'tem') + '</h4><div class="chips">' + sugeridosTemas(b).map(function (x) {
+      const on = b.tem.indexOf(x) >= 0;
+      return chip(x, 'crTema', x, on, lockT || (!on && b.tem.length >= I.LIMITES.tem));
+    }).join('') + '</div>' + (lockT ? '' : '<button class="btn" data-a="crPicker" data-v="tem">Ver los 227 temas</button>');
+    h += '<h4>Problemática o argumento (' + (b.prob || []).length + '/' + I.LIMITES.prob + ', al menos 1)' + candado(b, 'prob') + '</h4><div class="chips">' + sugeridosProblemas(b).map(function (x) {
+      const on = b.prob.indexOf(x) >= 0;
+      return chip(x, 'crProb', x, on, lockP || (!on && b.prob.length >= I.LIMITES.prob));
+    }).join('') + '</div>' + (lockP ? '' : '<button class="btn" data-a="crPicker" data-v="prob">Ver las 53</button>');
+    h += '<h4>Arco narrativo' + (b.nat === 'r' ? ' (opcional en realidad)' : ' (obligatorio en ficción)') + candado(b, 'arco') + '</h4><div class="chips">' + X.arcos.map(function (a) {
+      return chip(a.nombre, 'crArco', a.id, b.arco === a.id, lockA, ' title="' + esc(a.orig) + '"');
+    }).join('') + '</div>';
+    const arco = X.arco(b.arco);
+    if (arco) h += '<p class="nota">' + esc(arco.orig) + ': ' + esc(arco.final) + (arco.crit || arco.pub ? ' · crítica ' + signo(arco.crit) + ', público ' + signo(arco.pub) : '') + '</p>';
+    if (completo) {
+      h += '<h4>Subarcos (hasta ' + I.LIMITES.sarc + ', opcional)</h4><div class="chips">' + X.subarcos.map(function (s) {
+        const on = (b.sarc || []).indexOf(s.id) >= 0;
+        return chip(s.nombre, 'crSubarco', s.id, on, bloqueado(b, 'sarc') || (!on && (b.sarc || []).length >= I.LIMITES.sarc), ' title="' + esc(s.orig) + '"');
+      }).join('') + '</div>';
+      if (b.nat !== 'r') {
+        h += '<h4>Tipo de ficción' + candado(b, 'fic') + '</h4><p class="chico">' + esc(b.fic) + '</p>' + (bloqueado(b, 'fic') ? '' : '<button class="btn" data-a="crPicker" data-v="fic">Elegir entre las 34</button>');
+      }
+    }
+    return h;
+  }
+  function bloqueTono(b) {
+    const lock = bloqueado(b, 'tono');
+    const to = D.tonos.filter(function (x) { return x.id === b.tono; })[0] || D.tonos[0];
+    return '<h4>' + t('tono') + candado(b, 'tono') + '</h4><div class="chips">' + D.tonos.map(function (x) { return chip(x.id, 'crTono', x.id, b.tono === x.id, lock); }).join('') + '</div>' +
+      '<p class="nota">Crítica ' + signo(to.crit) + ' · Público ' + signo(to.pub) + (to.costo ? ' · producción +15 %' : '') + '</p>';
+  }
+  function bloqueEstilo(b) {
+    const a = anio(), fam = b.fam;
+    const corr = [[X.ESTANDAR, X.ESTANDAR]].concat(X.corrientesCine.map(function (c) {
+      const ef = X.efectoCorriente(c.id, a, fam);
+      return [c.id, c.id + ' (' + c.desde + ')' + (c.desde > a ? ' · llega en ' + c.desde : ef.novedad > 0 ? ' · ¡novedad!' : '') + (c.afines.indexOf(fam) >= 0 ? ' · afín' : ''), c.desde > a];
+    }));
+    const ec = b.corr !== X.ESTANDAR ? X.efectoCorriente(b.corr, a, fam) : null;
+    let h = '<label class="campo"><span>Corriente artística</span>' + sel('corr', corr, b.corr) + '</label>' + (ec ? '<p class="nota">Crítica ' + signo(ec.crit) + ' · público ' + signo(ec.pub) + (ec.costo !== 1 ? ' · costo ×' + U.decimal(ec.costo, 2) : '') + (ec.novedad > 0 ? ' · bono de novedad por ' + Math.round(ec.novedad * 12) + ' años más' : '') + '</p>' : '');
+    h += bloqueTono(b);
+    const est = X.estilos.map(function (s) { return [s.id, s.id + (s.desde && s.desde > a ? ' · llega en ' + s.desde : '') + (s.afines && s.afines.indexOf(fam) >= 0 ? ' · afín' : ''), s.desde && s.desde > a]; });
+    h += '<label class="campo"><span>Estilo artístico</span>' + sel('estilo', est, b.estilo) + '</label>';
+    h += '<h4>Prioridad</h4><div class="chips">' + X.prioridades.map(function (p) { return chip(p.nombre, 'crPrio', p.id, b.prio === p.id); }).join('') + '</div><p class="nota">' + esc(X.prioridad(b.prio).efecto) + '.</p>';
+    const fmt = function (k, nombre) {
+      return '<label class="campo crece"><span>' + nombre + '</span>' + sel('fmt.' + k, X.formatos[k].map(function (f) { return [f.id, f.id + (f.desde > a ? ' · ' + f.desde : ''), f.desde > a]; }), b.fmt[k]) + '</label>';
+    };
+    const ef = X.efectoFormato(b.fmt, a, fam);
+    h += '<h4>Formato de la época</h4><div class="fila envolver">' + fmt('color', 'Color') + fmt('visual', 'Imagen') + fmt('sonido', 'Sonido') + '</div><p class="nota">Lo normal en ' + a + ': ' + esc(X.formatoEstandar(a).color + ', ' + X.formatoEstandar(a).visual + ', ' + X.formatoEstandar(a).sonido) + '.' +
+      (ef.costo !== 1 || ef.crit || ef.pub ? ' Tu elección: costo ×' + U.decimal(ef.costo, 2) + ', crítica ' + signo(ef.crit) + ', público ' + signo(ef.pub) + '.' : '') + '</p>';
+    return h;
+  }
+  function bloqueMundo(b) {
+    const a = anio();
+    const epocas = X.epocasDisponibles(a);
+    const iEp = Math.max(0, epocas.map(function (e) { return e.id; }).indexOf(b.epo));
+    let h = bloqueado(b, 'epo') ? '<p>Época: <b>' + esc(X.epoca(b.epo).nombre) + '</b>' + candado(b, 'epo') + '</p>' : rango('epo', 0, epocas.length - 1, iEp, 'Época de la historia', textoRango(b, 'epo'));
+    const ep = X.epoca(b.epo);
+    h += '<p class="nota">Vestuario y sets: costo ×' + U.decimal(ep.costo, 2) + (ep.afines.length ? ' · encaja con ' + ep.afines.map(function (f) { return D.familia(f).nombre.toLowerCase(); }).join(', ') : '') + '.</p>';
+    const lugares = [['', 'Sin lugar fijo']].concat(D.paises.slice().sort(function (x, y) { return x.nombre.localeCompare(y.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre + ' (' + D.region(p.region).nombre + ')']; }), X.lugaresExtra.map(function (l) { return [l.id, l.nombre]; }));
+    h += '<label class="campo"><span>Dónde pasa la historia</span>' + sel('lug', lugares, b.lug) + '</label>';
+    h += '<label class="campo"><span>Idioma de la obra</span>' + sel('idio', X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; }), b.idio) + '</label>';
+    const casa = D.pais(N.S.estudios[0].pais);
+    const rodaje = [['', 'En casa: ' + casa.nombre]].concat(D.paises.filter(function (p) { return p.id !== casa.id; }).sort(function (x, y) { return x.costo - y.costo; }).map(function (p) {
+      return [p.id, p.nombre + ' · costo ×' + U.decimal(N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8), 2)];
+    }));
+    h += '<label class="campo"><span>País de rodaje</span>' + sel('rod', rodaje, b.rod || '') + '</label><p class="nota">Rodar fuera abarata o encarece la producción; el idioma y el lugar suman público en su región.</p>';
+    return h;
+  }
+  function bloquePublico(b) {
+    if (cr.picker === 'pubs') return bloquePicker(b);
+    let h = '<h4>Público objetivo (' + (b.pubs || []).length + '/' + I.LIMITES.pubs + ')</h4><p class="chico">' + esc((b.pubs || []).join(' · ') || 'General') + '</p><button class="btn" data-a="crPicker" data-v="pubs">Elegir público</button>';
+    h += '<h4>Contenido</h4><p class="nota">La clasificación sale de lo más fuerte del contenido. Nada es gráfico: lo de adultos siempre es sugerido.</p>';
+    X.contenido.forEach(function (c) { h += rango('c:' + c.id, 0, maxNivel(b, c), Math.min(b.cont[c.id] || 0, maxNivel(b, c)), c.nombre, textoNivel(c, b.cont[c.id] || 0)); });
+    if (I.hayMenores(b)) h += '<p class="nota">Hay personajes menores de edad: el amor no pasa de romántico.</p>';
+    h += '<p id="crClas">' + textoClas(b) + '</p>';
+    const permiteN = I.indiceClasificacion(b) <= 2 && b.gen.indexOf('Erótico') < 0;
+    h += '<label class="interruptor"><span>Clasificación N (general, con contenido moderado y controlado; rinde la mitad)</span><input type="checkbox" data-c="crClasN"' + (b.clasN ? ' checked' : '') + (permiteN ? '' : ' disabled') + '></label>';
+    return h;
+  }
+  function bloqueForma(b) {
+    const a = anio();
+    let maxFx = 0;
+    X.efectos.forEach(function (e, i) { if (e.desde <= a) maxFx = i; });
+    let h = rango('min', 1, 300, b.min, 'Duración', textoRango(b, 'min'));
+    h += rango('cx', 0, 5, b.cx, 'Complejidad e inteligencia', textoRango(b, 'cx')) + '<p class="nota">La complejidad gusta a la crítica y cansa al público.</p>';
+    h += rango('rit', 0, 4, b.rit, 'Ritmo', textoRango(b, 'rit'));
+    h += rango('fx', 0, maxFx, Math.min(b.fx, maxFx), 'Efectos especiales', textoRango(b, 'fx')) + '<p class="nota">Desde «Bastantes», el director y el diseñador de arte deciden si los efectos se aplauden o se repudian.</p>';
+    h += rango('pres', 0, 100, sliderDePres(b.presM), 'Presupuesto de producción', textoRango(b, 'pres'));
+    if (a >= I.ANIO_IA) h += rango('ia', 0, 100, b.ia, 'Uso de IA en la producción', textoRango(b, 'ia'), 5) + '<p class="nota">Abarata y acelera. Con un equipo excelente sale bien; con uno flojo, las actuaciones se ven dudosas.</p>';
+    return h;
+  }
+  function bloqueObra(b) {
+    const a = anio();
+    let h = '<h4>Tipo de película</h4><div class="chips">' + X.tiposCine.map(function (x) {
+      return chip(x.nombre + (x.desde > a ? ' · ' + x.desde : ''), 'crTipo', x.id, b.tipo === x.id, x.desde > a);
+    }).join('') + '</div><p class="nota">' + esc(X.tipoCine(b.tipo).efecto) + '.</p>';
+    h += '<p class="nota">Clase ' + I.clase(b) + ' · obra ' + I.perfil(b) + (b.mat ? ' · basada en «' + esc(X.material(b.mat).tit) + '»' : '') + (b.guionC ? ' · guion comprado (' + b.guionC + ')' : '') + (b.ideaIA ? ' · idea de la IA' : '') + '</p>';
+    return h;
+  }
+  // ---------- Personajes ----------
+  const IMP_CORTO = { protagonista: 'P', secundario: 'S', extra: 'E', invitado: 'I', cameo: 'C' };
+  function bloquePersonajes(b) {
+    const cuenta = {};
+    (b.pj || []).forEach(function (p) { cuenta[p.i] = (cuenta[p.i] || 0) + 1; });
+    let h = '<p class="nota">Hasta 10 protagonistas, 15 secundarios, 20 extras, 5 invitados especiales y 5 cameos. Protagonistas y secundarios pueden tener un intérprete contratado; los invitados cobran el 40 % y los cameos el 15 % de su tarifa. P = protagonista · S = secundario · E = extra · I = invitado · C = cameo.</p>';
+    h += '<div class="fila envolver">' + X.importancias.map(function (im) {
+      return '<button class="btn" data-a="crPjAdd" data-v="' + im.id + '"' + ((cuenta[im.id] || 0) >= im.max ? ' disabled' : '') + '>' + icono('mas') + esc(im.nombre) + ' (' + (cuenta[im.id] || 0) + '/' + im.max + ')</button>';
+    }).join('') + '<button class="btn" data-a="crPjGenerar">' + icono('dado') + 'Otro reparto</button></div>';
+    h += (b.pj || []).map(function (p, i) {
+      const ta = p.t !== null && p.t !== undefined ? T.porId(p.t) : null;
+      const conActor = p.i !== 'extra';
+      return '<div class="tarjeta" style="padding:8px">' +
+        '<div class="fila"><input type="text" maxlength="30" value="' + esc(p.n) + '" data-i="crPjNombre" data-k="' + i + '" class="crece" aria-label="Nombre del personaje"><button class="ico" data-a="crPjDado" data-v="' + i + '" aria-label="Nombre al azar">' + icono('dado') + '</button><button class="ico" data-a="crPjDel" data-v="' + i + '" aria-label="Quitar personaje">' + icono('cerrar') + '</button></div>' +
+        '<div class="chips" style="margin:4px 0">' + X.importancias.map(function (im) { return chip(IMP_CORTO[im.id], 'crPjImp', i + '|' + im.id, p.i === im.id, false, ' title="' + im.nombre + '" style="min-width:48px"'); }).join('') + '</div>' +
+        '<div class="fila envolver"><label class="campo" style="width:80px"><span>Edad</span><input type="number" min="1" max="110" value="' + p.e + '" data-c="crPjEdad" data-k="' + i + '"></label>' +
+        '<label class="campo"><span>Sexo</span><select data-c="crPjSexo" data-k="' + i + '"><option value="F"' + (p.s === 'F' ? ' selected' : '') + '>' + t('mujer') + '</option><option value="M"' + (p.s === 'M' ? ' selected' : '') + '>' + t('hombre') + '</option></select></label>' +
+        '<label class="campo crece"><span>Arquetipo</span><select data-c="crPjArq" data-k="' + i + '">' + X.arquetipos.map(function (a) { return '<option' + (a.id === p.a ? ' selected' : '') + '>' + esc(a.id) + '</option>'; }).join('') + '</select></label></div>' +
+        (conActor ? '<div class="fila entre"><span class="chico">' + (ta ? 'Lo interpreta <b>' + esc(ta.nom) + '</b> · ' + t('tal_habilidad').toLowerCase() + ' ' + Math.round(ta.hab) + ' · fama ' + Math.round(ta.fama * 100) : (p.i === 'invitado' || p.i === 'cameo' ? 'Sin estrella elegida' : 'Reparto de la casa (sin estrella)')) + '</span><span class="fila">' +
+          (ta ? '<button class="btn" data-a="crPjQuitarInt" data-v="' + i + '">Quitar</button>' : '') + '<button class="btn" data-a="crPjInt" data-v="' + i + '">' + (ta ? 'Cambiar' : 'Elegir') + '</button></span></div>' : '') +
+        (cr.rol === 'pj:' + i ? listaCandidatos(cr.rol) : '') + '</div>';
+    }).join('');
+    return h;
+  }
+  // ---------- Equipo ----------
+  function bloqueEquipo(b, conReparto) {
+    let h = '<p class="nota">' + t('equipo_ayuda') + '</p><button class="btn" data-a="crEquipoRec">' + icono('varita') + t('recomendado') + '</button>';
+    h += O.ROLES.map(function (r) {
+      const ta = T.porId(b.eq[r]);
+      const fijo = r === 'guion' && b.guionPagado;
+      return '<div class="tarjeta fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(D.oficio(r).nombre) + (fijo ? ' · autor del guion comprado' : '') + '</span><b>' + (ta ? esc(ta.nom) : '—') + '</b>' +
+        (ta ? '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(ta.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(ta.fama * 100) + ' · ' + (fijo ? 'pagado' : dinero(T.tarifa(ta))) + (ta.rasgo ? ' · ' + esc(ta.rasgo) : '') + '</span>' : '') + '</div>' +
+        (fijo ? '' : '<button class="btn" data-a="crRol" data-v="' + r + '">Cambiar</button>') + '</div>' + (cr.rol === r ? listaCandidatos(r) : '');
+    }).join('');
+    if (conReparto && b.pj) {
+      h += '<h4>Reparto</h4>' + b.pj.map(function (p, i) { return { p: p, i: i }; }).filter(function (x) { return x.p.i === 'protagonista' || x.p.i === 'secundario'; }).slice(0, 4).map(function (x) {
+        const ta = x.p.t !== null && x.p.t !== undefined ? T.porId(x.p.t) : null;
+        return '<div class="tarjeta fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(x.p.n) + ' · ' + (x.p.i === 'protagonista' ? 'protagonista' : 'secundario') + '</span><b>' + (ta ? esc(ta.nom) : 'Reparto de la casa') + '</b>' +
+          (ta ? '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(ta.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(ta.fama * 100) + ' · ' + dinero(T.tarifa(ta)) + '</span>' : '') + '</div><button class="btn" data-a="crPjInt" data-v="' + x.i + '">Cambiar</button></div>' + (cr.rol === 'pj:' + x.i ? listaCandidatos(cr.rol) : '');
+      }).join('');
+    }
+    return h;
+  }
+  function listaCandidatos(rol) {
+    const b = cr.b;
+    const usados = O.idsEquipo(b);
+    let lista, titulo;
+    if (rol.indexOf('pj:') === 0) {
+      const p = b.pj[+rol.slice(3)];
+      if (!p) return '';
+      if (p.i === 'invitado' || p.i === 'cameo') {
+        titulo = 'Estrella para un ' + (p.i === 'cameo' ? 'cameo (15 % de su tarifa)' : 'papel invitado (40 % de su tarifa)');
+        lista = N.S.talentos.filter(function (x) { return T.disponible(x) && usados.indexOf(x.id) < 0; }).sort(function (a, c) { return c.fama - a.fama; }).slice(0, 30);
+      } else {
+        titulo = 'Intérprete para ' + p.n;
+        lista = T.disponibles('interprete').filter(function (x) { return usados.indexOf(x.id) < 0; }).sort(function (a, c) { return (c.hab + c.fama * 12) - (a.hab + a.fama * 12); }).slice(0, 30);
+      }
+    } else {
+      titulo = D.oficio(rol).nombre;
+      lista = T.disponibles(rol).filter(function (x) { return usados.indexOf(x.id) < 0; }).sort(function (a, c) { return (c.hab + c.fama * 12) - (a.hab + a.fama * 12); }).slice(0, 30);
+    }
+    return '<div class="tarjeta"><h4>Elige: ' + esc(titulo) + '</h4>' + (lista.length ? lista.map(function (x) {
+      return '<button class="fila tarjeta toque" style="width:100%" data-a="crElegir" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece" style="text-align:left"><b>' + esc(x.nom) + '</b><span class="chico">' + D.oficio(x.of).nombre + ' · ' + (anio() - x.nac) + ' años · ' + t('tal_habilidad') + ' ' + Math.round(x.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(x.fama * 100) + (x.rasgo ? ' · ' + esc(x.rasgo) : '') + '</span></div><b>' + dinero(T.tarifa(x)) + '</b></button>';
+    }).join('') : '<p class="tenue">No hay nadie disponible.</p>') + '</div>';
+  }
+  // ---------- Título y sinopsis ----------
+  function bloqueTitulo(b) {
+    if (!b.sinEditada) b.sin = I.sinopsis(b);
+    let h = '<label class="campo"><span>' + t('titulo_obra') + '</span><input type="text" maxlength="48" value="' + esc(b.tit) + '" data-i="crTitulo"></label><button class="btn" data-a="crOtroTitulo">' + icono('dado') + t('otro_titulo') + '</button>';
+    h += '<label class="campo" style="margin-top:10px"><span>Sinopsis (puedes editarla)</span><textarea rows="4" maxlength="400" data-i="crSinTexto">' + esc(b.sin) + '</textarea></label><button class="btn" data-a="crSinopsis">' + icono('refrescar') + 'Volver a generar</button>';
+    h += '<div class="tarjeta" style="margin-top:10px"><b>' + esc(b.tit) + '</b><br>' + esc(b.gen.join(' · ')) + ' · ' + esc(b.tono) + ' · ' + esc(b.clas) + ' · ' + esc(X.tipoCine(b.tipo).nombre) + ' · ' + b.min + ' min<br>' +
+      '<span class="nota">La crítica podría decir: «' + esc(I.fraseCritica(b)) + '» · Si gana un premio: «' + esc(I.frasePremio(b)) + '»</span><br>' +
+      '<span class="nota">Etiquetas posibles: Clásico si la crítica pasa de 85; Culto si fracasa en taquilla y la crítica la defiende.</span></div>';
+    return h;
+  }
+  // ---------- Selector de listas grandes (con buscador) ----------
+  function gruposPicker(k) {
+    if (k === 'tem') return X.familiasTema.map(function (f) { return { nombre: f.nombre, items: f.items }; });
+    if (k === 'sub') return X.listaSubgeneros();
+    if (k === 'prob') return X.familiasProblema.map(function (f) { return { nombre: f.nombre, items: Object.keys(f.items).sort(function (x, y) { return x.localeCompare(y, 'es'); }) }; });
+    if (k === 'fic') return X.familiasFiccion.map(function (f) { return { nombre: f.nombre + (f.crit || f.pub ? ' (crítica ' + signo(f.crit) + ', público ' + signo(f.pub) + ')' : ''), items: f.items }; });
+    const g = {};
+    X.publicos.forEach(function (p) { (g[p.grupo] = g[p.grupo] || []).push(p.id); });
+    return Object.keys(g).map(function (n) { return { nombre: n, items: g[n] }; });
+  }
+  const NOMBRE_PICKER = { tem: 'Temas', sub: 'Subgéneros', prob: 'Problemáticas y argumentos', fic: 'Tipo de ficción', pubs: 'Público objetivo' };
+  function listaPicker() {
+    const b = cr.b, k = cr.picker, q = cr.q.toLowerCase();
+    const max = k === 'fic' ? 1 : I.LIMITES[k];
+    const elegidos = k === 'fic' ? [b.fic] : (b[k] || []);
+    return gruposPicker(k).map(function (g) {
+      const items = g.items.filter(function (x) { return !q || x.toLowerCase().indexOf(q) >= 0; });
+      if (!items.length) return '';
+      return '<h4 style="margin:8px 0 4px">' + esc(g.nombre) + '</h4><div class="chips">' + items.map(function (x) {
+        const on = elegidos.indexOf(x) >= 0;
+        const prueba = k === 'pubs' && b.gen.indexOf('Erótico') >= 0 && (X.publico(x) || {}).infantil;
+        return chip(x + (k === 'tem' && X.DEPORTES_NUEVOS.indexOf(x) >= 0 ? ' *' : ''), 'crPick', x, on, prueba || (!on && max > 1 && elegidos.length >= max));
+      }).join('') + '</div>';
+    }).join('') || '<p class="tenue">Nada coincide.</p>';
+  }
+  function bloquePicker(b) {
+    const k = cr.picker;
+    const max = k === 'fic' ? 1 : I.LIMITES[k];
+    const n = k === 'fic' ? 1 : (b[k] || []).length;
+    return '<div class="tarjeta picker"><div class="fila entre"><b>' + esc(NOMBRE_PICKER[k]) + ' (' + n + '/' + max + ')</b><button class="btn primario" data-a="crPickerCerrar">Listo</button></div>' +
+      (k === 'tem' ? '<p class="nota">227 temas en 8 familias; los 10 deportes nuevos llevan *.</p>' : '') +
+      '<input type="search" placeholder="Buscar" value="' + esc(cr.q) + '" data-i="crBuscar" style="margin:6px 0"><div id="crPickLista">' + listaPicker() + '</div></div>';
+  }
+
+  // =====================================================================
+  // MODO RÁPIDO Y MODO DETALLADO
+  // =====================================================================
+  const PASOS = ['paso_generos', 'paso_historia', 'paso_escala', 'paso_equipo', 'paso_titulo'];
+  function vistaRapida() {
+    const b = cr.b;
+    let h = '<div class="fila entre"><h2>' + t('crear_obra') + '</h2><button class="btn" data-a="crModo" data-v="detallado">Modo detallado</button></div>';
+    h += '<p class="nota">' + PASOS.map(function (p, i) { return '<span class="' + (i === cr.paso ? 'paso-actual' : '') + '">' + (i + 1) + '. ' + t(p) + '</span>'; }).join(' · ') + '</p>';
+    if (cr.paso === 0) h += bloqueGeneros(b);
+    else if (cr.paso === 1) h += bloqueHistoria(b, false) + (cr.picker ? '' : bloqueTono(b) + '<p class="tenue">' + esc(I.sinopsis(b)) + '</p>');
+    else if (cr.paso === 2) {
+      h += '<p class="nota">' + t('escala_ayuda') + '</p>' + D.escalas.map(function (es, i) {
+        const pp = E.produccionTipica(anio(), b.fam) * es.mult * O.escalaTono(b.tono) * I.factorCosto(b, anio());
+        return '<button class="tarjeta toque fila entre" style="width:100%;' + (Math.abs(b.presM - es.mult) < 0.01 ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="crEscala" data-v="' + i + '"><b>' + es.nombre + '</b><span>' + dinero(pp) + '</span></button>';
+      }).join('');
+      h += '<div class="tarjeta" style="margin-top:8px">' + textoClas(b) + (cr.abiertas.contRap ? '' : '<br><button class="btn" data-a="crSeccion" data-v="contRap">Ajustar contenido</button>') + '</div>';
+      if (cr.abiertas.contRap) h += bloquePublico(b);
+    } else if (cr.paso === 3) h += bloqueEquipo(b, true);
+    else h += bloqueTitulo(b);
+    h += pie(b);
+    h += '<div class="fila entre" style="margin-top:8px">' + (cr.paso > 0 ? '<button class="btn" data-a="crPaso" data-v="-1">' + t('atras') + '</button>' : '<button class="btn" data-a="crVolverCamino">' + t('atras') + '</button>') +
+      (cr.paso < PASOS.length - 1 ? '<button class="btn primario" data-a="crPaso" data-v="1">' + t('siguiente') + '</button>' : '<button class="btn primario" data-a="crIniciar">' + t('iniciar') + '</button>') + '</div>';
+    return h;
+  }
+  const SECCIONES = [
+    ['obra', 'La obra', bloqueObra], ['generos', 'Géneros', bloqueGeneros], ['historia', 'Historia', function (b) { return bloqueHistoria(b, true); }],
+    ['estilo', 'Corriente, tono, estilo y formato', bloqueEstilo], ['mundo', 'Época, lugar e idioma', bloqueMundo],
+    ['publico', 'Público y contenido', bloquePublico], ['forma', 'Duración, complejidad, ritmo, efectos y presupuesto', bloqueForma],
+    ['personajes', 'Personajes', bloquePersonajes], ['equipo', 'Equipo', function (b) { return bloqueEquipo(b, false); }], ['titulo', 'Título y sinopsis', bloqueTitulo],
+  ];
+  function resumenSeccion(b, id) {
+    if (id === 'obra') return X.tipoCine(b.tipo).nombre + ' · ' + (b.nat === 'r' ? 'realidad' : 'ficción');
+    if (id === 'generos') return b.gen.join(' · ');
+    if (id === 'historia') return (b.tem || []).slice(0, 2).join(', ') + (b.arco ? ' · ' + X.arco(b.arco).nombre : '');
+    if (id === 'estilo') return b.tono + ' · ' + b.estilo + (b.corr !== X.ESTANDAR ? ' · ' + b.corr : '');
+    if (id === 'mundo') return X.epoca(b.epo).nombre + ' · ' + b.idio;
+    if (id === 'publico') return b.clas + ((b.pubs || []).length ? ' · ' + b.pubs.join(', ') : '');
+    if (id === 'forma') return b.min + ' min · ' + X.complejidad[b.cx] + ' · ' + X.ritmo[b.rit].id + ' · ' + dinero(b.pp);
+    if (id === 'personajes') return (b.pj || []).length + ' personajes';
+    if (id === 'equipo') { const d = T.porId(b.eq.direccion); return d ? 'Dirige ' + d.nom : ''; }
+    return b.tit;
+  }
+  function vistaDetallada() {
+    const b = cr.b;
+    let h = '<div class="fila entre"><h2>' + t('crear_obra') + '</h2><button class="btn" data-a="crModo" data-v="rapido">Modo rápido</button></div>';
+    h += '<p class="nota">Todas las listas de tu documento. Toca cada sección para abrirla; los totales de abajo cambian en vivo.</p>';
+    SECCIONES.forEach(function (s) {
+      const abierta = !!cr.abiertas[s[0]];
+      h += '<div class="tarjeta seccion-cr"><button class="cab-seccion toque" data-a="crSeccion" data-v="' + s[0] + '" aria-expanded="' + abierta + '"><b>' + esc(s[1]) + '</b><span class="tenue chico">' + esc(abierta ? '' : resumenSeccion(b, s[0])) + '</span><span aria-hidden="true">' + (abierta ? '▲' : '▼') + '</span></button>' + (abierta ? '<div>' + s[2](b) + '</div>' : '') + '</div>';
+    });
+    h += pie(b);
+    h += '<div class="fila entre" style="margin-top:8px"><button class="btn" data-a="crVolverCamino">' + t('atras') + '</button><button class="btn primario" data-a="crIniciar">' + t('iniciar') + '</button></div>';
+    return h;
+  }
+  function fichaCrear() {
+    if (cr.etapa === 'camino' || !cr.b && cr.etapa === 'idea') return vistaCamino();
+    if (cr.etapa === 'guiones') return vistaGuiones();
+    if (cr.etapa === 'material') return vistaMaterial();
+    return modo === 'rapido' ? vistaRapida() : vistaDetallada();
+  }
+  function refrescar() { U.refrescarFicha(fichaCrear()); }
+  function irAPicker() {
+    setTimeout(function () { const p = document.querySelector('#ficha .picker'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'start' }); }, 0);
+  }
+
+  // =====================================================================
+  // ACCIONES
+  // =====================================================================
+  ac('crearObra', function () {
+    if (O.enProduccion(0).length >= NG.capacidad(0)) { U.aviso('No tienes capacidad libre: construye un plató o espera.', 'mal'); return; }
+    cr.b = null; cr.etapa = 'camino'; cr.paso = 0; cr.rol = null; cr.picker = null; cr.q = '';
+    U.abrirFicha(fichaCrear(), 'crear');
+  });
+  ac('crModo', function (v) {
+    modo = v === 'detallado' ? 'detallado' : 'rapido';
+    try { localStorage.setItem('ia.modoCrear', modo); } catch (e) { /* sin almacenamiento */ }
+    cr.picker = null; cr.rol = null;
+    refrescar();
+  });
+  ac('crVolverCamino', function () { cr.etapa = 'camino'; cr.b = null; cr.picker = null; cr.rol = null; refrescar(); });
+  function empezarIdea(b) { cr.b = ajustar(b); cr.etapa = 'idea'; cr.paso = 0; cr.rol = null; cr.picker = null; refrescar(); }
+  ac('crCamino', function (v) {
+    if (v === 'nueva') empezarIdea(nuevoBorrador());
+    else if (v === 'guion') { cr.etapa = 'guiones'; refrescar(); }
+    else if (v === 'material') { cr.etapa = 'material'; cr.qMat = ''; refrescar(); }
+    else if (v === 'ia') {
+      if (anio() < I.ANIO_IA) return;
+      empezarIdea(nuevoBorrador(null, function (b) { I.ideaIA(b, anio()); }));
+      cr.paso = 4;
+      U.aviso('La IA armó la idea: la historia queda fija; puedes cambiar el resto.');
+      refrescar();
+    }
+  });
+  ac('crComprarGuion', function (v) {
+    const err = J.comprarGuion(+v);
+    if (err) { U.aviso(err, 'mal'); return; }
+    IA.arte.sonido('dinero');
+    U.aviso('Guion comprado: ya está en «Tus guiones».');
+    U.renderBarra();
+    refrescar();
+  });
+  ac('crProducirGuion', function (v) {
+    const g = (N.S.guionesPropios || []).filter(function (x) { return x.id === +v; })[0];
+    if (!g) return;
+    const b = nuevoBorrador(g.idea.gen, function (b2) {
+      I.aplicarIdea(b2, g.idea);
+      b2.guionC = g.calif; b2.guionId = g.id;
+      // El precio del guion incluye a su autor; si no está disponible, otro escritor lo pule (y cobra)
+      const autor = T.porId(g.autor);
+      if (autor && T.disponible(autor)) { b2.eq.guion = autor.id; b2.guionPagado = 1; }
+    });
+    empezarIdea(b);
+  });
+  ac('crMatGrupo', function (v) { cr.grupoMat = v; refrescar(); });
+  ac('crMatBuscar', function (v) { cr.qMat = v; const l = document.getElementById('crMatLista'); if (l) l.innerHTML = listaMaterial(); });
+  ac('crAdaptar', function (v) {
+    const m = X.material(v);
+    if (!m) return;
+    const b = nuevoBorrador(X.generosDeCine(m.gen), function (b2) { I.usarMaterial(b2, v, anio()); });
+    b.contTocado = b.mat && m.grupo === 'tono' ? 1 : 0;
+    empezarIdea(b);
+  });
+  ac('crIA', function () { if (!cr.b || anio() < I.ANIO_IA) return; conAzarUI(function () { I.ideaIA(cr.b, anio()); I.generarPersonajes(cr.b); }); ajustar(cr.b); refrescar(); });
+  // ---------- Géneros ----------
+  ac('crGen', function (g) {
+    const b = cr.b;
+    if (!b || bloqueado(b, 'gen')) return;
+    const i = b.gen.indexOf(g);
+    if (i >= 0) { if (b.gen.length > 1) b.gen.splice(i, 1); } else if (b.gen.length < 3) b.gen.push(g);
+    ajustar(b); refrescar();
+  });
+  ac('crGenRec', function () {
+    const b = cr.b;
+    if (!b || bloqueado(b, 'gen')) return;
+    const g1 = recomendarGenero(), f1 = D.familiaDe[g1];
+    const buena = D.ORDEN_FAM.filter(function (f) { return D.encaje(f1, f) >= 3; })[0];
+    b.gen = [g1];
+    if (buena) { const g2 = D.familia(buena).generos.filter(function (g) { return g !== 'Erótico'; })[0]; if (!O.validarGeneros([g1, g2])) b.gen.push(g2); }
+    ajustar(b); refrescar();
+  });
+  ac('crGenDado', function () {
+    const b = cr.b;
+    if (!b || bloqueado(b, 'gen')) return;
+    const todos = [];
+    D.familias.forEach(function (f) { f.generos.forEach(function (g) { todos.push(g); }); });
+    const sem = Date.now();
+    const k = 1 + (N.hash('d' + sem) % 2), gen = [];
+    for (let i = 0; i < 20 && gen.length < k; i++) {
+      const g = todos[N.hash(i + '|' + sem) % todos.length];
+      if (gen.indexOf(g) < 0 && !O.validarGeneros(gen.concat([g]))) gen.push(g);
+    }
+    b.gen = gen.length ? gen : ['Drama'];
+    ajustar(b); refrescar();
+  });
+  // ---------- Historia ----------
+  ac('crHistRec', function () { if (!cr.b) return; conAzarUI(function () { const keep = { tem: bloqueado(cr.b, 'tem') && cr.b.tem, prob: bloqueado(cr.b, 'prob') && cr.b.prob, arco: bloqueado(cr.b, 'arco') && cr.b.arco, epo: cr.b.epo }; I.recomendarHistoria(cr.b, anio()); Object.keys(keep).forEach(function (k) { if (keep[k]) cr.b[k] = keep[k]; }); }); ajustar(cr.b); refrescar(); });
+  ac('crHistDado', function () {
+    const b = cr.b;
+    if (!b) return;
+    const i = conAzarUI(function () { N.azar(); return I.ideaAleatoria(anio(), 30 + N.entero(0, 60)); });
+    if (!bloqueado(b, 'tem')) b.tem = i.tem;
+    if (!bloqueado(b, 'prob')) b.prob = i.prob;
+    if (!bloqueado(b, 'arco')) b.arco = i.arco;
+    ajustar(b); refrescar();
+  });
+  function alternar(lista, x, max) { const i = lista.indexOf(x); if (i >= 0) lista.splice(i, 1); else if (lista.length < max) lista.push(x); return lista; }
+  ac('crTema', function (v) { if (!cr.b || bloqueado(cr.b, 'tem')) return; alternar(cr.b.tem, v, I.LIMITES.tem); ajustar(cr.b); refrescar(); });
+  ac('crProb', function (v) { if (!cr.b || bloqueado(cr.b, 'prob')) return; alternar(cr.b.prob, v, I.LIMITES.prob); ajustar(cr.b); refrescar(); });
+  ac('crArco', function (v) { if (!cr.b || bloqueado(cr.b, 'arco')) return; cr.b.arco = cr.b.arco === v && cr.b.nat === 'r' ? '' : v; ajustar(cr.b); refrescar(); });
+  ac('crSubarco', function (v) { if (!cr.b || bloqueado(cr.b, 'sarc')) return; alternar(cr.b.sarc, v, I.LIMITES.sarc); ajustar(cr.b); refrescar(); });
+  ac('crNat', function (v) {
+    const b = cr.b;
+    if (!b) return;
+    b.nat = v === 'r' ? 'r' : 'f';
+    if (b.nat === 'f' && b.tipo === 'documental') b.tipo = 'real';
+    ajustar(b); refrescar();
+  });
+  ac('crTono', function (v) { if (!cr.b || bloqueado(cr.b, 'tono')) return; cr.b.tono = v; ajustar(cr.b); refrescar(); });
+  ac('crPrio', function (v) { if (!cr.b) return; cr.b.prio = v; ajustar(cr.b); refrescar(); });
+  ac('crTipo', function (v) {
+    const b = cr.b;
+    if (!b) return;
+    b.tipo = v;
+    if (X.tipoCine(v).realidad) b.nat = 'r';
+    ajustar(b); refrescar();
+  });
+  // ---------- Selector de listas ----------
+  ac('crPicker', function (v) { if (!cr.b) return; cr.picker = v; cr.q = ''; refrescar(); irAPicker(); });
+  ac('crPickerCerrar', function () { cr.picker = null; cr.q = ''; refrescar(); });
+  ac('crBuscar', function (v) { cr.q = v; const l = document.getElementById('crPickLista'); if (l) l.innerHTML = listaPicker(); });
+  ac('crPick', function (v) {
+    const b = cr.b, k = cr.picker;
+    if (!b || !k || bloqueado(b, k)) return;
+    if (k === 'fic') b.fic = v;
+    else alternar(b[k] = b[k] || [], v, I.LIMITES[k]);
+    if (k === 'pubs' && b.gen.indexOf('Erótico') >= 0) b.pubs = b.pubs.filter(function (p) { const x = X.publico(p); return !(x && x.infantil); });
+    ajustar(b);
+    const l = document.getElementById('crPickLista');
+    if (l) { l.innerHTML = listaPicker(); const cab = document.querySelector('#ficha .picker b'); if (cab) cab.textContent = NOMBRE_PICKER[k] + ' (' + (k === 'fic' ? 1 : b[k].length) + '/' + (k === 'fic' ? 1 : I.LIMITES[k]) + ')'; refrescarPie(); }
+    else refrescar();
+  });
+  // ---------- Selectores y deslizadores ----------
+  ac('crSel', function (v, el) {
+    const b = cr.b;
+    if (!b) return;
+    const k = el.getAttribute('data-k');
+    if (k.indexOf('fmt.') === 0) { b.fmt = Object.assign({}, b.fmt); b.fmt[k.slice(4)] = v; } else b[k] = v;
+    if (k === 'rod' && !v) delete b.rod;
+    ajustar(b); refrescar();
+  });
+  function aplicarRango(b, k, v) {
+    v = +v;
+    if (k.indexOf('c:') === 0) { b.cont = Object.assign({}, b.cont); b.cont[k.slice(2)] = v; b.contTocado = 1; }
+    else if (k === 'pres') b.presM = presDeSlider(v);
+    else if (k === 'epo') { const ep = X.epocasDisponibles(anio())[v]; if (ep) b.epo = ep.id; }
+    else b[k] = v;
+    O.recalcular(b);
+  }
+  ac('crRango', function (v, el) {
+    const b = cr.b;
+    if (!b) return;
+    const k = el.getAttribute('data-k');
+    aplicarRango(b, k, v);
+    const lbl = document.getElementById('rv-' + k.replace(':', '-'));
+    if (lbl) lbl.textContent = textoRango(b, k);
+    const cl = document.getElementById('crClas');
+    if (cl) cl.innerHTML = textoClas(b);
+    refrescarPie();
+  });
+  ac('crRangoFin', function (v, el) { if (!cr.b) return; aplicarRango(cr.b, el.getAttribute('data-k'), v); ajustar(cr.b); refrescar(); });
+  ac('crClasN', function (v) { if (!cr.b) return; cr.b.clasN = !!v; cr.b.clasTocada = 1; ajustar(cr.b); refrescar(); });
+  ac('crSeccion', function (v) { cr.abiertas[v] = !cr.abiertas[v]; cr.picker = null; cr.rol = null; refrescar(); });
+  ac('crPieDetalle', function () { cr.pieAbierto = !cr.pieAbierto; refrescarPie(); });
+  ac('crEscala', function (v) { if (!cr.b) return; cr.b.presM = D.escalas[+v].mult; ajustar(cr.b); refrescar(); });
+  // ---------- Personajes ----------
+  function pjDe(v) { return cr.b && cr.b.pj ? cr.b.pj[+v] : null; }
+  ac('crPjAdd', function (v) {
+    const b = cr.b;
+    if (!b) return;
+    const im = X.importancias.filter(function (x) { return x.id === v; })[0];
+    if (!im || b.pj.filter(function (p) { return p.i === v; }).length >= im.max) return;
+    b.pj.push(conAzarUI(function () { return I.personajeNuevo(b, v); }));
+    sincronizar(b); refrescar();
+  });
+  ac('crPjDel', function (v) { const b = cr.b; if (!b) return; b.pj.splice(+v, 1); cr.rol = null; sincronizar(b); refrescar(); });
+  ac('crPjGenerar', function () { const b = cr.b; if (!b) return; conAzarUI(function () { I.generarPersonajes(b); }); sincronizar(b); refrescar(); });
+  ac('crPjNombre', function (v, el) { const p = pjDe(el.getAttribute('data-k')); if (p) { p.n = v.slice(0, 30); if (!cr.b.sinEditada) cr.b.sin = I.sinopsis(cr.b); } });
+  ac('crPjDado', function (v) { const p = pjDe(v); if (!p) return; p.n = conAzarUI(function () { return I.nombrePersonaje(I.regionDe(cr.b), p.s); }); ajustar(cr.b); refrescar(); });
+  ac('crPjImp', function (v) {
+    const x = v.split('|'), p = pjDe(x[0]);
+    if (!p || p.i === x[1]) return;
+    const im = X.importancias.filter(function (y) { return y.id === x[1]; })[0];
+    if (cr.b.pj.filter(function (q) { return q.i === x[1]; }).length >= im.max) { U.aviso('Máximo ' + im.max + ' de ese tipo.', 'mal'); return; }
+    const antes = p.i;
+    p.i = x[1];
+    // Intérprete contratado y estrella invitada son contratos distintos
+    if ((antes === 'invitado' || antes === 'cameo') !== (p.i === 'invitado' || p.i === 'cameo')) p.t = null;
+    sincronizar(cr.b); refrescar();
+  });
+  ac('crPjEdad', function (v, el) { const p = pjDe(el.getAttribute('data-k')); if (!p) return; p.e = N.limitar(Math.round(+v || 30), 1, 110); sincronizar(cr.b); refrescar(); });
+  ac('crPjSexo', function (v, el) { const p = pjDe(el.getAttribute('data-k')); if (!p) return; p.s = v === 'F' ? 'F' : 'M'; ajustar(cr.b); refrescar(); });
+  ac('crPjArq', function (v, el) { const p = pjDe(el.getAttribute('data-k')); if (!p) return; p.a = v; ajustar(cr.b); refrescar(); });
+  ac('crPjInt', function (v) { if (!cr.b) return; cr.rol = cr.rol === 'pj:' + v ? null : 'pj:' + v; refrescar(); });
+  ac('crPjQuitarInt', function (v) { const p = pjDe(v); if (!p) return; p.t = null; sincronizar(cr.b); refrescar(); });
+  // ---------- Equipo ----------
+  ac('crEquipoRec', function () {
+    const b = cr.b;
+    if (!b) return;
+    const guion = b.guionPagado ? b.eq.guion : null;
+    b.eq = { int: [], inv: b.eq.inv || [], cam: b.eq.cam || [] };
+    if (guion !== null && guion !== undefined) b.eq.guion = guion;
+    (b.pj || []).forEach(function (p) { if (p.i === 'protagonista' || p.i === 'secundario') p.t = null; });
+    conAzarUI(function () { O.equipoRecomendado(b, 1); });
+    cr.rol = null; ajustar(b); refrescar();
+  });
+  ac('crRol', function (v) { if (!cr.b) return; cr.rol = cr.rol === v ? null : v; refrescar(); });
+  ac('crElegir', function (v) {
+    const b = cr.b, id = +v;
+    if (!b || !cr.rol) return;
+    if (cr.rol.indexOf('pj:') === 0) { const p = b.pj[+cr.rol.slice(3)]; if (p) p.t = id; sincronizar(b); }
+    else b.eq[cr.rol] = id;
+    cr.rol = null; ajustar(b); refrescar();
+  });
+  // ---------- Título, sinopsis y pasos ----------
+  ac('crTitulo', function (v) { if (cr.b) cr.b.tit = v.slice(0, 48); });
+  ac('crOtroTitulo', function () { if (!cr.b) return; cr.b.tit = conAzarUI(function () { return O.tituloNuevo(cr.b.gen); }); refrescar(); });
+  ac('crSinTexto', function (v) { if (cr.b) { cr.b.sin = v.slice(0, 400); cr.b.sinEditada = 1; } });
+  ac('crSinopsis', function () { if (!cr.b) return; cr.b.sinEditada = 0; cr.b.sin = I.sinopsis(cr.b); refrescar(); });
+  ac('crPaso', function (v) { if (!cr.b) return; cr.paso = N.limitar(cr.paso + (+v), 0, PASOS.length - 1); cr.rol = null; cr.picker = null; refrescar(); });
+  ac('crIniciar', function () {
+    const b = cr.b;
+    if (!b) return;
+    b.tit = (b.tit || '').trim() || conAzarUI(function () { return O.tituloNuevo(b.gen); });
+    if (!b.sinEditada) b.sin = I.sinopsis(b);
+    delete b.contTocado; delete b.clasTocada; delete b.sinEditada;
+    const r = J.iniciarObra(b);
+    if (r.error) { U.aviso(r.error, 'mal'); refrescar(); return; }
+    IA.arte.sonido('exito');
+    cr.b = null;
+    U.cerrarFicha();
+    U.aviso('«' + r.obra.tit + '» empieza su desarrollo');
+    U.estado.sub.obras = 'marcha';
+    U.refrescar();
+  });
+
+  // =====================================================================
+  // FICHA DE OBRA: la idea completa
+  // =====================================================================
+  function bloqueIdea(o) {
+    if (!o.pj && !o.sin && !o.mat && !o.cont) return '';
+    let h = '<h3>La idea</h3>';
+    if (o.sin) h += '<p>' + esc(o.sin) + '</p>';
+    const filas = [];
+    filas.push(['Tipo', X.tipoCine(o.tipo || 'real').nombre + ' · ' + (o.nat === 'r' ? 'realidad' : 'ficción') + ' · clase ' + I.clase(o) + ' · obra ' + I.perfil(o)]);
+    if (o.tem && o.tem.length) filas.push(['Temas', o.tem.join(', ')]);
+    if (o.sub && o.sub.length) filas.push(['Subgéneros', o.sub.join(', ')]);
+    if (o.prob && o.prob.length) filas.push(['Problemática', o.prob.join(', ')]);
+    if (o.arco) filas.push(['Arco', X.arco(o.arco).nombre + ' (' + X.arco(o.arco).orig + ')' + (o.sarc && o.sarc.length ? ' · ' + o.sarc.map(function (s) { return X.subarco(s).nombre; }).join(', ') : '')]);
+    if (o.epo) filas.push(['Época y lugar', X.epoca(o.epo).nombre + (o.lug ? ' · ' + (D.pais(o.lug) ? D.pais(o.lug).nombre : (X.lugaresExtra.filter(function (l) { return l.id === o.lug; })[0] || {}).nombre || '') : '')]);
+    if (o.idio) filas.push(['Idioma', o.idio + (o.rod ? ' · rodada en ' + D.pais(o.rod).nombre : '')]);
+    if (o.min) filas.push(['Forma', o.min + ' min · ' + X.complejidad[v(o, 'cx', 2)] + ' · ritmo ' + X.ritmo[v(o, 'rit', 2)].id.toLowerCase() + ' · efectos ' + X.efectos[v(o, 'fx', 2)].id.toLowerCase() + (o.fxr ? ' (' + o.fxr + ')' : '')]);
+    if (o.corr || o.estilo) filas.push(['Estilo', (o.corr || X.ESTANDAR) + ' · ' + (o.estilo || 'General') + ' · prioridad ' + X.prioridad(o.prio).nombre.toLowerCase()]);
+    if (o.cont) filas.push(['Contenido', I.describirContenido(o)]);
+    if (o.pubs && o.pubs.length) filas.push(['Público', o.pubs.join(', ')]);
+    if (o.mat) { const m = X.material(o.mat); if (m) filas.push(['Material', '«' + m.tit + '», ' + m.autor + (o.suave ? ' (adaptada con guiños)' : '')]); }
+    if (o.guionC) filas.push(['Guion', 'Comprado, calificación ' + o.guionC]);
+    if (o.ideaIA) filas.push(['Idea', 'Automática con IA']);
+    if (o.ia) filas.push(['IA en producción', o.ia + ' %' + (o.iar ? ' · resultado ' + o.iar : '')]);
+    if ((o.et === 'cartelera' || o.et === 'terminada') && o.frc) filas.push(['La crítica', '«' + o.frc + '»']);
+    if ((o.aw || []).length && o.frp) filas.push(['Al premiarla', '«' + o.frp + '»']);
+    h += '<table class="tabla">' + filas.map(function (f) { return '<tr><td class="tenue">' + esc(f[0]) + '</td><td>' + esc(f[1]) + '</td></tr>'; }).join('') + '</table>';
+    if (o.pj && o.pj.length) {
+      h += '<h3>Personajes</h3><div class="col">' + o.pj.map(function (p) {
+        const ta = p.t !== null && p.t !== undefined ? T.porId(p.t) : null;
+        return '<div class="fila entre chico"><span><b>' + esc(p.n) + '</b> · ' + p.e + ' años · ' + esc(p.a) + '</span><span class="tenue">' + esc((X.importancias.filter(function (x) { return x.id === p.i; })[0] || {}).nombre || '') + (ta ? ' · ' + esc(ta.nom) : '') + '</span></div>';
+      }).join('') + '</div>';
+    }
+    return h;
+  }
+  function v(o, k, d) { return o[k] === undefined || o[k] === null ? d : o[k]; }
+
+  // =====================================================================
+  // MUNDO › TAXONOMÍA: todas las listas de todos los medios
+  // =====================================================================
+  function taxonomia() {
+    const m = cr.taxMedio;
+    let h = '<p class="nota">Todas las listas de tu documento, sin duplicados, por familias y en orden alfabético. La familia pesa en la matemática; cada elemento da el sabor.</p>';
+    h += '<div class="chips">' + X.medios.map(function (x) { return chip(x.nombre + (x.activo ? '' : ' · ' + x.version), 'taxMedio', x.id, m === x.id); }).join('') + '</div>';
+    const fams = m === 'cine' ? D.familias.map(function (f) { return { id: f.id, nombre: f.nombre, generos: f.generos, nucleo: f.temporada, inclina: f.inclina }; }) : X.generosMedio[m];
+    let total = 0;
+    fams.forEach(function (f) { total += f.generos.length; });
+    h += '<h3>Géneros (' + total + ' en ' + fams.length + ' familias)</h3>' + fams.map(function (f) {
+      return '<div class="tarjeta"><b>' + esc(f.nombre) + '</b> <span class="tenue chico">' + esc(m === 'cine' ? f.nucleo : f.nucleo) + ' · inclina a ' + (f.inclina === 'pub' ? 'el público' : f.inclina === 'crit' ? 'la crítica' : 'ambos') + '</span><br><span class="chico">' + esc(f.generos.slice().sort(function (x, y) { return x.localeCompare(y, 'es'); }).join(', ')) + '</span></div>';
+    }).join('');
+    const tabla = X.tablaEncaje(m);
+    const sim = function (x) { return x === null ? '—' : x >= 3 ? '++' : x >= 1 ? '+' : x === 0 ? '0' : '−'; };
+    h += '<h3>Encaje entre familias</h3><div class="desliza"><table class="tabla"><tr><th></th>' + fams.map(function (f) { return '<th>' + esc(f.id) + '</th>'; }).join('') + '</tr>' + fams.map(function (f, i) {
+      return '<tr><td><b>' + esc(f.id) + '</b> <span class="tenue chico">' + esc(f.nombre) + '</span></td>' + tabla[i].map(function (x) { return '<td class="n ' + (x >= 3 ? 'bien' : x < 0 ? 'mal' : '') + '">' + sim(x) + '</td>'; }).join('') + '</tr>';
+    }).join('') + '</table></div><p class="nota">++ suma 3, + suma 1, 0 es neutro, − resta 2. En el juego cada combinación muestra sus estrellas después de usarla.' + (m === 'cine' ? ' Erótico nunca va con Familia y juventud.' : ' Sale de la tabla del cine a través del eje de cada familia; el bot la ajusta cuando llegue su medio.') + '</p>';
+    if (m === 'cine') {
+      const cnt = X.contar();
+      h += '<h3>Subgéneros (' + cnt.subgeneros + ')</h3>' + X.listaSubgeneros().map(function (g) { return '<p class="chico"><b>' + esc(g.nombre) + ':</b> ' + esc(g.items.join(', ')) + '</p>'; }).join('');
+      h += '<h3>Temas (' + cnt.temas + ')</h3>' + X.familiasTema.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(f.items.map(function (x) { return X.DEPORTES_NUEVOS.indexOf(x) >= 0 ? x + '*' : x; }).join(', ')) + '</p>'; }).join('');
+      h += '<h3>Problemáticas y argumentos (' + cnt.problematicas + ')</h3>' + X.familiasProblema.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(Object.keys(f.items).sort(function (x, y) { return x.localeCompare(y, 'es'); }).join(', ')) + '</p>'; }).join('');
+      h += '<h3>Arcos y subarcos</h3>' + X.arcos.map(function (a) { return '<p class="chico"><b>' + esc(a.nombre) + '</b> (' + esc(a.orig) + ')</p>'; }).join('') + '<p class="chico">Subarcos: ' + esc(X.subarcos.map(function (s) { return s.nombre + ' (' + s.orig + ')'; }).join(', ')) + '</p>';
+      h += '<h3>Tipos de ficción (' + cnt.ficcion + ')</h3>' + X.familiasFiccion.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(f.items.join(', ')) + '</p>'; }).join('');
+      h += '<h3>Corrientes del cine</h3><p class="chico">' + esc(X.ESTANDAR) + ' · ' + esc(X.corrientesCine.map(function (c) { return c.id + ' (' + c.desde + ')'; }).join(' · ')) + '</p>';
+      h += '<h3>Estilos, tonos y prioridades</h3><p class="chico">Estilos: ' + esc(X.estilos.map(function (s) { return s.id; }).join(', ')) + '<br>Tonos: ' + esc(D.tonos.map(function (x) { return x.id; }).join(', ')) + '<br>Prioridades: ' + esc(X.prioridades.map(function (p) { return p.nombre; }).join(', ')) + '</p>';
+      h += '<h3>Épocas, idiomas y públicos</h3><p class="chico">Épocas: ' + esc(X.epocas.map(function (e) { return e.nombre; }).join(', ')) + '<br>Idiomas: ' + esc(X.idiomas.map(function (x) { return x.id; }).join(', ')) + '<br>Públicos: ' + esc(X.publicos.map(function (p) { return p.id; }).join(', ')) + '</p>';
+      h += '<h3>Arquetipos de personajes</h3><p class="chico">' + esc(X.arquetipos.map(function (a) { return a.id; }).join(', ')) + '</p>';
+      h += '<h3>Dominio público (' + cnt.dominio + ' obras)</h3><p class="chico">' + esc(X.dominio.map(function (d) { return d.tit; }).join(' · ')) + '</p>';
+    } else {
+      h += '<h3>Tipos de obra</h3><p class="chico">' + esc(X.tiposPorMedio[m].join(', ')) + '</p>';
+      h += '<h3>Corrientes</h3><p class="chico">' + esc(X.ESTANDAR) + ' · ' + esc(X.corrientesMedio[m].map(function (c) { return c[1] + (c[0] ? ' (' + c[0] + ')' : ' (desde el inicio)'); }).join(' · ')) + '</p>';
+      h += '<p class="nota">Subgéneros, temas, problemáticas, arcos y tipos de ficción son los mismos para todos los medios.</p>';
+    }
+    return h;
+  }
+  ac('taxMedio', function (v) { cr.taxMedio = v; U.refrescar(); });
+
+  return { fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr };
+})();

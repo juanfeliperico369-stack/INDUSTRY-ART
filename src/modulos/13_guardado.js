@@ -6,10 +6,19 @@
 IA.guardado = (function () {
   'use strict';
   const N = IA.n;
+  // (el prefijo se queda en v16 a propósito: así la V17 encuentra las partidas guardadas por la V16)
   const BD = 'industryart', ALMACEN = 'partidas', PREFIJO = 'industryart.v16.';
   const MANUALES = ['m1', 'm2', 'm3', 'm4', 'm5'], AUTOS = ['a1', 'a2', 'a3'];
   // Migraciones: MIGRACIONES[17] convierte una partida V16 en V17, y así. Las partidas de la V15 no se migran.
   const MIGRACIONES = {};
+  // V16 → V17 (Fábrica de ideas): guiones en venta, guiones propios, usos de material y regla del dominio público.
+  // Las obras viejas no cambian: los campos nuevos de la idea toman sus valores por defecto al leerse.
+  MIGRACIONES[17] = function (S) {
+    if (!S.guiones) S.guiones = [];
+    if (!S.guionesPropios) S.guionesPropios = [];
+    if (!S.usosMaterial) S.usosMaterial = {};
+    if (!S.reglaDominio) S.reglaDominio = 70;
+  };
 
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------
   function suma(texto) {

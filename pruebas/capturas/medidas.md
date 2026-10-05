@@ -1,4 +1,4 @@
-# Capturas automáticas · INDUSTRY ART V16
+# Capturas automáticas · INDUSTRY ART V17
 
 | Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |
 |---|---|---|---|---|
@@ -7,7 +7,12 @@
 | 390x844 | 03_estudio | 0 | 0 | no |
 | 390x844 | 04_obras | 0 | 0 | no |
 | 390x844 | 05_crear_obra | 0 | 0 | no |
+| 390x844 | 05b_crear_historia | 0 | 0 | no |
 | 390x844 | 06_crear_equipo | 0 | 0 | no |
+| 390x844 | 06b_crear_detallado | 0 | 0 | no |
+| 390x844 | 06c_crear_personajes | 0 | 0 | no |
+| 390x844 | 06d_usar_material | 0 | 0 | no |
+| 390x844 | 06e_comprar_guion | 0 | 0 | no |
 | 390x844 | 07_catalogo | 0 | 0 | no |
 | 390x844 | 08_ficha_obra | 0 | 0 | no |
 | 390x844 | 09_talento | 0 | 0 | no |
@@ -16,6 +21,7 @@
 | 390x844 | 12_mundo_poblacion | 0 | 0 | no |
 | 390x844 | 13_mundo_premios | 0 | 0 | no |
 | 390x844 | 13b_mundo_mapa | 0 | 0 | no |
+| 390x844 | 13c_mundo_taxonomia | 0 | 0 | no |
 | 390x844 | 14_negocio_finanzas | 0 | 0 | no |
 | 390x844 | 15_negocio_construcciones | 0 | 0 | no |
 | 390x844 | 16_ajustes | 0 | 0 | no |
@@ -24,7 +30,12 @@
 | 844x390 | 03_estudio | 0 | 0 | no |
 | 844x390 | 04_obras | 0 | 0 | no |
 | 844x390 | 05_crear_obra | 0 | 0 | no |
+| 844x390 | 05b_crear_historia | 0 | 0 | no |
 | 844x390 | 06_crear_equipo | 0 | 0 | no |
+| 844x390 | 06b_crear_detallado | 0 | 0 | no |
+| 844x390 | 06c_crear_personajes | 0 | 0 | no |
+| 844x390 | 06d_usar_material | 0 | 0 | no |
+| 844x390 | 06e_comprar_guion | 0 | 0 | no |
 | 844x390 | 07_catalogo | 0 | 0 | no |
 | 844x390 | 08_ficha_obra | 0 | 0 | no |
 | 844x390 | 09_talento | 0 | 0 | no |
@@ -33,6 +44,7 @@
 | 844x390 | 12_mundo_poblacion | 0 | 0 | no |
 | 844x390 | 13_mundo_premios | 0 | 0 | no |
 | 844x390 | 13b_mundo_mapa | 0 | 0 | no |
+| 844x390 | 13c_mundo_taxonomia | 0 | 0 | no |
 | 844x390 | 14_negocio_finanzas | 0 | 0 | no |
 | 844x390 | 15_negocio_construcciones | 0 | 0 | no |
 | 844x390 | 16_ajustes | 0 | 0 | no |
@@ -41,7 +53,12 @@
 | 1366x768 | 03_estudio | 0 | 0 | no |
 | 1366x768 | 04_obras | 0 | 0 | no |
 | 1366x768 | 05_crear_obra | 0 | 0 | no |
+| 1366x768 | 05b_crear_historia | 0 | 0 | no |
 | 1366x768 | 06_crear_equipo | 0 | 0 | no |
+| 1366x768 | 06b_crear_detallado | 0 | 0 | no |
+| 1366x768 | 06c_crear_personajes | 0 | 0 | no |
+| 1366x768 | 06d_usar_material | 0 | 0 | no |
+| 1366x768 | 06e_comprar_guion | 0 | 0 | no |
 | 1366x768 | 07_catalogo | 0 | 0 | no |
 | 1366x768 | 08_ficha_obra | 0 | 0 | no |
 | 1366x768 | 09_talento | 0 | 0 | no |
@@ -50,6 +67,7 @@
 | 1366x768 | 12_mundo_poblacion | 0 | 0 | no |
 | 1366x768 | 13_mundo_premios | 0 | 0 | no |
 | 1366x768 | 13b_mundo_mapa | 0 | 0 | no |
+| 1366x768 | 13c_mundo_taxonomia | 0 | 0 | no |
 | 1366x768 | 14_negocio_finanzas | 0 | 0 | no |
 | 1366x768 | 15_negocio_construcciones | 0 | 0 | no |
 | 1366x768 | 16_ajustes | 0 | 0 | no |

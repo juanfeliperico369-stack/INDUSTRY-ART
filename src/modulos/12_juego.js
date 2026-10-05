@@ -32,6 +32,7 @@ IA.juego = (function () {
       mercado: { fe52: [], anio: { total: 0, otras: 0, porEstudio: {} }, semana: null, hist: [], famMes: {} },
       fin: { mes: NG.libroVacio(), anio: NG.libroVacio(), meses: [], hist: [] },
       semanasEnRojo: 0, quiebra: null, majorDesde: null, investigaciones: 0,
+      guiones: [], guionesPropios: [], usosMaterial: {}, reglaDominio: 70,
       avatar: null, creado: op.creado || '', bot: !!op.bot,
     };
   }
@@ -64,8 +65,9 @@ IA.juego = (function () {
     if (vis && vis.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);
     O.reindexar();
     noticia({ tipo: 'estudio', texto: 'Nace ' + S.estudios[0].nombre + ' en ' + pais.nombre + '. ' + M.era(anio) + '.', importante: true });
-    // El mundo no arranca vacío: los rivales ya tienen obras en marcha
+    // El mundo no arranca vacío: los rivales ya tienen obras en marcha y hay guiones en venta
     R.mensual(NG.contextoDe(1));
+    IA.ideas.renovarGuiones();
     N.emit('partidaNueva', S);
     return S;
   }
@@ -102,23 +104,41 @@ IA.juego = (function () {
     const S = N.S;
     const gen = O.validarGeneros(b.gen);
     if (gen) return gen;
+    const idea = IA.ideas.validar(b, N.anio());
+    if (idea) return idea;
     if (O.clasificacionesDisponibles(N.anio(), b.gen).indexOf(b.clas) < 0) return 'Esa clasificación no está disponible en ' + N.anio() + '.';
     if (!O.equipoCompleto(b)) return 'Falta completar el equipo.';
     const ocupados = O.idsEquipo(b).filter(function (id) { return !T.disponible(T.porId(id)); });
     if (ocupados.length) return 'Alguien del equipo ya no está disponible.';
     if (O.enProduccion(0).length >= NG.capacidad(0)) return 'No tienes capacidad: construye un plató o espera a que termine un proyecto.';
-    const costo = O.costoTalento(b);
-    if (S.estudios[0].caja < costo) return 'No alcanza la caja para los contratos.';
+    const costo = O.costoTalento(b) + (b.derechos || 0);
+    if (S.estudios[0].caja < costo) return b.derechos ? 'No alcanza la caja para los contratos y los derechos.' : 'No alcanza la caja para los contratos.';
     return '';
   }
   function iniciarObra(b) {
     const err = puedeIniciar(b);
     if (err) return { error: err };
-    const fams = E.familiasDe(b);
-    for (let i = 0; i < fams.length; i++) for (let j = i + 1; j < fams.length; j++) N.S.encajeVisto[fams[i] + fams[j]] = N.S.encajeVisto[fams[j] + fams[i]] = 1;
+    IA.ideas.marcarEncaje(b);
+    if (b.derechos) NG.pagar(0, 'derechos', b.derechos);
+    if (b.mat) IA.ideas.registrarUso(b.mat, N.anio());
+    // Un guion propio se usa una sola vez
+    if (b.guionId) N.S.guionesPropios = (N.S.guionesPropios || []).filter(function (g) { return g.id !== b.guionId; });
     const o = PR.iniciar(b, NG.contextoDe(0));
-    noticia({ tipo: 'estudio', texto: 'Empieza el desarrollo de «' + o.tit + '».' });
+    noticia({ tipo: 'estudio', texto: 'Empieza el desarrollo de «' + o.tit + '».' + (b.mat ? ' Basada en «' + IA.taxonomia.material(b.mat).tit + '».' : '') });
     return { obra: o };
+  }
+  // Comprar un guion ya escrito: se paga ahora y queda en tus guiones hasta que lo produzcas
+  function comprarGuion(id) {
+    const S = N.S;
+    const g = (S.guiones || []).filter(function (x) { return x.id === id; })[0];
+    if (!g) return 'Ese guion ya no está en venta.';
+    if (S.estudios[0].caja < g.precio) return 'No alcanza la caja para comprar el guion.';
+    NG.pagar(0, 'derechos', g.precio);
+    S.guiones = S.guiones.filter(function (x) { return x.id !== id; });
+    S.guionesPropios = S.guionesPropios || [];
+    S.guionesPropios.push(g);
+    noticia({ tipo: 'estudio', texto: 'Compras el guion «' + g.idea.tit + '», de ' + g.nomAutor + '.' });
+    return '';
   }
   function programarEstreno(o, t, nivM) {
     if (o.et !== 'lista' || o.est !== 0) return 'La obra no está lista.';
@@ -149,6 +169,8 @@ IA.juego = (function () {
       M.actualizarTendencias(fm, tot);
       S.mercado.famMes = {};
       R.mensual(NG.contextoDe(1));
+      // Cada tres meses llegan guiones nuevos al mercado
+      if (N.mes(S.t) % 3 === 0) IA.ideas.renovarGuiones();
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;
@@ -207,7 +229,7 @@ IA.juego = (function () {
   return {
     ANIO_MIN: ANIO_MIN, ANIO_MAX: ANIO_MAX, CAPITALES: CAPITALES, DIFICULTADES: DIFICULTADES,
     capitalRecomendado: capitalRecomendado, nuevaPartida: nuevaPartida, conectar: conectar, noticia: noticia,
-    puedeIniciar: puedeIniciar, iniciarObra: iniciarObra, programarEstreno: programarEstreno,
+    puedeIniciar: puedeIniciar, iniciarObra: iniciarObra, programarEstreno: programarEstreno, comprarGuion: comprarGuion,
     avanzarSemana: avanzarSemana, avanzar: avanzar, hayEvento: hayEvento,
   };
 })();

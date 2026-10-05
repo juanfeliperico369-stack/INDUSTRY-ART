@@ -119,6 +119,12 @@ IA.economia = (function () {
     if (dep === 'interprete') {
       const a = talentos(eq.int[0]), b = talentos(eq.int[1]);
       h = a && b ? a.hab * 0.6 + b.hab * 0.4 : a ? a.hab : 35;
+      // Con más reparto (V17): la estrella pesa 50 %, la segunda 30 % y el resto del elenco 20 %
+      if (a && b && eq.int.length > 2) {
+        let s = 0, n = 0;
+        for (let i = 2; i < eq.int.length; i++) { const t = talentos(eq.int[i]); if (t) { s += t.hab; n++; } }
+        if (n) h = a.hab * 0.5 + b.hab * 0.3 + (s / n) * 0.2;
+      }
     } else {
       const t = talentos(eq[dep]);
       h = t ? t.hab : 35;
@@ -128,17 +134,21 @@ IA.economia = (function () {
   // Calcula la calidad base sin azar (para mostrar estimaciones) y con azar al terminar la producción
   function calidadBase(obra, talentos, bonos) {
     const fam = D.familia(familiaPrincipal(obra));
+    const anio = obra.anioPlan || N.anio();
     let q = 0;
-    Object.keys(fam.pesos).forEach(function (dep) { q += fam.pesos[dep] * habilidadDep(obra, dep, talentos, bonos || {}); });
+    const pesos = IA.ideas.pesos(obra, fam); // prioridad y tipo de obra reparten el peso de los departamentos
+    Object.keys(pesos).forEach(function (dep) { q += pesos[dep] * habilidadDep(obra, dep, talentos, bonos || {}); });
     // (las claves _crit y _pub de los bonos no son departamentos: se aplican en calificar)
-    const tipica = produccionTipica(obra.anioPlan || N.anio(), fam.id) * escalaTono(obra);
+    // Lo que cuesta la época, el formato o la animación no sube la calidad: solo el tamaño del presupuesto
+    const tipica = produccionTipica(anio, fam.id) * escalaTono(obra) * IA.ideas.factorCosto(obra, anio);
     q += N.limitar(6 * Math.log2(Math.max(1, obra.pp) / tipica), -18, 12);
     q += encajeObra(obra);
+    q += IA.ideas.ajusteCalidad(obra); // encaje de la idea, material, guion comprado, IA y personajes
     // Tres géneros sin un líder de 90 o más es un desastre
     if (obra.gen.length >= 3) {
       let mejor = 0;
       Object.keys(obra.eq).forEach(function (k) {
-        const ids = k === 'int' ? obra.eq.int : [obra.eq[k]];
+        const ids = Array.isArray(obra.eq[k]) ? obra.eq[k] : [obra.eq[k]];
         ids.forEach(function (id) { const t = talentos(id); if (t && t.hab > mejor) mejor = t.hab; });
       });
       if (mejor < 90) q -= 8;
@@ -151,23 +161,30 @@ IA.economia = (function () {
   }
   function eachTalento(obra, talentos, fn) {
     Object.keys(obra.eq).forEach(function (k) {
-      const ids = k === 'int' ? obra.eq.int : [obra.eq[k]];
+      const ids = Array.isArray(obra.eq[k]) ? obra.eq[k] : [obra.eq[k]];
       ids.forEach(function (id) { const t = talentos(id); if (t) fn(t, k); });
     });
   }
   function escalaTono(obra) { const to = D.tonos.filter(function (x) { return x.id === obra.tono; })[0]; return to && to.costo ? to.costo : 1; }
   function famaEstrellas(obra, talentos) {
     const a = talentos(obra.eq.int[0]), b = talentos(obra.eq.int[1]);
-    return (a ? a.fama * 0.6 : 0) + (b ? b.fama * 0.4 : 0);
+    let f = (a ? a.fama * 0.6 : 0) + (b ? b.fama * 0.4 : 0);
+    // Invitados especiales y cameos (V17): su fama atrae público
+    (obra.eq.inv || []).forEach(function (id) { const t = talentos(id); if (t) f += t.fama * 0.25; });
+    (obra.eq.cam || []).forEach(function (id) { const t = talentos(id); if (t) f += t.fama * 0.1; });
+    return Math.min(1.2, f);
   }
   // Notas finales al terminar la posproducción (con el azar acotado de ±4)
   function calificar(obra, talentos, bonos) {
     const fam = D.familia(familiaPrincipal(obra));
     const to = D.tonos.filter(function (x) { return x.id === obra.tono; })[0] || { crit: 0, pub: 0 };
-    const q = N.limitar(calidadBase(obra, talentos, bonos) + (N.azar() * 8 - 4), 1, 99);
+    let q = calidadBase(obra, talentos, bonos) + (N.azar() * 8 - 4);
+    const r = IA.ideas.resultado(obra); // efectos aplaudidos o repudiados y el resultado de la IA (V17)
+    q = N.limitar(q + r.q, 1, 99);
     const dir = talentos(obra.eq.direccion);
-    let crit = q + to.crit + (fam.inclina === 'crit' ? 3 : fam.inclina === 'pub' ? -2 : 0) + (dir && dir.hab >= 85 ? 2 : 0) + (N.azar() * 6 - 3);
-    let pub = q + to.pub + (fam.inclina === 'pub' ? 3 : fam.inclina === 'crit' ? -3 : 0) + famaEstrellas(obra, talentos) * 4 + (N.azar() * 6 - 3);
+    const ex = IA.ideas.ajusteNotas(obra, obra.anioPlan || N.anio());
+    let crit = q + to.crit + (fam.inclina === 'crit' ? 3 : fam.inclina === 'pub' ? -2 : 0) + (dir && dir.hab >= 85 ? 2 : 0) + (N.azar() * 6 - 3) + ex.crit + r.crit;
+    let pub = q + to.pub + (fam.inclina === 'pub' ? 3 : fam.inclina === 'crit' ? -3 : 0) + famaEstrellas(obra, talentos) * 4 + (N.azar() * 6 - 3) + ex.pub + r.pub;
     const esc = obra.pp / produccionTipica(obra.anioPlan || N.anio(), fam.id);
     if ((fam.id === 'AA' || fam.id === 'IM') && esc >= 1.8) pub += esc >= 3.5 ? 3 : 2; // efectos que el público disfruta
     // Visión y público objetivo del estudio (solo el jugador los tiene)
@@ -187,7 +204,7 @@ IA.economia = (function () {
     return p > 0 ? a / p : 0.8;
   }
   function conocimiento(obra, anio, famaEstudio, famaEst, bonoMarketing) {
-    const base = N.limitar(0.06 + 0.25 * famaEstudio + 0.2 * famaEst, 0.03, 0.6);
+    const base = N.limitar(0.06 + 0.25 * famaEstudio + 0.2 * famaEst + IA.ideas.bonoConocimiento(obra), 0.03, 0.6);
     const gasto = (obra.cm || 0) * (1 + (bonoMarketing || 0));
     const rel = gasto / Math.max(1, marketingTipico(anio));
     const resto = (1 - base) * Math.exp(-alcanceMedio(anio) * rel * 0.9);
@@ -203,9 +220,10 @@ IA.economia = (function () {
     const d = datosAnio(anio).regiones[reg];
     const fam = D.familia(familiaPrincipal(obra));
     const cl = D.clasificacion(obra.clas) || D.clasificacion('PG-13');
+    const ex = IA.ideas.edadesExtra(obra); // tipo de obra y público objetivo (V17)
     let s = 0;
-    for (let g = 0; g < 5; g++) s += d.edades[g] * PROPENSION[g] * fam.edades[g] * cl.acceso[g] * cl.gusto[g];
-    return Math.max(0.02, s / d.baseEdad);
+    for (let g = 0; g < 5; g++) s += d.edades[g] * PROPENSION[g] * fam.edades[g] * cl.acceso[g] * cl.gusto[g] * (ex ? ex[g] : 1);
+    return Math.max(0.02, s / d.baseEdad * IA.ideas.regionExtra(obra, reg, anio));
   }
 
   // ---------- Inicio del estreno ----------

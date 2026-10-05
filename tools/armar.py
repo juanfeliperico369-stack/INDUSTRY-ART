@@ -2,7 +2,7 @@
 """Arma INDUSTRY ART: une src/ en un solo HTML que funciona sin internet.
 
 Uso:
-    python3 tools/armar.py                 # crea INDUSTRY_ART_v16.html en la raíz
+    python3 tools/armar.py                 # crea INDUSTRY_ART_v17.html en la raíz
     python3 tools/armar.py --salida otro.html
 
 Qué hace:
@@ -20,7 +20,7 @@ import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(RAIZ, "src")
-VERSION = "16"
+VERSION = "17"
 
 MARCA = re.compile(r"^/\* ==== módulo: ([a-z0-9_]+) ==== \*/\s*$", re.M)
 

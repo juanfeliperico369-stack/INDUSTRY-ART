@@ -113,6 +113,17 @@ label.campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10
 label.campo > span { color: var(--tenue); font-size: 14px; }
 input[type=text], input[type=number], input[type=search], select { width: 100%; min-height: 44px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--borde); background: var(--panel2); }
 input[type=range] { width: 100%; accent-color: var(--acento); min-height: 44px; }
+textarea { width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--borde); background: var(--panel2); resize: vertical; }
+label.campo.rango { margin-bottom: 4px; }
+label.campo.rango > span b { color: var(--texto); font-weight: 600; }
+.mini { display: inline-block; width: 38px; height: 6px; background: var(--panel2); border-radius: 3px; vertical-align: middle; margin-right: 4px; }
+.mini i { display: block; height: 100%; background: var(--acento); border-radius: 3px; }
+.seccion-cr { padding: 4px 10px; }
+.cab-seccion { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 4px 0; background: none; border: 0; color: inherit; cursor: pointer; text-align: left; }
+.cab-seccion b { flex: 0 1 auto; }
+.cab-seccion .chico { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.seccion-cr h4 { margin: 10px 0 4px; }
+.picker { border-color: var(--acento); }
 input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 .interruptor { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; border-bottom: 1px solid var(--borde); }
 .barra-p { height: 10px; border-radius: 6px; background: var(--panel2); overflow: hidden; }

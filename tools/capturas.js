@@ -4,7 +4,7 @@
  * horizontal) y 1366×768 (PC). Guarda los PNG en pruebas/capturas/ y revisa que ningún control mida menos de
  * 44 px, que ningún texto mida menos de 14 px y que no haya desplazamiento horizontal.
  *
- * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v16.html]
+ * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v17.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 
 const RAIZ = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
-const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v16.html');
+const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v17.html');
 const SALIDA = path.join(RAIZ, 'pruebas', 'capturas');
 const TAMANOS = [[390, 844, 'celular_vertical'], [844, 390, 'celular_horizontal'], [1366, 768, 'pc']];
 
@@ -24,7 +24,12 @@ const PANTALLAS = [
   ['04_obras', async (p) => { await p.evaluate(() => IA.ui.irA('obras', 'marcha')); }],
   // (para la captura se agrega un plató si la capacidad está llena)
   ['05_crear_obra', async (p) => { await p.evaluate(() => { if (IA.obras.enProduccion(0).length >= IA.negocio.capacidad(0)) IA.n.S.estudios[0].pisos.push('plato'); IA.ui.irA('obras'); IA.ui.acciones.crearObra(); }); }],
-  ['06_crear_equipo', async (p) => { await p.evaluate(() => { for (let i = 0; i < 3; i++) IA.ui.acciones.crPaso('1'); }); }],
+  ['05b_crear_historia', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('rapido'); IA.ui.acciones.crCamino('nueva'); IA.ui.acciones.crPaso('1'); }); }],
+  ['06_crear_equipo', async (p) => { await p.evaluate(() => { for (let i = 0; i < 2; i++) IA.ui.acciones.crPaso('1'); }); }],
+  ['06b_crear_detallado', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('detallado'); ['obra', 'generos', 'historia'].forEach((s) => { if (IA.creacion.estado.abiertas[s]) IA.ui.acciones.crSeccion(s); }); IA.ui.acciones.crSeccion('forma'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06c_crear_personajes', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('forma'); IA.ui.acciones.crSeccion('personajes'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06d_usar_material', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('rapido'); IA.ui.acciones.crVolverCamino(); IA.ui.acciones.crCamino('material'); }); }],
+  ['06e_comprar_guion', async (p) => { await p.evaluate(() => { IA.ui.acciones.crVolverCamino(); IA.ui.acciones.crCamino('guion'); }); }],
   ['07_catalogo', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('obras', 'catalogo'); }); }],
   ['08_ficha_obra', async (p) => { await p.evaluate(() => { const o = IA.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada').pop(); if (o) IA.ui.acciones.verObra(String(o.id)); }); }],
   ['09_talento', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('talento'); }); }],
@@ -33,6 +38,7 @@ const PANTALLAS = [
   ['12_mundo_poblacion', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'poblacion')); }],
   ['13_mundo_premios', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'premios')); }],
   ['13b_mundo_mapa', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'mapa')); }],
+  ['13c_mundo_taxonomia', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'taxonomia')); }],
   ['14_negocio_finanzas', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'finanzas')); }],
   ['15_negocio_construcciones', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'estudio')); }],
   ['16_ajustes', async (p) => { await p.evaluate(() => IA.ui.acciones.abrirAjustes()); }],
@@ -85,7 +91,7 @@ async function medir(p) {
     await p.close();
   }
   await navegador.close();
-  let md = '# Capturas automáticas · INDUSTRY ART V16\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
+  let md = '# Capturas automáticas · INDUSTRY ART V17\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
   resumen.filter((r) => r.pantalla).forEach((r) => { md += `| ${r.tamano} | ${r.pantalla} | ${r.controles}${r.controles ? ' (' + r.detalle.join(', ') + ')' : ''} | ${r.textos} | ${r.desborde ? 'sí' : 'no'} |\n`; });
   const errores = resumen.filter((r) => r.errores);
   md += '\nErrores de página: ' + (errores.length ? errores.map((r) => r.tamano + ': ' + r.errores.join('; ')).join(' / ') : 'ninguno') + '\n';

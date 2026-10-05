@@ -85,7 +85,7 @@ IA.lanzamiento = (function () {
     if (O.costoTotal(o) > tipico * 2.5) r.push('Fue muy cara para su época: cuesta más recuperarla.');
     const acc = o.acc ? o.acc.nam : 1;
     if (acc < 0.6) r.push('Su clasificación (' + o.clas + ') dejó fuera a parte del público.');
-    return r;
+    return r.concat(IA.ideas.informe(o));
   }
 
   return {

@@ -5,26 +5,29 @@ programado junto a Claude, de Anthropic. El plan completo está en `docs/` (Plan
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v16.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Abre **`INDUSTRY_ART_v17.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Las partidas guardadas de la V16 se abren en la V17 (se migran solas).
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v16.html` | El juego, versión 16 (armado desde `src/`) |
-| `bitacora_v16.md` | La bitácora de la V16: qué se hizo, decisiones, bot, rendimiento y qué sigue |
+| `INDUSTRY_ART_v17.html` | El juego, versión 17 · Fábrica de ideas (armado desde `src/`) |
+| `INDUSTRY_ART_v16.html` | La versión anterior, para comparar |
+| `bitacora_v17.md` | La bitácora de la V17: qué se hizo, decisiones, bot, rendimiento y qué sigue |
+| `bitacora_v16.md` | La bitácora de la V16 |
 | `src/` | El código separado por módulos (ver `src/LEEME.md`) |
 | `tools/armar.py`, `tools/desarmar.py` | Unen los módulos en el HTML y lo vuelven a separar (solo Python 3, sin npm) |
-| `tools/bot.js`, `tools/capturas.js` | Bot de pruebas y capturas automáticas en un navegador real (usan Playwright) |
-| `pruebas/` | Informe del bot, capturas en 3 tamaños y los scripts de la auditoría de la V15 y de la revisión de la V16 |
+| `tools/bot.js`, `tools/capturas.js` | Bot de pruebas (con las pruebas de reglas) y capturas automáticas en un navegador real (usan Playwright) |
+| `pruebas/` | Informes del bot, capturas en 3 tamaños y los scripts de la auditoría de la V15 y de la revisión de la V16 |
 | `docs/` | Plan Maestro, auditoría de la V15 y revisión independiente de la V16 |
 | `legado/` | La V15 original (sigue jugable aparte) y su código desarmado |
 
 ## Para programar la siguiente versión
 
 ```bash
-python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v16.html
-node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1900 y 2000 -> pruebas/informe_bot_v16.md
+python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v17.html
+node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1900 y 2000 + pruebas de reglas -> pruebas/informe_bot_v17.md
 node tools/capturas.js                       # capturas en 390×844, 844×390 y 1366×768 -> pruebas/capturas/
-python3 tools/desarmar.py INDUSTRY_ART_v16.html   # HTML -> src/ (la ida y vuelta es idéntica)
+python3 tools/desarmar.py INDUSTRY_ART_v17.html   # HTML -> src/ (la ida y vuelta es idéntica)
 ```

@@ -3,8 +3,8 @@
 El juego se entrega como **un solo archivo HTML** (`INDUSTRY_ART_vXX.html`) que funciona sin internet.
 Aquí vive el mismo código separado por módulos para que cualquier chat lo lea y lo continúe.
 
-- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v16.html`.
-- `python3 tools/desarmar.py INDUSTRY_ART_v16.html` vuelve a separar un HTML armado en `src/`.
+- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v17.html`.
+- `python3 tools/desarmar.py INDUSTRY_ART_v17.html` vuelve a separar un HTML armado en `src/`.
 
 ## Estructura
 
@@ -35,6 +35,8 @@ IA.nombre = (function () {
   semilla con las mismas decisiones dé la misma partida. El arte usa su propio hash determinista.
 - La partida es **un solo objeto de datos** (`IA.n.S`) sin funciones adentro: se guarda, comprime y migra fácil.
 - Los textos visibles salen del diccionario `IA.textos` (`IA.t('clave')`).
-- Los datos (listas, países, épocas) van en `02_datos.js`, separados de la lógica.
+- Los datos (listas, países, épocas) van en `02_datos.js` y la taxonomía completa de la fábrica de ideas (V17) en
+  `02_taxonomia.js`, separados de la lógica. Las reglas de la idea (clasificación, encaje, sinopsis, personajes,
+  dominio público, guiones, IA) están en `06_ideas.js`, y su pantalla en `16_creacion.js`.
 - Los módulos de simulación (núcleo, mundo, economía, talentos, obras, producción, lanzamiento, rivales, premios,
   negocio) **no tocan el DOM**; solo la interfaz, el arte y el guardado lo hacen.

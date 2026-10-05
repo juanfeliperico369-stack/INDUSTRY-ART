@@ -180,19 +180,21 @@ IA.datos = (function () {
     return ENCAJE[i][j];
   }
 
-  // ---------- Clasificaciones (las del documento, intactas) ----------
+  // ---------- Clasificaciones (las de tu documento, con tus palabras) ----------
   // acceso: parte de cada grupo de edad que puede entrar [niños, adolescentes, jóvenes, adultos, mayores]
-  // NC-17 es para 17 años y se queda en el grupo de adolescentes (decidido). Las de adultos dicen "siempre sugerido".
+  // NC-17 es para 17 años y se queda en el grupo de adolescentes (decidido). Las de adultos agregan "siempre sugerido".
+  // Tu documento da cuánto rinde cada una: G 60 %, PG 70 %, PG-13 100 %, 16 90 %, NC-17 80 %, 18 50 %, R 40 %, X 30 %
+  // y N 50 %; aquí sale de quién puede entrar y de cuánto le gusta a cada edad.
   const clasificaciones = [
-    { id: 'G', desc: 'Para todo público', acceso: [1, 1, 1, 1, 1], gusto: [1.1, 0.7, 0.8, 0.9, 1.0], adultos: false, desde: 1850 },
-    { id: 'PG', desc: 'Guía de los padres', acceso: [0.9, 1, 1, 1, 1], gusto: [1.0, 0.85, 0.9, 1, 1], adultos: false, desde: 1850 },
-    { id: 'PG-13', desc: 'Mayores de 13; los menores, acompañados', acceso: [0.45, 1, 1, 1, 1], gusto: [1, 1, 1, 1, 1], adultos: false, desde: 1850 },
-    { id: '16', desc: 'Mayores de 16', acceso: [0, 0.4, 1, 1, 1], gusto: [1, 1, 1, 1, 0.95], adultos: false, desde: 1850 },
-    { id: 'NC-17', desc: 'Desde los 17 años (grupo adolescente)', acceso: [0, 0.2, 1, 1, 1], gusto: [1, 1, 1, 0.97, 0.9], adultos: false, desde: 1968 },
-    { id: '18', desc: 'Solo adultos: violencia y amor intensos, siempre sugerido', acceso: [0, 0, 1, 1, 1], gusto: [1, 1, 0.95, 0.95, 0.85], adultos: true, desde: 1968 },
-    { id: 'R', desc: 'Restringida: violencia gráfica y amor explícito, siempre sugerido', acceso: [0, 0, 0.9, 0.9, 0.85], gusto: [1, 1, 0.92, 0.9, 0.8], adultos: true, desde: 1968 },
-    { id: 'X', desc: 'Contenido extremo para adultos, siempre sugerido', acceso: [0, 0, 0.5, 0.45, 0.3], gusto: [1, 1, 0.8, 0.75, 0.6], adultos: true, desde: 1968 },
-    { id: 'N', desc: 'Sin clasificar: circuito de arte y festivales', acceso: [0, 0, 0.6, 0.6, 0.5], gusto: [1, 1, 1, 1, 1], adultos: true, desde: 1850 },
+    { id: 'G', desc: 'De 0 a 6 años: lenguaje normal, sin violencia, amor amistoso; apto para familias, ideal para todo público', acceso: [1, 1, 1, 1, 1], gusto: [1.1, 0.7, 0.8, 0.9, 1.0], adultos: false, desde: 1850 },
+    { id: 'PG', desc: 'De 7 a 12 años: lenguaje normal, violencia leve, amor amistoso y romántico; ideal para niños', acceso: [0.9, 1, 1, 1, 1], gusto: [1.0, 0.85, 0.9, 1, 1], adultos: false, desde: 1850 },
+    { id: 'PG-13', desc: 'De 13 a 15 años: lenguaje leve, violencia moderada, amor romántico; ideal para preadolescentes y adolescentes', acceso: [0.45, 1, 1, 1, 1], gusto: [1, 1, 1, 1, 1], adultos: false, desde: 1850 },
+    { id: '16', desc: 'De 16 a 17 años: lenguaje rudo, violencia intensa, amor apasionado; ideal para adolescentes', acceso: [0, 0.4, 1, 1, 1], gusto: [1, 1, 1, 1, 0.95], adultos: false, desde: 1850 },
+    { id: 'NC-17', desc: '17 años: lenguaje crudo, violencia intensa, amor candente; ideal para adolescentes mayores', acceso: [0, 0.2, 1, 1, 1], gusto: [1, 1, 1, 0.97, 0.9], adultos: false, desde: 1968 },
+    { id: '18', desc: 'Solo mayores de 18: lenguaje ofensivo, violencia gráfica, amor candente, siempre sugerido; ideal para nuevos adultos', acceso: [0, 0, 1, 1, 1], gusto: [1, 1, 0.95, 0.95, 0.85], adultos: true, desde: 1968 },
+    { id: 'R', desc: 'Restringido, solo para adultos: lenguaje explícito, violencia sangrienta, amor candente, siempre sugerido; ideal para adultos', acceso: [0, 0, 0.9, 0.9, 0.85], gusto: [1, 1, 0.92, 0.9, 0.8], adultos: true, desde: 1968 },
+    { id: 'X', desc: 'Solo para mayores: lenguaje explícito, violencia explícita, amor explícito, siempre sugerido; ideal para mayores', acceso: [0, 0, 0.5, 0.45, 0.3], gusto: [1, 1, 0.8, 0.75, 0.6], adultos: true, desde: 1968 },
+    { id: 'N', desc: 'General: apto para todo público, en especial para personas ya desarrolladas; lenguaje, violencia y amor moderados y controlados', acceso: [1, 1, 1, 1, 1], gusto: [0.35, 0.45, 0.55, 0.6, 0.6], adultos: false, desde: 1850 },
   ];
   // Antes de 1968 la censura de la época (Código de Producción en Norteamérica) no deja estrenar lo más fuerte.
   const ANIO_CLASIFICACION_POR_EDADES = 1968;

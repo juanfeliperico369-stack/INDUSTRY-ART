@@ -1,6 +1,6 @@
 /* ==== módulo: obras ==== */
-// La ficha de cada obra y su creación en modo rápido (géneros, tono, clasificación, escala, equipo y título).
-// La fábrica de ideas completa (taxonomía, sinopsis, personajes, dominio público) llega en la V17.
+// La ficha de cada obra y su creación: el borrador con todos los campos de la fábrica de ideas (V17), el equipo,
+// los costos y las semanas de cada etapa. Las reglas de la idea (clasificación, encaje, sinopsis) viven en IA.ideas.
 IA.obras = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, T = IA.talentos;
@@ -52,11 +52,10 @@ IA.obras = (function () {
       return true;
     }).map(function (c) { return c.id; });
   }
+  // La recomendada sale del contenido típico de la familia (V17: la clasificación se calcula desde el contenido)
   function clasificacionRecomendada(gen, anio) {
-    const fam = D.familia(D.familiaDe[gen[0]] || 'DR');
-    const disp = clasificacionesDisponibles(anio, gen);
-    if (gen.indexOf('Erótico') >= 0 && disp.indexOf('18') >= 0) return '18';
-    return disp.indexOf(fam.clas) >= 0 ? fam.clas : disp.indexOf('PG-13') >= 0 ? 'PG-13' : (disp[0] || 'PG-13');
+    const fam = D.familiaDe[gen[0]] || 'DR';
+    return IA.ideas.clasificar({ gen: gen, clasN: fam === 'AV' }, anio);
   }
   // Reglas de la combinación de géneros. Devuelve un texto de error o ''.
   function validarGeneros(gen, anio) {
@@ -70,6 +69,9 @@ IA.obras = (function () {
   }
 
   // ---------- Borrador: la obra antes de empezar ----------
+  // Campos de la fábrica de ideas que se copian de las opciones (las obras de los rivales usan los de siempre)
+  const CAMPOS_IDEA = ['med', 'nat', 'tipo', 'sub', 'prob', 'arco', 'sarc', 'fic', 'corr', 'estilo', 'prio', 'fmt', 'epo', 'lug', 'idio', 'pubs',
+    'cont', 'min', 'cx', 'rit', 'fx', 'ia', 'presM', 'clasN', 'mat', 'rod', 'ideaIA', 'guionC', 'guionPagado', 'derechos', 'suave', 'pj', 'sin'];
   function borrador(est, opciones) {
     const anio = N.anio();
     const o = opciones || {};
@@ -81,21 +83,44 @@ IA.obras = (function () {
     const tono = o.tono || 'Realista';
     const b = {
       id: 0, est: est, tit: o.tit || tituloNuevo(gen), gen: gen, fam: fam, tono: tono,
-      tem: o.tem || [N.elegir(D.temas)], clas: o.clas || clasificacionRecomendada(gen, anio),
-      esc: escala, anioPlan: anio, eq: { int: [] }, nivM: 2,
+      tem: o.tem ? o.tem.slice() : [N.elegir(D.temas)], esc: escala, anioPlan: anio, eq: { int: [] }, nivM: 2,
     };
-    b.pp = Math.round(E.produccionTipica(anio, fam) * D.escalas[escala].mult * escalaTono(tono) * (o.costoPais || 1));
+    CAMPOS_IDEA.forEach(function (k) { if (o[k] !== undefined) b[k] = N.copiar(o[k]); });
+    if (o.completa) IA.ideas.completar(b, anio);
+    if (b.clasN === undefined && fam === 'AV') b.clasN = true; // el arte y la vanguardia van al circuito de festivales (N)
+    b.clas = o.clas || IA.ideas.clasificar(b, anio);
+    b.pp = Math.round(IA.ideas.costoProduccion(b, anio) * (o.costoPais || 1));
     return b;
+  }
+  // Recalcula lo que depende de las decisiones (familia, contenido, clasificación y costo) sin tocar el equipo
+  function recalcular(b) {
+    const anio = N.anio();
+    b.fam = D.familiaDe[b.gen[0]] || 'DR';
+    if (b.cont) IA.ideas.normalizar(b, anio); else b.clas = IA.ideas.clasificar(b, anio);
+    if (b.presM) b.esc = escalaCercana(b.presM);
+    b.pp = Math.round(IA.ideas.costoProduccion(b, anio));
+    return b;
+  }
+  function escalaCercana(m) {
+    let mejor = 0;
+    D.escalas.forEach(function (e, i) { if (Math.abs(Math.log(e.mult / m)) < Math.abs(Math.log(D.escalas[mejor].mult / m))) mejor = i; });
+    return mejor;
   }
   function escalaTono(tono) { const to = D.tonos.filter(function (x) { return x.id === tono; })[0]; return to && to.costo ? to.costo : 1; }
   function idsEquipo(o) {
     const ids = [];
     ROLES.forEach(function (r) { if (o.eq[r] !== undefined && o.eq[r] !== null) ids.push(o.eq[r]); });
-    return ids.concat(o.eq.int || []);
+    return ids.concat(o.eq.int || [], o.eq.inv || [], o.eq.cam || []);
   }
+  // Invitados especiales cobran el 40 % de su tarifa y los cameos el 15 %; un guion comprado ya pagó al escritor
+  const PARTE_INVITADO = 0.4, PARTE_CAMEO = 0.15;
   function costoTalento(o) {
     let s = 0;
-    idsEquipo(o).forEach(function (id) { const t = T.porId(id); if (t) s += T.tarifa(t); });
+    const t = function (id) { const x = T.porId(id); return x ? T.tarifa(x) : 0; };
+    ROLES.forEach(function (r) { if (o.eq[r] !== undefined && o.eq[r] !== null && !(r === 'guion' && o.guionPagado)) s += t(o.eq[r]); });
+    (o.eq.int || []).forEach(function (id) { s += t(id); });
+    (o.eq.inv || []).forEach(function (id) { s += t(id) * PARTE_INVITADO; });
+    (o.eq.cam || []).forEach(function (id) { s += t(id) * PARTE_CAMEO; });
     return s;
   }
   // Arma el equipo recomendado dentro de un tope por rol (relativo al presupuesto típico de la época)
@@ -120,6 +145,7 @@ IA.obras = (function () {
       ints.push(t.id); usados.push(t.id);
     }
     o.eq.int = ints;
+    if (o.pj && IA.ideas) IA.ideas.asignarReparto(o);
     return o;
   }
   function equipoCompleto(o) {
@@ -131,12 +157,14 @@ IA.obras = (function () {
   function duraciones(o, rapidez) {
     const esc = D.escalas[o.esc];
     const r = rapidez || {};
-    const f = esc.semanas * N.interp(EPOCA_DURACION, o.anioPlan || N.anio());
+    const anio = o.anioPlan || N.anio();
+    const f = esc.semanas * N.interp(EPOCA_DURACION, anio);
+    const a = IA.ideas.ajusteSemanas(o, anio); // animación, duración, efectos, IA e idea automática
     return {
-      desarrollo: Math.max(1, Math.round(5 * f) - (r.guion || 0)),
+      desarrollo: Math.max(1, Math.round(5 * f) - (r.guion || 0) + a.desarrollo),
       preproduccion: Math.max(1, Math.round(4 * f)),
-      rodaje: Math.max(2, Math.round(8 * f)),
-      posproduccion: Math.max(2, Math.round(7 * f) - (r.edicion || 0) + (o.fam === 'IM' || o.fam === 'AA' ? 1 : 0)),
+      rodaje: Math.max(2, Math.round(8 * f * a.rodaje)),
+      posproduccion: Math.max(2, Math.round(7 * f * a.posproduccion) - (r.edicion || 0) + (o.fam === 'IM' || o.fam === 'AA' ? 1 : 0) + a.posExtra),
     };
   }
   function semanasTotales(o, rapidez) {
@@ -149,7 +177,9 @@ IA.obras = (function () {
     const ct = costoTalento(o);
     const cm = E.marketingTipico(N.anio()) * D.nivelesMarketing[o.nivM === undefined ? 2 : o.nivM].mult;
     const pp = Math.round(o.pp * (1 - IA.negocio.ahorro(o.est)));
-    return { calidad: Math.round(N.limitar(q, 1, 99)), talento: ct, produccion: pp, marketing: cm, total: ct + pp + cm };
+    const der = o.derechos || 0;
+    const calidad = Math.round(N.limitar(q, 1, 99));
+    return { calidad: calidad, talento: ct, produccion: pp, marketing: cm, derechos: der, total: ct + pp + cm + der, retorno: IA.ideas.retornoEstimado(calidad) };
   }
   // Convierte el borrador en obra real (la producción la mueve cada semana)
   function crear(b) {
@@ -162,6 +192,11 @@ IA.obras = (function () {
     o.cm = 0;
     o.bruto = 0; o.parte = 0;
     o.cr = creditos(o);
+    if (o.est === 0 && o.pj) {
+      o.sin = o.sin || IA.ideas.sinopsis(o);
+      o.frc = IA.ideas.fraseCritica(o);
+      o.frp = IA.ideas.frasePremio(o);
+    }
     registrar(o);
     return o;
   }
@@ -190,10 +225,13 @@ IA.obras = (function () {
   function multiplicador(o) { const c = costoTotal(o); return c > 0 ? (o.bruto || 0) / c : 0; }
   function neto(o) { return (o.parte || 0) - costoTotal(o); }
 
+  const DETALLE_IDEA = ['cont', 'fmt', 'pubs', 'sub', 'sarc', 'fic', 'corr', 'estilo', 'prio', 'idio', 'rod', 'cx', 'rit', 'fx', 'presM', 'clasN',
+    'derechos', 'guionId', 'guionPagado', 'lug', 'prob', 'min', 'iar', 'fxr', 'frc'];
   // Historial compacto: de las obras viejas de los rivales queda el resumen y el detalle semanal se borra
   function compactar() {
     const S = N.S, t = S.t;
-    const BORRAR = ['eq', 'acc', 'tem', 'u', 'delta', 'inf', 'dur', 'sr', 'semProd', 'sobre', 't0', 'tLista', 'prog', 'anioPlan', 'max', 'exp', 'tono', 'esc'];
+    const BORRAR = ['eq', 'acc', 'tem', 'u', 'delta', 'inf', 'dur', 'sr', 'semProd', 'sobre', 't0', 'tLista', 'prog', 'anioPlan', 'max', 'exp', 'tono', 'esc',
+      'sub', 'prob', 'arco', 'cont', 'ia', 'iar', 'fxr', 'presM', 'clasN', 'derechos'];
     S.obras.forEach(function (o) {
       if (o.et !== 'terminada') return;
       if (o.hs && (t - (o.fe || 0) > 52 * (o.est === 0 ? 30 : 2)) && !o.fav) delete o.hs;
@@ -204,6 +242,9 @@ IA.obras = (function () {
       // Tus obras de hace más de 25 años quedan con su ficha, créditos e informe, sin el detalle técnico
       if (o.est === 0 && t - (o.fe || 0) > 52 * 25 && o.dur) {
         ['acc', 'u', 'delta', 'dur', 'sr', 'semProd', 'sobre', 't0', 'tLista', 'prog', 'anioPlan', 'max', 'eq'].forEach(function (k) { delete o[k]; });
+        // De la idea quedan la sinopsis, los géneros, temas, arco, material y los protagonistas (sin el detalle técnico)
+        DETALLE_IDEA.forEach(function (k) { delete o[k]; });
+        if (o.pj) o.pj = o.pj.filter(function (p) { return p.i === 'protagonista'; }).map(function (p) { return { n: p.n, e: p.e, s: p.s, i: p.i, a: p.a }; });
       }
     });
     // Las obras de rivales muy viejas y sin premios se resumen por año para que el guardado no crezca sin fin
@@ -227,7 +268,8 @@ IA.obras = (function () {
     ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
     delEstudio: delEstudio, enProduccion: enProduccion, enCartelera: enCartelera, tituloNuevo: tituloNuevo,
     clasificacionesDisponibles: clasificacionesDisponibles, clasificacionRecomendada: clasificacionRecomendada,
-    validarGeneros: validarGeneros, borrador: borrador, idsEquipo: idsEquipo, costoTalento: costoTalento,
+    validarGeneros: validarGeneros, borrador: borrador, recalcular: recalcular, escalaCercana: escalaCercana, idsEquipo: idsEquipo, costoTalento: costoTalento,
+    PARTE_INVITADO: PARTE_INVITADO, PARTE_CAMEO: PARTE_CAMEO,
     equipoRecomendado: equipoRecomendado, equipoCompleto: equipoCompleto, duraciones: duraciones,
     semanasTotales: semanasTotales, estimar: estimar, crear: crear, paraPoster: paraPoster,
     costoTotal: costoTotal, multiplicador: multiplicador, neto: neto, compactar: compactar, escalaTono: escalaTono,

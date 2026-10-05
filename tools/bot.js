@@ -3,9 +3,9 @@
  * Bot de pruebas de INDUSTRY ART en un navegador real (Chromium sin pantalla).
  * Juega 3 estrategias (prudente, normal, agresiva) desde 1900 y desde 2000 hasta 2150 con semillas fijas,
  * revisa las metas de balance, los errores, los tiempos y el tamaño del guardado comprimido, y escribe
- * pruebas/informe_bot_v16.md y pruebas/informe_bot_v16.json.
+ * pruebas/informe_bot_v17.md y pruebas/informe_bot_v17.json, con las pruebas de reglas de la V17.
  *
- * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_v16.html]
+ * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_v17.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const arg = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const HASTA = +arg('hasta', 2150);
 const SEMILLAS = arg('semillas', 'bot,b2').split(',');
-const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_v16.html'));
+const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_v17.html'));
 const ESTRATEGIAS = ['prudente', 'normal', 'agresiva'];
 const DESDE = [1900, 2000];
 
@@ -94,6 +94,12 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
     rs.forEach((r) => { resultados.push(r); console.log(r.estrategia, r.desde, r.semilla, 'errores', r.errores.length, 'mult', r.multMediano.toFixed(2)); });
   }
   const lento = await rendimientoLento(navegador);
+  // Pruebas de reglas (clasificación, dominio público, Erótico, inflación y población)
+  const pr = await navegador.newPage();
+  await pr.goto('file://' + HTML);
+  const reglas = await pr.evaluate(() => { IA.juego.nuevaPartida({ semilla: 'reglas', anio: 2000, bot: true }); return IA.pruebas.reglas(); });
+  await pr.close();
+  console.log('reglas', reglas.filter((x) => x.ok).length + '/' + reglas.length);
   await navegador.close();
 
   // ---------- Informe ----------
@@ -107,7 +113,7 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
     ['Cuota de mercado', 'menos de 35 %', (r) => r.cuotaMax < 0.35, (r) => pct(r.cuotaMax) + ' máx.'],
   ];
   const fecha = new Date().toISOString().slice(0, 10);
-  let md = '# Informe del bot · INDUSTRY ART V16\n\n';
+  let md = '# Informe del bot · INDUSTRY ART V17\n\n';
   md += `Fecha: ${fecha} · Navegador: Chromium sin pantalla · ${resultados.length} partidas hasta ${HASTA} · semillas fijas: ${SEMILLAS.join(', ')}\n\n`;
   const totalErrores = resultados.reduce((a, r) => a + r.errores.filter((e) => !/^Quiebra del bot/.test(e)).length, 0);
   md += `**Errores del juego en todas las partidas: ${totalErrores}.** Quiebras del bot: ${resultados.filter((r) => r.quiebra).length}.\n\n`;
@@ -122,6 +128,12 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   md += '## Las tres estrategias\n\n| Estrategia | Desde | Semilla | Mult. mediano | Sobre ×5 | Pierden | Crec. real (años 10-40) | Arranque (años 0-10) | Premios | Major | Cuota máx. | Mult. del jugador | Pierden (jugador) | Rescates de rivales |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n';
   for (const r of resultados) {
     md += `| ${r.estrategia} | ${r.desde} | ${r.semilla.split('-')[0]} | ×${r.multMediano.toFixed(2)} | ${pct(r.sobre5)} | ${pct(r.pierden)} | ${pct(r.crecimiento30)} | ${pct(r.crecimientoArranque)} | ${pct(r.premiosJugador)} | ${r.aniosAMajor === null ? 'nunca' : r.aniosAMajor} | ${pct(r.cuotaMax)} | ×${r.multMedianoJugador.toFixed(2)} | ${pct(r.pierdenJugador)} | ${r.rescatesRivales} |\n`;
+  }
+  md += '\n## Pruebas de reglas\n\n' + `**${reglas.filter((x) => x.ok).length} de ${reglas.length} pasan.**\n\n| Regla | Resultado |\n|---|---|\n` + reglas.map((x) => `| ${x.nombre} | ${x.ok ? '✅' : '❌'}${x.detalle ? ' ' + x.detalle : ''} |`).join('\n') + '\n';
+  md += '\n## Fábrica de ideas: qué usó el bot\n\n| Estrategia | Desde | Semilla | Obras | Material | Guion comprado | IA | Efectos grandes (aplaudidos / repudiados) | Clasificaciones | Adaptaciones de rivales |\n|---|---|---|---|---|---|---|---|---|---|\n';
+  for (const r of resultados) {
+    const i = r.ideas || {};
+    md += `| ${r.estrategia} | ${r.desde} | ${r.semilla.split('-')[0]} | ${i.obras} | ${i.material} | ${i.guion} | ${i.ia} | ${i.efectos} (${i.aplaudidos} / ${i.repudiados}) | ${Object.entries(i.clasificaciones || {}).map((x) => x[0] + ': ' + x[1]).join(', ')} | ${i.adaptacionesRivales} |\n`;
   }
   md += '\n## Rendimiento\n\n| Medida | Meta | Resultado |\n|---|---|---|\n';
   const semanas = resultados.map((r) => r.rendimiento.msSemana), anios = resultados.map((r) => r.rendimiento.sAnio), peores = resultados.map((r) => r.rendimiento.peorSemana);
@@ -141,8 +153,8 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   md += `| Guardar y cargar en IndexedDB | sin fallos | ${resultados.every((r) => r.pruebaGuardado.guardar && r.pruebaGuardado.cargar) ? 'todas bien' : 'FALLÓ: ' + resultados.map((r) => r.pruebaGuardado.error).join('; ')} |\n`;
   md += '\n## Errores\n\n' + (totalErrores ? resultados.map((r) => r.errores.map((e) => `- ${r.estrategia} ${r.desde}: ${e}`).join('\n')).filter(Boolean).join('\n') : 'Ninguno.') + '\n';
   fs.mkdirSync(path.join(RAIZ, 'pruebas'), { recursive: true });
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v16.md'), md);
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v16.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento }, null, 1));
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v17.md'), md);
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v17.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento, reglas }, null, 1));
   console.log(md);
   process.exit(totalErrores ? 1 : 0);
 })();

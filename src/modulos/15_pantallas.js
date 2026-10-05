@@ -1,6 +1,6 @@
 /* ==== módulo: pantallas ==== */
-// Las pantallas: portada, nueva partida, las cinco secciones, la creación de obra en modo rápido (4 a 6
-// decisiones con "recomendado" y dado), el estreno, las fichas de obra y talento, ajustes y guardado.
+// Las pantallas: portada, nueva partida (con los deslizadores de identidad), las cinco secciones, el estreno, las
+// fichas de obra y talento, ajustes y guardado. La creación de obras (fábrica de ideas) vive en IA.creacion.
 // Una pantalla, una decisión principal; totales en vivo antes de confirmar; ayuda "i" en cada pantalla.
 IA.pantallas = (function () {
   'use strict';
@@ -57,11 +57,11 @@ IA.pantallas = (function () {
     const paises = D.paises.slice().sort(function (a, b) { return a.nombre.localeCompare(b.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre]; });
     const nTipicas = cap / tipico2025;
     const L = U.estado.logoNuevo;
-    const num = function (k, max, nombres) { return '<label class="campo crece" style="min-width:96px"><span>' + esc({ s: 'Forma', c: 'Color', b: 'Fondo', t: 'Letras', f: 'Tipografía' }[k]) + '</span><select data-c="npLogo" data-k="' + k + '">' + ops(Array.from({ length: max }, function (_, i) { return [i, nombres ? nombres[i] : String(i + 1)]; }), L[k]) + '</select></label>'; };
+    const num = function (k) { return deslizadorLogo(k, L[k], 'npLogo'); };
     return '<div class="portada" style="text-align:left">' + titulo(t('np_titulo'), 'nueva') +
       '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:200px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
-      '<div class="fila" style="margin-top:8px"><canvas data-logo="nuevo" style="width:64px;height:64px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div>' +
-      '<div class="fila envolver">' + num('s', 20) + num('c', 20) + num('b', 20) + num('t', 20) + num('f', 20, NOMBRES_FUENTE) + '</div>' +
+      '<div class="fila" style="margin-top:8px" id="npLogoVista"><canvas data-logo="nuevo" style="width:64px;height:64px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div>' +
+      '<div class="tarjeta">' + num('s') + num('c') + num('b') + num('t') + num('f') + '</div>' +
       '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
       '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select>' +
       '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota">' + t('np_anio_ayuda') + '</span></label>' +
@@ -95,7 +95,22 @@ IA.pantallas = (function () {
   });
   ac('np', function (v, el) { np[el.getAttribute('data-k')] = v; });
   ac('npNombre', function (v) { np.nombre = v; cacheT = -1; });
-  ac('npLogo', function (v, el) { U.estado.logoNuevo = Object.assign({}, U.estado.logoNuevo); U.estado.logoNuevo[el.getAttribute('data-k')] = +v; U.dibujar(document.getElementById('vista')); cacheT = -1; });
+  // Deslizadores de identidad (V15, a pedido): 20 estilos de logo, 20 colores de logo, de fondo y de letras, 20 tipografías
+  const NOMBRES_LOGO = { s: 'Tipo de logo', c: 'Color del logo', b: 'Color de fondo', t: 'Color de letras', f: 'Tipo de letra' };
+  function textoLogo(k, v) { return k === 'f' ? NOMBRES_FUENTE[v] : String(+v + 1) + ' de 20'; }
+  function deslizadorLogo(k, v, accion) {
+    return '<label class="campo rango"><span>' + NOMBRES_LOGO[k] + ': <b id="lg-' + accion + '-' + k + '">' + esc(textoLogo(k, v)) + '</b></span><input type="range" min="0" max="19" step="1" value="' + v + '" data-i="' + accion + '" data-c="' + accion + 'Fin" data-k="' + k + '" aria-label="' + NOMBRES_LOGO[k] + '"></label>';
+  }
+  function moverLogo(L, el, accion, raiz) {
+    const k = el.getAttribute('data-k');
+    L[k] = N.limitar(Math.round(+el.value), 0, 19);
+    const lbl = document.getElementById('lg-' + accion + '-' + k);
+    if (lbl) lbl.textContent = textoLogo(k, L[k]);
+    const r = document.getElementById(raiz);
+    if (r) U.dibujar(r);
+  }
+  ac('npLogo', function (v, el) { U.estado.logoNuevo = Object.assign({}, U.estado.logoNuevo); moverLogo(U.estado.logoNuevo, el, 'npLogo', 'npLogoVista'); cacheT = -1; });
+  ac('npLogoFin', function () { cacheT = -1; });
   ac('npEsp', function (v, el) { np.esp[+el.getAttribute('data-k')] = v; });
   ac('npAnio', function (v) {
     const a = Math.round(+v);
@@ -312,6 +327,7 @@ IA.pantallas = (function () {
       h += '<h3>' + t('bruto') + ' por semana</h3><canvas class="lienzo" data-grafica="' + id2 + '"></canvas>';
     }
     if (o.inf) h += '<h3>' + t('informe') + '</h3><ul>' + o.inf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    if (o.est === 0 || estrenada) h += IA.creacion.bloqueIdea(o);
     if (o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera') {
       h += '<div class="kpis">' + kpi(t('costo_talento'), dinero(o.cf)) + kpi(t('costo_produccion'), dinero(o.pp * (o.sobre || 1))) + kpi('Gastado en producción', dinero(o.gp || 0)) + '</div>';
     }
@@ -345,186 +361,6 @@ IA.pantallas = (function () {
     return h;
   }
   ac('verObra', function (v) { U.abrirFicha(fichaObra(+v), 'obra:' + v); });
-
-  // ---------- Crear obra (modo rápido) ----------
-  const cr = { b: null, paso: 0, rol: null };
-  // Mirar o preparar una obra no es una decisión: la interfaz usa su propio azar para que abrir "Crear obra"
-  // no cambie el mundo (la misma semilla con las mismas decisiones da la misma partida).
-  let azarUI = null;
-  function conAzarUI(fn) {
-    const S = N.S;
-    if (!azarUI) azarUI = N.estadoNuevo(S.semilla + '|interfaz|' + S.t);
-    const real = S.rng;
-    S.rng = azarUI;
-    try { return fn(); } finally { azarUI = S.rng; S.rng = real; }
-  }
-  const PASOS = ['paso_generos', 'paso_tono', 'paso_escala', 'paso_equipo', 'paso_titulo'];
-  function nuevoBorrador(gen) {
-    return conAzarUI(function () {
-      const b = O.borrador(0, { gen: gen || [recomendarGenero()], escala: 2 });
-      O.equipoRecomendado(b, 1);
-      return b;
-    });
-  }
-  function recomendarGenero() {
-    const S = N.S;
-    let mejor = 'DR', v = -9;
-    D.ORDEN_FAM.forEach(function (f) {
-      const x = (S.mundo.tendencias[f] || 0) + (E.pronosticoSemana(N.semana(S.t + 25), f) - 1) + (f === 'AV' ? -0.4 : 0);
-      if (x > v) { v = x; mejor = f; }
-    });
-    const fam = D.familia(mejor);
-    return fam.generos.filter(function (g) { return g !== 'Erótico'; })[N.hash(S.t + mejor) % fam.generos.filter(function (g) { return g !== 'Erótico'; }).length];
-  }
-  // Rehace los datos que dependen de géneros y escala, sin perder el equipo
-  function ajustarBorrador(b) {
-    b.fam = D.familiaDe[b.gen[0]] || 'DR';
-    const disp = O.clasificacionesDisponibles(N.anio(), b.gen);
-    if (disp.indexOf(b.clas) < 0) b.clas = O.clasificacionRecomendada(b.gen, N.anio());
-    b.pp = Math.round(E.produccionTipica(N.anio(), b.fam) * D.escalas[b.esc].mult * O.escalaTono(b.tono));
-  }
-  function estrellasEncaje(b) {
-    const fams = E.familiasDe(b);
-    if (fams.length < 2) return '';
-    let txt = '', desconocido = false;
-    for (let i = 0; i < fams.length; i++) for (let j = i + 1; j < fams.length; j++) {
-      if (!N.S.encajeVisto[fams[i] + fams[j]]) desconocido = true;
-    }
-    if (desconocido) return '<span class="tenue">' + t('encaje_desconocido') + '</span>';
-    const e = E.encajeObra(b);
-    txt = e >= 3 ? '★★★' : e >= 1 ? '★★' : e === 0 ? '★' : '☆';
-    return t('encaje') + ': <span class="encaje">' + txt + '</span>';
-  }
-  function pieTotales(b) {
-    const est = O.estimar(b, NG.bonos(0, b.fam));
-    const libre = NG.cajaLibre(0);
-    return '<div class="tarjeta totales" style="position:sticky;bottom:0;margin-top:12px;padding:8px 10px">' +
-      '<div class="fila entre"><span>' + t('costo_total') + ' <b class="cifra ' + (est.total > libre ? 'mal' : '') + '">' + dinero(est.total) + '</b></span><span>' + t('calidad_esperada') + ' <b>' + Math.max(1, est.calidad - 6) + '–' + Math.min(99, est.calidad + 6) + '</b></span></div>' +
-      '<div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · ' + O.semanasTotales(b, NG.rapidez(0)) + ' ' + t('semanas') + '</div></div>';
-  }
-  function fichaCrear() {
-    const b = cr.b;
-    if (!b) return '';
-    const pasos = '<p class="nota">' + PASOS.map(function (p, i) { return '<span class="' + (i === cr.paso ? 'paso-actual' : '') + '">' + (i + 1) + '. ' + t(p) + '</span>'; }).join(' · ') + '</p>';
-    let h = '<h2>' + t('crear_obra') + '</h2>' + pasos;
-    if (cr.paso === 0) {
-      h += '<p class="nota">' + t('generos_ayuda') + '</p><div class="fila envolver" style="margin-bottom:8px"><button class="btn" data-a="crGenRec">' + icono('varita') + t('recomendado') + '</button><button class="btn" data-a="crGenDado">' + icono('dado') + t('dado') + '</button><span>' + estrellasEncaje(b) + '</span></div>';
-      D.familias.forEach(function (f) {
-        const tend = N.S.mundo.tendencias[f.id] || 0;
-        h += '<h3 style="margin-top:10px">' + esc(f.nombre) + ' <span class="chico ' + (tend > 0.2 ? 'bien' : tend < -0.2 ? 'mal' : 'tenue') + '">' + (tend > 0.2 ? 'en alza' : tend < -0.2 ? 'en baja' : 'estable') + '</span></h3><div class="chips">' +
-          f.generos.map(function (g) {
-            const on = b.gen.indexOf(g) >= 0;
-            const prueba = on ? null : b.gen.concat([g]);
-            const bloqueado = !on && (b.gen.length >= 3 || O.validarGeneros(prueba, N.anio()));
-            return '<button class="chip' + (on ? ' on' : '') + '" data-a="crGen" data-v="' + esc(g) + '"' + (bloqueado ? ' disabled' : '') + ' aria-pressed="' + on + '">' + esc(g) + '</button>';
-          }).join('') + '</div><p class="nota">' + esc(f.temporada) + ' · costo ' + (f.costo >= 1.3 ? 'alto' : f.costo <= 0.6 ? 'bajo' : 'medio') + ' · inclina a ' + (f.inclina === 'pub' ? 'el público' : f.inclina === 'crit' ? 'la crítica' : 'ambos') + '</p>';
-      });
-    } else if (cr.paso === 1) {
-      h += '<h3>' + t('tono') + '</h3><div class="chips">' + D.tonos.map(function (x) {
-        return '<button class="chip' + (b.tono === x.id ? ' on' : '') + '" data-a="crTono" data-v="' + x.id + '">' + x.id + '</button>';
-      }).join('') + '</div>';
-      const to = D.tonos.filter(function (x) { return x.id === b.tono; })[0];
-      h += '<p class="nota">Crítica ' + (to.crit >= 0 ? '+' : '') + to.crit + ' · Público ' + (to.pub >= 0 ? '+' : '') + to.pub + (to.costo ? ' · producción +15 %' : '') + '</p>';
-      const disp = O.clasificacionesDisponibles(N.anio(), b.gen), rec = O.clasificacionRecomendada(b.gen, N.anio());
-      h += '<h3>' + t('clasificacion') + '</h3><div class="chips">' + D.clasificaciones.map(function (c) {
-        const ok = disp.indexOf(c.id) >= 0;
-        return '<button class="chip' + (b.clas === c.id ? ' on' : '') + '" data-a="crClas" data-v="' + c.id + '"' + (ok ? '' : ' disabled') + '>' + c.id + (c.id === rec ? ' ★' : '') + '</button>';
-      }).join('') + '</div>';
-      const cl = D.clasificacion(b.clas) || D.clasificacion('PG-13');
-      const acc = E.accesoClasificacion(Object.assign({}, b), N.S.estudios[0].reg, N.anio());
-      h += '<p class="nota">' + esc(cl.desc) + '. Público que puede verla en tu región: ' + Math.round(Math.min(1.5, acc) * 100) + ' % de lo normal.' + (N.anio() < D.ANIO_CLASIFICACION_POR_EDADES ? ' Antes de 1968 la censura de la época no deja estrenar NC-17, 18, R ni X.' : '') + '</p>';
-    } else if (cr.paso === 2) {
-      h += '<p class="nota">' + t('escala_ayuda') + '</p>' + D.escalas.map(function (es, i) {
-        const pp = E.produccionTipica(N.anio(), b.fam) * es.mult * O.escalaTono(b.tono);
-        return '<button class="tarjeta toque fila entre" style="width:100%;' + (b.esc === i ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="crEscala" data-v="' + i + '"><b>' + es.nombre + '</b><span>' + dinero(pp) + '</span></button>';
-      }).join('');
-    } else if (cr.paso === 3) {
-      h += '<p class="nota">' + t('equipo_ayuda') + '</p><button class="btn" data-a="crEquipoRec">' + icono('varita') + t('recomendado') + '</button>';
-      const filas = O.ROLES.map(function (r) { return [r, b.eq[r], D.oficio(r).nombre]; }).concat([['int0', b.eq.int[0], 'Protagonista'], ['int1', b.eq.int[1], 'Coprotagonista']]);
-      h += filas.map(function (f) {
-        const ta = T.porId(f[1]);
-        return '<div class="tarjeta fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(f[2]) + '</span><b>' + (ta ? esc(ta.nom) : '—') + '</b>' +
-          (ta ? '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(ta.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(ta.fama * 100) + ' · ' + dinero(T.tarifa(ta)) + '</span>' : '') + '</div><button class="btn" data-a="crRol" data-v="' + f[0] + '">Cambiar</button></div>';
-      }).join('');
-      if (cr.rol) h += listaCandidatos(cr.rol);
-    } else {
-      h += '<label class="campo"><span>' + t('titulo_obra') + '</span><input type="text" maxlength="48" value="' + esc(b.tit) + '" data-i="crTitulo"></label><button class="btn" data-a="crOtroTitulo">' + icono('dado') + t('otro_titulo') + '</button>' +
-        '<div class="tarjeta" style="margin-top:10px"><b>' + esc(b.tit) + '</b><br>' + esc(generosTxt(b)) + ' · ' + esc(b.tono) + ' · ' + esc(b.clas) + ' · ' + D.escalas[b.esc].nombre + '<br><span class="tenue">' + estrellasEncaje(b) + '</span></div>';
-      const err = J.puedeIniciar(b);
-      if (err) h += '<p class="mal">' + esc(err) + '</p>';
-    }
-    h += pieTotales(b);
-    h += '<div class="fila entre" style="margin-top:8px">' + (cr.paso > 0 ? '<button class="btn" data-a="crPaso" data-v="-1">' + t('atras') + '</button>' : '<span></span>') +
-      (cr.paso < PASOS.length - 1 ? '<button class="btn primario" data-a="crPaso" data-v="1">' + t('siguiente') + '</button>' : '<button class="btn primario" data-a="crIniciar">' + t('iniciar') + '</button>') + '</div>';
-    return h;
-  }
-  function listaCandidatos(rol) {
-    const b = cr.b;
-    const of = rol.indexOf('int') === 0 ? 'interprete' : rol;
-    const usados = O.idsEquipo(b);
-    const lista = T.disponibles(of).filter(function (x) { return usados.indexOf(x.id) < 0; })
-      .sort(function (a, c) { return (c.hab + c.fama * 12) - (a.hab + a.fama * 12); }).slice(0, 30);
-    return '<div class="tarjeta"><h3>Elige: ' + esc(rol.indexOf('int') === 0 ? 'Intérprete' : D.oficio(rol).nombre) + '</h3>' + (lista.length ? lista.map(function (x) {
-      return '<button class="fila tarjeta toque" style="width:100%" data-a="crElegir" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece" style="text-align:left"><b>' + esc(x.nom) + '</b><span class="chico">' + (N.anio() - x.nac) + ' años · ' + t('tal_habilidad') + ' ' + Math.round(x.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(x.fama * 100) + (x.rasgo ? ' · ' + esc(x.rasgo) : '') + '</span></div><b>' + dinero(T.tarifa(x)) + '</b></button>';
-    }).join('') : '<p class="tenue">No hay nadie disponible.</p>') + '</div>';
-  }
-  function refrescarCrear() { if (cr.b) U.refrescarFicha(fichaCrear()); }
-  ac('crearObra', function () {
-    if (O.enProduccion(0).length >= NG.capacidad(0)) { U.aviso('No tienes capacidad libre: construye un plató o espera.', 'mal'); return; }
-    cr.b = nuevoBorrador(); cr.paso = 0; cr.rol = null;
-    U.abrirFicha(fichaCrear(), 'crear');
-  });
-  ac('crGen', function (g) { if (!cr.b) return;
-    const b = cr.b, i = b.gen.indexOf(g);
-    if (i >= 0) { if (b.gen.length > 1) b.gen.splice(i, 1); } else if (b.gen.length < 3) b.gen.push(g);
-    ajustarBorrador(b); refrescarCrear();
-  });
-  ac('crGenRec', function () { if (!cr.b) return;
-    const b = cr.b, g1 = recomendarGenero();
-    const f1 = D.familiaDe[g1];
-    const buena = D.ORDEN_FAM.filter(function (f) { return D.encaje(f1, f) >= 3; })[0];
-    b.gen = [g1];
-    if (buena) { const g2 = D.familia(buena).generos.filter(function (g) { return g !== 'Erótico'; })[0]; if (!O.validarGeneros([g1, g2])) b.gen.push(g2); }
-    ajustarBorrador(b); refrescarCrear();
-  });
-  ac('crGenDado', function () { if (!cr.b) return;
-    const b = cr.b;
-    const todos = [];
-    D.familias.forEach(function (f) { f.generos.forEach(function (g) { todos.push(g); }); });
-    const k = 1 + (N.hash('d' + Date.now()) % 2);
-    const gen = [];
-    for (let i = 0; i < 20 && gen.length < k; i++) {
-      const g = todos[N.hash(i + '|' + Date.now()) % todos.length];
-      if (gen.indexOf(g) < 0 && !O.validarGeneros(gen.concat([g]))) gen.push(g);
-    }
-    b.gen = gen.length ? gen : ['Drama'];
-    ajustarBorrador(b); refrescarCrear();
-  });
-  ac('crTono', function (v) { if (!cr.b) return; cr.b.tono = v; ajustarBorrador(cr.b); refrescarCrear(); });
-  ac('crClas', function (v) { if (!cr.b) return; cr.b.clas = v; refrescarCrear(); });
-  ac('crEscala', function (v) { if (!cr.b) return; cr.b.esc = +v; ajustarBorrador(cr.b); refrescarCrear(); });
-  ac('crEquipoRec', function () { if (!cr.b) return; cr.b.eq = { int: [] }; conAzarUI(function () { O.equipoRecomendado(cr.b, 1); }); cr.rol = null; refrescarCrear(); });
-  ac('crRol', function (v) { if (!cr.b) return; cr.rol = cr.rol === v ? null : v; refrescarCrear(); });
-  ac('crElegir', function (v) { if (!cr.b) return;
-    const b = cr.b, id = +v;
-    if (cr.rol === 'int0') b.eq.int[0] = id; else if (cr.rol === 'int1') b.eq.int[1] = id; else b.eq[cr.rol] = id;
-    b.eq.int = b.eq.int.filter(function (x) { return x !== undefined && x !== null; });
-    cr.rol = null; refrescarCrear();
-  });
-  ac('crTitulo', function (v) { if (!cr.b) return; cr.b.tit = v.slice(0, 48); });
-  ac('crOtroTitulo', function () { if (!cr.b) return; cr.b.tit = conAzarUI(function () { return O.tituloNuevo(cr.b.gen); }); refrescarCrear(); });
-  ac('crPaso', function (v) { if (!cr.b) return; cr.paso = N.limitar(cr.paso + (+v), 0, PASOS.length - 1); cr.rol = null; refrescarCrear(); });
-  ac('crIniciar', function () { if (!cr.b) return;
-    const b = cr.b;
-    b.tit = (b.tit || '').trim() || conAzarUI(function () { return O.tituloNuevo(b.gen); });
-    const r = J.iniciarObra(b);
-    if (r.error) { U.aviso(r.error, 'mal'); refrescarCrear(); return; }
-    IA.arte.sonido('exito');
-    U.cerrarFicha();
-    U.aviso('«' + r.obra.tit + '» empieza su desarrollo');
-    U.estado.sub.obras = 'marcha';
-    U.refrescar();
-  });
 
   // ---------- Programar estreno ----------
   const pg = { id: 0, t: 0, nivM: 2 };
@@ -614,8 +450,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function mundo() {
     const s = sub('mundo', 'cartelera');
-    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['rivales', t('mun_rivales')], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa']], s);
-    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: mPremios, rivales: mRivales, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa }[s] || mCartelera)();
+    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['rivales', t('mun_rivales')], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa'], ['taxonomia', 'Taxonomía']], s);
+    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: mPremios, rivales: mRivales, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa, taxonomia: IA.creacion.taxonomia }[s] || mCartelera)();
   }
   function mCartelera() {
     const S = N.S, sem = S.mercado.semana;
@@ -782,8 +618,25 @@ IA.pantallas = (function () {
     };
     h += '<h3>Pisos del edificio</h3>' + D.pisos.filter(function (p) { return p.id !== 'oficinas'; }).map(function (p) { return fila(p, 'piso'); }).join('');
     h += '<h3>Terrenos</h3>' + D.terrenos.map(function (p) { return fila(p, 'terreno'); }).join('');
+    // Editar la descripción del estudio (tu documento): logo con deslizadores, público, visión y tipo de industria
+    const opsSel = function (k, lista, actual) { return '<select data-c="estEditar" data-k="' + k + '">' + lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === actual ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>'; };
+    h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div class="fila" id="estLogoVista"><canvas data-logo="0" style="width:64px;height:64px"></canvas><b>' + esc(est.nombre) + '</b></div>' +
+      ['s', 'c', 'b', 't', 'f'].map(function (k) { return deslizadorLogo(k, est.logo[k] || 0, 'estLogo'); }).join('') +
+      '<label class="campo"><span>Público objetivo</span>' + opsSel('publico', D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.publico) + '</label>' +
+      '<label class="campo"><span>Visión de la industria</span>' + opsSel('vision', D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.vision) + '</label>' +
+      '<label class="campo"><span>Tipo de industria</span>' + opsSel('tipo', D.tiposEstudio.map(function (x) { return [x, x]; }), est.tipo) + '</label>' +
+      '<p class="nota">Cambiar la visión o el público cambia sus efectos en tus próximas obras.</p></div>';
     return h;
   }
+  ac('estLogo', function (v, el) { const est = est0(); est.logo = Object.assign({}, est.logo); moverLogo(est.logo, el, 'estLogo', 'estLogoVista'); });
+  ac('estLogoFin', function () { U.refrescar(); });
+  ac('estEditar', function (v, el) {
+    const est = est0(), k = el.getAttribute('data-k');
+    if (['publico', 'vision', 'tipo'].indexOf(k) < 0) return;
+    est[k] = v;
+    U.aviso('Identidad actualizada');
+    U.refrescar();
+  });
   ac('construir', function (v) {
     const p = v.split(':');
     const err = NG.construir(p[0], p[1]);
@@ -950,7 +803,9 @@ IA.pantallas = (function () {
     const tuyos = res.categorias.filter(function (c) { return c.ganador.est === 0; }).length;
     if (tuyos) IA.arte.sonido('premio');
     U.modal('<h2>' + t('premios_titulo', { nombre: D.premios.nombre, anio: res.anio + 1 }) + '</h2>' + res.categorias.map(function (c) {
-      return '<p style="margin:6px 0"><span class="tenue chico">' + esc(c.nombre) + '</span><br><b class="' + (c.ganador.est === 0 ? 'oro' : '') + '">«' + esc(c.ganador.titulo) + '»' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + '</b> · ' + esc(nombreEstudio(c.ganador.est)) + '</p>';
+      // La frase del premio sale del arco de la obra (fábrica de ideas)
+      const og = c.id === 'pelicula' ? O.porId(c.ganador.obra) : null;
+      return '<p style="margin:6px 0"><span class="tenue chico">' + esc(c.nombre) + '</span><br><b class="' + (c.ganador.est === 0 ? 'oro' : '') + '">«' + esc(c.ganador.titulo) + '»' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + '</b> · ' + esc(nombreEstudio(c.ganador.est)) + (og && og.arco ? '<br><span class="nota">' + esc(IA.ideas.frasePremio(og)) + '</span>' : '') + '</p>';
     }).join('') + '<button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
   }
   function modalQuiebra() {
@@ -995,7 +850,10 @@ IA.pantallas = (function () {
     const actual = U.ajustes().ritmo;
     m.innerHTML = [['semana', t('ritmo_semana')], ['mes', t('ritmo_mes')], ['evento', t('ritmo_evento')], ['auto', t('ritmo_auto')]].map(function (x) {
       return '<button class="' + (x[0] === actual ? 'on' : '') + '" data-a="ritmo" data-v="' + x[0] + '">' + esc(x[1]) + '</button>';
-    }).join('');
+    }).join('') +
+      // Seleccionar tiempo a avanzar con un deslizador (tu documento)
+      '<label class="campo rango" style="padding:6px 10px;margin:0"><span>Avanzar <b id="rv-semanas">' + semanasElegidas + ' semanas</b></span><input type="range" min="1" max="52" value="' + semanasElegidas + '" data-i="semanasRango" aria-label="Semanas a avanzar"></label>' +
+      '<button data-a="avanzarSemanas">Avanzar ya</button>';
     document.body.appendChild(m);
     setTimeout(function () {
       cerrarRitmo = function (ev) { if (!ev.target.closest('.menu-ritmo') && !ev.target.closest('[data-a="menuRitmo"]')) quitarMenuRitmo(); };
@@ -1003,10 +861,19 @@ IA.pantallas = (function () {
     }, 0);
   });
   ac('ritmo', function (v) { U.ajuste('ritmo', v); quitarMenuRitmo(); detenerAuto(); U.renderBarra(); });
+  let semanasElegidas = 8;
+  ac('semanasRango', function (v) { semanasElegidas = N.limitar(Math.round(+v), 1, 52); const l = document.getElementById('rv-semanas'); if (l) l.textContent = semanasElegidas + (semanasElegidas === 1 ? ' semana' : ' semanas'); });
+  ac('avanzarSemanas', function () {
+    quitarMenuRitmo(); detenerAuto();
+    if (N.S && N.S.quiebra) { modalQuiebra(); return; }
+    IA.arte.sonido('avance');
+    despuesDeAvanzar(avanzarCon(semanasElegidas), true);
+  });
 
   // Refresco de la ficha abierta cuando avanza el tiempo
   function refrescarFicha(clave) {
-    if (clave === 'crear' || clave === 'programar') return;
+    if (clave === 'programar') return;
+    if (clave === 'crear') { if (IA.creacion.estado.etapa !== 'idea') U.refrescarFicha(IA.creacion.fichaCrear()); return; }
     const p = clave.split(':');
     if (p[0] === 'obra') U.refrescarFicha(fichaObra(+p[1]));
     else if (p[0] === 'talento') U.refrescarFicha(fichaTalento(+p[1]));
