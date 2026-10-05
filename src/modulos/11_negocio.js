@@ -49,7 +49,15 @@ IA.negocio = (function () {
       return b;
     }
     const est = N.S.estudios[0];
-    est.pisos.forEach(function (id) { const p = infoPiso(id); if (p.bono) Object.keys(p.bono).forEach(function (k) { b[k] = (b[k] || 0) + p.bono[k]; }); });
+    const sumar = function (bono) { Object.keys(bono).forEach(function (k) { b[k] = (b[k] || 0) + bono[k]; }); };
+    est.pisos.forEach(function (id) { const p = infoPiso(id); if (p.bono) sumar(p.bono); });
+    // Tus tres especialidades: +1 en esos departamentos de tus obras
+    ((N.S.avatar && N.S.avatar.esp) || []).forEach(function (of) { b[of] = (b[of] || 0) + 1; });
+    // Visión y público objetivo: _crit y _pub ajustan las notas finales
+    const vis = D.visiones.filter(function (v) { return v.id === est.vision; })[0];
+    if (vis) { if (vis.bono) sumar(vis.bono); b._crit = (b._crit || 0) + (vis.crit || 0); b._pub = (b._pub || 0) + (vis.pub || 0); }
+    const pub = D.publicos.filter(function (v) { return v.id === est.publico; })[0];
+    if (pub && pub.familias.indexOf(famId) >= 0) { b._crit = (b._crit || 0) + (pub.crit || 0); b._pub = (b._pub || 0) + (pub.pub || 0); }
     est.terrenos.forEach(function (id) {
       const p = infoTerreno(id);
       if (p.bono && (!p.familias || p.familias.indexOf(famId) >= 0)) Object.keys(p.bono).forEach(function (k) { b[k] = (b[k] || 0) + p.bono[k]; });
@@ -72,7 +80,8 @@ IA.negocio = (function () {
     if (estId !== 0) return 0;
     let a = 0;
     N.S.estudios[0].pisos.forEach(function (id) { a += infoPiso(id).marketing || 0; });
-    return a;
+    const vis = D.visiones.filter(function (v) { return v.id === N.S.estudios[0].vision; })[0];
+    return a + (vis && vis.marketing ? vis.marketing : 0);
   }
   // Cada construcción encarece la siguiente (terreno más caro, permisos, obras más grandes)
   function costoConstruccion(info) {
@@ -133,8 +142,9 @@ IA.negocio = (function () {
       bonos: bonos,
       famaTrasEstreno: function (o, mult) {
         const est = N.S.estudios[o.est];
-        const cambio = N.limitar(0.02 * Math.log(Math.max(0.2, mult)) + (o.crit - 60) / 1500, -0.03, 0.05);
-        est.fama = N.redondear(N.limitar(est.fama + cambio, 0.01, 1), 3);
+        // La fama del estudio sube despacio con los éxitos y la buena crítica (cuesta más cuanto más alta)
+        const cambio = N.limitar(0.008 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 3000, -0.012, 0.02);
+        est.fama = N.redondear(N.limitar(est.fama + (cambio > 0 ? cambio * (1 - est.fama) : cambio), 0.01, 1), 3);
       },
     };
     return ctxCache;
@@ -207,19 +217,19 @@ IA.negocio = (function () {
     const ranking = S.estudios.map(function (e) { return { id: e.id, bruto: Math.round(m.anio.porEstudio[e.id] || 0) }; }).sort(function (a, b) { return b.bruto - a.bruto; });
     m.hist.push({ anio: anioCerrado, total: Math.round(m.anio.total), otras: Math.round(m.anio.otras), ranking: ranking });
     if (m.hist.length > 400) m.hist.shift();
-    // Major: entre los 3 estudios más taquilleros del mundo, con 5 % o más del mercado, tres años seguidos
+    // Major: entre los 3 estudios más taquilleros del mundo, con 6 % o más del mercado, tres años seguidos
     const puesto = ranking.map(function (r) { return r.id; }).indexOf(0) + 1;
     fila.puesto = puesto;
     const ultimos = S.fin.hist.slice(-3);
-    if (ultimos.length === 3 && ultimos.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.05; }) && !S.majorDesde) {
+    if (ultimos.length === 3 && ultimos.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.06; }) && !S.majorDesde) {
       S.majorDesde = anioCerrado;
       N.emit('noticia', { tipo: 'estudio', texto: 'Tu estudio ya es una major: está entre los tres más taquilleros del mundo.', importante: true });
     }
-    jug.clase = puesto <= 3 && cuota >= 0.05 ? 'A' : cuota >= 0.015 ? 'B' : 'C';
+    jug.clase = puesto <= 3 && cuota >= 0.06 ? 'A' : cuota >= 0.015 ? 'B' : 'C';
     for (let i = 0; i < S.estudios.length; i++) {
       const e = S.estudios[i];
       e.ingAnio = 0; e.gasAnio = 0;
-      e.fama = N.redondear(N.limitar(e.fama * 0.985, 0.01, 1), 3);
+      e.fama = N.redondear(N.limitar(e.fama * 0.95, 0.01, 1), 3);
     }
     S.fin.anio = libroVacio();
     m.anio = { total: 0, otras: 0, porEstudio: {} };

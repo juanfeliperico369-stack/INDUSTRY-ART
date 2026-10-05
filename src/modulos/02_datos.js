@@ -19,38 +19,48 @@ IA.datos = (function () {
   // costo: índice de costo de rodaje frente a EE. UU.; peso: parte aproximada del mercado de su región.
   // Se agregan Rusia y Hong Kong (decisión del 5 de octubre de 2026), con nombres modernos.
   const paises = [
-    { id: 'us', nombre: 'Estados Unidos', region: 'nam', idioma: 'Inglés', costo: 1.0, peso: 0.89 },
-    { id: 'ca', nombre: 'Canadá', region: 'nam', idioma: 'Inglés y francés', costo: 0.9, peso: 0.11 },
-    { id: 'mx', nombre: 'México', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.24 },
-    { id: 'br', nombre: 'Brasil', region: 'lat', idioma: 'Portugués', costo: 0.5, peso: 0.3 },
-    { id: 'ar', nombre: 'Argentina', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.1 },
-    { id: 'co', nombre: 'Colombia', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.09 },
-    { id: 'cl', nombre: 'Chile', region: 'lat', idioma: 'Español', costo: 0.5, peso: 0.06 },
-    { id: 'pe', nombre: 'Perú', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.05 },
-    { id: 'cu', nombre: 'Cuba', region: 'lat', idioma: 'Español', costo: 0.35, peso: 0.03 },
-    { id: 'pa', nombre: 'Panamá', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.01 },
-    { id: 'gb', nombre: 'Reino Unido', region: 'eur', idioma: 'Inglés', costo: 1.0, peso: 0.18 },
-    { id: 'fr', nombre: 'Francia', region: 'eur', idioma: 'Francés', costo: 0.95, peso: 0.17 },
-    { id: 'de', nombre: 'Alemania', region: 'eur', idioma: 'Alemán', costo: 0.95, peso: 0.19 },
-    { id: 'es', nombre: 'España', region: 'eur', idioma: 'Español', costo: 0.75, peso: 0.12 },
-    { id: 'it', nombre: 'Italia', region: 'eur', idioma: 'Italiano', costo: 0.8, peso: 0.12 },
-    { id: 'ru', nombre: 'Rusia', region: 'eur', idioma: 'Ruso', costo: 0.6, peso: 0.15 },
-    { id: 'ng', nombre: 'Nigeria', region: 'afr', idioma: 'Inglés y yoruba', costo: 0.35, peso: 0.26 },
-    { id: 'eg', nombre: 'Egipto', region: 'afr', idioma: 'Árabe', costo: 0.35, peso: 0.22 },
-    { id: 'za', nombre: 'Sudáfrica', region: 'afr', idioma: 'Inglés y zulú', costo: 0.5, peso: 0.22 },
-    { id: 'ma', nombre: 'Marruecos', region: 'afr', idioma: 'Árabe y francés', costo: 0.4, peso: 0.12 },
-    { id: 'ke', nombre: 'Kenia', region: 'afr', idioma: 'Suajili e inglés', costo: 0.35, peso: 0.08 },
-    { id: 'in', nombre: 'India', region: 'asi', idioma: 'Hindi', costo: 0.3, peso: 0.3 },
-    { id: 'cn', nombre: 'China', region: 'asi', idioma: 'Mandarín', costo: 0.5, peso: 0.34 },
-    { id: 'jp', nombre: 'Japón', region: 'asi', idioma: 'Japonés', costo: 0.95, peso: 0.15 },
-    { id: 'kr', nombre: 'Corea del Sur', region: 'asi', idioma: 'Coreano', costo: 0.8, peso: 0.08 },
-    { id: 'th', nombre: 'Tailandia', region: 'asi', idioma: 'Tailandés', costo: 0.45, peso: 0.04 },
-    { id: 'hk', nombre: 'Hong Kong', region: 'asi', idioma: 'Cantonés e inglés', costo: 0.9, peso: 0.03 },
-    { id: 'au', nombre: 'Australia', region: 'oce', idioma: 'Inglés', costo: 0.95, peso: 0.8 },
-    { id: 'nz', nombre: 'Nueva Zelanda', region: 'oce', idioma: 'Inglés y maorí', costo: 0.85, peso: 0.12 },
-    { id: 'fj', nombre: 'Fiyi', region: 'oce', idioma: 'Fiyiano e inglés', costo: 0.4, peso: 0.03 },
-    { id: 'ws', nombre: 'Samoa', region: 'oce', idioma: 'Samoano', costo: 0.4, peso: 0.01 },
-    { id: 'pg', nombre: 'Papúa Nueva Guinea', region: 'oce', idioma: 'Tok Pisin', costo: 0.35, peso: 0.04 },
+    { id: 'us', nombre: 'Estados Unidos', region: 'nam', idioma: 'Inglés', costo: 1.0, peso: 0.89, lon: -98, lat: 39 },
+    { id: 'ca', nombre: 'Canadá', region: 'nam', idioma: 'Inglés y francés', costo: 0.9, peso: 0.11, lon: -100, lat: 57 },
+    { id: 'mx', nombre: 'México', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.24, lon: -102, lat: 23 },
+    { id: 'br', nombre: 'Brasil', region: 'lat', idioma: 'Portugués', costo: 0.5, peso: 0.3, lon: -52, lat: -10 },
+    { id: 'ar', nombre: 'Argentina', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.1, lon: -64, lat: -34 },
+    { id: 'co', nombre: 'Colombia', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.09, lon: -74, lat: 4 },
+    { id: 'cl', nombre: 'Chile', region: 'lat', idioma: 'Español', costo: 0.5, peso: 0.06, lon: -71, lat: -33 },
+    { id: 'pe', nombre: 'Perú', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.05, lon: -76, lat: -10 },
+    { id: 'cu', nombre: 'Cuba', region: 'lat', idioma: 'Español', costo: 0.35, peso: 0.03, lon: -79, lat: 22 },
+    { id: 'pa', nombre: 'Panamá', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.01, lon: -80, lat: 9 },
+    { id: 'gb', nombre: 'Reino Unido', region: 'eur', idioma: 'Inglés', costo: 1.0, peso: 0.18, lon: -2, lat: 54 },
+    { id: 'fr', nombre: 'Francia', region: 'eur', idioma: 'Francés', costo: 0.95, peso: 0.17, lon: 2, lat: 47 },
+    { id: 'de', nombre: 'Alemania', region: 'eur', idioma: 'Alemán', costo: 0.95, peso: 0.19, lon: 10, lat: 51 },
+    { id: 'es', nombre: 'España', region: 'eur', idioma: 'Español', costo: 0.75, peso: 0.12, lon: -4, lat: 40 },
+    { id: 'it', nombre: 'Italia', region: 'eur', idioma: 'Italiano', costo: 0.8, peso: 0.12, lon: 12, lat: 42 },
+    { id: 'ru', nombre: 'Rusia', region: 'eur', idioma: 'Ruso', costo: 0.6, peso: 0.15, lon: 90, lat: 60 },
+    { id: 'ng', nombre: 'Nigeria', region: 'afr', idioma: 'Inglés y yoruba', costo: 0.35, peso: 0.26, lon: 8, lat: 9 },
+    { id: 'eg', nombre: 'Egipto', region: 'afr', idioma: 'Árabe', costo: 0.35, peso: 0.22, lon: 30, lat: 27 },
+    { id: 'za', nombre: 'Sudáfrica', region: 'afr', idioma: 'Inglés y zulú', costo: 0.5, peso: 0.22, lon: 24, lat: -30 },
+    { id: 'ma', nombre: 'Marruecos', region: 'afr', idioma: 'Árabe y francés', costo: 0.4, peso: 0.12, lon: -6, lat: 32 },
+    { id: 'ke', nombre: 'Kenia', region: 'afr', idioma: 'Suajili e inglés', costo: 0.35, peso: 0.08, lon: 38, lat: 0 },
+    { id: 'in', nombre: 'India', region: 'asi', idioma: 'Hindi', costo: 0.3, peso: 0.3, lon: 78, lat: 22 },
+    { id: 'cn', nombre: 'China', region: 'asi', idioma: 'Mandarín', costo: 0.5, peso: 0.34, lon: 104, lat: 35 },
+    { id: 'jp', nombre: 'Japón', region: 'asi', idioma: 'Japonés', costo: 0.95, peso: 0.15, lon: 138, lat: 36 },
+    { id: 'kr', nombre: 'Corea del Sur', region: 'asi', idioma: 'Coreano', costo: 0.8, peso: 0.08, lon: 128, lat: 36 },
+    { id: 'th', nombre: 'Tailandia', region: 'asi', idioma: 'Tailandés', costo: 0.45, peso: 0.04, lon: 101, lat: 15 },
+    { id: 'hk', nombre: 'Hong Kong', region: 'asi', idioma: 'Cantonés e inglés', costo: 0.9, peso: 0.03, lon: 114, lat: 22 },
+    { id: 'au', nombre: 'Australia', region: 'oce', idioma: 'Inglés', costo: 0.95, peso: 0.8, lon: 134, lat: -25 },
+    { id: 'nz', nombre: 'Nueva Zelanda', region: 'oce', idioma: 'Inglés y maorí', costo: 0.85, peso: 0.12, lon: 172, lat: -41 },
+    { id: 'fj', nombre: 'Fiyi', region: 'oce', idioma: 'Fiyiano e inglés', costo: 0.4, peso: 0.03, lon: 178, lat: -18 },
+    { id: 'ws', nombre: 'Samoa', region: 'oce', idioma: 'Samoano', costo: 0.4, peso: 0.01, lon: -172, lat: -14 },
+    { id: 'pg', nombre: 'Papúa Nueva Guinea', region: 'oce', idioma: 'Tok Pisin', costo: 0.35, peso: 0.04, lon: 145, lat: -6 },
+  ];
+
+  // Siluetas simples de los continentes para el mapa (rescatadas de la V15: lon, lat)
+  const continentes = [
+    [[-168, 66], [-140, 70], [-95, 72], [-60, 60], [-52, 47], [-80, 25], [-97, 16], [-83, 8], [-105, 22], [-125, 38], [-135, 58]],
+    [[-80, 10], [-60, 10], [-35, -6], [-40, -22], [-58, -38], [-68, -54], [-75, -45], [-72, -18], [-81, -5]],
+    [[-10, 36], [-9, 43], [-2, 48], [8, 54], [10, 60], [25, 70], [40, 68], [40, 45], [28, 41], [12, 38]],
+    [[-17, 21], [-10, 35], [10, 37], [32, 31], [43, 12], [51, 11], [40, -15], [32, -30], [18, -35], [12, -17], [9, 4], [-8, 5], [-17, 14]],
+    [[40, 68], [100, 78], [170, 68], [150, 50], [122, 30], [110, 20], [100, 8], [78, 8], [68, 24], [50, 28], [36, 36], [40, 45]],
+    [[113, -22], [130, -12], [153, -26], [147, -38], [115, -34]],
   ];
 
   // ---------- Nombres por región (V15 NMR, más nombres de Rusia y Hong Kong) ----------
@@ -213,8 +223,26 @@ IA.datos = (function () {
 
   // ---------- Estudio: tipo, visión, público (V15 IT, VI, PU) ----------
   const tiposEstudio = sp('Corporación,Compañía,Productora,Estudio,Independiente,Colectivo');
-  const visiones = sp('Boutique de Culto,Prestigio de Industria,Alcance Comercial,Alcance Global,Alcance Tecnológico');
-  const publicos = sp('General,Familiar,Joven,Adulto,Cultos');
+  // Visión de la industria y público objetivo (V15 VI y PU), ahora con un efecto pequeño y claro
+  const visiones = [
+    { id: 'Boutique de Culto', efecto: '+2 a la crítica, −1 al público', crit: 2, pub: -1 },
+    { id: 'Prestigio de Industria', efecto: '+1 a la crítica y más fama al empezar', crit: 1, fama: 0.04 },
+    { id: 'Alcance Comercial', efecto: '+1 al público', pub: 1 },
+    { id: 'Alcance Global', efecto: 'Tus campañas rinden 5 % más', marketing: 0.05 },
+    { id: 'Alcance Tecnológico', efecto: '+2 al arte y los efectos', bono: { arte: 2 } },
+  ];
+  const publicos = [
+    { id: 'General', efecto: 'Sin preferencia', familias: [] },
+    { id: 'Familiar', efecto: '+1 al público en familia y humor', familias: ['FJ', 'HM'], pub: 1 },
+    { id: 'Joven', efecto: '+1 al público en acción, imaginación y suspenso', familias: ['AA', 'IM', 'SM'], pub: 1 },
+    { id: 'Adulto', efecto: '+1 a la crítica en drama, suspenso y romance', familias: ['DR', 'SM', 'RD'], crit: 1 },
+    { id: 'Cultos', efecto: '+2 a la crítica en arte e imaginación', familias: ['AV', 'IM'], crit: 2 },
+  ];
+  // Tipo de industria al empezar: en la V16 solo el cine; los demás medios llegan en su versión
+  const industrias = [
+    { id: 'Cine', desde: 'V16' }, { id: 'Televisión', desde: 'V24' }, { id: 'Música', desde: 'V30' },
+    { id: 'Videojuegos', desde: 'V31' }, { id: 'Teatro', desde: 'V32' }, { id: 'Editorial', desde: 'V32' }, { id: 'Mixto', desde: 'V32' },
+  ];
 
   // ---------- Rivales (nombres de la V15) ----------
   // tam: tamaño inicial relativo; calidad: tendencia de calidad; riesgo: cuánto se arriesgan con el presupuesto.
@@ -358,19 +386,22 @@ IA.datos = (function () {
   ];
 
   return {
-    regiones: regiones, paises: paises, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
+    regiones: regiones, paises: paises, continentes: continentes, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
     familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
     clasificaciones: clasificaciones, ANIO_CLASIFICACION_POR_EDADES: ANIO_CLASIFICACION_POR_EDADES,
     tonos: tonos, rasgos: rasgos, personalidades: personalidades,
-    tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, rivales: rivales,
+    tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, industrias: industrias, rivales: rivales,
     titulo1: titulo1, titulo2: titulo2, temas: temas,
     canales: canales, nivelesMarketing: nivelesMarketing, escalas: escalas,
     pisos: pisos, terrenos: terrenos, MAX_PISOS: MAX_PISOS, MAX_TERRENOS: MAX_TERRENOS,
     premios: premios, cronologia: cronologia, tecnologias: tecnologias,
-    region: function (id) { return regiones.filter(function (r) { return r.id === id; })[0]; },
-    pais: function (id) { return paises.filter(function (p) { return p.id === id; })[0]; },
-    familia: function (id) { return familias.filter(function (f) { return f.id === id; })[0]; },
-    clasificacion: function (id) { return clasificaciones.filter(function (c) { return c.id === id; })[0]; },
-    oficio: function (id) { return oficios.filter(function (o) { return o.id === id; })[0]; },
+    region: buscador(regiones), pais: buscador(paises), familia: buscador(familias),
+    clasificacion: buscador(clasificaciones), oficio: buscador(oficios),
   };
+  // Búsqueda por id con un índice (se usa miles de veces por semana)
+  function buscador(lista) {
+    const indice = {};
+    lista.forEach(function (x) { indice[x.id] = x; });
+    return function (id) { return indice[id]; };
+  }
 })();

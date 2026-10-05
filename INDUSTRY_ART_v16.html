@@ -45,7 +45,10 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
-body { background: var(--fondo); color: var(--texto); font: var(--t)/1.45 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; overflow: hidden; word-break: break-word; overflow-wrap: anywhere; }
+body { background: var(--fondo); color: var(--texto); font: var(--t)/1.45 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; overflow: hidden; overflow-wrap: break-word; }
+/* Nombres largos sin espacios (títulos y nombres de estudio) se cortan en vez de desbordar */
+h1, h2, h3, .tarjeta b, .marca b, .col b { overflow-wrap: anywhere; }
+.btn, .chip, .pestana, .tabla th, .tabla td { overflow-wrap: normal; }
 button, input, select, textarea { font: inherit; color: inherit; }
 h1, h2, h3 { font-family: var(--titulos); font-weight: 400; letter-spacing: .04em; margin: .2em 0 .4em; line-height: 1.1; }
 h1 { font-size: 2.3em; } h2 { font-size: 1.6em; } h3 { font-size: 1.25em; }
@@ -102,6 +105,7 @@ a { color: var(--acento); }
 .kpi { background: var(--panel2); border-radius: 12px; padding: 8px 10px; min-width: 0; }
 .kpi span { display: block; color: var(--tenue); font-size: 14px; }
 .kpi b { font-size: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.kpi svg { width: 18px; height: 18px; vertical-align: -3px; }
 .btn { min-height: 44px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--borde); background: var(--panel2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
 .btn.primario { background: var(--acento); color: var(--acento-tx); border: 0; font-weight: 700; }
 .btn.peligro { background: var(--mal); color: #fff; border: 0; }
@@ -504,38 +508,48 @@ IA.datos = (function () {
   // costo: índice de costo de rodaje frente a EE. UU.; peso: parte aproximada del mercado de su región.
   // Se agregan Rusia y Hong Kong (decisión del 5 de octubre de 2026), con nombres modernos.
   const paises = [
-    { id: 'us', nombre: 'Estados Unidos', region: 'nam', idioma: 'Inglés', costo: 1.0, peso: 0.89 },
-    { id: 'ca', nombre: 'Canadá', region: 'nam', idioma: 'Inglés y francés', costo: 0.9, peso: 0.11 },
-    { id: 'mx', nombre: 'México', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.24 },
-    { id: 'br', nombre: 'Brasil', region: 'lat', idioma: 'Portugués', costo: 0.5, peso: 0.3 },
-    { id: 'ar', nombre: 'Argentina', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.1 },
-    { id: 'co', nombre: 'Colombia', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.09 },
-    { id: 'cl', nombre: 'Chile', region: 'lat', idioma: 'Español', costo: 0.5, peso: 0.06 },
-    { id: 'pe', nombre: 'Perú', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.05 },
-    { id: 'cu', nombre: 'Cuba', region: 'lat', idioma: 'Español', costo: 0.35, peso: 0.03 },
-    { id: 'pa', nombre: 'Panamá', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.01 },
-    { id: 'gb', nombre: 'Reino Unido', region: 'eur', idioma: 'Inglés', costo: 1.0, peso: 0.18 },
-    { id: 'fr', nombre: 'Francia', region: 'eur', idioma: 'Francés', costo: 0.95, peso: 0.17 },
-    { id: 'de', nombre: 'Alemania', region: 'eur', idioma: 'Alemán', costo: 0.95, peso: 0.19 },
-    { id: 'es', nombre: 'España', region: 'eur', idioma: 'Español', costo: 0.75, peso: 0.12 },
-    { id: 'it', nombre: 'Italia', region: 'eur', idioma: 'Italiano', costo: 0.8, peso: 0.12 },
-    { id: 'ru', nombre: 'Rusia', region: 'eur', idioma: 'Ruso', costo: 0.6, peso: 0.15 },
-    { id: 'ng', nombre: 'Nigeria', region: 'afr', idioma: 'Inglés y yoruba', costo: 0.35, peso: 0.26 },
-    { id: 'eg', nombre: 'Egipto', region: 'afr', idioma: 'Árabe', costo: 0.35, peso: 0.22 },
-    { id: 'za', nombre: 'Sudáfrica', region: 'afr', idioma: 'Inglés y zulú', costo: 0.5, peso: 0.22 },
-    { id: 'ma', nombre: 'Marruecos', region: 'afr', idioma: 'Árabe y francés', costo: 0.4, peso: 0.12 },
-    { id: 'ke', nombre: 'Kenia', region: 'afr', idioma: 'Suajili e inglés', costo: 0.35, peso: 0.08 },
-    { id: 'in', nombre: 'India', region: 'asi', idioma: 'Hindi', costo: 0.3, peso: 0.3 },
-    { id: 'cn', nombre: 'China', region: 'asi', idioma: 'Mandarín', costo: 0.5, peso: 0.34 },
-    { id: 'jp', nombre: 'Japón', region: 'asi', idioma: 'Japonés', costo: 0.95, peso: 0.15 },
-    { id: 'kr', nombre: 'Corea del Sur', region: 'asi', idioma: 'Coreano', costo: 0.8, peso: 0.08 },
-    { id: 'th', nombre: 'Tailandia', region: 'asi', idioma: 'Tailandés', costo: 0.45, peso: 0.04 },
-    { id: 'hk', nombre: 'Hong Kong', region: 'asi', idioma: 'Cantonés e inglés', costo: 0.9, peso: 0.03 },
-    { id: 'au', nombre: 'Australia', region: 'oce', idioma: 'Inglés', costo: 0.95, peso: 0.8 },
-    { id: 'nz', nombre: 'Nueva Zelanda', region: 'oce', idioma: 'Inglés y maorí', costo: 0.85, peso: 0.12 },
-    { id: 'fj', nombre: 'Fiyi', region: 'oce', idioma: 'Fiyiano e inglés', costo: 0.4, peso: 0.03 },
-    { id: 'ws', nombre: 'Samoa', region: 'oce', idioma: 'Samoano', costo: 0.4, peso: 0.01 },
-    { id: 'pg', nombre: 'Papúa Nueva Guinea', region: 'oce', idioma: 'Tok Pisin', costo: 0.35, peso: 0.04 },
+    { id: 'us', nombre: 'Estados Unidos', region: 'nam', idioma: 'Inglés', costo: 1.0, peso: 0.89, lon: -98, lat: 39 },
+    { id: 'ca', nombre: 'Canadá', region: 'nam', idioma: 'Inglés y francés', costo: 0.9, peso: 0.11, lon: -100, lat: 57 },
+    { id: 'mx', nombre: 'México', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.24, lon: -102, lat: 23 },
+    { id: 'br', nombre: 'Brasil', region: 'lat', idioma: 'Portugués', costo: 0.5, peso: 0.3, lon: -52, lat: -10 },
+    { id: 'ar', nombre: 'Argentina', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.1, lon: -64, lat: -34 },
+    { id: 'co', nombre: 'Colombia', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.09, lon: -74, lat: 4 },
+    { id: 'cl', nombre: 'Chile', region: 'lat', idioma: 'Español', costo: 0.5, peso: 0.06, lon: -71, lat: -33 },
+    { id: 'pe', nombre: 'Perú', region: 'lat', idioma: 'Español', costo: 0.4, peso: 0.05, lon: -76, lat: -10 },
+    { id: 'cu', nombre: 'Cuba', region: 'lat', idioma: 'Español', costo: 0.35, peso: 0.03, lon: -79, lat: 22 },
+    { id: 'pa', nombre: 'Panamá', region: 'lat', idioma: 'Español', costo: 0.45, peso: 0.01, lon: -80, lat: 9 },
+    { id: 'gb', nombre: 'Reino Unido', region: 'eur', idioma: 'Inglés', costo: 1.0, peso: 0.18, lon: -2, lat: 54 },
+    { id: 'fr', nombre: 'Francia', region: 'eur', idioma: 'Francés', costo: 0.95, peso: 0.17, lon: 2, lat: 47 },
+    { id: 'de', nombre: 'Alemania', region: 'eur', idioma: 'Alemán', costo: 0.95, peso: 0.19, lon: 10, lat: 51 },
+    { id: 'es', nombre: 'España', region: 'eur', idioma: 'Español', costo: 0.75, peso: 0.12, lon: -4, lat: 40 },
+    { id: 'it', nombre: 'Italia', region: 'eur', idioma: 'Italiano', costo: 0.8, peso: 0.12, lon: 12, lat: 42 },
+    { id: 'ru', nombre: 'Rusia', region: 'eur', idioma: 'Ruso', costo: 0.6, peso: 0.15, lon: 90, lat: 60 },
+    { id: 'ng', nombre: 'Nigeria', region: 'afr', idioma: 'Inglés y yoruba', costo: 0.35, peso: 0.26, lon: 8, lat: 9 },
+    { id: 'eg', nombre: 'Egipto', region: 'afr', idioma: 'Árabe', costo: 0.35, peso: 0.22, lon: 30, lat: 27 },
+    { id: 'za', nombre: 'Sudáfrica', region: 'afr', idioma: 'Inglés y zulú', costo: 0.5, peso: 0.22, lon: 24, lat: -30 },
+    { id: 'ma', nombre: 'Marruecos', region: 'afr', idioma: 'Árabe y francés', costo: 0.4, peso: 0.12, lon: -6, lat: 32 },
+    { id: 'ke', nombre: 'Kenia', region: 'afr', idioma: 'Suajili e inglés', costo: 0.35, peso: 0.08, lon: 38, lat: 0 },
+    { id: 'in', nombre: 'India', region: 'asi', idioma: 'Hindi', costo: 0.3, peso: 0.3, lon: 78, lat: 22 },
+    { id: 'cn', nombre: 'China', region: 'asi', idioma: 'Mandarín', costo: 0.5, peso: 0.34, lon: 104, lat: 35 },
+    { id: 'jp', nombre: 'Japón', region: 'asi', idioma: 'Japonés', costo: 0.95, peso: 0.15, lon: 138, lat: 36 },
+    { id: 'kr', nombre: 'Corea del Sur', region: 'asi', idioma: 'Coreano', costo: 0.8, peso: 0.08, lon: 128, lat: 36 },
+    { id: 'th', nombre: 'Tailandia', region: 'asi', idioma: 'Tailandés', costo: 0.45, peso: 0.04, lon: 101, lat: 15 },
+    { id: 'hk', nombre: 'Hong Kong', region: 'asi', idioma: 'Cantonés e inglés', costo: 0.9, peso: 0.03, lon: 114, lat: 22 },
+    { id: 'au', nombre: 'Australia', region: 'oce', idioma: 'Inglés', costo: 0.95, peso: 0.8, lon: 134, lat: -25 },
+    { id: 'nz', nombre: 'Nueva Zelanda', region: 'oce', idioma: 'Inglés y maorí', costo: 0.85, peso: 0.12, lon: 172, lat: -41 },
+    { id: 'fj', nombre: 'Fiyi', region: 'oce', idioma: 'Fiyiano e inglés', costo: 0.4, peso: 0.03, lon: 178, lat: -18 },
+    { id: 'ws', nombre: 'Samoa', region: 'oce', idioma: 'Samoano', costo: 0.4, peso: 0.01, lon: -172, lat: -14 },
+    { id: 'pg', nombre: 'Papúa Nueva Guinea', region: 'oce', idioma: 'Tok Pisin', costo: 0.35, peso: 0.04, lon: 145, lat: -6 },
+  ];
+
+  // Siluetas simples de los continentes para el mapa (rescatadas de la V15: lon, lat)
+  const continentes = [
+    [[-168, 66], [-140, 70], [-95, 72], [-60, 60], [-52, 47], [-80, 25], [-97, 16], [-83, 8], [-105, 22], [-125, 38], [-135, 58]],
+    [[-80, 10], [-60, 10], [-35, -6], [-40, -22], [-58, -38], [-68, -54], [-75, -45], [-72, -18], [-81, -5]],
+    [[-10, 36], [-9, 43], [-2, 48], [8, 54], [10, 60], [25, 70], [40, 68], [40, 45], [28, 41], [12, 38]],
+    [[-17, 21], [-10, 35], [10, 37], [32, 31], [43, 12], [51, 11], [40, -15], [32, -30], [18, -35], [12, -17], [9, 4], [-8, 5], [-17, 14]],
+    [[40, 68], [100, 78], [170, 68], [150, 50], [122, 30], [110, 20], [100, 8], [78, 8], [68, 24], [50, 28], [36, 36], [40, 45]],
+    [[113, -22], [130, -12], [153, -26], [147, -38], [115, -34]],
   ];
 
   // ---------- Nombres por región (V15 NMR, más nombres de Rusia y Hong Kong) ----------
@@ -698,8 +712,26 @@ IA.datos = (function () {
 
   // ---------- Estudio: tipo, visión, público (V15 IT, VI, PU) ----------
   const tiposEstudio = sp('Corporación,Compañía,Productora,Estudio,Independiente,Colectivo');
-  const visiones = sp('Boutique de Culto,Prestigio de Industria,Alcance Comercial,Alcance Global,Alcance Tecnológico');
-  const publicos = sp('General,Familiar,Joven,Adulto,Cultos');
+  // Visión de la industria y público objetivo (V15 VI y PU), ahora con un efecto pequeño y claro
+  const visiones = [
+    { id: 'Boutique de Culto', efecto: '+2 a la crítica, −1 al público', crit: 2, pub: -1 },
+    { id: 'Prestigio de Industria', efecto: '+1 a la crítica y más fama al empezar', crit: 1, fama: 0.04 },
+    { id: 'Alcance Comercial', efecto: '+1 al público', pub: 1 },
+    { id: 'Alcance Global', efecto: 'Tus campañas rinden 5 % más', marketing: 0.05 },
+    { id: 'Alcance Tecnológico', efecto: '+2 al arte y los efectos', bono: { arte: 2 } },
+  ];
+  const publicos = [
+    { id: 'General', efecto: 'Sin preferencia', familias: [] },
+    { id: 'Familiar', efecto: '+1 al público en familia y humor', familias: ['FJ', 'HM'], pub: 1 },
+    { id: 'Joven', efecto: '+1 al público en acción, imaginación y suspenso', familias: ['AA', 'IM', 'SM'], pub: 1 },
+    { id: 'Adulto', efecto: '+1 a la crítica en drama, suspenso y romance', familias: ['DR', 'SM', 'RD'], crit: 1 },
+    { id: 'Cultos', efecto: '+2 a la crítica en arte e imaginación', familias: ['AV', 'IM'], crit: 2 },
+  ];
+  // Tipo de industria al empezar: en la V16 solo el cine; los demás medios llegan en su versión
+  const industrias = [
+    { id: 'Cine', desde: 'V16' }, { id: 'Televisión', desde: 'V24' }, { id: 'Música', desde: 'V30' },
+    { id: 'Videojuegos', desde: 'V31' }, { id: 'Teatro', desde: 'V32' }, { id: 'Editorial', desde: 'V32' }, { id: 'Mixto', desde: 'V32' },
+  ];
 
   // ---------- Rivales (nombres de la V15) ----------
   // tam: tamaño inicial relativo; calidad: tendencia de calidad; riesgo: cuánto se arriesgan con el presupuesto.
@@ -843,21 +875,24 @@ IA.datos = (function () {
   ];
 
   return {
-    regiones: regiones, paises: paises, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
+    regiones: regiones, paises: paises, continentes: continentes, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
     familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
     clasificaciones: clasificaciones, ANIO_CLASIFICACION_POR_EDADES: ANIO_CLASIFICACION_POR_EDADES,
     tonos: tonos, rasgos: rasgos, personalidades: personalidades,
-    tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, rivales: rivales,
+    tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, industrias: industrias, rivales: rivales,
     titulo1: titulo1, titulo2: titulo2, temas: temas,
     canales: canales, nivelesMarketing: nivelesMarketing, escalas: escalas,
     pisos: pisos, terrenos: terrenos, MAX_PISOS: MAX_PISOS, MAX_TERRENOS: MAX_TERRENOS,
     premios: premios, cronologia: cronologia, tecnologias: tecnologias,
-    region: function (id) { return regiones.filter(function (r) { return r.id === id; })[0]; },
-    pais: function (id) { return paises.filter(function (p) { return p.id === id; })[0]; },
-    familia: function (id) { return familias.filter(function (f) { return f.id === id; })[0]; },
-    clasificacion: function (id) { return clasificaciones.filter(function (c) { return c.id === id; })[0]; },
-    oficio: function (id) { return oficios.filter(function (o) { return o.id === id; })[0]; },
+    region: buscador(regiones), pais: buscador(paises), familia: buscador(familias),
+    clasificacion: buscador(clasificaciones), oficio: buscador(oficios),
   };
+  // Búsqueda por id con un índice (se usa miles de veces por semana)
+  function buscador(lista) {
+    const indice = {};
+    lista.forEach(function (x) { indice[x.id] = x; });
+    return function (id) { return indice[id]; };
+  }
 })();
 
 /* ==== módulo: mundo ==== */
@@ -991,6 +1026,37 @@ IA.mundo = (function () {
   const OCIO_CASA = [[1850, 0], [1920, 0.1], [1950, 0.3], [1976, 0.45], [1995, 0.55], [2007, 0.7], [2020, 0.85], [2050, 0.95], [2150, 1]];
   function ocioEnCasa(anio) { return N.interp(OCIO_CASA, anio); }
 
+  // ---------- Acceso a otros medios (radio, TV, internet, consolas) ----------
+  // Parte de la población con acceso en cada región. Aproximado; se verifica con fuentes en la V27. Lo usan
+  // la TV, la música y los videojuegos en sus versiones (V24, V30, V31); hoy se ve en Mundo → Población.
+  const ACCESO_MEDIOS = {
+    radio: {
+      nam: [[1920, 0], [1930, 0.4], [1940, 0.8], [1950, 0.95], [2150, 0.97]], eur: [[1922, 0], [1935, 0.3], [1950, 0.7], [1970, 0.95], [2150, 0.97]],
+      lat: [[1925, 0], [1950, 0.3], [1970, 0.6], [2000, 0.85], [2150, 0.9]], afr: [[1930, 0], [1960, 0.1], [1980, 0.4], [2000, 0.7], [2025, 0.8], [2150, 0.85]],
+      asi: [[1925, 0], [1950, 0.1], [1970, 0.4], [1990, 0.7], [2025, 0.85], [2150, 0.9]], oce: [[1923, 0], [1935, 0.5], [1950, 0.9], [2150, 0.97]],
+    },
+    tv: {
+      nam: [[1946, 0], [1950, 0.09], [1955, 0.65], [1960, 0.87], [1970, 0.95], [2150, 0.97]], eur: [[1950, 0], [1960, 0.3], [1970, 0.75], [1985, 0.95], [2150, 0.95]],
+      lat: [[1955, 0], [1970, 0.3], [1990, 0.75], [2010, 0.9], [2150, 0.92]], afr: [[1965, 0], [1990, 0.2], [2010, 0.45], [2025, 0.6], [2150, 0.85]],
+      asi: [[1958, 0], [1975, 0.25], [1995, 0.65], [2010, 0.85], [2150, 0.92]], oce: [[1956, 0], [1965, 0.6], [1975, 0.92], [2150, 0.96]],
+    },
+    internet: {
+      nam: [[1991, 0], [2000, 0.43], [2010, 0.72], [2020, 0.9], [2150, 0.98]], eur: [[1992, 0], [2000, 0.2], [2010, 0.65], [2020, 0.87], [2150, 0.98]],
+      lat: [[1995, 0], [2005, 0.15], [2015, 0.55], [2025, 0.8], [2150, 0.97]], afr: [[1996, 0], [2010, 0.1], [2020, 0.35], [2030, 0.6], [2150, 0.95]],
+      asi: [[1994, 0], [2005, 0.1], [2015, 0.4], [2025, 0.7], [2150, 0.97]], oce: [[1993, 0], [2000, 0.4], [2010, 0.75], [2020, 0.88], [2150, 0.98]],
+    },
+    consolas: {
+      nam: [[1972, 0], [1985, 0.2], [2000, 0.4], [2020, 0.6], [2150, 0.65]], eur: [[1975, 0], [1990, 0.15], [2005, 0.35], [2020, 0.5], [2150, 0.6]],
+      lat: [[1980, 0], [2000, 0.1], [2020, 0.3], [2150, 0.5]], afr: [[1985, 0], [2010, 0.03], [2025, 0.1], [2150, 0.4]],
+      asi: [[1975, 0], [1990, 0.08], [2010, 0.25], [2025, 0.45], [2150, 0.6]], oce: [[1974, 0], [1990, 0.2], [2010, 0.45], [2150, 0.6]],
+    },
+  };
+  function accesoMedio(medio, region, anio) {
+    if (medio === 'cine') return accesoCine(region, anio);
+    const t = ACCESO_MEDIOS[medio];
+    return t ? N.interp(t[region], anio) : 0;
+  }
+
   // ---------- Calendario y temporada ----------
   // Un factor semanal entre ×0,80 y ×1,40 (decidido) y bonos por género. Las estaciones dependen del hemisferio.
   const BASE_NORTE = [1.15, 0.85, 0.85, 0.85, 0.85, 0.85, 0.95, 0.85, 0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 0.95, 0.95, 0.95, 0.95, 0.95, 1.15, 1.15, 1.25, 1.25, 1.25, 1.25, 1.35, 1.3, 1.3, 1.3, 1.3, 1.1, 1.1, 1.1, 1.1, 0.8, 0.8, 0.8, 0.8, 0.9, 0.9, 0.9, 0.9, 0.95, 1.0, 1.0, 1.2, 0.95, 0.95, 0.95, 1.3, 1.4];
@@ -1059,7 +1125,7 @@ IA.mundo = (function () {
   return {
     GRUPOS: GRUPOS, poblacion: poblacion, poblacionMundial: poblacionMundial, edades: edades,
     ipc: ipc, aEpoca: aEpoca, aHoy: aHoy, inflacionAnual: inflacionAnual, IPC_2025: IPC_2025,
-    accesoCine: accesoCine, frecuenciaCine: frecuenciaCine, precioEntrada: precioEntrada,
+    accesoCine: accesoCine, accesoMedio: accesoMedio, frecuenciaCine: frecuenciaCine, precioEntrada: precioEntrada,
     precioEntrada2025: precioEntrada2025, publicoCine: publicoCine, ocioEnCasa: ocioEnCasa,
     temporada: temporada, bonoGenero: bonoGenero, nombreMes: nombreMes, fechaDeSemana: fechaDeSemana,
     era: era, decada: decada, tecnologia: tecnologia,
@@ -1199,6 +1265,7 @@ IA.economia = (function () {
     const fam = D.familia(familiaPrincipal(obra));
     let q = 0;
     Object.keys(fam.pesos).forEach(function (dep) { q += fam.pesos[dep] * habilidadDep(obra, dep, talentos, bonos || {}); });
+    // (las claves _crit y _pub de los bonos no son departamentos: se aplican en calificar)
     const tipica = produccionTipica(obra.anioPlan || N.anio(), fam.id) * escalaTono(obra);
     q += N.limitar(6 * Math.log2(Math.max(1, obra.pp) / tipica), -18, 12);
     q += encajeObra(obra);
@@ -1238,6 +1305,8 @@ IA.economia = (function () {
     let pub = q + to.pub + (fam.inclina === 'pub' ? 3 : fam.inclina === 'crit' ? -3 : 0) + famaEstrellas(obra, talentos) * 4 + (N.azar() * 6 - 3);
     const esc = obra.pp / produccionTipica(obra.anioPlan || N.anio(), fam.id);
     if ((fam.id === 'AA' || fam.id === 'IM') && esc >= 1.8) pub += esc >= 3.5 ? 3 : 2; // efectos que el público disfruta
+    // Visión y público objetivo del estudio (solo el jugador los tiene)
+    if (bonos) { crit += bonos._crit || 0; pub += bonos._pub || 0; }
     obra.q = Math.round(q);
     obra.crit = Math.round(N.limitar(crit, 1, 99));
     obra.pub = Math.round(N.limitar(pub, 1, 99));
@@ -1693,6 +1762,7 @@ IA.obras = (function () {
     return {
       direccion: n(o.eq.direccion), guion: n(o.eq.guion), musica: n(o.eq.musica), produccion: n(o.eq.produccion),
       reparto: (o.eq.int || []).map(n), sx: (o.eq.int || []).map(function (id) { const t = T.porId(id); return t ? t.sx : ''; }),
+      ejecutiva: o.est === 0 && N.S.avatar ? N.S.avatar.nom : '',
     };
   }
   // Datos que necesita el arte para el póster
@@ -2175,7 +2245,15 @@ IA.negocio = (function () {
       return b;
     }
     const est = N.S.estudios[0];
-    est.pisos.forEach(function (id) { const p = infoPiso(id); if (p.bono) Object.keys(p.bono).forEach(function (k) { b[k] = (b[k] || 0) + p.bono[k]; }); });
+    const sumar = function (bono) { Object.keys(bono).forEach(function (k) { b[k] = (b[k] || 0) + bono[k]; }); };
+    est.pisos.forEach(function (id) { const p = infoPiso(id); if (p.bono) sumar(p.bono); });
+    // Tus tres especialidades: +1 en esos departamentos de tus obras
+    ((N.S.avatar && N.S.avatar.esp) || []).forEach(function (of) { b[of] = (b[of] || 0) + 1; });
+    // Visión y público objetivo: _crit y _pub ajustan las notas finales
+    const vis = D.visiones.filter(function (v) { return v.id === est.vision; })[0];
+    if (vis) { if (vis.bono) sumar(vis.bono); b._crit = (b._crit || 0) + (vis.crit || 0); b._pub = (b._pub || 0) + (vis.pub || 0); }
+    const pub = D.publicos.filter(function (v) { return v.id === est.publico; })[0];
+    if (pub && pub.familias.indexOf(famId) >= 0) { b._crit = (b._crit || 0) + (pub.crit || 0); b._pub = (b._pub || 0) + (pub.pub || 0); }
     est.terrenos.forEach(function (id) {
       const p = infoTerreno(id);
       if (p.bono && (!p.familias || p.familias.indexOf(famId) >= 0)) Object.keys(p.bono).forEach(function (k) { b[k] = (b[k] || 0) + p.bono[k]; });
@@ -2198,7 +2276,8 @@ IA.negocio = (function () {
     if (estId !== 0) return 0;
     let a = 0;
     N.S.estudios[0].pisos.forEach(function (id) { a += infoPiso(id).marketing || 0; });
-    return a;
+    const vis = D.visiones.filter(function (v) { return v.id === N.S.estudios[0].vision; })[0];
+    return a + (vis && vis.marketing ? vis.marketing : 0);
   }
   // Cada construcción encarece la siguiente (terreno más caro, permisos, obras más grandes)
   function costoConstruccion(info) {
@@ -2259,8 +2338,9 @@ IA.negocio = (function () {
       bonos: bonos,
       famaTrasEstreno: function (o, mult) {
         const est = N.S.estudios[o.est];
-        const cambio = N.limitar(0.02 * Math.log(Math.max(0.2, mult)) + (o.crit - 60) / 1500, -0.03, 0.05);
-        est.fama = N.redondear(N.limitar(est.fama + cambio, 0.01, 1), 3);
+        // La fama del estudio sube despacio con los éxitos y la buena crítica (cuesta más cuanto más alta)
+        const cambio = N.limitar(0.008 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 3000, -0.012, 0.02);
+        est.fama = N.redondear(N.limitar(est.fama + (cambio > 0 ? cambio * (1 - est.fama) : cambio), 0.01, 1), 3);
       },
     };
     return ctxCache;
@@ -2333,19 +2413,19 @@ IA.negocio = (function () {
     const ranking = S.estudios.map(function (e) { return { id: e.id, bruto: Math.round(m.anio.porEstudio[e.id] || 0) }; }).sort(function (a, b) { return b.bruto - a.bruto; });
     m.hist.push({ anio: anioCerrado, total: Math.round(m.anio.total), otras: Math.round(m.anio.otras), ranking: ranking });
     if (m.hist.length > 400) m.hist.shift();
-    // Major: entre los 3 estudios más taquilleros del mundo, con 5 % o más del mercado, tres años seguidos
+    // Major: entre los 3 estudios más taquilleros del mundo, con 6 % o más del mercado, tres años seguidos
     const puesto = ranking.map(function (r) { return r.id; }).indexOf(0) + 1;
     fila.puesto = puesto;
     const ultimos = S.fin.hist.slice(-3);
-    if (ultimos.length === 3 && ultimos.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.05; }) && !S.majorDesde) {
+    if (ultimos.length === 3 && ultimos.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.06; }) && !S.majorDesde) {
       S.majorDesde = anioCerrado;
       N.emit('noticia', { tipo: 'estudio', texto: 'Tu estudio ya es una major: está entre los tres más taquilleros del mundo.', importante: true });
     }
-    jug.clase = puesto <= 3 && cuota >= 0.05 ? 'A' : cuota >= 0.015 ? 'B' : 'C';
+    jug.clase = puesto <= 3 && cuota >= 0.06 ? 'A' : cuota >= 0.015 ? 'B' : 'C';
     for (let i = 0; i < S.estudios.length; i++) {
       const e = S.estudios[i];
       e.ingAnio = 0; e.gasAnio = 0;
-      e.fama = N.redondear(N.limitar(e.fama * 0.985, 0.01, 1), 3);
+      e.fama = N.redondear(N.limitar(e.fama * 0.95, 0.01, 1), 3);
     }
     S.fin.anio = libroVacio();
     m.anio = { total: 0, otras: 0, porEstudio: {} };
@@ -5187,8 +5267,49 @@ IA.arte = (function () {
     }
   }
 
+  /* =========================================================
+     Mapa del mundo (V15 wmap): continentes y puntos por país
+     puntos: [{ lon, lat, r (0..1), color, etiqueta }]
+     ========================================================= */
+  function mapa(canvas, continentes, puntos) {
+    const p = prepararLienzo(canvas, 320, 170);
+    if (!p) return;
+    const c = p.c, w = p.w, h = p.h, T = leerTema();
+    const X = (lon) => ((lon + 180) / 360) * w;
+    const Y = (lat) => ((82 - lat) / 142) * h;
+    c.fillStyle = T.panel;
+    c.fillRect(0, 0, w, h);
+    c.strokeStyle = rgba(T.tenue, 0.15);
+    c.lineWidth = 1;
+    for (let lon = -150; lon <= 150; lon += 30) trazo(c, X(lon), 0, X(lon), h);
+    for (let lat = -60; lat <= 60; lat += 30) trazo(c, 0, Y(lat), w, Y(lat));
+    (continentes || []).forEach((poli) => {
+      c.beginPath();
+      poli.forEach((q, i) => (i ? c.lineTo(X(q[0]), Y(q[1])) : c.moveTo(X(q[0]), Y(q[1]))));
+      c.closePath();
+      c.fillStyle = rgba(T.acento, 0.12);
+      c.fill();
+      c.strokeStyle = rgba(T.acento, 0.35);
+      c.stroke();
+    });
+    const ordenados = (puntos || []).slice().sort((a, b) => (b.r || 0) - (a.r || 0));
+    ordenados.forEach((q) => {
+      const rr = 2.5 + Math.sqrt(Math.max(0, q.r || 0)) * Math.min(w, h) * 0.09;
+      c.beginPath();
+      c.arc(X(q.lon), Y(q.lat), rr, 0, TAU);
+      c.fillStyle = rgba(q.color || T.tenue, q.destacado ? 0.95 : 0.55);
+      c.fill();
+      if (q.destacado) { c.lineWidth = 2; c.strokeStyle = T.texto; c.stroke(); }
+    });
+    c.font = '12px sans-serif';
+    c.fillStyle = T.texto;
+    c.textAlign = 'center';
+    ordenados.filter((q) => q.etiqueta).forEach((q) => c.fillText(q.etiqueta, X(q.lon), Y(q.lat) - 8));
+  }
+
   const api = {
     hash,
+    mapa,
     FUENTES,
     logo,
     logoAleatorio,
@@ -5264,7 +5385,7 @@ IA.juego = (function () {
       id: 0, jugador: true, nombre: (op.nombre || 'INDUSTRY ART').slice(0, 40), logo: op.logo || { s: 8, c: 6, b: 14, t: 3, f: 1 },
       pais: pais.id, reg: pais.region, caja: Math.round(M.aEpoca(capital2025, anio)), capital2025: capital2025,
       fama: 0.05, pisos: ['oficinas', 'plato'], terrenos: [], valorObras: 0.9, tam: 1,
-      tipo: op.tipo || 'Estudio', vision: op.vision || 'Alcance Comercial', publico: op.publico || 'General',
+      tipo: op.tipo || 'Estudio', industria: 'Cine', vision: op.vision || 'Alcance Comercial', publico: op.publico || 'General',
       personalidad: op.personalidad || 'Normal', ingAnio: 0, gasAnio: 0, util: 0, clase: 'C',
     });
     const dif = DIFICULTADES.filter(function (d) { return d.id === S.dificultad; })[0] || DIFICULTADES[1];
@@ -5272,7 +5393,10 @@ IA.juego = (function () {
     for (let i = 1; i < S.estudios.length; i++) S.estudios[i].calidad += dif.rivales;
     T.generarInicial();
     const av = op.avatar || {};
-    S.avatar = { nom: av.nombre || 'Felipe', sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999 };
+    const esp = (av.especialidades || ['produccion', 'direccion', 'guion']).filter(function (x, i, a) { return D.oficio(x) && a.indexOf(x) === i; }).slice(0, 3);
+    S.avatar = { nom: (av.nombre || 'Felipe').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
+    const vis = D.visiones.filter(function (v) { return v.id === S.estudios[0].vision; })[0];
+    if (vis && vis.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);
     O.reindexar();
     noticia({ tipo: 'estudio', texto: 'Nace ' + S.estudios[0].nombre + ' en ' + pais.nombre + '. ' + M.era(anio) + '.', importante: true });
     // El mundo no arranca vacío: los rivales ya tienen obras en marcha
@@ -5291,7 +5415,7 @@ IA.juego = (function () {
     N.on('estreno', function (o) {
       const m = N.S.mercado;
       m.famMes[o.fam] = (m.famMes[o.fam] || 0) + 1;
-      if (o.est === 0) noticia({ tipo: 'estreno', texto: '«' + o.tit + '» llega a los cines.' });
+      if (o.est === 0) noticia({ tipo: 'estreno', texto: N.S.avatar.nom + ' presenta «' + o.tit + '»: llega a los cines.' });
     });
     N.on('obraTerminada', function (o) {
       if (o.est === 0) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });
@@ -5730,7 +5854,8 @@ IA.guardado = (function () {
   }
   async function importarTexto(texto) {
     try {
-      const o = JSON.parse(texto);
+      let o = null;
+      try { o = JSON.parse(texto); } catch (e) { o = null; }
       if (!o || o.formato !== 'iasave' || o.juego !== 'INDUSTRY ART') throw new Error(IA.t('gua_corrupto'));
       const S = await desempaquetar({ comp: o.comp, datos: deBase64(o.datos), suma: o.suma });
       activar(S);
@@ -6104,7 +6229,9 @@ IA.pantallas = (function () {
       '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' +
       '<p class="nota">' + t('creditos') + '</p><p class="nota">' + t('v15_aparte') + '</p></div>';
   }
-  const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'Felipe', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8 };
+  const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'Felipe', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
+    tipo: 'Estudio', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'] };
+  const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville'];
   function nuevaPartida() {
     const cap = np.capital || J.capitalRecomendado(np.anio);
     if (!U.estado.logoNuevo) U.estado.logoNuevo = { s: 8, c: 6, b: 14, t: 3, f: 1 };
@@ -6118,10 +6245,19 @@ IA.pantallas = (function () {
     });
     const paises = D.paises.slice().sort(function (a, b) { return a.nombre.localeCompare(b.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre]; });
     const nTipicas = cap / tipico2025;
+    const L = U.estado.logoNuevo;
+    const num = function (k, max, nombres) { return '<label class="campo crece" style="min-width:96px"><span>' + esc({ s: 'Forma', c: 'Color', b: 'Fondo', t: 'Letras', f: 'Tipografía' }[k]) + '</span><select data-c="npLogo" data-k="' + k + '">' + ops(Array.from({ length: max }, function (_, i) { return [i, nombres ? nombres[i] : String(i + 1)]; }), L[k]) + '</select></label>'; };
     return '<div class="portada" style="text-align:left">' + titulo(t('np_titulo'), 'nueva') +
-      '<div class="fila"><canvas data-logo="nuevo" style="width:64px;height:64px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div>' +
-      '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="np" data-k="nombre"></label>' +
-      '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select><span class="nota">' + t('np_anio_ayuda') + '</span></label>' +
+      '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:200px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
+      '<div class="fila" style="margin-top:8px"><canvas data-logo="nuevo" style="width:64px;height:64px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div>' +
+      '<div class="fila envolver">' + num('s', 20) + num('c', 20) + num('b', 20) + num('t', 20) + num('f', 20, NOMBRES_FUENTE) + '</div>' +
+      '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
+      '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select>' +
+      '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota">' + t('np_anio_ayuda') + '</span></label>' +
+      '<label class="campo"><span>Tipo de industria</span><select data-c="np" data-k="industria">' + D.industrias.map(function (x) { return '<option value="' + x.id + '"' + (x.id === 'Cine' ? ' selected' : ' disabled') + '>' + x.id + (x.id === 'Cine' ? '' : ' (llega en la ' + x.desde + ')') + '</option>'; }).join('') + '</select></label>' +
+      '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
+      '<label class="campo"><span>Visión de la industria</span><select data-c="np" data-k="vision">' + ops(D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.vision) + '</select></label>' +
+      '<label class="campo"><span>Público objetivo</span><select data-c="np" data-k="publico">' + ops(D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.publico) + '</select></label>' +
       '<label class="campo"><span>' + t('np_pais') + '</span><select data-c="np" data-k="pais">' + ops(paises, np.pais) + '</select></label>' +
       '<label class="campo"><span>' + t('np_capital') + '</span><select data-c="npCapital">' + ops(capOps, cap) + '</select><span class="nota">' +
       t('np_capital_ayuda', { epoca: esc(U.dinero(M.aEpoca(cap, np.anio)).replace(/^\$/, '$')), anio: np.anio, n: U.decimal(nTipicas, nTipicas < 10 ? 1 : 0) }) + '</span></label>' +
@@ -6132,18 +6268,32 @@ IA.pantallas = (function () {
       '<div class="fila"><label class="campo crece"><span>' + t('np_sexo') + '</span><select data-c="np" data-k="avSexo">' + ops([['F', t('mujer')], ['M', t('hombre')]], np.avSexo) + '</select></label>' +
       '<label class="campo crece"><span>' + t('np_edad') + '</span><input type="number" min="16" max="80" value="' + np.avEdad + '" data-i="np" data-k="avEdad"></label></div>' +
       '<label class="campo"><span>' + t('np_personalidad') + '</span><select data-c="np" data-k="personalidad">' + ops(D.personalidades.map(function (p) { return [p.id, p.id]; }), np.personalidad) + '</select></label>' +
+      '<span class="nota">Tus tres especialidades (+1 en esos departamentos de tus obras):</span><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+        return '<label class="campo crece"><span>Especialidad ' + (i + 1) + '</span><select data-c="npEsp" data-k="' + i + '">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.esp[i]) + '</select></label>';
+      }).join('') + '</div>' +
       '<label class="campo"><span>' + t('np_semilla') + '</span><input type="text" maxlength="24" value="' + esc(np.semilla) + '" data-i="np" data-k="semilla" placeholder="' + t('dado') + '"><span class="nota">' + t('np_semilla_ayuda') + '</span></label>' +
       '<button class="btn primario bloque" data-a="empezar">' + t('np_empezar') + '</button><p></p><button class="btn bloque" data-a="volverPortada">' + t('volver') + '</button></div>';
   }
-  ac('nuevaPartida', function () { U.estado.np = true; document.getElementById('vista').innerHTML = nuevaPartida(); U.dibujar(document.getElementById('vista')); });
+  ac('nuevaPartida', function () { U.estado.np = true; cacheT = -1; document.getElementById('vista').innerHTML = nuevaPartida(); U.dibujar(document.getElementById('vista')); alMostrar('nueva'); });
   ac('volverPortada', function () { U.estado.np = false; U.render(); });
   ac('otroLogo', function () {
     np.logoN = (np.logoN * 7 + 13) % 997;
     U.estado.logoNuevo = IA.arte.logoAleatorio(np.logoN);
-    U.dibujar(document.getElementById('vista'));
+    cacheT = -1;
+    U.acciones.nuevaPartida();
   });
   ac('np', function (v, el) { np[el.getAttribute('data-k')] = v; });
-  ac('npAnio', function (v) { np.anio = +v; np.capital = 0; U.acciones.nuevaPartida(); });
+  ac('npNombre', function (v) { np.nombre = v; cacheT = -1; });
+  ac('npLogo', function (v, el) { U.estado.logoNuevo = Object.assign({}, U.estado.logoNuevo); U.estado.logoNuevo[el.getAttribute('data-k')] = +v; U.dibujar(document.getElementById('vista')); cacheT = -1; });
+  ac('npEsp', function (v, el) { np.esp[+el.getAttribute('data-k')] = v; });
+  ac('npAnio', function (v) {
+    const a = Math.round(+v);
+    if (!isFinite(a)) return;
+    np.anio = N.limitar(a, J.ANIO_MIN, J.ANIO_MAX); np.capital = 0; cacheT = -1;
+    const y = document.getElementById('vista').scrollTop;
+    U.acciones.nuevaPartida();
+    document.getElementById('vista').scrollTop = y;
+  });
   ac('npCapital', function (v) { np.capital = +v; U.acciones.nuevaPartida(); });
   ac('empezar', function () {
     const edad = N.limitar(Math.round(+np.avEdad || 30), 16, 80);
@@ -6151,7 +6301,8 @@ IA.pantallas = (function () {
       semilla: (np.semilla || '').trim() || String(Date.now() % 1e9), anio: np.anio, nombre: (np.nombre || '').trim() || 'INDUSTRY ART',
       logo: U.estado.logoNuevo, pais: np.pais, capital: np.capital || J.capitalRecomendado(np.anio), dificultad: np.dificultad,
       escenario: np.escenario, personalidad: np.personalidad, creado: new Date().toISOString(),
-      avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad },
+      tipo: np.tipo, vision: np.vision, publico: np.publico,
+      avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad, especialidades: np.esp },
     });
     U.estado.np = false;
     U.estado.seccion = 'estudio';
@@ -6201,6 +6352,7 @@ IA.pantallas = (function () {
       '<div class="tarjeta"><h3>' + t('est_tareas') + '</h3>' + (tl.length ? tl.map(function (x) {
         return '<div class="fila entre" style="padding:6px 0;border-bottom:1px solid var(--borde)"><span class="' + (x.mal ? 'mal' : '') + '">' + esc(x.txt) + '</span>' + (x.btn ? '<button class="btn' + (x.imp ? ' primario' : '') + '" data-a="' + x.a + '" data-v="' + (x.v || '') + '">' + esc(x.btn) + '</button>' : '') + '</div>';
       }).join('') : '<p class="tenue">' + t('est_sin_tareas') + '</p>') + '</div>' +
+      calendarioCorto() +
       '<div class="tarjeta"><h3>' + t('est_fechas') + '</h3>' + fechas.map(function (f) {
         const n = f.t - S.t;
         return '<div class="fila entre" style="padding:4px 0"><span>' + esc(f.txt) + '</span><span class="etiqueta">' + (n <= 0 ? t('esta_semana') : t('faltan', { n: n })) + '</span></div>';
@@ -6219,9 +6371,25 @@ IA.pantallas = (function () {
         return '<p style="margin:6px 0"><span class="tenue chico">' + esc(U.fechaCorta(n.t)) + '</span><br>' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>';
       }).join('') + '</div></div></div>';
   }
+  // Calendario de escritorio: las próximas 8 semanas con tus estrenos, los rivales y los premios
+  function calendarioCorto() {
+    const S = N.S;
+    let h = '<div class="tarjeta"><h3>' + t('mun_calendario') + '</h3><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">';
+    for (let k = 0; k < 8; k++) {
+      const tt = S.t + k, sem = N.semana(tt);
+      const propios = O.activas().filter(function (o) { return o.prog && o.fe === tt && o.est === 0; }).length;
+      const rivales = O.activas().filter(function (o) { return o.prog && o.fe === tt && o.est !== 0; }).length;
+      const fiesta = M.fechaDeSemana(sem);
+      h += '<div class="kpi" style="padding:6px"><span>S' + sem + ' · ' + esc(M.nombreMes(N.mes(tt)).slice(0, 3)) + '</span>' +
+        (propios ? '<b class="oro">' + icono('estrella') + ' ' + propios + '</b>' : '') + (rivales ? '<span>' + rivales + ' rival' + (rivales > 1 ? 'es' : '') + '</span>' : '') +
+        (sem === D.premios.semana ? '<span class="oro">Premios</span>' : '') + (fiesta ? '<span>' + esc(fiesta) + '</span>' : '') + '</div>';
+    }
+    return h + '</div></div>';
+  }
   // Datos que el arte necesita para dibujar el edificio
   function datosEstudio() {
     const S = N.S;
+    if (!S && U.estado.np) return { anio: np.anio, semana: 22, nombre: (np.nombre || 'INDUSTRY ART').slice(0, 40), logo: U.estado.logoNuevo || { s: 8, c: 6, b: 14, t: 3, f: 1 }, pisos: [{ tipo: 'oficinas', actividad: 1, etiqueta: '' }, { tipo: 'plato', actividad: 1, etiqueta: '' }], terrenos: [{ tipo: 'vacio', lado: 'izq' }], rodajes: [] };
     if (!S) return { anio: 1930, semana: 20, nombre: 'INDUSTRY ART', logo: { s: 8, c: 6, b: 14, t: 3, f: 1 }, pisos: ['oficinas', 'guion', 'plato', 'edicion', 'sonido'].map(function (p) { return { tipo: p, actividad: 1, etiqueta: '' }; }), terrenos: [{ tipo: 'backlot', lado: 'izq' }, { tipo: 'vacio', lado: 'der' }], rodajes: [{ titulo: 'INDUSTRY ART', progreso: 0.6 }] };
     const est = est0();
     const prods = O.enProduccion(0);
@@ -6336,7 +6504,21 @@ IA.pantallas = (function () {
     if (o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera') {
       h += '<div class="kpis">' + kpi(t('costo_talento'), dinero(o.cf)) + kpi(t('costo_produccion'), dinero(o.pp * (o.sobre || 1))) + kpi('Gastado en producción', dinero(o.gp || 0)) + '</div>';
     }
+    if (o.eq) {
+      const fam = D.familia(o.fam || 'DR');
+      const bonos = NG.bonos(o.est, o.fam);
+      const deps = Object.keys(fam.pesos);
+      const valores = deps.map(function (dep) {
+        const ids = dep === 'interprete' ? o.eq.int : [o.eq[dep]];
+        let s = 0, n = 0;
+        ids.forEach(function (id) { const ta = T.porId(id); if (ta) { s += ta.hab; n++; } });
+        return Math.min(100, (n ? s / n : 35) + (bonos[dep] || 0));
+      });
+      const gr = U.grafica('radar' + o.id, function (cv) { IA.arte.radar(cv, valores, deps.map(function (d) { return D.oficio(d).dep; })); });
+      h += '<h3>Departamentos</h3><canvas class="lienzo" style="height:220px" data-grafica="' + gr + '"></canvas><p class="nota">Lo que más pesa en ' + esc(fam.nombre.toLowerCase()) + ': ' + deps.slice().sort(function (a, b) { return fam.pesos[b] - fam.pesos[a]; }).slice(0, 3).map(function (d) { return D.oficio(d).dep.toLowerCase(); }).join(', ') + '.</p>';
+    }
     h += '<h3>' + t('paso_equipo') + '</h3>';
+    if (o.cr && o.cr.ejecutiva) h += '<p class="tenue">Producción ejecutiva: ' + esc(o.cr.ejecutiva) + '</p>';
     if (o.eq) {
       h += '<div class="col">' + O.ROLES.concat(['int0', 'int1']).map(function (r) {
         const id = r === 'int0' ? o.eq.int[0] : r === 'int1' ? o.eq.int[1] : o.eq[r];
@@ -6399,6 +6581,7 @@ IA.pantallas = (function () {
   }
   function fichaCrear() {
     const b = cr.b;
+    if (!b) return '';
     const pasos = '<p class="nota">' + PASOS.map(function (p, i) { return '<span class="' + (i === cr.paso ? 'paso-actual' : '') + '">' + (i + 1) + '. ' + t(p) + '</span>'; }).join(' · ') + '</p>';
     let h = '<h2>' + t('crear_obra') + '</h2>' + pasos;
     if (cr.paso === 0) {
@@ -6462,18 +6645,18 @@ IA.pantallas = (function () {
       return '<button class="fila tarjeta toque" style="width:100%" data-a="crElegir" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece" style="text-align:left"><b>' + esc(x.nom) + '</b><span class="chico">' + (N.anio() - x.nac) + ' años · ' + t('tal_habilidad') + ' ' + Math.round(x.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(x.fama * 100) + (x.rasgo ? ' · ' + esc(x.rasgo) : '') + '</span></div><b>' + dinero(T.tarifa(x)) + '</b></button>';
     }).join('') : '<p class="tenue">No hay nadie disponible.</p>') + '</div>';
   }
-  function refrescarCrear() { U.refrescarFicha(fichaCrear()); }
+  function refrescarCrear() { if (cr.b) U.refrescarFicha(fichaCrear()); }
   ac('crearObra', function () {
     if (O.enProduccion(0).length >= NG.capacidad(0)) { U.aviso('No tienes capacidad libre: construye un plató o espera.', 'mal'); return; }
     cr.b = nuevoBorrador(); cr.paso = 0; cr.rol = null;
     U.abrirFicha(fichaCrear(), 'crear');
   });
-  ac('crGen', function (g) {
+  ac('crGen', function (g) { if (!cr.b) return;
     const b = cr.b, i = b.gen.indexOf(g);
     if (i >= 0) { if (b.gen.length > 1) b.gen.splice(i, 1); } else if (b.gen.length < 3) b.gen.push(g);
     ajustarBorrador(b); refrescarCrear();
   });
-  ac('crGenRec', function () {
+  ac('crGenRec', function () { if (!cr.b) return;
     const b = cr.b, g1 = recomendarGenero();
     const f1 = D.familiaDe[g1];
     const buena = D.ORDEN_FAM.filter(function (f) { return D.encaje(f1, f) >= 3; })[0];
@@ -6481,7 +6664,7 @@ IA.pantallas = (function () {
     if (buena) { const g2 = D.familia(buena).generos.filter(function (g) { return g !== 'Erótico'; })[0]; if (!O.validarGeneros([g1, g2])) b.gen.push(g2); }
     ajustarBorrador(b); refrescarCrear();
   });
-  ac('crGenDado', function () {
+  ac('crGenDado', function () { if (!cr.b) return;
     const b = cr.b;
     const todos = [];
     D.familias.forEach(function (f) { f.generos.forEach(function (g) { todos.push(g); }); });
@@ -6494,21 +6677,21 @@ IA.pantallas = (function () {
     b.gen = gen.length ? gen : ['Drama'];
     ajustarBorrador(b); refrescarCrear();
   });
-  ac('crTono', function (v) { cr.b.tono = v; ajustarBorrador(cr.b); refrescarCrear(); });
-  ac('crClas', function (v) { cr.b.clas = v; refrescarCrear(); });
-  ac('crEscala', function (v) { cr.b.esc = +v; ajustarBorrador(cr.b); refrescarCrear(); });
-  ac('crEquipoRec', function () { cr.b.eq = { int: [] }; O.equipoRecomendado(cr.b, 1); cr.rol = null; refrescarCrear(); });
-  ac('crRol', function (v) { cr.rol = cr.rol === v ? null : v; refrescarCrear(); });
-  ac('crElegir', function (v) {
+  ac('crTono', function (v) { if (!cr.b) return; cr.b.tono = v; ajustarBorrador(cr.b); refrescarCrear(); });
+  ac('crClas', function (v) { if (!cr.b) return; cr.b.clas = v; refrescarCrear(); });
+  ac('crEscala', function (v) { if (!cr.b) return; cr.b.esc = +v; ajustarBorrador(cr.b); refrescarCrear(); });
+  ac('crEquipoRec', function () { if (!cr.b) return; cr.b.eq = { int: [] }; O.equipoRecomendado(cr.b, 1); cr.rol = null; refrescarCrear(); });
+  ac('crRol', function (v) { if (!cr.b) return; cr.rol = cr.rol === v ? null : v; refrescarCrear(); });
+  ac('crElegir', function (v) { if (!cr.b) return;
     const b = cr.b, id = +v;
     if (cr.rol === 'int0') b.eq.int[0] = id; else if (cr.rol === 'int1') b.eq.int[1] = id; else b.eq[cr.rol] = id;
     b.eq.int = b.eq.int.filter(function (x) { return x !== undefined && x !== null; });
     cr.rol = null; refrescarCrear();
   });
-  ac('crTitulo', function (v) { cr.b.tit = v.slice(0, 48); });
-  ac('crOtroTitulo', function () { cr.b.tit = O.tituloNuevo(cr.b.gen); refrescarCrear(); });
-  ac('crPaso', function (v) { cr.paso = N.limitar(cr.paso + (+v), 0, PASOS.length - 1); cr.rol = null; refrescarCrear(); });
-  ac('crIniciar', function () {
+  ac('crTitulo', function (v) { if (!cr.b) return; cr.b.tit = v.slice(0, 48); });
+  ac('crOtroTitulo', function () { if (!cr.b) return; cr.b.tit = O.tituloNuevo(cr.b.gen); refrescarCrear(); });
+  ac('crPaso', function (v) { if (!cr.b) return; cr.paso = N.limitar(cr.paso + (+v), 0, PASOS.length - 1); cr.rol = null; refrescarCrear(); });
+  ac('crIniciar', function () { if (!cr.b) return;
     const b = cr.b;
     b.tit = (b.tit || '').trim() || O.tituloNuevo(b.gen);
     const r = J.iniciarObra(b);
@@ -6570,7 +6753,7 @@ IA.pantallas = (function () {
   function talento() {
     const S = N.S, av = S.avatar;
     let h = titulo(t('sec_talento'), 'talento');
-    h += '<div class="tarjeta fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col"><span class="tenue chico">' + t('tu_avatar') + '</span><h3>' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(est0().personalidad) + '</span><span class="nota">La vida ligera, la carrera como talento y los herederos llegan en la V29.</span></div></div>';
+    h += '<div class="tarjeta fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col"><span class="tenue chico">' + t('tu_avatar') + '</span><h3>' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(est0().personalidad) + '</span><span>Especialidades: ' + esc((av.esp || []).map(function (x) { return D.oficio(x).nombre; }).join(', ')) + ' (+1 en tus obras)</span><span class="nota">La vida ligera, la carrera como talento y los herederos llegan en la V29.</span></div></div>';
     h += '<div class="chips" style="margin:8px 0"><button class="chip' + (!ft.of ? ' on' : '') + '" data-a="ftOficio" data-v="">' + t('todos') + '</button>' + D.oficios.map(function (o) {
       return '<button class="chip' + (ft.of === o.id ? ' on' : '') + '" data-a="ftOficio" data-v="' + o.id + '">' + esc(o.nombre) + '</button>';
     }).join('') + '</div>';
@@ -6608,8 +6791,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function mundo() {
     const s = sub('mundo', 'cartelera');
-    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['rivales', t('mun_rivales')], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')]], s);
-    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: mPremios, rivales: mRivales, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion }[s] || mCartelera)();
+    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['rivales', t('mun_rivales')], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa']], s);
+    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: mPremios, rivales: mRivales, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa }[s] || mCartelera)();
   }
   function mCartelera() {
     const S = N.S, sem = S.mercado.semana;
@@ -6675,10 +6858,38 @@ IA.pantallas = (function () {
         '<div class="barra-p" style="position:relative"><i style="position:absolute;left:' + (v >= 0 ? 50 : 50 - w) + '%;width:' + w + '%;background:' + (v >= 0 ? 'var(--bien)' : 'var(--mal)') + '"></i></div><span class="nota">' + esc(f.generos.join(', ')) + '</span></div>';
     }).join('');
   }
+  // Mapa del mundo: cada país con su público de cine; tu sede en dorado y las de los rivales en rosa
+  function mMapa() {
+    const anio = N.anio(), da = E.datosAnio(anio), S = N.S;
+    const sedes = {};
+    S.estudios.forEach(function (e) { sedes[e.pais] = sedes[e.pais] || []; sedes[e.pais].push(e); });
+    const filas = D.paises.map(function (p) {
+      const pub = da.regiones[p.region].publico * p.peso;
+      return { p: p, pub: pub, pob: M.poblacion(p.region, anio) * p.peso };
+    });
+    const max = Math.max.apply(null, filas.map(function (f) { return f.pub; }).concat([1]));
+    const css = getComputedStyle(document.documentElement);
+    const g = U.grafica('mapa', function (cv) {
+      IA.arte.mapa(cv, D.continentes, filas.map(function (f) {
+        const s = sedes[f.p.id];
+        const propia = s && s.some(function (e) { return e.id === 0; });
+        return { lon: f.p.lon, lat: f.p.lat, r: f.pub / max, color: propia ? css.getPropertyValue('--dorado').trim() : s ? css.getPropertyValue('--rosa').trim() : css.getPropertyValue('--acento').trim(), destacado: !!s, etiqueta: propia ? f.p.nombre : '' };
+      }));
+    });
+    let h = '<p class="nota">El tamaño de cada círculo es su público de cine en ' + anio + '. <span class="oro">Dorado</span>: tu sede · <span class="rosa">Rosa</span>: sedes rivales. Sedes en otros países y cines propios llegan en la V28.</p>' +
+      '<canvas class="lienzo" style="height:auto;aspect-ratio:2/1" data-grafica="' + g + '"></canvas>';
+    h += '<div class="desliza"><table class="tabla"><tr><th>País</th><th class="n">Población</th><th class="n">Entradas/año</th><th class="n">Costo de rodaje</th><th>Sede de</th></tr>' + filas.sort(function (a, b) { return b.pub - a.pub; }).map(function (f) {
+      return '<tr><td>' + esc(f.p.nombre) + '<br><span class="tenue chico">' + esc(f.p.idioma) + '</span></td><td class="n">' + U.grande(f.pob) + '</td><td class="n">' + U.grande(f.pub) + '</td><td class="n">×' + U.decimal(f.p.costo, 2) + '</td><td>' + esc((sedes[f.p.id] || []).map(function (e) { return e.nombre; }).join(', ')) + '</td></tr>';
+    }).join('') + '</table></div><p class="nota">Población y entradas por país son aproximadas: salen de su región y de su peso en ella.</p>';
+    return h;
+  }
   function mPoblacion() {
     const anio = N.anio(), da = E.datosAnio(anio);
     let h = '<div class="kpis">' + kpi('Población mundial', U.grande(M.poblacionMundial(anio))) + kpi('Entradas posibles al año', U.grande(da.entradas)) +
       kpi('Mercado del cine al año', dinero(M.aEpoca(da.mercado2025, anio))) + kpi('Inflación del año', U.pct(M.inflacionAnual(anio))) + '</div>';
+    h += '<h3>Acceso por medio</h3><div class="desliza"><table class="tabla"><tr><th>Región</th><th class="n">Cine</th><th class="n">Radio</th><th class="n">TV</th><th class="n">Internet</th><th class="n">Consolas</th></tr>' + D.regiones.map(function (r) {
+      return '<tr><td>' + esc(r.nombre) + '</td>' + ['cine', 'radio', 'tv', 'internet', 'consolas'].map(function (m) { return '<td class="n">' + U.pct(M.accesoMedio(m, r.id, anio), 0) + '</td>'; }).join('') + '</tr>';
+    }).join('') + '</table></div><p class="nota">Radio, TV, internet y consolas compiten con el cine por el tiempo libre; en la V24, la V30 y la V31 serán mercados propios.</p>';
     h += '<p class="nota">$1 de ' + anio + ' equivale a ' + U.dinero(M.aHoy(1, anio) * 1, 2025).replace('$', '$') + ' de hoy (IPC de EE. UU.). Público = Población × Acceso × Frecuencia.</p>';
     h += '<div class="desliza"><table class="tabla"><tr><th>Región</th><th class="n">Población</th><th class="n">Acceso al cine</th><th class="n">Entradas/año</th><th class="n">Precio</th></tr>' + D.regiones.map(function (r) {
       return '<tr><td>' + esc(r.nombre) + '</td><td class="n">' + U.grande(M.poblacion(r.id, anio)) + '</td><td class="n">' + U.pct(M.accesoCine(r.id, anio), 0) + '</td><td class="n">' + U.grande(da.regiones[r.id].publico) + '</td><td class="n">' + dinero(da.regiones[r.id].precio) + '</td></tr>';
@@ -6770,7 +6981,7 @@ IA.pantallas = (function () {
       '<li>Antimonopolio: con 35 % o más del mercado se abre una investigación con multa.' + (S.investigaciones ? ' Has tenido ' + S.investigaciones + '.' : '') + '</li></ul></div>';
     const da = E.datosAnio(anio);
     h += '<div class="tarjeta"><h3>Economía de ' + anio + '</h3><div class="kpis">' + kpi('Película típica', dinero(da.tipico)) + kpi('Producción típica', dinero(E.produccionTipica(anio, 'DR'))) +
-      kpi('Marketing típico', dinero(E.marketingTipico(anio))) + kpi('Películas del año en el mundo', U.numero(da.peliculas)) + '</div><p class="nota">Una major es uno de los 3 estudios más taquilleros del mundo, con 5 % o más del mercado, tres años seguidos.' + (S.majorDesde ? ' Lo lograste en ' + S.majorDesde + '.' : '') + '</p></div>';
+      kpi('Marketing típico', dinero(E.marketingTipico(anio))) + kpi('Películas del año en el mundo', U.numero(da.peliculas)) + '</div><p class="nota">Una major es uno de los 3 estudios más taquilleros del mundo, con 6 % o más del mercado, tres años seguidos.' + (S.majorDesde ? ' Lo lograste en ' + S.majorDesde + '.' : '') + '</p></div>';
     return h;
   }
 

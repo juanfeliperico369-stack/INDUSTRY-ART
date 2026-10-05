@@ -166,6 +166,7 @@ IA.obras = (function () {
     return {
       direccion: n(o.eq.direccion), guion: n(o.eq.guion), musica: n(o.eq.musica), produccion: n(o.eq.produccion),
       reparto: (o.eq.int || []).map(n), sx: (o.eq.int || []).map(function (id) { const t = T.porId(id); return t ? t.sx : ''; }),
+      ejecutiva: o.est === 0 && N.S.avatar ? N.S.avatar.nom : '',
     };
   }
   // Datos que necesita el arte para el póster

@@ -22,7 +22,8 @@ const PANTALLAS = [
   ['02_nueva_partida', async (p) => { await p.evaluate(() => { IA.n.S = null; IA.ui.estado.np = true; IA.ui.render(); }); }],
   ['03_estudio', async (p) => { await partida(p); await p.evaluate(() => IA.ui.irA('estudio')); }],
   ['04_obras', async (p) => { await p.evaluate(() => IA.ui.irA('obras', 'marcha')); }],
-  ['05_crear_obra', async (p) => { await p.evaluate(() => { IA.ui.irA('obras'); IA.ui.acciones.crearObra(); }); }],
+  // (para la captura se agrega un plató si la capacidad está llena)
+  ['05_crear_obra', async (p) => { await p.evaluate(() => { if (IA.obras.enProduccion(0).length >= IA.negocio.capacidad(0)) IA.n.S.estudios[0].pisos.push('plato'); IA.ui.irA('obras'); IA.ui.acciones.crearObra(); }); }],
   ['06_crear_equipo', async (p) => { await p.evaluate(() => { for (let i = 0; i < 3; i++) IA.ui.acciones.crPaso('1'); }); }],
   ['07_catalogo', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('obras', 'catalogo'); }); }],
   ['08_ficha_obra', async (p) => { await p.evaluate(() => { const o = IA.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada').pop(); if (o) IA.ui.acciones.verObra(String(o.id)); }); }],
@@ -31,6 +32,7 @@ const PANTALLAS = [
   ['11_mundo_cartelera', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('mundo', 'cartelera'); }); }],
   ['12_mundo_poblacion', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'poblacion')); }],
   ['13_mundo_premios', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'premios')); }],
+  ['13b_mundo_mapa', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'mapa')); }],
   ['14_negocio_finanzas', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'finanzas')); }],
   ['15_negocio_construcciones', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'estudio')); }],
   ['16_ajustes', async (p) => { await p.evaluate(() => IA.ui.acciones.abrirAjustes()); }],

@@ -2804,8 +2804,49 @@ IA.arte = (function () {
     }
   }
 
+  /* =========================================================
+     Mapa del mundo (V15 wmap): continentes y puntos por país
+     puntos: [{ lon, lat, r (0..1), color, etiqueta }]
+     ========================================================= */
+  function mapa(canvas, continentes, puntos) {
+    const p = prepararLienzo(canvas, 320, 170);
+    if (!p) return;
+    const c = p.c, w = p.w, h = p.h, T = leerTema();
+    const X = (lon) => ((lon + 180) / 360) * w;
+    const Y = (lat) => ((82 - lat) / 142) * h;
+    c.fillStyle = T.panel;
+    c.fillRect(0, 0, w, h);
+    c.strokeStyle = rgba(T.tenue, 0.15);
+    c.lineWidth = 1;
+    for (let lon = -150; lon <= 150; lon += 30) trazo(c, X(lon), 0, X(lon), h);
+    for (let lat = -60; lat <= 60; lat += 30) trazo(c, 0, Y(lat), w, Y(lat));
+    (continentes || []).forEach((poli) => {
+      c.beginPath();
+      poli.forEach((q, i) => (i ? c.lineTo(X(q[0]), Y(q[1])) : c.moveTo(X(q[0]), Y(q[1]))));
+      c.closePath();
+      c.fillStyle = rgba(T.acento, 0.12);
+      c.fill();
+      c.strokeStyle = rgba(T.acento, 0.35);
+      c.stroke();
+    });
+    const ordenados = (puntos || []).slice().sort((a, b) => (b.r || 0) - (a.r || 0));
+    ordenados.forEach((q) => {
+      const rr = 2.5 + Math.sqrt(Math.max(0, q.r || 0)) * Math.min(w, h) * 0.09;
+      c.beginPath();
+      c.arc(X(q.lon), Y(q.lat), rr, 0, TAU);
+      c.fillStyle = rgba(q.color || T.tenue, q.destacado ? 0.95 : 0.55);
+      c.fill();
+      if (q.destacado) { c.lineWidth = 2; c.strokeStyle = T.texto; c.stroke(); }
+    });
+    c.font = '12px sans-serif';
+    c.fillStyle = T.texto;
+    c.textAlign = 'center';
+    ordenados.filter((q) => q.etiqueta).forEach((q) => c.fillText(q.etiqueta, X(q.lon), Y(q.lat) - 8));
+  }
+
   const api = {
     hash,
+    mapa,
     FUENTES,
     logo,
     logoAleatorio,

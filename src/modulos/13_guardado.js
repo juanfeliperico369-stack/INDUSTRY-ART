@@ -308,7 +308,8 @@ IA.guardado = (function () {
   }
   async function importarTexto(texto) {
     try {
-      const o = JSON.parse(texto);
+      let o = null;
+      try { o = JSON.parse(texto); } catch (e) { o = null; }
       if (!o || o.formato !== 'iasave' || o.juego !== 'INDUSTRY ART') throw new Error(IA.t('gua_corrupto'));
       const S = await desempaquetar({ comp: o.comp, datos: deBase64(o.datos), suma: o.suma });
       activar(S);

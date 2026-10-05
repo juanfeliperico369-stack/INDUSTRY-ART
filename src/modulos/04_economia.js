@@ -130,6 +130,7 @@ IA.economia = (function () {
     const fam = D.familia(familiaPrincipal(obra));
     let q = 0;
     Object.keys(fam.pesos).forEach(function (dep) { q += fam.pesos[dep] * habilidadDep(obra, dep, talentos, bonos || {}); });
+    // (las claves _crit y _pub de los bonos no son departamentos: se aplican en calificar)
     const tipica = produccionTipica(obra.anioPlan || N.anio(), fam.id) * escalaTono(obra);
     q += N.limitar(6 * Math.log2(Math.max(1, obra.pp) / tipica), -18, 12);
     q += encajeObra(obra);
@@ -169,6 +170,8 @@ IA.economia = (function () {
     let pub = q + to.pub + (fam.inclina === 'pub' ? 3 : fam.inclina === 'crit' ? -3 : 0) + famaEstrellas(obra, talentos) * 4 + (N.azar() * 6 - 3);
     const esc = obra.pp / produccionTipica(obra.anioPlan || N.anio(), fam.id);
     if ((fam.id === 'AA' || fam.id === 'IM') && esc >= 1.8) pub += esc >= 3.5 ? 3 : 2; // efectos que el público disfruta
+    // Visión y público objetivo del estudio (solo el jugador los tiene)
+    if (bonos) { crit += bonos._crit || 0; pub += bonos._pub || 0; }
     obra.q = Math.round(q);
     obra.crit = Math.round(N.limitar(crit, 1, 99));
     obra.pub = Math.round(N.limitar(pub, 1, 99));

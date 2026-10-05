@@ -35,7 +35,10 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
-body { background: var(--fondo); color: var(--texto); font: var(--t)/1.45 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; overflow: hidden; word-break: break-word; overflow-wrap: anywhere; }
+body { background: var(--fondo); color: var(--texto); font: var(--t)/1.45 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; overflow: hidden; overflow-wrap: break-word; }
+/* Nombres largos sin espacios (títulos y nombres de estudio) se cortan en vez de desbordar */
+h1, h2, h3, .tarjeta b, .marca b, .col b { overflow-wrap: anywhere; }
+.btn, .chip, .pestana, .tabla th, .tabla td { overflow-wrap: normal; }
 button, input, select, textarea { font: inherit; color: inherit; }
 h1, h2, h3 { font-family: var(--titulos); font-weight: 400; letter-spacing: .04em; margin: .2em 0 .4em; line-height: 1.1; }
 h1 { font-size: 2.3em; } h2 { font-size: 1.6em; } h3 { font-size: 1.25em; }
@@ -92,6 +95,7 @@ a { color: var(--acento); }
 .kpi { background: var(--panel2); border-radius: 12px; padding: 8px 10px; min-width: 0; }
 .kpi span { display: block; color: var(--tenue); font-size: 14px; }
 .kpi b { font-size: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.kpi svg { width: 18px; height: 18px; vertical-align: -3px; }
 .btn { min-height: 44px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--borde); background: var(--panel2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
 .btn.primario { background: var(--acento); color: var(--acento-tx); border: 0; font-weight: 700; }
 .btn.peligro { background: var(--mal); color: #fff; border: 0; }

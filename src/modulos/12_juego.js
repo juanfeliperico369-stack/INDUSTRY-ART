@@ -50,7 +50,7 @@ IA.juego = (function () {
       id: 0, jugador: true, nombre: (op.nombre || 'INDUSTRY ART').slice(0, 40), logo: op.logo || { s: 8, c: 6, b: 14, t: 3, f: 1 },
       pais: pais.id, reg: pais.region, caja: Math.round(M.aEpoca(capital2025, anio)), capital2025: capital2025,
       fama: 0.05, pisos: ['oficinas', 'plato'], terrenos: [], valorObras: 0.9, tam: 1,
-      tipo: op.tipo || 'Estudio', vision: op.vision || 'Alcance Comercial', publico: op.publico || 'General',
+      tipo: op.tipo || 'Estudio', industria: 'Cine', vision: op.vision || 'Alcance Comercial', publico: op.publico || 'General',
       personalidad: op.personalidad || 'Normal', ingAnio: 0, gasAnio: 0, util: 0, clase: 'C',
     });
     const dif = DIFICULTADES.filter(function (d) { return d.id === S.dificultad; })[0] || DIFICULTADES[1];
@@ -58,7 +58,10 @@ IA.juego = (function () {
     for (let i = 1; i < S.estudios.length; i++) S.estudios[i].calidad += dif.rivales;
     T.generarInicial();
     const av = op.avatar || {};
-    S.avatar = { nom: av.nombre || 'Felipe', sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999 };
+    const esp = (av.especialidades || ['produccion', 'direccion', 'guion']).filter(function (x, i, a) { return D.oficio(x) && a.indexOf(x) === i; }).slice(0, 3);
+    S.avatar = { nom: (av.nombre || 'Felipe').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
+    const vis = D.visiones.filter(function (v) { return v.id === S.estudios[0].vision; })[0];
+    if (vis && vis.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);
     O.reindexar();
     noticia({ tipo: 'estudio', texto: 'Nace ' + S.estudios[0].nombre + ' en ' + pais.nombre + '. ' + M.era(anio) + '.', importante: true });
     // El mundo no arranca vacío: los rivales ya tienen obras en marcha
@@ -77,7 +80,7 @@ IA.juego = (function () {
     N.on('estreno', function (o) {
       const m = N.S.mercado;
       m.famMes[o.fam] = (m.famMes[o.fam] || 0) + 1;
-      if (o.est === 0) noticia({ tipo: 'estreno', texto: '«' + o.tit + '» llega a los cines.' });
+      if (o.est === 0) noticia({ tipo: 'estreno', texto: N.S.avatar.nom + ' presenta «' + o.tit + '»: llega a los cines.' });
     });
     N.on('obraTerminada', function (o) {
       if (o.est === 0) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });

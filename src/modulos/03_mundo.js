@@ -129,6 +129,37 @@ IA.mundo = (function () {
   const OCIO_CASA = [[1850, 0], [1920, 0.1], [1950, 0.3], [1976, 0.45], [1995, 0.55], [2007, 0.7], [2020, 0.85], [2050, 0.95], [2150, 1]];
   function ocioEnCasa(anio) { return N.interp(OCIO_CASA, anio); }
 
+  // ---------- Acceso a otros medios (radio, TV, internet, consolas) ----------
+  // Parte de la población con acceso en cada región. Aproximado; se verifica con fuentes en la V27. Lo usan
+  // la TV, la música y los videojuegos en sus versiones (V24, V30, V31); hoy se ve en Mundo → Población.
+  const ACCESO_MEDIOS = {
+    radio: {
+      nam: [[1920, 0], [1930, 0.4], [1940, 0.8], [1950, 0.95], [2150, 0.97]], eur: [[1922, 0], [1935, 0.3], [1950, 0.7], [1970, 0.95], [2150, 0.97]],
+      lat: [[1925, 0], [1950, 0.3], [1970, 0.6], [2000, 0.85], [2150, 0.9]], afr: [[1930, 0], [1960, 0.1], [1980, 0.4], [2000, 0.7], [2025, 0.8], [2150, 0.85]],
+      asi: [[1925, 0], [1950, 0.1], [1970, 0.4], [1990, 0.7], [2025, 0.85], [2150, 0.9]], oce: [[1923, 0], [1935, 0.5], [1950, 0.9], [2150, 0.97]],
+    },
+    tv: {
+      nam: [[1946, 0], [1950, 0.09], [1955, 0.65], [1960, 0.87], [1970, 0.95], [2150, 0.97]], eur: [[1950, 0], [1960, 0.3], [1970, 0.75], [1985, 0.95], [2150, 0.95]],
+      lat: [[1955, 0], [1970, 0.3], [1990, 0.75], [2010, 0.9], [2150, 0.92]], afr: [[1965, 0], [1990, 0.2], [2010, 0.45], [2025, 0.6], [2150, 0.85]],
+      asi: [[1958, 0], [1975, 0.25], [1995, 0.65], [2010, 0.85], [2150, 0.92]], oce: [[1956, 0], [1965, 0.6], [1975, 0.92], [2150, 0.96]],
+    },
+    internet: {
+      nam: [[1991, 0], [2000, 0.43], [2010, 0.72], [2020, 0.9], [2150, 0.98]], eur: [[1992, 0], [2000, 0.2], [2010, 0.65], [2020, 0.87], [2150, 0.98]],
+      lat: [[1995, 0], [2005, 0.15], [2015, 0.55], [2025, 0.8], [2150, 0.97]], afr: [[1996, 0], [2010, 0.1], [2020, 0.35], [2030, 0.6], [2150, 0.95]],
+      asi: [[1994, 0], [2005, 0.1], [2015, 0.4], [2025, 0.7], [2150, 0.97]], oce: [[1993, 0], [2000, 0.4], [2010, 0.75], [2020, 0.88], [2150, 0.98]],
+    },
+    consolas: {
+      nam: [[1972, 0], [1985, 0.2], [2000, 0.4], [2020, 0.6], [2150, 0.65]], eur: [[1975, 0], [1990, 0.15], [2005, 0.35], [2020, 0.5], [2150, 0.6]],
+      lat: [[1980, 0], [2000, 0.1], [2020, 0.3], [2150, 0.5]], afr: [[1985, 0], [2010, 0.03], [2025, 0.1], [2150, 0.4]],
+      asi: [[1975, 0], [1990, 0.08], [2010, 0.25], [2025, 0.45], [2150, 0.6]], oce: [[1974, 0], [1990, 0.2], [2010, 0.45], [2150, 0.6]],
+    },
+  };
+  function accesoMedio(medio, region, anio) {
+    if (medio === 'cine') return accesoCine(region, anio);
+    const t = ACCESO_MEDIOS[medio];
+    return t ? N.interp(t[region], anio) : 0;
+  }
+
   // ---------- Calendario y temporada ----------
   // Un factor semanal entre ×0,80 y ×1,40 (decidido) y bonos por género. Las estaciones dependen del hemisferio.
   const BASE_NORTE = [1.15, 0.85, 0.85, 0.85, 0.85, 0.85, 0.95, 0.85, 0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 0.95, 0.95, 0.95, 0.95, 0.95, 1.15, 1.15, 1.25, 1.25, 1.25, 1.25, 1.35, 1.3, 1.3, 1.3, 1.3, 1.1, 1.1, 1.1, 1.1, 0.8, 0.8, 0.8, 0.8, 0.9, 0.9, 0.9, 0.9, 0.95, 1.0, 1.0, 1.2, 0.95, 0.95, 0.95, 1.3, 1.4];
@@ -197,7 +228,7 @@ IA.mundo = (function () {
   return {
     GRUPOS: GRUPOS, poblacion: poblacion, poblacionMundial: poblacionMundial, edades: edades,
     ipc: ipc, aEpoca: aEpoca, aHoy: aHoy, inflacionAnual: inflacionAnual, IPC_2025: IPC_2025,
-    accesoCine: accesoCine, frecuenciaCine: frecuenciaCine, precioEntrada: precioEntrada,
+    accesoCine: accesoCine, accesoMedio: accesoMedio, frecuenciaCine: frecuenciaCine, precioEntrada: precioEntrada,
     precioEntrada2025: precioEntrada2025, publicoCine: publicoCine, ocioEnCasa: ocioEnCasa,
     temporada: temporada, bonoGenero: bonoGenero, nombreMes: nombreMes, fechaDeSemana: fechaDeSemana,
     era: era, decada: decada, tecnologia: tecnologia,
