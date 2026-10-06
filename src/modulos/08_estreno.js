@@ -212,7 +212,7 @@ IA.estreno = (function () {
   function semanasMinimas(o) {
     const est = N.S.estudios[o.est];
     let m = 0;
-    if (est && est.cad) Object.keys(est.cad).forEach(function (r) { const k = est.cad[r]; if (k.hasta > N.S.t) { const c = cadena(k.id); if (c && (!o.plan || o.plan.reg[r] !== 'retener')) m = Math.max(m, c.minimo); } });
+    if (est && est.cad) Object.keys(est.cad).forEach(function (r) { const k = est.cad[r]; if (k.hasta > N.S.t) { const c = cadena(k.id); if (c && (!o.plan || (o.plan.reg || {})[r] !== 'retener')) m = Math.max(m, c.minimo); } });
     return m;
   }
 

@@ -3848,6 +3848,20 @@ IA.obras = (function () {
       if (o.et !== 'terminada') return;
       // Ventanas terminadas de los rivales (V20): solo queda lo cobrado
       if (o.est !== 0 && o.vt && o.vt.fin && (o.vt.video || o.vt.tv || o.vt.streaming)) o.vt = { total: o.vt.total, cob: o.vt.cob, fin: 1 };
+      // Tus obras (V20): la mezcla de canales no se usa después del estreno y de las ventanas cerradas quedan sus cifras
+      if (o.est === 0 && t - (o.fe || 0) > 52 * 2) {
+        if (o.plan && o.plan.mix) delete o.plan.mix;
+        if (o.plan && o.plan.reg && Object.keys(o.plan.reg).every(function (r) { return o.plan.reg[r] === 'amplio'; })) delete o.plan.reg;
+        if (t - (o.fe || 0) > 52 * 25) ['plan', 'campana', 'cmD', 'cmP'].forEach(function (k) { delete o[k]; });
+        if (o.vt && o.vt.fin) ['video', 'tv', 'streaming'].forEach(function (k) {
+          const w = o.vt[k];
+          if (w && w.t0 !== undefined) {
+            const c = { total: Math.round(w.total + (w.prev || 0)) };
+            ['copias', 'esp', 'vistas', 'fmt'].forEach(function (x) { if (w[x] !== undefined) c[x] = w[x]; });
+            o.vt[k] = c;
+          }
+        });
+      }
       if (o.hs && (t - (o.fe || 0) > 52 * (o.est === 0 ? 30 : 2)) && !o.fav) delete o.hs;
       if (o.est !== 0 && t - (o.fe || 0) > 52 * 4 && o.eq) {
         BORRAR.forEach(function (k) { delete o[k]; });
@@ -4911,7 +4925,7 @@ IA.estreno = (function () {
   function semanasMinimas(o) {
     const est = N.S.estudios[o.est];
     let m = 0;
-    if (est && est.cad) Object.keys(est.cad).forEach(function (r) { const k = est.cad[r]; if (k.hasta > N.S.t) { const c = cadena(k.id); if (c && (!o.plan || o.plan.reg[r] !== 'retener')) m = Math.max(m, c.minimo); } });
+    if (est && est.cad) Object.keys(est.cad).forEach(function (r) { const k = est.cad[r]; if (k.hasta > N.S.t) { const c = cadena(k.id); if (c && (!o.plan || (o.plan.reg || {})[r] !== 'retener')) m = Math.max(m, c.minimo); } });
     return m;
   }
 
@@ -5229,7 +5243,7 @@ IA.ventanas = (function () {
       let abiertas = 0;
       VENTANAS.forEach(function (v) {
         const w = o.vt[v.id];
-        if (!w || w.n >= w.dura) return;
+        if (!w || w.t0 === undefined || w.n >= w.dura) return;
         abiertas++;
         if (t < w.t0) return;
         // Más al principio y menos al final (cada semana el 92 % de la anterior)
@@ -5279,8 +5293,10 @@ IA.ventanas = (function () {
     if (!o.vt) return [];
     return VENTANAS.filter(function (v) { return o.vt[v.id]; }).map(function (v) {
       const w = o.vt[v.id];
-      const estado = o.bov ? 'boveda' : w.n >= w.dura ? 'terminada' : N.S.t < w.t0 ? 'pendiente' : 'curso';
-      return { id: v.id, nombre: v.nombre + (v.id === 'video' && w.fmt ? ' (' + w.fmt + ')' : ''), estado: estado, t0: w.t0, cobrado: Math.round(w.pag), total: w.total,
+      // (las ventanas viejas quedan compactadas: solo su total y sus cifras, ya cobradas)
+      const cerrada = w.t0 === undefined || w.n >= w.dura;
+      const estado = o.bov && !cerrada ? 'boveda' : cerrada ? 'terminada' : N.S.t < w.t0 ? 'pendiente' : 'curso';
+      return { id: v.id, nombre: v.nombre + (v.id === 'video' && w.fmt ? ' (' + w.fmt + ')' : ''), estado: estado, t0: w.t0, cobrado: Math.round((w.pag !== undefined ? w.pag : w.total) + (w.prev || 0)), total: w.total + (w.prev || 0),
         dato: v.id === 'video' ? (w.copias || 0) + ' copias' : v.id === 'tv' ? (w.esp || 0) + ' espectadores' : (w.vistas || 0) + ' vistas',
         n: v.id === 'video' ? (w.copias || 0) : v.id === 'tv' ? (w.esp || 0) : (w.vistas || 0), unidad: v.id === 'video' ? 'copias' : v.id === 'tv' ? 'espectadores' : 'vistas' };
     });
@@ -5347,7 +5363,9 @@ IA.ventanas = (function () {
     const total = valorReestreno(o, 1) * 0.6;
     o.vt = o.vt || { total: 0, cob: 0 };
     o.vt.fin = 0;
-    o.vt.video = { t0: N.S.t + 2, dura: 26, total: total, pag: 0, n: 0 };
+    const antes = o.vt.video || {};
+    // La edición nueva se cobra sola; las copias se suman a las de antes
+    o.vt.video = { t0: N.S.t + 2, dura: 26, total: Math.round(total), pag: 0, n: 0, copias: antes.copias || 0, prev: Math.round((antes.total || 0) + (antes.prev || 0)) };
     o.vt.total = Math.round((o.vt.total || 0) + total);
     N.emit('noticia', { tipo: 'estudio', texto: 'Remasterizas «' + o.tit + '» en ' + f.id + '.' });
     return '';
@@ -12337,7 +12355,7 @@ IA.distribucion = (function () {
     if (!p || p.rival) return '';
     if (p.via && p.via !== 'cines') return '<p class="nota">Estreno directo en ' + (p.via === 'video' ? 'video' : 'streaming') + '.</p>';
     const grupos = {};
-    D.regiones.forEach(function (r) { const m = p.reg[r.id] || 'amplio'; (grupos[m] = grupos[m] || []).push(r.nombre); });
+    D.regiones.forEach(function (r) { const m = (p.reg || {})[r.id] || 'amplio'; (grupos[m] = grupos[m] || []).push(r.nombre); });
     const dob = Object.keys(p.dob || {}).length;
     return '<p class="nota">Plan: ' + Object.keys(grupos).map(function (m) { return nombreModo(m).toLowerCase() + ' en ' + grupos[m].join(', '); }).join(' · ') +
       (dob ? ' · ' + dob + ' doblaje' + (dob > 1 ? 's' : '') : '') + ((p.promo || []).length ? ' · promociones: ' + p.promo.map(function (id) { return ES.promo(id).nombre.toLowerCase(); }).join(', ') : '') +

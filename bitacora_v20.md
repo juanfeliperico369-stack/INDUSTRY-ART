@@ -1,7 +1,7 @@
 # Bitácora V20 · Lanzamiento
 Fecha: 6 de octubre de 2026 · Chat: V20 (Claude Code)
 
-Archivo del juego: `INDUSTRY_ART_v20.html` (@TAM@ KB, un solo archivo, funciona sin internet). La V16, la V17, la V18 y la V19 quedan en el repositorio para comparar, y sus partidas guardadas se abren en la V20.
+Archivo del juego: `INDUSTRY_ART_v20.html` (844 KB, un solo archivo, funciona sin internet). La V16, la V17, la V18 y la V19 quedan en el repositorio para comparar, y sus partidas guardadas se abren en la V20.
 
 Fuentes de esta versión: el Plan Maestro (bloque 6 · Lanzamiento, ventanas y métricas, y las filas del bloque 3 que entran en la V20: festividades, estaciones, tendencias por región, idiomas y doblaje) y tus respuestas a la V19:
 
@@ -75,7 +75,67 @@ Marcadas con (No.) las que todavía no me confirmaste:
 - Cada obra guarda su plan de lanzamiento y sus ventanas.
 - La misma semilla con las mismas decisiones da la misma partida, también guardando y cargando a mitad de camino (comprobado).
 
-@BOT@
+## Bot de pruebas
+
+Corrido en un navegador real (Chromium) con `node tools/bot.js --hasta 2150`: 3 estrategias (prudente, normal, agresiva) × inicio en 1900 y en 2000 × 2 semillas fijas = 12 partidas hasta 2150. El bot ahora también arma el plan de lanzamiento (mezcla recomendada, doblajes), manda directo a video o streaming las obras muy flojas, reestrena clásicos y firma con una cadena de su región cuando le sobra caja. **Errores del juego: 0. Quiebras: 0. Pruebas de reglas: 70 de 70 pasan** (eran 57; se sumaron 13 de la V20). Informe completo en `pruebas/informe_bot_v20.md`.
+
+Estrategia normal ("estudio bien llevado"), dos semillas por inicio:
+
+| Meta | Objetivo | Desde 1900 | Desde 2000 |
+|---|---|---|---|
+| Multiplicador mediano | ×1,5 a ×2,5 | ✅ ×2,28 y ×2,27 | ✅ ×2,28 y ×2,25 |
+| Obras sobre ×5 | 5 % o menos | ⚠️ 5 % y 5,3 % | ⚠️ 5,2 % y 5,4 % |
+| Obras que pierden | 30 % a 45 % | ⚠️ 27,7 % y 28,2 % | ⚠️ 28,4 % y 28,5 % |
+| Crecimiento real de la caja | 5 % a 20 % al año | ✅ 17,3 % y 15 % | ✅ 11,5 % y 11,2 % |
+| Premios principales del jugador | 30 % o menos | ✅ 0,6 % y 0,6 % | ✅ 1,2 % y 0,7 % |
+| Años de independiente a major | 15 a 30 | ✅ 30 y 29 | ⚠️ 11 y 9 |
+| Cuota de mercado | menos de 35 % | ✅ 16,3 % y 16,8 % máx. | ✅ 16,2 % y 14,2 % máx. |
+
+- **Las tres estrategias, 0 quiebras.** El crecimiento desde 1900 bajó (21-24 % en la V19, 15-17 % ahora) porque casi la mitad del dinero llega por ventanas, meses o años después.
+- **Lanzamiento** (estrategia normal desde 1900, unas 5.500 obras hasta 2150): unas 3.500 obras certificadas en video (1.520 oro, 1.364 platino, 701 diamante), 112 reestrenos, y las ventanas son el 52 % de lo que ganan sus obras en toda la partida. La agresiva llega a diamante con 1.600 obras; la prudente manda algunas obras flojas directo a video.
+- **Las 13 nuevas pruebas de reglas**: las festividades suben a su familia en su región, Cannes existe desde 1946, las ventanas llegan en su año (TV 1955, video 1977, streaming 2007), directo a video desde 1980 y a streaming desde 2010, las certificaciones empiezan en 1979 y suben de oro a diamante, antes de la TV todo sale de la taquilla, retener una región no estrena allí y abarata la campaña, el escalonado llega 4 semanas después, doblar evita perder público, la mezcla recomendada rinde al menos como la de siempre, el reestreno necesita 7 años, el diseñador de arte y tecnología pesa en vestuario y los rivales también guardan sets.
+
+**Lo que encontró la prueba profunda y se arregló:**
+- **Las ventanas pagaban de más**: suponían que una obra típica tiene 58 de público, pero en el juego andan por 70-74; con eso las ventanas regalaban un 20 % extra. Ahora están centradas en 72.
+- **Las festividades favorecían solo a las películas simuladas** frente a las de "otras productoras": ahora reparten el público entre géneros y la temporada decide cuánta gente va al cine.
+- **Quiebra de un estudio agresivo que empezaba en 2000**: con casi la mitad del dinero llegando meses después por video y TV, se quedaba sin caja. Se arregló con el **adelanto del 35 %** al abrir cada ventana y con un bot que hace campañas medianas cuando tiene poca caja o la obra es floja.
+- **La mezcla de canales casi no cambiaba nada** (±0,5 %): se rehízo para que apuntar a las edades de la obra importe (de −40 % a +8 %).
+- **Las participaciones de los talentos** solo cobraban de la taquilla: ahora también de las ventanas.
+- **El guardado crecía de más** (2,19 MB a los 150 años): ahora las obras viejas sueltan la mezcla de canales y el detalle de sus ventanas cerradas (quedan sus cifras): 1,79 MB.
+- Una partida vieja (V19) no recibe ventanas por las obras que ya cobraron todo en cines.
+
+## Rendimiento
+
+Medido en el navegador real; "CPU ×4" simula un celular modesto como el Infinix.
+
+| Medida | Meta | Resultado |
+|---|---|---|
+| Avanzar una semana (simulación) | menos de 30 ms | 5 ms de mediana; la peor semana (cierre de año) 84 ms |
+| Avanzar una semana con pantalla, CPU ×4 (promedio de un trimestre) | menos de 30 ms | Estudio 16-22 ms · Obras 13-15 · Mundo 16 · Negocio 26-28 · Talento 4 |
+| Simular un año | menos de 1,5 s | 0,26 s (0,56 s con CPU ×4) |
+| Abrir el juego, CPU ×4 | menos de 2 s | 0,69 s |
+| Guardado tras 150 años, comprimido | menos de 2 MB | 1,79 MB (el mayor, agresiva desde 2000, medido de nuevo tras compactar; la corrida del bot, antes de compactar, dio 2,19 MB) |
+| Memoria | menos de 200 MB | 179 MB |
+| Tamaño del archivo | menos de 1,5 MB | 844 KB (768 KB en la V19) |
+
+Pantallas: capturas automáticas de 39 pantallas (9 nuevas: el plan de lanzamiento con sus regiones, su campaña y sus promociones, el dinero en cadena, las ventanas y el catálogo, el calendario, las tendencias por región y la distribución) en 390×844, 844×390 y 1366×768 (`pruebas/capturas/`), con 0 controles de menos de 44 px, 0 textos de menos de 14 px y sin desplazamiento horizontal.
+
+Pruebas de punta a punta en el navegador:
+- **V20**: abrir el plan de lanzamiento; cambiar modos por región (retener, escalonado, limitado), quitar un doblaje, mover la mezcla de canales, sumar alfombra roja y juguetes, elegir semana y campaña; confirmar; ver la ficha con el plan; calendario y tendencias por región; estrenar y terminar; ventanas de VHS y TV con copias y espectadores; dinero en cadena; reestrenar, guardar en la bóveda y sacarla; firmar con una cadena; construir un cine propio; estreno directo a video; finanzas con las categorías nuevas; guardar y cargar: sin errores.
+- **V19, V18 y V17** (cine a fondo, talentos, fábrica de ideas): sin errores; solo los avisos esperados del juego.
+- **Migración**: una partida jugada 12 años en la V19 se abre en la V20 y sigue 3 años más sin errores.
+
+Semana · Año · Guardado · Archivo: 5 ms · 0,26 s · 1,79 MB · 844 KB
+
+## Errores conocidos
+
+- **Obras que pierden**: 27,7 a 28,5 % en la estrategia normal (meta: 30 a 45 %) y obras sobre ×5 entre 5 y 5,4 % (meta: 5 % o menos). El juego quedó un poco más generoso que en la V19. Probé a endurecer el mercado (las "otras productoras" más fuertes) y las metas quedaban en verde, pero un estudio agresivo que empieza en 2000 con poco capital quebraba; preferí no arriesgar tu prueba larga. Lo afino en la V21 con lo que me cuentes.
+- **Años de independiente a major** desde 2000: 9 y 11 (meta 15 a 30), como en las versiones anteriores. Es la condición de la V28.
+- **Empezar en 2000 con el capital mínimo y gastar mucho en campañas es difícil**: casi la mitad del dinero llega después, por video y TV. Préstamos y adelantos de distribuidoras llegan en la V28.
+- **Rivales rescatados**: los rivales más chicos siguen viviendo de los inversionistas. Sus quiebras y fusiones llegan en la V26.
+- La pantalla de Negocio con la CPU ×4 tarda 26-28 ms por semana: dentro de la meta, pero cerca.
+- Acentos de los talentos: siguen sin efecto (el doblaje sí cuenta).
+
 
 ## Qué probar en el celular
 

@@ -367,6 +367,20 @@ IA.obras = (function () {
       if (o.et !== 'terminada') return;
       // Ventanas terminadas de los rivales (V20): solo queda lo cobrado
       if (o.est !== 0 && o.vt && o.vt.fin && (o.vt.video || o.vt.tv || o.vt.streaming)) o.vt = { total: o.vt.total, cob: o.vt.cob, fin: 1 };
+      // Tus obras (V20): la mezcla de canales no se usa después del estreno y de las ventanas cerradas quedan sus cifras
+      if (o.est === 0 && t - (o.fe || 0) > 52 * 2) {
+        if (o.plan && o.plan.mix) delete o.plan.mix;
+        if (o.plan && o.plan.reg && Object.keys(o.plan.reg).every(function (r) { return o.plan.reg[r] === 'amplio'; })) delete o.plan.reg;
+        if (t - (o.fe || 0) > 52 * 25) ['plan', 'campana', 'cmD', 'cmP'].forEach(function (k) { delete o[k]; });
+        if (o.vt && o.vt.fin) ['video', 'tv', 'streaming'].forEach(function (k) {
+          const w = o.vt[k];
+          if (w && w.t0 !== undefined) {
+            const c = { total: Math.round(w.total + (w.prev || 0)) };
+            ['copias', 'esp', 'vistas', 'fmt'].forEach(function (x) { if (w[x] !== undefined) c[x] = w[x]; });
+            o.vt[k] = c;
+          }
+        });
+      }
       if (o.hs && (t - (o.fe || 0) > 52 * (o.est === 0 ? 30 : 2)) && !o.fav) delete o.hs;
       if (o.est !== 0 && t - (o.fe || 0) > 52 * 4 && o.eq) {
         BORRAR.forEach(function (k) { delete o[k]; });

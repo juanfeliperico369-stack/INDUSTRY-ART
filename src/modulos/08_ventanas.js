@@ -133,7 +133,7 @@ IA.ventanas = (function () {
       let abiertas = 0;
       VENTANAS.forEach(function (v) {
         const w = o.vt[v.id];
-        if (!w || w.n >= w.dura) return;
+        if (!w || w.t0 === undefined || w.n >= w.dura) return;
         abiertas++;
         if (t < w.t0) return;
         // Más al principio y menos al final (cada semana el 92 % de la anterior)
@@ -183,8 +183,10 @@ IA.ventanas = (function () {
     if (!o.vt) return [];
     return VENTANAS.filter(function (v) { return o.vt[v.id]; }).map(function (v) {
       const w = o.vt[v.id];
-      const estado = o.bov ? 'boveda' : w.n >= w.dura ? 'terminada' : N.S.t < w.t0 ? 'pendiente' : 'curso';
-      return { id: v.id, nombre: v.nombre + (v.id === 'video' && w.fmt ? ' (' + w.fmt + ')' : ''), estado: estado, t0: w.t0, cobrado: Math.round(w.pag), total: w.total,
+      // (las ventanas viejas quedan compactadas: solo su total y sus cifras, ya cobradas)
+      const cerrada = w.t0 === undefined || w.n >= w.dura;
+      const estado = o.bov && !cerrada ? 'boveda' : cerrada ? 'terminada' : N.S.t < w.t0 ? 'pendiente' : 'curso';
+      return { id: v.id, nombre: v.nombre + (v.id === 'video' && w.fmt ? ' (' + w.fmt + ')' : ''), estado: estado, t0: w.t0, cobrado: Math.round((w.pag !== undefined ? w.pag : w.total) + (w.prev || 0)), total: w.total + (w.prev || 0),
         dato: v.id === 'video' ? (w.copias || 0) + ' copias' : v.id === 'tv' ? (w.esp || 0) + ' espectadores' : (w.vistas || 0) + ' vistas',
         n: v.id === 'video' ? (w.copias || 0) : v.id === 'tv' ? (w.esp || 0) : (w.vistas || 0), unidad: v.id === 'video' ? 'copias' : v.id === 'tv' ? 'espectadores' : 'vistas' };
     });
@@ -251,7 +253,9 @@ IA.ventanas = (function () {
     const total = valorReestreno(o, 1) * 0.6;
     o.vt = o.vt || { total: 0, cob: 0 };
     o.vt.fin = 0;
-    o.vt.video = { t0: N.S.t + 2, dura: 26, total: total, pag: 0, n: 0 };
+    const antes = o.vt.video || {};
+    // La edición nueva se cobra sola; las copias se suman a las de antes
+    o.vt.video = { t0: N.S.t + 2, dura: 26, total: Math.round(total), pag: 0, n: 0, copias: antes.copias || 0, prev: Math.round((antes.total || 0) + (antes.prev || 0)) };
     o.vt.total = Math.round((o.vt.total || 0) + total);
     N.emit('noticia', { tipo: 'estudio', texto: 'Remasterizas «' + o.tit + '» en ' + f.id + '.' });
     return '';

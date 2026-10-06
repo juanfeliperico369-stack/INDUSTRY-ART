@@ -190,7 +190,7 @@ IA.distribucion = (function () {
     if (!p || p.rival) return '';
     if (p.via && p.via !== 'cines') return '<p class="nota">Estreno directo en ' + (p.via === 'video' ? 'video' : 'streaming') + '.</p>';
     const grupos = {};
-    D.regiones.forEach(function (r) { const m = p.reg[r.id] || 'amplio'; (grupos[m] = grupos[m] || []).push(r.nombre); });
+    D.regiones.forEach(function (r) { const m = (p.reg || {})[r.id] || 'amplio'; (grupos[m] = grupos[m] || []).push(r.nombre); });
     const dob = Object.keys(p.dob || {}).length;
     return '<p class="nota">Plan: ' + Object.keys(grupos).map(function (m) { return nombreModo(m).toLowerCase() + ' en ' + grupos[m].join(', '); }).join(' · ') +
       (dob ? ' · ' + dob + ' doblaje' + (dob > 1 ? 's' : '') : '') + ((p.promo || []).length ? ' · promociones: ' + p.promo.map(function (id) { return ES.promo(id).nombre.toLowerCase(); }).join(', ') : '') +
