@@ -403,7 +403,7 @@ IA.creacion = (function () {
     if (b.guionPagado && b.eq.guion === ta.id) return '';
     const n = estadoNegociacion(b, ta.id);
     const pct = (b.pctT && b.pctT[ta.id]) || 0;
-    const ops = [0, 5, 10, 15].map(function (p) { return '<option value="' + p + '"' + (p === pct ? ' selected' : '') + '>' + (p ? p + ' % de la taquilla · salario ' + dinero(T.salarioCon(T.tarifaPara(ta, 0), p)) : 'Salario fijo · ' + dinero(T.tarifaPara(ta, 0))) + '</option>'; }).join('');
+    const ops = [0, 5, 10, 15].map(function (p) { return '<option value="' + p + '"' + (p === pct ? ' selected' : '') + '>' + (p ? p + ' % de lo que gane el estudio · salario ' + dinero(T.salarioCon(T.tarifaPara(ta, 0), p)) : 'Salario fijo · ' + dinero(T.tarifaPara(ta, 0))) + '</option>'; }).join('');
     return '<div class="fila envolver" style="margin:2px 0"><label class="campo crece" style="margin:0"><span>Contrato</span><select data-c="crPct" data-k="' + ta.id + '">' + ops + '</select></label>' +
       (n && !n.ok ? '<span class="mal chico">' + esc(n.r.texto) + '</span>' : n && n.r.estado !== 'acepta' ? '<span class="bien chico">' + esc(n.r.texto) + ' · de acuerdo</span>' : '<span class="chico tenue">Firma</span>') + '</div>';
   }
@@ -420,6 +420,7 @@ IA.creacion = (function () {
       h += '<label class="campo"><span>' + (r === 'efectos' ? 'Efectos' : 'Animación') + ': ¿talento propio o estudio externo?</span>' + sel('ext.' + r, ops, (b.ext && b.ext[r]) || '') + '</label>';
     });
     if (!Rr.necesita(b, 'efectos')) h += '<p class="nota">Con efectos normales, el diseñador de arte se ocupa de ellos; desde «Bastantes», o con CGI o efectos prácticos, conviene un supervisor de efectos.</p>';
+    h += '<p class="nota">El diseñador de arte y tecnología está a cargo de vestuario, efectos y animación: aunque contrates especialistas o un estudio externo, su nota pesa una cuarta parte en esas áreas.</p>';
     h += O.rolesDe(b).map(function (r) {
       const ta = T.porId(b.eq[r]);
       const fijo = r === 'guion' && b.guionPagado;

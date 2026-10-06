@@ -317,6 +317,8 @@ IA.datos = (function () {
     { id: 'backlot', nombre: 'Backlot (calles y sets)', desde: 1910, costo: 1.4, capacidad: 2, ahorro: 0.08, efecto: '+2 proyectos a la vez y −8 % en producción' },
     { id: 'foso', nombre: 'Foso de agua', desde: 1920, costo: 0.5, bono: { arte: 3 }, familias: ['AA', 'IM'], efecto: '+3 en acción e imaginación' },
     { id: 'captura', nombre: 'Estudio de captura', desde: 1995, costo: 0.7, bono: { arte: 4 }, familias: ['IM', 'AA', 'FJ'], efecto: '+4 en imaginación, acción y familia' },
+    // V20: cines propios en la región de tu sede (hasta 3 cuentan)
+    { id: 'cine', nombre: 'Cadena de cines propia', desde: 1905, costo: 1.2, efecto: 'En tu región: tus obras en 12 % más salas, te quedas con 12 puntos más de cada entrada y cobras una parte de las entradas de las obras ajenas' },
     // V19: tierras propias para rodar en locación (más barato, menos incidentes y una semana menos en ese terreno)
     { id: 't_ciudad', nombre: 'Manzana de ciudad', terreno: 'ciudad', desde: 1910, costo: 0.55, efecto: 'Rodar en la ciudad: más barato, más seguro y una semana menos' },
     { id: 't_pradera', nombre: 'Pradera propia', terreno: 'pradera', desde: 1905, costo: 0.35, efecto: 'Rodar en la pradera: más barato, más seguro y una semana menos' },
@@ -327,7 +329,7 @@ IA.datos = (function () {
     { id: 't_artico', nombre: 'Base en el ártico', terreno: 'artico', desde: 1935, costo: 0.7, efecto: 'Rodar en el ártico: más barato, más seguro y una semana menos' },
     { id: 't_mar', nombre: 'Costa y muelle propios', terreno: 'mar', desde: 1915, costo: 0.6, efecto: 'Rodar en el mar: más barato, más seguro y una semana menos' },
   ];
-  const MAX_PISOS = 10, MAX_TERRENOS = 8;
+  const MAX_PISOS = 10, MAX_TERRENOS = 10;
 
   // ---------- Premios básicos de la V16 (la versión completa llega en la V22) ----------
   const premios = {

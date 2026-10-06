@@ -3,8 +3,8 @@
 El juego se entrega como **un solo archivo HTML** (`INDUSTRY_ART_vXX.html`) que funciona sin internet.
 Aquí vive el mismo código separado por módulos para que cualquier chat lo lea y lo continúe.
 
-- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v19.html`.
-- `python3 tools/desarmar.py INDUSTRY_ART_v19.html` vuelve a separar un HTML armado en `src/`.
+- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v20.html`.
+- `python3 tools/desarmar.py INDUSTRY_ART_v20.html` vuelve a separar un HTML armado en `src/`.
 
 ## Estructura
 
@@ -45,5 +45,10 @@ IA.nombre = (function () {
 - Cómo se hace cada película (V19 · Cine a fondo: departamentos con nota, reparto del presupuesto, método,
   terreno, país, sets reutilizables, estilos de producción, estudios externos, incidentes, dilemas, prueba de público
   y línea de producción) vive en `07_rodaje.js`; `07_produccion.js` lo usa semana a semana.
+- El lanzamiento (V20): el plan de estreno de cada obra (modo por región, doblaje, mezcla de canales, promociones,
+  cadenas de cines con contrato y cines propios) vive en `08_estreno.js`; las ventanas después de los cines (video
+  doméstico con sus formatos y certificaciones, TV, streaming, estrenos directos, reestrenos, remasterizaciones y la
+  bóveda) en `08_ventanas.js`; las festividades, estaciones y tendencias por región en `03_mundo.js`. Su pantalla
+  (plan de lanzamiento, dinero en cadena, ventanas, catálogo, distribución, calendario) está en `16_distribucion.js`.
 - Los módulos de simulación (núcleo, mundo, economía, talentos, obras, producción, lanzamiento, rivales, premios,
   negocio) **no tocan el DOM**; solo la interfaz, el arte y el guardado lo hacen.

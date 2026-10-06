@@ -79,6 +79,12 @@ IA.rivales = (function () {
     while (b.pp * 1.4 > est.caja && op.escala > AJ.minEscala) { op.escala--; b = O.borrador(est.id, op); }
     const pobre = b.pp * 2 > est.caja;
     b.prest = prestigio ? 1 : 0;
+    // Cómo filman (V20): el método y el terreno recomendados y, si tienen uno que sirva, un set guardado
+    const R = IA.rodaje;
+    b.met = R.metodoRecomendado(b, anio); b.ter = R.terrenoRecomendado(b); b.pst = 'clasico';
+    const sets = R.usaSet(b) ? R.setsQueSirven(b) : [];
+    if (sets.length && sets[0].q >= 50) b.setR = sets[0].id;
+    O.recalcular(b);
     // La calidad de su equipo depende de su estilo más que de su tamaño (evita la espiral del más chico)
     O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4) * (pobre ? AJ.ambPobre : 1), prestigio ? 2 : 4);
     if (!O.equipoCompleto(b)) return null;

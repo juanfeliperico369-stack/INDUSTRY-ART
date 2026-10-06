@@ -264,12 +264,15 @@ IA.juego = (function () {
     noticia({ tipo: 'estudio', texto: 'Compras el guion «' + g.idea.tit + '», de ' + g.nomAutor + '.' });
     return '';
   }
-  function programarEstreno(o, t, nivM) {
+  function programarEstreno(o, t, nivM, plan) {
     if (o.et !== 'lista' || o.est !== 0) return 'La obra no está lista.';
     if (o.prog) return 'La obra ya tiene fecha de estreno.';
-    const cm = E.marketingTipico(N.anio(t)) * D.nivelesMarketing[nivM].mult;
-    if (N.S.estudios[0].caja < cm) return 'No alcanza la caja para esa campaña.';
-    L.programar(o, t, nivM, NG.contexto());
+    const p = IA.estreno.normalizar(o, plan, N.anio(t));
+    if (p.via !== 'cines' && !IA.ventanas.viasDirectas(N.anio(t)).some(function (v) { return v.id === p.via; })) return 'Esa vía de estreno todavía no existe.';
+    if (p.via === 'cines' && Object.keys(p.reg).every(function (r) { return p.reg[r] === 'retener'; })) return 'Si retienes todas las regiones, no hay estreno en cines: elige al menos una o estrena directo.';
+    const c = IA.estreno.costos(o, p, nivM, N.anio(t));
+    if (N.S.estudios[0].caja < c.total) return 'No alcanza la caja para ese plan.';
+    L.programar(o, t, nivM, NG.contexto(), p);
     return '';
   }
 
@@ -281,6 +284,7 @@ IA.juego = (function () {
     const antes = { caja: S.estudios[0].caja, t: S.t };
     PR.semana(ctx);
     L.semana(ctx);
+    IA.ventanas.semana(ctx);
     NG.semana();
     const ceremonia = PM.semana();
     academia();
@@ -292,9 +296,11 @@ IA.juego = (function () {
       let tot = 0;
       Object.keys(fm).forEach(function (k) { tot += fm[k]; });
       M.actualizarTendencias(fm, tot);
+      M.actualizarTendenciasRegion();
       S.mercado.famMes = {};
       R.mensual(NG.contextoDe(1));
       T.mensual(NG.contexto()); // salarios de los contratos exclusivos
+      IA.estreno.mensual(NG.contexto()); // cadenas de cines y cines propios (V20)
       // Cada tres meses llegan guiones nuevos al mercado
       if (N.mes(S.t) % 3 === 0) IA.ideas.renovarGuiones();
     }
@@ -304,6 +310,7 @@ IA.juego = (function () {
       R.anual();
       T.anual();
       T.exclusivosRivales();
+      IA.ventanas.anual();
       O.compactar();
       D.cronologia.forEach(function (c) { if (c[0] === N.anio()) noticia({ tipo: 'historia', texto: c[1], importante: true }); });
       if (S.fin.hist.length) N.emit('finAnio', S.fin.hist[S.fin.hist.length - 1]);

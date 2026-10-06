@@ -93,8 +93,8 @@ IA.produccion = (function () {
           const ns = R.notas(o);
           o.notas = {};
           ns.forEach(function (n) { o.notas[n.dep] = n.v; });
-          R.guardarSet(o);
         }
+        R.guardarSet(o); // también los rivales guardan sus sets (V20)
         o.tLista = N.S.t;
         T.liberar(O.idsEquipo(o));
         N.emit('obraLista', o);

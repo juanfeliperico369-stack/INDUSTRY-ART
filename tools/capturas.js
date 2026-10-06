@@ -4,7 +4,7 @@
  * horizontal) y 1366×768 (PC). Guarda los PNG en pruebas/capturas/ y revisa que ningún control mida menos de
  * 44 px, que ningún texto mida menos de 14 px y que no haya desplazamiento horizontal.
  *
- * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v19.html]
+ * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v20.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 
 const RAIZ = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
-const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v19.html');
+const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v20.html');
 const SALIDA = path.join(RAIZ, 'pruebas', 'capturas');
 const TAMANOS = [[390, 844, 'celular_vertical'], [844, 390, 'celular_horizontal'], [1366, 768, 'pc']];
 
@@ -38,6 +38,13 @@ const PANTALLAS = [
   ['08b_ficha_produccion', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0] || IA.n.S.obras.filter((x) => x.est === 0 && x.lp).pop(); if (o) { IA.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Producción')[0]; if (h) h.scrollIntoView(); } }); }],
   ['08c_dilema', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = { id: 'escenaClave', t: IA.n.S.t, n: { d: o.eq.direccion } }; IA.creacion.abrirDecision(o.id); } }); }],
   ['08d_prueba_publico', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = null; o.prueba = { p: 57, com: ['La música emociona.', 'El ritmo decae a la mitad.'], t: IA.n.S.t }; IA.creacion.abrirDecision(o.id); } }); }],
+  // V20 · Lanzamiento: el plan de estreno, el dinero en cadena y las ventanas
+  ['08e_plan_lanzamiento', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.prueba = null; o.dil = null; IA.distribucion.abrir(o.id); } }); }],
+  ['08f_plan_regiones', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Estreno por región')[0]; if (h) h.scrollIntoView(); }); }],
+  ['08g_plan_campana', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h4')].filter((x) => x.textContent.indexOf('Mezcla de canales') === 0)[0]; if (h) h.scrollIntoView(); }); }],
+  ['08h_plan_promociones', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Promociones')[0]; if (h) h.scrollIntoView(); }); }],
+  ['08i_ficha_dinero', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada' && x.vt).sort((a, b) => b.bruto - a.bruto)[0]; if (o) { IA.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Dinero en cadena')[0]; if (h) h.scrollIntoView(); } }); }],
+  ['08j_ficha_catalogo', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Ventanas')[0]; if (h) h.scrollIntoView(); }); }],
   ['09_talento', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('talento'); }); }],
   ['10_ficha_talento', async (p) => { await p.evaluate(() => { const t = IA.n.S.talentos.filter((x) => !x.ret).sort((a, b) => b.fama - a.fama)[0]; IA.ui.acciones.verTalento(String(t.id)); }); }],
   ['11_mundo_cartelera', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('mundo', 'cartelera'); }); }],
@@ -45,9 +52,12 @@ const PANTALLAS = [
   ['13_mundo_premios', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'premios')); }],
   ['13b_mundo_mapa', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'mapa')); }],
   ['13c_mundo_taxonomia', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'taxonomia')); }],
+  ['13d_mundo_calendario', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'calendario')); }],
+  ['13e_mundo_tendencias', async (p) => { await p.evaluate(() => { IA.ui.irA('mundo', 'tendencias'); const h = [...document.querySelectorAll('#vista h3')].filter((x) => x.textContent === 'Por región')[0]; if (h) h.scrollIntoView(); }); }],
   ['14_negocio_finanzas', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'finanzas')); }],
   ['15_negocio_construcciones', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.prueba = null; } IA.ui.irA('negocio', 'estudio'); }); }],
   ['15b_almacen_sets', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#vista h3')].filter((x) => x.textContent.indexOf('Almacén') === 0)[0]; if (h) h.scrollIntoView(); }); }],
+  ['15c_negocio_distribucion', async (p) => { await p.evaluate(() => { window.scrollTo(0, 0); IA.ui.irA('negocio', 'distribucion'); }); }],
   ['16_ajustes', async (p) => { await p.evaluate(() => IA.ui.acciones.abrirAjustes()); }],
 ];
 
@@ -98,7 +108,7 @@ async function medir(p) {
     await p.close();
   }
   await navegador.close();
-  let md = '# Capturas automáticas · INDUSTRY ART V19\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
+  let md = '# Capturas automáticas · INDUSTRY ART V20\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
   resumen.filter((r) => r.pantalla).forEach((r) => { md += `| ${r.tamano} | ${r.pantalla} | ${r.controles}${r.controles ? ' (' + r.detalle.join(', ') + ')' : ''} | ${r.textos} | ${r.desborde ? 'sí' : 'no'} |\n`; });
   const errores = resumen.filter((r) => r.errores);
   md += '\nErrores de página: ' + (errores.length ? errores.map((r) => r.tamano + ': ' + r.errores.join('; ')).join(' / ') : 'ninguno') + '\n';

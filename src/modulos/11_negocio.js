@@ -5,10 +5,11 @@
 IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
-  const INGRESOS = ['taquilla'];
-  const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas'];
+  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion'];
+  const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'distribucion', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas'];
   const NOMBRES = {
-    taquilla: 'Taquilla (parte del estudio)', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
+    taquilla: 'Taquilla (parte del estudio)', video: 'Video doméstico', tv: 'Televisión', streaming: 'Streaming', merchandising: 'Juguetes y coleccionables',
+    reestrenos: 'Reestrenos', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
     personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas',
   };
   function libroVacio() { return { ing: {}, gas: {} }; }

@@ -1,4 +1,4 @@
-# Capturas automáticas · INDUSTRY ART V19
+# Capturas automáticas · INDUSTRY ART V20
 
 | Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |
 |---|---|---|---|---|
@@ -21,6 +21,12 @@
 | 390x844 | 08b_ficha_produccion | 0 | 0 | no |
 | 390x844 | 08c_dilema | 0 | 0 | no |
 | 390x844 | 08d_prueba_publico | 0 | 0 | no |
+| 390x844 | 08e_plan_lanzamiento | 0 | 7 | no |
+| 390x844 | 08f_plan_regiones | 0 | 7 | no |
+| 390x844 | 08g_plan_campana | 0 | 7 | no |
+| 390x844 | 08h_plan_promociones | 0 | 7 | no |
+| 390x844 | 08i_ficha_dinero | 0 | 0 | no |
+| 390x844 | 08j_ficha_catalogo | 0 | 0 | no |
 | 390x844 | 09_talento | 0 | 0 | no |
 | 390x844 | 10_ficha_talento | 0 | 0 | no |
 | 390x844 | 11_mundo_cartelera | 0 | 0 | no |
@@ -28,9 +34,12 @@
 | 390x844 | 13_mundo_premios | 0 | 0 | no |
 | 390x844 | 13b_mundo_mapa | 0 | 0 | no |
 | 390x844 | 13c_mundo_taxonomia | 0 | 0 | no |
+| 390x844 | 13d_mundo_calendario | 0 | 0 | no |
+| 390x844 | 13e_mundo_tendencias | 0 | 0 | no |
 | 390x844 | 14_negocio_finanzas | 0 | 0 | no |
 | 390x844 | 15_negocio_construcciones | 0 | 0 | no |
 | 390x844 | 15b_almacen_sets | 0 | 0 | no |
+| 390x844 | 15c_negocio_distribucion | 0 | 0 | no |
 | 390x844 | 16_ajustes | 0 | 0 | no |
 | 844x390 | 01_portada | 0 | 0 | no |
 | 844x390 | 02_nueva_partida | 0 | 0 | no |
@@ -51,6 +60,12 @@
 | 844x390 | 08b_ficha_produccion | 0 | 0 | no |
 | 844x390 | 08c_dilema | 0 | 0 | no |
 | 844x390 | 08d_prueba_publico | 0 | 0 | no |
+| 844x390 | 08e_plan_lanzamiento | 0 | 7 | no |
+| 844x390 | 08f_plan_regiones | 0 | 7 | no |
+| 844x390 | 08g_plan_campana | 0 | 7 | no |
+| 844x390 | 08h_plan_promociones | 0 | 7 | no |
+| 844x390 | 08i_ficha_dinero | 0 | 0 | no |
+| 844x390 | 08j_ficha_catalogo | 0 | 0 | no |
 | 844x390 | 09_talento | 0 | 0 | no |
 | 844x390 | 10_ficha_talento | 0 | 0 | no |
 | 844x390 | 11_mundo_cartelera | 0 | 0 | no |
@@ -58,9 +73,12 @@
 | 844x390 | 13_mundo_premios | 0 | 0 | no |
 | 844x390 | 13b_mundo_mapa | 0 | 0 | no |
 | 844x390 | 13c_mundo_taxonomia | 0 | 0 | no |
+| 844x390 | 13d_mundo_calendario | 0 | 0 | no |
+| 844x390 | 13e_mundo_tendencias | 0 | 0 | no |
 | 844x390 | 14_negocio_finanzas | 0 | 0 | no |
 | 844x390 | 15_negocio_construcciones | 0 | 0 | no |
 | 844x390 | 15b_almacen_sets | 0 | 0 | no |
+| 844x390 | 15c_negocio_distribucion | 0 | 0 | no |
 | 844x390 | 16_ajustes | 0 | 0 | no |
 | 1366x768 | 01_portada | 0 | 0 | no |
 | 1366x768 | 02_nueva_partida | 0 | 0 | no |
@@ -81,6 +99,12 @@
 | 1366x768 | 08b_ficha_produccion | 0 | 0 | no |
 | 1366x768 | 08c_dilema | 0 | 0 | no |
 | 1366x768 | 08d_prueba_publico | 0 | 0 | no |
+| 1366x768 | 08e_plan_lanzamiento | 0 | 7 | no |
+| 1366x768 | 08f_plan_regiones | 0 | 7 | no |
+| 1366x768 | 08g_plan_campana | 0 | 7 | no |
+| 1366x768 | 08h_plan_promociones | 0 | 7 | no |
+| 1366x768 | 08i_ficha_dinero | 0 | 0 | no |
+| 1366x768 | 08j_ficha_catalogo | 0 | 0 | no |
 | 1366x768 | 09_talento | 0 | 0 | no |
 | 1366x768 | 10_ficha_talento | 0 | 0 | no |
 | 1366x768 | 11_mundo_cartelera | 0 | 0 | no |
@@ -88,9 +112,12 @@
 | 1366x768 | 13_mundo_premios | 0 | 0 | no |
 | 1366x768 | 13b_mundo_mapa | 0 | 0 | no |
 | 1366x768 | 13c_mundo_taxonomia | 0 | 0 | no |
+| 1366x768 | 13d_mundo_calendario | 0 | 0 | no |
+| 1366x768 | 13e_mundo_tendencias | 0 | 0 | no |
 | 1366x768 | 14_negocio_finanzas | 0 | 0 | no |
 | 1366x768 | 15_negocio_construcciones | 0 | 0 | no |
 | 1366x768 | 15b_almacen_sets | 0 | 0 | no |
+| 1366x768 | 15c_negocio_distribucion | 0 | 0 | no |
 | 1366x768 | 16_ajustes | 0 | 0 | no |
 
 Errores de página: ninguno

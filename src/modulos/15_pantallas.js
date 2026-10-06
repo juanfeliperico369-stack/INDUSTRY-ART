@@ -300,7 +300,8 @@ IA.pantallas = (function () {
       const cat = N.S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada'; }).sort(function (a, b) { return b.fe - a.fe; });
       h += cat.length ? '<div class="rejilla">' + cat.slice(0, 120).map(function (o) {
         const m = O.multiplicador(o);
-        return '<button class="tarjeta toque" style="text-align:left;display:block" data-a="verObra" data-v="' + o.id + '"><canvas class="poster" style="width:100%;height:auto;aspect-ratio:2/3" data-poster="' + o.id + '"></canvas><b>' + esc(o.tit) + '</b><br><span class="tenue chico">' + o.anio + '</span> <span class="etiqueta ' + (m >= 2.5 ? 'bien' : m < 1.4 ? 'mal' : '') + '">' + mult(o) + '</span>' + ((o.aw || []).length ? ' <span class="etiqueta oro">' + o.aw.length + ' premio' + (o.aw.length > 1 ? 's' : '') + '</span>' : '') + '</button>';
+        return '<button class="tarjeta toque" style="text-align:left;display:block" data-a="verObra" data-v="' + o.id + '"><canvas class="poster" style="width:100%;height:auto;aspect-ratio:2/3" data-poster="' + o.id + '"></canvas><b>' + esc(o.tit) + '</b><br><span class="tenue chico">' + o.anio + '</span> <span class="etiqueta ' + (m >= 2.5 ? 'bien' : m < 1.4 ? 'mal' : '') + '">' + mult(o) + '</span>' + ((o.aw || []).length ? ' <span class="etiqueta oro">' + o.aw.length + ' premio' + (o.aw.length > 1 ? 's' : '') + '</span>' : '') +
+          (o.cert ? ' <span class="etiqueta oro">' + esc(o.cert) + '</span>' : '') + (o.bov ? ' <span class="etiqueta">bóveda</span>' : '') + (o.dir ? ' <span class="etiqueta">directo a ' + (o.dir === 'video' ? 'video' : 'streaming') + '</span>' : '') + '</button>';
       }).join('') + '</div>' : vacio();
     }
     return h + '</div>';
@@ -318,7 +319,8 @@ IA.pantallas = (function () {
       ((o.aw || []).length ? '<span class="etiqueta oro">' + o.aw.map(function (a) { return D.premios.categorias.filter(function (c) { return c.id === a; })[0].nombre; }).join(', ') + '</span>' : '') + '</div></div>';
     if (o.est === 0 && O.ETAPAS.indexOf(o.et) < 4) h += '<p>' + t('progreso') + ': ' + O.NOMBRE_ETAPA[o.et] + ' · ' + t('faltan', { n: PR.semanasRestantes(o) }) + '</p>' + barraP(PR.progreso(o));
     if (o.est === 0 && o.et === 'lista' && !o.prog) h += '<p><button class="btn primario bloque" data-a="programar" data-v="' + o.id + '">' + t('programar') + '</button></p>';
-    if (o.et === 'lista' && o.prog) h += '<p class="oro">Estreno: ' + esc(U.fecha(o.fe)) + ' · ' + D.nivelesMarketing[o.nivM].nombre + '</p>';
+    if (o.et === 'lista' && o.prog) h += '<p class="oro">' + (o.plan && o.plan.via && o.plan.via !== 'cines' ? 'Estreno directo en ' + (o.plan.via === 'video' ? 'video' : 'streaming') : 'Estreno') + ': ' + esc(U.fecha(o.fe)) + ' · campaña ' + D.nivelesMarketing[o.nivM].nombre.toLowerCase() + '</p>';
+    if (o.est === 0 && (o.prog || estrenadaYa(o))) h += IA.distribucion.resumenPlan(o);
     const vis = o.est === 0 || estrenada;
     if (vis) {
       h += '<div class="kpis" style="margin:10px 0">' + kpi(t('costo_total'), dinero(O.costoTotal(o), o.anio || N.anio())) +
@@ -331,6 +333,8 @@ IA.pantallas = (function () {
       h += '<h3>' + t('bruto') + ' por semana</h3><canvas class="lienzo" data-grafica="' + id2 + '"></canvas>';
     }
     if (o.inf) h += '<h3>' + t('informe') + '</h3><ul>' + o.inf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    // Lanzamiento (V20): dinero en cadena, ventanas y acciones del catálogo
+    if (vis) h += IA.distribucion.bloqueDinero(o) + IA.distribucion.bloqueVentanas(o) + IA.distribucion.bloqueCatalogo(o);
     if (o.est === 0 || estrenada) h += IA.creacion.bloqueIdea(o);
     if (o.est === 0) h += IA.creacion.bloqueProduccion(o);
     if (o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera') {
@@ -359,50 +363,10 @@ IA.pantallas = (function () {
     }
     return h;
   }
+  function estrenadaYa(o) { return o.et === 'cartelera' || o.et === 'terminada'; }
   ac('verObra', function (v) { U.abrirFicha(fichaObra(+v), 'obra:' + v); });
 
-  // ---------- Programar estreno ----------
-  const pg = { id: 0, t: 0, nivM: 2 };
-  function fichaProgramar() {
-    const o = O.porId(pg.id);
-    if (!o) return '';
-    const S = N.S;
-    let mejor = L.mejorSemana(o, S.t + 1, S.t + 12);
-    if (!pg.t) pg.t = mejor;
-    let h = '<h2>' + t('programar') + '</h2><div class="fila"><canvas class="poster" data-poster="' + o.id + '"></canvas><div class="col"><b>' + esc(o.tit) + '</b><span class="tenue">' + esc(generosTxt(o)) + '</span><span class="nota">' + t('estreno_ayuda') + '</span></div></div>';
-    h += '<h3>' + t('estreno_semana') + '</h3><div class="col">';
-    for (let k = 1; k <= 12; k++) {
-      const tt = S.t + k;
-      const temp = E.pronosticoSemana(N.semana(tt), o.fam);
-      const comp = L.competenciaPrevista(tt, o.id);
-      const fiesta = M.fechaDeSemana(N.semana(tt));
-      h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.t === tt ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="pgSemana" data-v="' + tt + '"><span>' + esc(U.fechaCorta(tt)) + (fiesta ? ' · ' + esc(fiesta) : '') + (tt === mejor ? ' <span class="etiqueta oro">mejor</span>' : '') + '</span>' +
-        '<span class="chico">' + t('temporada') + ' ×' + U.decimal(temp, 2) + ' · ' + t('competencia') + ' ' + U.decimal(comp, 1) + '</span></button>';
-    }
-    h += '</div><h3>' + t('marketing') + '</h3><p class="nota">' + t('marketing_ayuda') + '</p><div class="col">';
-    const fe = E.famaEstrellas(o, T.porId), fam = N.S.estudios[0].fama;
-    D.nivelesMarketing.forEach(function (n, i) {
-      const cm = E.marketingTipico(N.anio(pg.t)) * n.mult;
-      const con = E.conocimiento({ cm: cm }, N.anio(pg.t), fam, fe, NG.bonoMarketing(0));
-      h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.nivM === i ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="pgMarketing" data-v="' + i + '"><b>' + n.nombre + '</b><span class="chico">' + dinero(cm) + ' · llega a ' + Math.round(con * 100) + ' %</span></button>';
-    });
-    const canales = E.canalesDe(N.anio()).map(function (c) { return c.nombre; }).join(', ');
-    h += '</div><p class="nota">Canales de la época: ' + esc(canales) + '.</p>';
-    h += '<button class="btn primario bloque" data-a="pgConfirmar">' + t('confirmar') + ' · ' + dinero(E.marketingTipico(N.anio(pg.t)) * D.nivelesMarketing[pg.nivM].mult) + '</button>';
-    return h;
-  }
-  ac('programar', function (v) { pg.id = +v; pg.t = 0; pg.nivM = 2; U.abrirFicha(fichaProgramar(), 'programar'); });
-  ac('pgSemana', function (v) { pg.t = +v; U.refrescarFicha(fichaProgramar()); });
-  ac('pgMarketing', function (v) { pg.nivM = +v; U.refrescarFicha(fichaProgramar()); });
-  ac('pgConfirmar', function () {
-    const o = O.porId(pg.id);
-    const err = J.programarEstreno(o, pg.t, pg.nivM);
-    if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('dinero');
-    U.cerrarFicha();
-    U.aviso('Estreno programado: ' + U.fechaCorta(pg.t));
-    U.refrescar();
-  });
+  // ---------- Programar estreno: el plan de lanzamiento vive en IA.distribucion (V20) ----------
 
   // =====================================================================
   // TALENTO (la sección y la ficha viven en IA.agencia desde la V18)
@@ -428,18 +392,7 @@ IA.pantallas = (function () {
     }).join('') + '</table></div>';
     return h;
   }
-  function mCalendario() {
-    const S = N.S;
-    let h = '<p class="nota">Próximas 16 semanas: estrenos anunciados, fechas especiales y temporada.</p>';
-    for (let k = 0; k < 16; k++) {
-      const tt = S.t + k, sem = N.semana(tt);
-      const est = O.activas().filter(function (o) { return o.et === 'lista' && o.prog && o.fe === tt; });
-      const fiesta = M.fechaDeSemana(sem);
-      h += '<div class="tarjeta"><div class="fila entre"><b>' + esc(U.fechaCorta(tt)) + '</b><span class="chico">' + t('temporada') + ' ×' + U.decimal(M.temporada('nam', sem), 2) + (fiesta ? ' · ' + esc(fiesta) : '') + (sem === D.premios.semana ? ' · ' + D.premios.nombre : '') + '</span></div>' +
-        (est.length ? est.map(function (o) { return '<div class="' + (o.est === 0 ? 'oro' : '') + '">«' + esc(o.tit) + '» · ' + esc(nombreEstudio(o.est)) + ' · ' + esc(o.gen[0]) + '</div>'; }).join('') : '<span class="tenue chico">Sin estrenos anunciados</span>') + '</div>';
-    }
-    return h;
-  }
+  function mCalendario() { return IA.distribucion.calendario(); }
   function mPremios() {
     const S = N.S, ult = S.premios[S.premios.length - 1];
     const pj = IA.premios.parteJugador();
@@ -475,12 +428,12 @@ IA.pantallas = (function () {
   }
   function mTendencias() {
     const S = N.S;
-    return '<p class="nota">Las familias de géneros suben y bajan en olas; si todos estrenan lo mismo, el público se cansa.</p>' + D.familias.map(function (f) {
+    return '<h3>En el mundo</h3><p class="nota">Las familias de géneros suben y bajan en olas; si todos estrenan lo mismo, el público se cansa.</p>' + D.familias.map(function (f) {
       const v = S.mundo.tendencias[f.id] || 0;
       const w = Math.round(Math.abs(v) * 50);
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(f.nombre) + '</b><span class="' + (v > 0.2 ? 'bien' : v < -0.2 ? 'mal' : 'tenue') + '">' + (v > 0.2 ? 'en alza' : v < -0.2 ? 'en baja' : 'estable') + ' (' + (v >= 0 ? '+' : '') + U.decimal(v, 2) + ')</span></div>' +
         '<div class="barra-p" style="position:relative"><i style="position:absolute;left:' + (v >= 0 ? 50 : 50 - w) + '%;width:' + w + '%;background:' + (v >= 0 ? 'var(--bien)' : 'var(--mal)') + '"></i></div><span class="nota">' + esc(f.generos.join(', ')) + '</span></div>';
-    }).join('');
+    }).join('') + IA.distribucion.tendenciasRegion();
   }
   // Mapa del mundo: cada país con su público de cine; tu sede en dorado y las de los rivales en rosa
   function mMapa() {
@@ -500,7 +453,7 @@ IA.pantallas = (function () {
         return { lon: f.p.lon, lat: f.p.lat, r: f.pub / max, color: propia ? css.getPropertyValue('--dorado').trim() : s ? css.getPropertyValue('--rosa').trim() : css.getPropertyValue('--acento').trim(), destacado: !!s, etiqueta: propia ? f.p.nombre : '' };
       }));
     });
-    let h = '<p class="nota">El tamaño de cada círculo es su público de cine en ' + anio + '. <span class="oro">Dorado</span>: tu sede · <span class="rosa">Rosa</span>: sedes rivales. Sedes en otros países y cines propios llegan en la V28.</p>' +
+    let h = '<p class="nota">El tamaño de cada círculo es su público de cine en ' + anio + '. <span class="oro">Dorado</span>: tu sede · <span class="rosa">Rosa</span>: sedes rivales. Sedes en otros países llegan en la V28; tus cines propios ya existen (Negocio › Estudio › Terrenos).</p>' +
       '<canvas class="lienzo" style="height:auto;aspect-ratio:2/1" data-grafica="' + g + '"></canvas>';
     h += '<div class="desliza"><table class="tabla"><tr><th>País</th><th class="n">Población</th><th class="n">Entradas/año</th><th class="n">Costo de rodaje</th><th>Sede de</th></tr>' + filas.sort(function (a, b) { return b.pub - a.pub; }).map(function (f) {
       return '<tr><td>' + esc(f.p.nombre) + '<br><span class="tenue chico">' + esc(f.p.idioma) + '</span></td><td class="n">' + U.grande(f.pob) + '</td><td class="n">' + U.grande(f.pub) + '</td><td class="n">×' + U.decimal(f.p.costo, 2) + '</td><td>' + esc((sedes[f.p.id] || []).map(function (e) { return e.nombre; }).join(', ')) + '</td></tr>';
@@ -538,8 +491,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function negocio() {
     const s = sub('negocio', 'finanzas');
-    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['mercado', t('neg_mercado')]], s) +
-      ({ finanzas: nFinanzas, estudio: nEstudio, mercado: nMercado }[s] || nFinanzas)();
+    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['distribucion', 'Distribución'], ['mercado', t('neg_mercado')]], s) +
+      ({ finanzas: nFinanzas, estudio: nEstudio, distribucion: IA.distribucion.negocioDistribucion, mercado: nMercado }[s] || nFinanzas)();
   }
   function tablaLibro(libro) {
     const filas = [];

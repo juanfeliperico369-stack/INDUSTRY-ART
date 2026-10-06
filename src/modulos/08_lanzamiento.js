@@ -1,15 +1,22 @@
 /* ==== módulo: lanzamiento ==== */
 // Fecha de estreno, marketing, la cartelera de cada semana y el cierre de cada obra con su informe.
-// Ventanas (video, TV, streaming), regiones, cadenas de cines y certificaciones llegan en la V20.
+// V20: el plan de estreno (regiones, doblaje, canales, promociones) vive en IA.estreno; las ventanas, en IA.ventanas.
 IA.lanzamiento = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, T = IA.talentos, O = IA.obras;
 
   // Programa el estreno: la campaña se paga ahora y el estreno ocurre en la semana elegida
-  function programar(o, tEstreno, nivM, ctx) {
+  function programar(o, tEstreno, nivM, ctx, plan) {
     o.fe = Math.max(N.S.t, tEstreno);
     o.nivM = nivM;
-    o.cm = Math.round(E.marketingTipico(N.anio(o.fe)) * D.nivelesMarketing[nivM].mult);
+    const anio = N.anio(o.fe), ES = IA.estreno;
+    o.plan = o.est === 0 ? ES.normalizar(o, plan, anio) : ES.planRival(o, anio);
+    o.plan.anuncio = o.fe - N.S.t; // la cuenta regresiva: anunciar con tiempo arma expectativa
+    const c = ES.costos(o, o.plan, nivM, anio);
+    o.cm = c.total;
+    o.cmD = c.doblaje; o.cmP = c.promos;
+    // La intensidad de la campaña en las regiones donde se estrena (retener una región ahorra, no diluye)
+    o.campana = Math.round(E.marketingTipico(anio) * D.nivelesMarketing[nivM].mult * (o.plan.via === 'cines' ? 1 : 0.3));
     if (o.cm > 0) ctx.pagar(o.est, 'marketing', o.cm);
     o.prog = 1;
   }
@@ -31,7 +38,7 @@ IA.lanzamiento = (function () {
   function mejorSemana(o, desde, hasta) {
     let mejor = desde, valor = -1;
     for (let t = desde; t <= hasta; t++) {
-      const v = E.pronosticoSemana(N.semana(t), o.fam) / (1 + 0.25 * competenciaPrevista(t, o.id));
+      const v = E.pronosticoSemana(N.semana(t), o.fam, N.S.estudios[o.est].reg) / (1 + 0.25 * competenciaPrevista(t, o.id));
       if (v > valor + 1e-9) { valor = v; mejor = t; }
     }
     return mejor;
@@ -39,6 +46,12 @@ IA.lanzamiento = (function () {
   function semana(ctx) {
     const lista = estrenosDeLaSemana(N.S.t);
     lista.forEach(function (o) {
+      // Estreno directo en video o en streaming: sin cines (V20)
+      if (o.plan && o.plan.via && o.plan.via !== 'cines') {
+        IA.ventanas.estrenarDirecto(o, o.plan.via);
+        cerrar(o, ctx);
+        return;
+      }
       o.et = 'cartelera';
       o.anio = N.anio();
       E.iniciarCartelera(o, ctx);
@@ -65,6 +78,18 @@ IA.lanzamiento = (function () {
     o.ent = Math.round(o.ent);
     if (o.part) o.part = Math.round(o.part);
     delete o.feR;
+    // Juguetes y coleccionables venden según la taquilla (V20)
+    const merch = o.plan && o.plan.promo ? o.plan.promo.reduce(function (s, id) { const x = IA.estreno.promo(id); return s + (x && x.merch ? x.merch : 0); }, 0) : 0;
+    if (merch > 0 && o.bruto > 0) {
+      const m = Math.round(o.bruto * merch * (['FJ', 'IM', 'AA'].indexOf(o.fam) >= 0 ? 1 : 0.4));
+      o.merch = m;
+      IA.negocio.cobrarEn(o.est, 'merchandising', m);
+    }
+    // Lo que falta llega por las ventanas: video, TV y streaming
+    IA.ventanas.alTerminar(o);
+    cerrar(o, ctx);
+  }
+  function cerrar(o, ctx) {
     const mult = O.multiplicador(o);
     T.trasEstreno(o, mult);
     ctx.famaTrasEstreno(o, mult);
@@ -80,6 +105,7 @@ IA.lanzamiento = (function () {
     if (o.con < 0.35) r.push('Poca gente se enteró: faltó marketing o fama.');
     else if (o.con > 0.85) r.push('Casi todo el mundo se enteró del estreno.');
     const temp = E.pronosticoSemana(N.semana(o.fe), o.fam);
+    if (o.dir) r.push('Se estrenó directo en ' + (o.dir === 'video' ? 'video' : 'streaming') + ': sin taquilla, con lo que dejan las ventanas.');
     if (temp >= 1.2) r.push('La fecha ayudó: estrenó en temporada alta para su género.');
     else if (temp <= 0.9) r.push('La fecha no ayudó: estrenó en temporada baja.');
     if (o.crit >= 80) r.push('La crítica la aplaudió (' + o.crit + ').');

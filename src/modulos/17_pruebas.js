@@ -76,11 +76,28 @@ IA.pruebas = (function () {
     // 1. Estrenar lo que esté listo en la mejor semana próxima
     O.delEstudio(0, ['lista']).forEach(function (o) {
       if (o.prog) return;
+      const nota = o.prueba ? o.prueba.p : o.pub;
       let nivM = S.t < 52 * 3 ? Math.min(est.marketing, 2) : est.marketing; // al principio, campañas medianas
+      // Con poca caja o una obra floja, campaña mediana: el dinero de las ventanas tarda en llegar (V20)
+      if (nota < 48 || NG.cajaLibre(0) < tipico * 2) nivM = Math.min(nivM, 2);
       while (nivM > 0 && NG.cajaLibre(0) < E.marketingTipico(N.anio()) * D.nivelesMarketing[nivM].mult * 1.2) nivM--;
       const t = L.mejorSemana(o, S.t + 1, S.t + 10);
-      IA.juego.programarEstreno(o, t, nivM);
+      // Una obra muy floja va directo a video o a streaming (V20): ahorra la campaña de cines
+      const vias = IA.ventanas.viasDirectas(N.anio());
+      const plan = nota < 42 && vias.length ? { via: vias[vias.length - 1].id } : null;
+      while (nivM >= 0 && IA.juego.programarEstreno(o, t, nivM, plan)) nivM--;
     });
+    // Reestreno de un clásico de tu catálogo cuando sobra caja (V20)
+    if (N.semana() === 10 && NG.cajaLibre(0) > tipico * 6) {
+      const cand = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && !IA.ventanas.puedeReestrenar(o); })
+        .sort(function (a, b) { return IA.ventanas.valorReestreno(b, 1) - IA.ventanas.valorReestreno(a, 1); })[0];
+      if (cand && IA.ventanas.valorReestreno(cand, 1) > IA.ventanas.costoReestreno(1) * 1.5) IA.ventanas.reestrenar(cand.id, 1);
+    }
+    // Contrato con una cadena de cines de tu región cuando sobra caja (V20)
+    if (N.semana() === 20 && NG.cajaLibre(0) > tipico * 8 && !(jug.cad && jug.cad[jug.reg])) {
+      const c = IA.estreno.cadenas(jug.reg).filter(function (x) { return !IA.estreno.puedeFirmar(x.id, 2); }).sort(function (a, b) { return b.salas - a.salas; })[0];
+      if (c) IA.estreno.firmar(c.id, 2);
+    }
     // Con la caja en rojo no se arriesga más: espera a que entren los ingresos
     if (S.semanasEnRojo > 0) return;
     // 2. Construir cuando sobra caja
@@ -294,7 +311,7 @@ IA.pruebas = (function () {
       cajaFinal2025: hist.length ? hist[hist.length - 1].caja2025 : 0,
       investigaciones: S.investigaciones, quiebra: S.quiebra ? S.quiebra.anio : null,
       rescatesRivales: S.estudios.slice(1).reduce(function (a, e) { return a + e.rescates; }, 0),
-      ideas: resumenIdeas(S), produccion: produccion,
+      ideas: resumenIdeas(S), produccion: produccion, lanzamiento: resumenLanzamiento(S),
       talentos: resumenTalentos(S, terminadas),
       errores: errores, rendimiento: rend,
     };
@@ -334,6 +351,18 @@ IA.pruebas = (function () {
       obras: mias.length, metodos: contar('met'), estilos: contar('pst'), pruebas: contar('pr'),
       sets: mias.filter(function (r) { return r.set; }).length, externos: mias.filter(function (r) { return r.ext; }).length,
       dilemas: mias.reduce(function (a, r) { return a + (r.dil || 0); }, 0), sobrecosto: sob.length ? sob[Math.floor(sob.length / 2)] : 0,
+    };
+  }
+  // Lanzamiento (V20): estrenos directos, certificaciones, reestrenos y cuánto llega por las ventanas
+  function resumenLanzamiento(S) {
+    const mias = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada'; });
+    const c = function (f) { return mias.filter(f).length; };
+    let vt = 0, tot = 0;
+    mias.forEach(function (o) { vt += o.vt ? o.vt.total : 0; tot += O.ingresosTotales(o); });
+    return {
+      obras: mias.length, directos: c(function (o) { return o.dir; }), oro: c(function (o) { return o.cert === 'oro'; }), platino: c(function (o) { return o.cert === 'platino'; }),
+      diamante: c(function (o) { return o.cert === 'diamante'; }), reestrenos: mias.reduce(function (a, o) { return a + (o.re || 0); }, 0), parteVentanas: tot > 0 ? vt / tot : 0,
+      promos: mias.filter(function (o) { return o.plan && o.plan.promo && o.plan.promo.length; }).length,
     };
   }
   function resumenIdeas(S) {
@@ -475,6 +504,42 @@ IA.pruebas = (function () {
       Object.assign(enRodaje, { et: 'rodaje', sr: 3, dur: { preproduccion: 4, rodaje: 8, posproduccion: 6 }, dil: { id: 'escenaClave', t: S.t, n: { d: muestra.eq.direccion } } });
       conAzar(function () { R.decidir(enRodaje, 0, ctxPrueba); });
       prueba('Un dilema de rodaje aplica sus efectos', !enRodaje.dil && enRodaje.sr === 5 && enRodaje.dq === 2);
+    }
+    // V20 · Lanzamiento
+    const ES = IA.estreno, V = IA.ventanas;
+    prueba('Las festividades suben a su familia en su región', M.bonoRegion('FJ', 'nam', 47, 2000) > 1 && M.bonoRegion('FJ', 'asi', 47, 2000) === 1);
+    prueba('El Festival de Cannes existe desde 1946', !M.festividades(20, 'eur', 1940).some(function (f) { return f.id === 'cannes'; }) && M.festividades(20, 'eur', 1950).some(function (f) { return f.id === 'cannes'; }));
+    prueba('Las ventanas llegan en su año (TV 1955, video 1977, streaming 2007)', V.disponibles(1950).length === 0 && V.disponibles(1960).length === 1 && V.disponibles(1980).length === 2 && V.disponibles(2010).length === 3);
+    prueba('Directo a video desde 1980 y a streaming desde 2010', V.viasDirectas(1979).length === 0 && V.viasDirectas(1985).length === 1 && V.viasDirectas(2015).length === 2);
+    prueba('Las certificaciones de video empiezan en 1979 y suben de oro a diamante', V.ANIO_CERT === 1979 && V.CERTIFICACIONES[0].copias < V.CERTIFICACIONES[1].copias && V.CERTIFICACIONES[1].copias < V.CERTIFICACIONES[2].copias);
+    prueba('Antes de la TV todo sale de la taquilla', V.parteVentanas(1940) === 0 && V.parteVentanas(2000) > 0.3);
+    if (S && S.estudios) {
+      const conAzar2 = function (fn) { const g = S.rng; const r2 = fn(); S.rng = g; return r2; };
+      const ob = conAzar2(function () { const b = O.borrador(0, { gen: ['Drama'], escala: 2, completa: true }); O.equipoRecomendado(b, 1); return b; });
+      ob.idio = 'Inglés'; ob.anio = 2000; ob.pub = 60; ob.est = 0; ob.fam = 'DR';
+      const pl = ES.planPorDefecto(ob, 2000);
+      const pRet = JSON.parse(JSON.stringify(pl)); pRet.reg.asi = 'retener';
+      const pEsc = JSON.parse(JSON.stringify(pl)); pEsc.reg.eur = 'escalonado';
+      prueba('Retener una región: no se estrena allí y la campaña cuesta menos', ES.factorRegion(Object.assign({}, ob, { plan: pRet }), 'asi', 3) === 0 && ES.costos(ob, pRet, 2, 2000).campana < ES.costos(ob, pl, 2, 2000).campana);
+      prueba('El estreno escalonado llega 4 semanas después', ES.factorRegion(Object.assign({}, ob, { plan: pEsc }), 'eur', 2) === 0 && ES.factorRegion(Object.assign({}, ob, { plan: pEsc }), 'eur', 4) > 0);
+      const sinDob = JSON.parse(JSON.stringify(pl)); delete sinDob.dob.lat;
+      prueba('Doblar evita perder público por el idioma', ES.necesitaDoblaje(ob, 'lat', 2000) && ES.factorRegion(Object.assign({}, ob, { plan: pl }), 'lat', 3) > ES.factorRegion(Object.assign({}, ob, { plan: sinDob }), 'lat', 3));
+      prueba('La mezcla de canales recomendada rinde al menos como la de siempre', ES.factorCampana(Object.assign({}, ob, { plan: pl })) >= 0.99);
+      const vieja = { id: -5, est: 0, et: 'terminada', anio: N.anio() - 3, bruto: 1e6, pub: 70, crit: 70 };
+      prueba('Un reestreno necesita 7 años desde el estreno', !!V.puedeReestrenar(vieja) && !V.puedeReestrenar(Object.assign({}, vieja, { anio: N.anio() - 10 })));
+      // El diseñador de arte y tecnología está a cargo de vestuario y efectos
+      const conVest = ob.eq.vestuario ? ob : null;
+      if (conVest) {
+        const bonos = {};
+        const h1 = E.habilidadDep(conVest, 'vestuario', T.porId, bonos);
+        const arteOrig = conVest.eq.arte;
+        const peor = S.talentos.filter(function (x) { return x.of === 'arte' && x.id !== arteOrig; }).sort(function (a, b) { return a.hab - b.hab; })[0];
+        conVest.eq.arte = peor.id;
+        const h2 = E.habilidadDep(conVest, 'vestuario', T.porId, bonos);
+        conVest.eq.arte = arteOrig;
+        prueba('El diseñador de arte y tecnología también pesa en vestuario', h2 < h1);
+      }
+      prueba('Los rivales también guardan sets', IA.rodaje.capacidadSets(1) >= 2);
     }
     return r;
   }

@@ -51,6 +51,14 @@ IA.guardado = (function () {
     S.faltanOficios = ['vestuario', 'efectos', 'animacion'].filter(function (of) { return !hay[of]; });
   };
 
+  // V19 → V20 (Lanzamiento): reestrenos en marcha, contratos con cadenas y tendencias por región. Las obras viejas
+  // no tienen plan ni ventanas: se leen con los valores de siempre (amplio, sin ventanas).
+  MIGRACIONES[20] = function (S) {
+    if (!S.reestrenos) S.reestrenos = [];
+    S.estudios.forEach(function (e) { if (!e.cad) e.cad = {}; if (!e.sets) e.sets = []; });
+    if (!S.mundo.tendR) S.mundo.tendR = {};
+  };
+
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------
   function suma(texto) {
     let h = 2166136261;

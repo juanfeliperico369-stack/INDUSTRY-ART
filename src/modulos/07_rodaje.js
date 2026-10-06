@@ -414,23 +414,24 @@ IA.rodaje = (function () {
   }
   function capacidadSets(estId) {
     const est = N.S.estudios[estId || 0];
+    if (estId) return 2 + Math.round(2 * (est.tam || 1)); // los rivales ya tienen sus backlots
     const c = function (id) { return est.pisos.concat(est.terrenos).filter(function (x) { return x === id; }).length; };
     return 1 + c('plato') + 3 * c('backlot');
   }
   // Al quedar lista la obra: el set nuevo se guarda (con la nota del arte) y el reutilizado se gasta un poco
   function guardarSet(o) {
-    if (o.est !== 0 || !usaSet(o) || !o.met) return;
-    const est = N.S.estudios[0];
+    if (!usaSet(o) || !o.met) return;
+    const est = N.S.estudios[o.est || 0];
     est.sets = est.sets || [];
     const usado = setDe(o);
     if (usado) { usado.usos++; usado.q = Math.max(30, usado.q - 2); usado.ult = anio(); return; }
     const tp = tipoSet(o);
     const arte = notas(o).filter(function (n) { return n.dep === 'arte'; })[0];
     est.sets.push({ id: N.sigId(), tipo: tp.id, nombre: tp.nombre, q: arte ? arte.v : 55, anio: anio(), usos: 0, obra: o.tit });
-    while (est.sets.length > capacidadSets(0)) {
+    while (est.sets.length > capacidadSets(o.est || 0)) {
       const viejo = est.sets.slice().sort(function (a, b) { return (a.q - (anio() - a.anio)) - (b.q - (anio() - b.anio)); })[0];
       est.sets = est.sets.filter(function (s) { return s !== viejo; });
-      N.emit('noticia', { tipo: 'estudio', texto: 'Desarmas el set «' + viejo.nombre + '» (de «' + viejo.obra + '») para hacer lugar.' });
+      if (!o.est) N.emit('noticia', { tipo: 'estudio', texto: 'Desarmas el set «' + viejo.nombre + '» (de «' + viejo.obra + '») para hacer lugar.' });
     }
   }
 
@@ -501,12 +502,19 @@ IA.rodaje = (function () {
     const p = base * riesgo(o) * (o.est === 0 ? 1 : 0.6);
     if (!N.probabilidad(p)) return;
     const n = personas(o);
-    const dil = o.est === 0 ? DILEMAS.filter(function (d) {
+    const dil = DILEMAS.filter(function (d) {
       return d.etapa === et && d.quien.every(function (k) { return n[k]; }) && (!d.cond || d.cond(o, n)) && !(o.lp && o.lp.dv && o.lp.dv.indexOf(d.id) >= 0);
-    }) : [];
+    });
     // Un dilema para el jugador (si hay uno que encaje) o un incidente para todos
     if (dil.length && N.probabilidad(0.6)) {
       const d = N.elegir(dil);
+      // Los rivales también tienen dilemas (V20): deciden al momento, casi siempre lo que más les conviene
+      if (o.est !== 0) {
+        o.dil = { id: d.id, t: N.S.t, n: {} };
+        d.quien.forEach(function (k) { o.dil.n[k] = n[k].id; });
+        decidir(o, N.probabilidad(0.65) ? mejorOpcion(o) : N.entero(0, d.ops.length - 1), ctx);
+        return;
+      }
       o.dil = { id: d.id, t: N.S.t, n: {} };
       d.quien.forEach(function (k) { o.dil.n[k] = n[k].id; });
       o.lp = o.lp || {};

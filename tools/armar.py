@@ -20,7 +20,7 @@ import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(RAIZ, "src")
-VERSION = "19"
+VERSION = "20"
 
 MARCA = re.compile(r"^/\* ==== módulo: ([a-z0-9_]+) ==== \*/\s*$", re.M)
 

@@ -347,8 +347,12 @@ IA.obras = (function () {
   }
   // Multiplicador (bruto ÷ costo) y resultado neto para el estudio
   function costoTotal(o) { return (o.cf || 0) + (o.gp || 0) + (o.cm || 0) + (o.part || 0); }
-  function multiplicador(o) { const c = costoTotal(o); return c > 0 ? (o.bruto || 0) / c : 0; }
-  function neto(o) { return (o.parte || 0) - costoTotal(o); }
+  // Multiplicador: taquilla ÷ costo. Un estreno directo en video o streaming se mide por lo que dejan sus ventanas
+  // como si fuera taquilla (el estudio se queda con algo más de la mitad de lo que pagan los cines)
+  function multiplicador(o) { const c = costoTotal(o); if (c <= 0) return 0; return o.dir ? ((o.vt ? o.vt.total : 0) / 0.55) / c : (o.bruto || 0) / c; }
+  // Lo que ganó el estudio: taquilla, ventanas (video, TV, streaming) y merchandising, menos todo lo que costó
+  function ingresosTotales(o) { return (o.parte || 0) + (o.vt ? o.vt.total : 0) + (o.merch || 0); }
+  function neto(o) { return ingresosTotales(o) - costoTotal(o); }
 
   const DETALLE_IDEA = ['cont', 'fmt', 'pubs', 'sub', 'sarc', 'fic', 'corr', 'estilo', 'prio', 'idio', 'rod', 'cx', 'rit', 'fx', 'presM', 'clasN',
     'derechos', 'guionId', 'guionPagado', 'lug', 'prob', 'min', 'iar', 'fxr', 'frc', 'extras', 'terceros', 'pctT', 'fat',
@@ -400,6 +404,6 @@ IA.obras = (function () {
     PARTE_SECUNDARIO: PARTE_SECUNDARIO, PARTE_INVITADO: PARTE_INVITADO, PARTE_CAMEO: PARTE_CAMEO,
     equipoRecomendado: equipoRecomendado, equipoCompleto: equipoCompleto, ajustarRolesV19: ajustarRolesV19, duraciones: duraciones,
     semanasTotales: semanasTotales, estimar: estimar, crear: crear, paraPoster: paraPoster,
-    creditosDe: creditos, costoTotal: costoTotal, multiplicador: multiplicador, neto: neto, compactar: compactar, escalaTono: escalaTono,
+    creditosDe: creditos, costoTotal: costoTotal, multiplicador: multiplicador, neto: neto, ingresosTotales: ingresosTotales, compactar: compactar, escalaTono: escalaTono,
   };
 })();
