@@ -19,7 +19,7 @@ IA.economia = (function () {
     TENDENCIA: 0.3,      // peso de la tendencia de la familia
     PARTICIPACION: 0.88, // parte del público posible que va al cine con una cartelera típica
     MULT_TIPICO: 1.85,   // bruto medio ÷ costo de una película típica (fija el presupuesto típico)
-    U_TIPICA: -0.2,      // atractivo de estreno de una película típica de otras productoras
+    U_TIPICA: -0.1,      // atractivo de estreno de una película típica de otras productoras
     CORTE: 0.025,        // la obra sale de cartelera bajo este % de su mejor semana
     MAX_SEMANAS: 30,
     ANIMO: 0.28,         // azar del ánimo del público en cada estreno
@@ -88,7 +88,10 @@ IA.economia = (function () {
   function demandaTalento(t) {
     const r = D.rasgos[t.rasgo];
     const excepcional = Math.max(0, (t.hab - 65) / 35);
-    return (1 + 1.6 * t.fama * t.fama + 3 * excepcional * excepcional) * (r ? r[2] : 1);
+    // V18: quien ya está en otros proyectos cobra más; el desmotivado, un poco menos
+    const ocupado = 1 + 0.12 * (t.act || 0);
+    const animo = t.mo !== undefined && t.mo < 35 ? 0.92 : 1;
+    return (1 + 1.6 * t.fama * t.fama + 3 * excepcional * excepcional) * (r ? r[2] : 1) * ocupado * animo;
   }
   function tarifa(t, anio) {
     const of = D.oficio(t.of);
@@ -113,21 +116,24 @@ IA.economia = (function () {
     }
     return s;
   }
+  // Habilidad de un departamento con la habilidad efectiva de cada talento en esta obra (afinidad con la familia,
+  // especialidad, moral, cansancio y edad del personaje: V18)
   function habilidadDep(obra, dep, talentos, bonos) {
     const eq = obra.eq;
+    const hab = function (t) { return IA.talentos.habilidadEn(t, obra, dep); };
     let h;
     if (dep === 'interprete') {
       const a = talentos(eq.int[0]), b = talentos(eq.int[1]);
-      h = a && b ? a.hab * 0.6 + b.hab * 0.4 : a ? a.hab : 35;
-      // Con más reparto (V17): la estrella pesa 50 %, la segunda 30 % y el resto del elenco 20 %
+      h = a && b ? hab(a) * 0.6 + hab(b) * 0.4 : a ? hab(a) : 35;
+      // El resto del elenco contratado suma o resta según su nivel (hasta ±3)
       if (a && b && eq.int.length > 2) {
         let s = 0, n = 0;
-        for (let i = 2; i < eq.int.length; i++) { const t = talentos(eq.int[i]); if (t) { s += t.hab; n++; } }
-        if (n) h = a.hab * 0.5 + b.hab * 0.3 + (s / n) * 0.2;
+        for (let i = 2; i < eq.int.length; i++) { const t = talentos(eq.int[i]); if (t) { s += hab(t); n++; } }
+        if (n) h += N.limitar((s / n - 50) * 0.1, -3, 3);
       }
     } else {
       const t = talentos(eq[dep]);
-      h = t ? t.hab : 35;
+      h = t ? hab(t) : 35;
     }
     return Math.min(100, h + (bonos[dep] || 0));
   }
@@ -144,6 +150,8 @@ IA.economia = (function () {
     q += N.limitar(6 * Math.log2(Math.max(1, obra.pp) / tipica), -18, 12);
     q += encajeObra(obra);
     q += IA.ideas.ajusteCalidad(obra); // encaje de la idea, material, guion comprado, IA y personajes
+    q += IA.talentos.quimica(obra); // amistades y rivalidades del equipo clave (V18)
+    eachTalento(obra, talentos, function (t) { if (IA.talentos.ventajas(t).some(function (v) { return v.id === 'Mentor'; })) q += 0.5; });
     // Tres géneros sin un líder de 90 o más es un desastre
     if (obra.gen.length >= 3) {
       let mejor = 0;
@@ -168,10 +176,20 @@ IA.economia = (function () {
   function escalaTono(obra) { const to = D.tonos.filter(function (x) { return x.id === obra.tono; })[0]; return to && to.costo ? to.costo : 1; }
   function famaEstrellas(obra, talentos) {
     const a = talentos(obra.eq.int[0]), b = talentos(obra.eq.int[1]);
-    let f = (a ? a.fama * 0.6 : 0) + (b ? b.fama * 0.4 : 0);
+    // La personalidad empuja la popularidad (Normal = 50 % es la referencia): Rockstar suma, Pretencioso resta
+    const fp = function (t) { return t.fama * (1 + 0.3 * IA.talentos.impulso(t)); };
+    let f = (a ? fp(a) * 0.6 : 0) + (b ? fp(b) * 0.4 : 0);
     // Invitados especiales y cameos (V17): su fama atrae público
     (obra.eq.inv || []).forEach(function (id) { const t = talentos(id); if (t) f += t.fama * 0.25; });
     (obra.eq.cam || []).forEach(function (id) { const t = talentos(id); if (t) f += t.fama * 0.1; });
+    return Math.min(1.2, f);
+  }
+  function famaEstrellasRegion(obra, talentos, reg) {
+    const a = talentos(obra.eq.int[0]), b = talentos(obra.eq.int[1]);
+    const fp = function (t) { return IA.talentos.famaRegion(t, reg) * (1 + 0.3 * IA.talentos.impulso(t)); };
+    let f = (a ? fp(a) * 0.6 : 0) + (b ? fp(b) * 0.4 : 0);
+    (obra.eq.inv || []).forEach(function (id) { const t = talentos(id); if (t) f += IA.talentos.famaRegion(t, reg) * 0.25; });
+    (obra.eq.cam || []).forEach(function (id) { const t = talentos(id); if (t) f += IA.talentos.famaRegion(t, reg) * 0.1; });
     return Math.min(1.2, f);
   }
   // Notas finales al terminar la posproducción (con el azar acotado de ±4)
@@ -183,6 +201,13 @@ IA.economia = (function () {
     q = N.limitar(q + r.q, 1, 99);
     const dir = talentos(obra.eq.direccion);
     const ex = IA.ideas.ajusteNotas(obra, obra.anioPlan || N.anio());
+    // Ventajas ganadas con la experiencia: taquilleros y laureados (hasta +2 cada una)
+    let vPub = 0, vCrit = 0;
+    eachTalento(obra, talentos, function (t) { IA.talentos.ventajas(t).forEach(function (v) { if (v.id === 'Taquillero' || v.id === 'Regreso triunfal') vPub++; if (v.id === 'Laureado') vCrit++; }); });
+    ex.pub += Math.min(2, vPub); ex.crit += Math.min(2, vCrit);
+    // La belleza de los protagonistas pesa en el romance y la comedia
+    const l1 = talentos(obra.eq.int[0]);
+    if (l1 && l1.bel >= 80 && (fam.id === 'RD' || fam.id === 'HM')) ex.pub += 1;
     let crit = q + to.crit + (fam.inclina === 'crit' ? 3 : fam.inclina === 'pub' ? -2 : 0) + (dir && dir.hab >= 85 ? 2 : 0) + (N.azar() * 6 - 3) + ex.crit + r.crit;
     let pub = q + to.pub + (fam.inclina === 'pub' ? 3 : fam.inclina === 'crit' ? -3 : 0) + famaEstrellas(obra, talentos) * 4 + (N.azar() * 6 - 3) + ex.pub + r.pub;
     const esc = obra.pp / produccionTipica(obra.anioPlan || N.anio(), fam.id);
@@ -233,11 +258,17 @@ IA.economia = (function () {
     const fe = famaEstrellas(obra, ctx.talento);
     obra.con = N.redondear(conocimiento(obra, anio, ctx.famaDe(obra.est), fe, ctx.bonoMarketingDe(obra.est)), 3);
     // El tráiler no siempre dice la verdad: la expectativa tiene su propio azar
-    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + N.normal(0, 4), 1, 99));
+    // La aprobación del público por la estrella principal (V18) también vende entradas
+    const lider = ctx.talento(obra.eq.int[0]);
+    const apr = lider && lider.apr !== undefined ? (lider.apr - 50) / 10 : 0;
+    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + apr + N.normal(0, 4), 1, 99));
     obra.exp = N.redondear(obra.con * obra.des / 100, 3);
     // El ánimo del público: algo que nadie controla hace que una obra prenda o no
     obra.animo = N.redondear(N.normal(0, P.ANIMO), 3);
     obra.u = N.redondear(P.AQ * (obra.des - 60) + Math.log(obra.con) + P.ESTRELLAS * fe + obra.animo, 4);
+    // Fama por región (V18): las estrellas pesan más en su tierra y afuera según su alcance
+    obra.feR = {};
+    D.regiones.forEach(function (r) { obra.feR[r.id] = N.redondear(famaEstrellasRegion(obra, ctx.talento, r.id) - fe, 3); });
     obra.sc = 0; obra.bruto = obra.bruto || 0; obra.parte = obra.parte || 0; obra.ent = 0; obra.max = 0; obra.hs = [];
     obra.acc = {};
     D.regiones.forEach(function (r) { obra.acc[r.id] = N.redondear(accesoClasificacion(obra, r.id, anio), 4); });
@@ -269,6 +300,7 @@ IA.economia = (function () {
         const o = obras[i];
         let u = o.u + Math.log(o.acc[r.id] || 0.02) + P.TENDENCIA * (tendencias[o.fam] || 0) + Math.log(M.bonoGenero(o.fam, sem));
         if (ctx.regionEstudio(o.est) === r.id) u += P.LOCAL;
+        if (o.feR) u += P.ESTRELLAS * (o.feR[r.id] || 0);
         const w = Math.exp(u);
         pesos.push(w);
         suma += w;

@@ -406,44 +406,10 @@ IA.pantallas = (function () {
   });
 
   // =====================================================================
-  // TALENTO
+  // TALENTO (la sección y la ficha viven en IA.agencia desde la V18)
   // =====================================================================
-  const ft = { of: '', disp: true, q: '', n: 40 };
-  function talento() {
-    const S = N.S, av = S.avatar;
-    let h = titulo(t('sec_talento'), 'talento');
-    h += '<div class="tarjeta fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col"><span class="tenue chico">' + t('tu_avatar') + '</span><h3>' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(est0().personalidad) + '</span><span>Especialidades: ' + esc((av.esp || []).map(function (x) { return D.oficio(x).nombre; }).join(', ')) + ' (+1 en tus obras)</span><span class="nota">La vida ligera, la carrera como talento y los herederos llegan en la V29.</span></div></div>';
-    h += '<div class="chips" style="margin:8px 0"><button class="chip' + (!ft.of ? ' on' : '') + '" data-a="ftOficio" data-v="">' + t('todos') + '</button>' + D.oficios.map(function (o) {
-      return '<button class="chip' + (ft.of === o.id ? ' on' : '') + '" data-a="ftOficio" data-v="' + o.id + '">' + esc(o.nombre) + '</button>';
-    }).join('') + '</div>';
-    h += '<div class="fila"><input type="search" placeholder="' + t('tal_buscar') + '" value="' + esc(ft.q) + '" data-c="ftBuscar" style="flex:1"><label class="fila" style="min-height:44px"><input type="checkbox" data-c="ftDisp"' + (ft.disp ? ' checked' : '') + '>' + t('tal_disponibles') + '</label></div>';
-    const q = ft.q.toLowerCase();
-    const lista = S.talentos.filter(function (x) {
-      return !x.ret && (!ft.of || x.of === ft.of) && (!ft.disp || x.ocup < S.t) && (!q || x.nom.toLowerCase().indexOf(q) >= 0);
-    }).sort(function (a, b) { return (b.hab + b.fama * 12) - (a.hab + a.fama * 12); });
-    h += '<p class="nota">' + lista.length + ' talentos</p><div class="col">' + lista.slice(0, ft.n).map(function (x) {
-      return '<button class="tarjeta toque fila" style="width:100%;text-align:left" data-a="verTalento" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece"><b>' + esc(x.nom) + '</b><span class="chico">' + esc(D.oficio(x.of).nombre) + ' · ' + (N.anio() - x.nac) + ' años · ' + esc(D.pais(x.pais).nombre) + '</span>' +
-        '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(x.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(x.fama * 100) + (x.ocup >= S.t ? ' · <span class="tenue">ocupado</span>' : '') + '</span></div><b class="cifra">' + dinero(T.tarifa(x)) + '</b></button>';
-    }).join('') + '</div>' + (lista.length > ft.n ? '<button class="btn bloque" data-a="ftMas">' + t('ver') + ' más</button>' : '');
-    return h;
-  }
-  ac('ftOficio', function (v) { ft.of = v; ft.n = 40; U.renderVista(); });
-  ac('ftBuscar', function (v) { ft.q = v; ft.n = 40; U.renderVista(); });
-  ac('ftDisp', function (v) { ft.disp = !!v; U.renderVista(); });
-  ac('ftMas', function () { ft.n += 40; U.renderVista(true); });
-  function fichaTalento(id) {
-    const x = T.porId(id);
-    if (!x) return '<p class="tenue">Este talento ya no está en el mundo.</p>';
-    const S = N.S, r = D.rasgos[x.rasgo];
-    const obrasDe = S.obras.filter(function (o) { return o.eq && (O.idsEquipo(o).indexOf(id) >= 0); }).slice(-12).reverse();
-    return '<div class="fila"><canvas class="retrato grande" data-retrato="' + x.id + '"></canvas><div class="col"><h2>' + esc(x.nom) + '</h2><span>' + esc(D.oficio(x.of).nombre) + '</span><span class="tenue">' + (N.anio() - x.nac) + ' años · ' + esc(D.pais(x.pais).nombre) + ' · ' + (x.sx === 'F' ? t('mujer') : t('hombre')) + '</span></div></div>' +
-      '<div class="kpis" style="margin:10px 0">' + kpi(t('tal_habilidad'), Math.round(x.hab)) + kpi(t('tal_fama'), Math.round(x.fama * 100)) + kpi(t('tal_tarifa'), dinero(T.tarifa(x))) +
-      kpi(t('tal_obras'), x.obras) + kpi(t('tal_premios'), x.premios) + kpi('Estado', x.ret ? t('retirado') : x.ocup >= S.t ? U.fechaCorta(x.ocup) : t('tal_disponible')) + '</div>' +
-      (x.rasgo ? '<p>' + t('tal_rasgo') + ': <b>' + esc(x.rasgo) + '</b> <span class="tenue chico">(calidad ' + (r[0] >= 0 ? '+' : '') + r[0] + ', sobrecosto ' + Math.round(r[1] * 100) + ' %, tarifa ×' + U.decimal(r[2], 2) + ')</span></p>' : '') +
-      '<p class="nota">La tarifa sale del mercado: habilidad, fama, demanda y época. Nunca del presupuesto de tu obra.</p>' +
-      (obrasDe.length ? '<h3>' + t('tal_obras') + '</h3>' + obrasDe.map(function (o) { return '<p style="margin:4px 0">«' + esc(o.tit) + '» · ' + esc(nombreEstudio(o.est)) + ' · ' + (o.anio || O.NOMBRE_ETAPA[o.et]) + '</p>'; }).join('') : '');
-  }
-  ac('verTalento', function (v) { U.abrirFicha(fichaTalento(+v), 'talento:' + v); });
+  function talento() { return IA.agencia.talento(); }
+  function fichaTalento(id) { return IA.agencia.fichaTalento(id); }
 
   // =====================================================================
   // MUNDO

@@ -72,10 +72,13 @@ IA.rivales = (function () {
     op.tem = [buenOjo ? IA.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
     op.prob = [buenOjo ? IA.ideas.problemaRecomendado(famIdea) : IA.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
     op.arco = buenOjo ? IA.ideas.arcoRecomendado(famIdea) : N.elegir(IA.taxonomia.arcos).id;
-    const b = O.borrador(est.id, op);
+    let b = O.borrador(est.id, op);
+    // Con poca caja hacen una obra más chica en vez de quedarse sin filmar (V18)
+    while (b.pp * 1.4 > est.caja && op.escala > 0) { op.escala--; b = O.borrador(est.id, op); }
+    const pobre = b.pp * 2 > est.caja;
     b.prest = prestigio ? 1 : 0;
     // La calidad de su equipo depende de su estilo más que de su tamaño (evita la espiral del más chico)
-    O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4), prestigio ? 2 : 4);
+    O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4) * (pobre ? 0.8 : 1), prestigio ? 2 : 4);
     if (!O.equipoCompleto(b)) return null;
     const costo = O.costoTalento(b) + b.pp;
     if (est.caja < costo * 0.9) return null;
@@ -101,7 +104,8 @@ IA.rivales = (function () {
   function alQuedarLista(o, ctx) {
     const est = N.S.estudios[o.est];
     const t = L.mejorSemana(o, N.S.t + 2, N.S.t + 2 + N.entero(6, 16));
-    const nivM = N.limitar(Math.round(N.normal(2 + (o.esc - 2) * 0.4, 0.45)), 1, 3);
+    // La campaña sigue a lo que prometen las primeras funciones de prueba: a una obra floja le gastan menos (V18)
+    const nivM = N.limitar(Math.round(N.normal(2 + (o.esc - 2) * 0.4 + ((o.pub || 60) - 65) / 15, 0.45)), 1, 3);
     L.programar(o, t, nivM, ctx);
   }
   // Cada año: crecen si ganan, se achican si pierden; si quedan en rojo reciben un rescate (las quiebras, en la V26)
@@ -111,10 +115,12 @@ IA.rivales = (function () {
     for (let i = 1; i < S.estudios.length; i++) {
       const est = S.estudios[i];
       const base = D.rivales[i - 1].tam;
-      // Rescate solo si de verdad quedó en rojo (no por tener la caja invertida en producciones)
-      if (est.caja < 0) {
+      // Rescate si de verdad quedó en rojo (no por tener la caja invertida en producciones) o si ya no le alcanza
+      // ni para la obra más chica y no tiene nada en marcha (V18: así ningún rival queda congelado para siempre)
+      const varado = est.caja < tipico * 0.25 && !O.enProduccion(est.id).length;
+      if (est.caja < 0 || varado) {
         est.tam = N.redondear(Math.max(base * 0.4, est.tam * 0.85), 3);
-        const aporte = Math.round(-est.caja + tipico * est.tam);
+        const aporte = Math.round(-est.caja + tipico * est.tam * (varado ? 2 : 1));
         est.caja += aporte;
         est.rescates++;
         N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' recibe dinero de inversionistas para seguir filmando.' });

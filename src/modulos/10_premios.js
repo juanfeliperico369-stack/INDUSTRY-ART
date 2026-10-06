@@ -63,7 +63,7 @@ IA.premios = (function () {
       const t = idT !== null ? T.porId(idT) : null;
       if (t) { t.fama = N.redondear(N.limitar(t.fama + 0.12, 0, 1), 3); t.premios++; }
       res.categorias.push({
-        id: c.id, nombre: c.nombre, ganador: { obra: g.o.id, titulo: g.o.tit, est: g.o.est, quien: quien },
+        id: c.id, nombre: c.nombre, ganador: { obra: g.o.id, titulo: g.o.tit, est: g.o.est, quien: quien, tid: idT },
         nominados: nominados.map(function (n) { return { obra: n.o.id, titulo: n.o.tit, est: n.o.est, quien: n.nombre || '' }; }),
       });
     });

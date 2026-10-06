@@ -63,6 +63,8 @@ IA.lanzamiento = (function () {
     o.bruto = Math.round(o.bruto);
     o.parte = Math.round(o.parte);
     o.ent = Math.round(o.ent);
+    if (o.part) o.part = Math.round(o.part);
+    delete o.feR;
     const mult = O.multiplicador(o);
     T.trasEstreno(o, mult);
     ctx.famaTrasEstreno(o, mult);

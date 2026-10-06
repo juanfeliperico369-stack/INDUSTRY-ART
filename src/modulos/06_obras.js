@@ -71,7 +71,8 @@ IA.obras = (function () {
   // ---------- Borrador: la obra antes de empezar ----------
   // Campos de la fábrica de ideas que se copian de las opciones (las obras de los rivales usan los de siempre)
   const CAMPOS_IDEA = ['med', 'nat', 'tipo', 'sub', 'prob', 'arco', 'sarc', 'fic', 'corr', 'estilo', 'prio', 'fmt', 'epo', 'lug', 'idio', 'pubs',
-    'cont', 'min', 'cx', 'rit', 'fx', 'ia', 'presM', 'clasN', 'mat', 'rod', 'ideaIA', 'guionC', 'guionPagado', 'derechos', 'suave', 'pj', 'sin'];
+    'cont', 'min', 'cx', 'rit', 'fx', 'ia', 'presM', 'clasN', 'mat', 'rod', 'ideaIA', 'guionC', 'guionPagado', 'derechos', 'suave', 'pj', 'sin',
+    'extras', 'terceros', 'pctT'];
   function borrador(est, opciones) {
     const anio = N.anio();
     const o = opciones || {};
@@ -96,7 +97,7 @@ IA.obras = (function () {
   function recalcular(b) {
     const anio = N.anio();
     b.fam = D.familiaDe[b.gen[0]] || 'DR';
-    if (b.cont) IA.ideas.normalizar(b, anio); else b.clas = IA.ideas.clasificar(b, anio);
+    if (b.cont || IA.ideas.hayNinos(b)) IA.ideas.normalizar(b, anio); else b.clas = IA.ideas.clasificar(b, anio);
     if (b.presM) b.esc = escalaCercana(b.presM);
     b.pp = Math.round(IA.ideas.costoProduccion(b, anio));
     return b;
@@ -112,44 +113,140 @@ IA.obras = (function () {
     ROLES.forEach(function (r) { if (o.eq[r] !== undefined && o.eq[r] !== null) ids.push(o.eq[r]); });
     return ids.concat(o.eq.int || [], o.eq.inv || [], o.eq.cam || []);
   }
-  // Invitados especiales cobran el 40 % de su tarifa y los cameos el 15 %; un guion comprado ya pagó al escritor
-  const PARTE_INVITADO = 0.4, PARTE_CAMEO = 0.15;
+  // Los secundarios cobran la mitad (menos días de rodaje), los invitados especiales el 40 % de su tarifa y los
+  // cameos el 15 %; un guion comprado ya pagó al escritor
+  const PARTE_SECUNDARIO = 0.5, PARTE_INVITADO = 0.4, PARTE_CAMEO = 0.15;
+  function esSecundario(o, id) { return !!(o.pj && o.pj.some(function (p) { return p.t === id && p.i === 'secundario'; })); }
   function costoTalento(o) {
     let s = 0;
-    const t = function (id) { const x = T.porId(id); return x ? T.tarifa(x) : 0; };
+    // Tarifa para este estudio (exclusivos y becados) menos el descuento por porcentaje de taquilla (V18)
+    const t = function (id) { const x = T.porId(id); return x ? T.salarioCon(T.tarifaPara(x, o.est), o.pctT && o.pctT[id] || 0) : 0; };
     ROLES.forEach(function (r) { if (o.eq[r] !== undefined && o.eq[r] !== null && !(r === 'guion' && o.guionPagado)) s += t(o.eq[r]); });
-    (o.eq.int || []).forEach(function (id) { s += t(id); });
+    (o.eq.int || []).forEach(function (id) { s += t(id) * (esSecundario(o, id) ? PARTE_SECUNDARIO : 1); });
     (o.eq.inv || []).forEach(function (id) { s += t(id) * PARTE_INVITADO; });
     (o.eq.cam || []).forEach(function (id) { s += t(id) * PARTE_CAMEO; });
     return s;
   }
-  // Arma el equipo recomendado dentro de un tope por rol (relativo al presupuesto típico de la época)
+  // Arma el equipo recomendado dentro de un tope por rol (relativo al presupuesto típico de la época). Prefiere la
+  // afinidad con la familia y descarta a quien no firmaría (fama del estudio, clasificación, edad).
   function equipoRecomendado(o, ambicion, azarEleccion) {
     const anio = N.anio();
     const tipico = E.presupuestoTipico(anio);
     const a = ambicion === undefined ? 1 : ambicion;
+    const k = IA.taxonomia.ORDEN_CLAS.indexOf(o.clas);
+    const op = { est: o.est, fam: o.fam || D.familiaDe[o.gen[0]], clas: k >= 0 ? k : 2 };
     const usados = [];
     ROLES.forEach(function (r) {
       if (o.eq[r] !== undefined && o.eq[r] !== null) { usados.push(o.eq[r]); return; }
       const of = D.oficio(r);
-      const t = T.mejorDisponible(r, of.base * tipico * 2.2 * a, usados, null, azarEleccion) || T.mejorDisponible(r, Infinity, usados);
+      const d = T.porId(o.eq.direccion);
+      const opR = r === 'guion' && d ? Object.assign({ dir: d.hab }, op) : op;
+      const t = T.mejorDisponible(r, of.base * tipico * 2.2 * a, usados, null, azarEleccion, opR) || T.mejorDisponible(r, Infinity, usados, null, 0, opR);
       if (t) { o.eq[r] = t.id; usados.push(t.id); }
     });
+    const dirHab = T.porId(o.eq.direccion) ? T.porId(o.eq.direccion).hab : undefined;
+    (o.eq.inv || []).concat(o.eq.cam || []).forEach(function (id) { usados.push(id); });
+    const base = D.oficio('interprete').base * tipico * a;
+    if (o.pj) {
+      // Cada protagonista y secundario tiene su intérprete contratado (V18): primero se reaprovechan los que ya
+      // estaban, después se busca a quien encaje en sexo y edad
+      const papeles = o.pj.filter(function (p) { return p.i === 'protagonista'; }).concat(o.pj.filter(function (p) { return p.i === 'secundario'; }));
+      const enUso = {};
+      papeles.forEach(function (p) { if (p.t !== null && p.t !== undefined) enUso[p.t] = 1; });
+      const sueltos = (o.eq.int || []).filter(function (id) { return !enUso[id]; });
+      papeles.forEach(function (p, i) {
+        if (p.t === null || p.t === undefined) {
+          if (sueltos.length) p.t = sueltos.shift();
+          else {
+            const tope = base * (p.i === 'protagonista' ? (i === 0 ? 3 : 2) : 2 * 0.6); // un secundario cobra la mitad
+            const op2 = Object.assign({ edad: p.e, imp: o.est === 0 ? p.i : undefined, dir: o.est === 0 ? dirHab : undefined }, op);
+            let t = T.mejorDisponible('interprete', tope, usados, p.s, azarEleccion, op2) || T.mejorDisponible('interprete', tope, usados, null, azarEleccion, op2) ||
+              T.mejorDisponible('interprete', Infinity, usados, null, 0, op2);
+            // Sin niños libres de esa edad, sirve cualquier niño; y si no hay, el personaje crece a 18
+            if (!t && p.e < 16) t = T.mejorDisponible('interprete', Infinity, usados, null, 0, Object.assign({}, op2, { edad: undefined, nino: true }));
+            if (!t && p.e < 16 && o.est !== 0) { p.e = 18; t = T.mejorDisponible('interprete', Infinity, usados, null, 0, Object.assign({}, op2, { edad: 18 })); }
+            p.t = t ? t.id : null;
+          }
+        }
+        if (p.t !== null && p.t !== undefined) usados.push(p.t);
+      });
+      o.eq.int = papeles.filter(function (p) { return p.t !== null && p.t !== undefined; }).map(function (p) { return p.t; });
+      return o;
+    }
     const ints = (o.eq.int || []).slice();
     ints.forEach(function (id) { usados.push(id); });
     const sexos = N.probabilidad(0.5) ? ['F', 'M'] : ['M', 'F'];
     while (ints.length < 2) {
-      const tope = D.oficio('interprete').base * tipico * (ints.length === 0 ? 3 : 2) * a;
-      const t = T.mejorDisponible('interprete', tope, usados, sexos[ints.length], azarEleccion) || T.mejorDisponible('interprete', tope, usados) || T.mejorDisponible('interprete', Infinity, usados);
+      const tope = base * (ints.length === 0 ? 3 : 2);
+      const t = T.mejorDisponible('interprete', tope, usados, sexos[ints.length], azarEleccion, op) || T.mejorDisponible('interprete', tope, usados, null, 0, op) || T.mejorDisponible('interprete', Infinity, usados, null, 0, op);
       if (!t) break;
       ints.push(t.id); usados.push(t.id);
     }
     o.eq.int = ints;
-    if (o.pj && IA.ideas) IA.ideas.asignarReparto(o);
+    return o;
+  }
+  // ---------- Negociación del equipo de una obra del jugador ----------
+  // Rol de cada talento contratado: oficio, importancia del personaje (intérpretes), invitado o cameo
+  function contratos(o) {
+    const out = [];
+    ROLES.forEach(function (r) { if (o.eq[r] !== undefined && o.eq[r] !== null) out.push({ id: o.eq[r], rol: r }); });
+    (o.eq.int || []).forEach(function (id) { const p = (o.pj || []).filter(function (x) { return x.t === id; })[0]; out.push({ id: id, rol: 'interprete', imp: p ? p.i : 'protagonista', pj: p }); });
+    (o.eq.inv || []).forEach(function (id) { out.push({ id: id, rol: 'interprete', imp: 'invitado' }); });
+    (o.eq.cam || []).forEach(function (id) { out.push({ id: id, rol: 'interprete', imp: 'cameo' }); });
+    return out;
+  }
+  function contextoNegociacion(o, c) {
+    const k = IA.taxonomia.ORDEN_CLAS.indexOf(o.clas);
+    const d = T.porId(o.eq.direccion);
+    return { est: o.est, rol: c.rol, imp: c.imp, clas: k >= 0 ? k : 2, dir: d && c.rol !== 'direccion' ? d.hab : undefined, amor: o.cont ? o.cont.amor : 0, fam: o.fam };
+  }
+  // Qué dice cada uno: lista de { id, rol, imp, r: resultado de la negociación, ok: si se cumplen sus condiciones }
+  function negociaciones(o) {
+    return contratos(o).map(function (c) {
+      const t = T.porId(c.id);
+      if (o.guionPagado && c.rol === 'guion') return Object.assign({ r: { estado: 'acepta', texto: 'Guion comprado' }, ok: true }, c);
+      if (T.exclusivoDe(t) === o.est) return Object.assign({ r: { estado: 'acepta', texto: 'Exclusivo de tu estudio' }, ok: true }, c);
+      const r = T.negociar(t, contextoNegociacion(o, c));
+      let ok = r.estado === 'acepta';
+      if (r.estado === 'contraoferta') ok = ((o.pctT && o.pctT[c.id]) || 0) >= r.pctMin;
+      return Object.assign({ r: r, ok: ok }, c);
+    });
+  }
+  // Acepta las contraofertas (pone el porcentaje pedido) y quita a quien rechaza o exige lo que no se cumple
+  function resolverNegociaciones(o) {
+    const quitados = [];
+    negociaciones(o).forEach(function (n) {
+      if (n.ok) return;
+      if (n.r.estado === 'contraoferta') { o.pctT = o.pctT || {}; o.pctT[n.id] = n.r.pctMin; return; }
+      quitados.push(n.id);
+      if (n.rol !== 'interprete') o.eq[n.rol] = null;
+      else {
+        o.eq.int = (o.eq.int || []).filter(function (x) { return x !== n.id; });
+        o.eq.inv = (o.eq.inv || []).filter(function (x) { return x !== n.id; });
+        o.eq.cam = (o.eq.cam || []).filter(function (x) { return x !== n.id; });
+        (o.pj || []).forEach(function (p) { if (p.t === n.id) p.t = null; });
+      }
+      if (o.pctT) delete o.pctT[n.id];
+    });
+    return quitados;
+  }
+  // Recomendado completo: arma el equipo y lo negocia hasta que todos firman (máximo 4 vueltas)
+  function equipoNegociado(o, ambicion, azarEleccion) {
+    const vetados = [];
+    for (let i = 0; i < 8; i++) {
+      equipoRecomendado(o, ambicion, azarEleccion);
+      const q = resolverNegociaciones(o);
+      if (!q.length) break;
+      q.forEach(function (id) { vetados.push(id); const t = T.porId(id); if (t) t._veto = 1; });
+      if (i === 7) equipoRecomendado(o, ambicion, azarEleccion); // última vuelta: llena los huecos
+    }
+    vetados.forEach(function (id) { const t = T.porId(id); if (t) delete t._veto; });
     return o;
   }
   function equipoCompleto(o) {
-    return ROLES.every(function (r) { return o.eq[r] !== undefined && o.eq[r] !== null; }) && o.eq.int && o.eq.int.length >= 1;
+    if (!ROLES.every(function (r) { return o.eq[r] !== undefined && o.eq[r] !== null; }) || !o.eq.int || !o.eq.int.length) return false;
+    // Con personajes, cada protagonista y secundario necesita intérprete
+    return !o.pj || o.pj.every(function (p) { return (p.i !== 'protagonista' && p.i !== 'secundario') || (p.t !== null && p.t !== undefined); });
   }
   // Duración por etapa en semanas (la escala alarga el rodaje; las salas propias aceleran)
   // Las películas de los primeros años eran cortos: se hacían en pocas semanas
@@ -221,17 +318,17 @@ IA.obras = (function () {
     };
   }
   // Multiplicador (bruto ÷ costo) y resultado neto para el estudio
-  function costoTotal(o) { return (o.cf || 0) + (o.gp || 0) + (o.cm || 0); }
+  function costoTotal(o) { return (o.cf || 0) + (o.gp || 0) + (o.cm || 0) + (o.part || 0); }
   function multiplicador(o) { const c = costoTotal(o); return c > 0 ? (o.bruto || 0) / c : 0; }
   function neto(o) { return (o.parte || 0) - costoTotal(o); }
 
   const DETALLE_IDEA = ['cont', 'fmt', 'pubs', 'sub', 'sarc', 'fic', 'corr', 'estilo', 'prio', 'idio', 'rod', 'cx', 'rit', 'fx', 'presM', 'clasN',
-    'derechos', 'guionId', 'guionPagado', 'lug', 'prob', 'min', 'iar', 'fxr', 'frc'];
+    'derechos', 'guionId', 'guionPagado', 'lug', 'prob', 'min', 'iar', 'fxr', 'frc', 'extras', 'terceros', 'pctT', 'fat'];
   // Historial compacto: de las obras viejas de los rivales queda el resumen y el detalle semanal se borra
   function compactar() {
     const S = N.S, t = S.t;
     const BORRAR = ['eq', 'acc', 'tem', 'u', 'delta', 'inf', 'dur', 'sr', 'semProd', 'sobre', 't0', 'tLista', 'prog', 'anioPlan', 'max', 'exp', 'tono', 'esc',
-      'sub', 'prob', 'arco', 'cont', 'ia', 'iar', 'fxr', 'presM', 'clasN', 'derechos'];
+      'sub', 'prob', 'arco', 'cont', 'ia', 'iar', 'fxr', 'presM', 'clasN', 'derechos', 'fat', 'feR', 'pctT'];
     S.obras.forEach(function (o) {
       if (o.et !== 'terminada') return;
       if (o.hs && (t - (o.fe || 0) > 52 * (o.est === 0 ? 30 : 2)) && !o.fav) delete o.hs;
@@ -268,10 +365,11 @@ IA.obras = (function () {
     ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
     delEstudio: delEstudio, enProduccion: enProduccion, enCartelera: enCartelera, tituloNuevo: tituloNuevo,
     clasificacionesDisponibles: clasificacionesDisponibles, clasificacionRecomendada: clasificacionRecomendada,
+    contratos: contratos, negociaciones: negociaciones, resolverNegociaciones: resolverNegociaciones, equipoNegociado: equipoNegociado,
     validarGeneros: validarGeneros, borrador: borrador, recalcular: recalcular, escalaCercana: escalaCercana, idsEquipo: idsEquipo, costoTalento: costoTalento,
-    PARTE_INVITADO: PARTE_INVITADO, PARTE_CAMEO: PARTE_CAMEO,
+    PARTE_SECUNDARIO: PARTE_SECUNDARIO, PARTE_INVITADO: PARTE_INVITADO, PARTE_CAMEO: PARTE_CAMEO,
     equipoRecomendado: equipoRecomendado, equipoCompleto: equipoCompleto, duraciones: duraciones,
     semanasTotales: semanasTotales, estimar: estimar, crear: crear, paraPoster: paraPoster,
-    costoTotal: costoTotal, multiplicador: multiplicador, neto: neto, compactar: compactar, escalaTono: escalaTono,
+    creditosDe: creditos, costoTotal: costoTotal, multiplicador: multiplicador, neto: neto, compactar: compactar, escalaTono: escalaTono,
   };
 })();

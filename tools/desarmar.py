@@ -3,7 +3,7 @@
 
 Uso:
     python3 tools/desarmar.py INDUSTRY_ART_v17.html            # reescribe src/ desde el HTML
-    python3 tools/desarmar.py INDUSTRY_ART_v17.html --destino carpeta
+    python3 tools/desarmar.py INDUSTRY_ART_v18.html --destino carpeta
     python3 tools/desarmar.py legado/INDUSTRY_ART_v15.html --destino legado/v15
 
 Con un HTML armado (V16 en adelante) separa:
@@ -76,7 +76,7 @@ def desarmar(html_ruta, destino):
     orden = {
         "nucleo": 0, "textos": 1, "datos": 2, "taxonomia": 2, "mundo": 3, "economia": 4, "talentos": 5, "ideas": 6, "obras": 6,
         "produccion": 7, "lanzamiento": 8, "rivales": 9, "premios": 10, "negocio": 11, "arte": 12, "juego": 12,
-        "guardado": 13, "interfaz": 14, "pantallas": 15, "creacion": 16, "pruebas": 17, "arranque": 99,
+        "guardado": 13, "interfaz": 14, "pantallas": 15, "agencia": 16, "creacion": 16, "pruebas": 17, "arranque": 99,
     }
     for i, m in enumerate(marcas):
         fin = marcas[i + 1].start() if i + 1 < len(marcas) else len(codigo)

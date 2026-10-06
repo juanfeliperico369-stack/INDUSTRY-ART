@@ -16,7 +16,7 @@ IA.pruebas = (function () {
   // Registro de cada obra al terminar (las métricas no dependen de lo que la compactación borra después)
   let registro = null;
   N.on('obraTerminada', function (o) {
-    if (registro) registro.push({ est: o.est, mult: O.multiplicador(o), neto: O.neto(o) });
+    if (registro) registro.push({ est: o.est, mult: O.multiplicador(o), neto: O.neto(o), talento: O.costoTotal(o) > 0 ? (o.cf || 0) / O.costoTotal(o) : 0 });
   });
   const ORDEN_TERRENOS = ['backlot', 'foso', 'captura', 'backlot'];
 
@@ -72,6 +72,7 @@ IA.pruebas = (function () {
     while (intentos-- > 0 && O.enProduccion(0).length < NG.capacidad(0)) {
       const gen = elegirGeneros(S);
       let escala = N.entero(est.escala[0], est.escala[1]) + (est.grande && N.probabilidad(est.grande) ? 1 : 0);
+      if (S.t < 52) escala = Math.min(escala, 2); // el primer año, sin superproducciones
       let b = null, costo = 0, ok = false;
       const tono = N.elegir(D.tonos).id;
       const idea = ideaDelBot(S, gen);
@@ -80,7 +81,7 @@ IA.pruebas = (function () {
         for (let e = escala; e >= 0 && !ok; e--) {
           b = O.borrador(0, Object.assign({ gen: idea.gen || gen, escala: e, tono: tono, completa: true }, idea.campos));
           O.equipoRecomendado(b, amb);
-          detallar(b, idea);
+          detallar(b, idea, amb);
           costo = O.costoTalento(b) + b.pp + (b.derechos || 0) + E.marketingTipico(N.anio()) * D.nivelesMarketing[Math.min(2, est.marketing)].mult * 0.5;
           if (NG.cajaLibre(0) > costo * est.colchon) ok = true;
         }
@@ -113,7 +114,7 @@ IA.pruebas = (function () {
     return r;
   }
   // Completa la historia, los personajes y algunas decisiones del modo detallado
-  function detallar(b, idea) {
+  function detallar(b, idea, amb) {
     const anio = N.anio();
     if (idea.mat) IA.ideas.usarMaterial(b, idea.mat, anio);
     if (idea.guion) {
@@ -130,12 +131,16 @@ IA.pruebas = (function () {
     IA.ideas.generarPersonajes(b);
     const dir = T.porId(b.eq.direccion), arte = T.porId(b.eq.arte);
     // Efectos grandes solo si el equipo da la talla; IA solo si el equipo creativo es bueno
-    if ((b.fam === 'AA' || b.fam === 'IM') && dir && arte && (dir.hab + arte.hab) / 2 >= 64 && N.probabilidad(0.4) && X.efectos[3].desde <= anio) b.fx = 3;
+    // (un estudio bien llevado no se juega la caja en efectos grandes hasta tener colchón)
+    const holgura = NG.cajaLibre(0) > E.presupuestoTipico(anio) * 5;
+    if (holgura && (b.fam === 'AA' || b.fam === 'IM') && dir && arte && (dir.hab + arte.hab) / 2 >= 64 && N.probabilidad(0.4) && X.efectos[3].desde <= anio) b.fx = 3;
     if (anio >= IA.ideas.ANIO_IA && IA.ideas.equipoCreativo(b) >= 62 && N.probabilidad(0.3)) b.ia = N.entero(10, 40);
     if (N.probabilidad(0.2)) b.cx = N.entero(1, 4);
     if (N.probabilidad(0.2)) b.rit = N.entero(1, 4);
     O.recalcular(b);
-    IA.ideas.asignarReparto(b);
+    // Todo el elenco con nombre se contrata y se negocia (V18), ya con la clasificación final
+    O.equipoNegociado(b, amb);
+    O.recalcular(b);
     return b;
   }
   let registroErrores = null;
@@ -155,6 +160,7 @@ IA.pruebas = (function () {
       if (IA.ideas.clasificar(o, o.anioPlan) !== o.clas) errores.push('La clasificación de «' + o.tit + '» no sale de su contenido');
       if (o.gen.indexOf('Erótico') >= 0 && ((o.pj || []).some(function (p) { return p.e < 18; }) || ['18', 'R', 'X'].indexOf(o.clas) < 0)) errores.push('Regla del Erótico rota en «' + o.tit + '»');
       if (IA.ideas.hayMenores(o) && o.cont.amor > 1) errores.push('Contenido no permitido con menores en «' + o.tit + '»');
+      if (IA.ideas.hayNinos(o) && IA.taxonomia.ORDEN_CLAS.indexOf(o.clas) > 2) errores.push('Obra de más de PG-13 con niños en el elenco: «' + o.tit + '»');
     });
     if (errores.length > 50) errores.length = 50;
   }
@@ -245,6 +251,7 @@ IA.pruebas = (function () {
       investigaciones: S.investigaciones, quiebra: S.quiebra ? S.quiebra.anio : null,
       rescatesRivales: S.estudios.slice(1).reduce(function (a, e) { return a + e.rescates; }, 0),
       ideas: resumenIdeas(S),
+      talentos: resumenTalentos(S, terminadas),
       errores: errores, rendimiento: rend,
     };
     return res;
@@ -259,6 +266,20 @@ IA.pruebas = (function () {
     { id: 'cuotaMax', nombre: 'Cuota de mercado', objetivo: 'menos de 35 %', ok: function (r) { return r.cuotaMax < 0.35; }, ver: function (r) { return pct(r.cuotaMax) + ' máx.'; } },
   ];
   function pct(x) { return (Math.round(x * 1000) / 10).toString().replace('.', ',') + ' %'; }
+  // Talentos 2.0: parte del costo que se va en talento, estrellas raras y nadie perfecto
+  function resumenTalentos(S, terminadas) {
+    const vivos = S.talentos.filter(function (t) { return !t.ret && !t.mu; });
+    return {
+      parteTalento: mediana(terminadas.map(function (r) { return r.talento; })),
+      sobre90: vivos.filter(function (t) { return t.hab >= 90; }).length / Math.max(1, vivos.length),
+      perfectos: S.talentos.filter(function (t) { return t.hab >= 99 && t.cp && t.cp.every(function (x) { return x >= 99; }); }).length,
+      vivos: vivos.length, ninos: vivos.filter(function (t) { return N.anio() - t.nac < 16; }).length,
+      exclusivos: vivos.filter(function (t) { return T.exclusivoDe(t) !== null; }).length,
+      relaciones: vivos.filter(function (t) { return t.rel && Object.keys(t.rel).length; }).length,
+      parejas: vivos.filter(function (t) { return Object.keys(t.rel || {}).some(function (k) { const o = T.porId(+k); return o && T.tipoRelacion(t.rel[k], t, o) === 'pareja'; }); }).length,
+      retiroMin: S.talentos.filter(function (t) { return t.ret && !t.mu; }).reduce(function (m, t) { return Math.min(m, t.ret - t.nac); }, 999),
+    };
+  }
   // Qué usó el bot de la fábrica de ideas (para el informe)
   function resumenIdeas(S) {
     const mias = S.obras.filter(function (o) { return o.est === 0; });
@@ -303,6 +324,7 @@ IA.pruebas = (function () {
     prueba('Erótico nunca con públicos infantiles', !!I.validar(idea(['Erótico'], { amor: 3 }, { pubs: ['Adolescentes'] }), 2000));
     prueba('Erótico solo con personajes adultos', !!I.validar(idea(['Erótico'], { amor: 3 }, { pj: [{ n: 'A', e: 16, s: 'F', i: 'protagonista', a: 'Amante' }], prob: ['Amor'], arco: 'pozo', nat: 'f', tipo: 'real' }), 2000));
     prueba('Con menores el amor no pasa de romántico', (function () { const b = idea(['Drama'], { amor: 4 }, { pj: [{ n: 'A', e: 14, s: 'F', i: 'protagonista', a: 'Héroe' }] }); I.normalizar(b, 2000); return b.cont.amor <= 1; })());
+    prueba('Con niños en el elenco la obra no pasa de PG-13', (function () { const b = idea(['Terror'], { violencia: 5, lenguaje: 4, terror: 4 }, { pj: [{ n: 'A', e: 12, s: 'M', i: 'protagonista', a: 'Héroe' }] }); I.normalizar(b, 2000); return IA.taxonomia.ORDEN_CLAS.indexOf(b.clas) <= 2; })());
     // Dominio público: vida del autor + 70
     const dracula = X.dominio.filter(function (m) { return m.tit === 'Drácula'; })[0];
     prueba('Drácula no es libre en 1982', !I.esLibre(dracula, 1982));
@@ -322,6 +344,38 @@ IA.pruebas = (function () {
     // Listas completas
     const cnt = X.contar();
     prueba('Listas completas: 227 temas, 85 subgéneros, 53 problemáticas, 34 ficciones', cnt.temas === 227 && cnt.subgeneros === 85 && cnt.problematicas === 53 && cnt.ficcion === 34, JSON.stringify(cnt));
+    // ---------- Talentos 2.0 (V18) ----------
+    if (N.S) {
+      const S = N.S, vivos = S.talentos.filter(function (t) { return !t.ret; });
+      prueba('Más de 1.000 talentos vivos', vivos.length >= 1000, vivos.length);
+      prueba('Nadie tiene todo en 100', !S.talentos.some(function (t) { return t.cp && t.cp.every(function (x) { return x >= 95; }); }));
+      const s90 = vivos.filter(function (t) { return t.hab >= 90; }).length / vivos.length;
+      prueba('Un 90 o más es raro (3 % o menos)', s90 <= 0.03, (s90 * 100).toFixed(1) + ' %');
+      const libre = vivos.filter(function (t) { return T.disponible(t, 0) && T.energia(t) === 100 && !t.act; })[0];
+      if (libre) {
+        const copia = JSON.parse(JSON.stringify(libre));
+        T.ocupar([libre.id], S.t + 10);
+        const tras = T.energia(libre), act = libre.act;
+        libre.enT = S.t - 9; // dos meses después
+        const recupera = T.energia(libre);
+        Object.keys(copia).forEach(function (k) { libre[k] = copia[k]; });
+        Object.keys(libre).forEach(function (k) { if (!(k in copia)) delete libre[k]; });
+        prueba('Un cargo cuesta 20 de energía y se recuperan 10 al mes', tras === 80 && recupera === 100 && act === 1, tras + ' → ' + recupera);
+      }
+      const ocupadoX = vivos.filter(function (t) { return (t.act || 0) > T.MAX_PROYECTOS; }).length;
+      prueba('Nadie trabaja en más de 2 proyectos a la vez', ocupadoX === 0, ocupadoX);
+      prueba('Nadie se retira antes de los 70', !S.talentos.some(function (t) { return t.ret && !t.mu && t.ret - t.nac < 70; }));
+      const nino = vivos.filter(function (t) { return N.anio() - t.nac < 16; })[0];
+      if (nino) prueba('Los niños actores solo hacen obras hasta PG-13', nino.cmax <= 2 && T.negociar(nino, { est: 0, rol: 'interprete', imp: 'secundario', clas: 3 }).estado === 'rechaza');
+      const estrella = vivos.filter(function (t) { return t.fama >= 0.8 && t.hab >= 70; })[0];
+      if (estrella) { const f0 = S.estudios[0].fama; S.estudios[0].fama = 0.01; prueba('Una estrella rechaza a un estudio sin fama', T.negociar(estrella, { est: 0, rol: estrella.of }).estado === 'rechaza'); S.estudios[0].fama = f0; }
+      prueba('Con porcentaje, el salario fijo baja', T.salarioCon(1000, 10) === 780 && T.salarioCon(1000, 0) === 1000);
+      const x = vivos[0];
+      prueba('El salario exclusivo sigue a la época (1,8 veces la tarifa)', T.salarioExclusivo(x) === Math.round(T.tarifa(x) * 1.8));
+      const tr = E.tarifa(x, 1920), tr2 = E.tarifa(x, 2020);
+      prueba('Las tarifas suben con la época, no con el presupuesto de la obra', tr2 > tr * 5, Math.round(tr) + ' → ' + Math.round(tr2));
+      prueba('La academia no pasa de +5 por oficio', (function () { const t = { hab: 40, of: 'guion', ac: { guion: 5 }, af: [0, 0, 0, 0, 0, 0, 0, 0], en: 100, enT: S.t, act: 0 }; return /\+5/.test(T.puedeEstudiar(t, T.curso('taller'), 'guion')); })());
+    }
     return r;
   }
 

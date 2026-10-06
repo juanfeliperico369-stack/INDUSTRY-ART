@@ -19,6 +19,28 @@ IA.guardado = (function () {
     if (!S.usosMaterial) S.usosMaterial = {};
     if (!S.reglaDominio) S.reglaDominio = 70;
   };
+  // V17 → V18 (Talentos 2.0): cada talento recibe su perfil completo con un azar fijo por persona (no toca el azar
+  // del mundo), se cuentan sus proyectos activos y el avatar puede estudiar.
+  MIGRACIONES[18] = function (S) {
+    S.talentos.forEach(function (t) {
+      let k = 0;
+      const azar = function () { k++; return (N.hash(t.id + '|v18|' + k) % 10007) / 10007; };
+      IA.talentos.completar(t, azar);
+      t.enT = S.t; t.moT = S.t; t.act = 0;
+      // En la V17 morir y retirarse se marcaban igual: quien "se retiró" antes de los 70 en realidad falleció
+      if (t.ret && !t.mu && t.ret - t.nac < 70) t.mu = t.ret;
+      if (S.y0 + Math.floor(S.t / 52) - t.nac < 16 && t.cmax > 2) t.cmax = 2;
+    });
+    const porId = {};
+    S.talentos.forEach(function (t) { porId[t.id] = t; });
+    S.obras.forEach(function (o) {
+      if (['desarrollo', 'preproduccion', 'rodaje', 'posproduccion'].indexOf(o.et) < 0 || !o.eq) return;
+      const ids = [];
+      Object.keys(o.eq).forEach(function (r) { (Array.isArray(o.eq[r]) ? o.eq[r] : [o.eq[r]]).forEach(function (id) { if (id !== null && id !== undefined) ids.push(id); }); });
+      ids.forEach(function (id) { if (porId[id]) porId[id].act++; });
+    });
+    if (S.avatar && !S.avatar.ac) S.avatar.ac = {};
+  };
 
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------
   function suma(texto) {

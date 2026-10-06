@@ -1,7 +1,8 @@
 /* ==== módulo: produccion ==== */
 // Etapas de la obra: desarrollo, preproducción, rodaje y posproducción, con su costo semana a semana.
-// El liderazgo del productor y los rasgos del equipo controlan el sobrecosto. Departamentos con nota,
-// locaciones, sets, dilemas y prueba de público llegan en la V19.
+// El productor, el liderazgo y la excelencia del director y del diseñador (tu documento), la experiencia y los
+// rasgos del equipo controlan el sobrecosto. Departamentos con nota, locaciones, sets, dilemas y prueba de
+// público llegan en la V19.
 IA.produccion = (function () {
   'use strict';
   const N = IA.n, T = IA.talentos, O = IA.obras, E = IA.economia;
@@ -16,12 +17,32 @@ IA.produccion = (function () {
     // Sobrecosto: el productor con buena habilidad lo controla; ciertos rasgos lo empeoran
     const prod = T.porId(o.eq.produccion);
     let riesgo = 0.04 - (prod ? (prod.hab - 50) / 900 : 0);
-    O.idsEquipo(o).forEach(function (id) { const t = T.porId(id); const r = t && IA.datos.rasgos[t.rasgo]; if (r) riesgo += r[1] / 3; });
+    // Director y diseñador: con liderazgo y excelencia altos el presupuesto se mantiene o sale más barato
+    const lid = [o.eq.direccion, o.eq.arte].map(T.porId).filter(Boolean).map(function (t) { return (T.capacidad(t, 'Liderazgo') + T.capacidad(t, 'Excelencia')) / 2; });
+    if (lid.length) riesgo -= (lid.reduce(function (a, x) { return a + x; }, 0) / lid.length - 60) / 1500;
+    let veteranos = 0;
+    O.idsEquipo(o).forEach(function (id) {
+      const t = T.porId(id);
+      const r = t && IA.datos.rasgos[t.rasgo];
+      if (r) riesgo += r[1] / 3;
+      if (t && t.obras >= 15) veteranos++;
+    });
+    riesgo -= Math.min(0.02, veteranos * 0.005);
     o.sobre = N.redondear(N.limitar(1 + N.normal(riesgo, 0.05), 0.92, 1.3), 3);
     o.pp = Math.round(o.pp * (1 - (ctx.ahorro || 0)));
     const total = o.dur.desarrollo + o.semProd;
-    T.ocupar(O.idsEquipo(o), N.S.t + total);
+    const ids = O.idsEquipo(o);
+    // Cada cargo cobra 20 de energía; quien llega cansado rinde menos en esta obra
+    T.ocupar(ids, N.S.t + total);
+    const fat = T.cansancio(ids);
+    if (fat) o.fat = fat;
     ctx.pagar(o.est, 'talento', o.cf);
+    ids.forEach(function (id) {
+      const t = T.porId(id);
+      if (!t) return;
+      const parte = (o.eq.cam || []).indexOf(id) >= 0 ? O.PARTE_CAMEO : (o.eq.inv || []).indexOf(id) >= 0 ? O.PARTE_INVITADO : (o.pj || []).some(function (p) { return p.t === id && p.i === 'secundario'; }) ? O.PARTE_SECUNDARIO : 1;
+      T.pagarA(id, T.salarioCon(T.tarifaPara(t, o.est), o.pctT && o.pctT[id] || 0) * parte);
+    });
     N.emit('obraIniciada', o);
     return o;
   }

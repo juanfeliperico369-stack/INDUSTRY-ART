@@ -50,6 +50,8 @@ IA.creacion = (function () {
       if (!(b.prob && b.prob.length)) I.recomendarHistoria(b, anio());
       I.generarPersonajes(b);
       O.recalcular(b);
+      O.equipoNegociado(b, 1); // todo el elenco con nombre, contratado y negociado (V18)
+      O.recalcular(b);
       return b;
     });
   }
@@ -100,6 +102,7 @@ IA.creacion = (function () {
     let k = 0;
     c.niveles.forEach(function (n, i) { if (n[1] <= tope) k = i; });
     if (c.id === 'amor' && I.hayMenores(b)) k = Math.min(k, 1);
+    if (I.hayNinos(b)) { let m = 0; c.niveles.forEach(function (n, i) { if (n[1] <= 2) m = i; }); k = Math.min(k, m); }
     return k;
   }
   function textoNivel(c, v) { const n = c.niveles[v] || c.niveles[0]; return n[0] + (n[1] >= 5 ? ' (siempre sugerido)' : '') + ' · ' + X.ORDEN_CLAS[n[1]]; }
@@ -112,6 +115,8 @@ IA.creacion = (function () {
     if (k === 'min') return b.min + ' min · ' + X.categoriaDuracion(b.min) + ' (lo normal en ' + anio() + ': ' + I.duracionTipica(anio()) + ')';
     if (k === 'pres') return dinero(b.pp) + ' · ×' + U.decimal(b.presM, 2) + ' de lo típico · clase ' + I.clase(b);
     if (k === 'epo') return X.epoca(b.epo).nombre;
+    if (k === 'extras') return (b.extras || 0) + ' personas';
+    if (k === 'terceros') return (b.terceros || 0) + ' personas';
     return '';
   }
   function signo(x) { return (x > 0 ? '+' : '') + x; }
@@ -133,7 +138,8 @@ IA.creacion = (function () {
       (cr.pieAbierto ? '<div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + (est.derechos ? ' · derechos ' + dinero(est.derechos) : '') + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · retorno orientativo ×' + U.decimal(est.retorno[0], 1) + ' a ×' + U.decimal(est.retorno[1], 1) + ' (multiplicador de lo invertido)</div>' : '') +
       (err && (modo === 'detallado' || cr.paso === 4) ? '<p class="mal chico" style="margin:4px 0 0">' + esc(err) + '</p>' : '');
   }
-  function pie(b) { return '<div id="crPie" class="tarjeta totales" style="position:sticky;bottom:0;margin-top:12px;padding:8px 10px">' + piezaPie(b) + '</div>'; }
+  // Los totales quedan fijos al final de la creación (no persiguen el desplazamiento)
+  function pie(b) { return '<div id="crPie" class="tarjeta totales" style="margin-top:12px;padding:8px 10px">' + piezaPie(b) + '</div>'; }
   function refrescarPie() {
     const p = document.getElementById('crPie');
     if (p && cr.b) p.innerHTML = piezaPie(cr.b);
@@ -318,7 +324,7 @@ IA.creacion = (function () {
     let h = '<h4>Público objetivo (' + (b.pubs || []).length + '/' + I.LIMITES.pubs + ')</h4><p class="chico">' + esc((b.pubs || []).join(' · ') || 'General') + '</p><button class="btn" data-a="crPicker" data-v="pubs">Elegir público</button>';
     h += '<h4>Contenido</h4><p class="nota">La clasificación sale de lo más fuerte del contenido. Nada es gráfico: lo de adultos siempre es sugerido.</p>';
     X.contenido.forEach(function (c) { h += rango('c:' + c.id, 0, maxNivel(b, c), Math.min(b.cont[c.id] || 0, maxNivel(b, c)), c.nombre, textoNivel(c, b.cont[c.id] || 0)); });
-    if (I.hayMenores(b)) h += '<p class="nota">Hay personajes menores de edad: el amor no pasa de romántico.</p>';
+    if (I.hayMenores(b)) h += '<p class="nota">Hay personajes menores de edad: el amor no pasa de romántico' + (I.hayNinos(b) ? ', y con niños en el elenco la obra no pasa de PG-13 (los niños actores solo hacen obras hasta PG-13)' : '') + '.</p>';
     h += '<p id="crClas">' + textoClas(b) + '</p>';
     const permiteN = I.indiceClasificacion(b) <= 2 && b.gen.indexOf('Erótico') < 0;
     h += '<label class="interruptor"><span>Clasificación N (general, con contenido moderado y controlado; rinde la mitad)</span><input type="checkbox" data-c="crClasN"' + (b.clasN ? ' checked' : '') + (permiteN ? '' : ' disabled') + '></label>';
@@ -345,69 +351,120 @@ IA.creacion = (function () {
     return h;
   }
   // ---------- Personajes ----------
-  const IMP_CORTO = { protagonista: 'P', secundario: 'S', extra: 'E', invitado: 'I', cameo: 'C' };
+  // Protagonistas, secundarios, invitados y cameos se contratan uno por uno (V18); extras y terceros son un número
+  const IMP_CORTO = { protagonista: 'P', secundario: 'S', invitado: 'I', cameo: 'C' };
+  const IMP_NOMBRADAS = X.importancias.filter(function (im) { return !im.contado; });
+  function avisoActor(p, ta) {
+    if (!ta) return '';
+    const e = anio() - ta.nac;
+    if (p.e < 16 && e >= 18) return ' <span class="mal">· un adulto no puede hacer de niño</span>';
+    if (p.i !== 'invitado' && p.i !== 'cameo' && Math.abs(e - p.e) > 15) return ' <span class="mal">· no encaja con la edad del personaje (' + e + ' años)</span>';
+    if (ta.pap && ta.pap.indexOf(p.a) >= 0) return ' <span class="bien">· papel recomendado</span>';
+    return '';
+  }
   function bloquePersonajes(b) {
     const cuenta = {};
     (b.pj || []).forEach(function (p) { cuenta[p.i] = (cuenta[p.i] || 0) + 1; });
-    let h = '<p class="nota">Hasta 10 protagonistas, 15 secundarios, 20 extras, 5 invitados especiales y 5 cameos. Protagonistas y secundarios pueden tener un intérprete contratado; los invitados cobran el 40 % y los cameos el 15 % de su tarifa. P = protagonista · S = secundario · E = extra · I = invitado · C = cameo.</p>';
-    h += '<div class="fila envolver">' + X.importancias.map(function (im) {
+    let h = '<p class="nota">Hasta 10 protagonistas, 15 secundarios, 5 invitados especiales y 5 cameos, cada uno con su intérprete contratado. Los secundarios cobran la mitad de su tarifa, los invitados el 40 % y los cameos el 15 %. Extras y terceros (figurantes, dobles y personal de apoyo) son un número. P = protagonista · S = secundario · I = invitado · C = cameo.</p>';
+    h += '<div class="fila envolver">' + IMP_NOMBRADAS.map(function (im) {
       return '<button class="btn" data-a="crPjAdd" data-v="' + im.id + '"' + ((cuenta[im.id] || 0) >= im.max ? ' disabled' : '') + '>' + icono('mas') + esc(im.nombre) + ' (' + (cuenta[im.id] || 0) + '/' + im.max + ')</button>';
     }).join('') + '<button class="btn" data-a="crPjGenerar">' + icono('dado') + 'Otro reparto</button></div>';
     h += (b.pj || []).map(function (p, i) {
+      if (p.i === 'extra') return '';
       const ta = p.t !== null && p.t !== undefined ? T.porId(p.t) : null;
-      const conActor = p.i !== 'extra';
       return '<div class="tarjeta" style="padding:8px">' +
         '<div class="fila"><input type="text" maxlength="30" value="' + esc(p.n) + '" data-i="crPjNombre" data-k="' + i + '" class="crece" aria-label="Nombre del personaje"><button class="ico" data-a="crPjDado" data-v="' + i + '" aria-label="Nombre al azar">' + icono('dado') + '</button><button class="ico" data-a="crPjDel" data-v="' + i + '" aria-label="Quitar personaje">' + icono('cerrar') + '</button></div>' +
-        '<div class="chips" style="margin:4px 0">' + X.importancias.map(function (im) { return chip(IMP_CORTO[im.id], 'crPjImp', i + '|' + im.id, p.i === im.id, false, ' title="' + im.nombre + '" style="min-width:48px"'); }).join('') + '</div>' +
+        '<div class="chips" style="margin:4px 0">' + IMP_NOMBRADAS.map(function (im) { return chip(IMP_CORTO[im.id], 'crPjImp', i + '|' + im.id, p.i === im.id, false, ' title="' + im.nombre + '" style="min-width:48px"'); }).join('') + '</div>' +
         '<div class="fila envolver"><label class="campo" style="width:80px"><span>Edad</span><input type="number" min="1" max="110" value="' + p.e + '" data-c="crPjEdad" data-k="' + i + '"></label>' +
         '<label class="campo"><span>Sexo</span><select data-c="crPjSexo" data-k="' + i + '"><option value="F"' + (p.s === 'F' ? ' selected' : '') + '>' + t('mujer') + '</option><option value="M"' + (p.s === 'M' ? ' selected' : '') + '>' + t('hombre') + '</option></select></label>' +
         '<label class="campo crece"><span>Arquetipo</span><select data-c="crPjArq" data-k="' + i + '">' + X.arquetipos.map(function (a) { return '<option' + (a.id === p.a ? ' selected' : '') + '>' + esc(a.id) + '</option>'; }).join('') + '</select></label></div>' +
-        (conActor ? '<div class="fila entre"><span class="chico">' + (ta ? 'Lo interpreta <b>' + esc(ta.nom) + '</b> · ' + t('tal_habilidad').toLowerCase() + ' ' + Math.round(ta.hab) + ' · fama ' + Math.round(ta.fama * 100) : (p.i === 'invitado' || p.i === 'cameo' ? 'Sin estrella elegida' : 'Reparto de la casa (sin estrella)')) + '</span><span class="fila">' +
-          (ta ? '<button class="btn" data-a="crPjQuitarInt" data-v="' + i + '">Quitar</button>' : '') + '<button class="btn" data-a="crPjInt" data-v="' + i + '">' + (ta ? 'Cambiar' : 'Elegir') + '</button></span></div>' : '') +
-        (cr.rol === 'pj:' + i ? listaCandidatos(cr.rol) : '') + '</div>';
+        '<div class="fila entre"><span class="chico">' + (ta ? 'Lo interpreta <b>' + esc(ta.nom) + '</b> · ' + t('tal_habilidad').toLowerCase() + ' ' + Math.round(ta.hab) + ' · fama ' + Math.round(ta.fama * 100) + ' · ' + dinero(costoDe(b, ta.id, p.i)) + avisoActor(p, ta) : '<span class="mal">Falta contratar a su intérprete</span>') + '</span><span class="fila">' +
+          (ta ? '<button class="btn" data-a="crPjQuitarInt" data-v="' + i + '">Quitar</button>' : '') + '<button class="btn" data-a="crPjInt" data-v="' + i + '">' + (ta ? 'Cambiar' : 'Contratar') + '</button></span></div>' +
+        (ta ? filaContrato(b, ta) : '') + (cr.rol === 'pj:' + i ? listaCandidatos(cr.rol) : '') + '</div>';
     }).join('');
+    h += rango('extras', 0, X.MAX_EXTRAS, b.extras || 0, 'Extras', textoRango(b, 'extras')) + rango('terceros', 0, X.MAX_TERCEROS, b.terceros || 0, 'Terceros (figurantes, dobles y personal de apoyo)', textoRango(b, 'terceros'));
     return h;
+  }
+  // ---------- Contratos: salario fijo o con porcentaje de la taquilla del estudio ----------
+  function costoDe(b, id, imp) {
+    const t = T.porId(id);
+    if (!t) return 0;
+    if (b.guionPagado && b.eq.guion === id) return 0;
+    let f = T.salarioCon(T.tarifaPara(t, 0), b.pctT && b.pctT[id] || 0);
+    if (imp === 'secundario') f *= O.PARTE_SECUNDARIO;
+    if (imp === 'invitado') f *= O.PARTE_INVITADO;
+    if (imp === 'cameo') f *= O.PARTE_CAMEO;
+    return Math.round(f);
+  }
+  function estadoNegociacion(b, id) { return O.negociaciones(b).filter(function (n) { return n.id === id; })[0]; }
+  function filaContrato(b, ta) {
+    if (T.exclusivoDe(ta) === 0) return '<p class="chico bien" style="margin:2px 0">Exclusivo de tu estudio: ya cobra su salario anual.</p>';
+    if (b.guionPagado && b.eq.guion === ta.id) return '';
+    const n = estadoNegociacion(b, ta.id);
+    const pct = (b.pctT && b.pctT[ta.id]) || 0;
+    const ops = [0, 5, 10, 15].map(function (p) { return '<option value="' + p + '"' + (p === pct ? ' selected' : '') + '>' + (p ? p + ' % de la taquilla · salario ' + dinero(T.salarioCon(T.tarifaPara(ta, 0), p)) : 'Salario fijo · ' + dinero(T.tarifaPara(ta, 0))) + '</option>'; }).join('');
+    return '<div class="fila envolver" style="margin:2px 0"><label class="campo crece" style="margin:0"><span>Contrato</span><select data-c="crPct" data-k="' + ta.id + '">' + ops + '</select></label>' +
+      (n && !n.ok ? '<span class="mal chico">' + esc(n.r.texto) + '</span>' : n && n.r.estado !== 'acepta' ? '<span class="bien chico">' + esc(n.r.texto) + ' · de acuerdo</span>' : '<span class="chico tenue">Firma</span>') + '</div>';
   }
   // ---------- Equipo ----------
   function bloqueEquipo(b, conReparto) {
-    let h = '<p class="nota">' + t('equipo_ayuda') + '</p><button class="btn" data-a="crEquipoRec">' + icono('varita') + t('recomendado') + '</button>';
+    let h = '<p class="nota">' + t('equipo_ayuda') + ' Cada uno negocia: puede aceptar, pedir un porcentaje, exigir algo o rechazar. Cada cargo le cuesta 20 de energía (recupera 10 al mes) y nadie toma más de 2 proyectos a la vez.</p><button class="btn" data-a="crEquipoRec">' + icono('varita') + t('recomendado') + '</button>';
     h += O.ROLES.map(function (r) {
       const ta = T.porId(b.eq[r]);
       const fijo = r === 'guion' && b.guionPagado;
-      return '<div class="tarjeta fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(D.oficio(r).nombre) + (fijo ? ' · autor del guion comprado' : '') + '</span><b>' + (ta ? esc(ta.nom) : '—') + '</b>' +
-        (ta ? '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(ta.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(ta.fama * 100) + ' · ' + (fijo ? 'pagado' : dinero(T.tarifa(ta))) + (ta.rasgo ? ' · ' + esc(ta.rasgo) : '') + '</span>' : '') + '</div>' +
-        (fijo ? '' : '<button class="btn" data-a="crRol" data-v="' + r + '">Cambiar</button>') + '</div>' + (cr.rol === r ? listaCandidatos(r) : '');
+      return '<div class="tarjeta"><div class="fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(D.oficio(r).nombre) + (fijo ? ' · autor del guion comprado' : '') + '</span><b>' + (ta ? esc(ta.nom) : '—') + '</b>' +
+        (ta ? '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(ta.hab) + ' · afinidad ' + signo(T.afinidad(ta, b.fam)) + ' · ' + t('tal_fama') + ' ' + Math.round(ta.fama * 100) + ' · ' + (fijo ? 'pagado' : dinero(costoDe(b, ta.id))) + (ta.rasgo ? ' · ' + esc(ta.rasgo) : '') + '</span>' : '') + '</div>' +
+        (fijo ? '' : '<button class="btn" data-a="crRol" data-v="' + r + '">Cambiar</button>') + '</div>' + (ta && !fijo ? filaContrato(b, ta) : '') + '</div>' + (cr.rol === r ? listaCandidatos(r) : '');
     }).join('');
     if (conReparto && b.pj) {
-      h += '<h4>Reparto</h4>' + b.pj.map(function (p, i) { return { p: p, i: i }; }).filter(function (x) { return x.p.i === 'protagonista' || x.p.i === 'secundario'; }).slice(0, 4).map(function (x) {
+      h += '<h4>Elenco</h4>' + b.pj.map(function (p, i) { return { p: p, i: i }; }).filter(function (x) { return x.p.i !== 'extra'; }).map(function (x) {
         const ta = x.p.t !== null && x.p.t !== undefined ? T.porId(x.p.t) : null;
-        return '<div class="tarjeta fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(x.p.n) + ' · ' + (x.p.i === 'protagonista' ? 'protagonista' : 'secundario') + '</span><b>' + (ta ? esc(ta.nom) : 'Reparto de la casa') + '</b>' +
-          (ta ? '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(ta.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(ta.fama * 100) + ' · ' + dinero(T.tarifa(ta)) + '</span>' : '') + '</div><button class="btn" data-a="crPjInt" data-v="' + x.i + '">Cambiar</button></div>' + (cr.rol === 'pj:' + x.i ? listaCandidatos(cr.rol) : '');
+        return '<div class="tarjeta"><div class="fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(x.p.n) + ' · ' + esc((X.importancias.filter(function (im) { return im.id === x.p.i; })[0] || {}).nombre || '') + '</span><b>' + (ta ? esc(ta.nom) : '<span class="mal">Falta contratar</span>') + '</b>' +
+          (ta ? '<span class="chico">' + t('tal_habilidad') + ' ' + Math.round(ta.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(ta.fama * 100) + ' · ' + dinero(costoDe(b, ta.id, x.p.i)) + avisoActor(x.p, ta) + '</span>' : '') + '</div><button class="btn" data-a="crPjInt" data-v="' + x.i + '">' + (ta ? 'Cambiar' : 'Contratar') + '</button></div>' + (ta ? filaContrato(b, ta) : '') + '</div>' + (cr.rol === 'pj:' + x.i ? listaCandidatos(cr.rol) : '');
       }).join('');
+      h += rango('extras', 0, X.MAX_EXTRAS, b.extras || 0, 'Extras', textoRango(b, 'extras')) + rango('terceros', 0, X.MAX_TERCEROS, b.terceros || 0, 'Terceros (figurantes, dobles y personal de apoyo)', textoRango(b, 'terceros'));
     }
     return h;
   }
+  // Candidatos con lo que diría cada uno si lo contratas para este papel
   function listaCandidatos(rol) {
     const b = cr.b;
     const usados = O.idsEquipo(b);
-    let lista, titulo;
+    let lista, titulo, imp = null, of = rol, edadPj;
     if (rol.indexOf('pj:') === 0) {
       const p = b.pj[+rol.slice(3)];
       if (!p) return '';
+      imp = p.i; of = 'interprete'; edadPj = p.e;
       if (p.i === 'invitado' || p.i === 'cameo') {
         titulo = 'Estrella para un ' + (p.i === 'cameo' ? 'cameo (15 % de su tarifa)' : 'papel invitado (40 % de su tarifa)');
-        lista = N.S.talentos.filter(function (x) { return T.disponible(x) && usados.indexOf(x.id) < 0; }).sort(function (a, c) { return c.fama - a.fama; }).slice(0, 30);
+        lista = N.S.talentos.filter(function (x) { return T.disponible(x, 0) && usados.indexOf(x.id) < 0; }).sort(function (a, c) { return c.fama - a.fama; }).slice(0, 30);
       } else {
-        titulo = 'Intérprete para ' + p.n;
-        lista = T.disponibles('interprete').filter(function (x) { return usados.indexOf(x.id) < 0; }).sort(function (a, c) { return (c.hab + c.fama * 12) - (a.hab + a.fama * 12); }).slice(0, 30);
+        titulo = 'Intérprete para ' + p.n + ' (' + p.e + ' años)';
+        lista = T.disponibles('interprete', 0).filter(function (x) { return usados.indexOf(x.id) < 0; })
+          .sort(function (a, c) { return puntaje(c, b, p) - puntaje(a, b, p); }).slice(0, 30);
       }
     } else {
       titulo = D.oficio(rol).nombre;
-      lista = T.disponibles(rol).filter(function (x) { return usados.indexOf(x.id) < 0; }).sort(function (a, c) { return (c.hab + c.fama * 12) - (a.hab + a.fama * 12); }).slice(0, 30);
+      lista = T.disponibles(rol, 0).filter(function (x) { return usados.indexOf(x.id) < 0; }).sort(function (a, c) { return (c.hab + c.fama * 12 + T.afinidad(c, b.fam)) - (a.hab + a.fama * 12 + T.afinidad(a, b.fam)); }).slice(0, 30);
     }
+    const k = X.ORDEN_CLAS.indexOf(b.clas);
+    const d = T.porId(b.eq.direccion);
     return '<div class="tarjeta"><h4>Elige: ' + esc(titulo) + '</h4>' + (lista.length ? lista.map(function (x) {
-      return '<button class="fila tarjeta toque" style="width:100%" data-a="crElegir" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece" style="text-align:left"><b>' + esc(x.nom) + '</b><span class="chico">' + D.oficio(x.of).nombre + ' · ' + (anio() - x.nac) + ' años · ' + t('tal_habilidad') + ' ' + Math.round(x.hab) + ' · ' + t('tal_fama') + ' ' + Math.round(x.fama * 100) + (x.rasgo ? ' · ' + esc(x.rasgo) : '') + '</span></div><b>' + dinero(T.tarifa(x)) + '</b></button>';
+      const r = T.negociar(x, { est: 0, rol: of, imp: imp, clas: k >= 0 ? k : 2, dir: d && of !== 'direccion' ? d.hab : undefined, amor: b.cont ? b.cont.amor : 0, fam: b.fam });
+      const no = r.estado === 'rechaza' || (r.estado === 'exige' && !(r.exige || []).every(function (e) { return e.tipo === 'protagonico' ? imp === 'protagonista' : e.tipo === 'director' ? d && d.hab >= e.min : true; }));
+      const e = anio() - x.nac;
+      const precio = Math.round(T.tarifaPara(x, 0) * (imp === 'secundario' ? O.PARTE_SECUNDARIO : imp === 'invitado' ? O.PARTE_INVITADO : imp === 'cameo' ? O.PARTE_CAMEO : 1));
+      return '<button class="fila tarjeta toque" style="width:100%"' + (no ? ' disabled' : '') + ' data-a="crElegir" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece" style="text-align:left"><b>' + esc(x.nom) + '</b><span class="chico">' + D.oficio(x.of).nombre + ' · ' + e + ' años · ' + t('tal_habilidad') + ' ' + Math.round(x.hab) + ' · afinidad ' + signo(T.afinidad(x, b.fam)) + ' · ' + t('tal_fama') + ' ' + Math.round(x.fama * 100) + ' · energía ' + T.energia(x) + (x.rasgo ? ' · ' + esc(x.rasgo) : '') + '</span>' +
+        '<span class="chico ' + (no ? 'mal' : r.estado === 'acepta' ? 'bien' : 'oro') + '">' + esc(r.texto) + (edadPj !== undefined && edadPj < 16 && e >= 18 ? ' · es adulto para un papel de niño' : '') + '</span></div><b>' + dinero(precio) + '</b></button>';
     }).join('') : '<p class="tenue">No hay nadie disponible.</p>') + '</div>';
+  }
+  function puntaje(x, b, p) {
+    const e = anio() - x.nac;
+    let v = x.hab + x.fama * 12 + T.afinidad(x, b.fam) * 0.5;
+    if (x.sx !== p.s) v -= 8;
+    if (p.e < 16 ? e >= 18 : Math.abs(e - p.e) > 15) v -= 25;
+    if (x.pap && x.pap.indexOf(p.a) >= 0) v += 4;
+    return v;
   }
   // ---------- Título y sinopsis ----------
   function bloqueTitulo(b) {
@@ -468,6 +525,7 @@ IA.creacion = (function () {
         const pp = E.produccionTipica(anio(), b.fam) * es.mult * O.escalaTono(b.tono) * I.factorCosto(b, anio());
         return '<button class="tarjeta toque fila entre" style="width:100%;' + (Math.abs(b.presM - es.mult) < 0.01 ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="crEscala" data-v="' + i + '"><b>' + es.nombre + '</b><span>' + dinero(pp) + '</span></button>';
       }).join('');
+      h += rango('pres', 0, 100, sliderDePres(b.presM), 'Presupuesto de producción', textoRango(b, 'pres'));
       h += '<div class="tarjeta" style="margin-top:8px">' + textoClas(b) + (cr.abiertas.contRap ? '' : '<br><button class="btn" data-a="crSeccion" data-v="contRap">Ajustar contenido</button>') + '</div>';
       if (cr.abiertas.contRap) h += bloquePublico(b);
     } else if (cr.paso === 3) h += bloqueEquipo(b, true);
@@ -575,6 +633,48 @@ IA.creacion = (function () {
     b.contTocado = b.mat && m.grupo === 'tono' ? 1 : 0;
     empezarIdea(b);
   });
+  // Nueva obra con un talento ya elegido (desde su ficha): va a su oficio o, si actúa, de protagonista
+  // Si quien elegiste exige un director de cierto nivel, se busca uno que cumpla (el más barato que acepte)
+  function cumplirExigencias(b, x) {
+    let n = O.negociaciones(b).filter(function (q) { return q.id === x.id; })[0];
+    const ex = n && n.r.exige ? n.r.exige.filter(function (e) { return e.tipo === 'director'; })[0] : null;
+    if (ex) buscarDirector(b, ex.min);
+    // Y si pide porcentaje, se le pone de una vez (como al elegirlo de la lista)
+    n = O.negociaciones(b).filter(function (q) { return q.id === x.id; })[0];
+    if (n && n.r.estado === 'contraoferta') { b.pctT = b.pctT || {}; b.pctT[x.id] = n.r.pctMin; }
+  }
+  function buscarDirector(b, min) {
+    const usados = O.idsEquipo(b);
+    const k = X.ORDEN_CLAS.indexOf(b.clas);
+    const cand = T.disponibles('direccion', 0).filter(function (d) {
+      if (d.hab < min || usados.indexOf(d.id) >= 0) return false;
+      return T.negociar(d, { est: 0, rol: 'direccion', clas: k >= 0 ? k : 2, amor: b.cont ? b.cont.amor : 0, fam: b.fam }).estado === 'acepta';
+    }).sort(function (a, c) { return T.tarifaPara(a, 0) - T.tarifaPara(c, 0); });
+    if (cand.length) { b.eq.direccion = cand[0].id; ajustar(b); }
+  }
+  function crearCon(id) {
+    const x = T.porId(id);
+    if (!x) return;
+    if (O.enProduccion(0).length >= NG.capacidad(0)) { U.aviso('No tienes capacidad libre: construye un plató o espera.', 'mal'); return; }
+    const b = nuevoBorrador(null, function (b2) {
+      if (x.of !== 'interprete') b2.eq[x.of] = x.id;
+    });
+    if (x.of !== 'interprete' && b.eq[x.of] !== x.id) b.eq[x.of] = x.id; // aunque pida algo, es tu elección
+    if (x.of === 'interprete' && b.pj) {
+      const p = b.pj.filter(function (q) { return q.i === 'protagonista'; })[0];
+      if (p) { p.t = x.id; p.s = x.sx; p.e = Math.min(80, N.anio() - x.nac); p.n = I.nombrePersonaje(I.regionDe(b), x.sx); }
+      b.eq.int = (b.eq.int || []).filter(function (q) { return q !== x.id; });
+      b.pj.forEach(function (q) { if (q !== p && q.t === x.id) q.t = null; });
+      conAzarUI(function () { O.equipoNegociado(b, 1); });
+      // Si la negociación lo sacó (por ejemplo, exige otro director), vuelve a su papel y se ve qué pide
+      if (p && p.t !== x.id) p.t = x.id;
+      sincronizar(b);
+    }
+    cumplirExigencias(b, x);
+    cr.b = ajustar(b); cr.etapa = 'idea'; cr.paso = 3; cr.rol = null; cr.picker = null;
+    U.abrirFicha(fichaCrear(), 'crear');
+    U.aviso(x.nom + ' ya está en tu nueva obra');
+  }
   ac('crIA', function () { if (!cr.b || anio() < I.ANIO_IA) return; conAzarUI(function () { I.ideaIA(cr.b, anio()); I.generarPersonajes(cr.b); }); ajustar(cr.b); refrescar(); });
   // ---------- Géneros ----------
   ac('crGen', function (g) {
@@ -683,6 +783,14 @@ IA.creacion = (function () {
     refrescarPie();
   });
   ac('crRangoFin', function (v, el) { if (!cr.b) return; aplicarRango(cr.b, el.getAttribute('data-k'), v); ajustar(cr.b); refrescar(); });
+  ac('crPct', function (v, el) {
+    const b = cr.b;
+    if (!b) return;
+    b.pctT = b.pctT || {};
+    const id = el.getAttribute('data-k');
+    if (+v) b.pctT[id] = +v; else delete b.pctT[id];
+    ajustar(b); refrescar();
+  });
   ac('crClasN', function (v) { if (!cr.b) return; cr.b.clasN = !!v; cr.b.clasTocada = 1; ajustar(cr.b); refrescar(); });
   ac('crSeccion', function (v) { cr.abiertas[v] = !cr.abiertas[v]; cr.picker = null; cr.rol = null; refrescar(); });
   ac('crPieDetalle', function () { cr.pieAbierto = !cr.pieAbierto; refrescarPie(); });
@@ -698,7 +806,12 @@ IA.creacion = (function () {
     sincronizar(b); refrescar();
   });
   ac('crPjDel', function (v) { const b = cr.b; if (!b) return; b.pj.splice(+v, 1); cr.rol = null; sincronizar(b); refrescar(); });
-  ac('crPjGenerar', function () { const b = cr.b; if (!b) return; conAzarUI(function () { I.generarPersonajes(b); }); sincronizar(b); refrescar(); });
+  ac('crPjGenerar', function () {
+    const b = cr.b;
+    if (!b) return;
+    conAzarUI(function () { I.generarPersonajes(b); O.equipoNegociado(b, 1); });
+    sincronizar(b); refrescar();
+  });
   ac('crPjNombre', function (v, el) { const p = pjDe(el.getAttribute('data-k')); if (p) { p.n = v.slice(0, 30); if (!cr.b.sinEditada) cr.b.sin = I.sinopsis(cr.b); } });
   ac('crPjDado', function (v) { const p = pjDe(v); if (!p) return; p.n = conAzarUI(function () { return I.nombrePersonaje(I.regionDe(cr.b), p.s); }); ajustar(cr.b); refrescar(); });
   ac('crPjImp', function (v) {
@@ -725,15 +838,21 @@ IA.creacion = (function () {
     b.eq = { int: [], inv: b.eq.inv || [], cam: b.eq.cam || [] };
     if (guion !== null && guion !== undefined) b.eq.guion = guion;
     (b.pj || []).forEach(function (p) { if (p.i === 'protagonista' || p.i === 'secundario') p.t = null; });
-    conAzarUI(function () { O.equipoRecomendado(b, 1); });
+    b.pctT = {};
+    conAzarUI(function () { O.equipoNegociado(b, 1); });
     cr.rol = null; ajustar(b); refrescar();
   });
   ac('crRol', function (v) { if (!cr.b) return; cr.rol = cr.rol === v ? null : v; refrescar(); });
   ac('crElegir', function (v) {
     const b = cr.b, id = +v;
     if (!b || !cr.rol) return;
+    const anterior = cr.rol.indexOf('pj:') === 0 ? (b.pj[+cr.rol.slice(3)] || {}).t : b.eq[cr.rol];
+    if (anterior !== null && anterior !== undefined && b.pctT) delete b.pctT[anterior];
     if (cr.rol.indexOf('pj:') === 0) { const p = b.pj[+cr.rol.slice(3)]; if (p) p.t = id; sincronizar(b); }
     else b.eq[cr.rol] = id;
+    // Si pidió un porcentaje, se le pone de una vez (puedes cambiarlo en su contrato)
+    const n = estadoNegociacion(b, id);
+    if (n && n.r.estado === 'contraoferta') { b.pctT = b.pctT || {}; b.pctT[id] = n.r.pctMin; }
     cr.rol = null; ajustar(b); refrescar();
   });
   // ---------- Título, sinopsis y pasos ----------
@@ -833,5 +952,5 @@ IA.creacion = (function () {
   }
   ac('taxMedio', function (v) { cr.taxMedio = v; U.refrescar(); });
 
-  return { fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr };
+  return { fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon };
 })();

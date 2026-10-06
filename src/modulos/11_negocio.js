@@ -6,9 +6,9 @@ IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
   const INGRESOS = ['taquilla'];
-  const GASTOS = ['talento', 'derechos', 'produccion', 'marketing', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas'];
+  const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas'];
   const NOMBRES = {
-    taquilla: 'Taquilla (parte del estudio)', talento: 'Contratos de talento', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
+    taquilla: 'Taquilla (parte del estudio)', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
     personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas',
   };
   function libroVacio() { return { ing: {}, gas: {} }; }
@@ -51,8 +51,10 @@ IA.negocio = (function () {
     const est = N.S.estudios[0];
     const sumar = function (bono) { Object.keys(bono).forEach(function (k) { b[k] = (b[k] || 0) + bono[k]; }); };
     est.pisos.forEach(function (id) { const p = infoPiso(id); if (p.bono) sumar(p.bono); });
-    // Tus tres especialidades: +1 en esos departamentos de tus obras
-    ((N.S.avatar && N.S.avatar.esp) || []).forEach(function (of) { b[of] = (b[of] || 0) + 1; });
+    // Tus tres especialidades: +1 en esos departamentos de tus obras, más lo que estudies en la academia (hasta +5)
+    const av = N.S.avatar || {};
+    (av.esp || []).forEach(function (of) { b[of] = (b[of] || 0) + 1; });
+    Object.keys(av.ac || {}).forEach(function (of) { b[of] = (b[of] || 0) + av.ac[of]; });
     // Visión y público objetivo: _crit y _pub ajustan las notas finales
     const vis = D.visiones.filter(function (v) { return v.id === est.vision; })[0];
     if (vis) { if (vis.bono) sumar(vis.bono); b._crit = (b._crit || 0) + (vis.crit || 0); b._pub = (b._pub || 0) + (vis.pub || 0); }
@@ -134,7 +136,16 @@ IA.negocio = (function () {
     ctxCache = {
       talento: function (id) { return T.porId(id); },
       pagar: pagar,
-      cobrar: function (o, parte) { cobrarEn(o.est, 'taquilla', parte); },
+      cobrar: function (o, parte) {
+        cobrarEn(o.est, 'taquilla', parte);
+        // Participaciones: los talentos con porcentaje cobran su parte de lo que recibe el estudio (V18)
+        if (o.pctT) {
+          let pct = 0;
+          Object.keys(o.pctT).forEach(function (id) { pct += o.pctT[id]; });
+          const p = parte * pct / 100;
+          if (p > 0) { pagar(o.est, 'talento', p); o.part = (o.part || 0) + p; Object.keys(o.pctT).forEach(function (id) { T.pagarA(+id, parte * o.pctT[id] / 100); }); }
+        }
+      },
       terminar: function (o) { IA.lanzamiento.terminar(o, ctxCache); },
       famaDe: function (estId) { return N.S.estudios[estId].fama; },
       bonoMarketingDe: bonoMarketing,

@@ -1,4 +1,4 @@
-# Capturas automáticas · INDUSTRY ART V17
+# Capturas automáticas · INDUSTRY ART V18
 
 | Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |
 |---|---|---|---|---|

@@ -58,6 +58,10 @@ IA.ideas = (function () {
   function hayMenores(o) {
     return (o.pj || []).some(function (p) { return p.e < 18 && (p.i === 'protagonista' || p.i === 'secundario'); });
   }
+  // Niños en el elenco (menores de 16): los interpretan niños actores, que solo hacen obras hasta PG-13 (V18)
+  function hayNinos(o) {
+    return (o.pj || []).some(function (p) { return p.e < 16 && (p.i === 'protagonista' || p.i === 'secundario'); });
+  }
   // Ajusta el contenido a lo que permite la época, los subgéneros y los personajes (nunca se sexualiza a menores)
   function normalizar(b, anio) {
     const cont = b.cont = Object.assign({}, contenidoDe(b));
@@ -72,6 +76,7 @@ IA.ideas = (function () {
       if (cont[c.id] > c.niveles.length - 1) cont[c.id] = c.niveles.length - 1;
     });
     if (hayMenores(b) && cont.amor > 1) cont.amor = 1;
+    if (hayNinos(b)) X.contenido.forEach(function (c) { while (cont[c.id] > 0 && c.niveles[cont[c.id]][1] > 2) cont[c.id]--; });
     b.clas = clasificar(b, anio);
     return b;
   }
@@ -106,6 +111,7 @@ IA.ideas = (function () {
     const erotico = gen.indexOf('Erótico') >= 0;
     if (erotico && (b.pubs || []).some(function (p) { const x = X.publico(p); return x && x.infantil; })) return 'Lo erótico nunca va con públicos infantiles, familiares o adolescentes.';
     if (erotico && (b.pj || []).some(function (p) { return p.e < 18; })) return 'En una obra erótica todos los personajes son mayores de edad.';
+    if (hayNinos(b) && indiceClasificacion(b) > 2) return 'Con niños en el elenco la obra no pasa de PG-13 (los niños actores solo hacen obras hasta PG-13): baja el contenido o sube la edad del personaje.';
     if (b.nat === 'r' && gen.some(function (g) { return D.familiaDe[g] === 'IM'; })) return 'Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.';
     if (b.nat === 'f' && b.tipo === 'documental') return 'Un documental es una obra de realidad.';
     if (b.nat === 'f' && b.med === 'cine' && !b.arco && b.pj) return 'Las obras de ficción necesitan un arco narrativo.';
@@ -115,6 +121,8 @@ IA.ideas = (function () {
       const cuenta = {};
       b.pj.forEach(function (p) { cuenta[p.i] = (cuenta[p.i] || 0) + 1; });
       if (!cuenta.protagonista) return 'Tu obra necesita al menos un protagonista.';
+      const sinActor = b.pj.filter(function (p) { return (p.i === 'protagonista' || p.i === 'secundario') && (p.t === null || p.t === undefined); })[0];
+      if (sinActor) return 'Falta contratar a quien interprete a ' + sinActor.n + ' (' + sinActor.i + ').';
       for (let i = 0; i < X.importancias.length; i++) {
         const im = X.importancias[i];
         if ((cuenta[im.id] || 0) > im.max) return 'Máximo ' + im.max + ' personajes de tipo ' + im.nombre.toLowerCase() + '.';
@@ -198,10 +206,11 @@ IA.ideas = (function () {
       if (p && casa) f *= N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8);
     }
     if (o.ia) f *= 1 - 0.4 * o.ia / 100; // la IA abarata la producción
+    // Extras y terceros (figurantes, dobles y personal de apoyo): un número, cada uno suma un poco al costo
     if (o.pj) {
-      let secSin = 0, extras = 0;
-      o.pj.forEach(function (p) { if (p.i === 'secundario' && !p.t) secSin++; if (p.i === 'extra') extras++; });
-      f *= 1 + 0.006 * secSin + 0.003 * extras;
+      let extras = o.extras || 0;
+      o.pj.forEach(function (p) { if (p.i === 'extra') extras++; }); // obras de la V17
+      f *= 1 + 0.003 * extras + 0.001 * (o.terceros || 0);
     }
     return f;
   }
@@ -419,15 +428,16 @@ IA.ideas = (function () {
     const sx = N.probabilidad(0.5) ? 'F' : 'M';
     return { n: nombrePersonaje(regionDe(b), sx), e: edadPara(b, importancia), s: sx, i: importancia, a: arquetipo || N.elegir(X.arquetipos).id, t: null };
   }
-  // Reparto inicial según la familia: protagonistas, sus aliados y antagonistas, y algunos extras
+  // Reparto inicial según la familia: protagonistas, sus aliados y antagonistas; extras y terceros como número
   function generarPersonajes(b) {
     const fam = familia(b);
     const pj = [personajeNuevo(b, 'protagonista', fam === 'SM' ? 'Antihéroe' : fam === 'HM' ? 'Bufón' : fam === 'FJ' ? 'Inocente' : 'Héroe')];
     if (fam === 'RD') { const otro = personajeNuevo(b, 'protagonista', 'Amante'); otro.s = pj[0].s === 'F' ? 'M' : 'F'; otro.n = nombrePersonaje(regionDe(b), otro.s); pj.push(otro); }
     pj.push(personajeNuevo(b, 'secundario', fam === 'FJ' || fam === 'AA' ? 'Mentor' : 'Aliado'));
     pj.push(personajeNuevo(b, 'secundario', fam === 'RD' ? 'Rival' : fam === 'HM' ? 'Embaucador' : 'Villano'));
-    for (let i = 0; i < 2; i++) pj.push(personajeNuevo(b, 'extra', 'Testigo'));
     b.pj = pj;
+    if (b.extras === undefined) b.extras = 4;
+    if (b.terceros === undefined) b.terceros = 10;
     asignarReparto(b);
     return b;
   }
@@ -559,6 +569,8 @@ IA.ideas = (function () {
       if (x.lgbt) { if (anio < 1990) pub -= 1; else if (anio >= 2010) pub += 1; crit += anio >= 1990 ? 1 : 0; }
     });
     if (fam === 'SM' && contenidoDe(o).terror >= 2) pub += 1;
+    // Multitudes: muchos extras lucen en la acción y en las épocas pasadas
+    if ((o.extras || 0) >= 12 && (fam === 'AA' || (o.epo && o.epo !== 'actualidad'))) pub += 1;
     return { crit: crit, pub: pub };
   }
   // Lo que se decide con azar al terminar: efectos aplaudidos o repudiados y el resultado de la IA
@@ -630,7 +642,7 @@ IA.ideas = (function () {
   return {
     LIMITES: LIMITES, ANIO_IA: ANIO_IA, duracionTipica: duracionTipica, familia: familia, completar: completar,
     nivelMaximoEpoca: nivelMaximoEpoca, normalizar: normalizar, indiceClasificacion: indiceClasificacion, clasificar: clasificar,
-    describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, validar: validar,
+    describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, validar: validar,
     encajeIdea: encajeIdea, clavesEncaje: clavesEncaje, marcarEncaje: marcarEncaje, estrellas: estrellas,
     factorCosto: factorCosto, costoProduccion: costoProduccion, ajusteSemanas: ajusteSemanas, clase: clase, perfil: perfil,
     reglaDominio: reglaDominio, anioLibre: anioLibre, esLibre: esLibre, costoDerechos: costoDerechos, materialesDisponibles: materialesDisponibles, anioMaterial: anioMaterial,

@@ -3,8 +3,8 @@
 El juego se entrega como **un solo archivo HTML** (`INDUSTRY_ART_vXX.html`) que funciona sin internet.
 Aquí vive el mismo código separado por módulos para que cualquier chat lo lea y lo continúe.
 
-- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v17.html`.
-- `python3 tools/desarmar.py INDUSTRY_ART_v17.html` vuelve a separar un HTML armado en `src/`.
+- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v18.html`.
+- `python3 tools/desarmar.py INDUSTRY_ART_v18.html` vuelve a separar un HTML armado en `src/`.
 
 ## Estructura
 
@@ -38,5 +38,9 @@ IA.nombre = (function () {
 - Los datos (listas, países, épocas) van en `02_datos.js` y la taxonomía completa de la fábrica de ideas (V17) en
   `02_taxonomia.js`, separados de la lógica. Las reglas de la idea (clasificación, encaje, sinopsis, personajes,
   dominio público, guiones, IA) están en `06_ideas.js`, y su pantalla en `16_creacion.js`.
+- Los talentos (V18 · Talentos 2.0: capacidades, afinidades, energía y moral, negociación, salario más porcentaje,
+  exclusivos, academia, promesas, relaciones y química, ventajas, ciclo de vida y biografía) viven en
+  `05_talentos.js`; su pantalla (buscador avanzado, ficha, contratar, exclusivos, academia) en `16_agencia.js`.
+  El elenco de cada obra se negocia en `06_obras.js` (`equipoNegociado`).
 - Los módulos de simulación (núcleo, mundo, economía, talentos, obras, producción, lanzamiento, rivales, premios,
   negocio) **no tocan el DOM**; solo la interfaz, el arte y el guardado lo hacen.

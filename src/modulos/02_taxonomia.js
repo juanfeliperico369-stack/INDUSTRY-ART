@@ -398,8 +398,10 @@ IA.taxonomia = (function () {
   // ---------- Personajes ----------
   const importancias = [
     { id: 'protagonista', nombre: 'Protagonista', max: 10 }, { id: 'secundario', nombre: 'Secundario', max: 15 },
-    { id: 'extra', nombre: 'Extra', max: 20 }, { id: 'invitado', nombre: 'Invitado especial', max: 5 }, { id: 'cameo', nombre: 'Cameo', max: 5 },
+    { id: 'extra', nombre: 'Extra', max: 20, contado: true }, { id: 'invitado', nombre: 'Invitado especial', max: 5 }, { id: 'cameo', nombre: 'Cameo', max: 5 },
   ];
+  // Desde la V18 los extras y los terceros (figurantes, dobles y personal de apoyo) son un número, no personajes
+  const MAX_EXTRAS = 20, MAX_TERCEROS = 100;
   // Arquetipos (Jung, Campbell y Vogler) con su palabra para la sinopsis según el sexo [él, ella]
   const arquetipos = [
     ['Héroe', 'un héroe improbable', 'una heroína improbable'], ['Antihéroe', 'un antihéroe sin escrúpulos', 'una antiheroína sin escrúpulos'],
@@ -536,7 +538,7 @@ IA.taxonomia = (function () {
     ORDEN_CLAS: ORDEN_CLAS, contenido: contenido, contenidoFamilia: contenidoFamilia,
     DURACION_TIPICA: DURACION_TIPICA, categoriaDuracion: categoriaDuracion, complejidad: complejidad, ritmo: ritmo, efectos: efectos,
     epocas: epocas, epocasDisponibles: epocasDisponibles, lugaresExtra: lugaresExtra, idiomas: idiomas,
-    publicos: publicos, sexoFamilia: sexoFamilia, importancias: importancias, arquetipos: arquetipos, oficiosGenero: oficiosGenero,
+    publicos: publicos, sexoFamilia: sexoFamilia, importancias: importancias, MAX_EXTRAS: MAX_EXTRAS, MAX_TERCEROS: MAX_TERCEROS, arquetipos: arquetipos, oficiosGenero: oficiosGenero,
     dominio: dominio, generosDeCine: generosDeCine, REGLA_DOMINIO: REGLA_DOMINIO,
     famSub: famSub, famTema: famTema, famProblema: famProblema, famFiccion: famFiccion, contar: contar,
     tipoCine: function (id) { return tiposCine.filter(function (x) { return x.id === id; })[0] || tiposCine[0]; },
