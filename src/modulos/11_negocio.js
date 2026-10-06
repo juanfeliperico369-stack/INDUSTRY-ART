@@ -45,7 +45,7 @@ IA.negocio = (function () {
     if (estId !== 0) {
       // Los rivales ya tienen sus instalaciones: un bono parejo según su tamaño
       const v = Math.min(4, Math.round(2 * N.S.estudios[estId].tam));
-      ['guion', 'direccion', 'produccion', 'fotografia', 'musica', 'edicion', 'arte', 'interprete'].forEach(function (k) { b[k] = v; });
+      ['guion', 'direccion', 'produccion', 'fotografia', 'musica', 'edicion', 'arte', 'interprete', 'vestuario', 'efectos', 'animacion'].forEach(function (k) { b[k] = v; });
       return b;
     }
     const est = N.S.estudios[0];
@@ -72,8 +72,10 @@ IA.negocio = (function () {
     N.S.estudios[0].pisos.forEach(function (id) { if (id === 'guion') r.guion = 1; if (id === 'edicion') r.edicion = 1; });
     return r;
   }
+  // Los rivales son estudios establecidos: ya tienen backlots y talleres que abaratan su producción (V19)
+  const AJ = { ahorroRivales: 0.1 };
   function ahorro(estId) {
-    if (estId !== 0) return 0;
+    if (estId !== 0) return AJ.ahorroRivales;
     let a = 0;
     N.S.estudios[0].terrenos.forEach(function (id) { a += infoTerreno(id).ahorro || 0; });
     return Math.min(0.2, a);
@@ -267,7 +269,7 @@ IA.negocio = (function () {
   }
 
   return {
-    INGRESOS: INGRESOS, GASTOS: GASTOS, NOMBRES: NOMBRES, libroVacio: libroVacio, mover: mover, pagar: pagar,
+    AJ: AJ, INGRESOS: INGRESOS, GASTOS: GASTOS, NOMBRES: NOMBRES, libroVacio: libroVacio, mover: mover, pagar: pagar,
     cobrarEn: cobrarEn, total: total, infoPiso: infoPiso, infoTerreno: infoTerreno, capacidad: capacidad, bonos: bonos,
     rapidez: rapidez, ahorro: ahorro, bonoMarketing: bonoMarketing, costoConstruccion: costoConstruccion,
     puedeConstruir: puedeConstruir, construir: construir, gastosFijosMes: gastosFijosMes, contexto: contexto,

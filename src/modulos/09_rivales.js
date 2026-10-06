@@ -48,6 +48,8 @@ IA.rivales = (function () {
     return gen;
   }
   // Proyectos de prestigio: obras pensadas para premios, con lo mejor del talento disponible
+  // Ajustes de la conducta de los rivales con poca caja (se pueden calibrar desde las pruebas)
+  const AJ = { minEscala: 2, ambPobre: 1 };
   const PRESTIGIO = { DR: 0.35, AV: 0.4, SM: 0.2, RD: 0.15, IM: 0.12, AA: 0.1, HM: 0.1, FJ: 0.1 };
   function nuevaObra(est, ctx) {
     const prestigio = N.probabilidad(PRESTIGIO[est.familia] || 0.1) && est.caja > E.presupuestoTipico(N.anio()) * 3;
@@ -74,11 +76,11 @@ IA.rivales = (function () {
     op.arco = buenOjo ? IA.ideas.arcoRecomendado(famIdea) : N.elegir(IA.taxonomia.arcos).id;
     let b = O.borrador(est.id, op);
     // Con poca caja hacen una obra más chica en vez de quedarse sin filmar (V18)
-    while (b.pp * 1.4 > est.caja && op.escala > 0) { op.escala--; b = O.borrador(est.id, op); }
+    while (b.pp * 1.4 > est.caja && op.escala > AJ.minEscala) { op.escala--; b = O.borrador(est.id, op); }
     const pobre = b.pp * 2 > est.caja;
     b.prest = prestigio ? 1 : 0;
     // La calidad de su equipo depende de su estilo más que de su tamaño (evita la espiral del más chico)
-    O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4) * (pobre ? 0.8 : 1), prestigio ? 2 : 4);
+    O.equipoRecomendado(b, prestigio ? 2.6 : N.limitar(0.95 + (est.tam - 1) * 0.15 + est.calidad / 25, 0.75, 1.4) * (pobre ? AJ.ambPobre : 1), prestigio ? 2 : 4);
     if (!O.equipoCompleto(b)) return null;
     const costo = O.costoTalento(b) + b.pp;
     if (est.caja < costo * 0.9) return null;
@@ -133,5 +135,5 @@ IA.rivales = (function () {
     }
   }
 
-  return { crearEstudios: crearEstudios, mensual: mensual, alQuedarLista: alQuedarLista, anual: anual, objetivo: objetivo };
+  return { crearEstudios: crearEstudios, mensual: mensual, alQuedarLista: alQuedarLista, anual: anual, objetivo: objetivo, AJ: AJ };
 })();

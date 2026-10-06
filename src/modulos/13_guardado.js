@@ -42,6 +42,15 @@ IA.guardado = (function () {
     if (S.avatar && !S.avatar.ac) S.avatar.ac = {};
   };
 
+  // V18 → V19 (Cine a fondo): almacén de sets y los talentos de los oficios nuevos (vestuario, efectos y
+  // animación), que se crean al activar la partida porque necesitan el azar y el año de la partida en juego.
+  MIGRACIONES[19] = function (S) {
+    S.estudios.forEach(function (e) { if (!e.sets) e.sets = []; });
+    const hay = {};
+    S.talentos.forEach(function (t) { hay[t.of] = 1; });
+    S.faltanOficios = ['vestuario', 'efectos', 'animacion'].filter(function (of) { return !hay[of]; });
+  };
+
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------
   function suma(texto) {
     let h = 2166136261;
@@ -273,6 +282,7 @@ IA.guardado = (function () {
   function activar(S) {
     N.S = S;
     IA.juego.conectar();
+    if (S.faltanOficios) { IA.talentos.poblarOficios(S.faltanOficios); delete S.faltanOficios; }
     IA.talentos.reindexar();
     IA.obras.reindexar();
     N.emit('partidaCargada', S);

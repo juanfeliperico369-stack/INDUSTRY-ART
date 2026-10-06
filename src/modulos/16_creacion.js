@@ -60,7 +60,12 @@ IA.creacion = (function () {
     const fam = D.familiaDe[b.gen[0]] || 'DR';
     if (!b.contTocado) b.cont = Object.assign({}, X.contenidoFamilia[fam]);
     if (!b.clasTocada) b.clasN = fam === 'AV';
+    // Cómo se filma (V19): sigue la recomendación hasta que el jugador elige
+    if (!b.metTocado) b.met = IA.rodaje.metodoRecomendado(b, anio());
+    if (!b.terTocado) b.ter = IA.rodaje.terrenoRecomendado(b);
+    if (b.setR && !IA.rodaje.setsQueSirven(b).some(function (x) { return x.id === b.setR; })) delete b.setR;
     O.recalcular(b);
+    if (b.eq) conAzarUI(function () { O.ajustarRolesV19(b, 1); });
     if (!b.sinEditada) b.sin = I.sinopsis(b);
     return b;
   }
@@ -107,6 +112,7 @@ IA.creacion = (function () {
   }
   function textoNivel(c, v) { const n = c.niveles[v] || c.niveles[0]; return n[0] + (n[1] >= 5 ? ' (siempre sugerido)' : '') + ' · ' + X.ORDEN_CLAS[n[1]]; }
   function textoRango(b, k) {
+    if (k.indexOf('rep:') === 0) { const d = k.slice(4), r = IA.rodaje.reparto(b); const ef = IA.rodaje.efectoReparto(b, d); return Math.round(r[d] * 100) + ' % · ' + dinero(b.pp * r[d]) + (ef ? ' · ' + (ef > 0 ? '+' : '') + U.decimal(ef, 1) + ' a su nota' : ''); }
     if (k.indexOf('c:') === 0) { const c = X.contenido.filter(function (x) { return x.id === k.slice(2); })[0]; return textoNivel(c, b.cont[c.id]); }
     if (k === 'cx') return X.complejidad[b.cx];
     if (k === 'rit') return X.ritmo[b.rit].id + (X.ritmo[b.rit].crit ? ' (crítica ' + signo(X.ritmo[b.rit].crit) + ', público ' + signo(X.ritmo[b.rit].pub) + ')' : '');
@@ -135,7 +141,7 @@ IA.creacion = (function () {
     // Dos líneas siempre a la vista; el desglose se abre tocando "Detalle"
     return '<div class="fila entre"><span>' + t('costo_total') + ' <b class="cifra ' + (est.total > libre ? 'mal' : '') + '">' + dinero(est.total) + '</b></span><span>' + t('calidad_esperada').split(' ')[0] + ' <b>' + Math.max(1, est.calidad - 6) + '–' + Math.min(99, est.calidad + 6) + '</b></span><span title="Retorno orientativo">×' + U.decimal(est.retorno[0], 1) + '–×' + U.decimal(est.retorno[1], 1) + '</span></div>' +
       '<div class="fila entre chico"><span>' + textoEncaje(b) + '</span><span>' + esc(b.clas) + ' · ' + O.semanasTotales(b, NG.rapidez(0)) + ' sem. <button class="btn" style="padding:2px 10px" data-a="crPieDetalle">' + (cr.pieAbierto ? 'Menos' : 'Detalle') + '</button></span></div>' +
-      (cr.pieAbierto ? '<div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + (est.derechos ? ' · derechos ' + dinero(est.derechos) : '') + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · retorno orientativo ×' + U.decimal(est.retorno[0], 1) + ' a ×' + U.decimal(est.retorno[1], 1) + ' (multiplicador de lo invertido)</div>' : '') +
+      (cr.pieAbierto ? '<div class="chips" style="margin:4px 0 0">' + notasTxt(b) + '</div><div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + (est.derechos ? ' · derechos ' + dinero(est.derechos) : '') + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · retorno orientativo ×' + U.decimal(est.retorno[0], 1) + ' a ×' + U.decimal(est.retorno[1], 1) + ' (multiplicador de lo invertido)</div>' : '') +
       (err && (modo === 'detallado' || cr.paso === 4) ? '<p class="mal chico" style="margin:4px 0 0">' + esc(err) + '</p>' : '');
   }
   // Los totales quedan fijos al final de la creación (no persiguen el desplazamiento)
@@ -312,11 +318,6 @@ IA.creacion = (function () {
     const lugares = [['', 'Sin lugar fijo']].concat(D.paises.slice().sort(function (x, y) { return x.nombre.localeCompare(y.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre + ' (' + D.region(p.region).nombre + ')']; }), X.lugaresExtra.map(function (l) { return [l.id, l.nombre]; }));
     h += '<label class="campo"><span>Dónde pasa la historia</span>' + sel('lug', lugares, b.lug) + '</label>';
     h += '<label class="campo"><span>Idioma de la obra</span>' + sel('idio', X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; }), b.idio) + '</label>';
-    const casa = D.pais(N.S.estudios[0].pais);
-    const rodaje = [['', 'En casa: ' + casa.nombre]].concat(D.paises.filter(function (p) { return p.id !== casa.id; }).sort(function (x, y) { return x.costo - y.costo; }).map(function (p) {
-      return [p.id, p.nombre + ' · costo ×' + U.decimal(N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8), 2)];
-    }));
-    h += '<label class="campo"><span>País de rodaje</span>' + sel('rod', rodaje, b.rod || '') + '</label><p class="nota">Rodar fuera abarata o encarece la producción; el idioma y el lugar suman público en su región.</p>';
     return h;
   }
   function bloquePublico(b) {
@@ -409,7 +410,17 @@ IA.creacion = (function () {
   // ---------- Equipo ----------
   function bloqueEquipo(b, conReparto) {
     let h = '<p class="nota">' + t('equipo_ayuda') + ' Cada uno negocia: puede aceptar, pedir un porcentaje, exigir algo o rechazar. Cada cargo le cuesta 20 de energía (recupera 10 al mes) y nadie toma más de 2 proyectos a la vez.</p><button class="btn" data-a="crEquipoRec">' + icono('varita') + t('recomendado') + '</button>';
-    h += O.ROLES.map(function (r) {
+    // Efectos y animación: talento propio o un estudio externo (V19)
+    const Rr = IA.rodaje;
+    ['efectos', 'animacion'].forEach(function (r) {
+      if (!Rr.necesita(b, r)) return;
+      const ops = [['', 'Contratar talento propio']].concat(Rr.externosDisponibles(r, anio()).map(function (e) {
+        return [e.id, e.nombre + ' · nivel ' + Math.round(e.nivel + N.limitar((anio() - e.desde) / 25, 0, 6)) + ' · ' + Math.round(e.costo * 100) + ' % de la producción'];
+      }));
+      h += '<label class="campo"><span>' + (r === 'efectos' ? 'Efectos' : 'Animación') + ': ¿talento propio o estudio externo?</span>' + sel('ext.' + r, ops, (b.ext && b.ext[r]) || '') + '</label>';
+    });
+    if (!Rr.necesita(b, 'efectos')) h += '<p class="nota">Con efectos normales, el diseñador de arte se ocupa de ellos; desde «Bastantes», o con CGI o efectos prácticos, conviene un supervisor de efectos.</p>';
+    h += O.rolesDe(b).map(function (r) {
       const ta = T.porId(b.eq[r]);
       const fijo = r === 'guion' && b.guionPagado;
       return '<div class="tarjeta"><div class="fila"><canvas class="retrato" data-retrato="' + (ta ? ta.id : '') + '"></canvas><div class="col crece"><span class="tenue chico">' + esc(D.oficio(r).nombre) + (fijo ? ' · autor del guion comprado' : '') + '</span><b>' + (ta ? esc(ta.nom) : '—') + '</b>' +
@@ -526,6 +537,9 @@ IA.creacion = (function () {
         return '<button class="tarjeta toque fila entre" style="width:100%;' + (Math.abs(b.presM - es.mult) < 0.01 ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="crEscala" data-v="' + i + '"><b>' + es.nombre + '</b><span>' + dinero(pp) + '</span></button>';
       }).join('');
       h += rango('pres', 0, 100, sliderDePres(b.presM), 'Presupuesto de producción', textoRango(b, 'pres'));
+      // Cómo se filma (V19): el método, con el recomendado marcado; el resto queda en lo ideal
+      const rec = IA.rodaje.metodoRecomendado(b, anio());
+      h += '<h4>Cómo se filma</h4><div class="chips">' + IA.rodaje.metodosDisponibles(anio()).map(function (m) { return chip(m.nombre + (m.id === rec ? ' ★' : ''), 'crMet', m.id, b.met === m.id); }).join('') + '</div><p class="nota">' + esc(IA.rodaje.metodo(b.met).texto) + ' Terreno, set, estilo y reparto del presupuesto: en el modo detallado.</p>';
       h += '<div class="tarjeta" style="margin-top:8px">' + textoClas(b) + (cr.abiertas.contRap ? '' : '<br><button class="btn" data-a="crSeccion" data-v="contRap">Ajustar contenido</button>') + '</div>';
       if (cr.abiertas.contRap) h += bloquePublico(b);
     } else if (cr.paso === 3) h += bloqueEquipo(b, true);
@@ -535,10 +549,61 @@ IA.creacion = (function () {
       (cr.paso < PASOS.length - 1 ? '<button class="btn primario" data-a="crPaso" data-v="1">' + t('siguiente') + '</button>' : '<button class="btn primario" data-a="crIniciar">' + t('iniciar') + '</button>') + '</div>';
     return h;
   }
+  // ---------- V19 · Cómo y dónde se filma ----------
+  const EDADES_N = ['niños', 'adolescentes', 'jóvenes', 'adultos', 'mayores'];
+  function bloquePais(b) {
+    const Rr = IA.rodaje, a = anio();
+    const casa = D.pais(N.S.estudios[0].pais);
+    const rodaje = [['', 'En casa: ' + casa.nombre]].concat(D.paises.filter(function (p) { return p.id !== casa.id; }).sort(function (x, y) { return x.costo - y.costo; }).map(function (p) {
+      const inc = Rr.incentivo({ rod: p.id }, a);
+      return [p.id, p.nombre + ' · costo ×' + U.decimal(N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8), 2) + (inc ? ' · incentivo −' + Math.round(inc * 100) + ' %' : '') + (Rr.INDUSTRIA.indexOf(p.id) < 0 ? ' · equipo local chico' : '')];
+    }));
+    return '<label class="campo"><span>País de rodaje</span>' + sel('rod', rodaje, b.rod || '') + '</label><p class="nota">Cada país tiene su costo local; algunos devuelven una parte del gasto (incentivos). Rodar en otra región suma una semana de viaje y 3 %; donde la industria es chica, la producción y la imagen rinden un poco menos.</p>';
+  }
+  function bloqueRodaje(b) {
+    const Rr = IA.rodaje, a = anio();
+    const rec = Rr.metodoRecomendado(b, a);
+    let h = '<h4>Método</h4><div class="chips">' + Rr.METODOS.map(function (m) {
+      return chip(m.nombre + (m.desde > a ? ' · ' + m.desde : '') + (m.id === rec ? ' ★' : ''), 'crMet', m.id, b.met === m.id, m.desde > a);
+    }).join('') + '</div><p class="nota">' + esc(Rr.metodo(b.met).texto) + (b.met === 'cgi' ? ' Costo del CGI en ' + a + ': ×' + U.decimal(Rr.costoCGI(a), 2) + '.' : '') + ' ★ = recomendado para esta idea.</p>';
+    if (Rr.usaLocacion(b)) {
+      h += '<h4>Terreno de la locación</h4><div class="chips">' + Rr.TERRENOS.map(function (tr) {
+        const luce = tr.generos.some(function (g) { return b.gen.indexOf(g) >= 0; });
+        const propio = Rr.terrenoPropio(Object.assign({}, b, { ter: tr.id }));
+        return chip(tr.nombre + (luce ? ' · luce' : '') + (propio ? ' · tuyo' : ''), 'crTer', tr.id, b.ter === tr.id);
+      }).join('') + '</div>';
+      const tr = Rr.terreno(b.ter);
+      h += '<p class="nota">' + esc(tr.nombre) + ': costo ×' + U.decimal(tr.costo, 2) + ', incidentes ×' + U.decimal(tr.riesgo, 1) + (tr.generos.some(function (g) { return b.gen.indexOf(g) >= 0; }) ? '; el paisaje luce en este género (+1 al público)' : '') + (Rr.terrenoPropio(b) ? '; es tierra tuya: más barato, más seguro y una semana menos' : '') + '. Las tierras propias se compran en Negocio › Construcciones.</p>';
+    }
+    h += bloquePais(b);
+    if (Rr.usaSet(b)) {
+      const tp = Rr.tipoSet(b), sets = Rr.setsQueSirven(b);
+      h += '<h4>Set: ' + esc(tp.nombre) + '</h4>';
+      h += sets.length ? '<div class="chips">' + chip('Construir uno nuevo', 'crSet', '', !b.setR) + sets.map(function (x) { return chip('Reusar el de «' + x.obra + '» (' + x.anio + ', calidad ' + x.q + ', ' + x.usos + ' usos)', 'crSet', String(x.id), b.setR === x.id); }).join('') + '</div><p class="nota">Reusar ahorra 7 % y una semana de preproducción; la calidad del set suma o resta al arte; si el público ya lo vio 3 veces, resta 1.</p>' :
+        '<p class="nota">Se construye nuevo y queda en tu almacén para otras obras (caben ' + Rr.capacidadSets(0) + '; más con platós y backlots).</p>';
+    }
+    h += '<h4>Estilo de producción</h4><div class="chips">' + Rr.ESTILOS.map(function (e) { return chip(e.nombre + (e.desde > a ? ' · ' + e.desde : ''), 'crPst', e.id, b.pst === e.id, e.desde > a); }).join('') + '</div>';
+    const es = Rr.estilo(b.pst);
+    h += '<p class="nota">' + esc(es.texto) + (es.ama.length ? ' Lo aman los ' + es.ama.map(function (i) { return EDADES_N[i]; }).join(' y los ') + '.' : '') + (es.rechaza.length ? ' Lo rechazan los ' + es.rechaza.map(function (i) { return EDADES_N[i]; }).join(' y los ') + '.' : '') + '</p>';
+    return h;
+  }
+  // ---------- V19 · Departamentos y presupuesto ----------
+  function notasTxt(b) {
+    return IA.rodaje.notas(b, NG.bonos(0, b.fam)).map(function (n) { return '<span class="etiqueta nota-dep">' + esc(n.nombre) + ' <b>' + n.letra + '</b></span>'; }).join(' ');
+  }
+  function bloquePresupuesto(b) {
+    const Rr = IA.rodaje, id = Rr.ideal(b), r = Rr.reparto(b);
+    let h = '<p class="nota">El presupuesto de producción (' + dinero(b.pp) + ') se reparte entre los departamentos. El ideal depende de la familia, los efectos, la época y cómo se filma: quitarle a uno le baja la nota (hasta −10) y darle de más suma poco (hasta +3).</p>' +
+      '<button class="btn" data-a="crRepIdeal">' + icono('varita') + 'Repartir como lo ideal</button>';
+    h += Object.keys(id).map(function (k) { return rango('rep:' + k, 0, 60, Math.round(r[k] * 100), Rr.nombreDep(k) + ' (ideal ' + Math.round(id[k] * 100) + ' %)', textoRango(b, 'rep:' + k)); }).join('');
+    h += '<h4>Notas esperadas por departamento</h4><div class="chips">' + notasTxt(b) + '</div><p class="nota">De F a A+: salen del talento a cargo, de su afinidad con la familia, de las instalaciones, del presupuesto y de cómo se filma.</p>';
+    return h;
+  }
   const SECCIONES = [
     ['obra', 'La obra', bloqueObra], ['generos', 'Géneros', bloqueGeneros], ['historia', 'Historia', function (b) { return bloqueHistoria(b, true); }],
     ['estilo', 'Corriente, tono, estilo y formato', bloqueEstilo], ['mundo', 'Época, lugar e idioma', bloqueMundo],
     ['publico', 'Público y contenido', bloquePublico], ['forma', 'Duración, complejidad, ritmo, efectos y presupuesto', bloqueForma],
+    ['rodaje', 'Cómo y dónde se filma', bloqueRodaje], ['presupuesto', 'Departamentos y presupuesto', bloquePresupuesto],
     ['personajes', 'Personajes', bloquePersonajes], ['equipo', 'Equipo', function (b) { return bloqueEquipo(b, false); }], ['titulo', 'Título y sinopsis', bloqueTitulo],
   ];
   function resumenSeccion(b, id) {
@@ -549,6 +614,8 @@ IA.creacion = (function () {
     if (id === 'mundo') return X.epoca(b.epo).nombre + ' · ' + b.idio;
     if (id === 'publico') return b.clas + ((b.pubs || []).length ? ' · ' + b.pubs.join(', ') : '');
     if (id === 'forma') return b.min + ' min · ' + X.complejidad[b.cx] + ' · ' + X.ritmo[b.rit].id + ' · ' + dinero(b.pp);
+    if (id === 'rodaje') return IA.rodaje.metodo(b.met).nombre + (IA.rodaje.usaLocacion(b) ? ' · ' + IA.rodaje.terreno(b.ter).nombre : '') + ' · ' + IA.rodaje.estilo(b.pst).nombre + (b.rod ? ' · ' + D.pais(b.rod).nombre : '');
+    if (id === 'presupuesto') return b.rep ? 'Reparto propio' : 'Reparto ideal';
     if (id === 'personajes') return (b.pj || []).length + ' personajes';
     if (id === 'equipo') { const d = T.porId(b.eq.direccion); return d ? 'Dirige ' + d.nom : ''; }
     return b.tit;
@@ -759,7 +826,9 @@ IA.creacion = (function () {
     const b = cr.b;
     if (!b) return;
     const k = el.getAttribute('data-k');
-    if (k.indexOf('fmt.') === 0) { b.fmt = Object.assign({}, b.fmt); b.fmt[k.slice(4)] = v; } else b[k] = v;
+    if (k.indexOf('fmt.') === 0) { b.fmt = Object.assign({}, b.fmt); b.fmt[k.slice(4)] = v; }
+    else if (k.indexOf('ext.') === 0) { b.ext = Object.assign({}, b.ext); if (v) b.ext[k.slice(4)] = v; else delete b.ext[k.slice(4)]; }
+    else b[k] = v;
     if (k === 'rod' && !v) delete b.rod;
     ajustar(b); refrescar();
   });
@@ -767,6 +836,7 @@ IA.creacion = (function () {
     v = +v;
     if (k.indexOf('c:') === 0) { b.cont = Object.assign({}, b.cont); b.cont[k.slice(2)] = v; b.contTocado = 1; }
     else if (k === 'pres') b.presM = presDeSlider(v);
+    else if (k.indexOf('rep:') === 0) { b.rep = Object.assign({}, IA.rodaje.reparto(b)); b.rep[k.slice(4)] = v / 100; }
     else if (k === 'epo') { const ep = X.epocasDisponibles(anio())[v]; if (ep) b.epo = ep.id; }
     else b[k] = v;
     O.recalcular(b);
@@ -791,6 +861,11 @@ IA.creacion = (function () {
     if (+v) b.pctT[id] = +v; else delete b.pctT[id];
     ajustar(b); refrescar();
   });
+  ac('crMet', function (v) { if (!cr.b) return; cr.b.met = v; cr.b.metTocado = 1; ajustar(cr.b); refrescar(); });
+  ac('crTer', function (v) { if (!cr.b) return; cr.b.ter = v; cr.b.terTocado = 1; ajustar(cr.b); refrescar(); });
+  ac('crPst', function (v) { if (!cr.b) return; cr.b.pst = v; ajustar(cr.b); refrescar(); });
+  ac('crSet', function (v) { if (!cr.b) return; if (v) cr.b.setR = +v; else delete cr.b.setR; ajustar(cr.b); refrescar(); });
+  ac('crRepIdeal', function () { if (!cr.b) return; delete cr.b.rep; ajustar(cr.b); refrescar(); });
   ac('crClasN', function (v) { if (!cr.b) return; cr.b.clasN = !!v; cr.b.clasTocada = 1; ajustar(cr.b); refrescar(); });
   ac('crSeccion', function (v) { cr.abiertas[v] = !cr.abiertas[v]; cr.picker = null; cr.rol = null; refrescar(); });
   ac('crPieDetalle', function () { cr.pieAbierto = !cr.pieAbierto; refrescarPie(); });
@@ -952,5 +1027,100 @@ IA.creacion = (function () {
   }
   ac('taxMedio', function (v) { cr.taxMedio = v; U.refrescar(); });
 
-  return { fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon };
+  // =====================================================================
+  // V19 · PRODUCCIÓN EN LA FICHA DE LA OBRA Y DECISIONES
+  // =====================================================================
+  const NOMBRE_ETAPA_CORTO = { preproduccion: 'Preproducción', rodaje: 'Rodaje', posproduccion: 'Posproducción' };
+  function barraNota(v) { return '<span class="mini" style="width:70px"><i style="width:' + Math.round(N.limitar(v / 100, 0, 1) * 100) + '%"></i></span>'; }
+  function bloqueProduccion(o) {
+    const Rr = IA.rodaje;
+    if (!o.eq && !o.notas && !o.lp) return '';
+    let h = '<h3>Producción</h3>';
+    const partes = [];
+    if (o.met) partes.push(Rr.metodo(o.met).nombre);
+    if (o.met && Rr.usaLocacion(o) && o.ter) partes.push('terreno: ' + Rr.terreno(o.ter).nombre.toLowerCase());
+    if (o.pst) partes.push('estilo: ' + Rr.estilo(o.pst).nombre.toLowerCase());
+    if (o.rod) partes.push('rodada en ' + D.pais(o.rod).nombre);
+    if (o.setR) partes.push('set reutilizado');
+    if (o.ext) Object.keys(o.ext).forEach(function (r) { const e = Rr.externo(r, o.ext[r]); if (e) partes.push(e.nombre.toLowerCase()); });
+    if (partes.length) h += '<p>' + esc(partes.join(' · ')) + '</p>';
+    if (o.est === 0 && o.dil) { const x = Rr.dilemaDe(o); h += '<button class="btn primario bloque" data-a="verDecision" data-v="' + o.id + '">Decidir: ' + esc(x ? x.txt : 'un dilema del rodaje') + '</button>'; }
+    else if (o.est === 0 && o.prueba && !o.prueba.ok) h += '<button class="btn primario bloque" data-a="verDecision" data-v="' + o.id + '">Ver la prueba de público (' + o.prueba.p + ' de 100)</button>';
+    // Notas por departamento: las finales al terminar; mientras tanto, las esperadas
+    const ns = o.notas ? Object.keys(o.notas).map(function (k) { return { nombre: Rr.nombreDep(k), v: o.notas[k], letra: Rr.letra(o.notas[k]) }; }).sort(function (a, b) { return b.v - a.v; }) :
+      (o.eq && o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera' ? Rr.notas(o) : []);
+    if (ns.length) h += '<h4>' + (o.notas ? 'Notas por departamento' : 'Notas esperadas por departamento') + '</h4><div class="col">' + ns.map(function (n) { return '<div class="fila entre chico"><span>' + esc(n.nombre) + '</span><span>' + barraNota(n.v) + ' <b style="display:inline-block;min-width:2.2em;text-align:right">' + n.letra + '</b></span></div>'; }).join('') + '</div>';
+    const l = Rr.linea(o);
+    if (l) {
+      const dif = l.plan ? l.real / l.plan - 1 : 0;
+      const enMarcha = ['desarrollo', 'preproduccion', 'rodaje', 'posproduccion'].indexOf(o.et) >= 0;
+      h += '<h4>Línea de producción</h4><p>' + (enMarcha ? 'Gastado hasta hoy <b>' + dinero(l.real) + '</b> de <b>' + dinero(l.plan) + '</b> acordados (' + Math.round(l.real / Math.max(1, l.plan) * 100) + ' %)' :
+        'Presupuesto acordado <b>' + dinero(l.plan) + '</b> · costo real <b class="' + (dif > 0.05 ? 'mal' : dif < -0.02 ? 'bien' : '') + '">' + dinero(l.real) + '</b> (' + (dif >= 0 ? '+' : '') + Math.round(dif * 100) + ' %)') + '</p>';
+      h += '<div class="col">' + l.filas.map(function (f) {
+        return '<div class="fila entre chico"><span>' + NOMBRE_ETAPA_CORTO[f.et] + '</span><span>plan ' + dinero(f.plan) + ' · real ' + dinero(f.real) + ' · ' + f.sem0 + (f.sem !== f.sem0 ? ' → ' + f.sem : '') + ' sem.</span></div>';
+      }).join('') + (l.extra ? '<div class="fila entre chico"><span>Imprevistos y decisiones</span><span>' + dinero(l.extra) + '</span></div>' : '') + '</div>';
+      if (l.ev.length) h += '<h4>Lo que pasó en la producción</h4><ul>' + l.ev.slice().reverse().map(function (e) { return '<li>' + esc(e.txt) + (e.c ? ' <span class="tenue">(' + dinero(e.c) + ')</span>' : '') + '</li>'; }).join('') + '</ul>';
+    }
+    if (o.prueba) {
+      const op = o.prueba.ok ? IA.rodaje.OPCIONES_PRUEBA.filter(function (x) { return x.id === o.prueba.ok; })[0] : null;
+      h += '<p>Prueba de público: <b>' + o.prueba.p + ' de 100</b>. ' + esc(o.prueba.com.join(' ')) + (op ? ' Decisión: ' + esc(op.t.toLowerCase()) + (o.prueba.dp ? ' (' + (o.prueba.dp > 0 ? '+' : '') + o.prueba.dp + ' al público)' : '') + '.' : '') + '</p>';
+    }
+    return h;
+  }
+  // Ventana de decisión: un dilema del rodaje o la prueba de público
+  function modalDecision(o) {
+    const Rr = IA.rodaje;
+    if (o.dil) {
+      const x = Rr.dilemaDe(o);
+      if (!x) return;
+      U.modal('<h2>«' + esc(o.tit) + '»</h2><p><b>' + esc(x.txt) + '</b></p><p class="nota">' + esc(O.NOMBRE_ETAPA[o.et]) + '. Si no decides en 2 semanas, el equipo hará lo más prudente.</p><div class="col">' +
+        x.ops.map(function (op) { return '<button class="btn bloque decision" data-a="rdDilema" data-v="' + o.id + '|' + op.i + '"><b>' + esc(op.t) + '</b><span class="tenue chico">' + esc(efectoTxt(op.op, o)) + '</span></button>'; }).join('') + '</div>');
+      return;
+    }
+    if (o.prueba && !o.prueba.ok) {
+      U.modal('<h2>Prueba de público</h2><p>«' + esc(o.tit) + '»: <b>' + o.prueba.p + ' de 100</b></p><p>' + esc(o.prueba.com.join(' ')) + '</p><p class="nota">El puntaje anticipa (con algo de azar) lo que dirá el público. Si no decides en 3 semanas, se estrena así.</p><div class="col">' +
+        Rr.opcionesPrueba(o).map(function (op) { return '<button class="btn bloque decision"' + (op.no ? ' disabled' : '') + ' data-a="rdPrueba" data-v="' + o.id + '|' + op.id + '"><b>' + esc(op.t) + '</b><span class="tenue chico">' + esc(op.no || op.texto + (op.costo > 0 ? ' Cuesta ' + dinero(o.pp * op.costo) + '.' : '')) + '</span></button>'; }).join('') + '</div>');
+    }
+  }
+  function efectoTxt(op, o) {
+    const p = [];
+    const sem = function (n) { return Math.max(1, Math.round(n * IA.rodaje.escalaSemanas())); };
+    if (op.costo) p.push('cuesta ' + dinero(o.pp * op.costo));
+    if (op.sem) p.push((op.sem > 0 ? '+' : '−') + sem(Math.abs(op.sem)) + ' semana' + (sem(Math.abs(op.sem)) > 1 ? 's' : ''));
+    if (op.q) p.push((op.q > 0 ? 'mejor' : 'peor') + ' calidad');
+    if (op.pub) p.push((op.pub > 0 ? '+' : '') + op.pub + ' al público');
+    if (op.crit) p.push((op.crit > 0 ? '+' : '') + op.crit + ' a la crítica');
+    if (op.des) p.push('más expectativa');
+    if (op.azar !== undefined) p.push('puede salir bien o mal');
+    if (op.mo) p.push('cambia la moral');
+    if (op.rel) p.push(op.rel[2] > 0 ? 'acerca a dos personas' : 'crea roces');
+    return p.length ? p.join(' · ') : 'sin efectos';
+  }
+  function abrirDecision(id) { const o = O.porId(+id); if (o) modalDecision(o); }
+  ac('verDecision', function (v) { if (U.fichaAbierta()) U.cerrarFicha(); abrirDecision(v); });
+  ac('rdDilema', function (v) {
+    const p = v.split('|');
+    const err = J.decidirDilema(+p[0], +p[1]);
+    U.cerrarModal();
+    if (err) { U.aviso(err, 'mal'); return; }
+    const o = O.porId(+p[0]);
+    const ev = o && o.lp && o.lp.ev.length ? o.lp.ev[o.lp.ev.length - 1].txt : 'Decidido';
+    U.aviso(ev.split(' → ').pop());
+    U.renderBarra(); U.refrescar();
+    siguienteDecision();
+  });
+  ac('rdPrueba', function (v) {
+    const p = v.split('|');
+    const err = J.decidirPrueba(+p[0], p[1]);
+    U.cerrarModal();
+    if (err) { U.aviso(err, 'mal'); return; }
+    IA.arte.sonido('dinero');
+    U.renderBarra(); U.refrescar();
+    siguienteDecision();
+  });
+  // Si quedan más decisiones pendientes, se abre la siguiente
+  function siguienteDecision() { const o = J.decisionesPendientes()[0]; if (o) setTimeout(function () { modalDecision(o); }, 50); }
+
+  return { fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon,
+    bloqueProduccion: bloqueProduccion, abrirDecision: abrirDecision, siguienteDecision: siguienteDecision };
 })();

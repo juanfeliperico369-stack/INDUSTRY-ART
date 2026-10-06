@@ -16,9 +16,18 @@ IA.pruebas = (function () {
   // Registro de cada obra al terminar (las métricas no dependen de lo que la compactación borra después)
   let registro = null;
   N.on('obraTerminada', function (o) {
-    if (registro) registro.push({ est: o.est, mult: O.multiplicador(o), neto: O.neto(o), talento: O.costoTotal(o) > 0 ? (o.cf || 0) / O.costoTotal(o) : 0 });
+    if (!registro) return;
+    const r = { est: o.est, mult: O.multiplicador(o), neto: O.neto(o), talento: O.costoTotal(o) > 0 ? (o.cf || 0) / O.costoTotal(o) : 0 };
+    // Cómo se hizo (V19), solo para las obras del jugador
+    if (o.est === 0) {
+      const l = IA.rodaje.linea(o);
+      r.met = o.met || 'mixto'; r.pst = o.pst || 'clasico'; r.set = o.setR ? 1 : 0; r.ext = o.ext ? Object.keys(o.ext).length : 0;
+      r.pr = o.prueba ? o.prueba.ok : null; r.dil = o.lp && o.lp.dv ? o.lp.dv.length : 0;
+      r.sobre = l && l.plan ? l.real / l.plan - 1 : 0;
+    }
+    registro.push(r);
   });
-  const ORDEN_TERRENOS = ['backlot', 'foso', 'captura', 'backlot'];
+  const ORDEN_TERRENOS = ['backlot', 'foso', 't_ciudad', 'captura', 'backlot'];
 
   // ---------- Decisiones del bot ----------
   // Atractivo comercial de cada familia para el bot (las de crítica rinden menos en taquilla)
@@ -44,13 +53,30 @@ IA.pruebas = (function () {
     }
     return gen;
   }
+  // Prueba de público: con un puntaje flojo reedita o regraba; con uno bueno estrena (V19)
+  function pruebaBot(o) {
+    const p = o.prueba.p, ops = IA.rodaje.opcionesPrueba(o);
+    const ok = function (id) { const x = ops.filter(function (q) { return q.id === id; })[0]; return x && !x.no; };
+    const holgura = NG.cajaLibre(0) > E.presupuestoTipico(N.anio()) * 3;
+    const ed = (IA.rodaje.notas(o).filter(function (n) { return n.dep === 'edicion'; })[0] || { v: 50 }).v;
+    if (!holgura) return p < 55 && ed >= 60 ? 'reeditar' : 'estrenar';
+    if (p < 50 && ok('regrabar')) return 'regrabar';
+    if (p < 62) return ed >= 55 ? 'reeditar' : 'pulir';
+    if (p < 70) return 'pulir';
+    return 'estrenar';
+  }
   function decidir(est) {
     const S = N.S, jug = S.estudios[0];
     const tipico = E.presupuestoTipico(N.anio());
+    // 0. Dilemas de rodaje y pruebas de público pendientes (V19)
+    IA.juego.decisionesPendientes().forEach(function (o) {
+      if (o.dil) IA.juego.decidirDilema(o.id, IA.rodaje.mejorOpcion(o));
+      else if (o.prueba && !o.prueba.ok) IA.juego.decidirPrueba(o.id, pruebaBot(o));
+    });
     // 1. Estrenar lo que esté listo en la mejor semana próxima
     O.delEstudio(0, ['lista']).forEach(function (o) {
       if (o.prog) return;
-      let nivM = est.marketing;
+      let nivM = S.t < 52 * 3 ? Math.min(est.marketing, 2) : est.marketing; // al principio, campañas medianas
       while (nivM > 0 && NG.cajaLibre(0) < E.marketingTipico(N.anio()) * D.nivelesMarketing[nivM].mult * 1.2) nivM--;
       const t = L.mejorSemana(o, S.t + 1, S.t + 10);
       IA.juego.programarEstreno(o, t, nivM);
@@ -58,7 +84,8 @@ IA.pruebas = (function () {
     // Con la caja en rojo no se arriesga más: espera a que entren los ingresos
     if (S.semanasEnRojo > 0) return;
     // 2. Construir cuando sobra caja
-    if (NG.cajaLibre(0) > tipico * est.construir) {
+    // Los dos primeros años solo construye si le sobra mucho (el colchón vale más que un plató)
+    if (NG.cajaLibre(0) > tipico * est.construir * (S.t < 104 ? 2 : 1)) {
       if (jug.pisos.length < Math.min(est.pisos, D.MAX_PISOS)) {
         const sig = ORDEN_PISOS.filter(function (p, i) { return contar(jug.pisos, p) < contar(ORDEN_PISOS.slice(0, i + 1), p); })[0];
         if (sig && !NG.puedeConstruir('piso', sig) && NG.cajaLibre(0) - NG.costoConstruccion(NG.infoPiso(sig)) > tipico * est.construir) NG.construir('piso', sig);
@@ -72,18 +99,20 @@ IA.pruebas = (function () {
     while (intentos-- > 0 && O.enProduccion(0).length < NG.capacidad(0)) {
       const gen = elegirGeneros(S);
       let escala = N.entero(est.escala[0], est.escala[1]) + (est.grande && N.probabilidad(est.grande) ? 1 : 0);
-      if (S.t < 52) escala = Math.min(escala, 2); // el primer año, sin superproducciones
+      if (S.t < 52 * 3) escala = Math.min(escala, 2); // los primeros tres años, sin superproducciones
       let b = null, costo = 0, ok = false;
       const tono = N.elegir(D.tonos).id;
       const idea = ideaDelBot(S, gen);
       // Si no alcanza, baja la escala y después la ambición del equipo
-      [est.ambicion, 0.6].forEach(function (amb) {
+      [S.t < 52 * 3 ? Math.min(est.ambicion, 1.15) : est.ambicion, 0.6].forEach(function (amb) {
         for (let e = escala; e >= 0 && !ok; e--) {
           b = O.borrador(0, Object.assign({ gen: idea.gen || gen, escala: e, tono: tono, completa: true }, idea.campos));
           O.equipoRecomendado(b, amb);
           detallar(b, idea, amb);
           costo = O.costoTalento(b) + b.pp + (b.derechos || 0) + E.marketingTipico(N.anio()) * D.nivelesMarketing[Math.min(2, est.marketing)].mult * 0.5;
-          if (NG.cajaLibre(0) > costo * est.colchon) ok = true;
+          // Guarda plata para la campaña de lo que ya está en marcha: un buen estreno sin marketing se hunde
+          const reservaMkt = O.enProduccion(0).length * E.marketingTipico(N.anio()) * D.nivelesMarketing[Math.min(2, est.marketing)].mult * 0.8;
+          if (NG.cajaLibre(0) - reservaMkt > costo * (S.t < 52 * 3 ? Math.max(est.colchon, 1.6) : est.colchon)) ok = true;
         }
       });
       if (!ok || !b) break;
@@ -137,6 +166,16 @@ IA.pruebas = (function () {
     if (anio >= IA.ideas.ANIO_IA && IA.ideas.equipoCreativo(b) >= 62 && N.probabilidad(0.3)) b.ia = N.entero(10, 40);
     if (N.probabilidad(0.2)) b.cx = N.entero(1, 4);
     if (N.probabilidad(0.2)) b.rit = N.entero(1, 4);
+    // Cómo se filma (V19): el método y el terreno recomendados, a veces un estilo propio y, si hay, un set guardado
+    const R = IA.rodaje;
+    b.met = R.metodoRecomendado(b, anio);
+    b.ter = R.terrenoRecomendado(b);
+    if ((b.fam === 'AA' || b.fam === 'IM') && b.presM >= 1.5 && anio >= 1915 && N.probabilidad(0.3)) b.pst = 'espectaculo';
+    else if (b.fam === 'SM' && anio >= 1999 && N.probabilidad(0.15)) b.pst = 'found';
+    else if (b.fam === 'AV' && anio >= 1950 && N.probabilidad(0.3)) b.pst = 'contemplativo';
+    else if (b.fam === 'DR' && anio >= 1922 && N.probabilidad(0.15)) b.pst = 'documental';
+    const sets = R.usaSet(b) ? R.setsQueSirven(b) : [];
+    if (sets.length && sets[0].q >= 50) b.setR = sets[0].id;
     O.recalcular(b);
     // Todo el elenco con nombre se contrata y se negocia (V18), ya con la clasificación final
     O.equipoNegociado(b, amb);
@@ -160,6 +199,10 @@ IA.pruebas = (function () {
       if (IA.ideas.clasificar(o, o.anioPlan) !== o.clas) errores.push('La clasificación de «' + o.tit + '» no sale de su contenido');
       if (o.gen.indexOf('Erótico') >= 0 && ((o.pj || []).some(function (p) { return p.e < 18; }) || ['18', 'R', 'X'].indexOf(o.clas) < 0)) errores.push('Regla del Erótico rota en «' + o.tit + '»');
       if (IA.ideas.hayMenores(o) && o.cont.amor > 1) errores.push('Contenido no permitido con menores en «' + o.tit + '»');
+      // V19: decisiones que no se quedan colgadas y cuentas que cuadran
+      if (o.dil && S.t - o.dil.t > 3) errores.push('Dilema sin resolver en «' + o.tit + '»');
+      if (o.prueba && !o.prueba.ok && S.t - o.prueba.t > 4) errores.push('Prueba de público sin resolver en «' + o.tit + '»');
+      if (o.lp && !isFinite(IA.rodaje.linea(o).real)) errores.push('Costo real no finito en «' + o.tit + '»');
       if (IA.ideas.hayNinos(o) && IA.taxonomia.ORDEN_CLAS.indexOf(o.clas) > 2) errores.push('Obra de más de PG-13 con niños en el elenco: «' + o.tit + '»');
     });
     if (errores.length > 50) errores.length = 50;
@@ -216,6 +259,7 @@ IA.pruebas = (function () {
   function medir(op, errores, rend) {
     const S = N.S;
     const terminadas = (registro || []).filter(function (r) { return isFinite(r.mult) && r.mult > 0; });
+    const produccion = resumenProduccion(); // antes de soltar el registro
     registro = null;
     const mults = terminadas.map(function (r) { return r.mult; });
     const pierden = terminadas.filter(function (r) { return r.neto < 0; }).length;
@@ -250,7 +294,7 @@ IA.pruebas = (function () {
       cajaFinal2025: hist.length ? hist[hist.length - 1].caja2025 : 0,
       investigaciones: S.investigaciones, quiebra: S.quiebra ? S.quiebra.anio : null,
       rescatesRivales: S.estudios.slice(1).reduce(function (a, e) { return a + e.rescates; }, 0),
-      ideas: resumenIdeas(S),
+      ideas: resumenIdeas(S), produccion: produccion,
       talentos: resumenTalentos(S, terminadas),
       errores: errores, rendimiento: rend,
     };
@@ -281,6 +325,17 @@ IA.pruebas = (function () {
     };
   }
   // Qué usó el bot de la fábrica de ideas (para el informe)
+  // Qué usó el bot de la producción (V19)
+  function resumenProduccion() {
+    const mias = (registro || []).filter(function (r) { return r.est === 0 && r.met; });
+    const contar = function (k) { return mias.reduce(function (a, r) { if (r[k]) a[r[k]] = (a[r[k]] || 0) + 1; return a; }, {}); };
+    const sob = mias.map(function (r) { return r.sobre; }).sort(function (a, b) { return a - b; });
+    return {
+      obras: mias.length, metodos: contar('met'), estilos: contar('pst'), pruebas: contar('pr'),
+      sets: mias.filter(function (r) { return r.set; }).length, externos: mias.filter(function (r) { return r.ext; }).length,
+      dilemas: mias.reduce(function (a, r) { return a + (r.dil || 0); }, 0), sobrecosto: sob.length ? sob[Math.floor(sob.length / 2)] : 0,
+    };
+  }
   function resumenIdeas(S) {
     const mias = S.obras.filter(function (o) { return o.est === 0; });
     const c = function (f) { return mias.filter(f).length; };
@@ -375,6 +430,51 @@ IA.pruebas = (function () {
       const tr = E.tarifa(x, 1920), tr2 = E.tarifa(x, 2020);
       prueba('Las tarifas suben con la época, no con el presupuesto de la obra', tr2 > tr * 5, Math.round(tr) + ' → ' + Math.round(tr2));
       prueba('La academia no pasa de +5 por oficio', (function () { const t = { hab: 40, of: 'guion', ac: { guion: 5 }, af: [0, 0, 0, 0, 0, 0, 0, 0], en: 100, enT: S.t, act: 0 }; return /\+5/.test(T.puedeEstudiar(t, T.curso('taller'), 'guion')); })());
+    }
+    // V19 · Cine a fondo
+    const R = IA.rodaje, S = N.S;
+    prueba('Las notas de los departamentos van de F a A+', R.letra(95) === 'A+' && R.letra(70) === 'B' && R.letra(20) === 'F');
+    prueba('El CGI no existe antes de 1973', !R.metodosDisponibles(1960).some(function (m) { return m.id === 'cgi'; }) && R.metodosDisponibles(1980).some(function (m) { return m.id === 'cgi'; }));
+    prueba('IMAX y 3D llegan en su año', X.formatos.visual.some(function (f) { return f.id === 'IMAX' && f.desde === 1970; }) && X.formatos.visual.some(function (f) { return f.id === '3D' && f.desde === 1953; }));
+    prueba('Los incentivos de Colombia rigen desde 2013', R.incentivo({ rod: 'co' }, 2012) === 0 && R.incentivo({ rod: 'co' }, 2013) > 0);
+    if (S && S.estudios) {
+      const conAzar = function (fn) { const g = S.rng; const r2 = fn(); S.rng = g; return r2; }; // no gasta el azar de la partida
+      const muestra = conAzar(function () { const b = O.borrador(0, { gen: ['Acción'], escala: 2, completa: true }); b.fx = 3; O.recalcular(b); O.equipoRecomendado(b, 1); return b; });
+      const id = R.ideal(muestra);
+      let suma = 0;
+      Object.keys(id).forEach(function (k) { suma += id[k]; });
+      prueba('El reparto ideal del presupuesto suma 100 %', Math.abs(suma - 1) < 0.01, Math.round(suma * 100) + ' %');
+      const p0 = IA.ideas.pesos(muestra, D.familia(muestra.fam));
+      prueba('Vestuario y efectos pesan en la calidad', p0.vestuario > 0 && p0.efectos > 0);
+      const quitado = Object.assign({}, muestra, { rep: Object.assign({}, id, { efectos: id.efectos * 0.2, produccion: id.produccion + id.efectos * 0.8 }) });
+      prueba('Quitarle presupuesto a un departamento le baja la nota', R.efectoReparto(quitado, 'efectos') < -5);
+      const est0 = S.estudios[0];
+      est0.sets = est0.sets || [];
+      const setPrueba = { id: -77, tipo: R.tipoSet(muestra).id, nombre: 'prueba', q: 70, anio: N.anio(), usos: 0, obra: '-' };
+      est0.sets.push(setPrueba);
+      const conSet = Object.assign({}, muestra, { met: 'set', setR: -77 }), sinSet = Object.assign({}, muestra, { met: 'set', setR: null });
+      prueba('Reusar un set abarata la producción y acorta la preproducción', R.factorCosto(conSet, N.anio()) < R.factorCosto(sinSet, N.anio()) && R.ajusteSemanas(conSet).pre < R.ajusteSemanas(sinSet).pre);
+      est0.sets = est0.sets.filter(function (x) { return x.id !== -77; });
+      const enDesierto = Object.assign({}, muestra, { met: 'locacion', ter: 'desierto' });
+      const terr = est0.terrenos.slice();
+      est0.terrenos = terr.filter(function (x) { return x !== 't_desierto'; });
+      const costoAjeno = R.factorCosto(enDesierto, N.anio());
+      est0.terrenos.push('t_desierto');
+      const costoPropio = R.factorCosto(enDesierto, N.anio());
+      est0.terrenos = terr;
+      prueba('Rodar en un terreno propio es más barato', costoPropio < costoAjeno);
+      const anim = conAzar(function () { const b = O.borrador(0, { gen: ['Familiar'], escala: 2, completa: true }); b.tipo = 'animacion'; O.recalcular(b); O.equipoRecomendado(b, 1); return b; });
+      const sinAnimar = Object.assign({}, anim, { eq: Object.assign({}, anim.eq, { animacion: null }), ext: {} });
+      prueba('Una obra animada necesita quien anime', !O.equipoCompleto(sinAnimar) && O.equipoCompleto(Object.assign({}, sinAnimar, { ext: { animacion: 'local' } })));
+      const ctxPrueba = { pagar: function () {} };
+      const enPos = N.copiar(muestra);
+      Object.assign(enPos, { et: 'posproduccion', sr: 2, dur: { preproduccion: 4, rodaje: 8, posproduccion: 6 }, pub: 60, crit: 60, prueba: { p: 58, t: S.t, com: [] } });
+      conAzar(function () { R.decidirPrueba(enPos, 'pulir', ctxPrueba); });
+      prueba('Pulir tras la prueba de público suma público y semanas', enPos.pub > 60 && enPos.sr === 4 && enPos.prueba.ok === 'pulir');
+      const enRodaje = N.copiar(muestra);
+      Object.assign(enRodaje, { et: 'rodaje', sr: 3, dur: { preproduccion: 4, rodaje: 8, posproduccion: 6 }, dil: { id: 'escenaClave', t: S.t, n: { d: muestra.eq.direccion } } });
+      conAzar(function () { R.decidir(enRodaje, 0, ctxPrueba); });
+      prueba('Un dilema de rodaje aplica sus efectos', !enRodaje.dil && enRodaje.sr === 5 && enRodaje.dq === 2);
     }
     return r;
   }

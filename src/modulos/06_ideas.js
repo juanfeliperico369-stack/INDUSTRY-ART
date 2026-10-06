@@ -19,6 +19,7 @@ IA.ideas = (function () {
   function duracionTipica(anio) { return Math.round(N.interp(X.DURACION_TIPICA, anio)); }
   function v(o, k, porDefecto) { return o[k] === undefined || o[k] === null ? porDefecto : o[k]; }
   function contenidoDe(o) { return o.cont || X.contenidoFamilia[familia(o)]; }
+  function nivelEfectos(o) { return N.limitar(v(o, 'fx', 2), 0, 4); }
   // Completa un borrador del jugador con todos los campos de la V17 (las obras de los rivales usan los de siempre)
   function completar(b, anio) {
     const fam = familia(b);
@@ -38,6 +39,10 @@ IA.ideas = (function () {
     if (!b.cont) b.cont = Object.assign({}, X.contenidoFamilia[fam]);
     if (!b.min) b.min = duracionTipica(anio);
     if (b.cx === undefined) b.cx = 2;
+    // V19: cómo se filma (método, terreno y estilo de producción); se recomiendan según la idea
+    if (!b.pst) b.pst = 'clasico';
+    if (!b.met) b.met = IA.rodaje.metodoRecomendado(b, anio);
+    if (!b.ter) b.ter = IA.rodaje.terrenoRecomendado(b);
     if (b.rit === undefined) b.rit = 2;
     if (b.fx === undefined) b.fx = 2;
     if (b.ia === undefined) b.ia = 0;
@@ -206,6 +211,7 @@ IA.ideas = (function () {
       if (p && casa) f *= N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8);
     }
     if (o.ia) f *= 1 - 0.4 * o.ia / 100; // la IA abarata la producción
+    f *= IA.rodaje.factorCosto(o, anio); // método, terreno, estilo, sets, viaje, incentivos y estudios externos (V19)
     // Extras y terceros (figurantes, dobles y personal de apoyo): un número, cada uno suma un poco al costo
     if (o.pj) {
       let extras = o.extras || 0;
@@ -223,11 +229,13 @@ IA.ideas = (function () {
     const tc = X.tipoCine(o.tipo || 'real');
     const largo = Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.4);
     const fx = v(o, 'fx', 2);
+    const r = IA.rodaje.ajusteSemanas(o); // sets, viaje, estilo, método y terreno (V19)
     return {
       desarrollo: o.ideaIA ? -2 : 0,
       rodaje: tc.semanas * N.limitar(largo, 0.5, 1.6),
       posproduccion: tc.semanas * (1 - 0.3 * (o.ia || 0) / 100),
-      posExtra: fx >= 3 ? fx - 2 : 0,
+      posExtra: (fx >= 3 ? fx - 2 : 0) + r.pos,
+      preExtra: r.pre, rodExtra: r.rodaje,
     };
   }
   // Presupuesto relativo a lo típico de la época (para la clase A, B o C)
@@ -510,12 +518,12 @@ IA.ideas = (function () {
   // Reparto de pesos de los departamentos: prioridad y tipo de obra (se normaliza para sumar 1)
   function pesos(o, famObj) {
     const pr = X.prioridad(o.prio).pesos, tc = X.tipoCine(o.tipo || 'real').pesos || {};
-    if (!Object.keys(pr).length && !Object.keys(tc).length) return famObj.pesos;
+    if (!Object.keys(pr).length && !Object.keys(tc).length) return IA.rodaje.pesosDep(o, famObj.pesos);
     const r = {};
     let s = 0;
     Object.keys(famObj.pesos).forEach(function (k) { r[k] = famObj.pesos[k] * (pr[k] || 1) * (tc[k] || 1); s += r[k]; });
     Object.keys(r).forEach(function (k) { r[k] /= s; });
-    return r;
+    return IA.rodaje.pesosDep(o, r); // vestuario, efectos y animación (V19)
   }
   function habilidad(id) { const t = id !== undefined && id !== null ? T().porId(id) : null; return t ? t.hab : 45; }
   function equipoCreativo(o) { return (habilidad(o.eq.guion) + habilidad(o.eq.direccion) + habilidad(o.eq.arte)) / 3; }
@@ -571,6 +579,7 @@ IA.ideas = (function () {
     if (fam === 'SM' && contenidoDe(o).terror >= 2) pub += 1;
     // Multitudes: muchos extras lucen en la acción y en las épocas pasadas
     if ((o.extras || 0) >= 12 && (fam === 'AA' || (o.epo && o.epo !== 'actualidad'))) pub += 1;
+    add(IA.rodaje.ajusteNotas(o, anio)); // estilo de producción, método, terreno y sets (V19)
     return { crit: crit, pub: pub };
   }
   // Lo que se decide con azar al terminar: efectos aplaudidos o repudiados y el resultado de la IA
@@ -597,8 +606,9 @@ IA.ideas = (function () {
   function edadesExtra(o) {
     const tc = X.tipoCine(o.tipo || 'real').edades;
     const focos = (o.pubs || []).map(X.publico).filter(function (x) { return x && x.edades; });
-    if (!tc && !focos.length) return null;
-    const r = [1, 1, 1, 1, 1];
+    const ep = IA.rodaje.edades(o); // estilo de producción: unos lo aman y otros lo rechazan (V19)
+    if (!tc && !focos.length && !ep) return null;
+    const r = ep || [1, 1, 1, 1, 1];
     if (tc) tc.forEach(function (x, i) { r[i] *= x; });
     if (focos.length) for (let i = 0; i < 5; i++) r[i] *= 1 + (media(focos.map(function (f) { return f.edades[i]; })) - 1) * 0.6;
     return r;
@@ -642,7 +652,7 @@ IA.ideas = (function () {
   return {
     LIMITES: LIMITES, ANIO_IA: ANIO_IA, duracionTipica: duracionTipica, familia: familia, completar: completar,
     nivelMaximoEpoca: nivelMaximoEpoca, normalizar: normalizar, indiceClasificacion: indiceClasificacion, clasificar: clasificar,
-    describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, validar: validar,
+    describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, nivelEfectos: nivelEfectos, validar: validar,
     encajeIdea: encajeIdea, clavesEncaje: clavesEncaje, marcarEncaje: marcarEncaje, estrellas: estrellas,
     factorCosto: factorCosto, costoProduccion: costoProduccion, ajusteSemanas: ajusteSemanas, clase: clase, perfil: perfil,
     reglaDominio: reglaDominio, anioLibre: anioLibre, esLibre: esLibre, costoDerechos: costoDerechos, materialesDisponibles: materialesDisponibles, anioMaterial: anioMaterial,

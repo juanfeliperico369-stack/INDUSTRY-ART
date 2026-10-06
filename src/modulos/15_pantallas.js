@@ -145,6 +145,10 @@ IA.pantallas = (function () {
     O.delEstudio(0, ['lista']).filter(function (o) { return !o.prog; }).forEach(function (o) {
       out.push({ txt: t('tarea_lista', { t: o.tit }), btn: t('programar'), a: 'programar', v: o.id, imp: 1 });
     });
+    // Dilemas de rodaje y pruebas de público que esperan tu decisión (V19)
+    J.decisionesPendientes().forEach(function (o) {
+      out.push({ txt: '«' + o.tit + '»: ' + (o.dil ? 'un dilema en ' + O.NOMBRE_ETAPA[o.et].toLowerCase() : 'resultado de la prueba de público (' + o.prueba.p + ' de 100)'), btn: 'Decidir', a: 'verDecision', v: o.id, imp: 1 });
+    });
     if (S.semanasEnRojo > 0) out.push({ txt: t('tarea_rojo', { n: S.semanasEnRojo }), mal: 1, imp: 1 });
     const libres = NG.capacidad(0) - O.enProduccion(0).length;
     if (libres > 0) out.push({ txt: t('tarea_capacidad') + ' (' + libres + ')', btn: t('crear_obra'), a: 'crearObra' });
@@ -328,31 +332,26 @@ IA.pantallas = (function () {
     }
     if (o.inf) h += '<h3>' + t('informe') + '</h3><ul>' + o.inf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
     if (o.est === 0 || estrenada) h += IA.creacion.bloqueIdea(o);
+    if (o.est === 0) h += IA.creacion.bloqueProduccion(o);
     if (o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera') {
       h += '<div class="kpis">' + kpi(t('costo_talento'), dinero(o.cf)) + kpi(t('costo_produccion'), dinero(o.pp * (o.sobre || 1))) + kpi('Gastado en producción', dinero(o.gp || 0)) + '</div>';
     }
-    if (o.eq) {
+    if (o.eq && o.gen) {
+      // Departamentos (V19): la nota de cada uno, en una telaraña; lo que más pesa va primero
       const fam = D.familia(o.fam || 'DR');
-      const bonos = NG.bonos(o.est, o.fam);
-      const deps = Object.keys(fam.pesos);
-      const valores = deps.map(function (dep) {
-        const ids = dep === 'interprete' ? o.eq.int : [o.eq[dep]];
-        let s = 0, n = 0;
-        ids.forEach(function (id) { const ta = T.porId(id); if (ta) { s += ta.hab; n++; } });
-        return Math.min(100, (n ? s / n : 35) + (bonos[dep] || 0));
-      });
-      const gr = U.grafica('radar' + o.id, function (cv) { IA.arte.radar(cv, valores, deps.map(function (d) { return D.oficio(d).dep; })); });
-      h += '<h3>Departamentos</h3><canvas class="lienzo" style="height:220px" data-grafica="' + gr + '"></canvas><p class="nota">Lo que más pesa en ' + esc(fam.nombre.toLowerCase()) + ': ' + deps.slice().sort(function (a, b) { return fam.pesos[b] - fam.pesos[a]; }).slice(0, 3).map(function (d) { return D.oficio(d).dep.toLowerCase(); }).join(', ') + '.</p>';
+      const ns = IA.rodaje.notas(o);
+      const gr = U.grafica('radar' + o.id, function (cv) { IA.arte.radar(cv, ns.map(function (n) { return n.v; }), ns.map(function (n) { return n.nombre; })); });
+      h += '<h3>Departamentos</h3><canvas class="lienzo" style="height:220px" data-grafica="' + gr + '"></canvas><p class="nota">Lo que más pesa en ' + esc(fam.nombre.toLowerCase()) + ': ' + ns.slice(0, 3).map(function (n) { return n.nombre.toLowerCase(); }).join(', ') + '.</p>';
     }
     h += '<h3>' + t('paso_equipo') + '</h3>';
     if (o.cr && o.cr.ejecutiva) h += '<p class="tenue">Producción ejecutiva: ' + esc(o.cr.ejecutiva) + '</p>';
     if (o.eq) {
-      h += '<div class="col">' + O.ROLES.concat(['int0', 'int1']).map(function (r) {
+      h += '<div class="col">' + O.TODOS_ROLES.concat(['int0', 'int1']).map(function (r) {
         const id = r === 'int0' ? o.eq.int[0] : r === 'int1' ? o.eq.int[1] : o.eq[r];
         const ta = T.porId(id);
         const nombre = ta ? ta.nom : '';
         if (!nombre) return '';
-        const of = r.indexOf('int') === 0 ? 'Intérprete' : D.oficio(r).nombre;
+        const of = r.indexOf('int') === 0 ? 'Intérprete' : T.nombreOficio(ta, r);
         return '<button class="tarjeta toque fila" data-a="verTalento" data-v="' + id + '"><canvas class="retrato" data-retrato="' + id + '"></canvas><div class="col"><b>' + esc(nombre) + '</b><span class="tenue chico">' + esc(of) + (ta ? ' · ' + t('tal_habilidad').toLowerCase() + ' ' + Math.round(ta.hab) : '') + '</span></div></button>';
       }).join('') + '</div>';
     } else if (o.cr) {
@@ -584,6 +583,11 @@ IA.pantallas = (function () {
     };
     h += '<h3>Pisos del edificio</h3>' + D.pisos.filter(function (p) { return p.id !== 'oficinas'; }).map(function (p) { return fila(p, 'piso'); }).join('');
     h += '<h3>Terrenos</h3>' + D.terrenos.map(function (p) { return fila(p, 'terreno'); }).join('');
+    // Almacén de sets (V19): los sets de tus obras quedan guardados para reusarlos
+    const sets = est.sets || [];
+    h += '<h3>Almacén de sets (' + sets.length + ' de ' + IA.rodaje.capacidadSets(0) + ')</h3>' + (sets.length ? sets.map(function (x) {
+      return '<div class="tarjeta fila entre"><div class="col crece"><b>' + esc(x.nombre) + '</b><span class="chico">De «' + esc(x.obra) + '» (' + x.anio + ') · calidad ' + x.q + ' · ' + x.usos + ' uso' + (x.usos === 1 ? '' : 's') + '</span></div><button class="btn" data-a="desarmarSet" data-v="' + x.id + '">Desarmar</button></div>';
+    }).join('') : '<p class="tenue">Los sets que construyas para tus obras se guardan aquí y se pueden reusar (más barato y una semana menos). Caben más con platós y backlots.</p>');
     // Editar la descripción del estudio (tu documento): logo con deslizadores, público, visión y tipo de industria
     const opsSel = function (k, lista, actual) { return '<select data-c="estEditar" data-k="' + k + '">' + lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === actual ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>'; };
     h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div class="fila" id="estLogoVista"><canvas data-logo="0" style="width:64px;height:64px"></canvas><b>' + esc(est.nombre) + '</b></div>' +
@@ -596,6 +600,14 @@ IA.pantallas = (function () {
   }
   ac('estLogo', function (v, el) { const est = est0(); est.logo = Object.assign({}, est.logo); moverLogo(est.logo, el, 'estLogo', 'estLogoVista'); });
   ac('estLogoFin', function () { U.refrescar(); });
+  ac('desarmarSet', function (v) {
+    const est = est0(), id = +v;
+    const usa = O.activas().filter(function (o) { return o.est === 0 && o.setR === id && ['lista', 'cartelera', 'terminada'].indexOf(o.et) < 0; })[0];
+    if (usa) { U.aviso('Lo está usando «' + usa.tit + '».', 'mal'); return; }
+    est.sets = (est.sets || []).filter(function (x) { return x.id !== id; });
+    U.aviso('Set desarmado');
+    U.refrescar();
+  });
   ac('estEditar', function (v, el) {
     const est = est0(), k = el.getAttribute('data-k');
     if (['publico', 'vision', 'tipo'].indexOf(k) < 0) return;
@@ -757,6 +769,7 @@ IA.pantallas = (function () {
     res.nuevas.filter(function (n) { return n.imp; }).slice(0, 2).forEach(function (n) { U.aviso(n.texto.split('{$}').join(n.monto !== undefined ? dinero(n.monto, N.anio(n.t)) : '')); });
     if (N.S.quiebra) { detenerAuto(); modalQuiebra(); IA.arte.sonido('fracaso'); return; }
     if (r && r.motivo === 'premios' && N.S.premios.length) mostrarPremios();
+    else if (J.decisionesPendientes().length) IA.creacion.siguienteDecision(); // dilemas y pruebas de público (V19)
     else if (mostrarResumen && r && r.semanas > 1) {
       U.modal('<h2>' + t('resumen_titulo', { n: r.semanas }) + '</h2><div class="kpis">' + kpi(t('ingresos'), dinero(r.ingresos), 'bien') + kpi(t('gastos'), dinero(r.gastos), 'mal') + kpi('Cambio de caja', dinero(r.caja), r.caja >= 0 ? 'bien' : 'mal') + kpi(t('caja'), dinero(est0().caja)) + '</div>' +
         (res.nuevas.length ? '<h3>' + t('mun_periodico') + '</h3>' + res.nuevas.slice(0, 8).map(function (n) { return '<p style="margin:4px 0">' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>'; }).join('') : '') +
@@ -790,9 +803,10 @@ IA.pantallas = (function () {
         if (!res) { detenerAuto(); U.renderBarra(); return; }
         const ev = N.S.quiebra ? 'quiebra' : res.r && res.r.motivo === 'premios' ? 'premios' : J.hayEvento();
         despuesDeAvanzar(res, false);
-        if (ev === 'lista' || ev === 'quiebra' || ev === 'premios') {
+        if (ev === 'lista' || ev === 'quiebra' || ev === 'premios' || ev === 'decision') {
           detenerAuto(); U.renderBarra();
           if (ev === 'lista') U.aviso('Tienes una obra lista para estrenar');
+          if (ev === 'decision') IA.creacion.siguienteDecision();
         }
       }, U.ajustes().movimiento ? 600 : 420);
       return;

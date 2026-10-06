@@ -19,7 +19,7 @@ IA.economia = (function () {
     TENDENCIA: 0.3,      // peso de la tendencia de la familia
     PARTICIPACION: 0.88, // parte del público posible que va al cine con una cartelera típica
     MULT_TIPICO: 1.85,   // bruto medio ÷ costo de una película típica (fija el presupuesto típico)
-    U_TIPICA: -0.1,      // atractivo de estreno de una película típica de otras productoras
+    U_TIPICA: -0.15,     // atractivo de estreno de una película típica de otras productoras
     CORTE: 0.025,        // la obra sale de cartelera bajo este % de su mejor semana
     MAX_SEMANAS: 30,
     ANIMO: 0.28,         // azar del ánimo del público en cada estreno
@@ -133,9 +133,15 @@ IA.economia = (function () {
       }
     } else {
       const t = talentos(eq[dep]);
-      h = t ? hab(t) : 35;
+      if (t) h = hab(t);
+      else if (dep === 'vestuario' || dep === 'efectos' || dep === 'animacion') {
+        // Sin talento propio: estudio externo o el diseñador de arte se ocupa (V19)
+        const arte = talentos(eq.arte);
+        h = IA.rodaje.habilidadSinTalento(obra, dep, arte ? IA.talentos.habilidadEn(arte, obra, 'arte') : 35);
+      } else h = 35;
     }
-    return Math.min(100, h + (bonos[dep] || 0));
+    // Reparto del presupuesto, método, estilo, set, terreno y país (V19)
+    return Math.min(100, h + (bonos[dep] || 0) + IA.rodaje.bonoDep(obra, dep));
   }
   // Calcula la calidad base sin azar (para mostrar estimaciones) y con azar al terminar la producción
   function calidadBase(obra, talentos, bonos) {
@@ -214,6 +220,8 @@ IA.economia = (function () {
     if ((fam.id === 'AA' || fam.id === 'IM') && esc >= 1.8) pub += esc >= 3.5 ? 3 : 2; // efectos que el público disfruta
     // Visión y público objetivo del estudio (solo el jugador los tiene)
     if (bonos) { crit += bonos._crit || 0; pub += bonos._pub || 0; }
+    // Lo que dejaron los dilemas e incidentes del rodaje (V19)
+    q += obra.dq || 0; crit += (obra.dq || 0) + (obra.dcrit || 0); pub += (obra.dq || 0) + (obra.dpub || 0);
     obra.q = Math.round(q);
     obra.crit = Math.round(N.limitar(crit, 1, 99));
     obra.pub = Math.round(N.limitar(pub, 1, 99));
@@ -261,7 +269,7 @@ IA.economia = (function () {
     // La aprobación del público por la estrella principal (V18) también vende entradas
     const lider = ctx.talento(obra.eq.int[0]);
     const apr = lider && lider.apr !== undefined ? (lider.apr - 50) / 10 : 0;
-    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + apr + N.normal(0, 4), 1, 99));
+    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + apr + (obra.ddes || 0) + N.normal(0, 4), 1, 99));
     obra.exp = N.redondear(obra.con * obra.des / 100, 3);
     // El ánimo del público: algo que nadie controla hace que una obra prenda o no
     obra.animo = N.redondear(N.normal(0, P.ANIMO), 3);
@@ -348,7 +356,7 @@ IA.economia = (function () {
     P: P, PROPENSION: PROPENSION, datosAnio: datosAnio, presupuestoTipico: presupuestoTipico, tipicoSuavizado: tipicoSuavizado,
     presupuestoTipico2025: presupuestoTipico2025, produccionTipica: produccionTipica, marketingTipico: marketingTipico,
     parteEstudio: parteEstudio, tarifa: tarifa, demanda: demandaTalento, familiaPrincipal: familiaPrincipal, familiasDe: familiasDe,
-    encajeObra: encajeObra, calidadBase: calidadBase, calificar: calificar, famaEstrellas: famaEstrellas,
+    encajeObra: encajeObra, calidadBase: calidadBase, calificar: calificar, famaEstrellas: famaEstrellas, habilidadDep: habilidadDep,
     canalesDe: canalesDe, conocimiento: conocimiento, deseo: deseo, accesoClasificacion: accesoClasificacion,
     iniciarCartelera: iniciarCartelera, semanaCartelera: semanaCartelera, pronosticoSemana: pronosticoSemana,
   };

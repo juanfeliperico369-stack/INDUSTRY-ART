@@ -4,7 +4,7 @@
  * horizontal) y 1366×768 (PC). Guarda los PNG en pruebas/capturas/ y revisa que ningún control mida menos de
  * 44 px, que ningún texto mida menos de 14 px y que no haya desplazamiento horizontal.
  *
- * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v18.html]
+ * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v19.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 
 const RAIZ = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
-const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v18.html');
+const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v19.html');
 const SALIDA = path.join(RAIZ, 'pruebas', 'capturas');
 const TAMANOS = [[390, 844, 'celular_vertical'], [844, 390, 'celular_horizontal'], [1366, 768, 'pc']];
 
@@ -28,10 +28,16 @@ const PANTALLAS = [
   ['06_crear_equipo', async (p) => { await p.evaluate(() => { for (let i = 0; i < 2; i++) IA.ui.acciones.crPaso('1'); }); }],
   ['06b_crear_detallado', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('detallado'); ['obra', 'generos', 'historia'].forEach((s) => { if (IA.creacion.estado.abiertas[s]) IA.ui.acciones.crSeccion(s); }); IA.ui.acciones.crSeccion('forma'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
   ['06c_crear_personajes', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('forma'); IA.ui.acciones.crSeccion('personajes'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06f_crear_rodaje', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('personajes'); IA.ui.acciones.crSeccion('rodaje'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06g_crear_presupuesto', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('rodaje'); IA.ui.acciones.crSeccion('presupuesto'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06h_crear_pie', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('presupuesto'); IA.ui.acciones.crPieDetalle(); document.getElementById('crPie').scrollIntoView(); }); }],
   ['06d_usar_material', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('rapido'); IA.ui.acciones.crVolverCamino(); IA.ui.acciones.crCamino('material'); }); }],
   ['06e_comprar_guion', async (p) => { await p.evaluate(() => { IA.ui.acciones.crVolverCamino(); IA.ui.acciones.crCamino('guion'); }); }],
   ['07_catalogo', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('obras', 'catalogo'); }); }],
   ['08_ficha_obra', async (p) => { await p.evaluate(() => { const o = IA.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada').pop(); if (o) IA.ui.acciones.verObra(String(o.id)); }); }],
+  ['08b_ficha_produccion', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0] || IA.n.S.obras.filter((x) => x.est === 0 && x.lp).pop(); if (o) { IA.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Producción')[0]; if (h) h.scrollIntoView(); } }); }],
+  ['08c_dilema', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = { id: 'escenaClave', t: IA.n.S.t, n: { d: o.eq.direccion } }; IA.creacion.abrirDecision(o.id); } }); }],
+  ['08d_prueba_publico', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = null; o.prueba = { p: 57, com: ['La música emociona.', 'El ritmo decae a la mitad.'], t: IA.n.S.t }; IA.creacion.abrirDecision(o.id); } }); }],
   ['09_talento', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('talento'); }); }],
   ['10_ficha_talento', async (p) => { await p.evaluate(() => { const t = IA.n.S.talentos.filter((x) => !x.ret).sort((a, b) => b.fama - a.fama)[0]; IA.ui.acciones.verTalento(String(t.id)); }); }],
   ['11_mundo_cartelera', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('mundo', 'cartelera'); }); }],
@@ -40,7 +46,8 @@ const PANTALLAS = [
   ['13b_mundo_mapa', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'mapa')); }],
   ['13c_mundo_taxonomia', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'taxonomia')); }],
   ['14_negocio_finanzas', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'finanzas')); }],
-  ['15_negocio_construcciones', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'estudio')); }],
+  ['15_negocio_construcciones', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.prueba = null; } IA.ui.irA('negocio', 'estudio'); }); }],
+  ['15b_almacen_sets', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#vista h3')].filter((x) => x.textContent.indexOf('Almacén') === 0)[0]; if (h) h.scrollIntoView(); }); }],
   ['16_ajustes', async (p) => { await p.evaluate(() => IA.ui.acciones.abrirAjustes()); }],
 ];
 
@@ -91,7 +98,7 @@ async function medir(p) {
     await p.close();
   }
   await navegador.close();
-  let md = '# Capturas automáticas · INDUSTRY ART V18\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
+  let md = '# Capturas automáticas · INDUSTRY ART V19\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
   resumen.filter((r) => r.pantalla).forEach((r) => { md += `| ${r.tamano} | ${r.pantalla} | ${r.controles}${r.controles ? ' (' + r.detalle.join(', ') + ')' : ''} | ${r.textos} | ${r.desborde ? 'sí' : 'no'} |\n`; });
   const errores = resumen.filter((r) => r.errores);
   md += '\nErrores de página: ' + (errores.length ? errores.map((r) => r.tamano + ': ' + r.errores.join('; ')).join(' / ') : 'ninguno') + '\n';

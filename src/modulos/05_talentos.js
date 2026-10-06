@@ -44,6 +44,7 @@ IA.talentos = (function () {
   const CURVA = {
     interprete: [35, 55, 0.8], guion: [45, 70, 0.6], direccion: [45, 70, 0.6], produccion: [48, 72, 0.5],
     fotografia: [42, 66, 0.7], musica: [40, 70, 0.6], edicion: [40, 66, 0.7], arte: [40, 66, 0.7],
+    vestuario: [40, 68, 0.6], efectos: [36, 60, 0.9], animacion: [34, 62, 0.8],
   };
   function curva(of) { return CURVA[of] || [40, 66, 0.8]; }
   function edadPico(of) { return curva(of)[0]; }
@@ -125,9 +126,13 @@ IA.talentos = (function () {
     return t;
   }
   function generarInicial() {
+    N.S.talentos = [];
+    poblarOficios(Object.keys(D.poblacionTalentos));
+  }
+  // Crea la población de unos oficios (al empezar, o en una partida vieja cuando llegan oficios nuevos)
+  function poblarOficios(lista) {
     const S = N.S, anio = N.anio();
-    S.talentos = [];
-    Object.keys(D.poblacionTalentos).forEach(function (of) {
+    lista.forEach(function (of) {
       const n = D.poblacionTalentos[of];
       for (let i = 0; i < n; i++) {
         // Los intérpretes empiezan desde niños (un 8 %); el resto desde los 18
@@ -593,7 +598,8 @@ IA.talentos = (function () {
   }
 
   // Nombre del oficio con el género de la persona (escritora, directora, diseñadora de arte…)
-  const FEMENINO = { Escritor: 'Escritora', Director: 'Directora', Productor: 'Productora', Compositor: 'Compositora', Editor: 'Editora', 'Diseñador de arte y tecnología': 'Diseñadora de arte y tecnología' };
+  const FEMENINO = { Escritor: 'Escritora', Director: 'Directora', Productor: 'Productora', Compositor: 'Compositora', Editor: 'Editora', 'Diseñador de arte y tecnología': 'Diseñadora de arte y tecnología',
+    'Diseñador de vestuario': 'Diseñadora de vestuario', 'Supervisor de efectos': 'Supervisora de efectos', Animador: 'Animadora' };
   function nombreOficio(t, of) {
     let n = D.oficio(of || t.of).nombre;
     if (n === 'Fotografía') n = 'Director de fotografía'; // la persona, no el departamento
@@ -620,7 +626,7 @@ IA.talentos = (function () {
 
   return {
     CAPACIDADES: CAPACIDADES, EJES: EJES, MEDIOS: MEDIOS, CURSOS: CURSOS, MAX_ACADEMIA: MAX_ACADEMIA, ENERGIA_CARGO: ENERGIA_CARGO, MAX_PROYECTOS: MAX_PROYECTOS,
-    reindexar: reindexar, porId: porId, crear: crear, completar: completar, generarInicial: generarInicial, edad: edad,
+    reindexar: reindexar, porId: porId, crear: crear, completar: completar, generarInicial: generarInicial, poblarOficios: poblarOficios, edad: edad,
     disponible: disponible, ocupado: ocupado, tarifa: tarifa, tarifaPara: tarifaPara, activos: activos, disponibles: disponibles,
     mejorDisponible: mejorDisponible, ocupar: ocupar, liberar: liberar, cansancio: cansancio, trasEstreno: trasEstreno, anual: anual,
     nombreNuevo: nombreNuevo, energia: energia, moral: moral, cambiarMoral: cambiarMoral, exclusivoDe: exclusivoDe, estudiando: estudiando,

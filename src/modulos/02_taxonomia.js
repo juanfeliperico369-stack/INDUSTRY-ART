@@ -272,7 +272,7 @@ IA.taxonomia = (function () {
       { id: 'Blanco y negro', desde: 1895 }, { id: 'Tecnicolor', desde: 1935 }, { id: 'Híbrido', desde: 1939 },
       { id: 'General', desde: 1952 }, { id: 'Digital', desde: 1999 },
     ],
-    visual: [{ id: '35 mm', desde: 1895 }, { id: '16 mm', desde: 1923 }, { id: '70 mm', desde: 1955 }, { id: 'Digital', desde: 2002 }, { id: 'Screen X', desde: 2013 }],
+    visual: [{ id: '35 mm', desde: 1895 }, { id: '16 mm', desde: 1923 }, { id: '3D', desde: 1953 }, { id: '70 mm', desde: 1955 }, { id: 'IMAX', desde: 1970 }, { id: 'Digital', desde: 2002 }, { id: 'Screen X', desde: 2013 }],
     sonido: [{ id: 'Mudo', desde: 1895 }, { id: 'Sonoro', desde: 1927 }],
   };
   // Lo normal de cada año (sin costo extra ni sorpresa)
@@ -297,6 +297,10 @@ IA.taxonomia = (function () {
     if (v === '16 mm') { r.costo *= 0.85; r.crit -= 1; if (anio >= 1950) r.pub -= 2; }
     if (v === '70 mm') { r.costo *= 1.15; if (famId === 'AA' || famId === 'IM' || famId === 'DR') r.pub += 2; }
     if (v === 'Screen X') { r.costo *= 1.1; r.pub += famId === 'AA' || famId === 'IM' ? 2 : 1; }
+    // IMAX: primero documentales; desde 2008 los estrenos grandes llenan sus salas
+    if (v === 'IMAX') { r.costo *= 1.2; r.pub += anio >= 2008 && (famId === 'AA' || famId === 'IM') ? 3 : famId === 'AA' || famId === 'IM' ? 1 : 0; if (anio < 2008 && famId !== 'AV') r.pub -= 1; }
+    // 3D: moda de 1953-1955 y de 2009-2014; fuera de esas olas cansa un poco
+    if (v === '3D') { r.costo *= 1.12; r.crit -= 1; const ola = (anio >= 1953 && anio <= 1955) || (anio >= 2009 && anio <= 2014); r.pub += ola ? (famId === 'AA' || famId === 'IM' || famId === 'FJ' ? 3 : 1) : (anio > 2014 ? 1 : -1); }
     if (v === 'Digital') r.costo *= 0.92;
     if (s === 'Mudo' && anio >= 1930) { r.crit += 1; r.pub -= 6; }
     if (s === 'Sonoro' && anio < 1933) r.costo *= 1.12;

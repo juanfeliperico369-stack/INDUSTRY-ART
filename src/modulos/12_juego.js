@@ -107,7 +107,10 @@ IA.juego = (function () {
     const idea = IA.ideas.validar(b, N.anio());
     if (idea) return idea;
     if (O.clasificacionesDisponibles(N.anio(), b.gen).indexOf(b.clas) < 0) return 'Esa clasificación no está disponible en ' + N.anio() + '.';
-    if (!O.equipoCompleto(b)) return 'Falta completar el equipo.';
+    if (!O.equipoCompleto(b)) return IA.rodaje.necesita(b, 'animacion') && (b.eq.animacion === undefined || b.eq.animacion === null) && !IA.rodaje.esExterno(b, 'animacion') ?
+      'Falta quien anime: contrata un animador o encarga la animación a un estudio externo.' : 'Falta completar el equipo.';
+    const rod = IA.rodaje.validar(b, N.anio());
+    if (rod) return rod;
     const ocupados = O.idsEquipo(b).filter(function (id) { return !T.disponible(T.porId(id), 0); });
     if (ocupados.length) { const t = T.porId(ocupados[0]); return (t ? t.nom : 'Alguien del equipo') + ' ya no está disponible.'; }
     // Negociación (V18): nadie firma si rechaza, si no se cumplen sus exigencias o si pidió un porcentaje
@@ -236,6 +239,18 @@ IA.juego = (function () {
     noticia({ tipo: 'estudio', texto: t.nom + ' se suma a «' + o.tit + '».' });
     return '';
   }
+  // Decisiones del rodaje (V19): un dilema por índice de opción y la prueba de público por id de opción
+  function decidirDilema(obraId, i) {
+    const o = O.porId(obraId);
+    if (!o || o.est !== 0 || !o.dil) return 'No hay nada que decidir.';
+    return IA.rodaje.decidir(o, i, NG.contexto());
+  }
+  function decidirPrueba(obraId, id) {
+    const o = O.porId(obraId);
+    if (!o || o.est !== 0) return 'No hay prueba pendiente.';
+    return IA.rodaje.decidirPrueba(o, id, NG.contexto());
+  }
+  function decisionesPendientes() { return O.activas().filter(function (o) { return o.est === 0 && (o.dil || (o.prueba && !o.prueba.ok)); }); }
   // Comprar un guion ya escrito: se paga ahora y queda en tus guiones hasta que lo produzcas
   function comprarGuion(id) {
     const S = N.S;
@@ -321,6 +336,8 @@ IA.juego = (function () {
     if (S.quiebra) return 'quiebra';
     const listas = O.activas().filter(function (o) { return o.est === 0 && o.et === 'lista' && !o.prog; });
     if (listas.length) return 'lista';
+    // Dilemas de rodaje y pruebas de público esperan tu decisión (V19)
+    if (O.activas().some(function (o) { return o.est === 0 && (o.dil || (o.prueba && !o.prueba.ok)); })) return 'decision';
     if (O.activas().some(function (o) { return o.est === 0 && o.et === 'lista' && o.prog && o.fe === S.t; })) return 'estreno';
     if (N.semana() === 1) return 'anio';
     return '';
@@ -362,6 +379,7 @@ IA.juego = (function () {
     puedeIniciar: puedeIniciar, iniciarObra: iniciarObra, programarEstreno: programarEstreno, comprarGuion: comprarGuion,
     firmarExclusivo: firmarExclusivo, comprarExclusividad: comprarExclusividad, cancelarExclusivo: cancelarExclusivo, estudiar: estudiar,
     buscarPromesas: buscarPromesas, costoPromesas: costoPromesas, contratarEnObra: contratarEnObra, ESPERA_PROMESAS: ESPERA_PROMESAS,
+    decidirDilema: decidirDilema, decidirPrueba: decidirPrueba, decisionesPendientes: decisionesPendientes,
     avanzarSemana: avanzarSemana, avanzar: avanzar, hayEvento: hayEvento,
   };
 })();

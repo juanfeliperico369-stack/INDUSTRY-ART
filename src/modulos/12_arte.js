@@ -947,7 +947,8 @@ IA.arte = (function () {
     const nino = edad < 13, joven = !nino && edad < 18, adulto = edad >= 18, mayor = edad >= 60;
     anio = anio || 2000;
     const era = epocaRetrato(anio);
-    const oficio = OFICIOS.indexOf(t.oficio) >= 0 ? t.oficio : 'interprete';
+    // Los oficios de la V19 se visten como sus parientes (vestuario y animación con el arte, efectos con la edición)
+    const oficio = OFICIOS.indexOf(t.oficio) >= 0 ? t.oficio : ({ vestuario: 'arte', animacion: 'arte', efectos: 'edicion' })[t.oficio] || 'interprete';
     const piel = PIELES[a.piel] || PIELES[2];
     const pelo = colorPelo(a, edad);
     const pelado = !fem && a.calvicie && edad >= 45;
@@ -2036,6 +2037,47 @@ IA.arte = (function () {
       c.fillRect(x, s - alto * 0.3, w, alto * 0.3);
       c.fillStyle = '#2f7fb5';
       c.fillRect(x + 3, s - alto * 0.27, w - 6, alto * 0.22);
+    } else if (L.tipo && L.tipo.indexOf('t_') === 0) { // tierras propias para rodar (V19): un paisaje chico
+      const ter = L.tipo.slice(2);
+      const cielo = { artico: '#cfe3f2', desierto: '#f2d9a4', tropico: '#9fd6c9', mar: '#9cc8ea' }[ter] || '#a9cde8';
+      const suelo = { artico: '#f4f8fb', desierto: '#e0b56a', tropico: '#3f9a52', mar: '#2f7fb5', pradera: '#7fb24f', bosque: '#3d7a3c', montana: '#7b7f86', ciudad: '#666a73' }[ter] || '#6a8a4a';
+      c.fillStyle = cielo;
+      c.fillRect(x + w * 0.04, s - alto * 0.8, w * 0.92, alto * 0.8);
+      c.fillStyle = suelo;
+      c.fillRect(x + w * 0.04, s - alto * 0.22, w * 0.92, alto * 0.22);
+      if (ter === 'montana' || ter === 'artico') {
+        c.fillStyle = ter === 'artico' ? '#ffffff' : '#8d9198';
+        c.beginPath(); c.moveTo(x + w * 0.1, s - alto * 0.22); c.lineTo(x + w * 0.4, s - alto * 0.72); c.lineTo(x + w * 0.7, s - alto * 0.22); c.fill();
+        c.beginPath(); c.moveTo(x + w * 0.45, s - alto * 0.22); c.lineTo(x + w * 0.7, s - alto * 0.6); c.lineTo(x + w * 0.92, s - alto * 0.22); c.fill();
+      } else if (ter === 'bosque' || ter === 'tropico' || ter === 'pradera') {
+        const n = ter === 'pradera' ? 1 : 3;
+        for (let i = 0; i < n; i++) {
+          const tx = x + w * (0.2 + i * 0.28 + q() * 0.06);
+          c.fillStyle = '#5b3a1e';
+          c.fillRect(tx - 1.5, s - alto * 0.42, 3, alto * 0.22);
+          c.fillStyle = ter === 'tropico' ? '#2e8f4a' : '#2f6b33';
+          elipse(c, tx, s - alto * 0.48, w * 0.09, alto * 0.12);
+          c.fill();
+        }
+      } else if (ter === 'desierto') {
+        c.fillStyle = '#4c8a3e';
+        c.fillRect(x + w * 0.62, s - alto * 0.5, w * 0.06, alto * 0.28);
+        c.fillRect(x + w * 0.56, s - alto * 0.42, w * 0.06, alto * 0.05);
+        c.fillStyle = '#f7c948';
+        elipse(c, x + w * 0.25, s - alto * 0.62, w * 0.07, w * 0.07);
+        c.fill();
+      } else if (ter === 'mar') {
+        c.fillStyle = '#ffffff';
+        c.beginPath(); c.moveTo(x + w * 0.45, s - alto * 0.3); c.lineTo(x + w * 0.55, s - alto * 0.62); c.lineTo(x + w * 0.55, s - alto * 0.3); c.fill();
+        c.fillStyle = '#7a4a2a';
+        c.fillRect(x + w * 0.36, s - alto * 0.3, w * 0.28, alto * 0.06);
+      } else if (ter === 'ciudad') {
+        for (let i = 0; i < 3; i++) {
+          const bh = alto * (0.35 + q() * 0.35);
+          c.fillStyle = ['#5c4a3d', '#4a5568', '#7a3b2e'][i];
+          c.fillRect(x + w * (0.1 + i * 0.28), s - alto * 0.22 - bh, w * 0.22, bh);
+        }
+      }
     } else if (L.tipo === 'captura') { // galpón oscuro con rejilla
       c.fillStyle = '#1d2230';
       c.fillRect(x + w * 0.05, s - alto * 0.85, w * 0.9, alto * 0.85);

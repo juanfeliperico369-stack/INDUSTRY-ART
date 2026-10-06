@@ -194,7 +194,11 @@ IA.agencia = (function () {
     abrirPanel(id, function () {
       const obras = O.delEstudio(0, ['desarrollo', 'preproduccion']);
       let h = '<div class="tarjeta picker"><div class="fila entre"><b>Contratar a ' + esc(x.nom) + '</b><button class="btn" data-a="agCerrarPanel" data-v="' + id + '">' + t('cerrar') + '</button></div>';
-      h += '<button class="btn primario bloque" data-a="agNuevaObra" data-v="' + id + '">Nueva obra con ' + esc(x.nom.split(' ')[0]) + '</button>';
+      // Lo que diría hoy (sin contar las condiciones de una obra concreta): si rechaza, se avisa antes
+      const r = T.negociar(x, { est: 0, rol: x.of, imp: x.of === 'interprete' ? 'protagonista' : undefined });
+      if (r.estado === 'rechaza') h += '<p class="mal">Hoy no firmaría: ' + esc(r.texto.charAt(0).toLowerCase() + r.texto.slice(1)) + '.</p>';
+      else if (r.estado === 'contraoferta') h += '<p class="nota oro">' + esc(r.texto) + '.</p>';
+      h += '<button class="btn primario bloque" data-a="agNuevaObra" data-v="' + id + '"' + (r.estado === 'rechaza' ? ' disabled' : '') + '>Nueva obra con ' + esc(x.nom.split(' ')[0]) + '</button>';
       h += obras.length ? '<p class="nota">O súmalo a una obra que todavía no empieza el rodaje:</p>' + obras.map(function (o) {
         let botones;
         if (x.of === 'interprete') botones = [['protagonista', 'Protagonista'], ['secundario', 'Secundario'], ['invitado', 'Invitado'], ['cameo', 'Cameo']].map(function (b) { return '<button class="btn" data-a="agSumar" data-v="' + o.id + '|' + id + '|interprete|' + b[0] + '">' + b[1] + '</button>'; }).join('');

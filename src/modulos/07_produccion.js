@@ -1,8 +1,9 @@
 /* ==== módulo: produccion ==== */
 // Etapas de la obra: desarrollo, preproducción, rodaje y posproducción, con su costo semana a semana.
 // El productor, el liderazgo y la excelencia del director y del diseñador (tu documento), la experiencia y los
-// rasgos del equipo controlan el sobrecosto. Departamentos con nota, locaciones, sets, dilemas y prueba de
-// público llegan en la V19.
+// rasgos del equipo controlan el sobrecosto. V19: cada semana puede pasar algo (incidentes) o surgir un dilema que
+// decides tú; dos semanas antes de terminar se hace la prueba de público; la línea de producción compara el
+// presupuesto acordado con el costo real y el set nuevo se guarda para otras obras (todo en IA.rodaje).
 IA.produccion = (function () {
   'use strict';
   const N = IA.n, T = IA.talentos, O = IA.obras, E = IA.economia;
@@ -31,6 +32,7 @@ IA.produccion = (function () {
     o.sobre = N.redondear(N.limitar(1 + N.normal(riesgo, 0.05), 0.92, 1.3), 3);
     o.pp = Math.round(o.pp * (1 - (ctx.ahorro || 0)));
     const total = o.dur.desarrollo + o.semProd;
+    if (o.est === 0) IA.rodaje.iniciarLinea(o);
     const ids = O.idsEquipo(o);
     // Cada cargo cobra 20 de energía; quien llega cansado rinde menos en esta obra
     T.ocupar(ids, N.S.t + total);
@@ -48,21 +50,51 @@ IA.produccion = (function () {
   }
   // Una semana de producción para todas las obras en marcha
   function semana(ctx) {
+    const R = IA.rodaje;
     const lista = O.activas().slice();
     for (let i = 0; i < lista.length; i++) {
       const o = lista[i];
       if (!SIGUIENTE[o.et]) continue;
+      // Una decisión pendiente detiene la obra (sin gastar); sin respuesta, el equipo hace lo más prudente
+      if (o.dil) {
+        if (!R.vencido(o)) continue;
+        const x = R.dilemaDe(o);
+        const def = x ? Math.max(0, x.d.ops.map(function (op) { return !!op.def; }).indexOf(true)) : 0;
+        R.decidir(o, def, ctx);
+        N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '»: como no decidiste, el equipo eligió «' + (x ? x.d.ops[def].t.toLowerCase() : 'lo prudente') + '».' });
+      }
+      if (o.prueba && !o.prueba.ok) {
+        if (!R.pruebaVencida(o)) continue;
+        R.decidirPrueba(o, 'estrenar', ctx);
+      }
       if (o.et !== 'desarrollo') {
-        const costo = o.pp * o.sobre / o.semProd;
+        const costo = R.costoSemana(o);
         o.gp = (o.gp || 0) + costo;
         ctx.pagar(o.est, 'produccion', costo);
+        R.sumarGasto(o, costo);
+        R.semanaObra(o, ctx);
+        if (o.dil) continue; // el dilema se decide antes de seguir
       }
       o.sr--;
+      // Prueba de público: dos semanas antes del final de la posproducción (solo tus obras)
+      if (o.et === 'posproduccion' && o.est === 0 && !o.prueba && (o.sr === 2 || (o.sr === 1 && o.dur.posproduccion <= 2))) {
+        E.calificar(o, T.porId, ctx.bonos(o.est, o.fam));
+        o.calif = 1;
+        R.hacerPrueba(o);
+        continue;
+      }
       if (o.sr > 0) continue;
       o.et = SIGUIENTE[o.et];
       if (o.et === 'lista') {
         o.gp = Math.round(o.gp);
-        E.calificar(o, T.porId, ctx.bonos(o.est, o.fam));
+        if (!o.calif) E.calificar(o, T.porId, ctx.bonos(o.est, o.fam));
+        delete o.calif;
+        if (o.est === 0) {
+          const ns = R.notas(o);
+          o.notas = {};
+          ns.forEach(function (n) { o.notas[n.dep] = n.v; });
+          R.guardarSet(o);
+        }
         o.tLista = N.S.t;
         T.liberar(O.idsEquipo(o));
         N.emit('obraLista', o);

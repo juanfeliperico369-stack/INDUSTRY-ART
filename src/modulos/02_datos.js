@@ -107,11 +107,15 @@ IA.datos = (function () {
     { id: 'fotografia', nombre: 'Fotografía', dep: 'Fotografía', base: 0.008 },
     { id: 'musica', nombre: 'Compositor', dep: 'Música', base: 0.006 },
     { id: 'edicion', nombre: 'Editor', dep: 'Edición', base: 0.006 },
-    { id: 'arte', nombre: 'Diseñador de arte y tecnología', dep: 'Arte y efectos', base: 0.008 },
+    { id: 'arte', nombre: 'Diseñador de arte y tecnología', dep: 'Arte y diseño', base: 0.008 },
     { id: 'interprete', nombre: 'Intérprete', dep: 'Actuación', base: 0.022 },
+    // V19 · Cine a fondo: departamentos que antes cubría el diseñador de arte
+    { id: 'vestuario', nombre: 'Diseñador de vestuario', dep: 'Vestuario y maquillaje', base: 0.005 },
+    { id: 'efectos', nombre: 'Supervisor de efectos', dep: 'Efectos', base: 0.007 },
+    { id: 'animacion', nombre: 'Animador', dep: 'Animación', base: 0.008 },
   ];
   // Cuántos talentos de cada oficio hay en el mundo (se mantiene con nuevas generaciones)
-  const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 90, interprete: 380 };
+  const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 90, interprete: 380, vestuario: 60, efectos: 60, animacion: 60 };
 
   // ---------- Familias y géneros del cine (pestaña Taxonomía del plan) ----------
   // edades: afinidad de cada grupo [niños 0-12, adolescentes 13-17, jóvenes 18-34, adultos 35-59, mayores 60+]
@@ -313,8 +317,17 @@ IA.datos = (function () {
     { id: 'backlot', nombre: 'Backlot (calles y sets)', desde: 1910, costo: 1.4, capacidad: 2, ahorro: 0.08, efecto: '+2 proyectos a la vez y −8 % en producción' },
     { id: 'foso', nombre: 'Foso de agua', desde: 1920, costo: 0.5, bono: { arte: 3 }, familias: ['AA', 'IM'], efecto: '+3 en acción e imaginación' },
     { id: 'captura', nombre: 'Estudio de captura', desde: 1995, costo: 0.7, bono: { arte: 4 }, familias: ['IM', 'AA', 'FJ'], efecto: '+4 en imaginación, acción y familia' },
+    // V19: tierras propias para rodar en locación (más barato, menos incidentes y una semana menos en ese terreno)
+    { id: 't_ciudad', nombre: 'Manzana de ciudad', terreno: 'ciudad', desde: 1910, costo: 0.55, efecto: 'Rodar en la ciudad: más barato, más seguro y una semana menos' },
+    { id: 't_pradera', nombre: 'Pradera propia', terreno: 'pradera', desde: 1905, costo: 0.35, efecto: 'Rodar en la pradera: más barato, más seguro y una semana menos' },
+    { id: 't_desierto', nombre: 'Rancho en el desierto', terreno: 'desierto', desde: 1910, costo: 0.45, efecto: 'Rodar en el desierto: más barato, más seguro y una semana menos' },
+    { id: 't_montana', nombre: 'Terreno en la montaña', terreno: 'montana', desde: 1915, costo: 0.5, efecto: 'Rodar en la montaña: más barato, más seguro y una semana menos' },
+    { id: 't_bosque', nombre: 'Bosque propio', terreno: 'bosque', desde: 1910, costo: 0.4, efecto: 'Rodar en el bosque: más barato, más seguro y una semana menos' },
+    { id: 't_tropico', nombre: 'Finca en el trópico', terreno: 'tropico', desde: 1920, costo: 0.5, efecto: 'Rodar en el trópico: más barato, más seguro y una semana menos' },
+    { id: 't_artico', nombre: 'Base en el ártico', terreno: 'artico', desde: 1935, costo: 0.7, efecto: 'Rodar en el ártico: más barato, más seguro y una semana menos' },
+    { id: 't_mar', nombre: 'Costa y muelle propios', terreno: 'mar', desde: 1915, costo: 0.6, efecto: 'Rodar en el mar: más barato, más seguro y una semana menos' },
   ];
-  const MAX_PISOS = 10, MAX_TERRENOS = 4;
+  const MAX_PISOS = 10, MAX_TERRENOS = 8;
 
   // ---------- Premios básicos de la V16 (la versión completa llega en la V22) ----------
   const premios = {

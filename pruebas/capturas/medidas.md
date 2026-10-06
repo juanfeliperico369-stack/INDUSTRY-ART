@@ -1,4 +1,4 @@
-# Capturas automáticas · INDUSTRY ART V18
+# Capturas automáticas · INDUSTRY ART V19
 
 | Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |
 |---|---|---|---|---|
@@ -11,10 +11,16 @@
 | 390x844 | 06_crear_equipo | 0 | 0 | no |
 | 390x844 | 06b_crear_detallado | 0 | 0 | no |
 | 390x844 | 06c_crear_personajes | 0 | 0 | no |
+| 390x844 | 06f_crear_rodaje | 0 | 0 | no |
+| 390x844 | 06g_crear_presupuesto | 0 | 0 | no |
+| 390x844 | 06h_crear_pie | 0 | 0 | no |
 | 390x844 | 06d_usar_material | 0 | 0 | no |
 | 390x844 | 06e_comprar_guion | 0 | 0 | no |
 | 390x844 | 07_catalogo | 0 | 0 | no |
 | 390x844 | 08_ficha_obra | 0 | 0 | no |
+| 390x844 | 08b_ficha_produccion | 0 | 0 | no |
+| 390x844 | 08c_dilema | 0 | 0 | no |
+| 390x844 | 08d_prueba_publico | 0 | 0 | no |
 | 390x844 | 09_talento | 0 | 0 | no |
 | 390x844 | 10_ficha_talento | 0 | 0 | no |
 | 390x844 | 11_mundo_cartelera | 0 | 0 | no |
@@ -24,6 +30,7 @@
 | 390x844 | 13c_mundo_taxonomia | 0 | 0 | no |
 | 390x844 | 14_negocio_finanzas | 0 | 0 | no |
 | 390x844 | 15_negocio_construcciones | 0 | 0 | no |
+| 390x844 | 15b_almacen_sets | 0 | 0 | no |
 | 390x844 | 16_ajustes | 0 | 0 | no |
 | 844x390 | 01_portada | 0 | 0 | no |
 | 844x390 | 02_nueva_partida | 0 | 0 | no |
@@ -34,10 +41,16 @@
 | 844x390 | 06_crear_equipo | 0 | 0 | no |
 | 844x390 | 06b_crear_detallado | 0 | 0 | no |
 | 844x390 | 06c_crear_personajes | 0 | 0 | no |
+| 844x390 | 06f_crear_rodaje | 0 | 0 | no |
+| 844x390 | 06g_crear_presupuesto | 0 | 0 | no |
+| 844x390 | 06h_crear_pie | 0 | 0 | no |
 | 844x390 | 06d_usar_material | 0 | 0 | no |
 | 844x390 | 06e_comprar_guion | 0 | 0 | no |
 | 844x390 | 07_catalogo | 0 | 0 | no |
 | 844x390 | 08_ficha_obra | 0 | 0 | no |
+| 844x390 | 08b_ficha_produccion | 0 | 0 | no |
+| 844x390 | 08c_dilema | 0 | 0 | no |
+| 844x390 | 08d_prueba_publico | 0 | 0 | no |
 | 844x390 | 09_talento | 0 | 0 | no |
 | 844x390 | 10_ficha_talento | 0 | 0 | no |
 | 844x390 | 11_mundo_cartelera | 0 | 0 | no |
@@ -47,6 +60,7 @@
 | 844x390 | 13c_mundo_taxonomia | 0 | 0 | no |
 | 844x390 | 14_negocio_finanzas | 0 | 0 | no |
 | 844x390 | 15_negocio_construcciones | 0 | 0 | no |
+| 844x390 | 15b_almacen_sets | 0 | 0 | no |
 | 844x390 | 16_ajustes | 0 | 0 | no |
 | 1366x768 | 01_portada | 0 | 0 | no |
 | 1366x768 | 02_nueva_partida | 0 | 0 | no |
@@ -57,10 +71,16 @@
 | 1366x768 | 06_crear_equipo | 0 | 0 | no |
 | 1366x768 | 06b_crear_detallado | 0 | 0 | no |
 | 1366x768 | 06c_crear_personajes | 0 | 0 | no |
+| 1366x768 | 06f_crear_rodaje | 0 | 0 | no |
+| 1366x768 | 06g_crear_presupuesto | 0 | 0 | no |
+| 1366x768 | 06h_crear_pie | 0 | 0 | no |
 | 1366x768 | 06d_usar_material | 0 | 0 | no |
 | 1366x768 | 06e_comprar_guion | 0 | 0 | no |
 | 1366x768 | 07_catalogo | 0 | 0 | no |
 | 1366x768 | 08_ficha_obra | 0 | 0 | no |
+| 1366x768 | 08b_ficha_produccion | 0 | 0 | no |
+| 1366x768 | 08c_dilema | 0 | 0 | no |
+| 1366x768 | 08d_prueba_publico | 0 | 0 | no |
 | 1366x768 | 09_talento | 0 | 0 | no |
 | 1366x768 | 10_ficha_talento | 0 | 0 | no |
 | 1366x768 | 11_mundo_cartelera | 0 | 0 | no |
@@ -70,6 +90,7 @@
 | 1366x768 | 13c_mundo_taxonomia | 0 | 0 | no |
 | 1366x768 | 14_negocio_finanzas | 0 | 0 | no |
 | 1366x768 | 15_negocio_construcciones | 0 | 0 | no |
+| 1366x768 | 15b_almacen_sets | 0 | 0 | no |
 | 1366x768 | 16_ajustes | 0 | 0 | no |
 
 Errores de página: ninguno

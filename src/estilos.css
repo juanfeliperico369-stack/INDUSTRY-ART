@@ -212,3 +212,7 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 :root[data-movimiento="menos"] * { transition: none !important; animation: none !important; }
+
+/* V19: botones de decisión (dilemas y prueba de público): título arriba y efecto abajo */
+.btn.decision { flex-direction: column; align-items: flex-start; text-align: left; gap: 2px; }
+.btn.decision b { font-weight: 600; }
