@@ -3843,9 +3843,11 @@ IA.obras = (function () {
     const S = N.S, t = S.t;
     const BORRAR = ['eq', 'acc', 'tem', 'u', 'delta', 'inf', 'dur', 'sr', 'semProd', 'sobre', 't0', 'tLista', 'prog', 'anioPlan', 'max', 'exp', 'tono', 'esc',
       'sub', 'prob', 'arco', 'cont', 'ia', 'iar', 'fxr', 'presM', 'clasN', 'derechos', 'fat', 'feR', 'pctT',
-      'met', 'ter', 'pst', 'rep', 'ext', 'setR', 'lp', 'dq', 'dcrit', 'dpub', 'ddes', 'notas'];
+      'met', 'ter', 'pst', 'rep', 'ext', 'setR', 'lp', 'dq', 'dcrit', 'dpub', 'ddes', 'notas', 'plan', 'campana', 'cmD', 'cmP'];
     S.obras.forEach(function (o) {
       if (o.et !== 'terminada') return;
+      // Ventanas terminadas de los rivales (V20): solo queda lo cobrado
+      if (o.est !== 0 && o.vt && o.vt.fin && (o.vt.video || o.vt.tv || o.vt.streaming)) o.vt = { total: o.vt.total, cob: o.vt.cob, fin: 1 };
       if (o.hs && (t - (o.fe || 0) > 52 * (o.est === 0 ? 30 : 2)) && !o.fav) delete o.hs;
       if (o.est !== 0 && t - (o.fe || 0) > 52 * 4 && o.eq) {
         BORRAR.forEach(function (k) { delete o[k]; });
