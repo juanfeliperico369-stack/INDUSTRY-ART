@@ -23,7 +23,7 @@ Las partidas guardadas de la V16, la V17, la V18 y la V19 se abren en la V20 (se
 | `tools/armar.py`, `tools/desarmar.py` | Unen los módulos en el HTML y lo vuelven a separar (solo Python 3, sin npm) |
 | `tools/bot.js`, `tools/capturas.js` | Bot de pruebas (con las pruebas de reglas) y capturas automáticas en un navegador real (usan Playwright) |
 | `pruebas/` | Informes del bot, capturas en 3 tamaños y los scripts de la auditoría de la V15 y de la revisión de la V16 |
-| `docs/` | Plan Maestro, auditoría de la V15 y revisión independiente de la V16 |
+| `docs/` | Plan Maestro v2 (Word), su Especificación y sus Datos, el análisis del plan v2 frente a lo construido (`analisis_plan_v2.md`), el plan v1, la auditoría de la V15 y la revisión de la V16 |
 | `legado/` | La V15 original (sigue jugable aparte) y su código desarmado |
 
 ## Para programar la siguiente versión

@@ -1,0 +1,1894 @@
+INDUSTRY ART · Datos v2 (para los chats de
+programación)
+Taxonomía y Datos del mundo del Plan Maestro v2 (10 de octubre de 2026).
+Léelos solo en la versión que los usa: V16 (población, IPC, precios y calendario
+anual), V17 (Taxonomía y dominio público), V19 (premios, festivales y circuito
+anual) y V21 (cronología y eras de ficción).
+
+
+Taxonomía: la fábrica de ideas
+Todas tus listas se conservan, sin duplicados, agrupadas en familias y en orden
+alfabético. La familia lleva el peso matemático; cada elemento aporta sabor,
+palabras para la sinopsis, frases de crítica y de premios, y etiquetas.
+
+Cómo funcionan las familias
+Todas tus listas se quedan completas; cada una se ordena en familias de elementos
+parecidos y en orden alfabético. La familia pesa en la matemática; el elemento da
+el sabor.
+
+
+  Nivel        Qué define                                    Ejemplo
+
+               Público núcleo, eje de afinidad del
+                                                             Acción y aventura:
+               talento, inclinación a la crítica o al
+                                                             jóvenes y adultos, eje
+  Familia      público, temporada favorable, costo
+                                                             Acción, inclina al público,
+               típico, clasificación usual y reparto ideal
+                                                             verano, costo alto, PG-13
+               de los departamentos
+
+                                                             Western: más fuerte en
+               Un ajuste de ±1 a ±3, palabras para la
+                                                             Norteamérica antes de
+  Elemento     sinopsis, frases de crítica, frase de
+                                                             1970; palabras como
+               premio y etiquetas posibles
+                                                             pistolero, frontera, duelo
+
+
+Ejes de afinidad del talento: Acción, Imaginación, Suspenso, Drama, Humor,
+Familia, Arte y Romance. Amplían los cuatro de tu documento (Drama, Humor,
+Romance y Acción), uno por cada familia del cine.
+Un ejemplo completo
+
+Western (Acción y aventura) + Venganza (Emociones y vínculos) + Ícaro (arco) +
+Siglo XIX (Épocas e historia):
+
+   Pesa: acción y efectos en la producción, público joven y adulto, mejor en
+   verano.
+   Sinopsis: “En el siglo XIX, un pistolero persigue a quien mató a su hermano y
+   sube más alto de lo que su rabia puede sostener.”
+   Crítica: “Un western sobre el precio de la venganza.”
+   Premio: “Por recordarnos que toda revancha tiene su caída.”
+   Etiquetas posibles: Clásico si la crítica pasa de 85; Culto si fracasa en taquilla y
+   la crítica la defiende.
+
+Encaje entre familias del cine
+
+El jugador lo descubre: cada combinación muestra sus estrellas después de usarla,
+como en Mad Games Tycoon 2. Los demás medios tendrán su propia tabla en la
+V17.
+
+
+                             AA   IM    SM      DR     HM      FJ        AV     RD
+
+  AA Acción y aventura       —    ++    +       +      +       +         −      0
+
+  IM Imaginación             ++   —     +       0      +       ++        +      0
+
+  SM Suspenso y
+                             +    +     —       +      0       −         +      0
+  miedo
+
+  DR Drama y realidad        +    0     +       —      +       0         ++     ++
+
+  HM Humor y música          +    +     0       +      —       ++        0      ++
+
+  FJ Familia y                                                                  0o
+                             +    ++    −       0      ++      —         −
+  juventud                                                                      ✕
+
+  AV Arte y vanguardia       −    +     +       ++     0       −         —      +
+
+                                                               0o
+  RD Romance y deseo         0    0     0       ++     ++                +      —
+                                                               ✕
+Leyenda: ++ suma 3, + suma 1, 0 es neutro, − resta 2 y ✕ no se permite. Entre
+Familia y juventud y Romance y deseo: Romance es 0 y Erótico es ✕, porque lo
+erótico nunca va con públicos infantiles, familiares o adolescentes.
+
+Cine
+40 géneros en 8 familias. Los atributos son una propuesta inicial que el bot ajusta
+en la V24.
+
+
+                                   Público                                            Clas
+  Familia        Géneros                          Inclina a    Temporada      Costo
+                                   núcleo                                             usu
+
+                 Acción,
+                 Aventura,
+                 Bélico,
+                 Catástrofes,
+  Acción y                         Jóvenes y
+                 Deportivo,                       Público      Verano         Alto    PG-
+  aventura                         adultos
+                 Épico,
+                 Espionaje,
+                 Superhéroes,
+                 Western
+
+                 Ciencia
+                 ficción,
+                                   Niños,
+                 Fantasía,                                     Verano y
+  Imaginación                      jóvenes y      Público                     Alto    PG-
+                 Folklórico,                                   fin de año
+                                   fans
+                 Monstruos,
+                 Surrealista
+
+                 Crimen,
+                 Misterio, Noir,                                              Bajo
+  Suspenso y                       Jóvenes y
+                 Policial,                        Equilibrio   Octubre        a       16 o
+  miedo                            adultos
+                 Terror,                                                      medio
+                 Thriller
+
+  Drama y        Biográfico,       Adultos        Crítica      Temporada      Medio   PG-
+  realidad       Drama,                                        de premios
+                 Histórico,
+                 Judicial,
+                 Melodrama,
+                 Político,
+                                      Público                                                   Clas
+  Familia           Géneros                              Inclina a     Temporada        Costo
+                                      núcleo                                                    usu
+
+                    Religioso,
+                    Social
+
+                    Comedia,
+                                                                                        Bajo
+  Humor y           Festivo,                                           Navidad y
+                                      Todos              Público                        a       PG
+  música            Musical,                                           verano
+                                                                                        medio
+                    Parodia
+
+                    Adolescentes,     Niños,
+  Familia y                                                            Vacaciones
+                    Familiar,         adolescentes       Público                        Medio   Go
+  juventud                                                             escolares
+                    Infantil          y familias
+
+                    Artes,
+  Arte y            Experimental,     Adultos y
+                                                         Crítica       Festivales       Bajo    N
+  vanguardia        Falso             cinéfilos
+                    documental
+
+                                                                                                PG-
+  Romance y         Erótico,          Adultos                          San
+                                                         Público                        Bajo    Eró
+  deseo             Romance           jóvenes                          Valentín
+                                                                                                18,
+
+
+Televisión
+La televisión usa las 8 familias del cine, incluido Erótico, y suma estas 3 propias.
+
+                                                                     Público
+  Familia                Géneros                                                    Inclina a
+                                                                     núcleo
+
+                         Antología, Comedia dramática, K-
+                         Drama, Procedimental, Serie web,
+  Ficción televisiva                                                 Todos          Público
+                         Sitcom, Sketches, Soap opera,
+                         Telenovela
+
+                         Citas, Concurso, Deportes en vivo,
+                         Game show, Late night, Magacín,
+  Entretenimiento                                                    Familias
+                         Premiaciones, Reality, Talent show,                        Público
+  en vivo                                                            y adultos
+                         Talk show, Telecompras, Variety
+                         show
+                                                                Público
+ Familia             Géneros                                              Inclina a
+                                                                núcleo
+
+                     Análisis, Cocina, Divulgación
+                     científica, Docuserie, Educativo,
+ No ficción                                                     Adultos   Equilibrio
+                     Estilo de vida, Informativo, Noticias,
+                     True crime, Vida salvaje
+
+
+Videojuegos
+39 géneros en 8 familias.
+
+
+                                                              Público
+ Familia            Géneros                                               Inclina a
+                                                              núcleo
+
+                    Acción, Arcade, Battle royale,
+                    Lucha, Plataformas, Shooter en
+ Acción                                                       Jóvenes     Público
+                    primera persona, Shooter en tercera
+                    persona, Sigilo
+
+                    Aventura, Horror / Terror,
+ Aventura y         Metroidvania, Mundo abierto,              Jóvenes y
+                                                                          Equilibrio
+ exploración        Roguelike / Roguelite,                    adultos
+                    Supervivencia
+
+                                                              Jóvenes,
+ Rol                Gacha, MMORPG, RPG                        adultos y   Público
+                                                              fans
+
+                    4X, Cartas, Estrategia, Estrategia en
+ Estrategia         tiempo real, MOBA, Por turnos,            Adultos     Crítica
+                    Táctica, Táctico
+
+ Simulación y       Construcción, Gestión / Tycoon,
+                                                              Todos       Equilibrio
+ construcción       Sandbox, Simulación, Vida
+
+ Deportes y                                                   Jóvenes y
+                    Carreras, Deportes                                    Público
+ velocidad                                                    adultos
+
+                    Musical, Party game, Puzzle,              Todos y
+ Música y fiesta                                                          Público
+                    Rhythm game                               familias
+                                                             Público
+  Familia            Géneros                                              Inclina a
+                                                             núcleo
+
+  Narrativa y        Erótico, Novela visual, Película
+                                                             Adultos      Crítica
+  deseo              interactiva
+
+
+Literatura
+74 géneros en 11 familias (sin los repetidos de tu lista).
+
+
+  Familia           Géneros                              Público núcleo   Inclina a
+
+                    Cómic, Cuento, Interactiva,
+  Formatos
+                    Manga, Microrrelato, Novela,
+  narrativos y                                           Todos            Público
+                    Novela gráfica, Pulp, Revista,
+  gráficos
+                    Serializada, Tiras cómicas
+
+                    Dramaturgia, Épica, Epopeya,
+  Poesía, mito y                                         Adultos y
+                    Fábula, Folklórica, Leyenda,                          Crítica
+  tradición                                              estudiantes
+                    Mito, Mitología, Poesía
+
+                    Autobiografía, Biografía, Ciencia,
+                    Crónica, Diario, Economía,
+  No ficción y      Ensayo, Epistolar, Filosofía,
+                                                         Adultos          Crítica
+  pensamiento       Filosófica, Memorias, Política,
+                    Psicología, Tecnología,
+                    Testimonial, Viajes
+
+                    Ciencia ficción, Fantasía,
+                                                         Jóvenes y
+  Imaginación       Futurismo, Gótico, Realismo                           Equilibrio
+                                                         adultos
+                    mágico
+
+  Suspenso y        Crimen, Misterio, Neo-noir,
+                                                         Adultos          Público
+  crimen            Novela negra, Terror, Thriller
+
+                    Contemporánea, Costumbrismo,
+                    Cotidianidad, Cultural, Drama,
+  Drama y
+                    Literaria, Novela de formación,      Adultos          Crítica
+  realidad
+                    Realismo, Social, Tragedia,
+                    Urbana
+  Familia              Géneros                                 Público núcleo   Inclina a
+
+                                                               Jóvenes y
+  Aventura             Aventura, Bélico, Western                                Público
+                                                               adultos
+
+  Humor y
+                       Comedia, Satírica                       Todos            Público
+  sátira
+
+                                                               Niños,
+  Público joven        Infantil, Josei, Juvenil, Seinen,       adolescentes y
+                                                                                Público
+  y demográfico        Shōjo, Shōnen                           lectores de
+                                                               manga
+
+  Romance y
+                       Erótica, Romance                        Adultos          Público
+  deseo
+
+                       Absurdismo, Experimental,
+  Vanguardia                                                   Adultos          Crítica
+                       Surrealismo
+
+
+Música
+49 géneros en 10 familias (sin los repetidos de tu lista).
+
+
+                                                                    Público
+  Familia                  Géneros                                              Inclina a
+                                                                    núcleo
+
+                           City pop, Dance, Disco, K-Pop,
+  Pop y baile                                                       Jóvenes     Público
+                           Pop
+
+                           Heavy metal, Indie / Alternativa,        Jóvenes y
+  Rock y alternativo                                                            Equilibrio
+                           Metal, Punk, Rock                        adultos
+
+  Urbano                   Hip hop, Rap, Reggaetón, Trap            Jóvenes     Público
+
+  Raíces                   Blues, Funk, Gospel, Jazz, R&B,
+                                                                    Adultos     Crítica
+  afroamericanas           Soul
+
+                           Ambiental, Electrónica, House,
+  Electrónica              Lo-fi, New age / New wave, Space         Jóvenes     Equilibrio
+                           age, Synthwave, Techno, Trance
+
+                           Cumbia, Latino, Merengue,
+  Latino y caribeño                                                 Todos       Público
+                           Mexicana, Reggae, Salsa, Samba
+                                                                Público
+ Familia                  Géneros                                            Inclina a
+                                                                núcleo
+
+                          Afrobeat, Country, Flamenco,
+ Raíces y tradición                                             Adultos      Equilibrio
+                          Folk, Folklórico
+
+ Clásica, escena y        Banda sonora, Clásica,
+                                                                Adultos      Crítica
+ vanguardia               Experimental, Ópera
+
+ Romántica y
+                          Balada, Bolero, Erótica               Adultos      Público
+ deseo
+
+ General                  Estándar                              Todos        Equilibrio
+
+
+Teatro
+40 géneros en 9 familias.
+
+ Familia              Géneros                               Público núcleo   Inclina a
+
+                      Autobiográfico, Costumbrismo,
+ Drama                Drama, Histórico, Melodrama,          Adultos          Crítica
+                      Psicológico, Tragedia
+
+                      Comedia, Farsa, Improvisación,
+ Comedia              Monólogo, Satírico,                   Todos            Público
+                      Tragicomedia
+
+ Música y
+                      Danza, Físico, Mímica, Musical        Todos            Público
+ movimiento
+
+ Compromiso           Documental, Político, Social          Adultos          Crítica
+
+ Imaginación y                                              Jóvenes y
+                      Épico, Misterio, Mitológico, Terror                    Equilibrio
+ misterio                                                   adultos
+
+ Tradición y          Marionetas, Oriental, Ritual,         Familias y
+                                                                             Crítica
+ rito                 Sacramental, Sombras                  público local
+
+                      Absurdo, Artística, Callejero,
+                      Experimental, Inmersivo,
+ Vanguardia                                                 Adultos          Crítica
+                      Instalaciones, Performativo,
+                      Poético
+  Familia           Géneros                                Público núcleo      Inclina a
+
+                                                           Niños y
+  Público joven     Infantil, Juvenil                                          Público
+                                                           adolescentes
+
+  Romance y
+                    Erótico                                Adultos             Público
+  deseo
+
+
+Subgéneros
+De tus 85 subgéneros, 38 también son géneros y usan la familia de su género.
+Estos 47 son propios y van en 5 familias; la v2 suma Western espacial.
+
+
+  Familia         Subgéneros
+
+                  Apocalíptico, Biopunk, Climáticas, Cósmico, Cyberpunk, Dieselpunk,
+  Futuros y       Distopía, Extraterrestres, Futurismo, Mecha, Post apocalíptico,
+  tecnología      Robótica, Solarpunk, Space opera, Steampunk, Tecnología, Ucronía,
+                  Utopía, Viajes en el tiempo, Western espacial
+
+  Fantasía y      Artes marciales, Crepuscular, Fantasía oscura, Folklore, Isekai,
+  mito            Leyendas, Magia, Mitología, Realismo mágico, Wuxia
+
+                  Corporal, Gore, Gótico, Kaiju, Lovecraftiano, Paranormal,
+  Horror
+                  Psicológico, Slasher, Zombies
+
+  Crimen y
+                  Detectives, Heist, Neo-noir
+  misterio
+
+  Vida, oficio
+                  Médico, Militar, Sátira, Supervivencia, Urbano, Viajes
+  y sátira
+
+
+Gore, Slasher y Corporal se muestran siempre con guiños: la clasificación sube,
+pero en pantalla nada es gráfico.
+
+Temas
+227 temas en 8 familias: los 217 de tu lista y 10 deportes nuevos, marcados con *.
+
+
+  Familia         Temas
+
+  Emociones       Aislamiento, Amistad, Amor, Culpa, Culpabilidad, Depresión, Dudas,
+  y vínculos      Duelo, Empatía, Esperanza, Familia, Hermanos, Lealtad, Locura,
+Familia        Temas
+
+               Memoria, Mentiras, Miedo, Obsesión, Perdón, Rivalidad, Secretos,
+               Soledad, Traición, Trauma, Venganza
+
+               Adolescencia, Adultez, Ambición, Bien y mal, Búsqueda, Codicia,
+               Conciencia, Destino, Existencia, Éxito, Fama, Fracaso, Héroes, Honor,
+Vida y
+               Humanidad, Humildad, Identidad, Infancia, Inmortalidad, Libertad,
+existencia
+               Lo prohibido, Moralidad, Mortalidad, Muerte, Redención, Sacrificio,
+               Ser humano, Sueños, Vejez, Villanos
+
+               Asesinos, Clase social, Colonialismo, Corrupción, Deshumanización,
+               Desigualdad, Dictadura, Dictaduras, Dinero, Discriminación, Drogas,
+               Esclavitud, Exclusión, Exilio, Explotación, Gangsters, Guerra,
+Sociedad y
+               Imperialismo, Injusticia, Justicia, Mafia, Migración, Minería, Negocios,
+poder
+               Paz, Pobreza, Poder, Política, Propaganda, Racismo, Radicalización,
+               Rebelión, Revolución, Riqueza, Robos, Sociedad, Terrorismo,
+               Vigilancia, Xenofobia
+
+               Alquimia, Anarquismo, Ateísmo, Capitalismo, Civilización y barbarie,
+Ideologías,
+               Comunismo, Conocimiento, Dios, Dioses, Existencialismo, Fascismo,
+fe y
+               Fe, Filosofía, Nihilismo, Ocultismo, Orden y caos, Religión,
+filosofía
+               Socialismo, Verdad
+
+               Bombas nucleares, Carrera espacial, Cibernética, Ciencia, Clonación,
+Ciencia,
+               Espacio, Evolución, Genética, Hackers, Humanidad y máquinas, IA,
+tecnología y
+               Informática, Naturaleza, Planetas, Progreso, Realidad virtual,
+naturaleza
+               Supervivencia, Tecnología, Tiempo
+
+               Actuación, Ajedrez*, Arte, Artes, Atletismo*, Automovilismo*,
+               Baloncesto*, Béisbol*, Boxeo*, Caza, Ciclismo*, Cine, Cómics,
+Arte, ocio y
+               Deportes electrónicos*, Elegancia, Entrenamiento, Fútbol, Historietas,
+deporte
+               Humor, Literatura, Lucha, Mangas, Moda, Música, Natación*,
+               Superhéroes, Tenis*, Videojuegos
+
+Fantasía       Caballeros, Elfos, Enanos, Hechiceros, Magia, Magos, Monarquías,
+heroica        Orcos, Reyes
+
+Épocas e       América, Antiguo Egipto, China imperial, Civilizaciones, Cruzadas,
+historia       Culturas indígenas, Descubrimientos, Era digital, Era victoriana,
+               Esparta, Fiebre del oro, Gladiadores, Globalización, Gran Depresión,
+               Grecia clásica, Guerra de trincheras, Guerra Fría, Guerras
+               napoleónicas, Holocausto, Ilustración, Imperio mongol, Imperio
+  Familia           Temas
+
+                    romano, Imprenta, Incas, Independencia, Independencias, India
+                    antigua, Inquisición, Islámico, Japón feudal, Las pirámides, Mayas,
+                    Medieval, Mesopotamia, Muro de Berlín, Nazismo, Olímpicos,
+                    Peloponeso, Peste negra, Piratas, Precolombinas, Prehistoria, Primera
+                    Guerra Mundial, Reinado del Terror, Renacimiento, Resistencia,
+                    Revolución francesa, Revolución industrial, Revolución rusa,
+                    Revoluciones artísticas, Revoluciones tecnológicas, Ruta de la Seda,
+                    Salvaje oeste, Segunda Guerra Mundial, Siglo XIX, Templarios,
+                    Tenochtitlan, Vikingos
+
+
+Problemáticas, arcos y tipos de ficción
+
+Problemáticas y argumentos
+
+53 en 7 familias.
+
+
+  Familia                Problemáticas
+
+                         Amenaza, Competencia, Contra la sociedad, Contra sí mismo,
+  Conflicto y lucha      La naturaleza, La supervivencia, La tecnología, Persecución,
+                         Rebelión, Vencer
+
+                         Descubrimiento, El regreso, El viaje, Escape, La búsqueda, Una
+  Viaje y búsqueda
+                         misión
+
+  Misterio y             Identidades, Investigación, La verdad, Lo oculto, Observar a los
+  engaño                 demás, Planear, Secretos, Secuestros
+
+  Destino y lo           El destino, La religión, Lo imposible, Lo prohibido, Maldición,
+  sobrenatural           Profecía, Tormentos
+
+                         Condena, Crisis, Deudas y promesas, Dilema, El ego,
+  Ascenso, caída y
+                         Enfermedad, Honor, La Ascensión, La caída, Redención,
+  moral
+                         Renacimiento, Sacrificio
+
+                         Amistad, Amor, Diferencias sociales, Familia, Mentor y aprendiz,
+  Vínculos
+                         Romántica, Traición
+
+  Tono del relato        Comedia, Justiciero, Tragedia
+
+
+Arcos y subarcos
+Con nombre en español y el original entre paréntesis.
+
+
+  Arco                                                 Forma
+
+  De la pobreza a la riqueza (Rags to riches)          Sube sin parar
+
+  De la riqueza a la ruina (Riches to rags)            Cae sin parar
+
+  Hombre en el pozo (Man in a hole)                    Cae y se levanta
+
+  Doble pozo (Double man in a hole)                    Cae, se levanta, cae y se levanta
+
+  Ícaro (Icarus)                                       Sube y cae
+
+  Edipo (Oedipus)                                      Cae, sube y vuelve a caer
+
+  Cenicienta (Cinderella)                              Sube, cae y sube más alto
+
+
+Subarcos: Arco plano (Flat arc), Chico conoce chica (Boy meets girl), Caída en
+desgracia (Fall from grace), De mal en peor (From bad to worse), Hacerse mayor
+(Coming of age), Hamlet, Historia de creación (Creation story), Ida y vuelta (Voyage
+and return), La búsqueda (The quest) y Redención.
+
+Tipos de ficción
+
+34 en 6 familias.
+
+
+  Familia                     Tipos
+
+  Realista y testimonial      Autoficción, Docuficción, Estándar, Histórica, Realista
+
+  Especulativa y              Especulativa, Fantástica, Maravillosa, Tecnológica,
+  fantástica                  Ucronía
+
+                              Alegórica, Filosófica, Literaria, Metaficción, Poética,
+  Literaria y simbólica
+                              Simbólica
+
+                              Comercial, Fábula, Fan fiction, Ficción de género,
+  Popular y de género
+                              Folclórica, Pulp fiction, Satírica
+
+  Experimental y
+                              Absurda, Experimental, Hipertextual, Transgresora
+  transgresora
+  Familia                  Tipos
+
+  Por extensión y          Epistolar, Flash fiction, Interactiva, Novelette, Novella,
+  soporte                  Serializada, Transmedia
+
+
+Premisas y tropos
+56 premisas en 8 familias, nuevas en la v2 (idea de la Referencia R7). En modo
+detallado se eligen 0 a 2 por obra y en modo rápido las propone el dado; dan
+frases para la sinopsis y el marketing, y las muy usadas cansan al público, como las
+tendencias.
+
+
+  Familia             Premisas
+
+                      Elegido, Empezar de cero, Mayoría de edad, Pez fuera del
+  Viaje y cambio
+                      agua, Regreso a casa, Segunda oportunidad, Viaje del héroe
+
+                      Ascenso y caída, David contra Goliat, Justicia por mano propia,
+  Poder y conflicto   Lucha por el trono, Rebelión contra el sistema, Traición del
+                      mentor, Último bastión
+
+                      Chantaje, Doble agente, El gran golpe, Encerrado con el
+  Crimen y engaño
+                      culpable, Falso culpable, Identidad secreta, Último trabajo
+
+                      Amor prohibido, Enemigos que se enamoran, Familia elegida,
+  Amor y vínculos     Hermanos separados, Matrimonio por conveniencia,
+                      Reencuentro, Triángulo amoroso
+
+                      Amnesia, Bucle temporal, Desaparición sin rastro, Mensaje del
+  Tiempo y misterio   pasado, Mundo paralelo, Secreto de familia, Visitante del
+                      futuro
+
+  Supervivencia y     Asedio, Catástrofe que se acerca, Contagio, Invasión, Monstruo
+  amenaza             en las sombras, Náufragos, Última noche
+
+                      Boda caótica, Confusión de identidades, Herencia con
+  Humor y enredo      condiciones, Intercambio de cuerpos, Mentira que crece, Pareja
+                      dispareja, Viaje por carretera
+
+                      Aprendiz que supera al maestro, Equipo improbable,
+  Equipo y misión     Expedición, Misión sin regreso, Rescate, Reunir al equipo,
+                      Torneo
+Corrientes artísticas por época
+Cada corriente se desbloquea en su década y da un bono de novedad durante
+unos 10 a 15 años; después queda disponible sin bono. Las anteriores a 1850
+están disponibles desde el inicio. “Estándar actual” existe siempre. Las décadas
+son aproximadas y se verifican en la V17.
+
+  Medio          Corrientes (década en que aparecen)
+
+                 Expresionismo alemán, Impresionismo cinematográfico francés, Cine
+                 soviético de montaje, Surrealismo cinematográfico, Cine experimental
+                 y Cine clásico de Hollywood (1920) · Cine poético y Realismo
+                 socialista cinematográfico (1930) · Neorrealismo italiano (1940) ·
+                 Cine de autor, Cine existencialista, Free Cinema británico y Nouvelle
+                 Vague francesa (1950) · Cinema Novo, Nuevo Cine Brasileño, Nuevo
+  Cine
+                 Cine Latinoamericano, Nuevo Cine Alemán, Cinéma vérité, Direct
+                 Cinema, Cine underground, Cine político, Cine militante, Cine de
+                 explotación y Nuevo Hollywood (1960) · Cine independiente
+                 estadounidense, Posmodernismo cinematográfico y Cine transgresor
+                 (1980) · New Queer Cinema y Dogma 95 (1990) · Slow Cinema
+                 (2000)
+
+                 Televisión clásica de estudio (1940) · Golden Age Television,
+                 Antología televisiva y Procedural television (1950) · Televisión
+                 experimental (1960) · Miniserie, Docudrama y Televisión documental
+                 observacional (1970) · Quality Television, Televisión posmoderna y
+                 Dramedy (1980) · Televisión de autor, Televisión independiente,
+  Televisión     Reality television y Teen television (1990) · Prestige Television,
+                 Prestige drama, Mockumentary, Dark comedy television, New Queer
+                 Television, High-concept television, Serialización contemporánea,
+                 Televisión hiperrealista, Web television, Transmedia television y Slow
+                 television (2000) · Limited series, Peak TV, Streaming-first television e
+                 Interactive television (2010)
+
+  Teatro         Clasicismo teatral, Neoclasicismo y Romanticismo teatral (desde el
+                 inicio) · Realismo teatral (1850) · Naturalismo teatral (1880) ·
+                 Simbolismo teatral (1890) · Expresionismo teatral, Teatro
+                 experimental y Teatro de vanguardia (1910) · Surrealismo teatral,
+                 Teatro político y Teatro épico (1920) · Teatro brechtiano, Teatro de la
+                 crueldad y Teatro social (1930) · Teatro existencialista (1940) ·
+                 Teatro del absurdo (1950) · Teatro pobre, Teatro documental, Teatro
+                 de creación colectiva, Teatro callejero y Teatro ritual (1960) · Teatro
+  Medio          Corrientes (década en que aparecen)
+
+                 feminista y Performance (1970) · Teatro físico, Teatro comunitario y
+                 Teatro posmoderno (1980) · Teatro postdramático y Teatro
+                 autobiográfico (1990) · Teatro inmersivo (2000)
+
+                 Renacimiento musical, Barroco, Clasicismo y Romanticismo (desde
+                 el inicio) · Nacionalismo musical (1850) · Impresionismo musical
+                 (1890) · Expresionismo musical (1910) · Dodecafonismo y
+                 Neoclasicismo musical (1920) · Bebop, Jazz moderno y Música
+                 concreta (1940) · Serialismo, Música electrónica académica, Música
+  Música
+                 aleatoria, Cool jazz, Avant-garde musical, Experimentalismo musical
+                 y Música electroacústica (1950) · Free jazz, Minimalismo y
+                 Psychedelia (1960) · Música espectral, Krautrock, Punk y New Wave
+                 (1970) · Post-punk (1980) · Grunge y Shoegaze (1990) · Hyperpop
+                 (2010)
+
+                 Escuela arcade e Interactive fiction (1970) · Diseño japonés clásico,
+                 Diseño occidental clásico, PC gaming underground, CRPG clásico,
+                 JRPG clásico y Educational games (1980) · Survival horror japonés
+                 e Immersive sim (1990) · Indie game movement, Art games, Juegos
+                 de autor, Game design experimental, Serious games y Newsgame
+  Videojuegos
+                 movement (2000) · Juegos narrativos, Experimental narrative games,
+                 Roguelike revival, Metroidvania revival, Retro revival, Pixel art revival,
+                 Soulslike movement, Walking simulator movement, Vaporwave
+                 games, Cozy games movement, Hyper-casual movement, Live-service
+                 design y Games-as-a-service (2010) · Lo-fi game movement (2020)
+
+                 Clasicismo, Medievalismo, Renacimiento, Barroco, Neoclasicismo y
+                 Romanticismo (desde el inicio) · Realismo (1850) · Parnasianismo
+                 (1860) · Naturalismo (1870) · Simbolismo, Decadentismo y
+                 Modernismo (1880) · Futurismo (1900) · Vanguardismo,
+  Literatura     Expresionismo, Dadaísmo, Creacionismo y Ultraísmo (1910) ·
+                 Estridentismo y Surrealismo (1920) · Existencialismo y Absurdismo
+                 (1940) · Realismo mágico (1950) · Boom latinoamericano,
+                 Posmodernismo y Literatura posmoderna (1960) · Literatura
+                 feminista (1970) · Poscolonialismo y Minimalismo literario (1980)
+
+
+Agregados y correcciones
+Nada se eliminó de tus listas: solo se agregó, se corrigió la ortografía y se quitaron
+repetidos exactos.
+Agregados
+
+   Género Erótico en cine, televisión, teatro y videojuegos; Erótica en música (en
+   literatura ya existía).
+   10 deportes en Temas: Ajedrez, Atletismo, Automovilismo, Baloncesto, Béisbol,
+   Boxeo, Ciclismo, Deportes electrónicos, Natación y Tenis.
+   Nombres en español para los arcos y subarcos, con el original al lado.
+   v2: Premisas y tropos, una lista nueva de 56 en 8 familias.
+   v2: 11 géneros de televisión: Comedia dramática, Procedimental, Serie web,
+   Telenovela, Citas, Deportes en vivo, Magacín, Premiaciones, Telecompras,
+   Divulgación científica y Vida salvaje.
+   v2: Western espacial en los subgéneros.
+
+Ortografía
+
+Monstrous → Monstruos · Holidays → Festivo · Intalaciones → Instalaciones ·
+Indepencia → Independencia · Hechizeros → Hechiceros · Contemporanea →
+Contemporánea · Erotica → Erótica · Epico → Épico · Estandar → Estándar ·
+Sketchs → Sketches · La Ascención → La Ascensión · Contra si mismo → Contra sí
+mismo · Futbol → Fútbol · Fhasion → Fashion
+
+Casi sinónimos por confirmar
+
+Están los dos por ahora. Propongo darles un sentido distinto (entre paréntesis) en
+lugar de borrar uno; dime si prefieres unirlos.
+
+   Concurso (de conocimiento) y Game show (de juegos y premios)
+   Noticias (del día) e Informativo (de análisis)
+   Táctica (de cartas o tablero) y Táctico (de escuadras)
+   Filosofía (ensayo) y Filosófica (narrativa)
+   Posmodernismo y Literatura posmoderna
+   Nuevo Cine Brasileño y Cinema Novo
+   Dictadura (una) y Dictaduras (época de dictaduras)
+   Independencia (de un país) e Independencias (las de América)
+   Civilizaciones y Precolombinas
+   Culpa y Culpabilidad; Arte y Artes; Cómics e Historietas; Mito y Mitología
+Datos del mundo
+Datos reales de 1850 a 2026 y ficción basada en predicciones hasta 2150:
+población, inflación, precios, tecnología, eventos y los nombres que usa el juego.
+
+Población mundial
+
+  [Figura: ONU, World Population Prospects 2024, y estimaciones históricas ·
+  1850 a 2100; 2125 y 2150 son ficción del juego. Se ve en el documento en
+  línea y en el Word.]
+
+Datos de la gráfica (millones de personas):
+
+
+  Año            Población (M)                Tipo
+
+  1850           1.262                        real
+
+  1900           1.650                        real
+
+  1927           2.000                        real
+
+  1950           2.500                        real
+
+  1960           3.000                        real
+
+  1975           4.000                        real
+
+  1987           5.000                        real
+
+  1999           6.000                        real
+
+  2011           7.000                        real
+
+  2022           8.000                        real
+
+  2024           8.160                        real
+
+  2030           8.500                        ONU, escenario medio
+
+  2050           9.700                        ONU, escenario medio
+
+  2084           10.300                       ONU, escenario medio
+
+  2100           10.200                       ONU, escenario medio
+  Año           Población (M)                Tipo
+
+  2125          9.900                        ficción del juego
+
+  2150          9.600                        ficción del juego
+
+
+El juego usa la población real hasta 2024, la proyección media de la ONU hasta
+2100 y su propia ficción hasta 2150; cada región tiene su curva y su pirámide de
+edades. Después de 2100 hay escenarios alto, medio y bajo; el medio es el de por
+defecto.
+
+Precios y asistencia
+
+   [Figura: Reserva Federal de Minneapolis, índice de precios de EE. UU. (1967 =
+   100), 1850 a 2025. Se ve en el documento en línea y en el Word.]
+
+Datos de la gráfica (índice de precios de EE. UU., 1967 = 100; entre dos años se
+interpola):
+
+
+  Año            IPC              $100 de 2025 equivalen a
+
+  1850           25,0             $2,58
+
+  1860           27,0             $2,79
+
+  1870           38,0             $3,93
+
+  1880           29,0             $3,00
+
+  1890           27,0             $2,79
+
+  1900           25,0             $2,58
+
+  1910           28,0             $2,89
+
+  1920           60,2             $6,22
+
+  1929           51,6             $5,33
+
+  1933           38,9             $4,02
+
+  1940           42,1             $4,35
+
+  1945           54,1             $5,59
+ Año             IPC                 $100 de 2025 equivalen a
+
+ 1950            72,3                $7,47
+
+ 1960            88,9                $9,19
+
+ 1970            116,7               $12,06
+
+ 1975            161,7               $16,71
+
+ 1980            247,6               $25,59
+
+ 1990            392,6               $40,58
+
+ 2000            517,5               $53,49
+
+ 2010            655,3               $67,73
+
+ 2020            777,7               $80,38
+
+ 2023            915,6               $94,64
+
+ 2024            942,7               $97,44
+
+ 2025            967,5               $100,00
+
+
+Todo precio del juego se define en dólares de 2025 y se convierte con esta curva;
+el botón “en dólares de hoy” hace el camino de vuelta.
+
+  [Figura: 24/7 Wall St. con datos de la asociación de cines de EE. UU.;
+  convertido con el índice de la Reserva Federal de Minneapolis. Se ve en el
+  documento en línea y en el Word.]
+
+Datos de la gráfica (precio promedio de una entrada en EE. UU.):
+
+ Año            Precio de su época                 En dólares de 2025
+
+ 1950           $0,50                              $6,69
+
+ 1960           $0,60                              $6,53
+
+ 1970           $1,55                              $12,85
+
+ 1980           $2,69                              $10,51
+  Año           Precio de su época                       En dólares de 2025
+
+  1990          $4,22                                    $10,40
+
+  2000          $5,39                                    $10,08
+
+  2010          $7,89                                    $11,65
+
+  2020          $9,18                                    $11,42
+
+
+El precio real de la entrada cambia poco: lo que cambia es cuánta gente va. En EE.
+UU., la asistencia semanal fue de 80 M en 1930 (cerca del 65 % de la población),
+pasó de 90 M en 1946 y cayó a 27,3 M en 2000 (9,7 %).
+
+Cronología real, 1850 a 2026
+Hechos que cambian el negocio, sin personas reales ni marcas. Es conocimiento
+general y cada fecha se verifica con fuentes en la V21, junto con su día exacto
+para el calendario.
+
+
+  Año         Hecho                                         Efecto en el juego
+
+              Teatro, libros y folletines por entregas
+  1850                                                      Teatro y libros desde el inicio
+              dominan el entretenimiento
+
+                                                            Aparece la música grabada en
+  1877        Se inventa el fonógrafo
+                                                            cilindros
+
+                                                            Discos de pizarra en la
+  1887        Se inventa el disco plano
+                                                            década siguiente
+
+              Primera proyección pública de cine
+  1895                                                      Nace el cine mudo
+              con entrada pagada, en París
+
+                                                            El público del cine crece
+  1905        Salas baratas de cine en EE. UU.
+                                                            rápido
+
+                                                            Obras más largas y poder de
+  1910s       Largometrajes y sistema de estrellas
+                                                            estrella
+
+                                                            Europa produce menos;
+  1914 a
+              Primera Guerra Mundial                        crecen los estudios de
+  1918
+                                                            Norteamérica
+Año      Hecho                                  Efecto en el juego
+
+         Primeras emisoras de radio             La radio compite y sirve de
+1920
+         comerciales                            marketing
+
+                                                Suben los costos; talentos sin
+1927     Llega el cine sonoro
+                                                voz pierden fama
+
+                                                Menos dinero; entradas
+1929     Crisis de 1929 y Gran Depresión
+                                                baratas
+
+         Se adopta el Código de Producción,
+1930                                            Censura en Norteamérica
+         aplicado de 1934 a 1968
+
+1932     Primer festival de cine, en Venecia    Festivales europeos
+
+         Primer largometraje en color de tres
+1935                                            Color caro y llamativo
+         bandas
+
+         Primeras emisiones regulares de TV,
+1936                                            TV experimental
+         en el Reino Unido
+
+1939 a                                          Propaganda, racionamiento y
+         Segunda Guerra Mundial
+1945                                            mercados cerrados
+
+         Récord de asistencia al cine en EE.
+1946                                            La cima del cine
+         UU. y primer festival de Cannes
+
+         Fallo antimonopolio contra los
+                                                Los estudios venden sus cines;
+1948     grandes estudios (3 de mayo) y disco
+                                                nace el álbum
+         de larga duración
+
+1949     Disco sencillo de 45 revoluciones      Sencillos
+
+         La TV llega a los hogares; el cine
+1950s                                           Cae la asistencia al cine
+         responde con pantalla ancha y 3D
+
+1951     Primer festival de Berlín              Festival de invierno
+
+         Primeras emisiones de TV en color en
+1954                                            TV en color
+         EE. UU.
+
+         Primera certificación de oro de la
+1958                                            Discos de oro
+         RIAA
+Año      Hecho                                   Efecto en el juego
+
+1963     Casete compacto                         Música portátil
+
+         Termina el Código y nace la
+1968                                             Clasificaciones por edad
+         clasificación por edades
+
+1971 a   Primeros videojuegos arcade y
+                                                 Nacen los videojuegos
+1972     primera consola doméstica
+
+1975 a
+         Video doméstico en cinta                Ventana de video
+1976
+
+         El estreno amplio de verano con
+1975                                             Estrenos amplios
+         anuncios en TV se vuelve estrategia
+
+1976     Certificación de platino                Discos de platino
+
+         Se popularizan las consolas de
+1977                                             Plataformas de juego
+         cartuchos
+
+1979     Reproductor de casete portátil          Música en la calle
+
+1981     Canal de TV de videos musicales         El videoclip como marketing
+
+1982     Disco compacto                          Música digital en físico
+
+1983     Crisis del videojuego en Norteamérica   Cae el mercado de consolas
+
+1984     Certificación multiplatino              Multiplatino
+
+         Vuelven con fuerza las consolas
+1985                                             Renace el mercado
+         domésticas
+
+1991     La web se abre al público               Internet
+
+         Primer largometraje animado por
+1995                                             Animación 3D
+         completo en computadora
+
+1996 a
+         DVD                                     Video de mejor calidad
+1997
+
+         Piratería musical por internet y
+1999                                             Piratería y discos de diamante
+         certificación de diamante
+ Año           Hecho                                      Efecto en el juego
+
+ 2003          Tiendas legales de música digital          Descargas
+
+ 2005          Plataformas de video en línea              Vistas en línea
+
+ 2006          Disco óptico de alta definición            Blu-ray
+
+               Streaming de video por suscripción y
+ 2007                                                     Streaming y juegos móviles
+               teléfonos inteligentes
+
+               Streaming de música y tiendas de
+ 2008                                                     Reproducciones
+               aplicaciones
+
+ 2009          Auge del 3D digital                        3D en salas
+
+               Las reproducciones cuentan para las        1.500 reproducciones = 1
+ 2016
+               certificaciones (1 de febrero)             álbum
+
+                                                          Plataformas compiten por
+ 2019          Guerra del streaming
+                                                          catálogo
+
+ 2020          Pandemia y cines cerrados                  Estrenos directos a streaming
+
+ 2022          IA generativa al alcance del público       Idea automática con IA
+
+               Huelgas de guionistas y actores en
+ 2023                                                     Huelgas como evento
+               Hollywood
+
+ 2026          Presente                                   Termina la historia real
+
+
+Eras de ficción, 2026 a 2150
+Basadas en predicciones de hoy; después de 2150 el juego genera eventos. La
+población sigue el escenario medio.
+
+
+ Era                      Años           Qué cambia en el juego
+
+ IA en todas              2026 a         IA en guion, efectos y doblaje; baja costos pero
+ partes                   2035           arriesga reputación; huelgas y reglas nuevas
+
+                                         Realidad mixta, salas inmersivas, series y
+                          2035 a
+ Inmersión                               juegos interactivos; nuevo formato de
+                          2050
+                                         experiencia
+ Era                  Años          Qué cambia en el juego
+
+ Clima y              2050 a        Eventos climáticos cierran rodajes; sets
+ megaciudades         2065          virtuales; el público se muda a megaciudades
+
+ Pico de              2065 a        El mercado llega a su máximo (unos 10.300
+ población            2085          M) y envejece: más público adulto
+
+ Interfaces           2085 a        Obras que se sienten; debates éticos y censura
+ neuronales           2100          nueva
+
+                      2100 a        Rodajes en órbita y pequeños públicos en
+ Era orbital
+                      2125          colonias; la población baja a unos 9.900 M
+
+                                    Talentos sintéticos con derechos, obras eternas
+                      2125 a
+ Arte posthumano                    y preservación; unos 9.600 M de personas en
+                      2150
+                                    2150
+
+ Después de           2150 en       Eventos generados a partir de lo que pasó en tu
+ 2150                 adelante      partida
+
+
+Nombres de premios y festivales
+Aprobados el 5 de octubre de 2026. Ningún premio se elimina: solo cambia el
+nombre de los que copian uno real. Antes de publicar se revisa que ninguno choque
+con una marca.
+
+Premiaciones
+
+
+ Referencia real                   Nombre en el juego           Medio
+
+ Premios de la Academia            Premios Quimera              Cine
+
+ Emmy                              Premios Señal                Televisión
+
+ Tony                              Premios Telón                Teatro
+
+ The Game Awards                   Premios Cartucho             Videojuegos
+
+ Music Awards (tipo Grammy)        Premios Vinilo               Música
+
+ Pulitzer y Editorial Book Award   Premios Pluma                Libros
+
+ Independent Award                 Premios Independientes       Todos
+  Referencia real              Nombre en el juego      Medio
+
+  Bastard Awards               Se queda                Los peores del año
+
+  Pop Awards                   Se queda                Los más populares
+
+  Festival Mundial del Arte    Se queda                Todos
+
+
+Festivales por continente
+
+
+  Continente (tu nombre)         Festival           Premio mayor
+
+  Europa (Olímpicos)             Riviera            Hoja de Oro
+
+  Europa (Olímpicos)             Laguna             Grifo de Oro
+
+  Europa (Olímpicos)             Spree              Lobo de Oro
+
+  Norteamérica (The Western)     Grandes Lagos      Golden Block
+
+  Norteamérica (The Western)     Montaña            Crystal Block
+
+  Norteamérica (The Western)     Altiplano          Águila de Oro
+
+  Sudamérica (América)           Atlántico          Estrella de Mar
+
+  Sudamérica (América)           Caribe             Mujer Dorada
+
+  Sudamérica (América)           Sierra             Araucaria de Oro
+
+  África (Edén)                  Atlas              Monolito Estrella
+
+  África (Edén)                  Desierto           Escarabajo de Oro
+
+  África (Edén)                  Delta              Corcel de Oro
+
+  Asia (Everest)                 Sol Naciente       Grulla de Oro
+
+  Asia (Everest)                 Yangtsé            Copa de Jade
+
+  Asia (Everest)                 Puerto             Ola de Oro
+
+  Oceanía (Pacífico)             Bahía              Ancla de Oro
+
+  Oceanía (Pacífico)             Nube Blanca        The Sign Maori
+  Continente (tu nombre)                     Festival                Premio mayor
+
+  Oceanía (Pacífico)                         Volcán                  Volcán de Oro
+
+
+Las plataformas de streaming, de música y de juegos también tendrán nombres
+inventados; se proponen en la V20 y la V22.
+
+Calendario anual
+Las fechas fijas que usa el calendario completo; ninguna se reparte al azar. Los
+meses de premios, festivales y convenciones son una propuesta inspirada en el
+circuito real que se confirma en la V19, y los años con ≈ se verifican con fuentes en
+la V21.
+
+Festividades
+
+Las 12 de la V15 pasan de semanas a fechas reales con sus mismos bonos; las
+nuevas llevan *.
+
+  Festividad           Fecha                        Dónde pesa más        Sube
+
+  Año Nuevo            1 de enero                   Todo el mundo         Todo
+
+                       Luna nueva entre el                                Familiar,
+  Año Nuevo
+                       21 de enero y el 20 de       Asia oriental         Comedia y
+  chino*
+                       febrero (tabla)                                    Fantasía
+
+  San Valentín         14 de febrero                América y Europa      Romance
+
+                       Los días antes del
+                                                    Sudamérica, el
+                       Miércoles de Ceniza,
+  Carnaval                                          Caribe y el sur de    Aventura
+                       46 días antes de
+                                                    Europa
+                       Pascua
+
+                       Domingo de Pascua,
+  Pascua               con el cálculo               Países cristianos     Fantasía
+                       gregoriano
+
+                                                    Casi todo el          Comedia y
+  Día del trabajo      1 de mayo
+                                                    mundo                 Acción
+Festividad      Fecha                    Dónde pesa más       Sube
+
+                                                              Acción,
+                Último lunes de mayo
+Día de la                                                     Aventura,
+                (antes de 1971, el 30    EE. UU.
+memoria                                                       Ciencia ficción y
+                de mayo)
+                                                              Fantasía
+
+                                                              Drama, Comedia
+Orgullo         Junio, desde ≈1970       América y Europa
+                                                              e Histórico
+
+                La fecha de cada país
+                (EE. UU., 4 de julio;
+Independencia   Colombia, 20 de julio;   El país de la sede   Todo
+                México, 16 de
+                septiembre)
+
+                De mediados de julio
+                a mediados de
+Pop days                                 Hemisferio norte     Todo
+                septiembre (semanas
+                28 a 38)
+
+                Fin del Ramadán,         Medio Oriente,
+                                                              Familiar y
+Eid al-Fitr*    calendario lunar         norte de África y
+                                                              Acción
+                (tabla)                  sur de Asia
+
+                Luna nueva de
+Diwali          octubre o noviembre      Sur de Asia          Todo
+                (tabla)
+
+                                         Norteamérica, y      Terror, Ciencia
+Halloween       31 de octubre            más regiones         ficción, Fantasía
+                                         desde ≈2000          y Superhéroes
+
+Día de                                                        Fantasía y
+                1 y 2 de noviembre       México
+Muertos*                                                      Familiar
+
+                Cuarto jueves de
+Acción de       noviembre (desde                              Familiar y
+                                         EE. UU.
+Gracias*        1942; antes, el último                        Animación
+                jueves)
+
+Navidad         25 de diciembre, con     Países cristianos    Todo
+                temporada desde
+  Festividad        Fecha                   Dónde pesa más       Sube
+
+                    mediados de
+                    diciembre
+
+
+Temporadas de estreno
+
+   Verano de estrenos (hemisferio norte): del último lunes de mayo al primer lunes
+   de septiembre.
+   Fin de año: de Acción de Gracias a Año Nuevo.
+   Temporada de premios: de octubre a febrero, cuando se estrenan las obras de
+   prestigio.
+   Meses tranquilos: enero, febrero y septiembre, con menos público y menos
+   competencia.
+   Vacaciones escolares: de junio a agosto en el norte y de diciembre a febrero en
+   el sur.
+   Todo junto se queda dentro del factor semanal de ×0,80 a ×1,40 que ya está
+   decidido.
+
+Circuito anual
+
+Las premiaciones conservan la semana que tenían en la V15 y su gala es el
+domingo de esa semana.
+
+
+  Evento              Tipo               Cuándo                          Desde
+
+  Premios
+                      Premiación         Semana 2 (enero)                ≈1985
+  Independientes
+
+  Bastard Awards      Premiación         Semana 4 (enero)                ≈1980
+
+                      Premiación de
+  Premios Vinilo                         Semana 6 (febrero)              1959
+                      música
+
+                      Premiación de
+  Premios Quimera                        Semana 11 (marzo)               1929
+                      cine
+
+                      Premiación de
+  Premios Pluma                          Semana 14 (abril)               1917
+                      libros
+Evento             Tipo            Cuándo                     Desde
+
+                   Premiación de
+Premios Telón                      Semana 24 (junio)          1947
+                   teatro
+
+                   Festival de
+Festival Mundial                                              Desde
+                   todos los       Semanas 23 a 26 (junio)
+del Arte                                                      el inicio
+                   medios
+
+Pop Awards         Premiación      Semana 38 (septiembre)     ≈1975
+
+                   Premiación de
+Premios Señal                      Semana 40 (octubre)        1949
+                   televisión
+
+                   Premiación de
+Premios Cartucho                   Semana 52 (diciembre)      ≈2003
+                   videojuegos
+
+Montaña            Festival        Fines de enero             1978
+
+Spree              Festival        Febrero                    1951
+
+                                   Febrero o marzo, en años
+Delta              Festival                                   1969
+                                   impares
+
+Altiplano          Festival        Marzo                      ≈1986
+
+Caribe             Festival        Marzo                      ≈1960
+
+Riviera            Festival        Mayo                       1946
+
+Yangtsé            Festival        Junio                      1993
+
+Bahía              Festival        Junio                      1954
+
+Nube Blanca        Festival        Julio                      ≈1969
+
+Volcán             Festival        Agosto                     ≈1952
+
+                                   De fines de agosto a
+Laguna             Festival                                   1932
+                                   septiembre
+
+Grandes Lagos      Festival        Septiembre                 1976
+
+Sierra             Festival        Octubre                    ≈1994
+ Evento              Tipo              Cuándo                        Desde
+
+ Puerto              Festival          Octubre                       1996
+
+ Sol Naciente        Festival          De octubre a noviembre        1985
+
+ Desierto            Festival          Noviembre                     1976
+
+ Atlántico           Festival          Noviembre                     1954
+
+ Atlas               Festival          De noviembre a diciembre      2001
+
+                                       En sus años reales: 1851,
+ Exposiciones        Exposición        1855, 1867, 1878, 1889,
+                                                                     1851
+ universales         (hecho real)      1900, 1904, 1939, 1958,
+                                       1967, 1970 y después
+
+ Mercado Mundial     Convención de
+                                       Enero                         ≈1967
+ de la Música        música
+
+                     Convención de
+ Expo Píxel                            Junio                         ≈1995
+                     videojuegos
+
+                     Convención de
+ Convención
+                     cómics, cine y    Julio                         1970
+ Viñeta
+                     series
+
+                     Convención de
+ Expo Anime                            Julio                         ≈1992
+                     animación
+
+ Gran Feria del      Convención de
+                                       Agosto                        ≈2009
+ Juego               videojuegos
+
+ Salón Arcade de     Convención de
+                                       Septiembre                    ≈1996
+ Oriente             videojuegos
+
+ Feria Mundial del   Convención de
+                                       Octubre                       1949
+ Libro               libros
+
+ Mercado de la       Convención de
+                                       Octubre                       ≈1985
+ Pantalla            TV y streaming
+
+
+Los nombres de las convenciones son propuestas nuevas; se aprueban como los de
+los premios.
+Días de lanzamiento
+
+   Cine: viernes en EE. UU.; otras regiones estrenan en jueves o en miércoles.
+   Música: viernes desde 2015; antes, martes en EE. UU.
+   Series: su día y franja de emisión; en streaming, la temporada completa o un
+   episodio por semana.
+   El jugador puede elegir cualquier día, pero el habitual rinde mejor.
+
+Tablas lunares
+
+El Año Nuevo chino, el Eid al-Fitr y el Diwali cambian de fecha cada año. La V16
+los guarda en una tabla de 1850 a 2150 hecha con un calendario astronómico, no
+inventada.
+
+Obras de dominio público
+Regla decidida: una obra queda libre el 1 de enero del año en que se cumplen 71
+años de la muerte de su autor; las obras antiguas y las tradiciones anónimas están
+libres siempre. Antes de liberarse, sus derechos se compran. Las subidas de tono se
+adaptan con guiños: la clasificación sube y nada es explícito. Se excluyen las obras
+que sexualizan a menores.
+
+Clásicos (los 50 de la V15, con la regla nueva)
+
+
+                                                      Libre
+  Obra                    Autor            Año                    Géneros
+                                                      desde
+
+                                           c. 700                 Aventura, Épico,
+  La Odisea               Homero                      Siempre
+                                           a. C.                  Fantasía
+
+                                                                  Aventura,
+  Las mil y una
+                          Anónimo          c. 900     Siempre     Fantasía,
+  noches
+                                                                  Romance
+
+                                           c.                     Épico, Fantasía,
+  Beowulf                 Anónimo                     Siempre
+                                           1000                   Acción
+
+                                                                  Fantasía, Épico,
+  El rey Arturo           Leyenda          1136       Siempre
+                                                                  Aventura
+                                                Libre
+Obra                   Autor             Año              Géneros
+                                                desde
+
+                                         c.               Épico, Histórico,
+El Cantar de mio Cid   Anónimo                  Siempre
+                                         1200             Acción
+
+                                                          Fantasía, Drama,
+La divina comedia      Dante Alighieri   1320   Siempre
+                                                          Épico
+
+                                         c.               Aventura,
+Robin Hood             Leyenda                  Siempre
+                                         1400             Acción, Histórico
+
+                       William                            Romance,
+Romeo y Julieta                          1597   Siempre
+                       Shakespeare                        Drama
+
+                       William                            Drama, Thriller,
+Hamlet                                   1603   Siempre
+                       Shakespeare                        Misterio
+
+Don Quijote de la      Miguel de                          Aventura,
+                                         1605   Siempre
+Mancha                 Cervantes                          Comedia, Drama
+
+                       William                            Drama, Thriller,
+Macbeth                                  1606   Siempre
+                       Shakespeare                        Fantasía
+
+                                                          Fantasía,
+                       Charles
+Cenicienta                               1697   Siempre   Romance,
+                       Perrault
+                                                          Familiar
+
+Robinson Crusoe        Daniel Defoe      1719   Siempre   Aventura, Drama
+
+                                                          Aventura,
+Los viajes de          Jonathan
+                                         1726   Siempre   Fantasía,
+Gulliver               Swift
+                                                          Comedia
+
+                       J. W. von                          Fantasía, Drama,
+Fausto                                   1808   1903
+                       Goethe                             Terror
+
+Cuentos de los         Hermanos                           Fantasía,
+                                         1812   1934
+hermanos Grimm         Grimm                              Familiar, Terror
+
+                                                          Romance,
+Orgullo y prejuicio    Jane Austen       1813   1888
+                                                          Drama, Comedia
+                                              Libre
+Obra                   Autor           Año            Géneros
+                                              desde
+
+                                                      Terror, Ciencia
+Frankenstein           Mary Shelley    1818   1922
+                                                      ficción, Drama
+
+La leyenda de          Washington
+                                       1820   1930    Terror, Misterio
+Sleepy Hollow          Irving
+
+                       Charles
+Oliver Twist                           1838   1941    Drama, Crimen
+                       Dickens
+
+Un cuento de           Charles                        Drama, Fantasía,
+                                       1843   1941
+Navidad                Dickens                        Familiar
+
+Los tres               Alexandre                      Aventura,
+                                       1844   1941
+mosqueteros            Dumas                          Acción, Histórico
+
+El conde de            Alexandre                      Aventura,
+                                       1844   1941
+Montecristo            Dumas                          Drama, Thriller
+
+                       Edgar Allan
+El cuervo                              1845   1920    Terror, Misterio
+                       Poe
+
+                       Herman                         Aventura,
+Moby Dick                              1851   1962
+                       Melville                       Drama, Épico
+
+                                                      Drama,
+Los miserables         Victor Hugo     1862   1956    Histórico,
+                                                      Musical
+
+                                                      Fantasía,
+Alicia en el país de
+                       Lewis Carroll   1865   1969    Aventura,
+las maravillas
+                                                      Familiar
+
+                       Fiódor                         Drama, Crimen,
+Crimen y castigo                       1866   1952
+                       Dostoyevski                    Thriller
+
+                       Louisa May                     Drama, Familiar,
+Mujercitas                             1868   1959
+                       Alcott                         Romance
+
+                                                      Drama,
+Guerra y paz           León Tolstói    1869   1981    Histórico, Bélico,
+                                                      Romance
+                                              Libre
+Obra                   Autor           Año            Géneros
+                                              desde
+
+Veinte mil leguas de                                  Aventura,
+                       Julio Verne     1870   1976
+viaje submarino                                       Ciencia ficción
+
+La vuelta al mundo                                    Aventura,
+                       Julio Verne     1872   1976
+en 80 días                                            Comedia
+
+                                                      Aventura,
+Las aventuras de
+                       Mark Twain      1876   1981    Comedia,
+Tom Sawyer
+                                                      Familiar
+
+                                                      Romance,
+Ana Karenina           León Tolstói    1877   1981
+                                                      Drama
+
+                       R. L.                          Aventura,
+La isla del tesoro                     1883   1965
+                       Stevenson                      Acción, Familiar
+
+                                                      Fantasía,
+Pinocho                Carlo Collodi   1883   1961    Familiar,
+                                                      Aventura
+
+El extraño caso del
+                       R. L.                          Terror, Thriller,
+Dr. Jekyll y Mr.                       1886   1965
+                       Stevenson                      Misterio
+Hyde
+
+                       Arthur Conan                   Misterio, Crimen,
+Estudio en escarlata                   1887   2001
+                       Doyle                          Thriller
+
+El retrato de Dorian                                  Drama, Terror,
+                       Oscar Wilde     1890   1971
+Gray                                                  Fantasía
+
+                                                      Aventura,
+                       Rudyard
+El libro de la selva                   1894   2007    Familiar,
+                       Kipling
+                                                      Fantasía
+
+                                                      Terror,
+Drácula                Bram Stoker     1897   1983    Romance,
+                                                      Fantasía
+
+La guerra de los                                      Ciencia ficción,
+                       H. G. Wells     1898   2017
+mundos                                                Acción, Terror
+                                                        Libre
+ Obra                     Autor                Año                Géneros
+                                                        desde
+
+                                                                  Fantasía,
+ El maravilloso mago
+                          L. Frank Baum        1900     1990      Aventura,
+ de Oz
+                                                                  Familiar, Musical
+
+                                                                  Fantasía,
+ Peter Pan                J. M. Barrie         1904     2008      Aventura,
+                                                                  Familiar
+
+                                                                  Terror,
+ El fantasma de la
+                          Gaston Leroux        1910     1998      Romance,
+ ópera
+                                                                  Musical
+
+ Tarzán de los            Edgar Rice
+                                               1912     2021      Aventura, Acción
+ monos                    Burroughs
+
+ La metamorfosis          Franz Kafka          1915     1995      Drama, Fantasía
+
+ Bambi                    Felix Salten         1923     2016      Familiar, Drama
+
+                          F. Scott                                Drama,
+ El gran Gatsby                                1925     2011
+                          Fitzgerald                              Romance
+
+ La llamada de            H. P.                                   Terror, Fantasía,
+                                               1928     2008
+ Cthulhu                  Lovecraft                               Misterio
+
+
+Subidas de tono (nuevas)
+
+
+                                                      Libre
+ Obra                  Autor              Año                   Géneros
+                                                      desde
+
+                                          c. 600                Poesía, Romance,
+ Poemas                Safo                           Siempre
+                                          a. C.                 Erótica
+
+                                          411 a.                Comedia, Político,
+ Lisístrata            Aristófanes                    Siempre
+                                          C.                    Erótico
+
+ El arte de amar       Ovidio             c. 2        Siempre   Erótica, Comedia
+
+                       Giovanni                                 Comedia,
+ Decamerón                                1353        Siempre
+                       Boccaccio                                Romance, Erótica
+                                           Libre
+Obra              Autor             Año              Géneros
+                                           desde
+
+Los cuentos de    Geoffrey          c.               Comedia,
+                                           Siempre
+Canterbury        Chaucer           1400             Aventura, Erótica
+
+                  Fernando de                        Tragicomedia,
+La Celestina                        1499   Siempre
+                  Rojas                              Romance, Erótico
+
+El burlador de                                       Drama, Romance,
+                  Tirso de Molina   1630   Siempre
+Sevilla                                              Erótico
+
+                                                     Drama, Romance,
+Moll Flanders     Daniel Defoe      1722   Siempre
+                                                     Crimen
+
+                  Prosper                            Romance, Drama,
+Carmen                              1845   1941
+                  Mérimée                            Musical
+
+La dama de las    Alexandre                          Romance,
+                                    1848   1966
+camelias          Dumas hijo                         Melodrama
+
+Hojas de hierba   Walt Whitman      1855   1963      Poesía, Erótica
+
+Las flores del    Charles                            Poesía, Gótico,
+                                    1857   1938
+mal               Baudelaire                         Erótica
+
+                  Gustave                            Drama, Romance,
+Madame Bovary                       1857   1951
+                  Flaubert                           Erótico
+
+                                                     Drama, Crimen,
+Teresa Raquin     Émile Zola        1867   1973
+                                                     Erótico
+
+La Venus de las   Leopold von
+                                    1870   1966      Drama, Erótico
+pieles            Sacher-Masoch
+
+                  Sheridan Le                        Terror, Romance,
+Carmilla                            1872   1944
+                  Fanu                               Erótico
+
+                                                     Drama, Social,
+Naná              Émile Zola        1880   1973
+                                                     Erótico
+
+                  Leopoldo Alas,                     Drama, Romance,
+La Regenta                          1884   1972
+                  Clarín                             Social
+                                                  Libre
+ Obra               Autor            Año                          Géneros
+                                                  desde
+
+                                                                  Drama, Romance,
+ El despertar       Kate Chopin      1899         1975
+                                                                  Erótico
+
+ El amante de                                                     Romance, Drama,
+                    D. H. Lawrence   1928         2001
+ Lady Chatterley                                                  Erótico
+
+                                                                  Drama,
+ Trópico de
+                    Henry Miller     1934         2051            Experimental,
+ Cáncer
+                                                                  Erótico
+
+
+Tradiciones del mundo (nuevas)
+
+
+                                                          Libre
+ Obra              Origen            Época                             Géneros
+                                                          desde
+
+                                                                       Épico,
+ Epopeya de
+                   Mesopotamia       c. 2100 a. C.        Siempre      Aventura,
+ Gilgamesh
+                                                                       Fantasía
+
+                                                                       Épico,
+                                     c. siglo V a.
+ Ramayana          India                                  Siempre      Aventura,
+                                     C.
+                                                                       Romance
+
+                                     c. siglo IV a.                    Épico, Bélico,
+ Mahabharata       India                                  Siempre
+                                     C.                                Drama
+
+                                                                       Épico,
+ Cantar de los
+                   Germania          c. 1200              Siempre      Fantasía,
+ nibelungos
+                                                                       Tragedia
+
+                                                                       Épico,
+ Epopeya de        Malí, tradición
+                                     Siglo XIII           Siempre      Histórico,
+ Sundiata          oral
+                                                                       Aventura
+
+ Romance de        China, Luo                                          Épico, Bélico,
+                                     Siglo XIV            Siempre
+ los Tres Reinos   Guanzhong                                           Histórico
+                                                          Libre
+ Obra               Origen              Época                       Géneros
+                                                          desde
+
+                                                                    Aventura,
+                    China, Wu
+ Viaje al Oeste                         1592              Siempre   Fantasía,
+                    Cheng'en
+                                                                    Comedia
+
+                                                                    Mitología,
+                                        Manuscrito
+ Popol Vuh          Tradición maya                        Siempre   Épico,
+                                        del siglo XVI
+                                                                    Fantasía
+
+                    Leyenda                                         Terror,
+ La Llorona                             Tradición         Siempre
+                    latinoamericana                                 Folklórico
+
+                    Leyenda                                         Aventura,
+ El Dorado                              Tradición         Siempre
+                    sudamericana                                    Histórico
+
+                                                                    Folklórico,
+ El Hombre          Leyenda
+                                        Tradición         Siempre   Comedia,
+ Caimán             colombiana
+                                                                    Fantasía
+
+
+Fuentes de los datos
+   ONU, World Population Prospects 2024
+   Our World in Data, crecimiento de la población
+   Estimaciones históricas de la población mundial
+   Hitos de la población mundial
+   IPC histórico, Reserva Federal de Minneapolis
+   Precio de la entrada de cine por año, 24/7 Wall St.
+   Asistencia al cine en EE. UU., Universidad de Dayton
+   Certificaciones de la RIAA
+   Duración del derecho de autor por país
+   Fallo antimonopolio de 1948
+   Código de Producción
+   Festival de Venecia, Festival de Cannes y Festival de Berlín
+
