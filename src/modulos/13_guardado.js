@@ -58,6 +58,17 @@ IA.guardado = (function () {
     S.estudios.forEach(function (e) { if (!e.cad) e.cad = {}; if (!e.sets) e.sets = []; });
     if (!S.mundo.tendR) S.mundo.tendR = {};
   };
+  // V20 → V21 (calendario completo, sede, personal, fans y avatar): valores iniciales para las partidas viejas
+  MIGRACIONES[21] = function (S) {
+    const e = S.estudios[0];
+    if (!e.sede) e.sede = 1;
+    if (!e.staff) e.staff = [];
+    if (e.influencia === undefined) e.influencia = Math.round(e.fama * 100);
+    if (S.fans === undefined) S.fans = Math.round(e.fama * 20000);
+    if (!S.recordatorios) S.recordatorios = [];
+    const a = S.avatar;
+    if (a) { if (!a.tf) a.tf = 'escuela'; if (!a.arq) a.arq = 'visionario'; if (!a.modo) a.modo = 'dueno'; if (a.salud === undefined) a.salud = 85; }
+  };
 
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------
   function suma(texto) {

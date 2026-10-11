@@ -27,6 +27,7 @@ IA.ideas = (function () {
     if (!b.nat) b.nat = 'f';
     if (!b.tipo) b.tipo = 'real';
     ['sub', 'tem', 'prob', 'sarc', 'pubs'].forEach(function (k) { if (!b[k]) b[k] = []; });
+    if (!b.pre) b.pre = premisasRecomendadas(fam, b.est === 0 ? 0 : undefined);
     if (b.arco === undefined) b.arco = '';
     if (!b.fic) b.fic = 'Estándar';
     if (!b.corr) b.corr = X.ESTANDAR;
@@ -296,6 +297,53 @@ IA.ideas = (function () {
     u.push(anio);
     if (u.length > 6) u.shift();
   }
+  // ---------- Premisas y tropos (V21) ----------
+  const TODAS_PREMISAS = [];
+  X.familiasPremisa.forEach(function (f) { f.items.forEach(function (p) { TODAS_PREMISAS.push(p); }); });
+  function famPremisa(p) { return X.familiasPremisa.filter(function (f) { return f.items.indexOf(p) >= 0; })[0]; }
+  function premisasRecomendadas(fam, n) {
+    const buenas = X.familiasPremisa.filter(function (f) { return f.afin.indexOf(fam) >= 0; });
+    const r = [];
+    for (let i = 0; i < (n === undefined ? N.entero(0, 2) : n); i++) {
+      const f = buenas.length ? N.elegir(buenas) : N.elegir(X.familiasPremisa);
+      const p = N.elegir(f.items);
+      if (r.indexOf(p) < 0) r.push(p);
+    }
+    return r;
+  }
+  // Veces que el mundo usó una premisa en los últimos 5 años (las muy usadas cansan)
+  function usosPremisa(p, anio) {
+    const u = N.S.usosPremisa && N.S.usosPremisa[p];
+    return u ? u.filter(function (a) { return anio - a < 5; }).length : 0;
+  }
+  function registrarPremisas(o, anio) {
+    const S = N.S;
+    S.usosPremisa = S.usosPremisa || {};
+    (o.pre || []).forEach(function (p) { const u = S.usosPremisa[p] = S.usosPremisa[p] || []; u.push(anio); if (u.length > 12) u.shift(); });
+  }
+  function efectoPremisas(o, anio) {
+    const fam = familia(o);
+    let pub = 0;
+    (o.pre || []).slice(0, 2).forEach(function (p) {
+      const f = famPremisa(p);
+      if (f && f.afin.indexOf(fam) >= 0) pub += 1;
+      const u = usosPremisa(p, anio);
+      if (u >= 8) pub -= 2; else if (u >= 4) pub -= 1;
+    });
+    return pub;
+  }
+  // Enfoque del estudio (V21): 3 géneros y 3 temas con bono, más experiencia con cada obra del enfoque
+  function efectoEnfoque(o) {
+    const est = N.S.estudios[o.est];
+    const en = est && est.enf;
+    if (!en) return { crit: 0, pub: 0 };
+    let crit = 0, pub = 0;
+    const g0 = (o.gen || [])[0];
+    if (g0 && en.gen.indexOf(g0) >= 0) pub += 1 + Math.min(2, Math.floor(((est.expG || {})[g0] || 0) / 5));
+    if ((o.tem || []).some(function (t) { return en.tem.indexOf(t) >= 0; })) crit += 1;
+    return { crit: crit, pub: pub };
+  }
+
   // Prepara un borrador a partir de un material (la censura de la época suaviza lo erótico)
   function usarMaterial(b, id, anio) {
     const m = X.material(id);
@@ -327,12 +375,43 @@ IA.ideas = (function () {
     if (!S.guiones) S.guiones = [];
     S.guiones = S.guiones.filter(function (g) { return g.vence > S.t; });
     const autores = T().disponibles('guion');
-    while (S.guiones.length < 4 && autores.length) {
+    while (S.guiones.length < 6 && autores.length) {
       const autor = N.elegir(autores);
       const idea = ideaAleatoria(anio, autor.hab);
       const calif = Math.round(N.limitar(N.normal(autor.hab, 10), 25, 98));
-      S.guiones.push({ id: N.sigId(), idea: idea, autor: autor.id, nomAutor: autor.nom, calif: calif, precio: precioGuion(calif, anio), vence: S.t + 26 });
+      // V21: la calidad real queda oculta; la primera lectura es una estimación con margen (±12)
+      const lect = Math.round(N.limitar(calif + N.normal(0, 7), 20, 99));
+      const pags = Math.round(N.limitar(N.normal(110, 15), 70, 160));
+      S.guiones.push({ id: N.sigId(), idea: idea, autor: autor.id, nomAutor: autor.nom, calif: calif, lect: lect, margen: 12, pags: pags,
+        precio: precioGuion(lect, anio), vence: S.t + 12 });
     }
+  }
+  // Informe de lectura pagado (V21): revela la calidad con un margen pequeño (más preciso con un analista)
+  function costoInforme(g) { return Math.max(1, Math.round(g.precio * 0.08)); }
+  function informeLectura(id, conAnalista) {
+    const S = N.S, g = (S.guiones || []).filter(function (x) { return x.id === id; })[0];
+    if (!g) return 'Ese guion ya no está en venta.';
+    if (g.margen <= 4) return 'Ya tienes su informe.';
+    const c = costoInforme(g);
+    if (S.estudios[0].caja < c) return 'No alcanza la caja para el informe.';
+    IA.negocio.pagar(0, 'derechos', c);
+    g.margen = conAnalista ? 1 : 4;
+    g.lect = Math.round(N.limitar(g.calif + N.normal(0, g.margen / 2), 20, 99));
+    return '';
+  }
+  // Regatear (V21): una vez por guion; puede bajar el precio, quedar igual o hacer que el vendedor se retire
+  function regatear(id, conAnalista) {
+    const S = N.S, g = (S.guiones || []).filter(function (x) { return x.id === id; })[0];
+    if (!g) return { error: 'Ese guion ya no está en venta.' };
+    if (g.reg) return { error: 'Ya regateaste este guion.' };
+    g.reg = 1;
+    const fama = S.estudios[0].fama;
+    const x = N.azar() + fama * 0.3 + (conAnalista ? 0.1 : 0);
+    if (x > 0.75) { g.precio = Math.round(g.precio * 0.8); return { ok: true, texto: 'Aceptan: el precio baja un 20 %.' }; }
+    if (x > 0.45) { g.precio = Math.round(g.precio * 0.92); return { ok: true, texto: 'Ceden un poco: −8 %.' }; }
+    if (x > 0.2) return { ok: true, texto: 'No bajan el precio.' };
+    S.guiones = S.guiones.filter(function (y) { return y.id !== id; });
+    return { ok: false, texto: 'Se ofenden y retiran el guion del mercado.' };
   }
 
   // ---------- Ideas automáticas (recomendado, dado e IA) ----------
@@ -361,6 +440,7 @@ IA.ideas = (function () {
     b.tem = [temaRecomendado(fam)];
     b.prob = [problemaRecomendado(fam)];
     b.arco = arcoRecomendado(fam);
+    b.pre = premisasRecomendadas(fam, 1);
     const epocas = X.epocasDisponibles(anio).filter(function (e) { return e.afines.indexOf(fam) >= 0; });
     const epo = fam === 'IM' && N.probabilidad(0.5) ? 'lejano' : epocas.length && N.probabilidad(0.3) ? N.elegir(epocas).id : 'actualidad';
     if (!b.mat) b.epo = epo; // un material ya trae su época
@@ -386,11 +466,12 @@ IA.ideas = (function () {
       if (!bueno || fs.afin[fam] >= 1) idea.sub = [N.elegir(fs.items)];
     }
     idea.tono = N.elegir(D.tonos).id;
+    idea.pre = bueno ? premisasRecomendadas(fam) : (N.probabilidad(0.5) ? [N.elegir(TODAS_PREMISAS)] : []);
     idea.tit = IA.obras.tituloNuevo(gen);
     return idea;
   }
   function aplicarIdea(b, idea) {
-    ['gen', 'tem', 'prob', 'arco', 'sub', 'tono', 'tit', 'epo', 'sarc', 'fic'].forEach(function (k) { if (idea[k] !== undefined) b[k] = Array.isArray(idea[k]) ? idea[k].slice() : idea[k]; });
+    ['gen', 'tem', 'prob', 'arco', 'sub', 'tono', 'tit', 'epo', 'sarc', 'fic', 'pre'].forEach(function (k) { if (idea[k] !== undefined) b[k] = Array.isArray(idea[k]) ? idea[k].slice() : idea[k]; });
     b.fam = familia(b);
     return b;
   }
@@ -495,6 +576,8 @@ IA.ideas = (function () {
     s = s.charAt(0).toUpperCase() + s.slice(1);
     const temas = (b.tem || []).slice(0, 3).map(minus);
     if (temas.length) s += ' Una historia de ' + (temas.length > 1 ? temas.slice(0, -1).join(', ') + ' y ' + temas[temas.length - 1] : temas[0]) + '.';
+    const pre = (b.pre || []).slice(0, 2);
+    if (pre.length) s += ' Con ' + (pre.length > 1 ? '«' + pre[0] + '» y «' + pre[1] + '»' : '«' + pre[0] + '»') + '.';
     if (b.mat) { const m = X.material(b.mat); if (m) s += ' Basada en «' + m.tit + '»' + (m.autor && m.grupo !== 'tradicion' ? ', de ' + m.autor : '') + (b.suave ? ', adaptada con guiños por la censura de la época' : '') + '.'; }
     return s;
   }
@@ -580,6 +663,8 @@ IA.ideas = (function () {
     // Multitudes: muchos extras lucen en la acción y en las épocas pasadas
     if ((o.extras || 0) >= 12 && (fam === 'AA' || (o.epo && o.epo !== 'actualidad'))) pub += 1;
     add(IA.rodaje.ajusteNotas(o, anio)); // estilo de producción, método, terreno y sets (V19)
+    pub += efectoPremisas(o, anio); // premisas y tropos (V21)
+    add(efectoEnfoque(o)); // enfoque del estudio (V21)
     return { crit: crit, pub: pub };
   }
   // Lo que se decide con azar al terminar: efectos aplaudidos o repudiados y el resultado de la IA
@@ -656,7 +741,7 @@ IA.ideas = (function () {
     encajeIdea: encajeIdea, clavesEncaje: clavesEncaje, marcarEncaje: marcarEncaje, estrellas: estrellas,
     factorCosto: factorCosto, costoProduccion: costoProduccion, ajusteSemanas: ajusteSemanas, clase: clase, perfil: perfil,
     reglaDominio: reglaDominio, anioLibre: anioLibre, esLibre: esLibre, costoDerechos: costoDerechos, materialesDisponibles: materialesDisponibles, anioMaterial: anioMaterial,
-    atractivo: atractivo, usosRecientes: usosRecientes, registrarUso: registrarUso, usarMaterial: usarMaterial,
+    atractivo: atractivo, usosRecientes: usosRecientes, registrarUso: registrarUso, costoInforme: costoInforme, informeLectura: informeLectura, regatear: regatear, TODAS_PREMISAS: TODAS_PREMISAS, famPremisa: famPremisa, premisasRecomendadas: premisasRecomendadas, usosPremisa: usosPremisa, registrarPremisas: registrarPremisas, efectoPremisas: efectoPremisas, efectoEnfoque: efectoEnfoque, usarMaterial: usarMaterial,
     precioGuion: precioGuion, renovarGuiones: renovarGuiones, recomendarHistoria: recomendarHistoria, ideaAleatoria: ideaAleatoria,
     aplicarIdea: aplicarIdea, ideaIA: ideaIA, temaRecomendado: temaRecomendado, arcoRecomendado: arcoRecomendado, problemaRecomendado: problemaRecomendado,
     nombrePersonaje: nombrePersonaje, regionDe: regionDe, personajeNuevo: personajeNuevo, generarPersonajes: generarPersonajes, asignarReparto: asignarReparto,

@@ -333,7 +333,7 @@ IA.datos = (function () {
 
   // ---------- Premios básicos de la V16 (la versión completa llega en la V22) ----------
   const premios = {
-    nombre: 'Premios Quimera', semana: 10,
+    nombre: 'Premios Quimera', semana: 11,
     categorias: [
       { id: 'pelicula', nombre: 'Mejor película' },
       { id: 'direccion', nombre: 'Mejor dirección' },
@@ -402,7 +402,46 @@ IA.datos = (function () {
     { anio: 2040, nombre: 'Salas inmersivas' }, { anio: 2090, nombre: 'Cine sensorial' },
   ];
 
+  // ---------- Inicio (V21, Referencia R7): tarjetas de región, de era, sufijos de logo y ADN del mercado ----------
+  // capital: múltiplo del capital recomendado; prestigio: 0 a 100; competencia: 1 baja … 3 alta
+  const regionesInicio = [
+    { id: 'losangeles', nombre: 'Los Ángeles', pais: 'us', desde: 1910, mercado: 'El mercado más grande del mundo', competencia: 3, capital: 1, prestigio: 8, texto: 'Sol todo el año y las majors a la vuelta de la esquina.' },
+    { id: 'nuevayork', nombre: 'Nueva York', pais: 'us', desde: 1850, mercado: 'Grande y exigente', competencia: 3, capital: 1, prestigio: 7, texto: 'Teatro, prensa y dinero: todo pasa primero aquí.' },
+    { id: 'londres', nombre: 'Londres', pais: 'gb', desde: 1850, mercado: 'Grande, con tradición teatral', competencia: 2, capital: 1, prestigio: 8, texto: 'Escenarios centenarios y una crítica implacable.' },
+    { id: 'paris', nombre: 'París', pais: 'fr', desde: 1850, mercado: 'Mediano, amante del arte', competencia: 2, capital: 0.9, prestigio: 10, texto: 'Aquí nació el cine; la crítica pesa más que la taquilla.' },
+    { id: 'berlin', nombre: 'Berlín', pais: 'de', desde: 1850, mercado: 'Mediano y experimental', competencia: 2, capital: 0.9, prestigio: 7, texto: 'Vanguardia, sombras largas y cabarets.' },
+    { id: 'roma', nombre: 'Roma', pais: 'it', desde: 1850, mercado: 'Mediano', competencia: 2, capital: 0.85, prestigio: 7, texto: 'Grandes platós y una historia que se filma sola.' },
+    { id: 'bombay', nombre: 'Bombay', pais: 'in', desde: 1913, mercado: 'Enorme y musical', competencia: 2, capital: 0.6, prestigio: 4, texto: 'Canciones, familias numerosas y salas siempre llenas.' },
+    { id: 'lagos', nombre: 'Lagos', pais: 'ng', desde: 1992, mercado: 'Joven y veloz', competencia: 1, capital: 0.4, prestigio: 2, texto: 'Se filma rápido, barato y para millones en video.' },
+    { id: 'cdmx', nombre: 'Ciudad de México', pais: 'mx', desde: 1896, mercado: 'Grande en Latinoamérica', competencia: 2, capital: 0.6, prestigio: 5, texto: 'Melodramas, comedias y una época de oro por delante.' },
+    { id: 'buenosaires', nombre: 'Buenos Aires', pais: 'ar', desde: 1896, mercado: 'Mediano y culto', competencia: 1, capital: 0.6, prestigio: 6, texto: 'Tango, teatro y un público que discute todo.' },
+    { id: 'bogota', nombre: 'Bogotá', pais: 'co', desde: 1897, mercado: 'Pequeño y en crecimiento', competencia: 1, capital: 0.45, prestigio: 3, texto: 'Rodar es barato y las montañas están cerca.' },
+    { id: 'tokio', nombre: 'Tokio', pais: 'jp', desde: 1899, mercado: 'Grande y fiel', competencia: 2, capital: 0.9, prestigio: 7, texto: 'Samuráis, monstruos y animación de primera.' },
+    { id: 'hongkong', nombre: 'Hong Kong', pais: 'hk', desde: 1909, mercado: 'Pequeño en casa, enorme afuera', competencia: 2, capital: 0.7, prestigio: 5, texto: 'Acción, artes marciales y rodajes nocturnos.' },
+    { id: 'seul', nombre: 'Seúl', pais: 'kr', desde: 1919, mercado: 'Mediano y en ascenso', competencia: 1, capital: 0.6, prestigio: 4, texto: 'Thrillers afilados y dramas que conquistan el mundo.' },
+    { id: 'elcairo', nombre: 'El Cairo', pais: 'eg', desde: 1896, mercado: 'El mayor del mundo árabe', competencia: 1, capital: 0.5, prestigio: 4, texto: 'Estrellas de la canción y comedias populares.' },
+    { id: 'sidney', nombre: 'Sídney', pais: 'au', desde: 1896, mercado: 'Pequeño y lejano', competencia: 1, capital: 0.8, prestigio: 4, texto: 'Paisajes enormes e incentivos para rodar.' },
+    { id: 'independiente', nombre: 'Independiente (donde quieras)', pais: null, desde: 1850, mercado: 'El de tu país', competencia: 1, capital: 0.5, prestigio: 1, texto: 'Sin padrinos: poco dinero, toda la libertad.' },
+  ];
+  // Tarjetas de era: 3 reglas del negocio de cada época (lo que ya hace la economía)
+  const erasInicio = [
+    { desde: 1850, hasta: 1894, nombre: 'Antes del cine', reglas: ['El teatro y la linterna mágica son el espectáculo', 'Los públicos son chicos y locales', 'La prensa decide qué se ve'] },
+    { desde: 1895, hasta: 1926, nombre: 'Cine mudo', reglas: ['Películas cortas, baratas y rápidas', 'Las barreras de idioma casi no existen', 'Las estrellas nacen de un día para otro'] },
+    { desde: 1927, hasta: 1947, nombre: 'Época de oro de los estudios', reglas: ['Todo el mundo va al cine cada semana', 'Los estudios tienen a sus estrellas bajo contrato', 'Llega el sonido: hay que doblar'] },
+    { desde: 1948, hasta: 1966, nombre: 'Llega la televisión', reglas: ['El público se queda en casa', 'Las grandes producciones y el color atraen', 'Los cines ya no son de los estudios'] },
+    { desde: 1967, hasta: 1979, nombre: 'Nuevo cine', reglas: ['Se acaba la censura: más libertad de contenido', 'Los autores mandan', 'Nace el taquillazo de verano'] },
+    { desde: 1980, hasta: 1999, nombre: 'Video y taquillazos', reglas: ['El video casero es la segunda vida de cada obra', 'El marketing decide el primer fin de semana', 'Las franquicias empiezan a dominar'] },
+    { desde: 2000, hasta: 2019, nombre: 'Era digital', reglas: ['El DVD y luego el streaming pagan casi la mitad', 'Los efectos digitales abaratan lo imposible', 'Las redes sociales hacen y deshacen éxitos'] },
+    { desde: 2020, hasta: 2049, nombre: 'Streaming', reglas: ['Las plataformas compiten con los cines', 'Las ventanas se acortan', 'El público global decide'] },
+    { desde: 2050, hasta: 9999, nombre: 'Futuro', reglas: ['Experiencias inmersivas', 'Talento humano y artificial conviven', 'Mercados nuevos que aún no existen'] },
+  ];
+  const sufijosLogo = sp('Pictures,Studios,Films,Productions,Entertainment,Media,Animation,Company,Cinema,Arts');
+  // Motor del mercado por era (ADN del mercado)
+  const motorMercado = [[1850, 'El teatro y las ferias'], [1895, 'Las novedades del cinematógrafo'], [1927, 'El cine sonoro y las estrellas'], [1948, 'La pelea contra la televisión'],
+    [1967, 'Los autores y la libertad'], [1975, 'El taquillazo de verano'], [1980, 'El video casero'], [2000, 'El DVD y los efectos digitales'], [2012, 'Las franquicias y el streaming'], [2030, 'Las plataformas globales'], [2060, 'La experiencia inmersiva']];
+
   return {
+    regionesInicio: regionesInicio, erasInicio: erasInicio, sufijosLogo: sufijosLogo, motorMercado: motorMercado,
     regiones: regiones, paises: paises, continentes: continentes, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
     familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
     clasificaciones: clasificaciones, ANIO_CLASIFICACION_POR_EDADES: ANIO_CLASIFICACION_POR_EDADES,

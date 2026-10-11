@@ -45,8 +45,10 @@ IA.juego = (function () {
     N.S = S;
     conectar();
     S.mundo.tendencias = M.tendenciasIniciales();
-    const pais = D.pais(op.pais || 'us') || D.pais('us');
-    const capital2025 = op.capital || capitalRecomendado(anio);
+    // Tarjeta de región de inicio (V21): país, capital, prestigio y competencia de su lugar
+    const tarjeta = D.regionesInicio.filter(function (r) { return r.id === op.region; })[0];
+    const pais = D.pais((tarjeta && tarjeta.pais) || op.pais || 'us') || D.pais('us');
+    const capital2025 = op.capital || Math.round(capitalRecomendado(anio) * (tarjeta ? tarjeta.capital : 1));
     S.estudios.push({
       id: 0, jugador: true, nombre: (op.nombre || 'INDUSTRY ART').slice(0, 40), logo: op.logo || { s: 8, c: 6, b: 14, t: 3, f: 1 },
       pais: pais.id, reg: pais.region, caja: Math.round(M.aEpoca(capital2025, anio)), capital2025: capital2025,
@@ -63,6 +65,18 @@ IA.juego = (function () {
     S.avatar = { nom: (av.nombre || 'Felipe').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
     const vis = D.visiones.filter(function (v) { return v.id === S.estudios[0].vision; })[0];
     if (vis && vis.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);
+    // V21: prestigio e influencia iniciales según la región y la dificultad; enfoque, sufijo, sede, fans y avatar
+    const e0 = S.estudios[0];
+    const ajusteDif = { facil: 3, normal: 0, dificil: -2 }[S.dificultad] || 0;
+    if (tarjeta) e0.fama = N.redondear(N.limitar(e0.fama + (tarjeta.prestigio + ajusteDif) / 100, 0.01, 0.5), 3);
+    e0.influencia = Math.round(N.limitar((tarjeta ? tarjeta.prestigio : 3) + ajusteDif + 5, 0, 100));
+    e0.region0 = tarjeta ? tarjeta.id : 'independiente';
+    if (op.enfoque) e0.enf = { gen: (op.enfoque.gen || []).slice(0, 3), tem: (op.enfoque.tem || []).slice(0, 3) };
+    e0.suf = op.sufijo || '';
+    e0.sede = 1; e0.staff = [];
+    S.fans = Math.round(e0.fama * 2000);
+    S.recordatorios = [];
+    IA.carrera.iniciar(op);
     O.reindexar();
     noticia({ tipo: 'estudio', texto: 'Nace ' + S.estudios[0].nombre + ' en ' + pais.nombre + '. ' + M.era(anio) + '.', importante: true });
     // El mundo no arranca vacío: los rivales ya tienen obras en marcha y hay guiones en venta
@@ -86,6 +100,7 @@ IA.juego = (function () {
       if (o.est === 0) noticia({ tipo: 'estreno', texto: N.S.avatar.nom + ' presenta «' + o.tit + '»: llega a los cines.' });
     });
     N.on('obraTerminada', function (o) {
+      IA.sede.alTerminar(o); // fans (V21)
       if (o.est === 0) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });
     });
     N.on('premios', function (r) {
@@ -135,6 +150,13 @@ IA.juego = (function () {
     // Un guion propio se usa una sola vez
     if (b.guionId) N.S.guionesPropios = (N.S.guionesPropios || []).filter(function (g) { return g.id !== b.guionId; });
     const o = PR.iniciar(b, NG.contextoDe(0));
+    IA.ideas.registrarPremisas(o, N.anio());
+    // Arquetipo carismático: el equipo llega con más moral (V21)
+    const ar = IA.carrera.arquetipo();
+    if (ar && ar.moral) O.idsEquipo(o).forEach(function (id) { const ta = T.porId(id); if (ta) T.cambiarMoral(ta, ar.moral); });
+    // Experiencia en los géneros del enfoque (V21)
+    const est = N.S.estudios[0], g0 = (o.gen || [])[0];
+    if (est.enf && est.enf.gen.indexOf(g0) >= 0) { est.expG = est.expG || {}; est.expG[g0] = (est.expG[g0] || 0) + 1; }
     noticia({ tipo: 'estudio', texto: 'Empieza el desarrollo de «' + o.tit + '».' + (b.mat ? ' Basada en «' + IA.taxonomia.material(b.mat).tit + '».' : '') });
     return { obra: o };
   }
@@ -286,6 +308,8 @@ IA.juego = (function () {
     L.semana(ctx);
     IA.ventanas.semana(ctx);
     NG.semana();
+    IA.sede.semana(); // reclutamiento y capacitación (V21)
+    IA.carrera.semana(); // encargos y vida ligera de tu avatar (V21)
     const ceremonia = PM.semana();
     academia();
     S.t++;
@@ -301,8 +325,8 @@ IA.juego = (function () {
       R.mensual(NG.contextoDe(1));
       T.mensual(NG.contexto()); // salarios de los contratos exclusivos
       IA.estreno.mensual(NG.contexto()); // cadenas de cines y cines propios (V20)
-      // Cada tres meses llegan guiones nuevos al mercado
-      if (N.mes(S.t) % 3 === 0) IA.ideas.renovarGuiones();
+      // El mercado de guiones se renueva cada mes (V21)
+      IA.ideas.renovarGuiones();
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;
@@ -311,6 +335,8 @@ IA.juego = (function () {
       T.anual();
       T.exclusivosRivales();
       IA.ventanas.anual();
+      IA.sede.anual();
+      IA.carrera.anual();
       O.compactar();
       D.cronologia.forEach(function (c) { if (c[0] === N.anio()) noticia({ tipo: 'historia', texto: c[1], importante: true }); });
       if (S.fin.hist.length) N.emit('finAnio', S.fin.hist[S.fin.hist.length - 1]);
@@ -346,6 +372,8 @@ IA.juego = (function () {
     // Dilemas de rodaje y pruebas de público esperan tu decisión (V19)
     if (O.activas().some(function (o) { return o.est === 0 && (o.dil || (o.prueba && !o.prueba.ok)); })) return 'decision';
     if (O.activas().some(function (o) { return o.est === 0 && o.et === 'lista' && o.prog && o.fe === S.t; })) return 'estreno';
+    if (IA.cal.recordatoriosDeSemana(S.t).length) return 'recordatorio'; // tus recordatorios detienen el tiempo (V21)
+    if (IA.carrera.pendiente()) return 'vida';
     if (N.semana() === 1) return 'anio';
     return '';
   }
@@ -355,7 +383,8 @@ IA.juego = (function () {
     const caja0 = S.estudios[0].caja, t0 = S.t;
     const ing0 = NG.total(S.fin.anio, 'ing'), gas0 = NG.total(S.fin.anio, 'gas');
     let n = 0, motivo = '';
-    const tope = modo === 'semana' ? 1 : modo === 'mes' ? 4 : typeof modo === 'number' ? modo : 52;
+    // modo también puede ser { hasta: t } para avanzar hasta un día elegido del calendario (V21)
+    const tope = modo === 'semana' ? 1 : modo === 'mes' ? 4 : typeof modo === 'number' ? modo : modo && modo.hasta !== undefined ? Math.max(0, modo.hasta - S.t) : 52;
     let ingAcum = 0, gasAcum = 0;
     while (n < tope) {
       const anioAntes = N.anio();
@@ -375,6 +404,7 @@ IA.juego = (function () {
       if (S.quiebra) { motivo = 'quiebra'; break; }
       if (huboCeremonia) { motivo = 'premios'; if (modo === 'evento' || modo === 'semana') break; }
       if (modo === 'evento') { motivo = hayEvento(); if (motivo) break; }
+      else if (IA.cal.recordatoriosDeSemana(S.t).length || (modo && modo.hasta !== undefined && IA.carrera.pendiente())) { motivo = IA.cal.recordatoriosDeSemana(S.t).length ? 'recordatorio' : 'vida'; break; }
     }
     void ing0; void gas0;
     return { semanas: n, desde: t0, hasta: S.t, caja: S.estudios[0].caja - caja0, ingresos: ingAcum, gastos: gasAcum, motivo: motivo };

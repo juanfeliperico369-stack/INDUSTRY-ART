@@ -308,7 +308,8 @@ IA.economia = (function () {
     D.regiones.forEach(function (r) {
       const dr = da.regiones[r.id];
       if (dr.publico <= 0) return;
-      const mercado = dr.publico / 52 * M.temporada(r.id, sem);
+      const temp = M.temporada(r.id, sem);
+      const mercado = dr.publico / 52 * temp;
       const pesos = [];
       let suma = pesoOtras + pesoCasa;
       // Las festividades reparten el público entre familias (cuánta gente va al cine ya lo da la temporada)
@@ -317,9 +318,11 @@ IA.economia = (function () {
       mediaFest /= D.familias.length;
       for (let i = 0; i < obras.length; i++) {
         const o = obras[i];
-        let u = o.u + Math.log(o.acc[r.id] || 0.02) + P.TENDENCIA * (tendencias[o.fam] || 0) + Math.log(M.bonoGenero(o.fam, sem));
-        // Festividades y olas de la región (V20)
-        u += Math.log(M.bonoRegion(o.fam, r.id, sem, anio) / mediaFest) + P.TENDENCIA * 0.6 * M.tendenciaRegion(r.id, o.fam);
+        // Temporada, bono de género y festividades juntos quedan dentro del factor semanal ×0,80 a ×1,40 (V21)
+        const fSem = N.limitar(M.bonoGenero(o.fam, sem) * M.bonoRegion(o.fam, r.id, sem, anio) / mediaFest, 0.8 / temp, 1.4 / temp);
+        let u = o.u + Math.log(o.acc[r.id] || 0.02) + P.TENDENCIA * (tendencias[o.fam] || 0) + Math.log(fSem);
+        // Olas de la región (V20)
+        u += P.TENDENCIA * 0.6 * M.tendenciaRegion(r.id, o.fam);
         if (ctx.regionEstudio(o.est) === r.id) u += P.LOCAL;
         if (o.feR) u += P.ESTRELLAS * (o.feR[r.id] || 0);
         // Plan de estreno (V20): modo en la región, doblaje, cadenas con contrato y cines propios
@@ -372,7 +375,7 @@ IA.economia = (function () {
     const regs = D.regiones, anio = N.S ? N.anio() : 2000;
     let t = 0, w = 0;
     regs.forEach(function (r) { const k = r.id === regCasa ? 2 : 1; t += k * M.temporada(r.id, semanaX) * M.bonoRegion(famId, r.id, semanaX, anio); w += k; });
-    return (t / w) * M.bonoGenero(famId, semanaX);
+    return N.limitar((t / w) * M.bonoGenero(famId, semanaX), 0.8, 1.4);
   }
 
   return {

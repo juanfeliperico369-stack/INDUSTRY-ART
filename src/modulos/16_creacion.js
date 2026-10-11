@@ -177,7 +177,7 @@ IA.creacion = (function () {
   }
   function vistaGuiones() {
     const S = N.S;
-    let h = cabecera('Comprar un guion', 'Guiones ya escritos. La calificación es la de su primera lectura: un guion mejor sube la calidad de la obra. Llegan nuevos cada tres meses; el precio incluye al escritor.');
+    let h = cabecera('Comprar un guion', 'Guiones ya escritos. La primera lectura es una estimación con margen; un informe de lectura pagado revela la calidad real (más exacta con un analista en tu personal). Puedes regatear una vez: a veces baja el precio y a veces el vendedor se va. El mercado se renueva cada mes.');
     const propios = S.guionesPropios || [];
     if (propios.length) h += '<h3>Tus guiones</h3>' + propios.map(function (g) { return tarjetaGuion(g, true); }).join('');
     h += '<h3>En venta</h3>' + ((S.guiones || []).length ? S.guiones.map(function (g) { return tarjetaGuion(g, false); }).join('') : '<p class="tenue">No hay guiones en venta ahora.</p>');
@@ -185,10 +185,14 @@ IA.creacion = (function () {
   }
   function tarjetaGuion(g, propio) {
     const sin = I.sinopsis({ gen: g.idea.gen, tem: g.idea.tem, prob: g.idea.prob, arco: g.idea.arco, epo: g.idea.epo || 'actualidad' });
-    return '<div class="tarjeta"><div class="fila entre"><b>' + esc(g.idea.tit) + '</b><span class="oro">' + estrellasCalif(g.calif) + ' ' + g.calif + '</span></div>' +
+    const lect = propio || g.lect === undefined ? g.calif : g.lect, margen = propio || g.margen === undefined ? 0 : g.margen;
+    return '<div class="tarjeta"><div class="fila entre"><b>' + esc(g.idea.tit) + '</b><span class="oro">' + estrellasCalif(lect) + ' ' + lect + (margen ? ' ±' + margen : '') + '</span></div>' +
+      (g.pags ? '<span class="chico tenue">' + g.pags + ' páginas · ' + (g.idea.pre && g.idea.pre.length ? esc(g.idea.pre.join(', ')) : 'sin premisa marcada') + '</span><br>' : '') +
       '<span class="chico">' + esc(g.idea.gen.join(' · ')) + ' · ' + esc((g.idea.tem || []).join(', ')) + '</span><br><span class="tenue chico">De ' + esc(g.nomAutor) + (propio ? '' : ' · en venta hasta ' + esc(U.fechaCorta(g.vence))) + '</span>' +
       '<p class="nota">' + esc(sin) + '</p>' +
-      (propio ? '<button class="btn primario" data-a="crProducirGuion" data-v="' + g.id + '">Producir</button>' : '<button class="btn primario" data-a="crComprarGuion" data-v="' + g.id + '">Comprar · ' + dinero(g.precio) + '</button>') + '</div>';
+      (propio ? '<button class="btn primario" data-a="crProducirGuion" data-v="' + g.id + '">Producir</button>' : '<div class="chips"><button class="btn primario" data-a="crComprarGuion" data-v="' + g.id + '">Comprar · ' + dinero(g.precio) + '</button>' +
+        (margen > 4 ? '<button class="chip" data-a="crInforme" data-v="' + g.id + '">Informe de lectura · ' + dinero(I.costoInforme(g)) + '</button>' : '') +
+        (g.reg ? '' : '<button class="chip" data-a="crRegatear" data-v="' + g.id + '">Regatear</button>') + '</div>') + '</div>';
   }
   const GRUPOS_MAT = [['todos', 'Todas'], ['clasico', 'Clásicos'], ['tono', 'Subidas de tono'], ['tradicion', 'Tradiciones del mundo']];
   function mini(v) { return '<span class="mini"><i style="width:' + Math.round(N.limitar(v / 1.5, 0, 1) * 100) + '%"></i></span>'; }
@@ -269,6 +273,15 @@ IA.creacion = (function () {
     h += '<h4>Arco narrativo' + (b.nat === 'r' ? ' (opcional en realidad)' : ' (obligatorio en ficción)') + candado(b, 'arco') + '</h4><div class="chips">' + X.arcos.map(function (a) {
       return chip(a.nombre, 'crArco', a.id, b.arco === a.id, lockA, ' title="' + esc(a.orig) + '"');
     }).join('') + '</div>';
+    // Premisas y tropos (V21): 0 a 2; encajan con ciertas familias y las muy usadas cansan
+    b.pre = b.pre || [];
+    const famB = b.fam || D.familiaDe[(b.gen || [])[0]];
+    h += '<h4>Premisas y tropos (' + b.pre.length + '/2, opcional)</h4><p class="nota">Encajan mejor con algunas familias (★) y las que el mundo usa mucho cansan al público.</p>' +
+      '<label class="campo"><span>Familia de premisas</span><select data-c="crPreFam">' + X.familiasPremisa.map(function (f) { return '<option value="' + f.id + '"' + (cr.preFam === f.id ? ' selected' : '') + '>' + esc(f.nombre) + (f.afin.indexOf(famB) >= 0 ? ' ★' : '') + '</option>'; }).join('') + '</select></label><div class="chips">' +
+      (X.familiasPremisa.filter(function (f) { return f.id === (cr.preFam || X.familiasPremisa[0].id); })[0].items).concat(b.pre.filter(function (p) { return (X.familiasPremisa.filter(function (f) { return f.id === (cr.preFam || X.familiasPremisa[0].id); })[0].items).indexOf(p) < 0; })).map(function (p) {
+        const on = b.pre.indexOf(p) >= 0, u = I.usosPremisa(p, anio());
+        return chip(p + (u >= 4 ? ' (muy usada)' : ''), 'crPre', p, on, !on && b.pre.length >= 2);
+      }).join('') + '</div>';
     const arco = X.arco(b.arco);
     if (arco) h += '<p class="nota">' + esc(arco.orig) + ': ' + esc(arco.final) + (arco.crit || arco.pub ? ' · crítica ' + signo(arco.crit) + ', público ' + signo(arco.pub) : '') + '</p>';
     if (completo) {
@@ -672,6 +685,8 @@ IA.creacion = (function () {
       refrescar();
     }
   });
+  ac('crInforme', function (v) { const e = I.informeLectura(+v, IA.sede.tieneAnalista()); if (e) U.aviso(e, 'mal'); else U.aviso('Llega el informe de lectura'); refrescar(); });
+  ac('crRegatear', function (v) { const r = I.regatear(+v, IA.sede.tieneAnalista()); if (r.error) U.aviso(r.error, 'mal'); else U.aviso(r.texto, r.ok ? '' : 'mal'); refrescar(); });
   ac('crComprarGuion', function (v) {
     const err = J.comprarGuion(+v);
     if (err) { U.aviso(err, 'mal'); return; }
@@ -789,6 +804,8 @@ IA.creacion = (function () {
   function alternar(lista, x, max) { const i = lista.indexOf(x); if (i >= 0) lista.splice(i, 1); else if (lista.length < max) lista.push(x); return lista; }
   ac('crTema', function (v) { if (!cr.b || bloqueado(cr.b, 'tem')) return; alternar(cr.b.tem, v, I.LIMITES.tem); ajustar(cr.b); refrescar(); });
   ac('crProb', function (v) { if (!cr.b || bloqueado(cr.b, 'prob')) return; alternar(cr.b.prob, v, I.LIMITES.prob); ajustar(cr.b); refrescar(); });
+  ac('crPreFam', function (v) { cr.preFam = v; refrescar(); });
+  ac('crPre', function (v) { if (!cr.b) return; const p = cr.b.pre = cr.b.pre || []; const i = p.indexOf(v); if (i >= 0) p.splice(i, 1); else if (p.length < 2) p.push(v); refrescar(); });
   ac('crArco', function (v) { if (!cr.b || bloqueado(cr.b, 'arco')) return; cr.b.arco = cr.b.arco === v && cr.b.nat === 'r' ? '' : v; ajustar(cr.b); refrescar(); });
   ac('crSubarco', function (v) { if (!cr.b || bloqueado(cr.b, 'sarc')) return; alternar(cr.b.sarc, v, I.LIMITES.sarc); ajustar(cr.b); refrescar(); });
   ac('crNat', function (v) {

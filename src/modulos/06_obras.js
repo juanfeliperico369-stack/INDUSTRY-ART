@@ -77,7 +77,7 @@ IA.obras = (function () {
   // Campos de la fábrica de ideas que se copian de las opciones (las obras de los rivales usan los de siempre)
   const CAMPOS_IDEA = ['med', 'nat', 'tipo', 'sub', 'prob', 'arco', 'sarc', 'fic', 'corr', 'estilo', 'prio', 'fmt', 'epo', 'lug', 'idio', 'pubs',
     'cont', 'min', 'cx', 'rit', 'fx', 'ia', 'presM', 'clasN', 'mat', 'rod', 'ideaIA', 'guionC', 'guionPagado', 'derechos', 'suave', 'pj', 'sin',
-    'extras', 'terceros', 'pctT'];
+    'extras', 'terceros', 'pctT', 'pre'];
   function borrador(est, opciones) {
     const anio = N.anio();
     const o = opciones || {};

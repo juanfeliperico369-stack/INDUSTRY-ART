@@ -5,11 +5,11 @@
 IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
-  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion'];
+  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera'];
   const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'distribucion', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas'];
   const NOMBRES = {
     taquilla: 'Taquilla (parte del estudio)', video: 'Video doméstico', tv: 'Televisión', streaming: 'Streaming', merchandising: 'Juguetes y coleccionables',
-    reestrenos: 'Reestrenos', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
+    reestrenos: 'Reestrenos', carrera: 'Tus encargos como talento', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
     personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas',
   };
   function libroVacio() { return { ing: {}, gas: {} }; }
@@ -41,7 +41,7 @@ IA.negocio = (function () {
     S.estudios[0].terrenos.forEach(function (p) { c += infoTerreno(p).capacidad || 0; });
     return c;
   }
-  function bonos(estId, famId) {
+  function bonos(estId, famId, obra) {
     const b = {};
     if (estId !== 0) {
       // Los rivales ya tienen sus instalaciones: un bono parejo según su tamaño
@@ -65,6 +65,8 @@ IA.negocio = (function () {
       const p = infoTerreno(id);
       if (p.bono && (!p.familias || p.familias.indexOf(famId) >= 0)) Object.keys(p.bono).forEach(function (k) { b[k] = (b[k] || 0) + p.bono[k]; });
     });
+    IA.sede.bonos(b, obra); // personal de oficina (V21)
+    IA.carrera.bonos(b); // trasfondo y arquetipo de tu avatar (V21)
     return b;
   }
   function rapidez(estId) {
@@ -79,14 +81,14 @@ IA.negocio = (function () {
     if (estId !== 0) return AJ.ahorroRivales;
     let a = 0;
     N.S.estudios[0].terrenos.forEach(function (id) { a += infoTerreno(id).ahorro || 0; });
-    return Math.min(0.2, a);
+    return Math.min(0.26, a + IA.sede.ahorroProductor() + IA.carrera.ahorro());
   }
   function bonoMarketing(estId) {
     if (estId !== 0) return 0;
     let a = 0;
     N.S.estudios[0].pisos.forEach(function (id) { a += infoPiso(id).marketing || 0; });
     const vis = D.visiones.filter(function (v) { return v.id === N.S.estudios[0].vision; })[0];
-    return a + (vis && vis.marketing ? vis.marketing : 0);
+    return a + (vis && vis.marketing ? vis.marketing : 0) + IA.sede.bonoMarketing() + IA.carrera.bonoMarketing();
   }
   // Cada construcción encarece la siguiente (terreno más caro, permisos, obras más grandes)
   function costoConstruccion(info) {
@@ -127,7 +129,7 @@ IA.negocio = (function () {
     est.pisos.forEach(function (id) { reduccion += -(infoPiso(id).fijo || 0); });
     const f = 1 - Math.min(0.3, reduccion);
     return {
-      personal: tipico * (0.006 + 0.004 * partes) * f,
+      personal: (tipico * (0.006 + 0.004 * partes) * f + IA.sede.gastoFijoMes()) * (1 - IA.carrera.descuentoFijo()), // sede y personal de oficina (V21)
       mantenimiento: tipico * 0.008 * (est.valorObras || 0) * f,
     };
   }

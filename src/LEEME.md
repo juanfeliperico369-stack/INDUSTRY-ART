@@ -3,8 +3,8 @@
 El juego se entrega como **un solo archivo HTML** (`INDUSTRY_ART_vXX.html`) que funciona sin internet.
 Aquí vive el mismo código separado por módulos para que cualquier chat lo lea y lo continúe.
 
-- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v20.html`.
-- `python3 tools/desarmar.py INDUSTRY_ART_v20.html` vuelve a separar un HTML armado en `src/`.
+- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v21.html`.
+- `python3 tools/desarmar.py INDUSTRY_ART_v21.html` vuelve a separar un HTML armado en `src/`.
 
 ## Estructura
 
@@ -52,3 +52,7 @@ IA.nombre = (function () {
   (plan de lanzamiento, dinero en cadena, ventanas, catálogo, distribución, calendario) está en `16_distribucion.js`.
 - Los módulos de simulación (núcleo, mundo, economía, talentos, obras, producción, lanzamiento, rivales, premios,
   negocio) **no tocan el DOM**; solo la interfaz, el arte y el guardado lo hacen.
+- V21 (Plan Maestro v2): el calendario real vive en `03_calendario.js` (IA.cal) y su pantalla en `16_calendario_ui.js`,
+  junto con la sede, el avatar y el menú de pausa; la sede y el personal de oficina en `11_sede.js`; el avatar (modo
+  carrera, vida ligera y heredero) en `12_carrera.js`. Desde la V21 se trabaja en modo rápido (ver
+  `docs/INDUSTRY_ART_Especificacion_v2.md`).

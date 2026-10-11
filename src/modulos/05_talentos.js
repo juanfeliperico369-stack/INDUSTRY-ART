@@ -174,6 +174,7 @@ IA.talentos = (function () {
   function tarifaPara(t, estId) {
     if (!t) return 0;
     if (exclusivoDe(t) === estId) return 0;
+    if (t.jugador && estId === 0) return 0; // tu avatar trabaja gratis en tu estudio (modo carrera, V21)
     let f = tarifa(t);
     if (estId === 0 && t.beca && t.beca > N.S.t) f *= 0.9; // la beca da 5 años de lealtad
     if (estId === 0 && t.desc && !t.obras) f *= 0.7; // tu descubrimiento firma barato su primer contrato
@@ -251,6 +252,37 @@ IA.talentos = (function () {
     return N.limitar(h, 1, 100);
   }
 
+  // ---------- Niveles de talento (V21): Promesa, Veterano, Estrella consolidada y Leyenda viva ----------
+  // Los niveles altos piden un prestigio mínimo del estudio (0 a 100) y la ficha dice cuánto falta
+  const NIVELES = [
+    { id: 'promesa', nombre: 'Promesa', prestigio: 0 },
+    { id: 'veterano', nombre: 'Veterano', prestigio: 0 },
+    { id: 'estrella', nombre: 'Estrella consolidada', prestigio: 25 },
+    { id: 'leyenda', nombre: 'Leyenda viva', prestigio: 45 },
+  ];
+  function nivel(t) {
+    const e = N.anio() - t.nac;
+    if (t.fama >= 0.72 && t.hab >= 78 && (e >= 45 || (t.premios || 0) >= 3)) return NIVELES[3];
+    if (t.fama >= 0.45) return NIVELES[2];
+    if (e >= 38 || (t.obras || 0) >= 15) return NIVELES[1];
+    return NIVELES[0];
+  }
+  function faltaPrestigio(t, estId) {
+    const est = N.S.estudios[estId || 0];
+    return Math.max(0, nivel(t).prestigio - Math.round((est ? est.fama : 0) * 100));
+  }
+  // Crear un talento propio (V21): con nombre, oficio, sexo y edad; la habilidad sale de un potencial modesto
+  function crearPropio(op) {
+    const anio = N.anio();
+    const edad = N.limitar(Math.round(op.edad || 25), 8, 80);
+    const t = crear(op.of || 'interprete', edad, anio, { reg: op.reg, sx: op.sx, pot: N.limitar(op.pot || 62, 30, 80), pasado: false });
+    if (op.nom) t.nom = String(op.nom).slice(0, 40);
+    t.propio = 1;
+    N.S.talentos.push(t);
+    reindexar();
+    return t;
+  }
+
   // ---------- Negociación: acepta, contraoferta (pide porcentaje o más dinero), exige o rechaza ----------
   // c: { est, rol, imp (importancia del personaje), clas (índice de la clasificación), dir (habilidad del director),
   //      amor (nivel de amor), fam }
@@ -267,6 +299,8 @@ IA.talentos = (function () {
     if (e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2)) return { estado: 'rechaza', texto: 'Es menor de edad: solo obras hasta PG-13' };
     const m = moral(t);
     if (m < 22) return { estado: 'rechaza', texto: 'Está desmotivado' };
+    const falta = faltaPrestigio(t, c.est || 0);
+    if (falta > 0) return { estado: 'rechaza', texto: nivel(t).nombre + ': pide prestigio ' + nivel(t).prestigio + ' (te faltan ' + falta + ')' };
     const brecha = t.fama - (est ? est.fama : 0);
     // Las estrellas exigen fama del estudio
     if (brecha > 0.65 && t.hab >= 70) return { estado: 'rechaza', texto: 'Tu estudio aún no le interesa (le falta fama)' };
@@ -629,7 +663,7 @@ IA.talentos = (function () {
     reindexar: reindexar, porId: porId, crear: crear, completar: completar, generarInicial: generarInicial, poblarOficios: poblarOficios, edad: edad,
     disponible: disponible, ocupado: ocupado, tarifa: tarifa, tarifaPara: tarifaPara, activos: activos, disponibles: disponibles,
     mejorDisponible: mejorDisponible, ocupar: ocupar, liberar: liberar, cansancio: cansancio, trasEstreno: trasEstreno, anual: anual,
-    nombreNuevo: nombreNuevo, energia: energia, moral: moral, cambiarMoral: cambiarMoral, exclusivoDe: exclusivoDe, estudiando: estudiando,
+    NIVELES: NIVELES, nivel: nivel, faltaPrestigio: faltaPrestigio, crearPropio: crearPropio, nombreNuevo: nombreNuevo, energia: energia, moral: moral, cambiarMoral: cambiarMoral, exclusivoDe: exclusivoDe, estudiando: estudiando,
     personalidad: personalidad, impulso: impulso, overall: overall, capacidad: capacidad, afinidad: afinidad, famaRegion: famaRegion,
     ventajas: ventajas, perfilExtra: perfilExtra, habilidadEn: habilidadEn, negociar: negociar, salarioCon: salarioCon,
     relacion: relacion, tipoRelacion: tipoRelacion, cambiarRelacion: cambiarRelacion, quimica: quimica, pagarA: pagarA,

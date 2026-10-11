@@ -185,47 +185,16 @@ IA.mundo = (function () {
     }
     return 1;
   }
-  // Festividades con fechas reales (V20): en sus regiones suben el público de ciertas familias. Las de la región
-  // de tu sede pesan más en tu calendario y en tu pronóstico. (San Valentín y Halloween ya están en las temporadas
-  // de romance y miedo; aquí suman donde se celebran.)
-  const TODAS = ['nam', 'lat', 'eur', 'afr', 'asi', 'oce'];
-  const FESTIVIDADES = [
-    { id: 'anonuevo', nombre: 'Año Nuevo', sem: [1, 1], reg: TODAS, fam: { HM: 1.08, FJ: 1.08 } },
-    { id: 'veranosur', nombre: 'Verano austral', sem: [1, 8], reg: ['lat', 'oce', 'afr'], fam: { AA: 1.05, HM: 1.05, FJ: 1.05 } },
-    { id: 'lunar', nombre: 'Año Nuevo Lunar', sem: [5, 6], reg: ['asi'], fam: { HM: 1.15, FJ: 1.12, AA: 1.1 } },
-    { id: 'valentin', nombre: 'San Valentín', sem: [7, 7], reg: ['nam', 'eur', 'lat', 'oce'], fam: { RD: 1.05 }, desde: 1900 },
-    { id: 'carnaval', nombre: 'Carnaval', sem: [7, 9], reg: ['lat'], fam: { HM: 1.12, RD: 1.05 } },
-    { id: 'santa', nombre: 'Semana Santa', sem: [13, 15], reg: ['lat', 'eur'], fam: { DR: 1.1, FJ: 1.05 } },
-    { id: 'golden', nombre: 'Golden Week (Japón)', sem: [18, 18], reg: ['asi'], fam: { AA: 1.1, IM: 1.1, FJ: 1.1 }, desde: 1948 },
-    { id: 'cannes', nombre: 'Festival de Cannes', sem: [20, 21], reg: ['eur'], fam: { AV: 1.15, DR: 1.05 }, desde: 1946 },
-    { id: 'veranonorte', nombre: 'Vacaciones de verano', sem: [26, 34], reg: ['nam', 'eur', 'asi'], fam: { AA: 1.05, IM: 1.05, FJ: 1.08 } },
-    { id: 'inviernosur', nombre: 'Vacaciones de invierno (sur)', sem: [27, 30], reg: ['lat', 'oce', 'afr'], fam: { FJ: 1.12 } },
-    { id: 'venecia', nombre: 'Festival de Venecia', sem: [35, 36], reg: ['eur'], fam: { AV: 1.1, DR: 1.05 }, desde: 1932 },
-    { id: 'diwali', nombre: 'Diwali', sem: [43, 45], reg: ['asi'], fam: { HM: 1.12, DR: 1.08, RD: 1.08 } },
-    { id: 'halloween', nombre: 'Halloween', sem: [43, 44], reg: ['nam', 'eur', 'oce'], fam: { SM: 1.06 }, desde: 1930 },
-    { id: 'muertos', nombre: 'Día de Muertos', sem: [44, 44], reg: ['lat'], fam: { SM: 1.1, FJ: 1.08 } },
-    { id: 'gracias', nombre: 'Acción de Gracias', sem: [47, 47], reg: ['nam'], fam: { FJ: 1.12, HM: 1.08 } },
-    { id: 'navidad', nombre: 'Navidad', sem: [51, 52], reg: ['nam', 'lat', 'eur', 'afr', 'oce'], fam: { FJ: 1.1, HM: 1.05, IM: 1.05 } },
-  ];
-  function festividades(sem, reg, anio) {
-    return FESTIVIDADES.filter(function (f) { return sem >= f.sem[0] && sem <= f.sem[1] && (!reg || f.reg.indexOf(reg) >= 0) && (!f.desde || !anio || anio >= f.desde); });
-  }
-  // Bono de una familia en una región por sus festividades (se multiplica con la temporada y el bono de género)
-  function bonoRegion(famId, reg, sem, anio) {
-    let b = 1;
-    FESTIVIDADES.forEach(function (f) { if (sem >= f.sem[0] && sem <= f.sem[1] && f.reg.indexOf(reg) >= 0 && (!f.desde || anio >= f.desde) && f.fam[famId]) b *= f.fam[famId]; });
-    return b;
-  }
+  // Festividades con fechas reales (V21): viven en IA.cal con su regla (fija, Pascua, luna nueva, calendario
+  // islámico). Aquí quedan los atajos que usan la economía y las pantallas.
+  function festividades(sem, reg, anio) { return IA.cal.fiestasSemana(sem, reg, anio || N.anio()); }
+  function bonoRegion(famId, reg, sem, anio) { return IA.cal.bonoFiesta(famId, reg, sem, anio || N.anio()); }
   const NOMBRES_MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   function nombreMes(m) { return NOMBRES_MES[m]; }
-  // Fechas con nombre (solo para mostrar en el calendario; el efecto ya está en la curva de temporada)
-  const FECHAS = [[1, 'Año Nuevo'], [7, 'San Valentín'], [13, 'Semana Santa (aprox.)'], [22, 'Inicio del verano boreal'], [27, 'Vacaciones de verano'], [44, 'Halloween'], [47, 'Acción de Gracias'], [52, 'Navidad']];
-  function fechaDeSemana(sem, reg) {
-    for (let i = 0; i < FECHAS.length; i++) if (FECHAS[i][0] === sem) return FECHAS[i][1];
-    // Las festividades de la región de tu sede (V20)
+  // Nombre de las festividades de una semana en una región (la de tu sede si no se dice)
+  function fechaDeSemana(sem, reg, anio) {
     const r = reg || (N.S && N.S.estudios ? N.S.estudios[0].reg : null);
-    const f = r ? festividades(sem, r, N.S ? N.anio() : 2000).filter(function (x) { return x.sem[0] === sem; })[0] : null;
-    return f ? f.nombre : '';
+    return festividades(sem, r, anio || (N.S ? N.anio() : 2000)).map(function (f) { return f.nombre; }).join(', ');
   }
 
   // ---------- Era ----------
@@ -283,7 +252,7 @@ IA.mundo = (function () {
   }
 
   return {
-    FESTIVIDADES: FESTIVIDADES, festividades: festividades, bonoRegion: bonoRegion,
+    festividades: festividades, bonoRegion: bonoRegion,
     actualizarTendenciasRegion: actualizarTendenciasRegion, tendenciaRegion: tendenciaRegion,
     GRUPOS: GRUPOS, poblacion: poblacion, poblacionMundial: poblacionMundial, edades: edades,
     ipc: ipc, aEpoca: aEpoca, aHoy: aHoy, inflacionAnual: inflacionAnual, IPC_2025: IPC_2025,

@@ -91,6 +91,7 @@ IA.rivales = (function () {
     const costo = O.costoTalento(b) + b.pp;
     if (est.caja < costo * 0.9) return null;
     const o = P.iniciar(b, ctx);
+    IA.ideas.registrarPremisas(o, anio);
     if (o.mat) {
       IA.ideas.registrarUso(o.mat, anio);
       N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' adapta «' + IA.taxonomia.material(o.mat).tit + '».' });

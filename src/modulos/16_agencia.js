@@ -12,7 +12,7 @@ IA.agencia = (function () {
 
   // ---------- Filtros del buscador (tu documento: nombre, overall, costo, sexo, talento, retirado o activo, orden) ----------
   const ft = { of: '', q: '', sx: '', estado: 'activos', disp: false, ovMin: 0, ovMax: 100, cMin: '', cMax: '', orden: 'valor', dir: 'desc', avanzado: false, n: 40, solo: '' };
-  const ORDENES = [['valor', 'Recomendado'], ['overall', 'Overall'], ['fama', 'Popularidad'], ['costo', 'Costo'], ['taquilla', 'Taquilla de su carrera'], ['nombre', 'Nombre'], ['edad', 'Edad'], ['energia', 'Energía']];
+  const ORDENES = [['valor', 'Recomendado'], ['overall', 'Overall'], ['fama', 'Popularidad'], ['costo', 'Costo'], ['taquilla', 'Taquilla de su carrera'], ['nombre', 'Nombre'], ['edad', 'Edad'], ['energia', 'Energía'], ['disponible', 'Disponibilidad']];
   function barra(v, max, clase) { return '<span class="mini" style="width:60px"><i class="' + (clase || '') + '" style="width:' + Math.round(N.limitar(v / (max || 100), 0, 1) * 100) + '%"></i></span>'; }
   function signo(x) { return (x > 0 ? '+' : '') + x; }
   function kpi(nombre, valor, clase) { return '<div class="kpi"><span>' + esc(nombre) + '</span><b class="cifra ' + (clase || '') + '">' + esc(valor) + '</b></div>'; }
@@ -22,6 +22,10 @@ IA.agencia = (function () {
     const ex = T.exclusivoDe(x);
     if (ex === 0) out.push('<span class="etiqueta oro">exclusivo tuyo</span>');
     else if (ex !== null) out.push('<span class="etiqueta">exclusivo de ' + esc(S.estudios[ex].nombre) + '</span>');
+    const nv = T.nivel(x);
+    if (!x.ret && !x.mu) out.push('<span class="etiqueta' + (nv.id === 'leyenda' || nv.id === 'estrella' ? ' oro' : '') + '">' + esc(nv.nombre) + '</span>');
+    if ((S.listaCorta || []).indexOf(x.id) >= 0) out.push('<span class="etiqueta bien">en tu lista corta</span>');
+    if (x.jugador) out.push('<span class="etiqueta oro">eres tú</span>');
     if (T.estudiando(x)) out.push('<span class="etiqueta">estudiando</span>');
     if (x.desc) out.push('<span class="etiqueta bien">tu promesa</span>');
     if (x.beca && x.beca > S.t) out.push('<span class="etiqueta bien">becado</span>');
@@ -42,6 +46,9 @@ IA.agencia = (function () {
       if (ft.solo === 'exclusivos' && T.exclusivoDe(x) !== 0) return false;
       if (ft.solo === 'promesas' && !x.desc && !x.beca) return false;
       if (q && x.nom.toLowerCase().indexOf(q) < 0) return false;
+      if (ft.letra && x.nom.charAt(0).toUpperCase() !== ft.letra) return false;
+      if (ft.nivel && T.nivel(x).id !== ft.nivel) return false;
+      if (ft.solo === 'corta' && (S.listaCorta || []).indexOf(x.id) < 0) return false;
       const ov = T.overall(x);
       if (ov < ft.ovMin || ov > ft.ovMax) return false;
       const c = T.tarifa(x);
@@ -50,7 +57,7 @@ IA.agencia = (function () {
     });
     const clave = {
       valor: function (x) { return x.hab + x.fama * 12; }, overall: T.overall, fama: function (x) { return x.fama; }, costo: T.tarifa,
-      taquilla: function (x) { return x.tq || 0; }, nombre: function (x) { return x.nom; }, edad: function (x) { return -x.nac; }, energia: T.energia,
+      taquilla: function (x) { return x.tq || 0; }, disponible: function (x) { return T.disponible(x, 0) ? 1 : 0; }, nombre: function (x) { return x.nom; }, edad: function (x) { return -x.nac; }, energia: T.energia,
     }[ft.orden] || function (x) { return x.hab; };
     r.sort(function (a, b) {
       const va = clave(a), vb = clave(b);
@@ -69,16 +76,21 @@ IA.agencia = (function () {
     const bonos = (av.esp || []).map(function (x) { return D.oficio(x).nombre + ' +' + (1 + ((av.ac && av.ac[x]) || 0)); }).concat(Object.keys(av.ac || {}).filter(function (x) { return (av.esp || []).indexOf(x) < 0; }).map(function (x) { return D.oficio(x).nombre + ' +' + av.ac[x]; }));
     h += '<div class="tarjeta"><div class="fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece"><span class="tenue chico">' + t('tu_avatar') + '</span><h3 style="margin:2px 0">' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(N.S.estudios[0].personalidad) + '</span>' +
       '<span class="chico">En tus obras: ' + esc(bonos.join(' · ')) + '</span>' + (av.es && av.es.fin > S.t ? '<span class="chico oro">Estudiando ' + esc(T.curso(av.es.c).nombre) + ' hasta ' + esc(U.fechaCorta(av.es.fin)) + '</span>' : '') + '</div></div>' +
-      '<button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><span class="nota"> Puedes ganar hasta +5 en cada oficio estudiando. La vida ligera y la carrera como talento llegan en la V29.</span></div>';
+      '<button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><span class="nota"> Puedes ganar hasta +5 en cada oficio estudiando. Tu vida, tus encargos y tu retiro están en Estudio.</span></div>';
     // Promesas
     const espera = S.tPromesas ? Math.max(0, J.ESPERA_PROMESAS - (S.t - S.tPromesas)) : 0;
     h += '<div class="tarjeta"><b>Buscar promesas</b><p class="nota" style="margin:2px 0">Tus cazatalentos encuentran 3 jóvenes con mucho potencial. Conocerás su potencial real, su primer contrato sale 30 % más barato y te tienen lealtad.</p><div class="fila envolver">' +
       '<select data-c="agPromesaOf" aria-label="Oficio a buscar"><option value="">Cualquier oficio</option>' + D.oficios.map(function (o) { return '<option value="' + o.id + '"' + (ft.promOf === o.id ? ' selected' : '') + '>' + esc(o.nombre) + '</option>'; }).join('') + '</select>' +
       '<button class="btn primario" data-a="agPromesas"' + (espera ? ' disabled' : '') + '>' + (espera ? 'De nuevo en ' + espera + ' semanas' : 'Buscar · ' + dinero(J.costoPromesas())) + '</button></div></div>';
-    // Filtros
-    h += '<div class="chips" style="margin:8px 0">' + '<button class="chip' + (!ft.of ? ' on' : '') + '" data-a="agOficio" data-v="">' + t('todos') + '</button>' + D.oficios.map(function (o) {
-      return '<button class="chip' + (ft.of === o.id ? ' on' : '') + '" data-a="agOficio" data-v="' + o.id + '">' + esc(o.nombre) + '</button>';
+    // Catálogo por gremios con conteo (V21)
+    const activos = T.activos();
+    const cuenta = {}; activos.forEach(function (x) { cuenta[x.of] = (cuenta[x.of] || 0) + 1; });
+    h += '<div class="chips" style="margin:8px 0">' + '<button class="chip' + (!ft.of ? ' on' : '') + '" data-a="agOficio" data-v="">' + t('todos') + ' (' + activos.length + ')</button>' + D.oficios.map(function (o) {
+      return '<button class="chip' + (ft.of === o.id ? ' on' : '') + '" data-a="agOficio" data-v="' + o.id + '">' + esc(o.nombre) + ' (' + (cuenta[o.id] || 0) + ')</button>';
     }).join('') + '</div>';
+    h += '<div class="chips">' + [['', 'Todos los niveles']].concat(T.NIVELES.map(function (n) { return [n.id, n.nombre]; })).map(function (n) { return '<button class="chip' + (ft.nivel === n[0] ? ' on' : '') + '" data-a="agNivel" data-v="' + n[0] + '">' + esc(n[1]) + '</button>'; }).join('') +
+      '<button class="chip' + (ft.solo === 'corta' ? ' on' : '') + '" data-a="agCorta">Lista corta (' + (S.listaCorta || []).length + ')</button></div>';
+    h += '<label class="campo"><span>Letra</span><select data-c="agLetra"><option value="">Todas</option>' + 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').map(function (c) { return '<option' + (ft.letra === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></label>';
     h += '<div class="fila"><input type="search" placeholder="' + t('tal_buscar') + '" value="' + esc(ft.q) + '" data-c="agBuscar" style="flex:1"><button class="btn" data-a="agAvanzado" aria-expanded="' + ft.avanzado + '">Filtros</button></div>';
     if (ft.avanzado) {
       const sel = function (k, ops) { return '<select data-c="agFiltro" data-k="' + k + '">' + ops.map(function (o) { return '<option value="' + o[0] + '"' + (String(ft[k]) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; };
@@ -103,6 +115,16 @@ IA.agencia = (function () {
   }
   function render(mantener) { U.renderVista(mantener); }
   ac('agOficio', function (v) { ft.of = v; ft.n = 40; render(); });
+  ac('agNivel', function (v) { ft.nivel = v; ft.n = 40; render(true); });
+  ac('agLetra', function (v) { ft.letra = v; ft.n = 40; render(true); });
+  ac('agCorta', function () { ft.solo = ft.solo === 'corta' ? '' : 'corta'; render(true); });
+  ac('agListaCorta', function (v) {
+    const S = N.S, id = +v;
+    S.listaCorta = S.listaCorta || [];
+    const i = S.listaCorta.indexOf(id);
+    if (i >= 0) S.listaCorta.splice(i, 1); else S.listaCorta.push(id);
+    U.refrescarFicha(fichaTalento(id));
+  });
   ac('agBuscar', function (v) { ft.q = v; ft.n = 40; render(true); });
   ac('agAvanzado', function () { ft.avanzado = !ft.avanzado; render(true); });
   ac('agMas', function () { ft.n += 40; render(true); });
@@ -143,6 +165,9 @@ IA.agencia = (function () {
       kpi(t('tal_tarifa'), dinero(T.tarifaPara(x, 0))) + kpi('Energía', x.ret ? '—' : T.energia(x)) + kpi('Moral', x.ret ? '—' : T.moral(x)) + kpi('Proyectos activos', (x.act || 0) + ' de ' + T.MAX_PROYECTOS) +
       kpi(t('tal_obras'), x.obras) + kpi('Éxitos', x.exitos) + kpi(t('tal_premios'), x.premios) + kpi('Taquilla en tu partida (hoy)', U.dinero(x.tq || 0, 2025)) + kpi('Ingresos en tu partida (hoy)', U.dinero(x.gan || 0, 2025)) + '</div>';
     if (pot === '?') h += '<p class="nota">El potencial se conoce de verdad si lo descubriste, si lo becaste o si trabajó contigo.</p>';
+    const nv = T.nivel(x), falta = T.faltaPrestigio(x, 0);
+    h += '<p><b>' + esc(nv.nombre) + '</b>' + (nv.prestigio ? ' · pide prestigio ' + nv.prestigio + (falta ? ' <span class="mal">(te faltan ' + falta + ')</span>' : ' <span class="bien">(lo tienes)</span>') : '') + '</p>';
+    h += '<button class="btn" data-a="agListaCorta" data-v="' + x.id + '">' + ((S.listaCorta || []).indexOf(x.id) >= 0 ? 'Quitar de la lista corta' : 'Agregar a la lista corta') + '</button>';
     // Acciones
     h += '<div class="fila envolver" style="margin:8px 0">' + (x.ret ? '' :
       '<button class="btn primario" data-a="agContratar" data-v="' + x.id + '">Contratar para…</button>' +

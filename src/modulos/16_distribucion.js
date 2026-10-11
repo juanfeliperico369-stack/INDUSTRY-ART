@@ -26,10 +26,10 @@ IA.distribucion = (function () {
   const pg = { id: 0, t: 0, nivM: 2, plan: null };
   function obra() { return O.porId(pg.id); }
   function anioPlan() { return N.anio(pg.t || N.S.t + 1); }
-  function abrir(id) {
+  function abrir(id, semana) {
     const o = O.porId(+id);
     if (!o) return;
-    pg.id = o.id; pg.t = 0; pg.nivM = 2;
+    pg.id = o.id; pg.t = semana && semana > N.S.t && semana <= N.S.t + 12 ? semana : 0; pg.nivM = 2;
     pg.plan = ES.planPorDefecto(o, N.anio());
     U.abrirFicha(fichaPlan(), 'programar');
   }
@@ -62,8 +62,8 @@ IA.distribucion = (function () {
       const temp = E.pronosticoSemana(sem, o.fam, est.reg);
       const comp = L.competenciaPrevista(tt, o.id);
       const fs = M.festividades(sem, est.reg, N.anio(tt)).map(function (f) { return f.nombre; });
-      h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.t === tt ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="plSemana" data-v="' + tt + '"><span>' + esc(U.fechaCorta(tt)) + ' <span class="tenue chico">· en ' + k + ' sem.</span>' + (fs.length ? '<br><span class="chico oro">' + esc(fs.join(', ')) + '</span>' : '') + (tt === mejor ? ' <span class="etiqueta oro">mejor</span>' : '') + '</span>' +
-        '<span class="chico" style="text-align:right">×' + U.decimal(temp, 2) + ' temporada<br>' + U.decimal(comp, 1) + ' rivales</span></button>';
+      h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.t === tt ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="plSemana" data-v="' + tt + '"><span>' + esc(U.fechaEstreno(tt)) + ' <span class="tenue chico">· en ' + k + ' sem.</span>' + (fs.length ? '<br><span class="chico oro">' + esc(fs.join(', ')) + '</span>' : '') + (tt === mejor ? ' <span class="etiqueta oro">mejor</span>' : '') + '</span>' +
+        '<span class="chico" style="text-align:right">×' + U.decimal(temp, 2) + ' temporada<br>' + IA.cal.competencia(tt, o.id).nombre + ' (' + U.decimal(comp, 1) + ')</span></button>';
     }
     h += '</div>';
 

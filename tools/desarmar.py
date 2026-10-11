@@ -74,9 +74,9 @@ def desarmar(html_ruta, destino):
         if viejo.endswith(".js"):
             os.remove(os.path.join(carpeta, viejo))
     orden = {
-        "nucleo": 0, "textos": 1, "datos": 2, "taxonomia": 2, "mundo": 3, "economia": 4, "talentos": 5, "ideas": 6, "obras": 6,
-        "produccion": 7, "rodaje": 7, "estreno": 8, "lanzamiento": 8, "ventanas": 8, "rivales": 9, "premios": 10, "negocio": 11, "arte": 12, "juego": 12,
-        "guardado": 13, "interfaz": 14, "pantallas": 15, "agencia": 16, "creacion": 16, "distribucion": 16, "pruebas": 17, "arranque": 99,
+        "nucleo": 0, "textos": 1, "datos": 2, "taxonomia": 2, "calendario": 3, "mundo": 3, "economia": 4, "talentos": 5, "ideas": 6, "obras": 6,
+        "produccion": 7, "rodaje": 7, "estreno": 8, "lanzamiento": 8, "ventanas": 8, "rivales": 9, "premios": 10, "negocio": 11, "sede": 11, "arte": 12, "juego": 12, "carrera": 12,
+        "guardado": 13, "interfaz": 14, "pantallas": 15, "agencia": 16, "creacion": 16, "distribucion": 16, "calendario_ui": 16, "pruebas": 17, "arranque": 99,
     }
     for i, m in enumerate(marcas):
         fin = marcas[i + 1].start() if i + 1 < len(marcas) else len(codigo)

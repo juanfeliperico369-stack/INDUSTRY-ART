@@ -62,11 +62,10 @@ IA.ui = (function () {
     return numero(v);
   }
   function pct(x, d) { return decimal(x * 100, d === undefined ? 1 : d) + ' %'; }
-  function fecha(tAbs) {
-    const sem = N.semana(tAbs);
-    return t('semana') + ' ' + sem + ' · ' + IA.mundo.nombreMes(N.mes(tAbs)) + ' ' + N.anio(tAbs);
-  }
-  function fechaCorta(tAbs) { return 'S' + N.semana(tAbs) + ' · ' + IA.mundo.nombreMes(N.mes(tAbs)).slice(0, 3) + ' ' + N.anio(tAbs); }
+  // Fechas reales (V21): la semana del juego empieza en su primer día; los estrenos de cine caen en su viernes
+  function fecha(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs), true) + ' · ' + t('semana') + ' ' + N.semana(tAbs); }
+  function fechaCorta(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs)); }
+  function fechaEstreno(tAbs) { return IA.cal.textoCorto(IA.cal.viernesDeT(tAbs)) + ' ' + N.anio(tAbs); }
   const esc = N.esc;
 
   // ---------- Íconos propios (SVG) ----------
@@ -208,14 +207,15 @@ IA.ui = (function () {
     const auto = !!estado.auto;
     const etiquetaRitmo = { semana: t('ritmo_semana'), mes: t('ritmo_mes'), evento: t('ritmo_evento'), auto: t('ritmo_auto') }[ajustes.ritmo];
     document.getElementById('barra').innerHTML =
-      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b>' + esc(est.nombre) + '</b></div>' +
-      '<div class="fecha"><b>S' + N.semana() + ' · ' + N.anio() + '</b><span class="tenue">' + esc(IA.mundo.nombreMes(N.mes())) + '</span></div>' +
+      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b>' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
+      '<button class="fecha" data-a="abrirCalendario" aria-label="Abrir el calendario"><b>' + esc(IA.cal.texto(IA.cal.hoy())) + '</b><span class="tenue">' + t('semana') + ' ' + N.semana() + '</span></button>' +
+      '<button class="fans" data-a="verFans" aria-label="Fans"><b class="cifra">' + grande(S.fans || 0) + '</b><span>fans</span></button>' +
       '<button class="dinero' + rojo + '" data-a="alternarDinero" aria-label="' + t('toca_dinero') + '"><b class="cifra">' + dinero(est.caja) + '</b><span>' + (ajustes.dineroHoy ? t('hoy') : t('epoca')) + '</span></button>' +
       '<span class="espacio"></span>' +
       '<button class="avanzar' + (auto ? ' auto' : '') + '" data-a="avanzar" aria-label="' + (auto ? t('pausa') : t('avanzar') + ': ' + esc(etiquetaRitmo)) + '">' + icono(auto ? 'pausa' : 'avanzar') + '<span>' + (auto ? t('pausa') : esc(etiquetaRitmo)) + '</span></button>' +
       '<button class="ico" data-a="menuRitmo" aria-label="' + t('ritmo') + '">' + icono('abajo') + '</button>' +
       '<button class="ico opcional" data-a="abrirGuardado" aria-label="' + t('guardar') + '">' + icono('guardar') + '</button>' +
-      '<button class="ico" data-a="abrirAjustes" aria-label="' + t('ajustes') + '">' + icono('ajustes') + '</button>';
+      '<button class="ico" data-a="abrirPausa" aria-label="Pausa y ajustes">' + icono('ajustes') + '</button>';
     dibujar(document.getElementById('barra'));
   }
   function renderMenu() {
@@ -300,7 +300,7 @@ IA.ui = (function () {
 
   return {
     SECCIONES: SECCIONES, estado: estado, ajuste: ajuste, ajustes: function () { return ajustes; }, cargarAjustes: cargarAjustes,
-    aplicarAjustes: aplicarAjustes, dinero: dinero, numero: numero, grande: grande, pct: pct, fecha: fecha, fechaCorta: fechaCorta,
+    aplicarAjustes: aplicarAjustes, dinero: dinero, numero: numero, grande: grande, pct: pct, fecha: fecha, fechaCorta: fechaCorta, fechaEstreno: fechaEstreno,
     decimal: decimal, icono: icono, aviso: aviso, abrirFicha: abrirFicha, refrescarFicha: refrescarFicha, cerrarFicha: cerrarFicha,
     fichaAbierta: fichaAbierta, modal: modal, cerrarModal: cerrarModal, modalAbierto: modalAbierto, dibujar: dibujar,
     grafica: grafica, comoRetrato: comoRetrato, render: render, renderBarra: renderBarra, renderVista: renderVista,

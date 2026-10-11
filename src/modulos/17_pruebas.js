@@ -73,6 +73,13 @@ IA.pruebas = (function () {
       if (o.dil) IA.juego.decidirDilema(o.id, IA.rodaje.mejorOpcion(o));
       else if (o.prueba && !o.prueba.ok) IA.juego.decidirPrueba(o.id, pruebaBot(o));
     });
+    // 0b. Vida del avatar y heredero (V21); personal de oficina cuando sobra caja
+    IA.carrera.autoDecidir();
+    if ((S.candidatos || []).length) { IA.sede.aceptar(S.candidatos[0].id); S.candidatos = []; }
+    if (N.semana() === 30 && NG.cajaLibre(0) > tipico * 8) {
+      if (IA.sede.personal().length >= IA.sede.nivelSede().tope && !IA.sede.puedeMejorar()) IA.sede.mejorar();
+      else if (!S.recl && IA.sede.personal().length < IA.sede.nivelSede().tope) IA.sede.reclutar('estandar', IA.sede.ROLES[IA.sede.personal().length % IA.sede.ROLES.length].id);
+    }
     // 1. Estrenar lo que esté listo en la mejor semana próxima
     O.delEstudio(0, ['lista']).forEach(function (o) {
       if (o.prog) return;
@@ -427,7 +434,7 @@ IA.pruebas = (function () {
     prueba('Población 2024 ≈ 8.100 millones', Math.abs(p(2024) - 8.1) < 0.3, p(2024).toFixed(2));
     // Listas completas
     const cnt = X.contar();
-    prueba('Listas completas: 227 temas, 85 subgéneros, 53 problemáticas, 34 ficciones', cnt.temas === 227 && cnt.subgeneros === 85 && cnt.problematicas === 53 && cnt.ficcion === 34, JSON.stringify(cnt));
+    prueba('Listas completas: 227 temas, 86 subgéneros (con Western espacial), 53 problemáticas, 34 ficciones', cnt.temas === 227 && cnt.subgeneros === 86 && cnt.problematicas === 53 && cnt.ficcion === 34, JSON.stringify(cnt));
     // ---------- Talentos 2.0 (V18) ----------
     if (N.S) {
       const S = N.S, vivos = S.talentos.filter(function (t) { return !t.ret; });
@@ -508,7 +515,16 @@ IA.pruebas = (function () {
     // V20 · Lanzamiento
     const ES = IA.estreno, V = IA.ventanas;
     prueba('Las festividades suben a su familia en su región', M.bonoRegion('FJ', 'nam', 47, 2000) > 1 && M.bonoRegion('FJ', 'asi', 47, 2000) === 1);
-    prueba('El Festival de Cannes existe desde 1946', !M.festividades(20, 'eur', 1940).some(function (f) { return f.id === 'cannes'; }) && M.festividades(20, 'eur', 1950).some(function (f) { return f.id === 'cannes'; }));
+    // Calendario completo (V21): días de la semana reales y festividades con su regla
+    const C = IA.cal;
+    prueba('El 1 de enero de 1850 fue martes', C.diaSemana(1850, 0, 1) === 1);
+    prueba('Pascua de 2024: 31 de marzo', C.pascua(2024).m === 2 && C.pascua(2024).d === 31);
+    prueba('Año Nuevo chino de 2024: 10 de febrero (luna nueva)', (function () { const f = C.lunaNuevaDesde(2024, 0, 21, 8); return f.m === 1 && f.d === 10; })());
+    prueba('Acción de Gracias de 2024: 28 de noviembre', (function () { const x = C.fiestasAnio(2024).filter(function (f) { return f.id === 'gracias'; })[0]; const d = C.desdeDiaDelAnio(2024, x.ini); return d.m === 10 && d.d === 28; })());
+    prueba('El factor semanal queda entre ×0,80 y ×1,40', [1, 20, 26, 47, 52].every(function (s) { const v = E.pronosticoSemana(s, 'FJ', 'nam'); return v >= 0.8 && v <= 1.4; }));
+    prueba('Ningún festival usa un nombre real', !C.circuitoAnio(2000).some(function (x) { return /Cannes|Venecia|Berlinale|Sundance|Oscar|Emmy|Grammy/.test(x.nombre); }));
+    prueba('Una Leyenda viva pide prestigio 45', IA.talentos.NIVELES[3].prestigio === 45);
+    prueba('Hay 56 premisas y tropos', IA.ideas.TODAS_PREMISAS.length === 56, IA.ideas.TODAS_PREMISAS.length);
     prueba('Las ventanas llegan en su año (TV 1955, video 1977, streaming 2007)', V.disponibles(1950).length === 0 && V.disponibles(1960).length === 1 && V.disponibles(1980).length === 2 && V.disponibles(2010).length === 3);
     prueba('Directo a video desde 1980 y a streaming desde 2010', V.viasDirectas(1979).length === 0 && V.viasDirectas(1985).length === 1 && V.viasDirectas(2015).length === 2);
     prueba('Las certificaciones de video empiezan en 1979 y suben de oro a diamante', V.ANIO_CERT === 1979 && V.CERTIFICACIONES[0].copias < V.CERTIFICACIONES[1].copias && V.CERTIFICACIONES[1].copias < V.CERTIFICACIONES[2].copias);

@@ -69,6 +69,13 @@ IA.rodaje = (function () {
     { id: 'mano', nombre: 'Cámara en mano', desde: 1959, costo: 0.92, crit: 1, pub: 0, ama: [1, 2], rechaza: [4], texto: 'Urgente y cercano: lo aman los jóvenes, no los mayores.' },
     { id: 'videoclip', nombre: 'Videoclip', desde: 1981, costo: 1, crit: -1, pub: 1, ama: [1, 2], rechaza: [3, 4], dep: { musica: 2, edicion: 2 }, texto: 'Montaje rápido y música al frente.' },
     { id: 'found', nombre: 'Metraje encontrado', desde: 1999, costo: 0.5, crit: -1, pub: 0, ama: [1, 2], rechaza: [3, 4], familias: ['SM'], texto: 'La mitad del costo; en suspenso y miedo, +2 al público.' },
+    // Los seis del Plan Maestro v2 (V21): edades 0 niños, 1 adolescentes, 2 jóvenes, 3 adultos, 4 mayores
+    { id: 'estandar', nombre: 'Estándar', desde: 1895, costo: 1, crit: 0, pub: 0, ama: [], rechaza: [], texto: 'Para todo público, sin riesgos.' },
+    { id: 'mas16', nombre: '+16', desde: 1968, costo: 1, crit: 0, pub: 1, ama: [1, 2], rechaza: [0], texto: 'Más filo para adolescentes y jóvenes; las familias con niños se alejan.' },
+    { id: 'adultos', nombre: 'Adultos', desde: 1968, costo: 1, crit: 1, pub: 0, ama: [3, 4], rechaza: [0, 1], texto: 'Tono maduro: +1 a la crítica, lo aman adultos y mayores.' },
+    { id: 'glamour', nombre: 'Glamour', desde: 1925, costo: 1.12, crit: -1, pub: 2, ama: [2, 3], rechaza: [], dep: { vestuario: 2, arte: 1 }, texto: 'Estrellas, vestuario y brillo: +2 al público, −1 a la crítica.' },
+    { id: 'caricatura', nombre: 'Caricatura', desde: 1910, costo: 0.95, crit: -1, pub: 1, ama: [0, 1], rechaza: [3, 4], dep: { animacion: 1 }, texto: 'Exagerado y colorido: lo aman niños y adolescentes.' },
+    { id: 'anime', nombre: 'Anime', desde: 1960, costo: 0.9, crit: 1, pub: 1, ama: [1, 2], rechaza: [4], dep: { animacion: 2 }, texto: 'Estética japonesa: adolescentes y jóvenes en todo el mundo.' },
     { id: 'virtual', nombre: 'Producción virtual', desde: 2019, costo: 1.05, crit: 0, pub: 1, ama: [1, 2], rechaza: [], dep: { arte: 2, efectos: 2 }, texto: 'Escenarios en pantallas gigantes: una semana menos de posproducción.' },
   ];
   // Estudios externos de efectos y animación (cobran una parte del presupuesto de producción)

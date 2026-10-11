@@ -66,7 +66,23 @@ a { color: var(--acento); }
 .marca { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 0 1 auto; }
 .marca canvas { width: 34px; height: 34px; flex: none; }
 .marca b { font-family: var(--titulos); font-size: 1.15em; letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 22vw; }
-.fecha { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; font-size: 14px; }
+.fecha { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; font-size: 14px; background: none; border: 0; color: inherit; text-align: left; min-height: 44px; justify-content: center; cursor: pointer; padding: 0 4px; }
+.fans { background: var(--panel2); border: 1px solid var(--borde); border-radius: 12px; padding: 4px 8px; min-height: 44px; display: flex; flex-direction: column; justify-content: center; line-height: 1.05; cursor: pointer; color: inherit; }
+.fans span { font-size: 14px; color: var(--tenue, #9aa); }
+@media (max-width: 420px) { .fans { display: none; } .marca b { display: none; } }
+/* Calendario (V21) */
+.cal-mes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-mes .cab { text-align: center; font-size: 14px; color: var(--tenue, #9aa); padding: 2px 0; }
+.cal-dia { min-height: 48px; border: 1px solid var(--borde); border-radius: 8px; background: var(--panel2); color: inherit; padding: 2px; display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 14px; overflow: hidden; }
+.cal-dia.fuera { opacity: .35; }
+.cal-dia.hoy { border-color: var(--acento); border-width: 2px; }
+.cal-dia.sel { background: var(--acento); color: #04121a; }
+.cal-dia .ics { font-size: 14px; line-height: 1; letter-spacing: 1px; white-space: nowrap; }
+.cal-ev { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--borde); }
+.cal-ev .ic { min-width: 20px; text-align: center; }
+.cal-anio { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.dos-cal { display: grid; gap: 10px; }
+@media (min-width: 900px) { .dos-cal { grid-template-columns: 1.2fr 1fr; } }
 .fecha b { font-size: 15px; white-space: nowrap; }
 .fecha span { white-space: nowrap; }
 .dinero { background: var(--panel2); border: 1px solid var(--borde); border-radius: 12px; padding: 4px 10px; min-height: 44px; display: flex; flex-direction: column; justify-content: center; line-height: 1.05; cursor: pointer; min-width: 0; }
@@ -136,7 +152,14 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 .tabla th, .tabla td { padding: 8px 6px; border-bottom: 1px solid var(--borde); text-align: left; vertical-align: top; }
 .tabla td.n, .tabla th.n { text-align: right; white-space: nowrap; }
 .tabla .chico, .kpi .chico { font-size: 14px; }
-.desliza { overflow-x: auto; }
+/* V21: las tablas no se deslizan a los lados en el celular: se ajustan, parten el texto y ocultan columnas menores */
+.desliza { overflow-x: visible; }
+@media (max-width: 600px) {
+  .tabla { table-layout: fixed; font-size: 14px; }
+  .tabla th, .tabla td { padding: 6px 3px; overflow-wrap: anywhere; word-break: break-word; }
+  .tabla td.n, .tabla th.n { white-space: normal; }
+  .tabla .opc { display: none; }
+}
 .poster { width: 96px; height: 144px; border-radius: 6px; flex: none; display: block; background: var(--panel2); }
 .poster.grande { width: 160px; height: 240px; }
 .retrato { width: 56px; height: 56px; flex: none; display: block; }

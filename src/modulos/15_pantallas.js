@@ -41,7 +41,8 @@ IA.pantallas = (function () {
       '<p class="nota">' + t('creditos') + '</p><p class="nota">' + t('v15_aparte') + '</p></div>';
   }
   const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'Felipe', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
-    tipo: 'Estudio', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'] };
+    tipo: 'Estudio', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
+    region: 'losangeles', sufijo: 'Pictures', tf: 'escuela', arq: 'visionario', modo: 'dueno', oficio: 'direccion', enfG: ['Drama', 'Comedia', 'Aventura'], enfT: ['', '', ''] };
   const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville'];
   function nuevaPartida() {
     const cap = np.capital || J.capitalRecomendado(np.anio);
@@ -58,18 +59,44 @@ IA.pantallas = (function () {
     const nTipicas = cap / tipico2025;
     const L = U.estado.logoNuevo;
     const num = function (k) { return deslizadorLogo(k, L[k], 'npLogo'); };
-    return '<div class="portada" style="text-align:left">' + titulo(t('np_titulo'), 'nueva') +
+    // V21 (Referencia R7): inicio al azar, tarjetas de región y de era, enfoque, trasfondo, arquetipo y modo carrera
+    const regs = D.regionesInicio.filter(function (r) { return r.desde <= np.anio; });
+    if (!regs.some(function (r) { return r.id === np.region; })) np.region = 'independiente';
+    const era = D.erasInicio.filter(function (e) { return np.anio >= e.desde && np.anio <= e.hasta; })[0];
+    const generos = [];
+    D.familias.forEach(function (f) { f.generos.forEach(function (g) { if (generos.indexOf(g) < 0) generos.push(g); }); });
+    generos.sort(function (a, b) { return a.localeCompare(b, 'es'); });
+    const temas = [];
+    IA.taxonomia.familiasTema.forEach(function (f) { f.items.forEach(function (x) { temas.push(x); }); });
+    temas.sort(function (a, b) { return a.localeCompare(b, 'es'); });
+    const r7 = '<button class="btn bloque" data-a="npAzar">' + icono('dado') + ' Inicio al azar (un dado arma toda la partida)</button>' +
+      '<h3>Región de inicio</h3><div class="col">' + regs.map(function (r) {
+        return '<button class="tarjeta toque" style="text-align:left;width:100%;margin:0;' + (r.id === np.region ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="npRegion" data-v="' + r.id + '"><b>' + esc(r.nombre) + '</b>' + (r.pais ? ' <span class="tenue chico">' + esc(D.pais(r.pais).nombre) + '</span>' : '') +
+          '<br><span class="chico">' + esc(r.mercado) + ' · competencia ' + ['', 'baja', 'media', 'alta'][r.competencia] + ' · capital ×' + U.decimal(r.capital, 2) + ' · prestigio ' + r.prestigio + '</span><br><span class="nota">' + esc(r.texto) + '</span></button>';
+      }).join('') + '</div>' +
+      (era ? '<div class="tarjeta"><b>Era: ' + esc(era.nombre) + '</b><ul style="margin:6px 0 0 18px;padding:0">' + era.reglas.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>' : '') +
+      '<h3>Enfoque del estudio</h3><p class="nota">3 géneros y 3 temas: tus obras con ellos ganan público y crítica, y cada 5 obras del enfoque suman experiencia.</p><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+        return '<label class="campo crece"><span>Género ' + (i + 1) + '</span><select data-c="npEnf" data-k="g' + i + '">' + ops(generos.map(function (g) { return [g, g]; }), np.enfG[i]) + '</select></label>';
+      }).join('') + '</div><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+        return '<label class="campo crece"><span>Tema ' + (i + 1) + '</span><select data-c="npEnf" data-k="t' + i + '">' + ops([['', '—']].concat(temas.map(function (x) { return [x, x]; })), np.enfT[i]) + '</select></label>';
+      }).join('') + '</div>';
+    const avatar2 = '<label class="campo"><span>Trasfondo</span><select data-c="np" data-k="tf">' + ops(IA.carrera.TRASFONDOS.map(function (x) { return [x.id, x.nombre + ' · ' + x.texto]; }), np.tf) + '</select></label>' +
+      '<label class="campo"><span>Arquetipo de liderazgo</span><select data-c="np" data-k="arq">' + ops(IA.carrera.ARQUETIPOS.map(function (x) { return [x.id, x.nombre + ' · ' + x.texto]; }), np.arq) + '</select></label>' +
+      '<label class="campo"><span>Cómo empiezas</span><select data-c="npModo">' + ops([['dueno', 'Dueño de estudio'], ['carrera', 'Modo carrera: también eres un talento y recibes encargos']], np.modo) + '</select></label>' +
+      (np.modo === 'carrera' ? '<label class="campo"><span>Tu oficio como talento</span><select data-c="np" data-k="oficio">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.oficio) + '</select></label>' : '');
+    return '<div class="portada" style="text-align:left">' + titulo(t('np_titulo'), 'nueva') + r7 +
       '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:200px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
       '<div class="fila" style="margin-top:8px" id="npLogoVista"><canvas data-logo="nuevo" style="width:64px;height:64px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div>' +
       '<div class="tarjeta">' + num('s') + num('c') + num('b') + num('t') + num('f') + '</div>' +
       '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
+      '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Sufijo del logo</span><select data-c="np" data-k="sufijo">' + ops([['', 'Sin sufijo']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
       '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select>' +
       '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota">' + t('np_anio_ayuda') + '</span></label>' +
       '<label class="campo"><span>Tipo de industria</span><select data-c="np" data-k="industria">' + D.industrias.map(function (x) { return '<option value="' + x.id + '"' + (x.id === 'Cine' ? ' selected' : ' disabled') + '>' + x.id + (x.id === 'Cine' ? '' : ' (llega en la ' + x.desde + ')') + '</option>'; }).join('') + '</select></label>' +
       '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
       '<label class="campo"><span>Visión de la industria</span><select data-c="np" data-k="vision">' + ops(D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.vision) + '</select></label>' +
       '<label class="campo"><span>Público objetivo</span><select data-c="np" data-k="publico">' + ops(D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.publico) + '</select></label>' +
-      '<label class="campo"><span>' + t('np_pais') + '</span><select data-c="np" data-k="pais">' + ops(paises, np.pais) + '</select></label>' +
+      (np.region === 'independiente' ? '<label class="campo"><span>' + t('np_pais') + '</span><select data-c="np" data-k="pais">' + ops(paises, np.pais) + '</select></label>' : '') +
       '<label class="campo"><span>' + t('np_capital') + '</span><select data-c="npCapital">' + ops(capOps, cap) + '</select><span class="nota">' +
       t('np_capital_ayuda', { epoca: esc(U.dinero(M.aEpoca(cap, np.anio)).replace(/^\$/, '$')), anio: np.anio, n: U.decimal(nTipicas, nTipicas < 10 ? 1 : 0) }) + '</span></label>' +
       '<label class="campo"><span>' + t('np_dificultad') + '</span><select data-c="np" data-k="dificultad">' + ops(J.DIFICULTADES.map(function (d) { return [d.id, d.nombre]; }), np.dificultad) + '</select></label>' +
@@ -78,6 +105,7 @@ IA.pantallas = (function () {
       '<label class="campo"><span>' + t('np_tu_nombre') + '</span><input type="text" maxlength="30" value="' + esc(np.avNombre) + '" data-i="np" data-k="avNombre"></label>' +
       '<div class="fila"><label class="campo crece"><span>' + t('np_sexo') + '</span><select data-c="np" data-k="avSexo">' + ops([['F', t('mujer')], ['M', t('hombre')]], np.avSexo) + '</select></label>' +
       '<label class="campo crece"><span>' + t('np_edad') + '</span><input type="number" min="16" max="80" value="' + np.avEdad + '" data-i="np" data-k="avEdad"></label></div>' +
+      '<button class="btn" data-a="npDadoAvatar">' + icono('dado') + ' Otro nombre para tu avatar</button>' + avatar2 +
       '<label class="campo"><span>' + t('np_personalidad') + '</span><select data-c="np" data-k="personalidad">' + ops(D.personalidades.map(function (p) { return [p.id, p.id]; }), np.personalidad) + '</select></label>' +
       '<span class="nota">Tus tres especialidades (+1 en esos departamentos de tus obras):</span><div class="fila envolver">' + [0, 1, 2].map(function (i) {
         return '<label class="campo crece"><span>Especialidad ' + (i + 1) + '</span><select data-c="npEsp" data-k="' + i + '">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.esp[i]) + '</select></label>';
@@ -121,6 +149,40 @@ IA.pantallas = (function () {
     document.getElementById('vista').scrollTop = y;
   });
   ac('npCapital', function (v) { np.capital = +v; U.acciones.nuevaPartida(); });
+  function redibujarNP() { const y = document.getElementById('vista').scrollTop; U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; }
+  ac('npRegion', function (v) { np.region = v; np.capital = 0; const r = D.regionesInicio.filter(function (x) { return x.id === v; })[0]; if (r && r.pais) np.pais = r.pais; redibujarNP(); });
+  ac('npModo', function (v) { np.modo = v; redibujarNP(); });
+  ac('npEnf', function (v, el) { const k = el.getAttribute('data-k'); (k[0] === 'g' ? np.enfG : np.enfT)[+k[1]] = v; });
+  // Dado de nombres (sin azar de la partida: es solo para elegir)
+  let dadoN = 1;
+  const PARTES = ['Aurora', 'Cóndor', 'Faro', 'Quimera', 'Linterna', 'Meridiano', 'Brújula', 'Ámbar', 'Telón', 'Cometa', 'Atlas', 'Prisma', 'Halcón', 'Ola', 'Galaxia', 'Sauce'];
+  const PARTES2 = ['Dorada', 'del Sur', 'Norte', 'Nueva', 'Azul', 'de Plata', 'Eterna', 'Roja', 'del Alba', 'Mágica'];
+  function nombreDado() { dadoN = (dadoN * 31 + 7) % 9973; return PARTES[dadoN % PARTES.length] + ' ' + PARTES2[Math.floor(dadoN / 7) % PARTES2.length]; }
+  ac('npDadoNombre', function () { np.nombre = nombreDado(); cacheT = -1; redibujarNP(); });
+  ac('npDadoAvatar', function () {
+    dadoN = (dadoN * 17 + 3) % 9973;
+    const reg = (D.pais(np.pais) || D.pais('us')).region;
+    const NOMS = { F: ['Lucía', 'Marta', 'Elena', 'Sofía', 'Valeria', 'Inés', 'Aiko', 'Amara', 'Priya', 'Chloe'], M: ['Mateo', 'Andrés', 'Tomás', 'Kenji', 'Kwame', 'Ravi', 'Lucas', 'Hugo', 'Omar', 'Diego'] };
+    const AP = ['Rojas', 'Valdés', 'Moreau', 'Tanaka', 'Okafor', 'Sharma', 'Blake', 'Ferrari', 'Novak', 'Duarte'];
+    np.avNombre = NOMS[np.avSexo][dadoN % 10] + ' ' + AP[Math.floor(dadoN / 10) % 10];
+    void reg; redibujarNP();
+  });
+  // Inicio al azar: un dado arma toda la partida (región, era, enfoque, nombres, logo, avatar)
+  ac('npAzar', function () {
+    dadoN = (dadoN * 53 + Date.now() % 97) % 9973;
+    const pick = function (l) { dadoN = (dadoN * 29 + 11) % 9973; return l[dadoN % l.length]; };
+    const eras = [1900, 1925, 1950, 1970, 1985, 2000, 2015, 2026];
+    np.anio = pick(eras);
+    const regs = D.regionesInicio.filter(function (r) { return r.desde <= np.anio; });
+    const r = pick(regs); np.region = r.id; if (r.pais) np.pais = r.pais;
+    const gens = []; D.familias.forEach(function (f) { f.generos.forEach(function (g) { if (g !== 'Erótico') gens.push(g); }); });
+    np.enfG = [pick(gens), pick(gens), pick(gens)];
+    np.tf = pick(IA.carrera.TRASFONDOS).id; np.arq = pick(IA.carrera.ARQUETIPOS).id;
+    np.vision = pick(D.visiones).id; np.publico = pick(D.publicos).id; np.tipo = pick(D.tiposEstudio);
+    np.sufijo = pick(D.sufijosLogo); np.nombre = nombreDado(); np.capital = 0;
+    np.logoN = (np.logoN * 7 + 13) % 997; U.estado.logoNuevo = IA.arte.logoAleatorio(np.logoN);
+    cacheT = -1; redibujarNP();
+  });
   ac('empezar', function () {
     const edad = N.limitar(Math.round(+np.avEdad || 30), 16, 80);
     J.nuevaPartida({
@@ -129,6 +191,8 @@ IA.pantallas = (function () {
       escenario: np.escenario, personalidad: np.personalidad, creado: new Date().toISOString(),
       tipo: np.tipo, vision: np.vision, publico: np.publico,
       avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad, especialidades: np.esp },
+      region: np.region, sufijo: np.sufijo, trasfondo: np.tf, arquetipo: np.arq, modo: np.modo, oficio: np.oficio,
+      enfoque: { gen: np.enfG.filter(function (x, i, a) { return x && a.indexOf(x) === i; }), tem: np.enfT.filter(function (x, i, a) { return x && a.indexOf(x) === i; }) },
     });
     U.estado.np = false;
     U.estado.seccion = 'estudio';
@@ -149,6 +213,10 @@ IA.pantallas = (function () {
     J.decisionesPendientes().forEach(function (o) {
       out.push({ txt: '«' + o.tit + '»: ' + (o.dil ? 'un dilema en ' + O.NOMBRE_ETAPA[o.et].toLowerCase() : 'resultado de la prueba de público (' + o.prueba.p + ' de 100)'), btn: 'Decidir', a: 'verDecision', v: o.id, imp: 1 });
     });
+    // V21: vida del avatar, heredero, candidatos y encargos
+    if (S.herederos || IA.carrera.vidaPendiente()) out.push({ txt: S.herederos ? 'Elige a tu heredero' : 'Una decisión de tu vida te espera', btn: 'Decidir', a: 'verPendientes', imp: 1 });
+    if ((S.candidatos || []).length) out.push({ txt: S.candidatos.length + ' candidatos esperan en la bandeja', btn: 'Ver', a: 'irSede' });
+    if ((S.ofertas || []).some(function (o) { return o.vence > S.t; })) out.push({ txt: 'Tienes ofertas de encargo como talento', imp: 1 });
     if (S.semanasEnRojo > 0) out.push({ txt: t('tarea_rojo', { n: S.semanasEnRojo }), mal: 1, imp: 1 });
     const libres = NG.capacidad(0) - O.enProduccion(0).length;
     if (libres > 0) out.push({ txt: t('tarea_capacidad') + ' (' + libres + ')', btn: t('crear_obra'), a: 'crearObra' });
@@ -192,11 +260,12 @@ IA.pantallas = (function () {
       kpi(t('caja_libre'), dinero(NG.cajaLibre(0))) +
       kpi(t('est_capacidad'), enMarcha + ' / ' + NG.capacidad(0)) +
       kpi(t('est_cuota'), U.pct(cuota)) +
-      kpi(t('est_fama'), Math.round(est.fama * 100) + ' / 100') +
+      kpi('Prestigio', Math.round(est.fama * 100) + ' / 100') + kpi('Fans', U.grande(S.fans || 0)) +
       kpi(t('est_clase'), est.clase || 'C') +
       kpi('Típico de la época', dinero(E.presupuestoTipico(N.anio()))) +
       kpi('Entrada de cine', dinero(M.precioEntrada('nam', N.anio()))) +
       '</div></div>' +
+      IA.calendarioUI.tarjetasEstudio() +
       '<div class="tarjeta"><h3>' + t('mun_periodico') + '</h3>' + S.noticias.slice(0, 5).map(function (n) {
         return '<p style="margin:6px 0"><span class="tenue chico">' + esc(U.fechaCorta(n.t)) + '</span><br>' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>';
       }).join('') + '</div></div></div>';
@@ -267,6 +336,7 @@ IA.pantallas = (function () {
       });
     }
   }
+  ac('verPendientes', function () { IA.calendarioUI.mostrarPendientes(); });
   ac('irNegocio', function () { U.irA('negocio', 'estudio'); });
 
   // =====================================================================
@@ -392,7 +462,7 @@ IA.pantallas = (function () {
     }).join('') + '</table></div>';
     return h;
   }
-  function mCalendario() { return IA.distribucion.calendario(); }
+  function mCalendario() { return IA.calendarioUI.calendario(); }
   function mPremios() {
     const S = N.S, ult = S.premios[S.premios.length - 1];
     const pj = IA.premios.parteJugador();
@@ -491,8 +561,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function negocio() {
     const s = sub('negocio', 'finanzas');
-    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['distribucion', 'Distribución'], ['mercado', t('neg_mercado')]], s) +
-      ({ finanzas: nFinanzas, estudio: nEstudio, distribucion: IA.distribucion.negocioDistribucion, mercado: nMercado }[s] || nFinanzas)();
+    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['mercado', t('neg_mercado')]], s) +
+      ({ finanzas: nFinanzas, estudio: nEstudio, sede: IA.calendarioUI.negocioSede, distribucion: IA.distribucion.negocioDistribucion, mercado: nMercado }[s] || nFinanzas)();
   }
   function tablaLibro(libro) {
     const filas = [];
@@ -578,7 +648,7 @@ IA.pantallas = (function () {
   });
   function nMercado() {
     const S = N.S, anio = N.anio(), cuota = NG.cuotaAnioActual(0), ult = S.fin.hist[S.fin.hist.length - 1];
-    let h = '<div class="kpis">' + kpi(t('est_cuota'), U.pct(cuota)) + kpi('Cuota del año pasado', ult ? U.pct(ult.cuota) : '—') + kpi('Puesto del año pasado', ult && ult.puesto ? ult.puesto + '.º' : '—') + kpi(t('est_clase'), est0().clase || 'C') + '</div>';
+    let h = IA.calendarioUI.adnMercado() + '<div class="kpis">' + kpi(t('est_cuota'), U.pct(cuota)) + kpi('Cuota del año pasado', ult ? U.pct(ult.cuota) : '—') + kpi('Puesto del año pasado', ult && ult.puesto ? ult.puesto + '.º' : '—') + kpi(t('est_clase'), est0().clase || 'C') + '</div>';
     h += '<div class="tarjeta"><h3>Frenos contra el dinero infinito</h3><ul>' +
       '<li>El público es finito: población × acceso × frecuencia de cada época.</li>' +
       '<li>Cada semana compites con los estrenos rivales y con las otras productoras.</li>' +
@@ -723,6 +793,7 @@ IA.pantallas = (function () {
     if (N.S.quiebra) { detenerAuto(); modalQuiebra(); IA.arte.sonido('fracaso'); return; }
     if (r && r.motivo === 'premios' && N.S.premios.length) mostrarPremios();
     else if (J.decisionesPendientes().length) IA.creacion.siguienteDecision(); // dilemas y pruebas de público (V19)
+    else if (IA.calendarioUI.mostrarPendientes()) { /* vida, heredero o recordatorio (V21) */ }
     else if (mostrarResumen && r && r.semanas > 1) {
       U.modal('<h2>' + t('resumen_titulo', { n: r.semanas }) + '</h2><div class="kpis">' + kpi(t('ingresos'), dinero(r.ingresos), 'bien') + kpi(t('gastos'), dinero(r.gastos), 'mal') + kpi('Cambio de caja', dinero(r.caja), r.caja >= 0 ? 'bien' : 'mal') + kpi(t('caja'), dinero(est0().caja)) + '</div>' +
         (res.nuevas.length ? '<h3>' + t('mun_periodico') + '</h3>' + res.nuevas.slice(0, 8).map(function (n) { return '<p style="margin:4px 0">' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>'; }).join('') : '') +
@@ -756,7 +827,7 @@ IA.pantallas = (function () {
         if (!res) { detenerAuto(); U.renderBarra(); return; }
         const ev = N.S.quiebra ? 'quiebra' : res.r && res.r.motivo === 'premios' ? 'premios' : J.hayEvento();
         despuesDeAvanzar(res, false);
-        if (ev === 'lista' || ev === 'quiebra' || ev === 'premios' || ev === 'decision') {
+        if (ev === 'lista' || ev === 'quiebra' || ev === 'premios' || ev === 'decision' || ev === 'recordatorio' || ev === 'vida') {
           detenerAuto(); U.renderBarra();
           if (ev === 'lista') U.aviso('Tienes una obra lista para estrenar');
           if (ev === 'decision') IA.creacion.siguienteDecision();
@@ -796,6 +867,14 @@ IA.pantallas = (function () {
   ac('ritmo', function (v) { U.ajuste('ritmo', v); quitarMenuRitmo(); detenerAuto(); U.renderBarra(); });
   let semanasElegidas = 8;
   ac('semanasRango', function (v) { semanasElegidas = N.limitar(Math.round(+v), 1, 52); const l = document.getElementById('rv-semanas'); if (l) l.textContent = semanasElegidas + (semanasElegidas === 1 ? ' semana' : ' semanas'); });
+  // Avanzar hasta un día elegido en el calendario (V21); se detiene antes si llega algo que decidir
+  function avanzarHasta(tt) {
+    detenerAuto();
+    if (N.S && N.S.quiebra) { modalQuiebra(); return; }
+    if (tt <= N.S.t) return;
+    IA.arte.sonido('avance');
+    despuesDeAvanzar(avanzarCon({ hasta: tt }), true);
+  }
   ac('avanzarSemanas', function () {
     quitarMenuRitmo(); detenerAuto();
     if (N.S && N.S.quiebra) { modalQuiebra(); return; }
@@ -815,6 +894,6 @@ IA.pantallas = (function () {
   return {
     portada: portada, nuevaPartida: nuevaPartida, estudio: estudio, obras: obras, talento: talento, mundo: mundo, negocio: negocio,
     fichaObra: fichaObra, fichaTalento: fichaTalento, alMostrar: alMostrar, refrescarFicha: refrescarFicha, detenerAuto: detenerAuto,
-    datosEstudio: datosEstudio, tareas: tareas,
+    datosEstudio: datosEstudio, tareas: tareas, avanzarHasta: avanzarHasta,
   };
 })();

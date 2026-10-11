@@ -78,7 +78,7 @@ IA.produccion = (function () {
       o.sr--;
       // Prueba de público: dos semanas antes del final de la posproducción (solo tus obras)
       if (o.et === 'posproduccion' && o.est === 0 && !o.prueba && (o.sr === 2 || (o.sr === 1 && o.dur.posproduccion <= 2))) {
-        E.calificar(o, T.porId, ctx.bonos(o.est, o.fam));
+        E.calificar(o, T.porId, ctx.bonos(o.est, o.fam, o));
         o.calif = 1;
         R.hacerPrueba(o);
         continue;
@@ -87,7 +87,7 @@ IA.produccion = (function () {
       o.et = SIGUIENTE[o.et];
       if (o.et === 'lista') {
         o.gp = Math.round(o.gp);
-        if (!o.calif) E.calificar(o, T.porId, ctx.bonos(o.est, o.fam));
+        if (!o.calif) E.calificar(o, T.porId, ctx.bonos(o.est, o.fam, o));
         delete o.calif;
         if (o.est === 0) {
           const ns = R.notas(o);

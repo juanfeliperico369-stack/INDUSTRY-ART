@@ -3,9 +3,9 @@
  * Bot de pruebas de INDUSTRY ART en un navegador real (Chromium sin pantalla).
  * Juega 3 estrategias (prudente, normal, agresiva) desde 1900 y desde 2000 hasta 2150 con semillas fijas,
  * revisa las metas de balance, los errores, los tiempos y el tamaño del guardado comprimido, y escribe
- * pruebas/informe_bot_v20.md y pruebas/informe_bot_v20.json, con las pruebas de reglas de la V17 a la V20.
+ * pruebas/informe_bot_v21.md y pruebas/informe_bot_v21.json, con las pruebas de reglas de la V17 a la V21.
  *
- * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_v20.html]
+ * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_v21.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const arg = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const HASTA = +arg('hasta', 2150);
 const SEMILLAS = arg('semillas', 'bot,b2').split(',');
-const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_v20.html'));
+const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_v21.html'));
 const ESTRATEGIAS = ['prudente', 'normal', 'agresiva'];
 const DESDE = [1900, 2000];
 
@@ -114,7 +114,7 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
     ['Cuota de mercado', 'menos de 35 %', (r) => r.cuotaMax < 0.35, (r) => pct(r.cuotaMax) + ' máx.'],
   ];
   const fecha = new Date().toISOString().slice(0, 10);
-  let md = '# Informe del bot · INDUSTRY ART V20\n\n';
+  let md = '# Informe del bot · INDUSTRY ART V21\n\n';
   md += `Fecha: ${fecha} · Navegador: Chromium sin pantalla · ${resultados.length} partidas hasta ${HASTA} · semillas fijas: ${SEMILLAS.join(', ')}\n\n`;
   const totalErrores = resultados.reduce((a, r) => a + r.errores.filter((e) => !/^Quiebra del bot/.test(e)).length, 0);
   md += `**Errores del juego en todas las partidas: ${totalErrores}.** Quiebras del bot: ${resultados.filter((r) => r.quiebra).length}.\n\n`;
@@ -143,7 +143,7 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
     md += `| ${r.estrategia} | ${r.desde} | ${r.semilla.split('-')[0]} | ${p.obras || 0} | ${lista(p.metodos)} | ${lista(p.estilos)} | ${p.sets || 0} | ${p.externos || 0} | ${p.dilemas || 0} | ${lista(p.pruebas)} | ${pct(p.sobrecosto || 0)} |\n`;
   }
 
-  md += '\n## Lanzamiento: qué pasó con las obras del bot (V20)\n\n| Estrategia | Desde | Semilla | Obras | Directo a video/streaming | Oro | Platino | Diamante | Reestrenos | Parte de ventanas en sus ingresos |\n|---|---|---|---|---|---|---|---|---|---|\n';
+  md += '\n## Lanzamiento: qué pasó con las obras del bot (V21)\n\n| Estrategia | Desde | Semilla | Obras | Directo a video/streaming | Oro | Platino | Diamante | Reestrenos | Parte de ventanas en sus ingresos |\n|---|---|---|---|---|---|---|---|---|---|\n';
   for (const r of resultados) {
     const l = r.lanzamiento || {};
     md += `| ${r.estrategia} | ${r.desde} | ${r.semilla.split('-')[0]} | ${l.obras || 0} | ${l.directos || 0} | ${l.oro || 0} | ${l.platino || 0} | ${l.diamante || 0} | ${l.reestrenos || 0} | ${pct(l.parteVentanas || 0)} |\n`;
@@ -167,8 +167,8 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   md += `| Guardar y cargar en IndexedDB | sin fallos | ${resultados.every((r) => r.pruebaGuardado.guardar && r.pruebaGuardado.cargar) ? 'todas bien' : 'FALLÓ: ' + resultados.map((r) => r.pruebaGuardado.error).join('; ')} |\n`;
   md += '\n## Errores\n\n' + (totalErrores ? resultados.map((r) => r.errores.map((e) => `- ${r.estrategia} ${r.desde}: ${e}`).join('\n')).filter(Boolean).join('\n') : 'Ninguno.') + '\n';
   fs.mkdirSync(path.join(RAIZ, 'pruebas'), { recursive: true });
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v20.md'), md);
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v20.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento, reglas }, null, 1));
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v21.md'), md);
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v21.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento, reglas }, null, 1));
   console.log(md);
   process.exit(totalErrores ? 1 : 0);
 })();

@@ -40,9 +40,9 @@ IA.taxonomia = (function () {
   const fam = function (id, nombre, generos, nucleo, inclina, eje) { return { id: id, nombre: nombre, generos: alfa(sp(generos)), nucleo: nucleo, inclina: inclina, eje: eje }; };
   const generosMedio = {
     tv: [
-      fam('TF', 'Ficción televisiva', 'Antología,K-Drama,Sitcom,Sketches,Soap opera', 'Todos', 'pub', 'HM'),
-      fam('TE', 'Entretenimiento en vivo', 'Concurso,Game show,Late night,Reality,Talent show,Talk show,Variety show', 'Familias y adultos', 'pub', 'FJ'),
-      fam('TN', 'No ficción', 'Análisis,Cocina,Docuserie,Educativo,Estilo de vida,Informativo,Noticias,True crime', 'Adultos', 'eq', 'DR'),
+      fam('TF', 'Ficción televisiva', 'Antología,Comedia dramática,K-Drama,Procedimental,Serie web,Sitcom,Sketches,Soap opera,Telenovela', 'Todos', 'pub', 'HM'),
+      fam('TE', 'Entretenimiento en vivo', 'Citas,Concurso,Deportes en vivo,Game show,Late night,Magacín,Premiaciones,Reality,Talent show,Talk show,Telecompras,Variety show', 'Familias y adultos', 'pub', 'FJ'),
+      fam('TN', 'No ficción', 'Análisis,Cocina,Divulgación científica,Docuserie,Educativo,Estilo de vida,Informativo,Noticias,True crime,Vida salvaje', 'Adultos', 'eq', 'DR'),
     ],
     juegos: [
       fam('JA', 'Acción', 'Acción,Arcade,Battle royale,Lucha,Plataformas,Shooter en primera persona,Shooter en tercera persona,Sigilo', 'Jóvenes', 'pub', 'AA'),
@@ -99,11 +99,24 @@ IA.taxonomia = (function () {
     });
   }
 
+  // ---------- Premisas y tropos (v2): 56 en 8 familias; 0 a 2 por obra, dan frases a la sinopsis y al marketing ----------
+  // afin: con qué familias del cine encaja mejor cada familia de premisas
+  const familiasPremisa = [
+    { id: 'VC', nombre: 'Viaje y cambio', items: sp('Elegido,Empezar de cero,Mayoría de edad,Pez fuera del agua,Regreso a casa,Segunda oportunidad,Viaje del héroe'), afin: ['IM', 'FJ', 'DR', 'AA'] },
+    { id: 'PC', nombre: 'Poder y conflicto', items: sp('Ascenso y caída,David contra Goliat,Justicia por mano propia,Lucha por el trono,Rebelión contra el sistema,Traición del mentor,Último bastión'), afin: ['AA', 'DR', 'IM'] },
+    { id: 'CE', nombre: 'Crimen y engaño', items: sp('Chantaje,Doble agente,El gran golpe,Encerrado con el culpable,Falso culpable,Identidad secreta,Último trabajo'), afin: ['SM', 'AA', 'DR'] },
+    { id: 'AV', nombre: 'Amor y vínculos', items: sp('Amor prohibido,Enemigos que se enamoran,Familia elegida,Hermanos separados,Matrimonio por conveniencia,Reencuentro,Triángulo amoroso'), afin: ['RD', 'DR', 'HM', 'FJ'] },
+    { id: 'TM', nombre: 'Tiempo y misterio', items: sp('Amnesia,Bucle temporal,Desaparición sin rastro,Mensaje del pasado,Mundo paralelo,Secreto de familia,Visitante del futuro'), afin: ['IM', 'SM', 'AV'] },
+    { id: 'SA', nombre: 'Supervivencia y amenaza', items: sp('Asedio,Catástrofe que se acerca,Contagio,Invasión,Monstruo en las sombras,Náufragos,Última noche'), afin: ['SM', 'AA', 'IM'] },
+    { id: 'HE', nombre: 'Humor y enredo', items: sp('Boda caótica,Confusión de identidades,Herencia con condiciones,Intercambio de cuerpos,Mentira que crece,Pareja dispareja,Viaje por carretera'), afin: ['HM', 'RD', 'FJ'] },
+    { id: 'EM', nombre: 'Equipo y misión', items: sp('Aprendiz que supera al maestro,Equipo improbable,Expedición,Misión sin regreso,Rescate,Reunir al equipo,Torneo'), afin: ['AA', 'FJ', 'IM'] },
+  ];
+
   // ---------- Subgéneros: 38 son también géneros (usan la familia de su género) y 47 propios en 5 familias ----------
   // afin: encaje de la familia del subgénero con cada familia del cine (++ 3, + 1, 0, − 2)
   const subgenerosGenero = sp('Acción,Aventura,Ciencia ficción,Fantasía,Terror,Thriller,Misterio,Crimen,Policial,Noir,Drama,Romance,Comedia,Musical,Histórico,Bélico,Western,Superhéroes,Biográfico,Político,Social,Deportivo,Judicial,Espionaje,Religioso,Falso documental,Experimental,Surrealista,Adolescentes,Melodrama,Parodia,Infantil,Catástrofes,Épico,Artes,Monstruos,Festivo,Folklórico');
   const familiasSub = [
-    { id: 'FT', nombre: 'Futuros y tecnología', items: sp('Apocalíptico,Biopunk,Climáticas,Cósmico,Cyberpunk,Dieselpunk,Distopía,Extraterrestres,Futurismo,Mecha,Post apocalíptico,Robótica,Solarpunk,Space opera,Steampunk,Tecnología,Ucronía,Utopía,Viajes en el tiempo'),
+    { id: 'FT', nombre: 'Futuros y tecnología', items: sp('Apocalíptico,Biopunk,Climáticas,Cósmico,Cyberpunk,Dieselpunk,Distopía,Extraterrestres,Futurismo,Mecha,Post apocalíptico,Robótica,Solarpunk,Space opera,Steampunk,Western espacial,Tecnología,Ucronía,Utopía,Viajes en el tiempo'),
       afin: { AA: 1, IM: 3, SM: 1, DR: 0, HM: 0, FJ: 0, AV: 1, RD: -2 } },
     { id: 'FM', nombre: 'Fantasía y mito', items: sp('Artes marciales,Crepuscular,Fantasía oscura,Folklore,Isekai,Leyendas,Magia,Mitología,Realismo mágico,Wuxia'),
       afin: { AA: 1, IM: 3, SM: 0, DR: 0, HM: 0, FJ: 1, AV: 1, RD: 0 } },
@@ -535,7 +548,7 @@ IA.taxonomia = (function () {
   return {
     medios: medios, tiposPorMedio: tiposPorMedio, tiposCine: tiposCine, generosMedio: generosMedio, tablaEncaje: tablaEncaje,
     subgenerosGenero: subgenerosGenero, familiasSub: familiasSub, subMinimos: subMinimos, listaSubgeneros: listaSubgeneros,
-    familiasTema: familiasTema, DEPORTES_NUEVOS: DEPORTES_NUEVOS, familiasProblema: familiasProblema, fraseProblema: fraseProblema,
+    familiasTema: familiasTema, familiasPremisa: familiasPremisa, DEPORTES_NUEVOS: DEPORTES_NUEVOS, familiasProblema: familiasProblema, fraseProblema: fraseProblema,
     arcos: arcos, subarcos: subarcos, familiasFiccion: familiasFiccion,
     corrientesCine: corrientesCine, corrientesMedio: corrientesMedio, ESTANDAR: ESTANDAR, efectoCorriente: efectoCorriente,
     estilos: estilos, prioridades: prioridades, formatos: formatos, formatoEstandar: formatoEstandar, efectoFormato: efectoFormato,
