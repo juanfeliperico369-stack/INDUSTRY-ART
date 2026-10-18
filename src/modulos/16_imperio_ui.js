@@ -139,7 +139,11 @@ ART.imperioUI = (function () {
     const pasado = function (x) { return x.y < hoy.y || (x.y === hoy.y && (x.m < hoy.m || (x.m === hoy.m && x.d <= hoy.d))); };
     const vis = st.hist === 'todo' ? l : l.filter(function (x) { return x.y >= a - 15 && x.y <= a + 25; });
     let h = '<p class="nota info">La historia real llega hasta 2026 (sin personas reales); después siguen las eras de ficción y, desde 2150, eventos que salen de tu partida.</p>' +
-      '<div class="fila">' + chip('Cerca de hoy', 'hsVer', 'cerca', st.hist === 'cerca') + chip('Toda la historia', 'hsVer', 'todo', st.hist === 'todo') + '</div>';
+      '<div class="fila">' + chip('Cerca de hoy', 'hsVer', 'cerca', st.hist === 'cerca') + chip('Toda la historia', 'hsVer', 'todo', st.hist === 'todo') + chip('Archivo de curiosidades', 'hsVer', 'curio', st.hist === 'curio') + '</div>';
+    if (st.hist === 'curio') {
+      const cs = ART.curiosidades.todas(a);
+      return h + '<p class="nota">' + cs.length + ' de ' + ART.curiosidades.total() + ' temas desbloqueados: aparecen cuando la partida llega a su año.</p>' + cs.map(fichaCuriosidad).join('');
+    }
     const act = ART.historia.activos();
     if (act.length) h += '<div class="tarjeta"><b>Ahora mismo:</b> ' + act.map(function (p) { return esc(p.txt || { guerra1: 'Primera Guerra Mundial', guerra2: 'Segunda Guerra Mundial', depresion: 'Gran Depresión', hays: 'Código de Producción (censura)', huelgaG: 'Huelga de guionistas', huelgaA: 'Huelga de actores' }[p.id] || p.tipo || p.id); }).join(' · ') + '</div>';
     h += '<div class="col">' + vis.map(function (x) {
@@ -148,6 +152,16 @@ ART.imperioUI = (function () {
     return h;
   }
   ac('hsVer', function (v) { st.hist = v; U.refrescar(); });
+  // ---------- Archivo de curiosidades: lo que todos saben y lo que pocos saben ----------
+  function fichaCuriosidad(c, conBoton) {
+    return '<div class="tarjeta curio" data-fijo="1"><div class="fila entre"><h3>' + esc(c.tema) + '</h3><span class="etiqueta">' + c.anio + '</span></div>' +
+      '<p class="curio-todos"><b>' + (ART.idioma.actual() === 'en' ? 'What everyone knows' : 'Lo que todos saben') + '</b><br>' + esc(c.todos) + '</p>' +
+      '<p class="curio-pocos"><b>' + (ART.idioma.actual() === 'en' ? 'What few people know' : 'Lo que pocos saben') + '</b><br>' + esc(c.pocos) + '</p>' +
+      (conBoton ? '<button class="btn" data-a="otraCuriosidad">' + (ART.idioma.actual() === 'en' ? 'Another one' : 'Otra curiosidad') + '</button>' : '') + '</div>';
+  }
+  let desplazarCurio = 0;
+  function curiosidad() { const c = ART.curiosidades.deLaSemana(desplazarCurio); return c ? fichaCuriosidad(c, true) : ''; }
+  ac('otraCuriosidad', function () { desplazarCurio++; U.refrescar(); });
 
   // ---------- Bitácora del estudio ----------
   function bitacora() {
@@ -181,5 +195,5 @@ ART.imperioUI = (function () {
   }
   ac('qbSalir', function (v) { const e = B.salir(v); if (e) return U.aviso(e, 'mal'); if (v === 'terminar') return quiebra(); U.cerrarModal(); U.aviso('El estudio sigue en pie'); U.refrescar(); });
 
-  return { banco: banco, imperio: imperio, rivales: rivales, historia: historia, bitacora: bitacora, mostrarEvento: mostrarEvento, quiebra: quiebra };
+  return { banco: banco, imperio: imperio, rivales: rivales, historia: historia, bitacora: bitacora, curiosidad: curiosidad, mostrarEvento: mostrarEvento, quiebra: quiebra };
 })();

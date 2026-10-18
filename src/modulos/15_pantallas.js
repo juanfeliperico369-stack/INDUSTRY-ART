@@ -348,7 +348,7 @@ ART.pantallas = (function () {
       kpi('Típico de la época', dinero(E.presupuestoTipico(N.anio()))) +
       kpi('Entrada de cine', dinero(M.precioEntrada('nam', N.anio()))) +
       '</div></div>' +
-      ART.metasUI.tarjetas() + ART.prensaUI.banner() + ART.imperioUI.bitacora() + ART.calendarioUI.tarjetasEstudio() +
+      ART.metasUI.tarjetas() + ART.prensaUI.banner() + ART.imperioUI.curiosidad() + ART.imperioUI.bitacora() + ART.calendarioUI.tarjetasEstudio() +
       '<div class="tarjeta"><h3>' + t('mun_periodico') + '</h3>' + S.noticias.slice(0, 5).map(function (n) {
         return '<p style="margin:6px 0"><span class="tenue chico">' + esc(U.fechaCorta(n.t)) + '</span><br>' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>';
       }).join('') + '</div></div></div>';

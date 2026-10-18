@@ -94,15 +94,17 @@ ART.idioma = (function () {
     return s;
   }
   const ATRIBUTOS = ['placeholder', 'title', 'aria-label'];
+  // Lo que ya viene escrito en inglés (data-fijo) no pasa por el diccionario
+  function fijo(n) { const e = n.nodeType === 1 ? n : n.parentNode; return !!(e && e.closest && e.closest('[data-fijo]')); }
   function nodo(raiz) {
-    if (actual !== 'en' || !raiz) return;
+    if (actual !== 'en' || !raiz || fijo(raiz)) return;
     if (raiz.nodeType === 3) { const v = texto(raiz.nodeValue); if (v !== raiz.nodeValue) raiz.nodeValue = v; return; }
     if (raiz.nodeType !== 1 || raiz.tagName === 'SCRIPT' || raiz.tagName === 'STYLE' || raiz.tagName === 'TEXTAREA') return;
     ATRIBUTOS.forEach(function (a) { const v = raiz.getAttribute && raiz.getAttribute(a); if (v) { const w = texto(v); if (w !== v) raiz.setAttribute(a, w); } });
     const tw = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     let n = tw.nextNode();
     while (n) {
-      if (n.nodeType === 3) { if (!n.parentNode || ['SCRIPT', 'STYLE', 'TEXTAREA'].indexOf(n.parentNode.tagName) < 0) { const v = texto(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; } }
+      if (n.nodeType === 3) { if (!n.parentNode || (['SCRIPT', 'STYLE', 'TEXTAREA'].indexOf(n.parentNode.tagName) < 0 && !fijo(n))) { const v = texto(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; } }
       else ATRIBUTOS.forEach(function (a) { const v = n.getAttribute(a); if (v) { const w = texto(v); if (w !== v) n.setAttribute(a, w); } });
       n = tw.nextNode();
     }

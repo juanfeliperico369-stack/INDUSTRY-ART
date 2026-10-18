@@ -204,7 +204,7 @@ ART.medios = (function () {
   function calificar(p) {
     const ts = p.eq.map(T.porId).filter(Boolean);
     let q = ts.length ? ts.reduce(function (s, t, i) { return s + habMedio(t, p.med) * (i === 0 ? 1.5 : 1); }, 0) / (ts.length + 0.5) : 40;
-    q += p.esc * 3;
+    q += p.esc * 3 + (p.dq || 0); // dq: decisiones de los eventos
     const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
     if (bd) q += bd.prac / 6 + (bd.rel - 50) / 25;
     const mo = motor(p.cfg.motor); if (mo) q += mo.est * 1.5;
