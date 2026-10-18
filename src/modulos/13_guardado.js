@@ -72,6 +72,7 @@ IA.guardado = (function () {
 
   // V21 → V22: premios, festivales, crítica y prensa (todo empieza vacío)
   MIGRACIONES[22] = function (S) { ['galas', 'palmares', 'revista', 'cartas', 'hitos'].forEach(function (k) { if (!S[k]) S[k] = []; }); if (!S.fest) S.fest = {}; };
+  MIGRACIONES[28] = function () { /* V28: interfaz y rendimiento, sin datos nuevos */ };
   MIGRACIONES[27] = function () { /* V27: solo balance, sin datos nuevos */ };
   MIGRACIONES[26] = function (S) { if (!S.metas) S.metas = { modo: 'libre', reto: null, logros: {}, misiones: [], legado: 0, decadas: [], tut: 0, fin: null, ret: 0 }; };
   MIGRACIONES[25] = function (S) { if (!S.med) S.med = { p: [], bandas: [], kits: {}, motores: [], motorLic: [], ofMot: [], premios: [], ing: {} }; };

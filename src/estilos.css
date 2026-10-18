@@ -100,7 +100,7 @@ a { color: var(--acento); }
 .tarjeta { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio) var(--radio) var(--radio) 4px; padding: 12px; margin: 0 0 10px; }
 .tarjeta.toque { cursor: pointer; }
 .tarjeta.toque:active { transform: scale(.99); }
-.fila { display: flex; align-items: center; gap: 10px; }
+.fila { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } /* V28: las filas saltan de línea en el celular */
 .fila.entre { justify-content: space-between; }
 .fila.envolver { flex-wrap: wrap; }
 .col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -239,3 +239,9 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 /* V19: botones de decisión (dilemas y prueba de público): título arriba y efecto abajo */
 .btn.decision { flex-direction: column; align-items: flex-start; text-align: left; gap: 2px; }
 .btn.decision b { font-weight: 600; }
+/* V28: pestañas en varias filas en pantallas anchas (en el celular se deslizan) y paleta para daltonismo */
+@media (min-width: 900px) { .pestanas { flex-wrap: wrap; overflow-x: visible; } }
+:root[data-dalton="si"] { --bien: #3b82f6; --mal: #f59e0b; --rosa: #e879f9; }
+/* V28: todo lo que se toca mide al menos 44 px */
+a[data-a] { display: inline-flex; align-items: center; min-height: 44px; }
+.btn, .chip, .pestana, .ico { min-width: 44px; }

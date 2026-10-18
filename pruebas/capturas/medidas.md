@@ -1,4 +1,4 @@
-# Capturas automáticas · INDUSTRY ART V20
+# Capturas automáticas · INDUSTRY ART V22
 
 | Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |
 |---|---|---|---|---|
