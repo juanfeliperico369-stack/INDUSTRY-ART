@@ -6,13 +6,27 @@ IA.idioma = (function () {
   'use strict';
   let actual = 'es', mapa = null, re = null, obs = null;
   const LETRA = 'A-Za-zÁÉÍÓÚÜÑáéíóúüñ';
-  // El diccionario viaja comprimido (gzip en base64) para que el archivo no pase de 1,5 MB
+  // El diccionario viaja comprimido (gzip en Z85 desde la V34; antes en base64) para que el archivo no pase de 1,5 MB
+  const Z85 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!~*?&<>()[]{}@%$#';
+  function deZ85(s, largo) {
+    const val = {};
+    for (let i = 0; i < 85; i++) val[Z85.charCodeAt(i)] = i;
+    const out = new Uint8Array((s.length / 5) * 4);
+    let o = 0;
+    for (let i = 0; i < s.length; i += 5) {
+      let v = 0;
+      for (let j = 0; j < 5; j++) v = v * 85 + val[s.charCodeAt(i + j)];
+      out[o++] = Math.floor(v / 16777216) & 255; out[o++] = (v >>> 16) & 255; out[o++] = (v >>> 8) & 255; out[o++] = v & 255;
+    }
+    return out.subarray(0, largo);
+  }
   let cargando = null;
   function cargar() {
     if (mapa || cargando) return cargando || Promise.resolve();
-    if (!IA.INGLES_GZ || typeof DecompressionStream === 'undefined') { mapa = IA.INGLES || {}; return Promise.resolve(); }
-    const bin = atob(IA.INGLES_GZ), u = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    if (!(IA.INGLES_Z85 || IA.INGLES_GZ) || typeof DecompressionStream === 'undefined') { mapa = IA.INGLES || {}; return Promise.resolve(); }
+    let u;
+    if (IA.INGLES_Z85) u = deZ85(IA.INGLES_Z85, IA.INGLES_LEN);
+    else { const bin = atob(IA.INGLES_GZ); u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); }
     cargando = new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(function (txt) {
       const m = {};
       txt.split('\n').forEach(function (l) { const k = l.indexOf('\t'); if (k > 0) m[l.slice(0, k)] = l.slice(k + 1); });

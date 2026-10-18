@@ -3,9 +3,9 @@
  * Bot de pruebas de INDUSTRY ART en un navegador real (Chromium sin pantalla).
  * Juega 3 estrategias (prudente, normal, agresiva) desde 1900 y desde 2000 hasta 2150 con semillas fijas,
  * revisa las metas de balance, los errores, los tiempos y el tamaño del guardado comprimido, y escribe
- * pruebas/informe_bot_v33.md y pruebas/informe_bot_v33.json, con las pruebas de reglas de la V17 a la V33.
+ * pruebas/informe_bot_v34.md y pruebas/informe_bot_v34.json, con las pruebas de reglas de la V17 a la V34.
  *
- * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_v33.html]
+ * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_v34.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const arg = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const HASTA = +arg('hasta', 2150);
 const SEMILLAS = arg('semillas', 'bot,b2').split(',');
-const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_v33.html'));
+const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_v34.html'));
 const ESTRATEGIAS = ['prudente', 'normal', 'agresiva'];
 const DESDE = [1900, 2000];
 
@@ -98,6 +98,7 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   // Pruebas de reglas (clasificación, dominio público, Erótico, inflación y población)
   const pr = await navegador.newPage();
   await pr.goto('file://' + HTML);
+  await pr.addScriptTag({ path: path.join(RAIZ, 'tools', 'reglas.js') }); // V34: las reglas viven fuera del juego
   const reglas = await pr.evaluate(() => { IA.juego.nuevaPartida({ semilla: 'reglas', anio: 2000, bot: true }); return IA.pruebas.reglas(); });
   await pr.close();
   console.log('reglas', reglas.filter((x) => x.ok).length + '/' + reglas.length);
@@ -167,8 +168,8 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   md += `| Guardar y cargar en IndexedDB | sin fallos | ${resultados.every((r) => r.pruebaGuardado.guardar && r.pruebaGuardado.cargar) ? 'todas bien' : 'FALLÓ: ' + resultados.map((r) => r.pruebaGuardado.error).join('; ')} |\n`;
   md += '\n## Errores\n\n' + (totalErrores ? resultados.map((r) => r.errores.map((e) => `- ${r.estrategia} ${r.desde}: ${e}`).join('\n')).filter(Boolean).join('\n') : 'Ninguno.') + '\n';
   fs.mkdirSync(path.join(RAIZ, 'pruebas'), { recursive: true });
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v33.md'), md);
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v33.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento, reglas }, null, 1));
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v34.md'), md);
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v34.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento, reglas }, null, 1));
   console.log(md);
   process.exit(totalErrores ? 1 : 0);
 })();

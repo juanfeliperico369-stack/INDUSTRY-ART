@@ -244,11 +244,19 @@ IA.datos = (function () {
     { id: 'Adulto', efecto: '+1 a la crítica en drama, suspenso y romance', familias: ['DR', 'SM', 'RD'], crit: 1 },
     { id: 'Cultos', efecto: '+2 a la crítica en arte e imaginación', familias: ['AV', 'IM'], crit: 2 },
   ];
-  // Tipo de industria al empezar: en la V16 solo el cine; los demás medios llegan en su versión
+  // Tipo de industria al empezar (V34): define con qué empieza el estudio. plato: arranca con el plató de rodaje;
+  // meds: medios con +1 proyecto a la vez; rebaja: factor de costo en esos medios; canal: factor del costo del canal propio
   const industrias = [
-    { id: 'Cine', desde: 'V16' }, { id: 'Televisión', desde: 'V24' }, { id: 'Música', desde: 'V30' },
-    { id: 'Videojuegos', desde: 'V31' }, { id: 'Teatro', desde: 'V32' }, { id: 'Editorial', desde: 'V32' }, { id: 'Mixto', desde: 'V32' },
+    { id: 'Cine', desde: 1895, plato: 1, meds: [], efecto: 'Plató de rodaje incluido: +2 películas o series a la vez' },
+    { id: 'Televisión', desde: 1936, plato: 1, meds: [], canal: 0.6, efecto: 'Plató incluido y tu canal propio cuesta 40 % menos' },
+    { id: 'Música', desde: 1877, meds: ['musica'], rebaja: 0.85, efecto: 'Sin plató; en música, +1 proyecto a la vez y 15 % menos de costo' },
+    { id: 'Videojuegos', desde: 1972, meds: ['juegos'], rebaja: 0.85, efecto: 'Sin plató; en videojuegos, +1 proyecto a la vez y 15 % menos de costo' },
+    { id: 'Teatro', desde: 1850, meds: ['teatro'], rebaja: 0.85, efecto: 'Sin plató; en teatro, +1 obra a la vez y 15 % menos de costo' },
+    { id: 'Editorial', desde: 1850, meds: ['libros'], rebaja: 0.85, efecto: 'Sin plató; en libros, +1 proyecto a la vez y 15 % menos de costo' },
+    { id: 'Mixto', desde: 1850, meds: ['musica', 'juegos', 'teatro', 'libros'], efecto: 'Sin plató; +1 proyecto a la vez en música, videojuegos, teatro y libros' },
   ];
+  const CINE_DESDE = 1895;
+  function industria(id) { return industrias.filter(function (x) { return x.id === id; })[0] || industrias[0]; }
 
   // ---------- Rivales (nombres de la V15) ----------
   // tam: tamaño inicial relativo; calidad: tendencia de calidad; riesgo: cuánto se arriesgan con el presupuesto.
@@ -455,7 +463,7 @@ IA.datos = (function () {
     familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
     clasificaciones: clasificaciones, ANIO_CLASIFICACION_POR_EDADES: ANIO_CLASIFICACION_POR_EDADES,
     tonos: tonos, rasgos: rasgos, personalidades: personalidades,
-    tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, industrias: industrias, rivales: rivales,
+    tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, industrias: industrias, industria: industria, CINE_DESDE: CINE_DESDE, rivales: rivales,
     titulo1: titulo1, titulo2: titulo2, temas: temas,
     canales: canales, nivelesMarketing: nivelesMarketing, escalas: escalas,
     pisos: pisos, terrenos: terrenos, MAX_PISOS: MAX_PISOS, MAX_TERRENOS: MAX_TERRENOS,

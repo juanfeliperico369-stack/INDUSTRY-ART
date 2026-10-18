@@ -245,3 +245,7 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 /* V28: todo lo que se toca mide al menos 44 px */
 a[data-a] { display: inline-flex; align-items: center; min-height: 44px; }
 .btn, .chip, .pestana, .ico { min-width: 44px; }
+/* V34: globo con el valor al tocar una gráfica */
+#globo { position: fixed; z-index: 60; pointer-events: none; transform: translate(-50%, -100%); max-width: 70vw; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 8px; padding: 4px 9px; font-size: 13px; line-height: 1.3; opacity: 0; transition: opacity .12s; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+#globo.on { opacity: 1; }
+canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }

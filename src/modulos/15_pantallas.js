@@ -41,7 +41,7 @@ IA.pantallas = (function () {
       '<p class="nota">' + t('creditos') + '</p><p class="nota">' + t('v15_aparte') + '</p></div>';
   }
   const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'Felipe', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
-    tipo: 'Estudio', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
+    tipo: 'Estudio', industria: 'Cine', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
     region: 'losangeles', sufijo: 'Pictures', tf: 'escuela', arq: 'visionario', modo: 'dueno', oficio: 'direccion', enfG: ['Drama', 'Comedia', 'Aventura'], enfT: ['', '', ''] };
   const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville'];
   function nuevaPartida() {
@@ -92,7 +92,7 @@ IA.pantallas = (function () {
       '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Sufijo del logo</span><select data-c="np" data-k="sufijo">' + ops([['', 'Sin sufijo']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
       '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select>' +
       '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota">' + t('np_anio_ayuda') + '</span></label>' +
-      '<label class="campo"><span>Tipo de industria</span><select data-c="np" data-k="industria">' + D.industrias.map(function (x) { return '<option value="' + x.id + '"' + (x.id === 'Cine' ? ' selected' : ' disabled') + '>' + x.id + (x.id === 'Cine' ? '' : ' (llega en la ' + x.desde + ')') + '</option>'; }).join('') + '</select></label>' +
+      '<label class="campo"><span>Tipo de industria</span><select data-c="npInd">' + ops(D.industrias.filter(function (x) { return x.desde <= np.anio; }).map(function (x) { return [x.id, x.id]; }), indNp().id) + '</select><span class="nota">' + esc(indNp().efecto) + '</span></label>' +
       '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
       '<label class="campo"><span>Visión de la industria</span><select data-c="np" data-k="vision">' + ops(D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.vision) + '</select></label>' +
       '<label class="campo"><span>Público objetivo</span><select data-c="np" data-k="publico">' + ops(D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.publico) + '</select></label>' +
@@ -122,6 +122,9 @@ IA.pantallas = (function () {
     U.acciones.nuevaPartida();
   });
   ac('np', function (v, el) { np[el.getAttribute('data-k')] = v; });
+  // V34: tipo de industria; si el año elegido es anterior a ese medio, se usa el que corresponde a la época
+  function indNp() { const x = D.industria(np.industria); return x.desde <= np.anio && x.id === np.industria ? x : D.industria(np.anio >= D.CINE_DESDE ? 'Cine' : 'Teatro'); }
+  ac('npInd', function (v) { np.industria = v; const y = document.getElementById('vista').scrollTop; U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; });
   ac('npNombre', function (v) { np.nombre = v; cacheT = -1; });
   // Deslizadores de identidad (V15, a pedido): 20 estilos de logo, 20 colores de logo, de fondo y de letras, 20 tipografías
   const NOMBRES_LOGO = { s: 'Tipo de logo', c: 'Color del logo', b: 'Color de fondo', t: 'Color de letras', f: 'Tipo de letra' };
@@ -192,7 +195,7 @@ IA.pantallas = (function () {
       semilla: (np.semilla || '').trim() || String(Date.now() % 1e9), anio: np.anio, nombre: (np.nombre || '').trim() || 'INDUSTRY ART',
       logo: U.estado.logoNuevo, pais: np.pais, capital: np.capital || J.capitalRecomendado(np.anio), dificultad: np.dificultad,
       escenario: np.escenario, personalidad: np.personalidad, creado: new Date().toISOString(),
-      tipo: np.tipo, vision: np.vision, publico: np.publico,
+      tipo: np.tipo, vision: np.vision, publico: np.publico, industria: indNp().id,
       avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad, especialidades: np.esp },
       modoJuego: np.modoJuego, reto: np.reto === undefined ? undefined : np.reto || null, tutorial: !!np.tutorial, perso: np.perso,
       region: np.region, sufijo: np.sufijo, trasfondo: np.tf, arquetipo: np.arq, modo: np.modo, oficio: np.oficio,
@@ -249,7 +252,7 @@ IA.pantallas = (function () {
     const tl = tareas();
     const fechas = proximasFechas();
     return titulo(est.nombre, 'estudio') +
-      '<canvas id="lienzoEstudio" class="estudio-lienzo" role="img" aria-label="Tu estudio"></canvas>' +
+      '<canvas id="lienzoEstudio" class="estudio-lienzo" role="img" aria-label="Tu estudio: toca un piso para ver su departamento" data-a="tocarEstudio"></canvas>' +
       '<div class="dos" style="margin-top:10px"><div>' +
       '<div class="tarjeta"><h3>' + t('est_tareas') + '</h3>' + (tl.length ? tl.map(function (x) {
         return '<div class="fila entre" style="padding:6px 0;border-bottom:1px solid var(--borde)"><span class="' + (x.mal ? 'mal' : '') + '">' + esc(x.txt) + '</span>' + (x.btn ? '<button class="btn' + (x.imp ? ' primario' : '') + '" data-a="' + x.a + '" data-v="' + (x.v || '') + '">' + esc(x.btn) + '</button>' : '') + '</div>';
@@ -337,6 +340,16 @@ IA.pantallas = (function () {
     if (!cacheDatos || cacheT !== tt) { cacheDatos = datosEstudio(); cacheT = tt; }
     IA.arte.estudio(c, w, h, ts, cacheDatos);
   }
+  // V34: tocar un piso del edificio abre su departamento; un terreno, su ficha
+  ac('tocarEstudio', function (v, el, ev) {
+    if (!ev || !cacheDatos) return;
+    const r = el.getBoundingClientRect(), q = IA.arte.estudioEn(el.clientWidth, el.clientHeight, cacheDatos, ev.clientX - r.left, ev.clientY - r.top);
+    if (!q) return;
+    if (q.tipo === 'piso' && q.id !== 'vacio' && U.acciones.verDepto) { U.acciones.verDepto(q.id); return; }
+    const info = q.tipo === 'terreno' && q.id !== 'vacio' ? NG.infoTerreno(q.id) : null;
+    if (info) U.modal('<h2>' + esc(info.nombre) + '</h2><p>' + esc(info.efecto || '') + '</p><button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
+    else U.irA('negocio', 'estudio'); // un lote vacío: a construir
+  });
   function alMostrar(sec) {
     cacheT = -1; firmaQuieta = '';
     if (!anim) anim = requestAnimationFrame(animar);
@@ -430,6 +443,10 @@ IA.pantallas = (function () {
     if (vis || o.est === 0) h += IA.prensaUI.bloqueObra(o);
     h += IA.teleUI.bloqueObra(o); // franquicia y serie (V23)
     if (o.est === 0 || estrenada) h += IA.creacion.bloqueIdea(o);
+    // V34: herramienta de ideas: notas del autor y el documento completo de la idea (trama y datos técnicos) en Word
+    if (o.est === 0 && (o.pj || o.sin || o.gen)) h += '<div class="tarjeta"><h3>Desarrolla tu idea</h3><p class="nota">Descarga la trama completa (planteamiento, nudo, desenlace y escaleta), los personajes y los datos técnicos en un documento de Word. Tus notas van al final.</p>' +
+      '<label class="campo"><span>Notas del autor</span><textarea rows="4" maxlength="4000" data-i="obraDiario" data-v="' + o.id + '" placeholder="Escenas, diálogos, ideas sueltas…">' + esc(o.diario || '') + '</textarea></label>' +
+      '<div class="fila"><button class="btn primario" data-a="docIdea" data-v="' + o.id + '">Descargar documento (.docx)</button><button class="btn" data-a="docTexto" data-v="' + o.id + '">Ver la trama</button></div></div>';
     if (o.est === 0) h += IA.creacion.bloqueProduccion(o);
     if (o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera') {
       h += '<div class="kpis">' + kpi(t('costo_talento'), dinero(o.cf)) + kpi(t('costo_produccion'), dinero(o.pp * (o.sobre || 1))) + kpi('Gastado en producción', dinero(o.gp || 0)) + '</div>';
@@ -459,6 +476,16 @@ IA.pantallas = (function () {
   }
   function estrenadaYa(o) { return o.et === 'cartelera' || o.et === 'terminada'; }
   ac('verObra', function (v) { U.abrirFicha(fichaObra(+v), 'obra:' + v); });
+  ac('obraDiario', function (v, el) { const o = O.porId(+el.getAttribute('data-v')); if (o && o.est === 0) o.diario = String(v).slice(0, 4000); });
+  ac('docIdea', function (v) {
+    const o = O.porId(+v);
+    if (!o) return;
+    IA.documento.descargar(o).then(function (r) { U.aviso(r.ok ? 'Documento listo: ' + r.nombre : 'No se pudo guardar el documento: usa «Ver la trama» y cópiala.', r.ok ? '' : 'mal'); });
+  });
+  ac('docTexto', function (v) {
+    const o = O.porId(+v);
+    if (o) U.modal('<h2>' + esc(o.tit) + '</h2><textarea rows="18" style="width:100%" readonly>' + esc(IA.documento.texto(o)) + '</textarea><button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
+  });
   ac('catalogoMas', function () { U.estado.catalogoVer = (U.estado.catalogoVer || 30) + 30; U.refrescar(); }); // V33
 
   // ---------- Programar estreno: el plan de lanzamiento vive en IA.distribucion (V20) ----------
@@ -488,19 +515,6 @@ IA.pantallas = (function () {
     return h;
   }
   function mCalendario() { return IA.calendarioUI.calendario(); }
-  function mRivales() {
-    const S = N.S, m = S.mercado, ult = m.hist[m.hist.length - 1];
-    let h = '<p class="nota">Estudios rivales con obras de verdad en la misma cartelera. Estrategias, compras y quiebras llegan en la V26.</p><div class="desliza"><table class="tabla"><tr><th>Estudio</th><th class="n">Cuota ' + N.anio() + '</th><th class="n">Cuota ' + (ult ? ult.anio : '') + '</th><th class="n">En marcha</th><th class="n">Fama</th></tr>';
-    const filas = S.estudios.map(function (e) {
-      const prev = ult ? ult.ranking.filter(function (r) { return r.id === e.id; })[0] : null;
-      return { e: e, ahora: NG.cuotaAnioActual(e.id), antes: prev && ult.total ? prev.bruto / ult.total : 0 };
-    }).sort(function (a, b) { return b.antes - a.antes || b.ahora - a.ahora; });
-    h += filas.map(function (f) {
-      return '<tr' + (f.e.id === 0 ? ' class="oro"' : '') + '><td><div class="fila"><canvas data-logo="' + f.e.id + '" style="width:30px;height:30px"></canvas><div><b>' + esc(f.e.nombre) + '</b><br><span class="tenue chico">' + esc(D.pais(f.e.pais).nombre) + (f.e.familia ? ' · ' + esc(D.familia(f.e.familia).nombre) : '') + '</span></div></div></td><td class="n">' + U.pct(f.ahora) + '</td><td class="n">' + U.pct(f.antes) + '</td><td class="n">' + O.enProduccion(f.e.id).length + '</td><td class="n">' + Math.round(f.e.fama * 100) + '</td></tr>';
-    }).join('');
-    h += '<tr><td>' + t('otras_productoras') + '</td><td class="n">' + U.pct(m.anio.total ? m.anio.otras / m.anio.total : 0) + '</td><td class="n">' + U.pct(ult && ult.total ? ult.otras / ult.total : 0) + '</td><td></td><td></td></tr></table></div>';
-    return h;
-  }
   function mPeriodico() {
     const S = N.S;
     const medio = N.anio() < 1920 ? 'Diario impreso' : N.anio() < 1950 ? 'Diario y radio' : N.anio() < 1995 ? 'Noticiero de TV' : N.anio() < 2006 ? 'Portal web' : 'Redes y noticias en línea';
@@ -535,7 +549,7 @@ IA.pantallas = (function () {
         return { lon: f.p.lon, lat: f.p.lat, r: f.pub / max, color: propia ? css.getPropertyValue('--dorado').trim() : s ? css.getPropertyValue('--rosa').trim() : css.getPropertyValue('--acento').trim(), destacado: !!s, etiqueta: propia ? f.p.nombre : '' };
       }));
     });
-    let h = '<p class="nota">El tamaño de cada círculo es su público de cine en ' + anio + '. <span class="oro">Dorado</span>: tu sede · <span class="rosa">Rosa</span>: sedes rivales. Sedes en otros países llegan en la V28; tus cines propios ya existen (Negocio › Estudio › Terrenos).</p>' +
+    let h = '<p class="nota">El tamaño de cada círculo es su público de cine en ' + anio + '. <span class="oro">Dorado</span>: tu sede · <span class="rosa">Rosa</span>: sedes rivales. Tus sedes en otros países se abren en Negocio › Imperio y tus cines propios en Negocio › Estudio › Terrenos.</p>' +
       '<canvas class="lienzo" style="height:auto;aspect-ratio:2/1" data-grafica="' + g + '"></canvas>';
     h += '<div class="desliza"><table class="tabla"><tr><th>País</th><th class="n">Población</th><th class="n">Entradas/año</th><th class="n">Costo de rodaje</th><th>Sede de</th></tr>' + filas.sort(function (a, b) { return b.pub - a.pub; }).map(function (f) {
       return '<tr><td>' + esc(f.p.nombre) + '<br><span class="tenue chico">' + esc(f.p.idioma) + '</span></td><td class="n">' + U.grande(f.pob) + '</td><td class="n">' + U.grande(f.pub) + '</td><td class="n">×' + U.decimal(f.p.costo, 2) + '</td><td>' + esc((sedes[f.p.id] || []).map(function (e) { return e.nombre; }).join(', ')) + '</td></tr>';
@@ -548,7 +562,7 @@ IA.pantallas = (function () {
       kpi('Mercado del cine al año', dinero(M.aEpoca(da.mercado2025, anio))) + kpi('Inflación del año', U.pct(M.inflacionAnual(anio))) + '</div>';
     h += '<h3>Acceso por medio</h3><div class="desliza"><table class="tabla"><tr><th>Región</th><th class="n">Cine</th><th class="n">Radio</th><th class="n">TV</th><th class="n">Internet</th><th class="n">Consolas</th></tr>' + D.regiones.map(function (r) {
       return '<tr><td>' + esc(r.nombre) + '</td>' + ['cine', 'radio', 'tv', 'internet', 'consolas'].map(function (m) { return '<td class="n">' + U.pct(M.accesoMedio(m, r.id, anio), 0) + '</td>'; }).join('') + '</tr>';
-    }).join('') + '</table></div><p class="nota">Radio, TV, internet y consolas compiten con el cine por el tiempo libre; en la V24, la V30 y la V31 serán mercados propios.</p>';
+    }).join('') + '</table></div><p class="nota">Radio, TV, internet y consolas compiten con el cine por el tiempo libre, y cada uno es también un mercado propio (TV, streaming, música y videojuegos).</p>';
     h += '<p class="nota">$1 de ' + anio + ' equivale a ' + U.dinero(M.aHoy(1, anio) * 1, 2025).replace('$', '$') + ' de hoy (IPC de EE. UU.). Público = Población × Acceso × Frecuencia.</p>';
     h += '<div class="desliza"><table class="tabla"><tr><th>Región</th><th class="n">Población</th><th class="n">Acceso al cine</th><th class="n">Entradas/año</th><th class="n">Precio</th></tr>' + D.regiones.map(function (r) {
       return '<tr><td>' + esc(r.nombre) + '</td><td class="n">' + U.grande(M.poblacion(r.id, anio)) + '</td><td class="n">' + U.pct(M.accesoCine(r.id, anio), 0) + '</td><td class="n">' + U.grande(da.regiones[r.id].publico) + '</td><td class="n">' + dinero(da.regiones[r.id].precio) + '</td></tr>';
@@ -562,9 +576,9 @@ IA.pantallas = (function () {
     const reg = N.S.estudios[0].reg;
     const g2 = U.grafica('piramide', function (cv) {
       const ed = M.edades(reg, anio);
-      IA.arte.barras(cv, ed.map(function (x) { return Math.round(x * 1000) / 10; }), M.GRUPOS, { formato: function (v) { return U.decimal(v, 1) + ' %'; } });
+      IA.arte.piramide(cv, ed.map(function (x) { return Math.round(x * 1000) / 10; }), M.GRUPOS, { formato: function (v) { return U.decimal(v, 1) + ' %'; } }); // V34: pirámide de verdad
     });
-    h += '<h3>Edades en ' + esc(D.region(reg).nombre) + '</h3><canvas class="lienzo" data-grafica="' + g2 + '"></canvas>';
+    h += '<h3>Pirámide de edades en ' + esc(D.region(reg).nombre) + '</h3><canvas class="lienzo" style="height:220px" data-grafica="' + g2 + '"></canvas>';
     return h;
   }
 
@@ -576,12 +590,15 @@ IA.pantallas = (function () {
     return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['banco', 'Banco'], ['imperio', 'Imperio'], ['mercado', t('neg_mercado')]], s) +
       ({ finanzas: nFinanzas, estudio: nEstudio, sede: IA.calendarioUI.negocioSede, distribucion: IA.distribucion.negocioDistribucion, canal: IA.teleUI.canal, streaming: IA.teleUI.streaming, banco: IA.imperioUI.banco, imperio: IA.imperioUI.imperio, mercado: nMercado }[s] || nFinanzas)();
   }
+  // V34: primero lo operativo y la utilidad; debajo, el capital (préstamos, socio, acciones), que mueve la caja pero no paga impuestos
   function tablaLibro(libro) {
-    const filas = [];
-    Object.keys(libro.ing).forEach(function (k) { filas.push('<tr><td>' + esc(NG.NOMBRES[k] || k) + '</td><td class="n bien">' + dinero(libro.ing[k]) + '</td></tr>'); });
-    Object.keys(libro.gas).forEach(function (k) { filas.push('<tr><td>' + esc(NG.NOMBRES[k] || k) + '</td><td class="n mal">−' + dinero(libro.gas[k]).replace('$', '$') + '</td></tr>'); });
+    const filas = [], cap = [];
+    const fila = function (k, v, ing) { return '<tr><td>' + esc(NG.NOMBRES[k] || k) + '</td><td class="n ' + (ing ? 'bien' : 'mal') + '">' + (ing ? '' : '−') + dinero(v) + '</td></tr>'; };
+    Object.keys(libro.ing).forEach(function (k) { (NG.esCapital(k) ? cap : filas).push(fila(k, libro.ing[k], true)); });
+    Object.keys(libro.gas).forEach(function (k) { (NG.esCapital(k) ? cap : filas).push(fila(k, libro.gas[k], false)); });
     const r = NG.total(libro, 'ing') - NG.total(libro, 'gas');
     filas.push('<tr><td><b>' + t('utilidad') + '</b></td><td class="n ' + (r >= 0 ? 'bien' : 'mal') + '"><b>' + dinero(r) + '</b></td></tr>');
+    if (cap.length) filas.push('<tr><td colspan="2" class="tenue chico">Movimientos de capital (mueven la caja, no la utilidad)</td></tr>' + cap.join(''));
     return '<table class="tabla">' + filas.join('') + '</table>';
   }
   function nFinanzas() {
@@ -590,6 +607,16 @@ IA.pantallas = (function () {
     h += '<div class="dos" style="margin-top:10px"><div class="tarjeta"><h3>Año ' + N.anio() + ' hasta hoy</h3>' + tablaLibro(S.fin.anio) + '<p class="nota">El impuesto del 25 % se paga al cerrar el año, solo sobre las utilidades.</p></div>';
     const ult = S.fin.meses[S.fin.meses.length - 1];
     h += '<div class="tarjeta"><h3>Mes en curso</h3>' + tablaLibro(S.fin.mes) + (ult ? '<p class="nota">Mes anterior: ingresos ' + dinero(ult.ing) + ', gastos ' + dinero(ult.gas) + '.</p>' : '') + '</div></div>';
+    // V34: flujo de caja mes a mes (lo operativo; el capital va aparte en la tabla)
+    if (S.fin.meses.length > 1) {
+      const ms = S.fin.meses.slice(-24);
+      const gf = U.grafica('flujo', function (cv) {
+        const css = getComputedStyle(document.documentElement), netos = ms.map(function (x) { return x.ing - x.gas; });
+        IA.arte.barras(cv, netos, ms.map(function (x) { return (x.mes + 1) + '/' + String(x.anio).slice(2); }), { formato: function (v) { return dinero(v); },
+          colores: netos.map(function (v) { return v >= 0 ? css.getPropertyValue('--bien').trim() : css.getPropertyValue('--mal').trim(); }) });
+      });
+      h += '<h3>Flujo de caja mes a mes</h3><canvas class="lienzo" style="height:180px" data-grafica="' + gf + '"></canvas><p class="nota">Ingresos menos gastos de cada mes. Toca una barra para ver su valor.</p>';
+    }
     if (S.fin.hist.length) {
       const hist = S.fin.hist.slice(-40);
       const g1 = U.grafica('cajaReal', function (cv) {
@@ -627,10 +654,13 @@ IA.pantallas = (function () {
     const opsSel = function (k, lista, actual) { return '<select data-c="estEditar" data-k="' + k + '">' + lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === actual ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>'; };
     h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div class="fila" id="estLogoVista"><canvas data-logo="0" style="width:64px;height:64px"></canvas><b>' + esc(est.nombre) + '</b></div>' +
       ['s', 'c', 'b', 't', 'f'].map(function (k) { return deslizadorLogo(k, est.logo[k] || 0, 'estLogo'); }).join('') +
+      '<div class="fila"><label class="btn">' + (U.logoPropio() ? 'Cambiar la imagen del logo' : 'Usar una imagen propia') + '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-c="estLogoImg" class="oculto"></label>' +
+      (U.logoPropio() ? '<button class="btn" data-a="estLogoQuitar">Volver al logo dibujado</button>' : '') + '</div>' +
+      '<p class="nota">La imagen propia se guarda solo en este dispositivo: no viaja en la partida, en el archivo .iasave ni en los pósters.</p>' +
       '<label class="campo"><span>Público objetivo</span>' + opsSel('publico', D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.publico) + '</label>' +
       '<label class="campo"><span>Visión de la industria</span>' + opsSel('vision', D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.vision) + '</label>' +
-      '<label class="campo"><span>Tipo de industria</span>' + opsSel('tipo', D.tiposEstudio.map(function (x) { return [x, x]; }), est.tipo) + '</label>' +
-      '<p class="nota">Cambiar la visión o el público cambia sus efectos en tus próximas obras.</p></div>';
+      '<label class="campo"><span>Tipo de estudio</span>' + opsSel('tipo', D.tiposEstudio.map(function (x) { return [x, x]; }), est.tipo) + '</label>' +
+      '<p class="nota">Industria de origen: <b>' + esc(D.industria(est.industria).id) + '</b> · ' + esc(D.industria(est.industria).efecto) + '. Cambiar la visión o el público cambia sus efectos en tus próximas obras.</p></div>';
     return h;
   }
   ac('estLogo', function (v, el) { const est = est0(); est.logo = Object.assign({}, est.logo); moverLogo(est.logo, el, 'estLogo', 'estLogoVista'); });
@@ -768,6 +798,12 @@ IA.pantallas = (function () {
   ac('exportar', function () {
     IA.guardado.exportarArchivo().then(function (r) { if (r.ok) U.aviso('Archivo ' + r.nombre + ' listo'); else U.aviso(t('gua_error', { e: r.error }), 'mal'); });
   });
+  ac('estLogoImg', function (v, el) {
+    const f = el.files && el.files[0];
+    el.value = '';
+    U.ponerLogoPropio(f).then(function () { U.aviso('Logo listo: se ve solo en este dispositivo.'); U.render(); }, function (e) { U.aviso(e.message, 'mal'); });
+  });
+  ac('estLogoQuitar', function () { U.quitarLogoPropio(); U.render(); });
   ac('importarArchivo', function (v, el) {
     const f = el.files && el.files[0];
     if (!f) return;
@@ -859,17 +895,9 @@ IA.pantallas = (function () {
     const res = N.S.premios[N.S.premios.length - 1];
     if (!res) return;
     return IA.prensaUI.ceremonia(res);
-    const tuyos = res.categorias.filter(function (c) { return c.ganador.est === 0; }).length;
-    if (tuyos) IA.arte.sonido('premio');
-    U.modal('<h2>' + t('premios_titulo', { nombre: D.premios.nombre, anio: res.anio + 1 }) + '</h2>' + res.categorias.map(function (c) {
-      // La frase del premio sale del arco de la obra (fábrica de ideas)
-      const og = c.id === 'pelicula' ? O.porId(c.ganador.obra) : null;
-      return '<p style="margin:6px 0"><span class="tenue chico">' + esc(c.nombre) + '</span><br><b class="' + (c.ganador.est === 0 ? 'oro' : '') + '">«' + esc(c.ganador.titulo) + '»' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + '</b> · ' + esc(nombreEstudio(c.ganador.est)) + (og && og.arco ? '<br><span class="nota">' + esc(IA.ideas.frasePremio(og)) + '</span>' : '') + '</p>';
-    }).join('') + '<button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
   }
   function modalQuiebra() {
     return IA.imperioUI.quiebra(); // tres salidas (V24)
-    U.modal('<h2>' + t('quiebra_titulo') + '</h2><p>' + t('quiebra_texto') + '</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + t('cargar') + '</button><button class="btn" data-a="salir">' + t('aj_salir') + '</button></div>');
   }
   ac('avanzar', function () {
     if (U.estado.auto) { detenerAuto(); U.renderBarra(); return; }

@@ -47,7 +47,6 @@ IA.talentos = (function () {
     vestuario: [40, 68, 0.6], efectos: [36, 60, 0.9], animacion: [34, 62, 0.8],
   };
   function curva(of) { return CURVA[of] || [40, 66, 0.8]; }
-  function edadPico(of) { return curva(of)[0]; }
   function habilidadPorEdad(pot, edad, of) {
     const c = curva(of);
     const inicio = of === 'interprete' ? 6 : 18;

@@ -69,11 +69,6 @@ IA.estreno = (function () {
     for (let g = 0; g < 5; g++) v.push(fam.edades[g] * E.PROPENSION[g] * cl.acceso[g] * (ex ? ex[g] : 1));
     return v;
   }
-  function coseno(a, b) { // (se conserva para otras comparaciones)
-    let ab = 0, aa = 0, bb = 0;
-    for (let i = 0; i < 5; i++) { ab += a[i] * b[i]; aa += a[i] * a[i]; bb += b[i] * b[i]; }
-    return aa > 0 && bb > 0 ? ab / Math.sqrt(aa * bb) : 0;
-  }
   // Edades de la obra como reparto (suma 1)
   function objetivo(o) {
     const ed = edadesObra(o);

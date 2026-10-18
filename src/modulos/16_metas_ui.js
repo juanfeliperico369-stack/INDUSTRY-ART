@@ -90,11 +90,15 @@ IA.metasUI = (function () {
     if (st.ed === 'estudio') h += '<div class="col">' + S.estudios.map(function (e) { return '<div class="fila">' + campo('estudio', e.id, 'nombre', e.nombre) + ' caja ' + campo('estudio', e.id, 'caja', Math.round(e.caja), 1) + ' calidad ' + campo('estudio', e.id, 'calidad', e.calidad || 0, 1) + '</div>'; }).join('') + '</div>';
     if (st.ed === 'obra') h += '<div class="col">' + S.obras.filter(function (o) { return o.pub !== undefined; }).slice(-25).reverse().map(function (o) { return '<div class="fila">' + campo('obra', o.id, 'tit', o.tit) + ' crít ' + campo('obra', o.id, 'crit', o.crit, 1) + ' púb ' + campo('obra', o.id, 'pub', o.pub, 1) + '</div>'; }).join('') + '</div>';
     if (st.ed === 'franquicia') h += '<div class="col">' + IA.franquicias.lista().slice(-20).map(function (f) { return '<div class="tarjeta"><div class="fila">' + campo('franquicia', f.id, 'nom', f.nom) + campo('franquicia', f.id, 'gen', f.gen) + '</div>' + f.pers.map(function (p) { return '<div class="fila"><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"> pop <input type="number" value="' + p.pop + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop" style="max-width:70px"></div>'; }).join('') + '</div>'; }).join('') + '</div>';
+    if (st.ed === 'franquicia') h += '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
+      '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + IA.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') +
+      ((S.edit && S.edit.mat || []).length ? '<p class="chico">Tus materiales: ' + S.edit.mat.map(function (m) { return '«' + esc(m.tit) + '» (' + esc(m.gen.join(', ')) + ')'; }).join(' · ') + '</p>' : '') + '</div>';
     if (st.ed === 'precio') h += '<label class="campo"><span>Precio de la entrada ×' + ((S.edit && S.edit.precio) || 1) + '</span><input type="range" min="0.2" max="5" step="0.1" value="' + ((S.edit && S.edit.precio) || 1) + '" data-c="edCampo" data-v="precio|0|x"></label>';
     return h + paquetesUI();
   }
   function paquetesUI() {
-    return '<h3>Paquetes</h3><p class="nota">Un paquete guarda tus talentos creados, los nombres de los estudios, las franquicias y los precios. Copia el texto para compartirlo o pega uno para importarlo.</p>' +
+    return '<h3>Paquetes</h3><p class="nota">Un paquete guarda tus talentos creados, los nombres de los estudios, las franquicias, tus materiales propios y los precios. Copia el texto para compartirlo o pega uno para importarlo: las franquicias llegan como material para adaptar.</p>' +
       '<textarea id="edPaquete" rows="4" style="width:100%"></textarea><div class="fila">' + btn('Exportar', 'edExportar') + btn('Descargar archivo', 'edDescargar') + btn('Importar', 'edImportar', '', 'primario') + '</div>';
   }
   ac('edActivar', function () { M.activarSandbox(); U.refrescar(); });
@@ -103,7 +107,11 @@ IA.metasUI = (function () {
   ac('edPers', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.personaje(p[0], p[1], p[2] === 'n' ? v : '', p[2] === 'pop' ? v : undefined); U.aviso(e || 'Guardado', e ? 'mal' : ''); });
   ac('edCrearT', function () { const e = M.crearTalento({ nom: document.getElementById('edTNom').value, of: document.getElementById('edTOf').value, edad: 30, pot: 70 }); U.aviso(e || 'Talento creado', e ? 'mal' : ''); U.refrescar(); });
   ac('edExportar', function () { document.getElementById('edPaquete').value = M.exportarPaquete(); });
-  ac('edDescargar', function () { try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([M.exportarPaquete()], { type: 'application/json' })); a.download = 'paquete_industry_art.json'; a.click(); } catch (e) { U.aviso('No se pudo descargar: copia el texto.', 'mal'); } });
+  ac('edDescargar', function () { IA.publicacion.guardarArchivo('paquete_industry_art.json', M.exportarPaquete(), 'application/json').then(function (r) { if (!r.ok) U.aviso('No se pudo descargar: copia el texto.', 'mal'); }); });
+  ac('edMaterial', function () {
+    const e = M.agregarMaterial({ tit: document.getElementById('edMTit').value, gen: [document.getElementById('edMGen').value], pers: document.getElementById('edMPers').value.split(',') });
+    U.aviso(e || 'Material agregado', e ? 'mal' : ''); if (!e) U.refrescar();
+  });;
   ac('edImportar', function () { const e = M.importarPaquete(document.getElementById('edPaquete').value); U.aviso(e || 'Paquete importado', e ? 'mal' : ''); if (!e) U.refrescar(); });
   // ---------- Música de fondo (opcional, sintetizada) ----------
   let audio = null;

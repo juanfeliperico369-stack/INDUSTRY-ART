@@ -169,6 +169,39 @@ IA.ui = (function () {
     return vigia;
   }
   function vigilar(cv) { vigia.observe(cv); vigilados.add(cv); }
+  // V34: logo con imagen propia. Se guarda solo en este dispositivo (no viaja en la partida ni en el .iasave):
+  // se reduce a 128 × 128 en un lienzo y se guarda como PNG; al leerlo solo se acepta una imagen en data:.
+  let logoImg = null, logoClave = '';
+  function claveLogo() { return N.S ? 'ia_logo_' + String(N.S.semilla).slice(0, 40) + '_' + String(N.S.creado || '').slice(0, 30) : ''; }
+  function logoPropio() {
+    const k = claveLogo();
+    if (!k) return null;
+    if (k !== logoClave) {
+      logoClave = k; logoImg = null;
+      let u = null; try { u = localStorage.getItem(k); } catch (e) { u = null; }
+      if (u && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+\/=]+$/.test(u) && u.length < 400000) { const im = new Image(); im.onload = function () { logoImg = im; dibujar(); }; im.src = u; }
+    }
+    return logoImg && logoImg.complete ? logoImg : null;
+  }
+  function ponerLogoPropio(archivo) {
+    return new Promise(function (ok, mal) {
+      if (!archivo || !/^image\/(png|jpeg|webp|gif)$/.test(archivo.type)) return mal(new Error('Elige una imagen PNG, JPG, WEBP o GIF.'));
+      if (archivo.size > 8 * 1024 * 1024) return mal(new Error('La imagen pesa más de 8 MB.'));
+      const url = URL.createObjectURL(archivo), im = new Image();
+      im.onerror = function () { URL.revokeObjectURL(url); mal(new Error('No se pudo leer la imagen.')); };
+      im.onload = function () {
+        const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+        const s = Math.min(im.naturalWidth, im.naturalHeight);
+        cv.getContext('2d').drawImage(im, (im.naturalWidth - s) / 2, (im.naturalHeight - s) / 2, s, s, 0, 0, 128, 128);
+        URL.revokeObjectURL(url);
+        const u = cv.toDataURL('image/png');
+        try { localStorage.setItem(claveLogo(), u); } catch (e) { return mal(new Error('Este dispositivo no deja guardar la imagen.')); }
+        logoClave = ''; logoPropio(); ok();
+      };
+      im.src = url;
+    });
+  }
+  function quitarLogoPropio() { try { localStorage.removeItem(claveLogo()); } catch (e) { /* nada que quitar */ } logoClave = ''; logoImg = null; }
   function dibujar(raiz) {
     const r = raiz || document;
     const v = vigiaPosters();
@@ -176,6 +209,7 @@ IA.ui = (function () {
     if (v) vigilados.forEach(function (cv) { if (!cv.isConnected) { v.unobserve(cv); vigilados.delete(cv); } });
     r.querySelectorAll('canvas[data-poster]').forEach(function (cv) { if (v) vigilar(cv); else dibujarPoster(cv); });
     r.querySelectorAll('canvas[data-retrato]').forEach(function (cv) { if (v) vigilar(cv); else dibujarRetrato(cv); });
+    const img = logoPropio();
     r.querySelectorAll('canvas[data-logo]').forEach(function (cv) {
       const est = N.S && N.S.estudios[+cv.getAttribute('data-logo')];
       const L = est ? est.logo : estado.logoNuevo;
@@ -184,12 +218,28 @@ IA.ui = (function () {
       cv.width = w * d; cv.height = h * d;
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
-      IA.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.42, L);
+      if (img && est && est.id === 0) { const q = Math.min(w, h) * 0.46; c.save(); c.beginPath(); c.arc(w / 2, h / 2, q, 0, Math.PI * 2); c.clip(); c.drawImage(img, w / 2 - q, h / 2 - q, q * 2, q * 2); c.restore(); }
+      else IA.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.42, L);
     });
     r.querySelectorAll('canvas[data-grafica]').forEach(function (cv) {
       const g = graficas[cv.getAttribute('data-grafica')];
       if (g) g(cv);
     });
+  }
+  function ocultarGlobo() { const g = document.getElementById('globo'); if (g) g.classList.remove('on'); }
+  function globoGrafica(ev) {
+    const cv = ev.target;
+    if (!cv || cv.tagName !== 'CANVAS' || !cv._pts || !cv._pts.length) { ocultarGlobo(); return; }
+    const r = cv.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+    let mejor = null, d = Infinity;
+    cv._pts.forEach(function (p) { const dd = Math.abs(p.x - x) * 2 + Math.abs(p.y - y) * 0.5; if (dd < d) { d = dd; mejor = p; } });
+    if (!mejor) return;
+    let g = document.getElementById('globo');
+    if (!g) { g = document.createElement('div'); g.id = 'globo'; g.setAttribute('role', 'status'); document.body.appendChild(g); }
+    g.textContent = mejor.t;
+    g.style.left = Math.max(70, Math.min(window.innerWidth - 70, r.left + mejor.x)) + 'px';
+    g.style.top = Math.max(30, r.top + mejor.y - 6) + 'px';
+    g.classList.add('on');
   }
   const graficas = {};
   function grafica(id, fn) { graficas[id] = fn; return id; }
@@ -294,6 +344,10 @@ IA.ui = (function () {
       const fn = acciones[el.getAttribute('data-c')];
       if (fn) { try { fn(el.type === 'checkbox' ? el.checked : el.value, el, ev); } catch (e) { console.error(e); aviso('Error: ' + e.message, 'mal'); } }
     });
+    // V34: tocar una gráfica muestra el valor más cercano (con el mouse, también al pasar por encima)
+    document.addEventListener('pointerdown', globoGrafica, true);
+    document.addEventListener('pointermove', function (ev) { if (ev.pointerType === 'mouse') globoGrafica(ev); }, { passive: true });
+    window.addEventListener('scroll', ocultarGlobo, { passive: true, capture: true });
     document.addEventListener('input', function (ev) {
       const el = ev.target.closest('[data-i]');
       if (!el) return;
@@ -327,7 +381,7 @@ IA.ui = (function () {
     SECCIONES: SECCIONES, estado: estado, ajuste: ajuste, ajustes: function () { return ajustes; }, cargarAjustes: cargarAjustes,
     aplicarAjustes: aplicarAjustes, dinero: dinero, numero: numero, grande: grande, pct: pct, fecha: fecha, fechaCorta: fechaCorta, fechaEstreno: fechaEstreno,
     decimal: decimal, icono: icono, aviso: aviso, abrirFicha: abrirFicha, refrescarFicha: refrescarFicha, cerrarFicha: cerrarFicha,
-    fichaAbierta: fichaAbierta, modal: modal, cerrarModal: cerrarModal, modalAbierto: modalAbierto, dibujar: dibujar,
+    fichaAbierta: fichaAbierta, modal: modal, cerrarModal: cerrarModal, modalAbierto: modalAbierto, dibujar: dibujar, logoPropio: logoPropio, ponerLogoPropio: ponerLogoPropio, quitarLogoPropio: quitarLogoPropio,
     grafica: grafica, comoRetrato: comoRetrato, render: render, renderBarra: renderBarra, renderVista: renderVista,
     refrescar: refrescar, irA: irA, enlazar: enlazar, accion: accion, acciones: acciones,
   };

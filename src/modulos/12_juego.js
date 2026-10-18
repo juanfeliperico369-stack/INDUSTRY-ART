@@ -7,7 +7,7 @@ IA.juego = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, M = IA.mundo, E = IA.economia, T = IA.talentos, O = IA.obras;
   const PR = IA.produccion, L = IA.lanzamiento, R = IA.rivales, PM = IA.premios, NG = IA.negocio;
-  const ANIO_MIN = 1895, ANIO_MAX = 2100;
+  const ANIO_MIN = 1850, ANIO_MAX = 2100;
   // Los valores de tu documento (de $500 a $1 B) con pasos intermedios para que el recomendado sea justo
   const CAPITALES = [500, 1e3, 2.5e3, 5e3, 1e4, 2.5e4, 5e4, 1e5, 2.5e5, 5e5, 1e6, 2.5e6, 5e6, 1e7, 2.5e7, 5e7, 1e8, 2.5e8, 5e8, 1e9];
   const DIFICULTADES = [
@@ -21,7 +21,8 @@ IA.juego = (function () {
 
   // Capital recomendado: el menor de la lista que alcance para unas 2,6 películas típicas de la época
   function capitalRecomendado(anio) {
-    const meta = E.presupuestoTipico2025(anio) * 2.6;
+    // V34: antes del cine (1850–1894) el capital alcanza para montar teatro y publicar libros
+    const meta = Math.max(E.presupuestoTipico2025(anio), anio < D.CINE_DESDE ? 3.8e5 : 0) * 2.6;
     for (let i = 0; i < CAPITALES.length; i++) if (CAPITALES[i] >= meta) return CAPITALES[i];
     return CAPITALES[CAPITALES.length - 1];
   }
@@ -51,11 +52,14 @@ IA.juego = (function () {
     const tarjeta = D.regionesInicio.filter(function (r) { return r.id === op.region; })[0];
     const pais = D.pais((tarjeta && tarjeta.pais) || op.pais || 'us') || D.pais('us');
     const capital2025 = op.capital || Math.round(capitalRecomendado(anio) * (tarjeta ? tarjeta.capital : 1));
+    // V34: tipo de industria elegido (solo los que ya existen ese año); antes de 1895 no hay cine
+    let ind = D.industria(op.industria || (anio >= D.CINE_DESDE ? 'Cine' : 'Teatro'));
+    if (ind.desde > anio) ind = D.industria(anio >= D.CINE_DESDE ? 'Cine' : 'Teatro');
     S.estudios.push({
       id: 0, jugador: true, nombre: (op.nombre || 'INDUSTRY ART').slice(0, 40), logo: op.logo || { s: 8, c: 6, b: 14, t: 3, f: 1 },
       pais: pais.id, reg: pais.region, caja: Math.round(M.aEpoca(capital2025, anio)), capital2025: capital2025,
-      fama: 0.05, pisos: ['oficinas', 'plato'], terrenos: [], valorObras: 0.9, tam: 1,
-      tipo: op.tipo || 'Estudio', industria: 'Cine', vision: op.vision || 'Alcance Comercial', publico: op.publico || 'General',
+      fama: 0.05, pisos: ind.plato && anio >= D.CINE_DESDE ? ['oficinas', 'plato'] : ['oficinas'], terrenos: [], valorObras: 0.9, tam: 1,
+      tipo: op.tipo || 'Estudio', industria: ind.id, vision: op.vision || 'Alcance Comercial', publico: op.publico || 'General',
       personalidad: op.personalidad || 'Normal', ingAnio: 0, gasAnio: 0, util: 0, clase: 'C',
     });
     const dif = DIFICULTADES.filter(function (d) { return d.id === S.dificultad; })[0] || DIFICULTADES[1];
@@ -147,6 +151,7 @@ IA.juego = (function () {
   // Inicia una obra del jugador desde un borrador (valida capacidad y caja)
   function puedeIniciar(b) {
     const S = N.S;
+    if (N.anio() < D.CINE_DESDE) return 'El cine nace en ' + D.CINE_DESDE + ': hasta entonces produce teatro, libros y música (Obras › Teatro, Libros o Música).';
     const gen = O.validarGeneros(b.gen);
     if (gen) return gen;
     const idea = IA.ideas.validar(b, N.anio());

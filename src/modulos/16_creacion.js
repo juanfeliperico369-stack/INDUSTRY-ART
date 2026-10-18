@@ -141,10 +141,12 @@ IA.creacion = (function () {
     // Dos líneas siempre a la vista; el desglose se abre tocando "Detalle"
     return '<div class="fila entre"><span>' + t('costo_total') + ' <b class="cifra ' + (est.total > libre ? 'mal' : '') + '">' + dinero(est.total) + '</b></span><span>' + t('calidad_esperada').split(' ')[0] + ' <b>' + Math.max(1, est.calidad - 6) + '–' + Math.min(99, est.calidad + 6) + '</b></span><span title="Retorno orientativo">×' + U.decimal(est.retorno[0], 1) + '–×' + U.decimal(est.retorno[1], 1) + '</span></div>' +
       '<div class="fila entre chico"><span>' + textoEncaje(b) + '</span><span>' + esc(b.clas) + ' · ' + O.semanasTotales(b, NG.rapidez(0)) + ' sem. <button class="btn" style="padding:2px 10px" data-a="crPieDetalle">' + (cr.pieAbierto ? 'Menos' : 'Detalle') + '</button></span></div>' +
-      (cr.pieAbierto ? '<div class="chips" style="margin:4px 0 0">' + notasTxt(b) + '</div><div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + (est.derechos ? ' · derechos ' + dinero(est.derechos) : '') + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · retorno orientativo ×' + U.decimal(est.retorno[0], 1) + ' a ×' + U.decimal(est.retorno[1], 1) + ' (multiplicador de lo invertido)</div>' : '') +
+      (cr.pieAbierto ? '<div class="chips" style="margin:4px 0 0">' + notasTxt(b) + '<button class="chip" data-a="crDocIdea">Documento de la idea (.docx)</button></div><div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + (est.derechos ? ' · derechos ' + dinero(est.derechos) : '') + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · retorno orientativo ×' + U.decimal(est.retorno[0], 1) + ' a ×' + U.decimal(est.retorno[1], 1) + ' (multiplicador de lo invertido)</div>' : '') +
       (err && (modo === 'detallado' || cr.paso === 4) ? '<p class="mal chico" style="margin:4px 0 0">' + esc(err) + '</p>' : '');
   }
   // Los totales quedan fijos al final de la creación (no persiguen el desplazamiento)
+  // V34: la idea todavía en borrador también se puede descargar como documento
+  ac('crDocIdea', function () { if (cr.b) IA.documento.descargar(cr.b).then(function (r) { U.aviso(r.ok ? 'Documento listo: ' + r.nombre : 'No se pudo guardar el documento.', r.ok ? '' : 'mal'); }); });
   function pie(b) { return '<div id="crPie" class="tarjeta totales" style="margin-top:12px;padding:8px 10px">' + piezaPie(b) + '</div>'; }
   function refrescarPie() {
     const p = document.getElementById('crPie');
@@ -162,7 +164,7 @@ IA.creacion = (function () {
     let h = '<h2>' + t('crear_obra') + '</h2><p class="nota">Primero, de dónde sale la idea. Todo se puede cambiar antes de empezar.</p>';
     h += '<h3>Medio</h3><div class="chips">' + X.medios.map(function (m) {
       return '<button class="chip' + (m.activo ? ' on' : '') + '"' + (m.activo ? '' : ' disabled') + '>' + esc(m.nombre) + (m.activo ? '' : ' · ' + m.version) + '</button>';
-    }).join('') + '</div><p class="nota">En esta versión se produce cine. Las listas de los demás medios ya están completas en Mundo › Taxonomía y llegan con su economía.</p>';
+    }).join('') + '</div><p class="nota">Aquí se crean películas' + (a >= 1936 ? ' y series' : '') + '. La música, los videojuegos, el teatro y los libros se producen en Obras, cada uno en su pestaña.</p>';
     h += '<h3>Modo</h3><div class="chips">' + chip('Rápido · 5 decisiones', 'crModo', 'rapido', modo === 'rapido') + chip('Detallado · todas las listas', 'crModo', 'detallado', modo === 'detallado') + '</div>';
     const nG = (S.guiones || []).length, nP = (S.guionesPropios || []).length;
     h += '<div class="col" style="margin-top:12px;gap:8px">' +
@@ -662,6 +664,7 @@ IA.creacion = (function () {
   // ACCIONES
   // =====================================================================
   ac('crearObra', function () {
+    if (N.anio() < D.CINE_DESDE) { U.aviso('El cine nace en ' + D.CINE_DESDE + ': por ahora produce teatro, libros' + (N.anio() >= 1877 ? ' o música.' : '.')); U.irA('obras', 'teatro'); return; } // V34
     if (O.enProduccion(0).length >= NG.capacidad(0)) { U.aviso('No tienes capacidad libre: construye un plató o espera.', 'mal'); return; }
     cr.b = null; cr.etapa = 'camino'; cr.paso = 0; cr.rol = null; cr.picker = null; cr.q = '';
     U.abrirFicha(fichaCrear(), 'crear');
@@ -978,24 +981,7 @@ IA.creacion = (function () {
     if (!o.pj && !o.sin && !o.mat && !o.cont) return '';
     let h = '<h3>La idea</h3>';
     if (o.sin) h += '<p>' + esc(o.sin) + '</p>';
-    const filas = [];
-    filas.push(['Tipo', X.tipoCine(o.tipo || 'real').nombre + ' · ' + (o.nat === 'r' ? 'realidad' : 'ficción') + ' · clase ' + I.clase(o) + ' · obra ' + I.perfil(o)]);
-    if (o.tem && o.tem.length) filas.push(['Temas', o.tem.join(', ')]);
-    if (o.sub && o.sub.length) filas.push(['Subgéneros', o.sub.join(', ')]);
-    if (o.prob && o.prob.length) filas.push(['Problemática', o.prob.join(', ')]);
-    if (o.arco) filas.push(['Arco', X.arco(o.arco).nombre + ' (' + X.arco(o.arco).orig + ')' + (o.sarc && o.sarc.length ? ' · ' + o.sarc.map(function (s) { return X.subarco(s).nombre; }).join(', ') : '')]);
-    if (o.epo) filas.push(['Época y lugar', X.epoca(o.epo).nombre + (o.lug ? ' · ' + (D.pais(o.lug) ? D.pais(o.lug).nombre : (X.lugaresExtra.filter(function (l) { return l.id === o.lug; })[0] || {}).nombre || '') : '')]);
-    if (o.idio) filas.push(['Idioma', o.idio + (o.rod ? ' · rodada en ' + D.pais(o.rod).nombre : '')]);
-    if (o.min) filas.push(['Forma', o.min + ' min · ' + X.complejidad[v(o, 'cx', 2)] + ' · ritmo ' + X.ritmo[v(o, 'rit', 2)].id.toLowerCase() + ' · efectos ' + X.efectos[v(o, 'fx', 2)].id.toLowerCase() + (o.fxr ? ' (' + o.fxr + ')' : '')]);
-    if (o.corr || o.estilo) filas.push(['Estilo', (o.corr || X.ESTANDAR) + ' · ' + (o.estilo || 'General') + ' · prioridad ' + X.prioridad(o.prio).nombre.toLowerCase()]);
-    if (o.cont) filas.push(['Contenido', I.describirContenido(o)]);
-    if (o.pubs && o.pubs.length) filas.push(['Público', o.pubs.join(', ')]);
-    if (o.mat) { const m = X.material(o.mat); if (m) filas.push(['Material', '«' + m.tit + '», ' + m.autor + (o.suave ? ' (adaptada con guiños)' : '')]); }
-    if (o.guionC) filas.push(['Guion', 'Comprado, calificación ' + o.guionC]);
-    if (o.ideaIA) filas.push(['Idea', 'Automática con IA']);
-    if (o.ia) filas.push(['IA en producción', o.ia + ' %' + (o.iar ? ' · resultado ' + o.iar : '')]);
-    if ((o.et === 'cartelera' || o.et === 'terminada') && o.frc) filas.push(['La crítica', '«' + o.frc + '»']);
-    if ((o.aw || []).length && o.frp) filas.push(['Al premiarla', '«' + o.frp + '»']);
+    const filas = IA.documento.filasIdea(o); // V34: la misma ficha que va al documento descargable
     h += '<table class="tabla">' + filas.map(function (f) { return '<tr><td class="tenue">' + esc(f[0]) + '</td><td>' + esc(f[1]) + '</td></tr>'; }).join('') + '</table>';
     if (o.pj && o.pj.length) {
       h += '<h3>Personajes</h3><div class="col">' + o.pj.map(function (p) {

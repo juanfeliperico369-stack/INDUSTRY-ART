@@ -10,7 +10,11 @@
 IA.medios = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, X = IA.taxonomia, T = IA.talentos;
-  const tip = function (a) { return IA.economia.presupuestoTipico(a || N.anio()); };
+  // V34: piso de costos en dólares de 2025. Antes de 1912 el cine es chico y su presupuesto típico no sirve de vara para
+  // los demás medios; el teatro cobra entradas a precio de su época, así que su costo nunca baja de una sala de hoy.
+  const tip = function (a, med) { a = a || N.anio(); return Math.max(IA.economia.presupuestoTipico(a), IA.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
+  function industria() { const e = N.S && N.S.estudios[0]; return D.industria(e && e.industria); }
+  function especial(med) { return industria().meds.indexOf(med) >= 0; }
   const ep = function (v, a) { return IA.mundo.aEpoca(v, a || N.anio()); };
   // ---------- Datos de cada medio ----------
   const MED = {
@@ -72,7 +76,7 @@ IA.medios = (function () {
   function famDe(med, gen) { return familias(med).filter(function (f) { return f.generos.indexOf(gen) >= 0; })[0] || familias(med)[0]; }
   function porId(id) { return st().p.filter(function (p) { return p.id === +id; })[0] || null; }
   function proyectos(med) { return st().p.filter(function (p) { return !med || p.med === med; }); }
-  function capacidad(med) { return 2 + (IA.imperio.tiene(MED[med].cap) ? 1 : 0); }
+  function capacidad(med) { return 2 + (IA.imperio.tiene(MED[med].cap) ? 1 : 0) + (especial(med) ? 1 : 0); }
   function enMarcha(med) { return proyectos(med).filter(function (p) { return p.et === 'produccion' || p.et === 'ensayo'; }).length; }
   function habMedio(t, med) { return T.perfilExtra(t).medios[med] || t.hab; }
   // Equipo recomendado: lo mejor disponible en ese medio dentro del presupuesto
@@ -102,7 +106,7 @@ IA.medios = (function () {
     return recalcular(b);
   }
   function recalcular(b) {
-    const a = N.anio(), m = MED[b.med], t = tip();
+    const a = N.anio(), m = MED[b.med], t = tip(a, b.med) * (especial(b.med) ? industria().rebaja || 1 : 1);
     let k = (m.base + (b.med === 'teatro' ? 0.005 : 0.06) * b.esc) * (b.esc === 2 && b.med !== 'juegos' ? 1.6 : 1), sem = 8;
     if (b.med === 'musica') { const tp = MED.musica.tipos.filter(function (x) { return x.id === b.tipo; })[0] || MED.musica.tipos[2]; k *= tp.k; sem = tp.sem; }
     if (b.med === 'juegos') {
@@ -270,7 +274,10 @@ IA.medios = (function () {
     p.semT++;
     p.ocup = N.redondear(N.limitar(p.ocup + (p.pub - 60) / 600 + N.normal(0, 0.02), 0.05, 1), 3);
     const entradas = Math.round(s.asientos * p.cfg.funciones * p.ocup * (p.gira ? 0.8 : 1));
-    const ing = Math.round(entradas * ep(p.gira ? 60 : 90, a)), gas = Math.round(p.costo * 0.03);
+    const ing = Math.round(entradas * ep(p.gira ? 60 : 90, a));
+    // V34: cada función cuesta (elenco, sala, técnicos): unos 45 dólares de hoy por butaca, 35 en gira; sin esto una obra
+    // chica rendía 20 a 50 veces lo invertido. Con la sala llena al 50 % se cubren los gastos.
+    const gas = Math.round(p.costo * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 35 : 45, a));
     cobrar(p, ing); IA.negocio.pagar(0, 'produccion', gas); p.gas += gas;
     p.vend.entradas = (p.vend.entradas || 0) + entradas;
     p.vend.funciones = (p.vend.funciones || 0) + p.cfg.funciones;

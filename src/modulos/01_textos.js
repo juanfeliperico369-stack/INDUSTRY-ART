@@ -27,7 +27,7 @@ IA.textos = {
     np_dificultad: 'Dificultad', np_escenario: 'Población después de 2100', np_semilla: 'Semilla del mundo (opcional)',
     np_semilla_ayuda: 'La misma semilla con las mismas decisiones da el mismo mundo: sirve para repetir o compartir.',
     np_avatar: 'Tu avatar', np_tu_nombre: 'Tu nombre', np_sexo: 'Sexo', np_edad: 'Edad', np_personalidad: 'Personalidad',
-    np_empezar: 'Empezar', np_anio_ayuda: 'Por ahora se empieza desde 1895 (nace el cine). Teatro y libros desde 1850 llegan en la V32.',
+    np_empezar: 'Empezar', np_anio_ayuda: 'Desde 1850 empiezas con teatro y libros; la música grabada llega en 1877 y el cine en 1895.',
     escenario_alto: 'Alto', escenario_medio: 'Medio (ONU)', escenario_bajo: 'Bajo', mujer: 'Mujer', hombre: 'Hombre',
     // Estudio
     est_tareas: 'Tareas de la semana', est_fechas: 'Próximas fechas', est_resumen: 'Resumen', est_sin_tareas: 'Todo en marcha. Puedes avanzar.',

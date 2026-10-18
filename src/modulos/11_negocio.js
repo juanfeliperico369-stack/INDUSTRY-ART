@@ -12,6 +12,12 @@ IA.negocio = (function () {
     reestrenos: 'Reestrenos', carrera: 'Tus encargos como talento', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
     personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio', musica: 'Música', juegos: 'Videojuegos', teatro: 'Teatro', libros: 'Libros',
   };
+  // V34: movimientos de capital. Entran y salen de la caja (flujo de caja), pero no son ingresos ni gastos del año:
+  // no cambian la utilidad ni el impuesto (antes el capital de los préstamos se descontaba como gasto).
+  const CAPITAL = { prestamo: 1, amortizacion: 1, aportes: 1, recompra: 1, socio: 1, acciones: 1, aporteFilial: 1 };
+  Object.assign(NOMBRES, { prestamo: 'Préstamos recibidos', amortizacion: 'Pago de capital de deudas', aportes: 'Aportes del socio',
+    recompra: 'Recompra de la parte del socio', acciones: 'Compra y venta de acciones (capital)', aporteFilial: 'Aportes a filiales', deuda: 'Intereses de deudas' });
+  function esCapital(cat) { return !!CAPITAL[cat]; }
   function libroVacio() { return { ing: {}, gas: {} }; }
 
   // ---------- Movimientos de dinero ----------
@@ -21,14 +27,16 @@ IA.negocio = (function () {
     if (!monto || !isFinite(monto)) return;
     const S = N.S, est = S.estudios[estId];
     est.caja += monto;
-    if (monto > 0) est.ingAnio += monto; else est.gasAnio -= monto;
+    if (!CAPITAL[cat]) { if (monto > 0) est.ingAnio += monto; else est.gasAnio -= monto; }
     if (estId !== 0) return;
     const lado = monto > 0 ? 'ing' : 'gas';
     const v = Math.abs(monto);
     S.fin.mes[lado][cat] = (S.fin.mes[lado][cat] || 0) + v;
     S.fin.anio[lado][cat] = (S.fin.anio[lado][cat] || 0) + v;
   }
-  function total(libro, lado) { let s = 0; Object.keys(libro[lado]).forEach(function (k) { s += libro[lado][k]; }); return s; }
+  // Total de un lado del libro: solo lo operativo (lo que cuenta para la utilidad); conCapital suma también el capital
+  function total(libro, lado, conCapital) { let s = 0; Object.keys(libro[lado]).forEach(function (k) { if (conCapital || !CAPITAL[k]) s += libro[lado][k]; }); return s; }
+  function capitalNeto(libro) { return total(libro, 'ing', true) - total(libro, 'ing') - (total(libro, 'gas', true) - total(libro, 'gas')); }
 
   // ---------- Estudio del jugador: construcciones ----------
   function infoPiso(id) { return D.pisos.filter(function (p) { return p.id === id; })[0]; }
@@ -195,7 +203,7 @@ IA.negocio = (function () {
       pagar(i, 'mantenimiento', g.mantenimiento);
     }
     const f = S.fin;
-    f.meses.push({ t: S.t, anio: N.anio(), mes: N.mes(S.t - 1), ing: Math.round(total(f.mes, 'ing')), gas: Math.round(total(f.mes, 'gas')), caja: Math.round(S.estudios[0].caja) });
+    f.meses.push({ t: S.t, anio: N.anio(S.t - 1), mes: N.mes(S.t - 1), ing: Math.round(total(f.mes, 'ing')), gas: Math.round(total(f.mes, 'gas')), cap: Math.round(capitalNeto(f.mes)), caja: Math.round(S.estudios[0].caja) });
     if (f.meses.length > 36) f.meses.shift();
     f.mes = libroVacio();
   }
@@ -225,7 +233,7 @@ IA.negocio = (function () {
     }
     const ing = total(S.fin.anio, 'ing'), gas = total(S.fin.anio, 'gas');
     const fila = {
-      anio: anioCerrado, ing: Math.round(ing), gas: Math.round(gas), util: Math.round(jug.util), imp: Math.round(S.fin.anio.gas.impuestos || 0),
+      anio: anioCerrado, ing: Math.round(ing), gas: Math.round(gas), cap: Math.round(capitalNeto(S.fin.anio)), util: Math.round(jug.util), imp: Math.round(S.fin.anio.gas.impuestos || 0),
       caja: Math.round(jug.caja), caja2025: Math.round(M.aHoy(jug.caja, anioCerrado)), cuota: N.redondear(cuota, 4), multa: multa,
       estrenos: S.obras.filter(function (o) { return o.est === 0 && o.anio === anioCerrado; }).length,
       tipico: Math.round(tipicoCerrado), fama: jug.fama, detalle: N.copiar(S.fin.anio),
@@ -281,7 +289,7 @@ IA.negocio = (function () {
 
   return {
     AJ: AJ, INGRESOS: INGRESOS, GASTOS: GASTOS, NOMBRES: NOMBRES, libroVacio: libroVacio, mover: mover, pagar: pagar,
-    cobrarEn: cobrarEn, total: total, infoPiso: infoPiso, infoTerreno: infoTerreno, capacidad: capacidad, bonos: bonos,
+    cobrarEn: cobrarEn, total: total, esCapital: esCapital, capitalNeto: capitalNeto, infoPiso: infoPiso, infoTerreno: infoTerreno, capacidad: capacidad, bonos: bonos,
     rapidez: rapidez, ahorro: ahorro, bonoMarketing: bonoMarketing, costoConstruccion: costoConstruccion,
     puedeConstruir: puedeConstruir, construir: construir, gastosFijosMes: gastosFijosMes, contexto: contexto,
     contextoDe: contextoDe, semana: semana, mensual: mensual, anual: anual, cuotaAnioActual: cuotaAnioActual,

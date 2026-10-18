@@ -165,6 +165,13 @@ IA.agencia = (function () {
       kpi(t('tal_tarifa'), dinero(T.tarifaPara(x, 0))) + kpi('Energía', x.ret ? '—' : T.energia(x)) + kpi('Moral', x.ret ? '—' : T.moral(x)) + kpi('Proyectos activos', (x.act || 0) + ' de ' + T.MAX_PROYECTOS) +
       kpi(t('tal_obras'), x.obras) + kpi('Éxitos', x.exitos) + kpi(t('tal_premios'), x.premios) + kpi('Taquilla en tu partida (hoy)', U.dinero(x.tq || 0, 2025)) + kpi('Ingresos en tu partida (hoy)', U.dinero(x.gan || 0, 2025)) + '</div>';
     if (pot === '?') h += '<p class="nota">El potencial se conoce de verdad si lo descubriste, si lo becaste o si trabajó contigo.</p>';
+    // V34: radar del talento (sus capacidades frente al promedio de su oficio)
+    const pares = S.talentos.filter(function (y) { return y.of === x.of && !y.ret && !y.mu && y.cp; }).slice(0, 300);
+    const prom = T.CAPACIDADES.map(function (_, i) { return pares.length ? pares.reduce(function (a, y) { return a + y.cp[i]; }, 0) / pares.length : 50; });
+    const gr = U.grafica('radarT' + x.id, function (cv) {
+      IA.arte.radar(cv, [T.CAPACIDADES.map(function (_, i) { return x.cp ? x.cp[i] : x.hab; }), prom], T.CAPACIDADES, { leyenda: [x.nom.split(' ')[0], 'Promedio de su oficio'] });
+    });
+    h += '<canvas class="lienzo" style="height:230px;max-width:420px;margin:0 auto;display:block" data-grafica="' + gr + '" role="img" aria-label="Radar de capacidades"></canvas>';
     const nv = T.nivel(x), falta = T.faltaPrestigio(x, 0);
     h += '<p><b>' + esc(nv.nombre) + '</b>' + (nv.prestigio ? ' · pide prestigio ' + nv.prestigio + (falta ? ' <span class="mal">(te faltan ' + falta + ')</span>' : ' <span class="bien">(lo tienes)</span>') : '') + '</p>';
     h += '<button class="btn" data-a="agListaCorta" data-v="' + x.id + '">' + ((S.listaCorta || []).indexOf(x.id) >= 0 ? 'Quitar de la lista corta' : 'Agregar a la lista corta') + '</button>';

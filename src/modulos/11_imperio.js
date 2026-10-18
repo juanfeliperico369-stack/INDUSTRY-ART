@@ -82,7 +82,7 @@ IA.imperio = (function () {
     e.filial = 0;
     return '';
   }
-  function inyectar(id, monto) { const S = N.S, e = S.estudios[+id]; monto = Math.round(+monto || 0); if (!e || !e.filial || S.estudios[0].caja < monto || monto <= 0) return 'No se puede.'; S.estudios[0].caja -= monto; e.caja += monto; return ''; }
+  function inyectar(id, monto) { const S = N.S, e = S.estudios[+id]; monto = Math.round(+monto || 0); if (!e || !e.filial || S.estudios[0].caja < monto || monto <= 0) return 'No se puede.'; IA.negocio.pagar(0, 'aporteFilial', monto); e.caja += monto; return ''; }
   // Filiales: cada año entregan dividendos si ganaron y a veces deciden algo por su cuenta
   function anualFiliales() {
     filiales().forEach(function (e) {
@@ -112,6 +112,7 @@ IA.imperio = (function () {
   function encargar(estId, gen, escala) {
     const S = N.S, e = S.estudios[+estId];
     if (!e || e.quebrado || e.id === 0) return 'Elige un estudio.';
+    if (N.anio() < IA.datos.CINE_DESDE) return 'El cine nace en ' + IA.datos.CINE_DESDE + '.';
     const b = O.borrador(e.id, { gen: [gen || 'Drama'], escala: escala === undefined ? 2 : +escala, completa: true });
     O.equipoRecomendado(b, 1);
     if (!O.equipoCompleto(b)) return 'No consiguen equipo ahora.';

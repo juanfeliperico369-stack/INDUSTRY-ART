@@ -5,7 +5,7 @@
 // desbloquea las secciones poco a poco; consejos del momento y Editor Sandbox con paquetes.
 IA.metas = (function () {
   'use strict';
-  const N = IA.n, O = IA.obras;
+  const N = IA.n, O = IA.obras, D = IA.datos;
   const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
   const MODOS = [
     { id: 'campana', nombre: 'Campaña', texto: 'Metas por década, legado y un reto final.' },
@@ -218,25 +218,55 @@ IA.metas = (function () {
     return '';
   }
   function personaje(frId, k, nom, pop) { const f = IA.franquicias.porId(+frId); if (!N.S.sandbox || !f) return 'No se puede.'; const p = f.pers.filter(function (x) { return x.k === +k; })[0]; if (!p) return 'No existe.'; if (nom) p.n = String(nom).slice(0, 40); if (pop !== undefined && pop !== '') p.pop = N.limitar(+pop || 0, 1, 99); return ''; }
+  // V34: franquicias u obras propias (reales o inventadas por el jugador) que se adaptan como material, igual que el
+  // dominio público; viven en la partida y en los paquetes, nunca en el juego base (Registro: «lo real solo lo agrega el jugador»)
+  function agregarMaterial(m) {
+    const S = N.S;
+    if (!S.sandbox) return 'Activa el Editor Sandbox primero.';
+    const tit = String(m.tit || '').trim().slice(0, 60);
+    if (!tit) return 'Ponle un título.';
+    S.edit = S.edit || {};
+    const lista = S.edit.mat = S.edit.mat || [];
+    if (lista.length >= 100) return 'Ya tienes 100 materiales propios.';
+    if (lista.some(function (x) { return x.tit === tit; })) return 'Ya existe un material con ese título.';
+    const gen = (Array.isArray(m.gen) ? m.gen : String(m.gen || '').split(',')).map(function (g) { return String(g).trim(); })
+      .filter(function (g) { return D.familiaDe[g]; }).slice(0, 3);
+    S.edit.matSig = (S.edit.matSig || 0) + 1;
+    lista.push({ id: 'ed' + S.edit.matSig, tit: tit, autor: 'Material propio', anio: String(N.anio()), libre: 0, gen: gen.length ? gen : ['Drama'], fama: 0.5, grupo: 'editor',
+      pers: (Array.isArray(m.pers) ? m.pers : []).filter(function (x) { return typeof x === 'string' && x.trim(); }).slice(0, 10).map(function (x) { return x.slice(0, 40); }) });
+    return '';
+  }
   function crearTalento(op) { if (!N.S.sandbox) return 'Activa el Editor Sandbox primero.'; const t = IA.talentos.crearPropio(op); t.sb = 1; return ''; }
   function exportarPaquete() {
     const S = N.S;
     return JSON.stringify({ tipo: 'paquete-industry-art', v: 1, talentos: S.talentos.filter(function (t) { return t.sb || t.propio; }).map(function (t) { return { nom: t.nom, of: t.of, sx: t.sx, edad: N.anio() - t.nac, pot: t.pot, hab: t.hab }; }),
-      estudios: S.estudios.map(function (e) { return { id: e.id, nombre: e.nombre }; }), franquicias: IA.franquicias.lista().map(function (f) { return { nom: f.nom, gen: f.gen, pers: f.pers.map(function (p) { return p.n; }) }; }), precio: S.edit ? S.edit.precio : 1 });
+      estudios: S.estudios.map(function (e) { return { id: e.id, nombre: e.nombre }; }), franquicias: IA.franquicias.lista().map(function (f) { return { nom: f.nom, gen: f.gen, pers: f.pers.map(function (p) { return p.n; }) }; }),
+      materiales: (S.edit && S.edit.mat || []).map(function (m) { return { tit: m.tit, gen: m.gen, pers: m.pers }; }), precio: S.edit ? S.edit.precio : 1 });
   }
   function importarPaquete(txt) {
     const S = N.S;
     let p;
-    try { p = JSON.parse(txt); } catch (e) { return 'El paquete no es válido.'; }
+    // V34: un paquete puede venir de otra persona: tope de tamaño, limpieza de textos y claves, y datos validados
+    if (typeof txt !== 'string' || txt.length > 2e6) return 'El paquete es demasiado grande.';
+    try { p = IA.guardado.limpiar(JSON.parse(txt)); } catch (e) { return 'El paquete no es válido.'; }
     if (!p || p.tipo !== 'paquete-industry-art') return 'No es un paquete de INDUSTRY ART.';
     activarSandbox();
-    (p.talentos || []).slice(0, 200).forEach(function (t) { const n = IA.talentos.crearPropio({ of: t.of, sx: t.sx, edad: t.edad, pot: t.pot, nom: t.nom }); n.sb = 1; if (t.hab) n.hab = N.limitar(+t.hab, 1, 99); });
-    (p.estudios || []).forEach(function (e) { if (S.estudios[e.id] && e.nombre) S.estudios[e.id].nombre = String(e.nombre).slice(0, 40); });
-    if (p.precio) { S.edit = S.edit || {}; S.edit.precio = N.limitar(+p.precio, 0.2, 5); }
+    const oficios = D.oficios.map(function (o) { return o.id; });
+    (Array.isArray(p.talentos) ? p.talentos : []).slice(0, 200).forEach(function (t) {
+      if (!t || oficios.indexOf(t.of) < 0) return;
+      const n = IA.talentos.crearPropio({ of: t.of, sx: t.sx === 'F' ? 'F' : 'M', edad: N.limitar(+t.edad || 25, 8, 80), pot: N.limitar(+t.pot || 62, 30, 80), nom: typeof t.nom === 'string' ? t.nom : '' });
+      n.sb = 1;
+      if (t.hab) n.hab = N.limitar(+t.hab || 50, 1, 99);
+    });
+    (Array.isArray(p.estudios) ? p.estudios : []).forEach(function (e) { if (e && S.estudios[+e.id] && typeof e.nombre === 'string' && e.nombre.trim()) S.estudios[+e.id].nombre = e.nombre.slice(0, 40); });
+    // Franquicias del paquete: llegan como material propio para adaptar (Obras › Crear › Usar material)
+    (Array.isArray(p.franquicias) ? p.franquicias : []).slice(0, 100).forEach(function (f) { if (f && typeof f.nom === 'string') agregarMaterial({ tit: f.nom, gen: f.gen, pers: f.pers }); });
+    (Array.isArray(p.materiales) ? p.materiales : []).slice(0, 100).forEach(function (m) { if (m && typeof m.tit === 'string') agregarMaterial(m); });
+    if (p.precio) { S.edit = S.edit || {}; S.edit.precio = N.limitar(+p.precio || 1, 0.2, 5); }
     return '';
   }
   return { MODOS: MODOS, HUMOR: HUMOR, RETOS: RETOS, LOGROS: LOGROS, PASOS: PASOS, estado: st, iniciar: iniciar, frecEventos: frecEventos, cumpleMeta: cumpleMeta, mensual: mensual,
     revisarLogros: revisarLogros, progresoReto: progresoReto, anual: anual, resumen: resumen, seccionesVisibles: seccionesVisibles, pasoTutorial: pasoTutorial, semana: semana,
     saltarTutorial: saltarTutorial, consejos: consejos, activarSandbox: activarSandbox, editar: editar, personaje: personaje, crearTalento: crearTalento,
-    exportarPaquete: exportarPaquete, importarPaquete: importarPaquete };
+    exportarPaquete: exportarPaquete, importarPaquete: importarPaquete, agregarMaterial: agregarMaterial };
 })();

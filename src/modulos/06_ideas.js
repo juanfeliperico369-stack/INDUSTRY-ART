@@ -272,7 +272,8 @@ IA.ideas = (function () {
     return n ? parseInt(n[0], 10) : -1;
   }
   function materialesDisponibles(anio) {
-    return X.dominio.filter(function (m) { return anioMaterial(m) <= anio; });
+    const S = N.S; // V34: más el material propio del Editor
+    return X.dominio.filter(function (m) { return anioMaterial(m) <= anio; }).concat(S && S.edit && S.edit.mat || []);
   }
   // Atractivo de un material por edad [niños, adolescentes, jóvenes, adultos, mayores] y por sexo [hombres, mujeres]
   function atractivo(m) {

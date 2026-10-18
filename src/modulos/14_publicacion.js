@@ -109,10 +109,43 @@ IA.publicacion = (function () {
   }
   function privacidadDisponible() { return privacidad && !!plugin(); }
   function abrirPrivacidad() { const ad = plugin(); return ad ? ad.showPrivacyOptionsForm().catch(function () {}) : Promise.resolve(); }
+  // ---------- V34: guardar un archivo (partida, paquete o documento de la idea) ----------
+  // En el navegador y en PC, una descarga normal. En la app (Android y iPhone) el visor web no descarga: el archivo se
+  // escribe en la caché de la app (Filesystem) y se abre el menú Compartir para guardarlo en Archivos, Drive o el correo.
+  function aBase64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 32768));
+    return btoa(s);
+  }
+  function nombreSeguro(n) { return String(n || 'archivo').replace(/[^A-Za-z0-9_.-]+/g, '_').slice(0, 80) || 'archivo'; }
+  function guardarArchivo(nombre, contenido, tipo) {
+    nombre = nombreSeguro(nombre);
+    const bytes = typeof contenido === 'string' ? new TextEncoder().encode(contenido) : contenido;
+    const P = enApp() && window.Capacitor.Plugins;
+    if (P && P.Filesystem && P.Share) {
+      return P.Filesystem.writeFile({ path: nombre, data: aBase64(bytes), directory: 'CACHE' })
+        .then(function (r) {
+          return P.Share.share({ title: nombre, files: [r.uri], dialogTitle: 'Guardar o compartir' })
+            .catch(function (e) { if (!/cancel/i.test(String(e && (e.message || e)))) throw e; }); // cerrar el menú no es un error
+        })
+        .then(function () { return { ok: true, nombre: nombre, bytes: bytes.length }; })
+        .catch(function (e) { return { ok: false, nombre: nombre, error: (e && e.message) || String(e) }; });
+    }
+    try {
+      const url = URL.createObjectURL(new Blob([bytes], { type: tipo || 'application/octet-stream' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = nombre; a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      return Promise.resolve({ ok: true, nombre: nombre, bytes: bytes.length });
+    } catch (e) {
+      return Promise.resolve({ ok: false, nombre: nombre, error: (e && e.message) || String(e) });
+    }
+  }
   const CREDITOS = ['Ideado y creado por Felipe', 'Programado junto a Claude, de Anthropic'];
   function creditos() { return CREDITOS.slice(); }
   return { config: config, enApp: enApp, plataforma: plataforma, nombrePlataforma: nombrePlataforma, alAbrir: alAbrir,
     privacidadDisponible: privacidadDisponible, abrirPrivacidad: abrirPrivacidad, creditos: creditos,
     revisarCompra: revisarCompra, compraDisponible: compraDisponible, tieneCompleta: tieneCompleta, precio: precio, precioGuardado: precioGuardado,
-    comprar: comprar, restaurar: restaurar };
+    comprar: comprar, restaurar: restaurar, guardarArchivo: guardarArchivo };
 })();

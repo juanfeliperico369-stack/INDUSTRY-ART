@@ -144,6 +144,7 @@ IA.rivales = (function () {
   // Cada mes: decide qué producir
   function mensual(ctx) {
     const S = N.S;
+    if (N.anio() < D.CINE_DESDE) return; // V34: antes de 1895 no hay películas
     for (let i = 1; i < S.estudios.length; i++) {
       const est = S.estudios[i];
       if (est.quebrado) continue;

@@ -76,6 +76,7 @@ IA.guardado = (function () {
   MIGRACIONES[31] = function () { /* 1.1 (iPhone y PC): sin datos nuevos */ };
   MIGRACIONES[32] = function () { /* 1.2 (compra «Versión completa»): sin datos nuevos; la compra vive en la tienda */ };
   MIGRACIONES[33] = function () { /* 1.3 (celulares lentos): sin datos nuevos */ };
+  MIGRACIONES[34] = function () { /* 1.4: sin datos nuevos obligatorios (notas del autor, material propio y logo propio son opcionales) */ };
   MIGRACIONES[29] = function () { /* V29: errores e inglés, sin datos nuevos */ };
   MIGRACIONES[28] = function () { /* V28: interfaz y rendimiento, sin datos nuevos */ };
   MIGRACIONES[27] = function () { /* V27: solo balance, sin datos nuevos */ };
@@ -101,15 +102,51 @@ IA.guardado = (function () {
     return (h >>> 0).toString(16).padStart(8, '0');
   }
 
+  // ---------- V34: lo que llega de afuera (.iasave o paquete de otra persona) se limpia antes de usarlo ----------
+  // Topes de tamaño, claves trampa fuera (__proto__…) y, en todos los textos, los caracteres que podrían armar HTML
+  // (< > " ' `) se cambian por otros que se ven igual. Así ningún campo, aunque la pantalla lo muestre tal cual, inyecta nada.
+  const TOPE_ARCHIVO = 64 * 1024 * 1024, TOPE_TEXTO = 160 * 1024 * 1024, TOPE_NODOS = 8e6;
+  const GRANDE = 'el archivo es demasiado grande para ser una partida';
+  const PROHIBIDAS = ['__proto__', 'constructor', 'prototype'];
+  const RARO = /[<>"'`]/, RAROS = /[<>"'`]/g, SEGURO = { '<': '‹', '>': '›', '"': '”', "'": '’', '`': '‘' };
+  function limpiarTexto(s) { return RARO.test(s) ? s.replace(RAROS, function (c) { return SEGURO[c]; }) : s; }
+  function limpiar(x, prof, cuenta) {
+    prof = prof || 0; cuenta = cuenta || { n: 0 };
+    if (prof > 64) throw new Error('el archivo tiene una estructura demasiado profunda');
+    if (typeof x === 'string') return limpiarTexto(x);
+    if (typeof x === 'number') return isFinite(x) ? x : 0;
+    if (x === null || typeof x !== 'object') return x;
+    if (++cuenta.n > TOPE_NODOS) throw new Error(GRANDE);
+    if (Array.isArray(x)) { for (let i = 0; i < x.length; i++) x[i] = limpiar(x[i], prof + 1, cuenta); return x; }
+    Object.keys(x).forEach(function (k) {
+      if (PROHIBIDAS.indexOf(k) >= 0 || RARO.test(k)) { delete x[k]; return; }
+      x[k] = limpiar(x[k], prof + 1, cuenta);
+    });
+    return x;
+  }
+
   // ---------- Compresión ----------
   function hayGzip() { return typeof CompressionStream === 'function' && typeof DecompressionStream === 'function' && typeof Response === 'function'; }
   async function gzip(texto) {
     const flujo = new Blob([texto]).stream().pipeThrough(new CompressionStream('gzip'));
     return new Uint8Array(await new Response(flujo).arrayBuffer());
   }
+  // V34: se descomprime por partes y se corta si pasa del tope (un archivo chico no puede inflarse hasta colgar la app)
   async function gunzip(bytes) {
-    const flujo = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-    return await new Response(flujo).text();
+    const lector = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();
+    const partes = [];
+    let total = 0;
+    for (;;) {
+      const r = await lector.read();
+      if (r.done) break;
+      total += r.value.length;
+      if (total > TOPE_TEXTO) { try { await lector.cancel(); } catch (e) { /* ya se cerró */ } throw new Error(GRANDE); }
+      partes.push(r.value);
+    }
+    const todo = new Uint8Array(total);
+    let p = 0;
+    partes.forEach(function (x) { todo.set(x, p); p += x.length; });
+    return new TextDecoder().decode(todo);
   }
   // Compresor propio para navegadores sin CompressionStream: LZW con diccionario que crece (los caracteres
   // entran al diccionario cuando aparecen) y ancho de bits variable. Sin librerías.
@@ -178,6 +215,7 @@ IA.guardado = (function () {
     let w = String.fromCharCode(leerBits(tipo === 0 ? 8 : 16));
     dic[3] = w;
     const partes = [w];
+    let largo = w.length;
     for (;;) {
       let c = leerBits(bits);
       if (c === 0 || c === 1) {
@@ -193,6 +231,8 @@ IA.guardado = (function () {
       else if (c === tam) entrada = w + w[0];
       else throw new Error('datos dañados');
       partes.push(entrada);
+      largo += entrada.length;
+      if (largo > TOPE_TEXTO) throw new Error(GRANDE);
       dic[tam++] = w + entrada[0];
       agrandar--;
       w = entrada;
@@ -305,10 +345,17 @@ IA.guardado = (function () {
     const c = await comprimir(texto);
     return { meta: metaDe(S), comp: c.comp, datos: c.datos, suma: suma(texto), version: S.v, bytes: texto.length };
   }
-  async function desempaquetar(reg) {
+  // ajeno: viene de un archivo (de esta u otra persona); se limpia antes de usarlo
+  async function desempaquetar(reg, ajeno) {
     const texto = await descomprimir(reg.comp, reg.datos);
+    if (texto.length > TOPE_TEXTO) throw new Error(GRANDE);
     if (reg.suma && suma(texto) !== reg.suma) throw new Error('la suma de verificación no coincide');
-    return migrar(JSON.parse(texto));
+    let S = JSON.parse(texto);
+    if (ajeno) {
+      S = limpiar(S);
+      if (!S || !Array.isArray(S.estudios) || !S.estudios.length || !Array.isArray(S.obras) || !Array.isArray(S.talentos)) throw new Error('no es una partida de INDUSTRY ART V16 o posterior');
+    }
+    return migrar(S);
   }
   function migrar(S) {
     if (!S || S.juego !== 'INDUSTRY ART' || typeof S.v !== 'number') throw new Error('no es una partida de INDUSTRY ART V16 o posterior');
@@ -380,11 +427,9 @@ IA.guardado = (function () {
       const texto = await exportarTexto();
       const est = N.S.estudios[0];
       const nombre = ('industryart_' + est.nombre + '_' + N.anio()).toLowerCase().replace(/[^a-z0-9_]+/g, '_') + '.iasave';
-      const url = URL.createObjectURL(new Blob([texto], { type: 'application/json' }));
-      const a = document.createElement('a');
-      a.href = url; a.download = nombre;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      // V34: en la app de Android y iPhone se guarda con el menú Compartir (antes no bajaba nada)
+      const r = await IA.publicacion.guardarArchivo(nombre, texto, 'application/json');
+      if (!r.ok) throw new Error(r.error || 'no se pudo guardar el archivo');
       return { ok: true, nombre: nombre, bytes: texto.length };
     } catch (e) {
       return { ok: false, error: (e && e.message) || String(e) };
@@ -392,10 +437,11 @@ IA.guardado = (function () {
   }
   async function importarTexto(texto) {
     try {
+      if (typeof texto !== 'string' || texto.length > TOPE_ARCHIVO) throw new Error(GRANDE);
       let o = null;
       try { o = JSON.parse(texto); } catch (e) { o = null; }
-      if (!o || o.formato !== 'iasave' || o.juego !== 'INDUSTRY ART') throw new Error(IA.t('gua_corrupto'));
-      const S = await desempaquetar({ comp: o.comp, datos: deBase64(o.datos), suma: o.suma });
+      if (!o || o.formato !== 'iasave' || o.juego !== 'INDUSTRY ART' || typeof o.datos !== 'string' || typeof o.comp !== 'string') throw new Error(IA.t('gua_corrupto'));
+      const S = await desempaquetar({ comp: o.comp, datos: deBase64(o.datos), suma: o.suma }, true);
       activar(S);
       return { ok: true };
     } catch (e) {
@@ -412,6 +458,6 @@ IA.guardado = (function () {
     MANUALES: MANUALES, AUTOS: AUTOS, suma: suma, hayGzip: hayGzip, comprimir: comprimir, descomprimir: descomprimir,
     lzwComprimir: lzwComprimir, lzwDescomprimir: lzwDescomprimir, migrar: migrar, listar: listar,
     guardar: guardar, autoguardar: autoguardar, cargar: cargar, borrar: borrar, masReciente: masReciente,
-    exportarTexto: exportarTexto, exportarArchivo: exportarArchivo, importarTexto: importarTexto, medir: medir, activar: activar,
+    exportarTexto: exportarTexto, exportarArchivo: exportarArchivo, importarTexto: importarTexto, medir: medir, activar: activar, limpiar: limpiar,
   };
 })();

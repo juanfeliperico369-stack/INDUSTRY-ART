@@ -223,7 +223,7 @@ IA.tv = (function () {
   }
   function cancelar(id) { const o = O.porId(+id); if (o && o.tv) o.tv.ren = 'cancelada'; }
   // ---------- Canal propio ----------
-  function costoCanal() { return Math.round(tip() * 4); }
+  function costoCanal() { return Math.round(tip() * 4 * (D.industria(N.S.estudios[0].industria).canal || 1)); } // V34: industria Televisión, 40 % menos
   function comprarCanal(nom, tema) {
     const s = N.S;
     if (s.canal) return 'Ya tienes canal.';

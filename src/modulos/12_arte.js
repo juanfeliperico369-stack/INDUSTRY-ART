@@ -2394,6 +2394,15 @@ IA.arte = (function () {
     ctx.restore();
   }
 
+  // V34: qué hay en un punto del dibujo del estudio (tocar un piso abre su departamento; un terreno, su ficha)
+  function estudioEn(w, h, datos, x, y) {
+    const pisos = ((datos && datos.pisos) || []).filter(Boolean), terrenos = ((datos && datos.terrenos) || []).filter(Boolean);
+    const g = geometria(w, h, pisos.length, terrenos);
+    for (let i = 0; i < pisos.length; i++) { const s = sala(g, i); if (x >= s.x - g.muro && x <= s.x + s.w + g.muro && y >= s.y - g.losa && y <= s.y + s.h) return { tipo: 'piso', i, id: pisos[i].tipo }; }
+    for (let k = 0; k < g.lotes.length; k++) { const L = g.lotes[k]; if (x >= L.x && x <= L.x + L.w && y >= g.suelo - L.alto - 6 && y <= g.suelo + 4) return { tipo: 'terreno', id: L.tipo }; }
+    return null;
+  }
+
   function cieloVivo(c, capa, f) {
     const g = capa.g, ep = capa.ep, w = g.w;
     for (let i = 0; i < 12; i++) { // estrellas que titilan
@@ -2649,49 +2658,60 @@ IA.arte = (function () {
      Gráficas
      ========================================================= */
 
+  // ---------- Gráficas (V34: rejilla con escala, valores al tocar, paleta para daltonismo, anillo y pirámide) ----------
+  // Cada gráfica deja en el lienzo sus puntos (_pts: x, y y texto en px CSS); la interfaz muestra el valor al tocar.
+  function paletaSeries(T) {
+    let dalton = false;
+    try { dalton = document.documentElement.getAttribute('data-dalton') === 'si'; } catch (e) { dalton = false; }
+    return dalton ? ['#0072B2', '#E69F00', '#009E73', '#CC79A7', '#56B4E9', '#D55E00'] : [T.acento, T.dorado, T.rosa, '#5b8cff', '#c38bff', '#ff8f5a'];
+  }
+  // Valores «redondos» para la escala: 4 líneas que caen en 1, 2 o 5 × 10^n
+  function escala(min, max, n) {
+    const paso0 = (max - min) / (n || 4) || 1, mag = Math.pow(10, Math.floor(Math.log10(Math.abs(paso0))));
+    const paso = [1, 2, 2.5, 5, 10].map((k) => k * mag).filter((x) => x >= paso0)[0] || paso0;
+    const a = Math.floor(min / paso) * paso, b = Math.ceil(max / paso) * paso, marcas = [];
+    for (let x = a; x <= b + paso * 0.5; x += paso) marcas.push(Math.round(x * 1e6) / 1e6);
+    return { min: a, max: b, marcas };
+  }
+  function rejilla(c, T, izq, arriba, ancho, alto, esc, fmt, py) {
+    c.font = '10px sans-serif'; c.textAlign = 'right'; c.textBaseline = 'middle';
+    esc.marcas.forEach((m) => {
+      const y = Math.round(py(m));
+      c.fillStyle = T.tenue; c.globalAlpha = m === 0 ? 0.7 : 0.18; c.fillRect(izq, y, ancho, 1); c.globalAlpha = 1;
+      c.fillStyle = T.tenue; c.fillText(fmt(m), izq - 4, y);
+    });
+  }
+  function anchoEscala(c, esc, fmt) { c.font = '10px sans-serif'; return Math.ceil(Math.max.apply(null, esc.marcas.map((m) => c.measureText(fmt(m)).width))) + 8; }
   function barras(canvas, valores, etiquetas, opts) {
     const L = prepararLienzo(canvas);
     if (!L) return;
     const o = opts || {}, T = leerTema(), c = L.c, w = L.w, h = L.h;
     const v = (valores || []).map((x) => +x || 0), n = v.length;
     if (!n) return;
-    const fmt = typeof o.formato === 'function' ? o.formato : null;
+    const fmt = typeof o.formato === 'function' ? o.formato : (x) => String(Math.round(x * 100) / 100);
     const etiq = etiquetas || [];
-    const max = Math.max(0, Math.max.apply(null, v)), min = Math.min(0, Math.min.apply(null, v));
-    const arriba = fmt ? 14 : 4, abajo = etiq.length ? 15 : 3;
-    const alto = Math.max(1, h - arriba - abajo), rango = max - min || 1;
-    const cero = arriba + alto * (max / rango), bw = w / n, hueco = Math.min(3, bw * 0.15);
-    c.font = '10px sans-serif';
+    const esc = escala(Math.min(0, Math.min.apply(null, v)), Math.max(0, Math.max.apply(null, v)) || 1, 4);
+    const izq = anchoEscala(c, esc, fmt), arriba = 8, abajo = etiq.length ? 16 : 4;
+    const ancho = Math.max(1, w - izq - 4), alto = Math.max(1, h - arriba - abajo);
+    const py = (x) => arriba + (1 - (x - esc.min) / (esc.max - esc.min || 1)) * alto;
+    rejilla(c, T, izq, arriba, ancho, alto, esc, fmt, py);
+    const bw = ancho / n, hueco = Math.min(4, bw * 0.18), cero = py(0), imax = v.indexOf(Math.max.apply(null, v));
     c.textAlign = 'center';
     let anchoEtiq = 0;
     etiq.forEach((e) => { anchoEtiq = Math.max(anchoEtiq, c.measureText(String(e)).width); });
-    const salto = Math.max(1, Math.ceil((anchoEtiq + 6) / bw));
-    const conValor = fmt && bw >= 34;
+    const salto = Math.max(1, Math.ceil((anchoEtiq + 6) / bw)), pts = [];
     v.forEach((x, i) => {
-      const bh = (Math.abs(x) / rango) * alto, bx = i * bw + hueco;
-      c.fillStyle = x < 0 ? T.mal : o.color || T.acento;
-      c.fillRect(bx, x < 0 ? cero : cero - bh, bw - 2 * hueco, Math.max(x ? 1 : 0, bh));
-      if (conValor) {
-        c.fillStyle = T.texto;
-        c.textBaseline = x < 0 ? 'top' : 'bottom';
-        c.fillText(fmt(x), i * bw + bw / 2, x < 0 ? Math.min(cero + bh + 1, h - abajo - 10) : cero - bh - 1, bw);
-      }
-      if (i % salto === 0 && etiq[i] != null) {
-        c.fillStyle = T.tenue;
-        c.textBaseline = 'alphabetic';
-        c.fillText(String(etiq[i]), i * bw + bw / 2, h - 3);
-      }
+      const bx = izq + i * bw + hueco, bwi = Math.max(1, bw - 2 * hueco), y = py(x);
+      const color = (o.colores && o.colores[i]) || (x < 0 ? T.mal : o.color || T.acento);
+      c.fillStyle = color; c.globalAlpha = i === imax || o.colores ? 1 : 0.82;
+      c.beginPath();
+      if (c.roundRect) c.roundRect(bx, Math.min(y, cero), bwi, Math.max(x ? 1 : 0, Math.abs(cero - y)), x < 0 ? [0, 0, 3, 3] : [3, 3, 0, 0]); else c.rect(bx, Math.min(y, cero), bwi, Math.max(x ? 1 : 0, Math.abs(cero - y)));
+      c.fill(); c.globalAlpha = 1;
+      if (o.formato && bw >= 38) { c.fillStyle = T.texto; c.textBaseline = x < 0 ? 'top' : 'bottom'; c.fillText(fmt(x), bx + bwi / 2, x < 0 ? Math.min(y + 2, h - abajo - 10) : y - 2, bw); }
+      if (i % salto === 0 && etiq[i] != null) { c.fillStyle = T.tenue; c.textBaseline = 'alphabetic'; c.fillText(String(etiq[i]), bx + bwi / 2, h - 3); }
+      pts.push({ x: bx + bwi / 2, y: Math.min(y, cero), t: (etiq[i] != null ? etiq[i] + ': ' : '') + fmt(x) });
     });
-    if (min < 0) {
-      c.fillStyle = T.tenue;
-      c.fillRect(0, Math.round(cero), w, 1);
-    }
-    if (fmt && !conValor) {
-      c.fillStyle = T.tenue;
-      c.textAlign = 'left';
-      c.textBaseline = 'top';
-      c.fillText('máx ' + fmt(max), 2, 1);
-    }
+    canvas._pts = pts;
   }
 
   function linea(canvas, series, etiquetas, opts) {
@@ -2703,100 +2723,144 @@ IA.arte = (function () {
     const fmt = typeof o.formato === 'function' ? o.formato : (x) => String(Math.round(x * 100) / 100);
     const valido = (x) => x != null && !isNaN(x);
     let min = Infinity, max = -Infinity, n = 0;
-    lista.forEach((s) => {
-      n = Math.max(n, s.valores.length);
-      s.valores.forEach((x) => { if (valido(x)) { min = Math.min(min, +x); max = Math.max(max, +x); } });
-    });
+    lista.forEach((s) => { n = Math.max(n, s.valores.length); s.valores.forEach((x) => { if (valido(x)) { min = Math.min(min, +x); max = Math.max(max, +x); } }); });
     if (!isFinite(min)) return;
     if (min === max) { min -= 1; max += 1; }
-    c.font = '10px sans-serif';
-    const tMax = fmt(max), tMin = fmt(min);
-    const izq = Math.ceil(Math.max(c.measureText(tMax).width, c.measureText(tMin).width)) + 8;
-    const arriba = 16, abajo = (etiquetas || []).length ? 15 : 4, der = 6;
+    const esc = escala(min, max, 4);
+    const izq = anchoEscala(c, esc, fmt), arriba = 20, abajo = (etiquetas || []).length ? 16 : 4, der = 8;
     const ancho = Math.max(1, w - izq - der), alto = Math.max(1, h - arriba - abajo);
     const px = (i) => izq + (n > 1 ? (i / (n - 1)) * ancho : ancho / 2);
-    const py = (x) => arriba + (1 - (x - min) / (max - min)) * alto;
-    c.fillStyle = T.tenue;
-    c.globalAlpha = 0.25;
-    [0, 0.5, 1].forEach((k) => c.fillRect(izq, Math.round(arriba + k * alto), ancho, 1));
-    if (min < 0 && max > 0) { c.globalAlpha = 0.6; c.fillRect(izq, Math.round(py(0)), ancho, 1); }
-    c.globalAlpha = 1;
-    c.textAlign = 'right';
-    c.textBaseline = 'middle';
-    c.fillText(tMax, izq - 4, arriba);
-    c.fillText(tMin, izq - 4, arriba + alto);
+    const py = (x) => arriba + (1 - (x - esc.min) / (esc.max - esc.min)) * alto;
+    rejilla(c, T, izq, arriba, ancho, alto, esc, fmt, py);
     const etiq = etiquetas || [];
     if (etiq.length) {
       let anchoEtiq = 0;
       etiq.forEach((e) => { anchoEtiq = Math.max(anchoEtiq, c.measureText(String(e)).width); });
-      const paso = n > 1 ? ancho / (n - 1) : ancho;
-      const salto = Math.max(1, Math.ceil((anchoEtiq + 8) / paso));
-      c.textAlign = 'center';
-      c.textBaseline = 'alphabetic';
+      const paso = n > 1 ? ancho / (n - 1) : ancho, salto = Math.max(1, Math.ceil((anchoEtiq + 8) / paso));
+      c.fillStyle = T.tenue; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
       etiq.forEach((e, i) => { if (i % salto === 0 && i < n) c.fillText(String(e), limitar(px(i), izq + anchoEtiq / 2, w - anchoEtiq / 2), h - 3); });
     }
-    const paleta = [T.acento, T.dorado, T.rosa, '#5b8cff', '#c38bff', '#ff8f5a'];
+    const paleta = paletaSeries(T), pts = [];
     lista.forEach((s, k) => {
       const color = s.color || paleta[k % paleta.length];
-      c.strokeStyle = color;
-      c.fillStyle = color;
-      c.lineWidth = 2;
-      c.lineJoin = 'round';
+      // Área suave bajo la primera serie: se lee mejor la forma
+      if (k === 0 && lista.length <= 2) {
+        const g = c.createLinearGradient(0, arriba, 0, arriba + alto);
+        g.addColorStop(0, rgba(color.charAt(0) === '#' && color.length === 7 ? color : '#35d0ba', 0.22)); g.addColorStop(1, rgba(color.charAt(0) === '#' && color.length === 7 ? color : '#35d0ba', 0));
+        c.fillStyle = g; c.beginPath();
+        let ini = -1, fin = -1;
+        s.valores.forEach((x, i) => { if (!valido(x)) return; if (ini < 0) { ini = i; c.moveTo(px(i), py(+x)); } else c.lineTo(px(i), py(+x)); fin = i; });
+        if (ini >= 0) { c.lineTo(px(fin), arriba + alto); c.lineTo(px(ini), arriba + alto); c.closePath(); c.fill(); }
+      }
+      c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 2; c.lineJoin = 'round'; c.setLineDash(k % 2 && lista.length > 1 ? [6, 3] : []); // la 2.ª serie punteada: nunca solo color
       c.beginPath();
       let seguido = false, ultimo = -1;
       s.valores.forEach((x, i) => {
         if (!valido(x)) { seguido = false; return; }
         if (seguido) c.lineTo(px(i), py(+x)); else c.moveTo(px(i), py(+x));
-        seguido = true;
-        ultimo = i;
+        seguido = true; ultimo = i;
+        pts.push({ x: px(i), y: py(+x), t: (s.nombre ? s.nombre + ' · ' : '') + (etiq[i] != null ? etiq[i] + ': ' : '') + fmt(+x) });
       });
-      c.stroke();
-      if (ultimo >= 0) { circulo(c, px(ultimo), py(+s.valores[ultimo]), 2.8); c.fill(); }
+      c.stroke(); c.setLineDash([]);
+      if (ultimo >= 0) { circulo(c, px(ultimo), py(+s.valores[ultimo]), 3.2); c.fill(); }
     });
-    c.textAlign = 'left';
-    c.textBaseline = 'middle';
+    c.textAlign = 'left'; c.textBaseline = 'middle'; c.font = '10px sans-serif';
     let lx = izq;
     lista.forEach((s, k) => {
       if (!s.nombre) return;
       c.fillStyle = s.color || paleta[k % paleta.length];
-      circulo(c, lx + 4, 7, 3.5);
-      c.fill();
-      c.fillStyle = T.texto;
-      c.fillText(String(s.nombre), lx + 11, 7);
-      lx += 22 + c.measureText(String(s.nombre)).width;
+      c.fillRect(lx, 6, 12, 3);
+      c.fillStyle = T.texto; c.fillText(String(s.nombre), lx + 16, 8);
+      lx += 26 + c.measureText(String(s.nombre)).width;
     });
+    canvas._pts = pts;
   }
 
-  function radar(canvas, valores, etiquetas) {
+  // Radar: una o varias series (por ejemplo, el talento frente al promedio de su oficio)
+  function radar(canvas, valores, etiquetas, opts) {
     const L = prepararLienzo(canvas);
     if (!L) return;
-    const T = leerTema(), c = L.c, w = L.w, h = L.h;
-    const v = valores || [], n = v.length;
+    const o = opts || {}, T = leerTema(), c = L.c, w = L.w, h = L.h;
+    const series = Array.isArray(valores[0]) ? valores : [valores], n = series[0].length;
     if (n < 3) return;
-    const cx = w / 2, cy = h / 2 + 4, R = Math.max(10, Math.min(w, h) / 2 - 22);
+    const cx = w / 2, cy = h / 2 + 4, R = Math.max(10, Math.min(w, h) / 2 - 24);
     const punto = (i, r) => [cx + Math.cos(-Math.PI / 2 + (i / n) * TAU) * r, cy + Math.sin(-Math.PI / 2 + (i / n) * TAU) * r];
-    c.strokeStyle = T.tenue;
-    c.globalAlpha = 0.3;
-    c.lineWidth = 1;
+    c.strokeStyle = T.tenue; c.lineWidth = 1;
     for (let k = 1; k <= 4; k++) {
-      c.beginPath();
+      c.globalAlpha = k === 4 ? 0.45 : 0.22; c.beginPath();
       for (let i = 0; i <= n; i++) { const p = punto(i % n, (R * k) / 4); c.lineTo(p[0], p[1]); }
       c.stroke();
     }
+    for (let i = 0; i < n; i++) { const p = punto(i, R); c.globalAlpha = 0.18; c.beginPath(); c.moveTo(cx, cy); c.lineTo(p[0], p[1]); c.stroke(); }
     c.globalAlpha = 1;
-    c.fillStyle = rgba(T.acento.charAt(0) === '#' && T.acento.length === 7 ? T.acento : '#35d0ba', 0.3);
-    c.strokeStyle = T.acento;
-    c.lineWidth = 2;
-    c.beginPath();
-    v.forEach((x, i) => { const p = punto(i, (R * limitar(+x || 0, 0, 100)) / 100); c.lineTo(p[0], p[1]); });
-    c.closePath();
-    c.fill();
-    c.stroke();
-    c.fillStyle = T.tenue;
-    c.font = '9px sans-serif';
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
-    (etiquetas || []).forEach((e, i) => { const p = punto(i, R + 13); c.fillText(String(e), p[0], p[1]); });
+    const paleta = paletaSeries(T), pts = [];
+    series.slice().reverse().forEach((v, kk) => {
+      const k = series.length - 1 - kk, color = (o.colores && o.colores[k]) || paleta[k % paleta.length];
+      c.fillStyle = rgba(color.charAt(0) === '#' && color.length === 7 ? color : '#35d0ba', k ? 0.12 : 0.28);
+      c.strokeStyle = color; c.lineWidth = k ? 1.5 : 2; c.setLineDash(k ? [5, 3] : []);
+      c.beginPath();
+      v.forEach((x, i) => { const p = punto(i, (R * limitar(+x || 0, 0, 100)) / 100); c.lineTo(p[0], p[1]); if (!k) pts.push({ x: p[0], y: p[1], t: (etiquetas && etiquetas[i] ? etiquetas[i] + ': ' : '') + Math.round(+x || 0) }); });
+      c.closePath(); c.fill(); c.stroke(); c.setLineDash([]);
+      if (!k) { c.fillStyle = color; v.forEach((x, i) => { const p = punto(i, (R * limitar(+x || 0, 0, 100)) / 100); circulo(c, p[0], p[1], 2.6); c.fill(); }); }
+    });
+    c.fillStyle = T.tenue; c.font = '10px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    (etiquetas || []).forEach((e, i) => { const p = punto(i, R + 14); c.fillText(String(e), limitar(p[0], 24, w - 24), p[1]); });
+    if (o.leyenda) { c.textAlign = 'left'; o.leyenda.forEach((t, k) => { c.fillStyle = (o.colores && o.colores[k]) || paleta[k % paleta.length]; c.fillRect(4, 6 + k * 14, 12, 3); c.fillStyle = T.texto; c.fillText(t, 20, 8 + k * 14); }); }
+    canvas._pts = pts;
+  }
+
+  // Anillo con porcentajes (por ejemplo, obras por medio)
+  function anillo(canvas, partes, opts) {
+    const L = prepararLienzo(canvas);
+    if (!L) return;
+    const o = opts || {}, T = leerTema(), c = L.c, w = L.w, h = L.h;
+    const lista = (partes || []).filter((p) => p.valor > 0), total = lista.reduce((s, p) => s + p.valor, 0);
+    if (!total) return;
+    const R = Math.max(10, Math.min(h / 2 - 8, w * 0.22)), cx = R + 10, cy = h / 2, paleta = paletaSeries(T), pts = [];
+    let a = -Math.PI / 2;
+    lista.forEach((p, i) => {
+      const da = (p.valor / total) * TAU, color = p.color || paleta[i % paleta.length];
+      c.fillStyle = color; c.beginPath(); c.arc(cx, cy, R, a, a + da); c.arc(cx, cy, R * 0.58, a + da, a, true); c.closePath(); c.fill();
+      c.strokeStyle = T.fondo; c.lineWidth = 2; c.stroke();
+      const am = a + da / 2;
+      pts.push({ x: cx + Math.cos(am) * R * 0.8, y: cy + Math.sin(am) * R * 0.8, t: p.nombre + ': ' + (o.formato ? o.formato(p.valor) : p.valor) + ' (' + Math.round((p.valor / total) * 100) + ' %)' });
+      a += da;
+    });
+    c.fillStyle = T.texto; c.font = 'bold 14px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(o.centro !== undefined ? String(o.centro) : String(total), cx, cy);
+    c.font = '11px sans-serif'; c.textAlign = 'left';
+    const lx = cx + R + 16, alto = Math.min(18, (h - 8) / lista.length);
+    lista.forEach((p, i) => {
+      const y = cy - (lista.length * alto) / 2 + i * alto + alto / 2;
+      c.fillStyle = p.color || paleta[i % paleta.length]; c.fillRect(lx, y - 5, 10, 10);
+      c.fillStyle = T.texto; c.fillText(p.nombre + ' · ' + Math.round((p.valor / total) * 100) + ' %', lx + 16, y, w - lx - 18);
+    });
+    canvas._pts = pts;
+  }
+
+  // Pirámide de edades: barras horizontales centradas, los más jóvenes abajo
+  function piramide(canvas, valores, etiquetas, opts) {
+    const L = prepararLienzo(canvas);
+    if (!L) return;
+    const o = opts || {}, T = leerTema(), c = L.c, w = L.w, h = L.h;
+    const v = (valores || []).map((x) => +x || 0), n = v.length;
+    if (!n) return;
+    const fmt = o.formato || ((x) => String(x)), max = Math.max.apply(null, v) || 1;
+    c.font = '10px sans-serif';
+    const izq = Math.ceil(Math.max.apply(null, (etiquetas || []).map((e) => c.measureText(String(e)).width).concat([0]))) + 10;
+    const cx = izq + (w - izq) / 2, mitad = (w - izq) / 2 - 6, fila = (h - 6) / n, pts = [];
+    const paleta = paletaSeries(T);
+    v.forEach((x, i) => {
+      const y = h - 3 - (i + 1) * fila, a = (x / max) * mitad, alto = Math.max(2, fila - 4);
+      c.fillStyle = paleta[i % 2 ? 1 : 0]; c.globalAlpha = 0.85;
+      c.fillRect(cx - a, y + 2, a * 2, alto); c.globalAlpha = 1;
+      c.fillStyle = T.tenue; c.textAlign = 'right'; c.textBaseline = 'middle';
+      if (etiquetas && etiquetas[i] != null) c.fillText(String(etiquetas[i]), izq - 6, y + 2 + alto / 2);
+      c.fillStyle = T.texto; c.textAlign = 'center';
+      if (a * 2 > 40) c.fillText(fmt(x), cx, y + 2 + alto / 2);
+      pts.push({ x: cx, y: y + 2 + alto / 2, t: (etiquetas && etiquetas[i] != null ? etiquetas[i] + ': ' : '') + fmt(x) });
+    });
+    canvas._pts = pts;
   }
 
   /* =========================================================
@@ -2902,9 +2966,12 @@ IA.arte = (function () {
     retrato,
     retratoEn,
     estudio,
+    estudioEn,
     barras,
     linea,
     radar,
+    anillo,
+    piramide,
     sonido,
     activarSonido(v) { sonidoEncendido = !!v; },
     sonidoActivo() { return sonidoEncendido; },

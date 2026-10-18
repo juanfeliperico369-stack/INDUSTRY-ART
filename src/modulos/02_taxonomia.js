@@ -562,7 +562,12 @@ IA.taxonomia = (function () {
     epoca: function (id) { return epocas.filter(function (x) { return x.id === id; })[0] || epocas[10]; },
     arco: function (id) { return arcos.filter(function (x) { return x.id === id; })[0] || null; },
     subarco: function (id) { return subarcos.filter(function (x) { return x.id === id; })[0] || null; },
-    material: function (id) { return dominio.filter(function (x) { return x.id === id; })[0] || null; },
+    material: function (id) {
+      const d = dominio.filter(function (x) { return x.id === id; })[0];
+      if (d) return d;
+      const S = IA.n && IA.n.S; // V34: material propio del Editor (vive en la partida)
+      return (S && S.edit && S.edit.mat || []).filter(function (x) { return x.id === id; })[0] || null;
+    },
     estilo: function (id) { return estilos.filter(function (x) { return x.id === id; })[0] || estilos[0]; },
     prioridad: function (id) { return prioridades.filter(function (x) { return x.id === id; })[0] || prioridades[0]; },
     idioma: function (id) { return idiomas.filter(function (x) { return x.id === id; })[0] || null; },

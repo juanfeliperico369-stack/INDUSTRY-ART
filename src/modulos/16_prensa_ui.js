@@ -109,6 +109,14 @@ IA.prensaUI = (function () {
     if (b) h += '<div class="tarjeta"><h3>Biografía pública</h3><p class="chico">Mejor obra: «' + esc(b.mejor.tit) + '» · más taquillera: «' + esc(b.taquillera.tit) + '» · más cara: «' + esc(b.cara.tit) + '»' +
       (b.clasico ? ' · mayor clásico: «' + esc(b.clasico.tit) + '»' : '') + ' · obras de culto: ' + b.culto + ' · especialidad: ' + esc(b.genero) + ' · perfil ' + esc(b.perfil) + ' · clase ' + esc(b.clase) + '</p>' +
       '<label class="campo"><span>Mascota del estudio</span><input type="text" maxlength="30" value="' + esc(b.mascota) + '" data-c="prMascota" placeholder="Por ejemplo: un búho con boina"></label></div>';
+    // V34: obras por medio (cine, TV y los otros cuatro medios)
+    const todas = S.obras.filter(function (o) { return o.est === 0; });
+    const porMedio = [['Cine', todas.filter(function (o) { return !o.tv && (o.med || 'cine') === 'cine'; }).length], ['Televisión', todas.filter(function (o) { return o.tv || o.med === 'tv'; }).length]]
+      .concat(['musica', 'juegos', 'teatro', 'libros'].map(function (m) { return [IA.medios.MED[m].nombre, IA.medios.proyectos(m).length]; }));
+    if (porMedio.some(function (x) { return x[1] > 0; })) {
+      const gm = U.grafica('panelMedios', function (cv) { IA.arte.anillo(cv, porMedio.map(function (x) { return { nombre: x[0], valor: x[1] }; }), { centro: porMedio.reduce(function (a, x) { return a + x[1]; }, 0) }); });
+      h += '<h3>Obras por medio</h3><canvas class="lienzo" style="height:170px" data-grafica="' + gm + '"></canvas>';
+    }
     if (S.fin.hist.length) {
       const hist = S.fin.hist.slice(-40);
       const g = U.grafica('panelIng', function (cv) { IA.arte.linea(cv, [{ nombre: 'Ingresos (hoy)', color: getComputedStyle(document.documentElement).getPropertyValue('--acento').trim(), valores: hist.map(function (x) { return IA.mundo.aHoy(x.ing, x.anio); }) }], hist.map(function (x) { return String(x.anio); }), { formato: function (v) { return U.dinero(v, 2025); } }); });
