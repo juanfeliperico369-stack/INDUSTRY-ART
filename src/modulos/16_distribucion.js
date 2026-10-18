@@ -136,7 +136,7 @@ IA.distribucion = (function () {
     if (orden[0][0] - orden[4][0] < 0.15) return 'todas las edades';
     return orden.slice(0, 2).map(function (x) { return M.GRUPOS[x[1]].toLowerCase(); }).join(' y ');
   }
-  ac('programar', function (v) { abrir(v); });
+  ac('programar', function (v) { const o = IA.obras.porId(+v); if (o && o.tv) { U.abrirFicha(IA.pantallas.fichaObra(+v), 'obra:' + v); return; } abrir(v); });
   ac('plVia', function (v) { pg.plan.via = v; refrescar(); });
   ac('plSemana', function (v) { pg.t = +v; refrescar(); });
   ac('plNivel', function (v) { pg.nivM = +v; refrescar(); });

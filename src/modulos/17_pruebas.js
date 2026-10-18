@@ -105,6 +105,7 @@ IA.pruebas = (function () {
       const c = IA.estreno.cadenas(jug.reg).filter(function (x) { return !IA.estreno.puedeFirmar(x.id, 2); }).sort(function (a, b) { return b.salas - a.salas; })[0];
       if (c) IA.estreno.firmar(c.id, 2);
     }
+    botTele(est, tipico); // series, canal, plataforma, franquicias y licencias (V23)
     // Con la caja en rojo no se arriesga más: espera a que entren los ingresos
     if (S.semanasEnRojo > 0) return;
     // 2. Construir cuando sobra caja
@@ -143,6 +144,72 @@ IA.pruebas = (function () {
       const r = IA.juego.iniciarObra(b);
       if (r.error) { if (registroErrores) registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error); break; }
     }
+  }
+  // V23: lo que haría un jugador con la televisión, el streaming y sus franquicias
+  function botTele(est, tipico) {
+    const S = N.S, anio = N.anio(), TV = IA.tv, ST = IA.streaming, F = IA.franquicias;
+    (S.pilotos || []).filter(function (p) { return p.nota !== undefined; }).forEach(function (p) {
+      if (p.nota >= 55 && O.enProduccion(0).length < NG.capacidad(0) && !TV.ordenarTemporada(p.id).error) return;
+      TV.descartarPiloto(p.id);
+    });
+    O.delEstudio(0, ['lista']).forEach(function (o) {
+      if (!o.tv) return;
+      const ops = TV.opcionesEmision(o).map(function (x) { return x.id; });
+      const d = o.pitch ? o.pitch.c : ops.indexOf('stream') >= 0 ? 'stream' : ops.indexOf('canal') >= 0 ? 'canal' : 'cable';
+      TV.emitir(o.id, d, { completa: o.id % 2 === 0 });
+    });
+    S.obras.forEach(function (o) {
+      if (o.est !== 0 || !o.tv || o.tv.ren !== 'pendiente') return;
+      if ((o.tv.q || 0) >= 58 && O.enProduccion(0).length < NG.capacidad(0) && NG.cajaLibre(0) > (o.gp || 0) * 1.5) {
+        const r = TV.renovar(o.id);
+        if (!r.error && IA.juego.iniciarObra(r.b).error) o.tv.ren = 'cancelada';
+      } else TV.cancelar(o.id);
+    });
+    if (S.canal) {
+      if (S.canal.ofPat.length && S.canal.pat.length < 3) TV.aceptarPatrocinio(S.canal.ofPat[0].id);
+      if (S.canal.ofNot.length && NG.cajaLibre(0) > tipico * 3 && N.probabilidad(0.3)) TV.comprarNoticia(S.canal.ofNot[0].id);
+      if (N.semana() % 4 === 0) TV.autocompletar(true);
+    } else if (anio >= 1952 && N.semana() === 26 && NG.cajaLibre(0) > tipico * 10) TV.comprarCanal('', 'DR');
+    if (S.stream) {
+      if (N.semana() % 4 === 1) {
+        S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && S.t - o.fe < 8; }).forEach(function (o) { ST.agregar(o.id, 'propio'); });
+        if (S.stream.ofLic.length && NG.cajaLibre(0) > tipico * 4) ST.licenciar(0, N.probabilidad(0.5) ? 'temporal' : 'exclusiva', N.probabilidad(0.3) ? S.stream.ofLic[0].p * 0.8 : 0);
+        if (!S.stream.lineas.length) ST.contratarLinea('anim');
+        if (S.stream.cat.length >= S.stream.cap - 2 && NG.cajaLibre(0) > tipico * 3) ST.comprarBoveda();
+      }
+    } else if (ST.puede() && N.semana() === 30 && NG.cajaLibre(0) > tipico * 12) ST.lanzar('');
+    // Licencias del personaje más popular de tu mejor franquicia
+    if (N.semana() === 40) {
+      const f = F.lista().filter(function (x) { return x.est === 0 && x.pers.length; }).sort(function (a, b) { return F.valor(b) - F.valor(a); })[0];
+      const pr = F.productos(anio);
+      if (f && pr.length) F.licenciar(f.id, f.pers[0].k, pr[N.entero(0, pr.length - 1)].id, N.probabilidad(0.7));
+    }
+    if (S.ofFr && S.ofFr.length && N.probabilidad(0.2)) F.aceptarOferta(0);
+    // Una vez al mes: continuar un éxito o producir una serie
+    if (N.semana() % 4 !== 2 || S.semanasEnRojo > 0 || O.enProduccion(0).length >= NG.capacidad(0)) return;
+    const exito = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && o.pub >= 64 && S.t - o.fe < 52 * 5 && !o.cont2; }).sort(function (a, b) { return b.pub - a.pub; })[0];
+    let b = null;
+    if (exito && N.probabilidad(0.35)) {
+      exito.cont2 = 1;
+      const f = F.de(exito), cam = f && f.fat > 0.5 ? 'reboot' : N.elegir(['secuela', 'secuela', 'precuela', 'spinoff', 'softreboot']);
+      const r = F.continuar(exito.id, cam, TV.puedeTV(anio) && anio >= 1952 && N.probabilidad(0.3) ? 'tv' : 'cine');
+      if (!r.error) b = r.b;
+    } else if (anio >= 1952 && N.probabilidad(0.25)) {
+      b = O.borrador(0, { gen: elegirGeneros(S), escala: 1, completa: true });
+      const fs = TV.formatosDe(anio);
+      TV.aplicar(b, { fmt: N.elegir(fs).id });
+      if (!(b.prob && b.prob.length)) IA.ideas.recomendarHistoria(b, anio);
+      IA.ideas.generarPersonajes(b);
+      O.equipoRecomendado(b, est.ambicion);
+      O.recalcular(b);
+      const cs = TV.compradores(anio);
+      if (cs.length && N.probabilidad(0.3)) TV.pitch(b, cs[0].id);
+      if (!b.pitch && N.probabilidad(0.3) && NG.cajaLibre(0) > (b.pp + O.costoTalento(b)) * 1.6) { TV.rodarPiloto(b); return; }
+    }
+    if (!b) return;
+    if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6) return;
+    const r = IA.juego.iniciarObra(b);
+    if (r.error && registroErrores && !/disponible|equipo/.test(r.error)) registroErrores.push('Bot V23 en ' + anio + ': ' + r.error);
   }
   function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x) c++; }); return c; }
   // La idea del bot (V17): a veces adapta un material, a veces produce un guion comprado, y si no, una idea propia
@@ -556,6 +623,22 @@ IA.pruebas = (function () {
         prueba('El diseñador de arte y tecnología también pesa en vestuario', h2 < h1);
       }
       prueba('Los rivales también guardan sets', IA.rodaje.capacidadSets(1) >= 2);
+    }
+    // V23 · Franquicias, TV y streaming
+    {
+      const TV = IA.tv, F = IA.franquicias;
+      const b1 = TV.aplicar({ gen: ['Drama'] }, { fmt: 'telenovela', eps: 999 }), b2 = TV.aplicar({ gen: ['Drama'] }, { fmt: 'miniserie', eps: 1 });
+      prueba('Una temporada va de 2 a 300 episodios', b1.tv.eps === 300 && b2.tv.eps === 2, b1.tv.eps + ' / ' + b2.tv.eps);
+      const b3 = TV.aplicar({ gen: ['Drama'], min: 500 }, { fmt: 'vivo' }), b4 = TV.aplicar({ gen: ['Drama'], min: 1 }, { fmt: 'vivo' });
+      prueba('Un episodio va de 5 a 180 minutos', b3.min === 60 && TV.aplicar(Object.assign(b3, { min: 999 }), {}).min === 180 && TV.aplicar(Object.assign(b4, { min: 1 }), {}).min === 5);
+      prueba('Hay siete caminos de continuación', F.CAMINOS.length === 7);
+      prueba('El reboot baja la fatiga y la secuela la sube', F.camino('reboot').fat < 0 && F.camino('secuela').fat > 0);
+      prueba('El horario familiar multa el contenido para adultos', TV.multable({ clas: 'R' }) && !TV.multable({ clas: 'G' }) && TV.FRANJAS.filter(function (x) { return x.fam; }).length >= 2);
+      prueba('La parrilla tiene 7 días y 6 franjas', TV.DIAS.length === 7 && TV.FRANJAS.length === 6);
+      prueba('La plataforma tiene tres planes', IA.streaming.PLANES.length === 3);
+      const vivas = F.lista();
+      prueba('Toda franquicia viva tiene al menos una obra y un canon', vivas.every(function (f) { return f.o.length >= 1 && f.cont.length >= 1; }), vivas.length);
+      prueba('El efecto de la franquicia en el deseo está acotado', N.S.obras.every(function (o) { const v = F.bonoDeseo(o); return v >= -15 && v <= 18; }));
     }
     return r;
   }

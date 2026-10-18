@@ -72,6 +72,7 @@ IA.guardado = (function () {
 
   // V21 → V22: premios, festivales, crítica y prensa (todo empieza vacío)
   MIGRACIONES[22] = function (S) { ['galas', 'palmares', 'revista', 'cartas', 'hitos'].forEach(function (k) { if (!S[k]) S[k] = []; }); if (!S.fest) S.fest = {}; };
+  MIGRACIONES[23] = function (S) { if (!S.franq) S.franq = { lista: [], sig: 1 }; ['pilotos', 'ofFr'].forEach(function (k) { if (!S[k]) S[k] = []; }); };
 
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------
   function suma(texto) {

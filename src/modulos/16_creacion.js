@@ -647,6 +647,7 @@ IA.creacion = (function () {
     return h;
   }
   function fichaCrear() {
+    if (cr.b && (cr.b.tv || cr.b.fr) && cr.etapa === 'idea') return IA.teleUI.bannerCrear(cr.b) + (modo === 'rapido' ? vistaRapida() : vistaDetallada()); // series y continuaciones (V23)
     if (cr.etapa === 'camino' || !cr.b && cr.etapa === 'idea') return vistaCamino();
     if (cr.etapa === 'guiones') return vistaGuiones();
     if (cr.etapa === 'material') return vistaMaterial();
@@ -1139,6 +1140,8 @@ IA.creacion = (function () {
   // Si quedan más decisiones pendientes, se abre la siguiente
   function siguienteDecision() { const o = J.decisionesPendientes()[0]; if (o) setTimeout(function () { modalDecision(o); }, 50); }
 
-  return { fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon,
+  // Abre la creación con un borrador ya armado (continuaciones, series y adaptaciones, V23)
+  function abrirCon(b) { cr.b = ajustar(b); cr.etapa = 'idea'; cr.paso = 3; cr.rol = null; cr.picker = null; U.abrirFicha(fichaCrear(), 'crear'); }
+  return { abrirCon: abrirCon, refrescar: refrescar, fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon,
     bloqueProduccion: bloqueProduccion, abrirDecision: abrirDecision, siguienteDecision: siguienteDecision };
 })();

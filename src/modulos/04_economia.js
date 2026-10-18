@@ -241,7 +241,7 @@ IA.economia = (function () {
   }
   function conocimiento(obra, anio, famaEstudio, famaEst, bonoMarketing) {
     // V20: la cuenta regresiva y las promociones suman; la mezcla de canales hace rendir más (o menos) la campaña
-    const base = N.limitar(0.06 + 0.25 * famaEstudio + 0.2 * famaEst + IA.ideas.bonoConocimiento(obra) + IA.estreno.bonoConocimiento(obra), 0.03, 0.65);
+    const base = N.limitar(0.06 + 0.25 * famaEstudio + 0.2 * famaEst + IA.ideas.bonoConocimiento(obra) + IA.estreno.bonoConocimiento(obra) + IA.franquicias.bonoConocimiento(obra), 0.03, 0.65);
     const gasto = (obra.campana !== undefined ? obra.campana : obra.cm || 0) * (1 + (bonoMarketing || 0)) * IA.estreno.factorCampana(obra);
     const rel = gasto / Math.max(1, marketingTipico(anio));
     const resto = (1 - base) * Math.exp(-alcanceMedio(anio) * rel * 0.9);
@@ -273,7 +273,7 @@ IA.economia = (function () {
     // La aprobación del público por la estrella principal (V18) también vende entradas
     const lider = ctx.talento(obra.eq.int[0]);
     const apr = lider && lider.apr !== undefined ? (lider.apr - 50) / 10 : 0;
-    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + apr + (obra.ddes || 0) + IA.estreno.bonoDeseo(obra) + N.normal(0, 4), 1, 99));
+    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + apr + (obra.ddes || 0) + IA.estreno.bonoDeseo(obra) + IA.franquicias.bonoDeseo(obra) + N.normal(0, 4), 1, 99));
     obra.crit = Math.round(N.limitar((obra.crit || 0) + IA.estreno.ajusteCritica(obra), 1, 99));
     // Parte de lo que gana esta obra que llegará por las ventanas (video, TV, streaming) y no por la taquilla
     obra.fv = N.redondear(IA.ventanas.parteVentanas(anio), 3);

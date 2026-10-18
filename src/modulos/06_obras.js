@@ -7,7 +7,7 @@ IA.obras = (function () {
   const ETAPAS = ['desarrollo', 'preproduccion', 'rodaje', 'posproduccion', 'lista', 'cartelera', 'terminada'];
   const NOMBRE_ETAPA = {
     desarrollo: 'Desarrollo', preproduccion: 'Preproducción', rodaje: 'Rodaje', posproduccion: 'Posproducción',
-    lista: 'Lista para estrenar', cartelera: 'En cartelera', terminada: 'Terminada',
+    lista: 'Lista para estrenar', cartelera: 'En cartelera', emision: 'En emisión', terminada: 'Terminada',
   };
   const ROLES = ['guion', 'direccion', 'produccion', 'fotografia', 'musica', 'edicion', 'arte'];
   // V19: vestuario, efectos y animación. Se contratan cuando la obra los necesita; efectos y animación también
@@ -162,8 +162,8 @@ IA.obras = (function () {
       // estaban, después se busca a quien encaje en sexo y edad
       const papeles = o.pj.filter(function (p) { return p.i === 'protagonista'; }).concat(o.pj.filter(function (p) { return p.i === 'secundario'; }));
       const enUso = {};
-      papeles.forEach(function (p) { if (p.t !== null && p.t !== undefined) enUso[p.t] = 1; });
-      const sueltos = (o.eq.int || []).filter(function (id) { return !enUso[id]; });
+      papeles.forEach(function (p) { if (p.t !== null && p.t !== undefined) { if (enUso[p.t]) p.t = null; else enUso[p.t] = 1; } }); // nadie hace dos papeles
+      const sueltos = (o.eq.int || []).filter(function (id, k, a) { return !enUso[id] && a.indexOf(id) === k; });
       papeles.forEach(function (p, i) {
         if (p.t === null || p.t === undefined) {
           if (sueltos.length) p.t = sueltos.shift();
@@ -285,10 +285,11 @@ IA.obras = (function () {
     const anio = o.anioPlan || N.anio();
     const f = esc.semanas * N.interp(EPOCA_DURACION, anio);
     const a = IA.ideas.ajusteSemanas(o, anio); // animación, duración, efectos, IA e idea automática
+    const tv = IA.tv.factorSemanas(o); // series: más episodios, más rodaje (V23)
     return {
       desarrollo: Math.max(1, Math.round(5 * f) - (r.guion || 0) + a.desarrollo),
       preproduccion: Math.max(1, Math.round(4 * f) + (a.preExtra || 0)),
-      rodaje: Math.max(2, Math.round(8 * f * a.rodaje) + (a.rodExtra || 0)),
+      rodaje: Math.max(2, Math.round(8 * f * a.rodaje * tv) + (a.rodExtra || 0)),
       posproduccion: Math.max(2, Math.round(7 * f * a.posproduccion) - (r.edicion || 0) + (o.fam === 'IM' || o.fam === 'AA' ? 1 : 0) + a.posExtra),
     };
   }
@@ -323,6 +324,8 @@ IA.obras = (function () {
       o.frp = IA.ideas.frasePremio(o);
     }
     registrar(o);
+    if (o.fr) IA.franquicias.alCrear(o); // franquicias (V23)
+    if (o.tv) IA.tv.alCrear(o); // series vendidas con el pitch (V23)
     return o;
   }
   // Créditos con nombre (quedan aunque el talento se retire y se borre del mundo)
@@ -365,6 +368,8 @@ IA.obras = (function () {
       'met', 'ter', 'pst', 'rep', 'ext', 'setR', 'lp', 'dq', 'dcrit', 'dpub', 'ddes', 'notas', 'plan', 'campana', 'cmD', 'cmP'];
     S.obras.forEach(function (o) {
       if (o.et !== 'terminada') return;
+      // Series viejas (V23): de las audiencias por episodio queda el promedio
+      if (o.tv && o.tv.em && o.tv.em.aud.length > 1 && t - (o.fe || 0) > 104) o.tv.em.aud = [N.redondear(o.tv.em.aud.reduce(function (x, y) { return x + y; }, 0) / o.tv.em.aud.length, 2)];
       // Ventanas terminadas de los rivales (V20): solo queda lo cobrado
       if (o.est !== 0 && o.vt && o.vt.fin && (o.vt.video || o.vt.tv || o.vt.streaming)) o.vt = { total: o.vt.total, cob: o.vt.cob, fin: 1 };
       // Tus obras (V20): la mezcla de canales no se usa después del estreno y de las ventanas cerradas quedan sus cifras

@@ -348,11 +348,12 @@ IA.pantallas = (function () {
   }
   function obras() {
     const s = sub('obras', 'marcha');
-    const marcha = O.enProduccion(0), listas = O.delEstudio(0, ['lista']), cart = O.delEstudio(0, ['cartelera']);
-    let h = titulo(t('sec_obras'), 'obras', '<button class="btn primario" data-a="crearObra">' + icono('mas') + t('crear_obra') + '</button>') +
-      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')], ['filmografia', 'Filmografía'], ['panel', 'Panel']], s);
+    const marcha = O.enProduccion(0), listas = O.delEstudio(0, ['lista']), cart = O.delEstudio(0, ['cartelera', 'emision']);
+    let h = titulo(t('sec_obras'), 'obras', '<button class="btn primario" data-a="crearObra">' + icono('mas') + t('crear_obra') + '</button>' + (IA.tv.puedeTV(N.anio()) ? '<button class="btn" data-a="tvNuevaSerie">' + icono('mas') + 'Nueva serie</button>' : '')) +
+      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')], ['franquicias', 'Franquicias'], ['adquisicion', 'Adquisición'], ['filmografia', 'Filmografía'], ['panel', 'Panel']], s);
     h += '<div class="lista-obras">';
     if (s === 'marcha') {
+      h += IA.teleUI.pilotos();
       h += marcha.length ? marcha.map(function (o) {
         return tarjetaObra(o, '<span>' + O.NOMBRE_ETAPA[o.et] + ' · ' + t('faltan', { n: PR.semanasRestantes(o) }) + '</span>' + barraP(PR.progreso(o)) + '<span class="tenue chico">' + t('costo') + ': ' + dinero(O.costoTotal(o)) + '</span>');
       }).join('') : vacio();
@@ -363,9 +364,12 @@ IA.pantallas = (function () {
       }).join('') : vacio();
     } else if (s === 'cartelera') {
       h += cart.length ? cart.map(function (o) {
+        if (o.tv && o.tv.em) return tarjetaObra(o, '<span>En emisión: episodio ' + o.tv.em.ep + ' de ' + o.tv.eps + ' · ' + esc(IA.tv.DONDE[o.tv.em.d].nombre) + '</span><span class="tenue chico">Promedio ' + U.decimal(IA.tv.promedioAud(o), 1) + ' M por episodio</span>');
         const ult = o.hs && o.hs.length ? o.hs[o.hs.length - 1] : 0;
         return tarjetaObra(o, '<span>' + t('bruto') + ': <b>' + dinero(o.bruto) + '</b> · última semana ' + dinero(ult) + '</span><span class="tenue chico">' + t('semanas_cartelera') + ': ' + o.sc + ' · ' + t('critica') + ' ' + o.crit + ' · ' + t('publico') + ' ' + o.pub + '</span>');
       }).join('') : vacio();
+    } else if (s === 'franquicias' || s === 'adquisicion') {
+      h += '</div>' + (s === 'franquicias' ? IA.teleUI.franquicias() : IA.teleUI.adquisicion()) + '<div>';
     } else if (s === 'filmografia' || s === 'panel') {
       h += '</div>' + (s === 'panel' ? IA.prensaUI.panel() : IA.prensaUI.filmografia()) + '<div>';
     } else {
@@ -390,7 +394,7 @@ IA.pantallas = (function () {
       '<span class="tenue">' + esc(est ? est.nombre : '') + (o.anio ? ' · ' + o.anio : '') + '</span><span class="etiqueta">' + O.NOMBRE_ETAPA[o.et] + '</span>' +
       ((o.aw || []).length ? '<span class="etiqueta oro">' + o.aw.map(function (a) { return D.premios.categorias.filter(function (c) { return c.id === a; })[0].nombre; }).join(', ') + '</span>' : '') + '</div></div>';
     if (o.est === 0 && O.ETAPAS.indexOf(o.et) < 4) h += '<p>' + t('progreso') + ': ' + O.NOMBRE_ETAPA[o.et] + ' · ' + t('faltan', { n: PR.semanasRestantes(o) }) + '</p>' + barraP(PR.progreso(o));
-    if (o.est === 0 && o.et === 'lista' && !o.prog) h += '<p><button class="btn primario bloque" data-a="programar" data-v="' + o.id + '">' + t('programar') + '</button></p>';
+    if (o.est === 0 && o.et === 'lista' && !o.prog && !o.tv) h += '<p><button class="btn primario bloque" data-a="programar" data-v="' + o.id + '">' + t('programar') + '</button></p>';
     if (o.et === 'lista' && o.prog) h += '<p class="oro">' + (o.plan && o.plan.via && o.plan.via !== 'cines' ? 'Estreno directo en ' + (o.plan.via === 'video' ? 'video' : 'streaming') : 'Estreno') + ': ' + esc(U.fecha(o.fe)) + ' · campaña ' + D.nivelesMarketing[o.nivM].nombre.toLowerCase() + '</p>';
     if (o.est === 0 && (o.prog || estrenadaYa(o))) h += IA.distribucion.resumenPlan(o);
     const vis = o.est === 0 || estrenada;
@@ -408,6 +412,7 @@ IA.pantallas = (function () {
     // Lanzamiento (V20): dinero en cadena, ventanas y acciones del catálogo
     if (vis) h += IA.distribucion.bloqueDinero(o) + IA.distribucion.bloqueVentanas(o) + IA.distribucion.bloqueCatalogo(o);
     if (vis || o.est === 0) h += IA.prensaUI.bloqueObra(o);
+    h += IA.teleUI.bloqueObra(o); // franquicia y serie (V23)
     if (o.est === 0 || estrenada) h += IA.creacion.bloqueIdea(o);
     if (o.est === 0) h += IA.creacion.bloqueProduccion(o);
     if (o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera') {
@@ -551,8 +556,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function negocio() {
     const s = sub('negocio', 'finanzas');
-    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['mercado', t('neg_mercado')]], s) +
-      ({ finanzas: nFinanzas, estudio: nEstudio, sede: IA.calendarioUI.negocioSede, distribucion: IA.distribucion.negocioDistribucion, mercado: nMercado }[s] || nFinanzas)();
+    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['mercado', t('neg_mercado')]], s) +
+      ({ finanzas: nFinanzas, estudio: nEstudio, sede: IA.calendarioUI.negocioSede, distribucion: IA.distribucion.negocioDistribucion, canal: IA.teleUI.canal, streaming: IA.teleUI.streaming, mercado: nMercado }[s] || nFinanzas)();
   }
   function tablaLibro(libro) {
     const filas = [];

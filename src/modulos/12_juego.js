@@ -92,10 +92,12 @@ IA.juego = (function () {
     N.on('noticia', noticia);
     N.on('aviso', function (a) { noticia({ tipo: a.tipo, texto: a.texto, importante: true }); });
     N.on('obraLista', function (o) {
+      if (o.tv) IA.tv.alQuedarLista(o); // tramas de la serie (V23)
       if (o.est !== 0) R.alQuedarLista(o, NG.contextoDe(o.est));
     });
     N.on('estreno', function (o) {
       IA.prensa.alEstrenar(o); // promesas de la rueda de prensa (V22)
+      IA.franquicias.alEstrenar(o); // fatiga de la franquicia (V23)
       if (o.est === 0) IA.critica.resenar(o); // reseñas y proyección para la prensa (V22)
       const m = N.S.mercado;
       m.famMes[o.fam] = (m.famMes[o.fam] || 0) + 1;
@@ -104,7 +106,8 @@ IA.juego = (function () {
     N.on('obraTerminada', function (o) {
       IA.sede.alTerminar(o); // fans (V21)
       IA.critica.alTerminar(o); // cronología (V22)
-      if (o.est === 0) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });
+      IA.franquicias.alTerminar(o); // popularidad de los personajes (V23)
+      if (o.est === 0 && !o.tv) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });
     });
     N.on('premios', function (r) {
       const p = r.categorias.filter(function (c) { return c.id === 'pelicula' || c.id === 'mayor'; })[0];
@@ -293,6 +296,7 @@ IA.juego = (function () {
   function programarEstreno(o, t, nivM, plan) {
     if (o.et !== 'lista' || o.est !== 0) return 'La obra no está lista.';
     if (o.prog) return 'La obra ya tiene fecha de estreno.';
+    if (o.tv) return 'Las series se emiten: elige dónde en su ficha.';
     if (o.fest && o.fest.hasta > t) return 'Está inscrita en un festival: no puede estrenarse antes de que termine.';
     const p = IA.estreno.normalizar(o, plan, N.anio(t));
     if (p.via !== 'cines' && !IA.ventanas.viasDirectas(N.anio(t)).some(function (v) { return v.id === p.via; })) return 'Esa vía de estreno todavía no existe.';
@@ -316,6 +320,7 @@ IA.juego = (function () {
     IA.sede.semana(); // reclutamiento y capacitación (V21)
     IA.carrera.semana(); // encargos y vida ligera de tu avatar (V21)
     IA.prensa.semana(); // rivales que mueven fechas (V22)
+    IA.tv.semana(); IA.streaming.semana(); IA.franquicias.semana(); // series, canal, plataforma y licencias (V23)
     const ceremonia = PM.semana();
     academia();
     S.t++;
@@ -334,6 +339,7 @@ IA.juego = (function () {
       // El mercado de guiones se renueva cada mes (V21)
       IA.ideas.renovarGuiones();
       IA.critica.cartaMensual(); IA.critica.numeroRevista(); // cartas de fans y revista (V22)
+      IA.franquicias.mensual(); IA.tv.mensual(); // ofertas por tus franquicias y patrocinadores (V23)
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;
@@ -344,6 +350,7 @@ IA.juego = (function () {
       IA.ventanas.anual();
       IA.sede.anual();
       IA.carrera.anual();
+      IA.franquicias.anual();
       O.compactar();
       D.cronologia.forEach(function (c) { if (c[0] === N.anio()) noticia({ tipo: 'historia', texto: c[1], importante: true }); });
       if (S.fin.hist.length) N.emit('finAnio', S.fin.hist[S.fin.hist.length - 1]);

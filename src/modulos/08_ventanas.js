@@ -197,6 +197,7 @@ IA.ventanas = (function () {
   function puedeReestrenar(o) {
     if (!o || o.est !== 0 || o.et !== 'terminada') return 'Solo tus obras ya estrenadas.';
     if (o.dir) return 'Se estrenó directo: no tiene reestreno en cines.';
+    if (o.tv) return 'Las series se repiten en tu canal o en tu plataforma.';
     if (N.anio() - o.anio < ESPERA_REESTRENO) return 'Un reestreno necesita ' + ESPERA_REESTRENO + ' años desde el estreno.';
     if (o.reA && N.anio() - o.reA < ENTRE_REESTRENOS) return 'Debe pasar ' + ENTRE_REESTRENOS + ' años entre reestrenos.';
     if ((N.S.reestrenos || []).some(function (r) { return r.id === o.id; })) return 'Ya está en cartelera otra vez.';

@@ -206,6 +206,7 @@ IA.ideas = (function () {
     f *= X.epoca(o.epo || 'actualidad').costo;
     if (o.corr && o.corr !== X.ESTANDAR) f *= X.efectoCorriente(o.corr, anio, fam).costo;
     f *= X.estilo(o.estilo).costo || 1;
+    if (o.tv) f *= IA.tv.factorCosto(o); // episodios, sala de guionistas y tramas (V23)
     f *= N.limitar(Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.55), 0.35, 2.2);
     if (o.rod) {
       const p = D.pais(o.rod), casa = N.S && N.S.estudios[o.est] ? D.pais(N.S.estudios[o.est].pais) : null;

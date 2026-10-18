@@ -74,9 +74,12 @@ IA.rivales = (function () {
     op.tem = [buenOjo ? IA.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
     op.prob = [buenOjo ? IA.ideas.problemaRecomendado(famIdea) : IA.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
     op.arco = buenOjo ? IA.ideas.arcoRecomendado(famIdea) : N.elegir(IA.taxonomia.arcos).id;
+    const sec = IA.franquicias.secuelaRival(est); // a veces continúan su éxito (V23)
+    if (sec) { op.gen = sec.gen.slice(); delete op.mat; }
     let b = O.borrador(est.id, op);
     // Con poca caja hacen una obra más chica en vez de quedarse sin filmar (V18)
     while (b.pp * 1.4 > est.caja && op.escala > AJ.minEscala) { op.escala--; b = O.borrador(est.id, op); }
+    if (sec) IA.franquicias.prepararRival(b, sec);
     const pobre = b.pp * 2 > est.caja;
     b.prest = prestigio ? 1 : 0;
     // Cómo filman (V20): el método y el terreno recomendados y, si tienen uno que sirva, un set guardado
