@@ -679,9 +679,39 @@ IA.pantallas = (function () {
       sw('sonido', t('aj_sonido')) + sw('movimiento', t('aj_movimiento')) + sw('vibracion', t('aj_vibracion')) + sw('dineroHoy', t('dinero_hoy')) + sw('musica', 'Música de fondo') + sw('dalton', 'Colores para daltonismo') +
       '<p></p><div class="col">' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button><button class="btn" data-a="laboratorio">' + t('aj_laboratorio') + '</button><button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') +
       (IA.publicacion.privacidadDisponible() ? '<button class="btn" data-a="privacidadAnuncios">Privacidad de los anuncios</button>' : '') + '</div>' +
+      compraCompleta() +
       '<p class="nota">' + t('juego') + ' ' + IA.VERSION + ' · ' + IA.publicacion.nombrePlataforma() + ' · ' + t('creditos') + '</p>';
   }
-  ac('abrirAjustes', function () { U.modal(ajustes()); });
+  // V32: compra única «Versión completa» (solo quita el anuncio); en la web y en PC no aparece
+  function compraCompleta() {
+    const P = IA.publicacion;
+    if (!P.compraDisponible()) return '';
+    if (P.tieneCompleta()) return '<p class="oro">Versión completa · ¡gracias por apoyar el juego!</p>';
+    const pr = P.precioGuardado();
+    return '<div class="tarjeta"><h3>Versión completa</h3><p class="nota">Una sola compra quita el anuncio al abrir. El juego es el mismo para todos.</p>' +
+      '<div class="col"><button class="btn primario" data-a="comprarCompleta">Quitar el anuncio' + (pr ? ' · ' + esc(pr) : '') + '</button>' +
+      '<button class="btn" data-a="restaurarCompras">Restaurar compras</button></div></div>';
+  }
+  function reabrirAjustes() { if (U.modalAbierto() && document.querySelector('#modal [data-k="idioma"]')) U.modal(ajustes()); } // solo si Ajustes sigue abierto
+  ac('abrirAjustes', function () {
+    U.modal(ajustes());
+    // El precio llega de la tienda (en la moneda del país): se pide una vez y se redibuja
+    if (IA.publicacion.compraDisponible() && !IA.publicacion.tieneCompleta() && !IA.publicacion.precioGuardado()) IA.publicacion.precio().then(function (p) { if (p) reabrirAjustes(); });
+  });
+  ac('comprarCompleta', function () {
+    IA.publicacion.comprar().then(function (r) {
+      const txt = { ok: '¡Listo! Ya no verás el anuncio al abrir. Gracias por apoyar el juego.', pendiente: 'El pago está pendiente: cuando se confirme, el anuncio desaparece.',
+        cancelada: 'Compra cancelada.', error: 'No se pudo completar la compra. Revisa tu conexión e inténtalo otra vez.' }[r];
+      U.aviso(txt, r === 'error' ? 'mal' : '');
+      reabrirAjustes();
+    });
+  });
+  ac('restaurarCompras', function () {
+    IA.publicacion.restaurar().then(function (si) {
+      U.aviso(si ? 'Compra restaurada: ya no verás el anuncio al abrir.' : 'No encontramos compras de esta cuenta.', si ? '' : 'mal');
+      reabrirAjustes();
+    });
+  });
   ac('privacidadAnuncios', function () { IA.publicacion.abrirPrivacidad(); }); // V31: consentimiento de Google
   ac('ajuste', function (v, el) {
     const k = el.getAttribute('data-k');

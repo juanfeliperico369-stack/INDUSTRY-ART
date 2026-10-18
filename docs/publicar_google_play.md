@@ -65,18 +65,29 @@ Tarda unos 6 minutos. Al final, en la misma página, descarga **industry-art-aab
 
 ## 5. Crear la app en Play Console
 
-1. **Crear app** › nombre «INDUSTRY ART» › Juego › Gratis o De pago.
-   - Ojo: una app gratis **no** puede volverse de pago después. Una de pago sí puede volverse gratis.
+1. **Crear app** › nombre «INDUSTRY ART» › Juego › **Gratis** (decisión de la V32: gratis con un anuncio al abrir, más la compra «Versión completa» que solo quita el anuncio).
 2. **Ficha de la tienda**: copia los textos y las imágenes de [`tienda.md`](tienda.md) y [`tienda/`](tienda/).
 3. **Política de privacidad**: Google pide una dirección pública. GitHub Pages **no funciona en repositorios privados** con la cuenta gratuita, así que tienes dos caminos:
    - **Fácil (recomendado):** crea un repositorio **público** nuevo, por ejemplo `industry-art-web`, sube ahí `docs/privacidad.html` (y si quieres el HTML del juego como `index.html`), y en ese repositorio activa Settings › Pages › Deploy from a branch › `main`. La dirección queda así: `https://juanfeliperico369-stack.github.io/industry-art-web/privacidad.html`.
    - Con GitHub Pro (o haciendo público este repositorio): Settings › Pages › Source: GitHub Actions, y corre a mano la receta «Versión web».
 4. **Contenido de la app** (menú «Política»):
-   - **Anuncios**: «Sí, contiene anuncios» (gratis) o «No» (pago).
+   - **Anuncios**: «Sí, contiene anuncios».
    - **Clasificación de contenido**: categoría Juego. Responde con la verdad: violencia de ficción, temas sexuales sugeridos sin desnudos explícitos (género Erótico), sin apuestas con dinero real, sin chat. Debería salir 16+.
    - **Público objetivo**: 16 años o más. No marques «atrae a niños».
    - **Seguridad de los datos** (solo versión gratis): «Recopila datos: sí» › *Identificadores del dispositivo u otros (ID de publicidad)* › propósito *Publicidad*, compartido con Google AdMob, cifrado en tránsito, no se puede pedir que se borre desde la app. Las partidas no salen del teléfono. En la versión de pago: «No recopila datos».
    - **ID de publicidad**: «Sí, usa el ID de publicidad» (gratis).
+
+## 5 b. La compra «Versión completa»
+
+1. **Perfil de pagos**: Play Console › Configuración › Perfil de pagos. Llena tus datos y una cuenta bancaria. Sin esto Google no deja vender.
+2. **Monetizar › Productos › Productos integrados en la aplicación** › Crear producto:
+   - ID del producto: **`version_completa`** (tiene que ser exacto, porque el juego lo busca con ese nombre).
+   - Nombre: «Versión completa». Descripción: «Quita el anuncio al abrir. El juego es el mismo para todos.»
+   - Precio: el que quieras (sugerencia: 2,99 USD). Google lo convierte a cada país, y el juego muestra el precio que manda la tienda.
+   - Actívalo.
+3. **Probar sin pagar**: Configuración › **Pruebas de licencias** › agrega tu Gmail y los de tus probadores. Con esas cuentas, la compra sale como «prueba» y no cobra.
+
+Cómo funciona dentro del juego: Ajustes › «Quitar el anuncio» y «Restaurar compras». Cada vez que se abre la app, el juego le pregunta a Google Play si esa cuenta compró. Si hubo un reembolso, el anuncio vuelve. Sin internet vale la última respuesta.
 
 ## 6. Prueba cerrada (12 personas × 14 días)
 
@@ -95,7 +106,8 @@ Si encuentras errores durante la prueba, arregla, sube una versión nueva al rep
 ## Cosas que puedes cambiar
 
 - **Identificador de la app**: `com.industryart.juego` (en `app/capacitor.config.json`, `app/android/app/build.gradle` y `app/ios/App/App.xcodeproj/project.pbxproj`; en iPhone también en `.github/workflows/ios.yml`). Cámbialo **antes** de la primera subida; después ya no se puede.
-- **Gratis o de pago**: el modo de la receta (paso 4). En modo `pago` no se carga ningún anuncio.
+- **Producto de la compra**: `compra` en `app/config.json` (por defecto `version_completa`); tiene que coincidir con el ID que crees en Google Play y en la App Store.
+- **Modo `pago`** (sin anuncios ni compras): sigue disponible en la receta (paso 4), pero la decisión de la V32 es `gratis`.
 - **Anuncio al abrir**: `anuncioAlAbrir` en `app/config.json`.
 
 ## Probar la app en tu teléfono sin la tienda

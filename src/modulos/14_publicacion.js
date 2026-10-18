@@ -3,12 +3,14 @@
 // versión gratuita o de pago según IA_CONFIG (lo pone tools/preparar_app.py al armar la app) y créditos.
 // V31 · iPhone y PC: la misma app en iOS (con el permiso de rastreo de Apple) y en Windows, macOS y Linux (Electron, sin anuncios).
 // Antes del anuncio se pide el consentimiento que exige Google en Europa (UMP); en Ajustes queda «Privacidad de los anuncios».
-// En el navegador y en PC no hay anuncios ni restricciones.
+// V32 · Compra única «Versión completa» (Google Play y App Store) que solo quita el anuncio; el juego es el mismo para todos.
+// La compra se consulta a la tienda cada vez que se abre la app (un reembolso la quita); sin internet vale la última respuesta.
+// En el navegador y en PC no hay anuncios ni compras.
 IA.publicacion = (function () {
   'use strict';
   // Identificadores de prueba de Google (no pagan); los reales llegan por app/config.json
   const BASE = {
-    modo: 'gratis', anuncioAlAbrir: true,
+    modo: 'gratis', anuncioAlAbrir: true, compra: 'version_completa',
     admob: {
       prueba: true,
       android: { app: 'ca-app-pub-3940256099942544~3347511713', intersticial: 'ca-app-pub-3940256099942544/1033173712' },
@@ -17,6 +19,10 @@ IA.publicacion = (function () {
   };
   const NOMBRES = { android: 'Android', ios: 'iPhone', pc: 'PC', web: 'Web' };
   let privacidad = false; // el usuario puede cambiar su consentimiento (lo dice Google al pedirlo)
+  const CLAVE_COMPRA = 'industryart_completa';
+  let completa = leerCompra(), precioTexto = '';
+  function leerCompra() { try { return localStorage.getItem(CLAVE_COMPRA) === 'si'; } catch (e) { return false; } }
+  function anotarCompra(si) { completa = !!si; try { if (si) localStorage.setItem(CLAVE_COMPRA, 'si'); else localStorage.removeItem(CLAVE_COMPRA); } catch (e) { /* sin almacenamiento: vale la sesión */ } }
   function config() {
     const c = (typeof window !== 'undefined' && window.IA_CONFIG) || {}, a = c.admob || {};
     return Object.assign({}, BASE, c, { admob: { prueba: a.prueba !== undefined ? a.prueba : BASE.admob.prueba,
@@ -45,10 +51,51 @@ IA.publicacion = (function () {
     if (plataforma() !== 'ios') return Promise.resolve();
     return ad.trackingAuthorizationStatus().then(function (r) { return r.status === 'notDetermined' ? ad.requestTrackingAuthorization() : null; });
   }
+  // ---- Compra «Versión completa» (V32) ----
+  function tienda() { return enApp() && window.Capacitor.Plugins ? window.Capacitor.Plugins.NativePurchases || null : null; }
+  function conTiempo(p, ms) { return Promise.race([p, new Promise(function (_, no) { setTimeout(function () { no(new Error('tiempo')); }, ms); })]); }
+  // Vale solo la compra de este producto ya pagada (en Android, estado «1»; un pago pendiente todavía no cuenta)
+  function valida(t) { return !!t && t.productIdentifier === config().compra && (plataforma() !== 'android' || String(t.purchaseState) === '1'); }
+  // Pregunta a Google Play o a la App Store qué compró esta cuenta; si la tienda no responde, queda lo último que se supo
+  function revisarCompra() {
+    const st = tienda();
+    if (!st || config().modo === 'pago') return Promise.resolve(completa);
+    return conTiempo(st.getPurchases({ productType: 'inapp', onlyCurrentEntitlements: true }), 4000)
+      .then(function (r) { anotarCompra((r.purchases || []).some(valida)); return completa; })
+      .catch(function () { return completa; });
+  }
+  function compraDisponible() { return !!tienda() && config().modo !== 'pago'; }
+  function tieneCompleta() { return config().modo === 'pago' || completa; }
+  function precio() {
+    const st = tienda();
+    if (!st) return Promise.resolve('');
+    return conTiempo(st.getProduct({ productIdentifier: config().compra, productType: 'inapp' }), 4000)
+      .then(function (r) { precioTexto = (r.product && r.product.priceString) || ''; return precioTexto; }).catch(function () { return precioTexto; });
+  }
+  function precioGuardado() { return precioTexto; }
+  // Devuelve 'ok', 'pendiente', 'cancelada' o 'error'
+  function comprar() {
+    const st = tienda();
+    if (!st) return Promise.resolve('error');
+    return st.purchaseProduct({ productIdentifier: config().compra, productType: 'inapp' })
+      .then(function (t) {
+        if (valida(t)) { anotarCompra(true); return 'ok'; }
+        return t && String(t.purchaseState) === '0' ? 'pendiente' : 'error';
+      })
+      .catch(function (e) { return /cancel/i.test(String(e && (e.code || e.message))) ? 'cancelada' : 'error'; });
+  }
+  function restaurar() {
+    const st = tienda();
+    if (!st) return Promise.resolve(false);
+    return st.restorePurchases().catch(function () {}).then(revisarCompra);
+  }
   // Un solo anuncio al abrir (versión gratuita); si algo falla, el juego sigue sin esperar
   function alAbrir() {
+    return revisarCompra().then(anuncio);
+  }
+  function anuncio() {
     const c = config(), ad = plugin(), ids = c.admob[plataforma()];
-    if (!ad || !ids || c.modo === 'pago' || !c.anuncioAlAbrir) return Promise.resolve(false);
+    if (!ad || !ids || c.modo === 'pago' || !c.anuncioAlAbrir || completa) return Promise.resolve(false);
     return ad.initialize({ initializeForTesting: !!c.admob.prueba })
       .then(function () { return consentir(ad); })
       .then(function (puede) {
@@ -65,5 +112,7 @@ IA.publicacion = (function () {
   const CREDITOS = ['Ideado y creado por Felipe', 'Programado junto a Claude, de Anthropic'];
   function creditos() { return CREDITOS.slice(); }
   return { config: config, enApp: enApp, plataforma: plataforma, nombrePlataforma: nombrePlataforma, alAbrir: alAbrir,
-    privacidadDisponible: privacidadDisponible, abrirPrivacidad: abrirPrivacidad, creditos: creditos };
+    privacidadDisponible: privacidadDisponible, abrirPrivacidad: abrirPrivacidad, creditos: creditos,
+    revisarCompra: revisarCompra, compraDisponible: compraDisponible, tieneCompleta: tieneCompleta, precio: precio, precioGuardado: precioGuardado,
+    comprar: comprar, restaurar: restaurar };
 })();

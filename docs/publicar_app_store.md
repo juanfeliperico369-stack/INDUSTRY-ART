@@ -64,7 +64,12 @@ En App Store Connect › TestFlight agrega tu correo como probador interno, inst
 ## 8. Ficha, privacidad y revisión
 
 - **Ficha**: textos en [`tienda.md`](tienda.md) (sección App Store). Capturas: `docs/tienda/iphone_es_*.jpg` e `iphone_en_*.jpg` (1320 × 2868, pantalla de 6,9 pulgadas). La app es solo para iPhone, así que no pide capturas de iPad.
-- **Categoría**: Juegos › Simulación. **Precio**: gratis o el nivel de precio que elijas.
+- **Categoría**: Juegos › Simulación. **Precio**: gratis.
+- **Compra «Versión completa»** (solo quita el anuncio):
+  1. App Store Connect › **Negocios** › firma el **Acuerdo de apps de pago** y llena los datos bancarios y de impuestos. Sin esto Apple no deja vender.
+  2. En tu app › **Compras dentro de la app** › **+** › tipo **No consumible**. ID del producto: **`version_completa`** (exacto). Nombre de referencia: «Versión completa». Elige el precio (sugerencia: 2,99 USD) y escribe el nombre y la descripción en español e inglés.
+  3. Sube una captura de Ajustes con el botón «Quitar el anuncio» para la revisión, y en la versión que envíes marca la compra para revisarla junto con la app.
+  4. En TestFlight, las compras son de prueba y no cobran.
 - **Privacidad de la app** (versión gratis), según la guía de Google para AdMob: *Ubicación aproximada*, *Identificadores › ID del dispositivo*, *Datos de uso › Interacción con el producto y Datos de publicidad*, *Diagnóstico*. Todos con el uso «Publicidad de terceros», no vinculados a tu identidad. El ID del dispositivo sí se usa para **rastreo**. En la versión de pago: «No se recopilan datos».
 - **URL de privacidad**: la misma de Google Play (ver la guía de Google Play, paso 5).
 - **Clasificación por edad**: responde con la verdad: violencia de ficción y temas sexuales sugeridos poco frecuentes, sin desnudos, sin apuestas, sin chat. Debería salir 16+.
