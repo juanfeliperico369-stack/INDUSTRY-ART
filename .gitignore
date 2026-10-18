@@ -19,3 +19,4 @@ app/escritorio/dist/
 dist/
 app/android/app/src/completa/assets/public/index.html
 app/android/app/src/anuncios/assets/public/index.html
+app/android/.kotlin/
