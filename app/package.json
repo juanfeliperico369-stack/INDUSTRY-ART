@@ -1,16 +1,17 @@
 {
   "name": "industry-art",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "INDUSTRY ART para Android (Capacitor)",
+  "description": "INDUSTRY ART para Android e iPhone (Capacitor)",
   "scripts": {
     "preparar": "python3 ../tools/preparar_app.py",
-    "sync": "npx cap sync android"
+    "sync": "npx cap sync"
   },
   "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
     "@capacitor/android": "^8.0.0",
     "@capacitor/core": "^8.0.0",
-    "@capacitor-community/admob": "^8.0.0"
+    "@capacitor/ios": "^8.5.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0"

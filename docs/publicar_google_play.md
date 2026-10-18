@@ -1,12 +1,14 @@
 # Cómo publicar INDUSTRY ART en Google Play
 
+Otras tiendas: [iPhone (App Store)](publicar_app_store.md) · [PC (Windows, macOS y Linux)](publicar_pc.md).
+
 Guía paso a paso. Lo que está **en el repositorio** ya funciona: la app de Android, los íconos, las imágenes de la tienda y la receta que arma la app en la nube. Lo que sigue solo lo puedes hacer **tú**, porque son tus cuentas y tu llave.
 
 Necesitas Java (keytool) solo para el paso 2. No hace falta Android Studio.
 
 ## 1. Cuentas
 
-1. **GitHub**: ya la tienes (`juanfeliperico369-stack`). Une la rama de trabajo con `main` para que la receta corra sola en cada versión nueva, o córrela a mano (paso 4).
+1. **GitHub**: ya la tienes (`juanfeliperico369-stack`). La receta de Android corre sola cada vez que llega una versión nueva a la rama principal del repositorio (`claude/industry-art-v16-analysis-dbf0iv`) o a `main`, y también a mano (paso 4).
 2. **Google Play Console**: <https://play.google.com/console>. Pago único de 25 USD y verificación de identidad.
    - Nombre del desarrollador: el tuyo o el de tu estudio. **No uses «Claude».**
    - Las cuentas personales nuevas deben hacer una **prueba cerrada con 12 personas durante 14 días** antes de publicar (paso 6).
@@ -15,6 +17,7 @@ Necesitas Java (keytool) solo para el paso 2. No hace falta Android Studio.
    - del intersticial: `ca-app-pub-XXXXXXXX/ZZZZZZZZ`
 
    Mientras no los pongas, la app usa los anuncios **de prueba** de Google, que no pagan, pero sirven para la prueba cerrada.
+   - En AdMob › **Privacidad y mensajes** crea el mensaje **RGPD** (Europa) y, si sacas la app de iPhone, el de **IDFA**. La app ya muestra ese formulario de consentimiento antes del anuncio, y en Ajustes aparece «Privacidad de los anuncios» para cambiarlo. Sin ese mensaje, en Europa no se muestran anuncios.
 
 ## 2. La llave de firma (fuera de GitHub)
 
@@ -65,7 +68,9 @@ Tarda unos 6 minutos. Al final, en la misma página, descarga **industry-art-aab
 1. **Crear app** › nombre «INDUSTRY ART» › Juego › Gratis o De pago.
    - Ojo: una app gratis **no** puede volverse de pago después. Una de pago sí puede volverse gratis.
 2. **Ficha de la tienda**: copia los textos y las imágenes de [`tienda.md`](tienda.md) y [`tienda/`](tienda/).
-3. **Política de privacidad**: activa GitHub Pages (Settings › Pages › Source: GitHub Actions) y corre la receta «Versión web». La dirección queda así: `https://juanfeliperico369-stack.github.io/INDUSTRY-ART/privacidad.html`. De paso, el juego queda jugable en `…/INDUSTRY-ART/`.
+3. **Política de privacidad**: Google pide una dirección pública. GitHub Pages **no funciona en repositorios privados** con la cuenta gratuita, así que tienes dos caminos:
+   - **Fácil (recomendado):** crea un repositorio **público** nuevo, por ejemplo `industry-art-web`, sube ahí `docs/privacidad.html` (y si quieres el HTML del juego como `index.html`), y en ese repositorio activa Settings › Pages › Deploy from a branch › `main`. La dirección queda así: `https://juanfeliperico369-stack.github.io/industry-art-web/privacidad.html`.
+   - Con GitHub Pro (o haciendo público este repositorio): Settings › Pages › Source: GitHub Actions, y corre a mano la receta «Versión web».
 4. **Contenido de la app** (menú «Política»):
    - **Anuncios**: «Sí, contiene anuncios» (gratis) o «No» (pago).
    - **Clasificación de contenido**: categoría Juego. Responde con la verdad: violencia de ficción, temas sexuales sugeridos sin desnudos explícitos (género Erótico), sin apuestas con dinero real, sin chat. Debería salir 16+.
@@ -89,7 +94,7 @@ Si encuentras errores durante la prueba, arregla, sube una versión nueva al rep
 
 ## Cosas que puedes cambiar
 
-- **Identificador de la app**: `com.industryart.juego` (en `app/capacitor.config.json` y `app/android/app/build.gradle`). Cámbialo **antes** de la primera subida; después ya no se puede.
+- **Identificador de la app**: `com.industryart.juego` (en `app/capacitor.config.json`, `app/android/app/build.gradle` y `app/ios/App/App.xcodeproj/project.pbxproj`; en iPhone también en `.github/workflows/ios.yml`). Cámbialo **antes** de la primera subida; después ya no se puede.
 - **Gratis o de pago**: el modo de la receta (paso 4). En modo `pago` no se carga ningún anuncio.
 - **Anuncio al abrir**: `anuncioAlAbrir` en `app/config.json`.
 

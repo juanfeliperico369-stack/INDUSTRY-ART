@@ -1,0 +1,131 @@
+# Arma INDUSTRY ART para iPhone en un Mac de GitHub. Solo corre a mano (Actions › App de iPhone › Run workflow),
+# porque en un repositorio privado cada minuto de Mac gasta 10 de los minutos gratis del mes.
+# Sin los secretos de Apple solo comprueba que compila (simulador). Con ellos firma el .ipa y, si está la clave de la API,
+# lo sube a TestFlight. Secretos (Settings › Secrets and variables › Actions):
+#   IOS_CERT_P12_BASE64 y IOS_CERT_PASSWORD   certificado «Apple Distribution» (.p12) en base64 y su contraseña
+#   IOS_PROFILE_BASE64                         perfil de aprovisionamiento «App Store» (.mobileprovision) en base64
+#   IOS_TEAM_ID                                el Team ID de tu cuenta de Apple Developer
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64   clave de la API de App Store Connect (para subir a TestFlight)
+#   ADMOB_IOS_APP_ID y ADMOB_IOS_INTERSTITIAL_ID    (opcionales) tus identificadores reales de AdMob para iPhone
+name: App de iPhone
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: 'gratis (un anuncio al abrir) o pago (sin anuncios)'
+        default: 'gratis'
+jobs:
+  ios:
+    runs-on: macos-26
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: xcodebuild -version
+      - name: Configuración de la app (modo y AdMob)
+        env:
+          MODO: ${{ github.event.inputs.modo || 'gratis' }}
+          ADMOB_APP_ID: ${{ secrets.ADMOB_IOS_APP_ID }}
+          ADMOB_INTERSTITIAL_ID: ${{ secrets.ADMOB_IOS_INTERSTITIAL_ID }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          c = json.load(open('app/config.json'))
+          c['modo'] = os.environ.get('MODO') or 'gratis'
+          if os.environ.get('ADMOB_APP_ID') and os.environ.get('ADMOB_INTERSTITIAL_ID'):
+              c['admob']['ios'] = {'app': os.environ['ADMOB_APP_ID'], 'intersticial': os.environ['ADMOB_INTERSTITIAL_ID']}
+              c['admob']['prueba'] = False
+          json.dump(c, open('app/config.json', 'w'), indent=2)
+          PY
+      - name: Preparar la app
+        working-directory: app
+        run: |
+          npm ci || npm install
+          python3 ../tools/preparar_app.py
+          npx cap sync ios
+      - name: ¿Hay firma de Apple?
+        id: firma
+        env: { P12: '${{ secrets.IOS_CERT_P12_BASE64 }}' }
+        run: |
+          if [ -n "$P12" ]; then echo "si=1" >> "$GITHUB_OUTPUT"
+          else echo "::warning::Sin los secretos de Apple: solo se comprueba que la app compila (simulador)."; fi
+      - name: Compilar para el simulador (sin firma)
+        if: steps.firma.outputs.si != '1'
+        working-directory: app/ios/App
+        run: |
+          set -o pipefail
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build | tail -n 30
+      - name: Certificado y perfil
+        if: steps.firma.outputs.si == '1'
+        env:
+          P12: ${{ secrets.IOS_CERT_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+          PERFIL: ${{ secrets.IOS_PROFILE_BASE64 }}
+          TEAM: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          KC="$RUNNER_TEMP/firma.keychain-db"; KCP="$(openssl rand -hex 16)"
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          echo "$PERFIL" | base64 --decode > "$RUNNER_TEMP/perfil.mobileprovision"
+          security create-keychain -p "$KCP" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KCP" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KC"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KCP" "$KC" > /dev/null
+          security list-keychain -d user -s "$KC" login.keychain-db
+          security cms -D -i "$RUNNER_TEMP/perfil.mobileprovision" > "$RUNNER_TEMP/perfil.plist"
+          UUID=$(plutil -extract UUID raw "$RUNNER_TEMP/perfil.plist"); NOMBRE=$(plutil -extract Name raw "$RUNNER_TEMP/perfil.plist")
+          for D in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$D"; cp "$RUNNER_TEMP/perfil.mobileprovision" "$D/$UUID.mobileprovision"; done
+          # Firma manual solo para la app (los paquetes de Swift no llevan perfil)
+          PERFIL_NOMBRE="$NOMBRE" python3 - <<'PY'
+          import os, re
+          p = 'app/ios/App/App.xcodeproj/project.pbxproj'; s = open(p).read()
+          def firmar(m):
+              b = m.group(0)
+              b = b.replace('CODE_SIGN_STYLE = Automatic;', 'CODE_SIGN_STYLE = Manual;\n\t\t\t\tDEVELOPMENT_TEAM = %s;\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "%s";\n\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";' % (os.environ['TEAM'], os.environ['PERFIL_NOMBRE']))
+              return b
+          s = re.sub(r'buildSettings = \{[^{}]*PRODUCT_BUNDLE_IDENTIFIER[^{}]*\}', firmar, s)
+          open(p, 'w').write(s)
+          PY
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key><dict><key>com.industryart.juego</key><string>$NOMBRE</string></dict>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          EOF
+      - name: Archivar y exportar el .ipa
+        if: steps.firma.outputs.si == '1'
+        working-directory: app/ios/App
+        run: |
+          set -o pipefail
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" CURRENT_PROJECT_VERSION=${{ github.run_number }} archive | tail -n 30
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportPath "$RUNNER_TEMP/ipa" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" | tail -n 20
+          ls -la "$RUNNER_TEMP/ipa"
+      - name: Subir a TestFlight
+        if: steps.firma.outputs.si == '1' && env.ASC_KEY_ID != ''
+        env:
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo "$ASC_KEY_P8" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8"
+          xcrun altool --upload-app -t ios -f "$RUNNER_TEMP"/ipa/*.ipa --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+      - uses: actions/upload-artifact@v4
+        if: steps.firma.outputs.si == '1'
+        with:
+          name: industry-art-ipa
+          path: ${{ runner.temp }}/ipa/*.ipa
+      - name: Borrar el llavero
+        if: always() && steps.firma.outputs.si == '1'
+        run: security delete-keychain "$RUNNER_TEMP/firma.keychain-db" || true

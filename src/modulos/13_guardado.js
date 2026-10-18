@@ -73,6 +73,7 @@ IA.guardado = (function () {
   // V21 → V22: premios, festivales, crítica y prensa (todo empieza vacío)
   MIGRACIONES[22] = function (S) { ['galas', 'palmares', 'revista', 'cartas', 'hitos'].forEach(function (k) { if (!S[k]) S[k] = []; }); if (!S.fest) S.fest = {}; };
   MIGRACIONES[30] = function () { /* 1.0: sin datos nuevos */ };
+  MIGRACIONES[31] = function () { /* 1.1 (iPhone y PC): sin datos nuevos */ };
   MIGRACIONES[29] = function () { /* V29: errores e inglés, sin datos nuevos */ };
   MIGRACIONES[28] = function () { /* V28: interfaz y rendimiento, sin datos nuevos */ };
   MIGRACIONES[27] = function () { /* V27: solo balance, sin datos nuevos */ };

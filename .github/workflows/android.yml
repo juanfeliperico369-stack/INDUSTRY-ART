@@ -2,12 +2,12 @@
 # Secretos que tú pones en GitHub (Settings › Secrets and variables › Actions):
 #   KEYSTORE_BASE64  la llave de firma (.jks) en base64      KEYSTORE_PASSWORD  su contraseña
 #   KEY_ALIAS        el alias de la llave                    KEY_PASSWORD       la contraseña de la llave
-#   ADMOB_APP_ID y ADMOB_INTERSTITIAL_ID (opcionales): tus identificadores reales de AdMob
+#   ADMOB_APP_ID y ADMOB_INTERSTITIAL_ID (opcionales): tus identificadores reales de AdMob para Android
 name: App de Android
 on:
   push:
-    branches: [main]
-    paths: ['INDUSTRY_ART_v*.html', 'app/**', 'tools/preparar_app.py', '.github/workflows/android.yml']
+    branches: [main, claude/industry-art-v16-analysis-dbf0iv]
+    paths: ['INDUSTRY_ART_v*.html', 'app/config.json', 'app/package.json', 'app/android/**', 'tools/preparar_app.py', '.github/workflows/android.yml']
   workflow_dispatch:
     inputs:
       modo:
@@ -34,7 +34,8 @@ jobs:
           c = json.load(open('app/config.json'))
           c['modo'] = os.environ.get('MODO') or 'gratis'
           if os.environ.get('ADMOB_APP_ID') and os.environ.get('ADMOB_INTERSTITIAL_ID'):
-              c['admob'] = {'app': os.environ['ADMOB_APP_ID'], 'intersticial': os.environ['ADMOB_INTERSTITIAL_ID'], 'prueba': False}
+              c['admob']['android'] = {'app': os.environ['ADMOB_APP_ID'], 'intersticial': os.environ['ADMOB_INTERSTITIAL_ID']}
+              c['admob']['prueba'] = False
           json.dump(c, open('app/config.json', 'w'), indent=2)
           PY
       - name: Preparar la app

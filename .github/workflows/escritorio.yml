@@ -1,0 +1,70 @@
+# Arma INDUSTRY ART para PC: instalador y versión portátil de Windows, .dmg de macOS y AppImage de Linux.
+# Corre a mano (Actions › App de PC › Run workflow): en repositorios privados el Mac gasta 10 minutos por minuto
+# y Windows 2. Sin certificados las apps salen sin firma: Windows avisa «editor desconocido» y macOS pide abrirla
+# con clic derecho › Abrir. Secretos opcionales para firmar:
+#   CSC_LINK y CSC_KEY_PASSWORD            certificado de firma (.p12 en base64) para Windows o macOS
+#   APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID   para notarizar en macOS (cuenta de Apple Developer)
+name: App de PC
+on:
+  workflow_dispatch:
+    inputs:
+      sistemas:
+        description: 'todos, windows, mac o linux'
+        default: 'todos'
+jobs:
+  pc:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { nombre: windows, so: windows-latest, args: --win }
+          - { nombre: mac, so: macos-latest, args: --mac }
+          - { nombre: linux, so: ubuntu-latest, args: --linux }
+    runs-on: ${{ matrix.so }}
+    env:
+      CSC_LINK: ${{ secrets.CSC_LINK }}
+    steps:
+      - name: ¿Toca este sistema?
+        id: toca
+        shell: bash
+        run: |
+          S="${{ github.event.inputs.sistemas || 'todos' }}"
+          if [ "$S" = "todos" ] || [ "$S" = "${{ matrix.nombre }}" ]; then echo "si=1" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.toca.outputs.si == '1'
+      - uses: actions/setup-node@v4
+        if: steps.toca.outputs.si == '1'
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        if: steps.toca.outputs.si == '1'
+        with: { python-version: '3.12' }
+      - name: Preparar el juego
+        if: steps.toca.outputs.si == '1'
+        run: python tools/preparar_app.py
+      - name: Armar la app
+        if: steps.toca.outputs.si == '1'
+        working-directory: app/escritorio
+        shell: bash
+        env:
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          npm ci || npm install
+          EXTRA=""
+          if [ -z "$CSC_LINK" ]; then
+            unset CSC_LINK; export CSC_IDENTITY_AUTO_DISCOVERY=false
+            # Sin certificado de Apple: firma «ad hoc» para que el .dmg abra en Mac con chip Apple
+            [ "${{ matrix.nombre }}" = "mac" ] && EXTRA="-c.mac.identity=- -c.mac.hardenedRuntime=false"
+          fi
+          npx electron-builder ${{ matrix.args }} --publish never $EXTRA
+      - uses: actions/upload-artifact@v4
+        if: steps.toca.outputs.si == '1'
+        with:
+          name: industry-art-pc-${{ matrix.nombre }}
+          path: |
+            app/escritorio/dist/*.exe
+            app/escritorio/dist/*.dmg
+            app/escritorio/dist/*.AppImage
+          if-no-files-found: error

@@ -1,4 +1,6 @@
-# Ficha de INDUSTRY ART en Google Play
+# Fichas de INDUSTRY ART en las tiendas
+
+Google Play (abajo), [App Store](#app-store-iphone) y [PC](#pc-itchio-y-otras).
 
 Textos listos para copiar y pegar en Play Console › Presencia en la tienda › Ficha principal.
 Agrega el inglés como segundo idioma (Agregar traducción › English (United States)).
@@ -10,9 +12,9 @@ Agrega el inglés como segundo idioma (Agregar traducción › English (United S
 | Nombre de la app (≤30) | INDUSTRY ART |
 | Categoría | Juegos › Simulación |
 | Etiquetas | Simulación, Gestión, Un jugador, Sin conexión |
-| Nombre del desarrollador | El tuyo (por ejemplo «Felipe Rico» o un nombre de estudio). **No uses «Claude».** |
+| Nombre del desarrollador | Tu nombre o un nombre de estudio. **No uses «Claude».** |
 | Correo de contacto | El que quieras mostrar en público |
-| Política de privacidad | `https://<tu-usuario>.github.io/INDUSTRY-ART/privacidad.html` |
+| Política de privacidad | La pública que armes (ver `publicar_google_play.md`, paso 5) |
 | Clasificación esperada | 16+ (PEGI 16 / Teen–Mature según el cuestionario) |
 | Precio | Gratis con un anuncio al abrir (ahora) · o de pago sin anuncios (por decidir) |
 
@@ -80,3 +82,29 @@ Conceived and created by Felipe. Programmed together with Claude, by Anthropic.
 | `captura_en_1.png` … `captura_en_6.png` | Capturas de teléfono, ficha en inglés (1080 × 1920) |
 
 Para rehacerlas después de cambiar el juego: `node tools/imagenes_app.js`.
+
+## App Store (iPhone)
+
+Mismas descripciones largas de arriba (español e inglés). Lo que cambia:
+
+| Campo | Español | English |
+|---|---|---|
+| Nombre (≤30) | INDUSTRY ART | INDUSTRY ART |
+| Subtítulo (≤30) | Tu estudio de cine, desde 1895 | Your film studio since 1895 |
+| Palabras clave (≤100) | cine,estudio,películas,simulador,gestión,magnate,hollywood,productora,tycoon,estrategia | movie,film,studio,tycoon,simulator,management,hollywood,producer,cinema,strategy |
+| Texto promocional (≤170) | Dirige un estudio de cine durante más de un siglo: talentos, rodajes, estrenos, premios y rivales. Sin conexión. | Run a film studio for more than a century: talent, shoots, releases, awards and rivals. Fully offline. |
+| Categoría | Juegos › Simulación (secundaria: Estrategia) | |
+| Clasificación esperada | 16+ | |
+
+Capturas: `iphone_es_1.jpg` … `iphone_es_6.jpg` y `iphone_en_1.jpg` … `iphone_en_6.jpg` (1320 × 2868, pantalla de 6,9 pulgadas). El ícono de 1024 ya va dentro de la app.
+
+## PC (itch.io y otras)
+
+| Campo | Valor |
+|---|---|
+| Título | INDUSTRY ART |
+| Frase corta | Dirige tu propio estudio de cine desde 1895 y conviértelo en un imperio. / Run your own film studio from 1895 and grow it into an entertainment empire. |
+| Descripción | La larga de arriba, más: «Versión de PC sin anuncios. Windows 10/11, macOS 12+ y Linux de 64 bits.» |
+| Género / etiquetas | Simulation · management, tycoon, singleplayer, offline, movies |
+| Capturas | `pc_es_1.png` … `pc_es_3.png` (1920 × 1080) y las de teléfono si quieres |
+| Ícono / portada | `icono_512.png` y `destacada_1024x500.png` |

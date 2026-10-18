@@ -11,3 +11,6 @@ app/android/build/
 app/android/.gradle/
 *.jks
 *.keystore
+app/escritorio/node_modules/
+app/escritorio/www/
+app/escritorio/dist/

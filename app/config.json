@@ -2,8 +2,8 @@
   "modo": "gratis",
   "anuncioAlAbrir": true,
   "admob": {
-    "app": "ca-app-pub-3940256099942544~3347511713",
-    "intersticial": "ca-app-pub-3940256099942544/1033173712",
-    "prueba": true
+    "prueba": true,
+    "android": { "app": "ca-app-pub-3940256099942544~3347511713", "intersticial": "ca-app-pub-3940256099942544/1033173712" },
+    "ios": { "app": "ca-app-pub-3940256099942544~1458002511", "intersticial": "ca-app-pub-3940256099942544/4411468910" }
   }
 }

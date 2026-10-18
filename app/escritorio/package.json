@@ -1,0 +1,30 @@
+{
+  "name": "industry-art-pc",
+  "productName": "INDUSTRY ART",
+  "version": "1.1.0",
+  "description": "INDUSTRY ART para PC (Windows, macOS y Linux)",
+  "author": "Felipe",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "jugar": "electron .",
+    "armar": "electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.industryart.juego",
+    "productName": "INDUSTRY ART",
+    "copyright": "Ideado y creado por Felipe",
+    "publish": null,
+    "files": ["main.js", "www/index.html", "build/icon.png"],
+    "directories": { "output": "dist", "buildResources": "build" },
+    "win": { "target": ["nsis", "portable"] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "artifactName": "INDUSTRY-ART-${version}-Windows-instalador.${ext}" },
+    "portable": { "artifactName": "INDUSTRY-ART-${version}-Windows-portable.${ext}" },
+    "mac": { "target": [{ "target": "dmg", "arch": ["universal"] }], "category": "public.app-category.simulation-games", "artifactName": "INDUSTRY-ART-${version}-macOS.${ext}" },
+    "linux": { "target": ["AppImage"], "category": "Game", "artifactName": "INDUSTRY-ART-${version}-Linux.${ext}" }
+  }
+}

@@ -1,9 +1,7 @@
-# Publica gratis la versión web (GitHub Pages) con el HTML más nuevo del juego.
+# Publica la versión web (GitHub Pages) con el HTML más nuevo del juego y la política de privacidad.
+# Ojo: GitHub Pages no funciona en repositorios privados con la cuenta gratuita (ver docs/publicar_google_play.md).
 name: Versión web
 on:
-  push:
-    branches: [main]
-    paths: ['INDUSTRY_ART_v*.html', 'docs/privacidad.html']
   workflow_dispatch:
 permissions: { contents: read, pages: write, id-token: write }
 jobs:

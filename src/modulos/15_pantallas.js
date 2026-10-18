@@ -677,10 +677,12 @@ IA.pantallas = (function () {
       '<label class="campo"><span>' + t('aj_orientacion') + '</span>' + sel('orientacion', [['auto', t('ori_auto')], ['vertical', t('ori_vertical')], ['horizontal', t('ori_horizontal')]]) + '</label>' +
       '<label class="campo"><span>' + t('gua_autoguardado') + '</span>' + sel('autoguardado', [['mes', t('auto_mes')], ['anio', t('auto_anio')], ['no', t('auto_no')]]) + '</label>' +
       sw('sonido', t('aj_sonido')) + sw('movimiento', t('aj_movimiento')) + sw('vibracion', t('aj_vibracion')) + sw('dineroHoy', t('dinero_hoy')) + sw('musica', 'Música de fondo') + sw('dalton', 'Colores para daltonismo') +
-      '<p></p><div class="col">' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button><button class="btn" data-a="laboratorio">' + t('aj_laboratorio') + '</button><button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') + '</div>' +
-      '<p class="nota">' + t('juego') + ' ' + IA.VERSION + ' · ' + t('creditos') + '</p>';
+      '<p></p><div class="col">' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button><button class="btn" data-a="laboratorio">' + t('aj_laboratorio') + '</button><button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') +
+      (IA.publicacion.privacidadDisponible() ? '<button class="btn" data-a="privacidadAnuncios">Privacidad de los anuncios</button>' : '') + '</div>' +
+      '<p class="nota">' + t('juego') + ' ' + IA.VERSION + ' · ' + IA.publicacion.nombrePlataforma() + ' · ' + t('creditos') + '</p>';
   }
   ac('abrirAjustes', function () { U.modal(ajustes()); });
+  ac('privacidadAnuncios', function () { IA.publicacion.abrirPrivacidad(); }); // V31: consentimiento de Google
   ac('ajuste', function (v, el) {
     const k = el.getAttribute('data-k');
     const val = el.type === 'checkbox' ? !!v : (k === 'texto' ? +v : v);
