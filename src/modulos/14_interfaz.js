@@ -92,6 +92,19 @@ ART.ui = (function () {
     estrella: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
     abajo: '<path d="M6 9l6 6 6-6"/>',
     varita: '<path d="M4 20L16 8M14 4v3M18 8h3M17 4l2-2M11 6l-1-1M18 11l1 1"/>',
+    calendario: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    corazon: '<path d="M12 20s-7-4.4-9-8.6C1.6 8.2 3.6 5 6.8 5c2 0 3.5 1.2 4.2 2.6C11.7 6.2 13.2 5 15.2 5c3.2 0 5.2 3.2 3.8 6.4C19 15.6 12 20 12 20z"/>',
+    moneda: '<circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.6-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.9-2.8 2.1 0 2.9 5.8 1.4 5.8 4.3 0 1.2-1.3 2.1-3 2.1-1.3 0-2.4-.6-3-1.5M12 6v1.8M12 16.2V18"/>',
+    trofeo: '<path d="M8 4h8v4a4 4 0 0 1-8 0V4z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 12v4M8 20h8M9.5 16h5"/>',
+    rapido: '<path d="M4 6l8 6-8 6zM12 6l8 6-8 6z" fill="currentColor"/>',
+    subir: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+    bajar: '<path d="M12 4v12M7 11l5 5 5-5M4 20h16"/>',
+    bombilla: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/>',
+    flecha: '<path d="M9 6l6 6-6 6"/>',
+    libro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
+    carpeta: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
+    persona: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 4.5-6.5 8-6.5s6.5 2 8 6.5"/><path d="M19 3v5M16.5 5.5h5"/>',
+    pincel: '<path d="M14 4l6 6-8.5 8.5a3 3 0 0 1-4.2 0l-1.8-1.8a3 3 0 0 1 0-4.2L14 4z"/><path d="M5.5 16.5L3 21l4.5-2.5"/>',
   };
   function icono(nombre, titulo) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="' + (titulo ? 'false' : 'true') + '"' + (titulo ? ' role="img" aria-label="' + esc(titulo) + '"' : '') + '>' + (P[nombre] || '') + '</svg>';
@@ -305,12 +318,12 @@ ART.ui = (function () {
     const auto = !!estado.auto;
     const etiquetaRitmo = { semana: t('ritmo_semana'), mes: t('ritmo_mes'), evento: t('ritmo_evento'), auto: t('ritmo_auto') }[ajustes.ritmo];
     document.getElementById('barra').innerHTML =
-      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b style="font:' + esc(ART.arte.fuenteLetra((est.logo || {}).f, 16)) + '">' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
-      '<button class="fecha" data-a="abrirCalendario" aria-label="Abrir el calendario"><b>' + esc(ART.cal.texto(ART.cal.hoy())) + '</b><span class="tenue">' + t('semana') + ' ' + N.semana() + '</span></button>' +
-      '<button class="fans" data-a="verFans" aria-label="Fans"><b class="cifra">' + grande(S.fans || 0) + '</b><span>fans</span></button>' +
-      '<button class="dinero' + rojo + '" data-a="alternarDinero" aria-label="' + t('toca_dinero') + '"><b class="cifra">' + dinero(est.caja) + '</b><span>' + (ajustes.dineroHoy ? t('hoy') : t('epoca')) + '</span></button>' +
+      '<div class="marca"><canvas data-logo="0" width="36" height="36"></canvas><b style="font:' + esc(ART.arte.fuenteLetra((est.logo || {}).f, 16)) + '">' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
+      '<button class="indicador fecha" data-a="abrirCalendario" aria-label="Abrir el calendario">' + icono('calendario') + '<span class="col"><b>' + esc(ART.cal.texto(ART.cal.hoy())) + '</b><span>' + t('semana') + ' ' + N.semana() + '</span></span></button>' +
+      '<button class="indicador fans" data-a="verFans" aria-label="Fans">' + icono('corazon') + '<span class="col"><b class="cifra">' + grande(S.fans || 0) + '</b><span>fans</span></span></button>' +
+      '<button class="indicador dinero' + rojo + '" data-a="alternarDinero" aria-label="' + t('toca_dinero') + '">' + icono('moneda') + '<span class="col"><b class="cifra">' + dinero(est.caja) + '</b><span>' + (ajustes.dineroHoy ? t('hoy') : t('epoca')) + '</span></span></button>' +
       '<span class="espacio"></span>' +
-      '<button class="avanzar' + (auto ? ' auto' : '') + '" data-a="avanzar" aria-label="' + (auto ? t('pausa') : t('avanzar') + ': ' + esc(etiquetaRitmo)) + '">' + icono(auto ? 'pausa' : 'avanzar') + '<span>' + (auto ? t('pausa') : esc(etiquetaRitmo)) + '</span></button>' +
+      '<button class="avanzar' + (auto ? ' auto' : '') + '" data-a="avanzar" aria-label="' + (auto ? t('pausa') : t('avanzar') + ': ' + esc(etiquetaRitmo)) + '">' + icono(auto ? 'pausa' : ajustes.ritmo === 'semana' ? 'avanzar' : 'rapido') + '<span>' + (auto ? t('pausa') : esc(etiquetaRitmo)) + '</span></button>' +
       '<button class="ico" data-a="menuRitmo" aria-label="' + t('ritmo') + '">' + icono('abajo') + '</button>' +
       '<button class="ico opcional" data-a="abrirGuardado" aria-label="' + t('guardar') + '">' + icono('guardar') + '</button>' +
       '<button class="ico" data-a="abrirPausa" aria-label="Pausa y ajustes">' + icono('ajustes') + '</button>';
@@ -342,12 +355,17 @@ ART.ui = (function () {
     if (fichaAbierta() && estado.fichaActual && ART.pantallas.refrescarFicha) ART.pantallas.refrescarFicha(estado.fichaActual);
   }
   function irA(seccion, sub) {
+    const cambio = estado.seccion !== seccion;
     estado.seccion = seccion;
     if (sub) estado.sub[seccion] = sub;
     cerrarFicha();
+    document.getElementById('app').setAttribute('data-seccion', seccion);
     renderMenu();
     renderVista();
-    document.getElementById('vista').scrollTop = 0;
+    const v = document.getElementById('vista');
+    v.scrollTop = 0;
+    // Al cambiar de sección, la vista entra con un leve deslizamiento (no al refrescar cada semana)
+    if (cambio && !ajustes.movimiento) { v.classList.remove('entra'); void v.offsetWidth; v.classList.add('entra'); clearTimeout(irA.t); irA.t = setTimeout(function () { v.classList.remove('entra'); }, 400); }
   }
 
   // ---------- Eventos: un solo oyente para todos los botones ----------

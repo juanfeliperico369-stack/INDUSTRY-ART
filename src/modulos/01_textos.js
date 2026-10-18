@@ -31,7 +31,7 @@ ART.textos = {
     // Estudio
     est_tareas: 'Tareas de la semana', est_fechas: 'Próximas fechas', est_resumen: 'Resumen', est_sin_tareas: 'Todo en marcha. Puedes avanzar.',
     est_capacidad: 'Proyectos a la vez', est_fama: 'Fama del estudio', est_cuota: 'Cuota del año', est_clase: 'Clase',
-    tarea_lista: '«{t}» está lista: elige fecha de estreno', tarea_capacidad: 'Hay lugar para otra producción: crea una obra',
+    tarea_lista: '«{t}» está lista: elige fecha de estreno', tarea_capacidad: 'Hay lugar para {n} más: crea una obra',
     tarea_rojo: 'Caja en rojo: {n} de 26 semanas antes de la quiebra', tarea_premios: 'Premios Quimera en {n} semanas',
     tarea_construir: 'Te sobra caja: amplía el estudio en Negocio', faltan: 'faltan {n} sem.', esta_semana: 'esta semana',
     // Obras

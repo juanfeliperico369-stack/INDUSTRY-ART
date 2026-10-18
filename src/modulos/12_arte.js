@@ -2792,10 +2792,14 @@ ART.arte = (function () {
     v.forEach((x, i) => {
       const bx = izq + i * bw + hueco, bwi = Math.max(1, bw - 2 * hueco), y = py(x);
       const color = (o.colores && o.colores[i]) || (x < 0 ? T.mal : o.color || T.acento);
-      c.fillStyle = color; c.globalAlpha = i === imax || o.colores ? 1 : 0.82;
+      // Relleno con degradado (más claro arriba) y un halo en la barra más alta
+      const hex = color.charAt(0) === '#' && color.length === 7;
+      if (hex) { const gr = c.createLinearGradient(0, Math.min(y, cero), 0, Math.max(y, cero)); gr.addColorStop(0, mezclar(color, '#ffffff', 0.18)); gr.addColorStop(1, rgba(color, 0.62)); c.fillStyle = gr; } else c.fillStyle = color;
+      c.globalAlpha = i === imax || o.colores ? 1 : 0.88;
+      if (i === imax && hex) { c.shadowColor = rgba(color, 0.55); c.shadowBlur = 10; }
       c.beginPath();
       if (c.roundRect) c.roundRect(bx, Math.min(y, cero), bwi, Math.max(x ? 1 : 0, Math.abs(cero - y)), x < 0 ? [0, 0, 3, 3] : [3, 3, 0, 0]); else c.rect(bx, Math.min(y, cero), bwi, Math.max(x ? 1 : 0, Math.abs(cero - y)));
-      c.fill(); c.globalAlpha = 1;
+      c.fill(); c.globalAlpha = 1; c.shadowBlur = 0;
       if (o.formato && bw >= 38) { c.fillStyle = T.texto; c.textBaseline = x < 0 ? 'top' : 'bottom'; c.fillText(fmt(x), bx + bwi / 2, x < 0 ? Math.min(y + 2, h - abajo - 10) : y - 2, bw); }
       if (i % salto === 0 && etiq[i] != null) { c.fillStyle = T.tenue; c.textBaseline = 'alphabetic'; c.fillText(String(etiq[i]), bx + bwi / 2, h - 3); }
       pts.push({ x: bx + bwi / 2, y: Math.min(y, cero), t: (etiq[i] != null ? etiq[i] + ': ' : '') + fmt(x) });
@@ -2841,7 +2845,8 @@ ART.arte = (function () {
         s.valores.forEach((x, i) => { if (!valido(x)) return; if (ini < 0) { ini = i; c.moveTo(px(i), py(+x)); } else c.lineTo(px(i), py(+x)); fin = i; });
         if (ini >= 0) { c.lineTo(px(fin), arriba + alto); c.lineTo(px(ini), arriba + alto); c.closePath(); c.fill(); }
       }
-      c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 2; c.lineJoin = 'round'; c.setLineDash(k % 2 && lista.length > 1 ? [6, 3] : []); // la 2.ª serie punteada: nunca solo color
+      c.strokeStyle = color; c.fillStyle = color; c.lineWidth = k ? 2 : 2.5; c.lineJoin = 'round'; c.lineCap = 'round'; c.setLineDash(k % 2 && lista.length > 1 ? [6, 3] : []); // la 2.ª serie punteada: nunca solo color
+      if (!k && color.charAt(0) === '#' && color.length === 7) { c.shadowColor = rgba(color, 0.5); c.shadowBlur = 8; }
       c.beginPath();
       let seguido = false, ultimo = -1;
       s.valores.forEach((x, i) => {
@@ -2850,8 +2855,8 @@ ART.arte = (function () {
         seguido = true; ultimo = i;
         pts.push({ x: px(i), y: py(+x), t: (s.nombre ? s.nombre + ' · ' : '') + (etiq[i] != null ? etiq[i] + ': ' : '') + fmt(+x) });
       });
-      c.stroke(); c.setLineDash([]);
-      if (ultimo >= 0) { circulo(c, px(ultimo), py(+s.valores[ultimo]), 3.2); c.fill(); }
+      c.stroke(); c.setLineDash([]); c.shadowBlur = 0;
+      if (ultimo >= 0) { circulo(c, px(ultimo), py(+s.valores[ultimo]), 4); c.fill(); c.strokeStyle = T.fondo; c.lineWidth = 1.5; c.stroke(); }
     });
     c.textAlign = 'left'; c.textBaseline = 'middle'; c.font = '10px sans-serif';
     let lx = izq;

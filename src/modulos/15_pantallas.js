@@ -30,15 +30,19 @@ ART.pantallas = (function () {
   // =====================================================================
   // PORTADA Y NUEVA PARTIDA
   // =====================================================================
+  // Pantalla de título: la escena del estudio, la marquesina con bombillos y el menú del juego
   function portada() {
-    return '<div class="portada"><canvas id="lienzoEstudio" class="estudio-lienzo" data-demo="1"></canvas>' +
-      '<h1>' + t('juego') + '</h1><p class="tenue">' + t('subtitulo') + ' · ' + t('version', { v: ART.VERSION }) + '</p>' +
-      '<button class="btn primario" data-a="continuar" id="btnContinuar" disabled>' + t('continuar') + '</button>' +
-      '<button class="btn" data-a="nuevaPartida">' + t('nueva_partida') + '</button>' +
-      '<button class="btn" data-a="abrirGuardado">' + t('cargar') + '</button>' +
-      '<label class="btn">' + t('importar') + '<input type="file" accept=".iasave,application/json" data-c="importarArchivo" class="oculto"></label>' +
-      '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' +
-      '<p class="tenue chico">' + t('creditos') + '</p></div>';
+    const op = function (accion, ic, texto, extra) { return '<button class="btn' + (extra || '') + '" data-a="' + accion + '">' + icono(ic) + '<span>' + texto + '</span>' + icono('flecha').replace('<svg', '<svg class="flecha"') + '</button>'; };
+    return '<div class="portada"><div class="escena"><canvas id="lienzoEstudio" class="estudio-lienzo" data-demo="1"></canvas></div>' +
+      '<div class="marquesina"><h1>' + t('juego') + '</h1><p class="lema">' + t('subtitulo') + '</p><span class="version">' + t('version', { v: ART.VERSION }) + '</span></div>' +
+      '<div class="menu-juego">' +
+      '<button class="btn primario" data-a="continuar" id="btnContinuar" disabled>' + icono('avanzar') + '<span>' + t('continuar') + '</span>' + icono('flecha').replace('<svg', '<svg class="flecha"') + '</button>' +
+      op('nuevaPartida', 'mas', t('nueva_partida')) +
+      (ART.taller ? op('abrirTaller', 'bombilla', 'Taller creativo') : '') +
+      op('abrirGuardado', 'carpeta', t('cargar')) +
+      '<label class="btn">' + icono('subir') + '<span>' + t('importar') + '</span><input type="file" accept=".iasave,.json,application/json" data-c="importarArchivo" class="oculto"></label>' +
+      op('abrirAjustes', 'ajustes', t('ajustes')) +
+      '</div><p class="creditos">' + t('creditos') + '</p></div>';
   }
   const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'OneZero', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
     tipo: 'Estudio', industria: 'Cine', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
@@ -298,7 +302,7 @@ ART.pantallas = (function () {
     if ((S.ofertas || []).some(function (o) { return o.vence > S.t; })) out.push({ txt: 'Tienes ofertas de encargo como talento', imp: 1 });
     if (S.semanasEnRojo > 0) out.push({ txt: t('tarea_rojo', { n: S.semanasEnRojo }), mal: 1, imp: 1 });
     const libres = NG.capacidad(0) - O.enProduccion(0).length;
-    if (libres > 0) out.push({ txt: t('tarea_capacidad') + ' (' + libres + ')', btn: t('crear_obra'), a: 'crearObra' });
+    if (libres > 0) out.push({ txt: t('tarea_capacidad', { n: N.cuenta(libres, 'producción', 'producciones') }), btn: t('crear_obra'), a: 'crearObra' });
     const semPremios = (D.premios.semana - N.semana() + 52) % 52;
     if (semPremios > 0 && semPremios <= 4) out.push({ txt: t('tarea_premios', { n: semPremios }) });
     if (NG.cajaLibre(0) > E.presupuestoTipico(N.anio()) * 6 && est.pisos.length < D.MAX_PISOS) out.push({ txt: t('tarea_construir'), btn: t('construir'), a: 'irNegocio' });
@@ -429,7 +433,7 @@ ART.pantallas = (function () {
       ART.guardado.masReciente().then(function (r) {
         const b = document.getElementById('btnContinuar');
         if (!b) return;
-        if (r) { b.disabled = false; b.setAttribute('data-v', r.ranura); b.textContent = t('continuar') + ' · ' + r.meta.nombre + ' (' + r.meta.anio + ')'; }
+        if (r) { b.disabled = false; b.setAttribute('data-v', r.ranura); const s = b.querySelector('span'); if (s) s.textContent = t('continuar') + ' · ' + r.meta.nombre + ' (' + r.meta.anio + ')'; }
         else b.classList.add('oculto');
       });
     }
