@@ -24,9 +24,10 @@ Fecha: 18 de octubre de 2026 · Plan Maestro v2 («Web y Android primero; luego 
 - PC real (Electron): abre, juega 3 años, guarda, se cierra y al volver a abrir carga la partida; la AppImage armada también abre, con 0 errores.
 - Anuncios simulados en 5 casos (Android, iPhone, Europa que acepta, Europa que no acepta y modo de pago): cada uno hace solo lo que debe.
 - Android 1.1 vuelve a armar (APK de 10,7 MB, API 36).
+- En la nube (GitHub), todas bien: Android arma el .aab; iPhone compila con Xcode 26.6 y pasa la validación de la tienda; PC arma el instalador y el portátil de Windows, el .dmg de Mac y la AppImage de Linux. Arreglos en el camino: un paquete viejo del SDK de Android y una flecha que la consola de Windows no imprimía.
 
 ## Errores conocidos
-- iPhone: sin un Mac aquí, la compilación se comprueba en la receta de GitHub; la firma y la subida a TestFlight solo se pueden probar con tu cuenta de Apple.
+- iPhone: la firma y la subida a TestFlight solo se pueden probar con tu cuenta de Apple.
 - Las apps de PC salen sin firma: Windows y macOS avisan la primera vez (la guía dice cómo abrirlas).
 
 ## Qué probar en el celular (3 cosas)
