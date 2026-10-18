@@ -189,7 +189,7 @@ IA.tv = (function () {
       for (let i = 0; i < n; i++) {
         const q = calidadEp(o);
         let aud;
-        if (em.d === 'stream') aud = (S.stream ? S.stream.subs : 0) / 1e6 * 0.25 * Math.pow(q / 60, 1.4);
+        if (em.d === 'stream') { aud = (S.stream ? S.stream.subs : 0) / 1e6 * 0.25 * Math.pow(q / 60, 1.4); const h = S.stream && S.stream.hist[S.stream.hist.length - 1]; if (h) em.ing += Math.round(h.ing * 0.12 / Math.max(1, f.sem)); } // V29: parte de la plataforma que se le atribuye a la serie (solo estadística)
         else if (em.d === 'ajena') aud = hogares(a) * 0.05 * Math.pow(q / 60, 1.4);
         else if (em.d === 'cable') aud = hogares(a) * 0.06 * competencia(a) * Math.pow(q / 60, 1.6);
         else aud = 0; // en tu canal la audiencia la calcula la parrilla

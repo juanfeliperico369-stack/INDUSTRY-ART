@@ -693,6 +693,21 @@ IA.pruebas = (function () {
       }
       prueba('Los rivales también guardan sets', IA.rodaje.capacidadSets(1) >= 2);
     }
+    // V29 · Contra los Datos: calendario, inflación, población, dominio público y Erótico
+    {
+      const C = IA.cal, fi = function (y, id) { return C.fiestasAnio(y).filter(function (f) { return f.id === id; })[0]; };
+      const pa = C.pascua(2024), pa2 = C.pascua(2025);
+      prueba('Pascua 2024 cae el 31 de marzo y la de 2025 el 20 de abril', pa.m === 2 && pa.d === 31 && pa2.m === 3 && pa2.d === 20, JSON.stringify([pa, pa2]));
+      prueba('Año Nuevo chino 2024 empieza el 10 de febrero', fi(2024, 'lunar') && fi(2024, 'lunar').ini === 41);
+      prueba('Acción de Gracias 2024 es el 28 de noviembre', fi(2024, 'gracias') && fi(2024, 'gracias').ini === 333);
+      prueba('El 1 de enero de 2024 fue lunes', C.diaSemana(2024, 0, 1) === 0);
+      prueba('Población mundial de 2025 cerca de 8.200 millones', Math.abs(M.poblacionMundial(2025) / 1e9 - 8.2) < 0.25, Math.round(M.poblacionMundial(2025) / 1e6));
+      prueba('Un dólar de 1950 vale unos 13 de 2025', Math.abs(M.ipc(2025) / M.ipc(1950) - 13.4) < 1.5, (M.ipc(2025) / M.ipc(1950)).toFixed(1));
+      prueba('La inflación de 2022 fue de 7 % a 9 %', M.inflacionAnual(2022) > 0.07 && M.inflacionAnual(2022) < 0.09);
+      const libres = I.materialesDisponibles(1950).filter(function (m) { return I.esLibre(m, 1950); }).length, libres2 = I.materialesDisponibles(2050).filter(function (m) { return I.esLibre(m, 2050); }).length;
+      prueba('Con los años hay más obras en dominio público', libres2 > libres, libres + ' → ' + libres2);
+      prueba('El Erótico no se puede antes de su año', !!O.validarGeneros(['Erótico'], 1900));
+    }
     // V26 · Metas, modos y editor
     {
       const Mt = IA.metas;

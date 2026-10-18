@@ -671,6 +671,7 @@ IA.pantallas = (function () {
     const sel = function (k, lista) { return '<select data-c="ajuste" data-k="' + k + '">' + lista.map(function (x) { return '<option value="' + x[0] + '"' + (String(a[k]) === String(x[0]) ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>'; };
     const sw = function (k, txt) { return '<label class="interruptor"><span>' + esc(txt) + '</span><input type="checkbox" data-c="ajuste" data-k="' + k + '"' + (a[k] ? ' checked' : '') + '></label>'; };
     return '<div class="fila entre"><h2>' + t('ajustes') + '</h2><button class="ico" data-a="cerrarModal" aria-label="' + t('cerrar') + '">' + icono('cerrar') + '</button></div>' +
+      '<label class="campo"><span>Idioma · Language</span>' + sel('idioma', [['es', 'Español'], ['en', 'English']]) + '</label>' +
       '<label class="campo"><span>' + t('aj_tema') + '</span>' + sel('tema', [['oscuro', t('tema_oscuro')], ['claro', t('tema_claro')], ['epoca', t('tema_epoca')], ['contraste', t('tema_contraste')]]) + '</label>' +
       '<label class="campo"><span>' + t('aj_texto') + '</span>' + sel('texto', [[1, 'Pequeño'], [2, 'Normal'], [3, 'Grande'], [4, 'Muy grande']]) + '</label>' +
       '<label class="campo"><span>' + t('aj_orientacion') + '</span>' + sel('orientacion', [['auto', t('ori_auto')], ['vertical', t('ori_vertical')], ['horizontal', t('ori_horizontal')]]) + '</label>' +

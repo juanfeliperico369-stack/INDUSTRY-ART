@@ -111,6 +111,7 @@ IA.juego = (function () {
       if (o.est === 0) noticia({ tipo: 'estreno', texto: N.S.avatar.nom + ' presenta «' + o.tit + '»: llega a los cines.' });
     });
     N.on('obraTerminada', function (o) {
+      if (o.anio === undefined) o.anio = N.anio(o.fe !== undefined ? o.fe : N.S.t); // series y estrenos directos también tienen año (V29)
       IA.sede.alTerminar(o); // fans (V21)
       IA.critica.alTerminar(o); // cronología (V22)
       IA.franquicias.alTerminar(o); // popularidad de los personajes (V23)

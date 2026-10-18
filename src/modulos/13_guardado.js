@@ -72,6 +72,7 @@ IA.guardado = (function () {
 
   // V21 → V22: premios, festivales, crítica y prensa (todo empieza vacío)
   MIGRACIONES[22] = function (S) { ['galas', 'palmares', 'revista', 'cartas', 'hitos'].forEach(function (k) { if (!S[k]) S[k] = []; }); if (!S.fest) S.fest = {}; };
+  MIGRACIONES[29] = function () { /* V29: errores e inglés, sin datos nuevos */ };
   MIGRACIONES[28] = function () { /* V28: interfaz y rendimiento, sin datos nuevos */ };
   MIGRACIONES[27] = function () { /* V27: solo balance, sin datos nuevos */ };
   MIGRACIONES[26] = function (S) { if (!S.metas) S.metas = { modo: 'libre', reto: null, logros: {}, misiones: [], legado: 0, decadas: [], tut: 0, fin: null, ret: 0 }; };
@@ -82,7 +83,7 @@ IA.guardado = (function () {
     // Hitos ya pasados (la semana del juego se calcula con el año de inicio de esta partida)
     if (!S.hist) {
       let v = 0;
-      IA.historia.HITOS.forEach(function (x, i) { const tx = (x[0] - S.y0) * 52 + IA.cal.semanaDeFecha(x[0], x[1], x[2]) - 1; if (tx < S.t) v = i + 1; });
+      IA.historia.HITOS.forEach(function (x, i) { const tx = (x[0] - S.y0) * 52 + IA.cal.semanaDeFecha(x[0], x[1] - 1, x[2]) - 1; if (tx < S.t) v = i + 1; });
       S.hist = { gen: [], vistos: v, ultAnio: 0 };
     }
     if (!S.bitacora) S.bitacora = [];

@@ -167,7 +167,7 @@ IA.medios = (function () {
   }
   // Lo que puede ganar en total (repartido semana a semana con su caída)
   function potencial(p) {
-    let f = 1.35 * Math.pow(p.pub / 60, 2.2) * Math.exp(N.normal(0, 0.35));
+    let f = 1.15 * Math.pow(p.pub / 60, 2.2) // V29: rendían de más * Math.exp(N.normal(0, 0.35));
     const fam = famDe(p.med, p.gen); if (fam) f *= 1 + (N.S.mundo.tendencias[fam.eje] || 0) * 0.3;
     const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
     if (bd) { f *= 1 + Math.min(1, bd.fans / 2e6) * 0.5; if (bd.reu) { f *= 1.5; bd.reu = 0; } }
@@ -249,6 +249,7 @@ IA.medios = (function () {
         certificar(p);
       }
       if (p.et === 'lanzado' && p.pw > 60) { p.et = 'catalogo'; p.sop = 0; }
+      if (p.et === 'catalogo' && S.t - p.fe > 52 * 5 && p.hs.length) p.hs = []; // memoria (V29)
     });
     // Los proyectos viejos del catálogo se resumen (memoria)
     if (s.p.length > 120) s.p = s.p.filter(function (p) { return p.et !== 'catalogo' || S.t - p.fe < 52 * 30 || p.cert || p.prem; });
@@ -269,7 +270,7 @@ IA.medios = (function () {
     p.semT++;
     p.ocup = N.redondear(N.limitar(p.ocup + (p.pub - 60) / 600 + N.normal(0, 0.02), 0.05, 1), 3);
     const entradas = Math.round(s.asientos * p.cfg.funciones * p.ocup * (p.gira ? 0.8 : 1));
-    const ing = Math.round(entradas * ep(p.gira ? 70 : 110, a)), gas = Math.round(p.costo * 0.03);
+    const ing = Math.round(entradas * ep(p.gira ? 60 : 90, a)), gas = Math.round(p.costo * 0.03);
     cobrar(p, ing); IA.negocio.pagar(0, 'produccion', gas); p.gas += gas;
     p.vend.entradas = (p.vend.entradas || 0) + entradas;
     p.vend.funciones = (p.vend.funciones || 0) + p.cfg.funciones;

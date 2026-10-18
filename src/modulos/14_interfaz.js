@@ -9,7 +9,7 @@ IA.ui = (function () {
   const SECCIONES = ['estudio', 'obras', 'talento', 'mundo', 'negocio'];
 
   // ---------- Ajustes del jugador (fuera de la partida) ----------
-  const AJUSTES_BASE = { tema: 'oscuro', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana', musica: false, dalton: false };
+  const AJUSTES_BASE = { tema: 'oscuro', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana', musica: false, dalton: false, idioma: 'es' };
   let ajustes = Object.assign({}, AJUSTES_BASE);
   function cargarAjustes() {
     try { const a = JSON.parse(localStorage.getItem(CLAVE_AJUSTES) || '{}'); ajustes = Object.assign({}, AJUSTES_BASE, a); } catch (e) { ajustes = Object.assign({}, AJUSTES_BASE); }
@@ -24,6 +24,7 @@ IA.ui = (function () {
     r.setAttribute('data-movimiento', ajustes.movimiento ? 'menos' : 'normal');
     r.setAttribute('data-orientacion', ajustes.orientacion);
     r.setAttribute('data-dalton', ajustes.dalton ? 'si' : 'no'); // daltonismo (V28)
+    IA.idioma.poner(ajustes.idioma); // español o inglés (V29)
     actualizarEpoca();
     if (IA.arte) { IA.arte.menosMovimiento = !!ajustes.movimiento; IA.arte.activarSonido(!!ajustes.sonido); }
     if (ajustes.orientacion !== 'auto' && window.screen && screen.orientation && screen.orientation.lock) {

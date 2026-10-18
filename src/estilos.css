@@ -169,7 +169,7 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 .vacio { text-align: center; color: var(--tenue); padding: 24px 10px; }
 .ayuda-i { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; border: 1px solid var(--borde); background: var(--panel2); cursor: pointer; font-weight: 700; color: var(--acento); }
 .ayuda-i { min-height: 44px; min-width: 44px; }
-.titulo-sec { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.titulo-sec { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; } /* V29: los títulos largos en inglés no se parten */
 .lista-obras .tarjeta { display: flex; gap: 10px; align-items: flex-start; }
 .nota { font-size: 14px; color: var(--tenue); margin: 4px 0 8px; }
 .cifra { font-variant-numeric: tabular-nums; }

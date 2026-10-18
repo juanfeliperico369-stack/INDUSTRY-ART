@@ -62,7 +62,7 @@ IA.historia = (function () {
     [2040, 'Salas de realidad mixta', 'fotografia'], [2048, 'Hologramas en escena', 'efectos'], [2060, 'Sets climáticos virtuales', 'arte'], [2075, 'Guion asistido por emociones', 'guion'],
     [2088, 'Interfaz neuronal de rodaje', 'direccion'], [2105, 'Cámaras orbitales', 'fotografia'], [2130, 'Talentos sintéticos con derechos', 'interprete'], [2145, 'Montaje por pensamiento', 'edicion'],
   ].map(function (x, i) { return { id: 'inv' + i, anio: x[0], nombre: x[1], dep: x[2] }; });
-  function tDe(y, m, d) { return IA.cal.tDeFecha(y, m, d); }
+  function tDe(y, m, d) { return IA.cal.tDeFecha(y, m - 1, d); } // los hitos usan meses 1–12; el calendario, 0–11 (V29)
   function st() { const S = N.S; if (!S.hist) S.hist = { gen: [], vistos: 0, ultAnio: 0 }; return S.hist; }
   function activo(p, t) { return t >= tDe(p.ini[0], p.ini[1], p.ini[2]) && t <= tDe(p.fin[0], p.fin[1], p.fin[2]); }
   // Eventos generados (después de 2026): recesiones, auges, pandemias, huelgas, guerras regionales y clima
@@ -129,14 +129,14 @@ IA.historia = (function () {
       if (tx > S.t) return;
       h.vistos = i + 1;
       if (tx < S.t - 1) return; // lo de antes del inicio no se anuncia
-      N.emit('noticia', { tipo: 'historia', texto: IA.cal.texto({ y: x[0], m: x[1], d: x[2] }) + ': ' + x[3] + '.', importante: true });
+      N.emit('noticia', { tipo: 'historia', texto: IA.cal.texto({ y: x[0], m: x[1] - 1, d: x[2] }) + ': ' + x[3] + '.', importante: true });
       if (x[4]) N.emit('hito', x[4]);
     });
     if (N.semana() === 1) generarAnio(N.anio());
   }
   function inicio() { const h = st(); h.vistos = 0; HITOS.forEach(function (x, i) { if (tDe(x[0], x[1], x[2]) < N.S.t) h.vistos = i + 1; }); }
   function lineaDeTiempo() {
-    return HITOS.map(function (x) { return { y: x[0], m: x[1], d: x[2], txt: x[3], fx: x[4] || '' }; }).concat(generados().map(function (g) { const f = IA.cal.inicioDeT ? IA.cal.inicioDeT(g.ini) : null; return { y: N.anio(g.ini), m: f ? f.m : 1, d: f ? f.d : 1, txt: g.txt || g.tipo, gen: 1 }; }))
+    return HITOS.map(function (x) { return { y: x[0], m: x[1] - 1, d: x[2], txt: x[3], fx: x[4] || '' }; }).concat(generados().map(function (g) { const f = IA.cal.inicioDeT ? IA.cal.inicioDeT(g.ini) : null; return { y: N.anio(g.ini), m: f ? f.m : 0, d: f ? f.d : 1, txt: g.txt || g.tipo, gen: 1 }; }))
       .sort(function (a, b) { return (a.y - b.y) || (a.m - b.m) || (a.d - b.d); });
   }
   return { HITOS: HITOS, PERIODOS: PERIODOS, INVENTOS: INVENTOS, activos: activos, factorMercado: factorMercado, censura: censura, censurar: censurar, pausa: pausa,

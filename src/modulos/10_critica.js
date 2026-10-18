@@ -35,6 +35,11 @@ IA.critica = (function () {
   function activos(anio) { return CRITICOS.filter(function (c) { return anio >= c.desde && anio <= c.hasta; }); }
 
   // ---------- Reseñas ----------
+  const REMATES = {
+    alto: ['Habrá que verla dos veces.', 'De lo mejor del año.', 'El público saldrá hablando de ella.', 'Un oficio que se nota en cada plano.', 'Merece cada minuto.', 'Quedará en la memoria.', 'Una sorpresa mayúscula.', 'Así se cuenta una historia.'],
+    medio: ['Correcta, sin más.', 'Se deja ver.', 'Le sobra media hora.', 'Tiene momentos, pero no alcanza.', 'Para una tarde de lluvia.', 'Cumple, aunque no emociona.', 'Le faltó valentía.', 'El final la salva a medias.'],
+    bajo: ['Mejor esperar a verla en casa.', 'Ni el reparto la rescata.', 'Se olvida al salir de la sala.', 'Larga y sin rumbo.', 'Un tropiezo para todos.', 'Difícil de recomendar.', 'Nadie parece creer en ella.', 'Un desperdicio de talento.'],
+  };
   const FRASES = {
     alto: ['Una obra que se queda contigo días después.', 'Lo mejor del año, sin discusión.', 'Valiente, precisa y emocionante.', 'Cada plano está donde debe estar.'],
     medio: ['Correcta, aunque no arriesga.', 'Entretiene, pero se olvida pronto.', 'Tiene momentos, no una obra.', 'Cumple sin brillar.'],
@@ -57,6 +62,8 @@ IA.critica = (function () {
       n = Math.round(N.limitar(n + N.normal(0, 5), 5, 100));
       const banda = n >= 72 ? 'alto' : n >= 50 ? 'medio' : 'bajo';
       let f = N.elegir(FRASES[banda]);
+      // V29: un remate al azar para que las reseñas no se repitan en partidas largas
+      if (N.probabilidad(0.6)) f += ' ' + N.elegir(REMATES[banda]);
       if (banda === 'alto' && mejor) f += ' Brilla ' + DEP_TEXTO[mejor] + '.';
       if (banda === 'bajo' && peor) f += ' Falla ' + DEP_TEXTO[peor] + '.';
       if (banda === 'medio' && (o.ddes || 0) >= 4) f += ' Prometía más de lo que da.';
