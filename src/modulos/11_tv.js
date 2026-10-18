@@ -161,7 +161,7 @@ IA.tv = (function () {
   function pagoVenta(o, k) {
     if (o.pitch) return 0;
     const c = O.costoTotal ? O.costoTotal(o) : (o.gp || 0) + (o.cf || 0);
-    return Math.round(c * N.limitar(0.55 + (o.tv && o.tv.q !== undefined ? o.tv.q : o.pub || 50) / 110, 0.6, 1.5) * (k === 'ajena' ? 1.1 : 1) * (o.fr && o.cam ? 1.15 : 1));
+    return Math.round(c * N.limitar(0.7 + (o.tv && o.tv.q !== undefined ? o.tv.q : o.pub || 50) / 110, 0.75, 1.6) * (k === 'ajena' ? 1.1 : 1) * (o.fr && o.cam ? 1.15 : 1));
   }
   function emitir(id, donde, op) {
     const S = N.S, o = O.porId(+id);

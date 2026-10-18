@@ -447,7 +447,7 @@ IA.medios = (function () {
     const nom = function () { return { tit: IA.obras.tituloNuevo(['Drama']), est: rivs.length ? N.elegir(rivs).id : -1, crit: Math.round(N.normal(76, 8)), pub: Math.round(N.normal(76, 8)) }; };
     const cand = mios.map(function (p) { return { tit: p.tit, est: 0, crit: p.crit, pub: p.pub, p: p }; }).concat([nom(), nom(), nom(), nom(), nom(), nom()]);
     const cats = [['mejor', 'Mejor ' + (med === 'musica' ? 'álbum' : med === 'juegos' ? 'juego' : med === 'teatro' ? 'obra' : 'libro') + ' del año', function (x) { return x.crit + x.pub; }], ['critica', 'Premio de la crítica', function (x) { return x.crit; }], ['publico', 'Favorito del público', function (x) { return x.pub; }]];
-    const r = { med: med, nombre: m.premio, anio: anio, cats: cats.map(function (c) { const g = cand.slice().sort(function (a, b) { return c[2](b) - c[2](a); })[0]; if (g.p) { g.p.prem = (g.p.prem || 0) + 1; S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + 0.01), 3); } return { nombre: c[1], tit: g.tit, est: g.est }; }) };
+    const r = { med: med, nombre: m.premio, anio: anio, cats: cats.map(function (c) { const g = cand.slice().sort(function (a, b) { return c[2](b) - c[2](a); })[0]; if (g.p) { g.p.prem = (g.p.prem || 0) + 1; S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + 0.003 * (1 - S.estudios[0].fama)), 3); } return { nombre: c[1], tit: g.tit, est: g.est }; }) };
     st().premios.push(r); if (st().premios.length > 200) st().premios.shift();
     const tuyos = r.cats.filter(function (c) { return c.est === 0; }).length;
     if (tuyos) N.emit('noticia', { tipo: 'premios', texto: m.premio + ' ' + (anio + 1) + ': ganas ' + tuyos + ' de 3.', importante: true });

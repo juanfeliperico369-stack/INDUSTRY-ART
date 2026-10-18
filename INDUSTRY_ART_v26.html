@@ -2543,7 +2543,7 @@ IA.economia = (function () {
   }
   function deseo(obra, famaEst, tendencia) {
     const promesa = [0, 1, 2, 4, 6][obra.nivM || 0];
-    return N.limitar(0.5 * obra.pub + 0.5 * 55 + promesa + famaEst * 8 + tendencia * 4, 1, 99);
+    return N.limitar(0.5 * obra.pub + 0.5 * 55 + promesa + famaEst * 5 + tendencia * 4, 1, 99);
   }
 
   // ---------- Atractivo por región (clasificación, edades, sede) ----------
@@ -6558,14 +6558,14 @@ IA.premios = (function () {
       if (g.id === 'quimera') {
         ga.o.aw = ga.o.aw || []; ga.o.aw.push(c.id);
         nominados.forEach(function (n) { n.o.nom = (n.o.nom || 0) + 1; });
-        est.fama = N.redondear(N.limitar(est.fama + (c.id === 'pelicula' ? 0.05 : D.premios.principales.indexOf(c.id) >= 0 ? 0.02 : 0.008), 0, 1), 3);
+        est.fama = N.redondear(N.limitar(est.fama + (c.id === 'pelicula' ? 0.05 : D.premios.principales.indexOf(c.id) >= 0 ? 0.02 : 0.008) * (1 - est.fama), 0, 1), 3);
         if (t) { t.fama = N.redondear(N.limitar(t.fama + 0.12, 0, 1), 3); t.premios++; }
       } else if (g.id === 'bastard') {
         // Los peores: hunden la fama… o vuelven la obra de culto
         est.fama = N.redondear(N.limitar(est.fama - 0.01, 0.01, 1), 3);
         if (N.probabilidad(0.25)) ga.o.culto = 1;
       } else {
-        est.fama = N.redondear(N.limitar(est.fama + 0.01, 0, 1), 3);
+        est.fama = N.redondear(N.limitar(est.fama + 0.01 * (1 - est.fama), 0, 1), 3);
         if (t) t.fama = N.redondear(N.limitar(t.fama + 0.03, 0, 1), 3);
       }
       if (g.id !== 'quimera') { ga.o.galas = ga.o.galas || []; ga.o.galas.push({ g: g.id, c: c.id }); }
@@ -6717,7 +6717,7 @@ IA.premios = (function () {
         o.galas = o.galas || [];
         o.galas.push({ g: f.id, c: p[0] });
         const est = S.estudios[o.est];
-        est.fama = N.redondear(N.limitar(est.fama + (i === 0 ? 0.01 * f.prestigio : 0.004 * f.prestigio), 0, 1), 3);
+        est.fama = N.redondear(N.limitar(est.fama + (i === 0 ? 0.01 * f.prestigio : 0.004 * f.prestigio) * (1 - est.fama), 0, 1), 3);
         if (o.et === 'lista') o.ddes = (o.ddes || 0) + (i === 0 ? 2 + f.prestigio : 1);
         if (o.est === 0) N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» gana ' + (p[1] || f.premio) + ' en ' + f.nombre + '.', importante: true });
       }
@@ -7344,14 +7344,14 @@ IA.franquicias = (function () {
     const f = de(o);
     if (!f || !o.cam) return 0;
     const cam = camino(o.cam);
-    let b = hype(f) * (cam.des / 6) + cam.des * 0.5 - f.fat * 14 + (f.mente !== null ? 2 : 0);
+    let b = hype(f) * (cam.des / 6) * 0.5 + cam.des * 0.35 - f.fat * 14 + (f.mente !== null ? 1.5 : 0);
     if (o.cam === 'remake') { const ed = N.anio() - N.anio(f.t0 || N.S.t); b += ed > 15 ? 3 : -3; }
-    return Math.round(N.limitar(b, -15, 18));
+    return Math.round(N.limitar(b, -15, 10));
   }
   function bonoConocimiento(o) {
     const f = de(o);
     if (!f || !o.cam) return 0;
-    return N.limitar(0.025 * Math.min(6, estrenadas(f).length) + (o.fr2 ? 0.03 : 0), 0, 0.16) * (1 - f.fat * 0.5);
+    return N.limitar(0.012 * Math.min(6, estrenadas(f).length) + (o.fr2 ? 0.02 : 0), 0, 0.08) * (1 - f.fat * 0.5);
   }
   function alEstrenar(o) {
     const f = de(o);
@@ -7756,7 +7756,7 @@ IA.imperio = (function () {
     IA.historia.INVENTOS.forEach(function (x) {
       const t = s.tec[x.id];
       const mio = t && (t.de === 0 || t.lic);
-      if (mio && a < x.anio + 5) suma[x.dep] = Math.min(6, (suma[x.dep] || 0) + 2);
+      if (mio && a < x.anio + 5) suma[x.dep] = Math.min(3, (suma[x.dep] || 0) + 1);
     });
     Object.keys(suma).forEach(function (k) { b[k] = (b[k] || 0) + suma[k]; });
   }
@@ -8231,7 +8231,7 @@ IA.medios = (function () {
     const nom = function () { return { tit: IA.obras.tituloNuevo(['Drama']), est: rivs.length ? N.elegir(rivs).id : -1, crit: Math.round(N.normal(76, 8)), pub: Math.round(N.normal(76, 8)) }; };
     const cand = mios.map(function (p) { return { tit: p.tit, est: 0, crit: p.crit, pub: p.pub, p: p }; }).concat([nom(), nom(), nom(), nom(), nom(), nom()]);
     const cats = [['mejor', 'Mejor ' + (med === 'musica' ? 'álbum' : med === 'juegos' ? 'juego' : med === 'teatro' ? 'obra' : 'libro') + ' del año', function (x) { return x.crit + x.pub; }], ['critica', 'Premio de la crítica', function (x) { return x.crit; }], ['publico', 'Favorito del público', function (x) { return x.pub; }]];
-    const r = { med: med, nombre: m.premio, anio: anio, cats: cats.map(function (c) { const g = cand.slice().sort(function (a, b) { return c[2](b) - c[2](a); })[0]; if (g.p) { g.p.prem = (g.p.prem || 0) + 1; S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + 0.01), 3); } return { nombre: c[1], tit: g.tit, est: g.est }; }) };
+    const r = { med: med, nombre: m.premio, anio: anio, cats: cats.map(function (c) { const g = cand.slice().sort(function (a, b) { return c[2](b) - c[2](a); })[0]; if (g.p) { g.p.prem = (g.p.prem || 0) + 1; S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + 0.003 * (1 - S.estudios[0].fama)), 3); } return { nombre: c[1], tit: g.tit, est: g.est }; }) };
     st().premios.push(r); if (st().premios.length > 200) st().premios.shift();
     const tuyos = r.cats.filter(function (c) { return c.est === 0; }).length;
     if (tuyos) N.emit('noticia', { tipo: 'premios', texto: m.premio + ' ' + (anio + 1) + ': ganas ' + tuyos + ' de 3.', importante: true });
@@ -8438,7 +8438,7 @@ IA.negocio = (function () {
       famaTrasEstreno: function (o, mult) {
         const est = N.S.estudios[o.est];
         // La fama del estudio sube despacio con los éxitos y la buena crítica (cuesta más cuanto más alta)
-        const cambio = N.limitar(0.008 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 3000, -0.012, 0.02);
+        const cambio = N.limitar(0.004 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 6000, -0.012, 0.01); // V27: más lento
         est.fama = N.redondear(N.limitar(est.fama + (cambio > 0 ? cambio * (1 - est.fama) : cambio), 0.01, 1), 3);
       },
     };
@@ -8517,7 +8517,9 @@ IA.negocio = (function () {
     const puesto = ranking.map(function (r) { return r.id; }).indexOf(0) + 1;
     fila.puesto = puesto;
     const ultimos = S.fin.hist.slice(-3);
-    if (ultimos.length === 3 && ultimos.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.06; }) && !S.majorDesde) {
+    // V27: cuatro años seguidos entre los tres primeros con 4 % o más del mercado, prestigio de 75 y al menos 15 años de historia
+    const cinco = S.fin.hist.slice(-4);
+    if (cinco.length === 4 && cinco.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.04; }) && jug.fama >= 0.75 && S.fin.hist.length >= 16 && !S.majorDesde) {
       S.majorDesde = anioCerrado;
       N.emit('noticia', { tipo: 'estudio', texto: 'Tu estudio ya es una major: está entre los tres más taquilleros del mundo.', importante: true });
     }
@@ -9066,7 +9068,7 @@ IA.tv = (function () {
   function pagoVenta(o, k) {
     if (o.pitch) return 0;
     const c = O.costoTotal ? O.costoTotal(o) : (o.gp || 0) + (o.cf || 0);
-    return Math.round(c * N.limitar(0.55 + (o.tv && o.tv.q !== undefined ? o.tv.q : o.pub || 50) / 110, 0.6, 1.5) * (k === 'ajena' ? 1.1 : 1) * (o.fr && o.cam ? 1.15 : 1));
+    return Math.round(c * N.limitar(0.7 + (o.tv && o.tv.q !== undefined ? o.tv.q : o.pub || 50) / 110, 0.75, 1.6) * (k === 'ajena' ? 1.1 : 1) * (o.fr && o.cam ? 1.15 : 1));
   }
   function emitir(id, donde, op) {
     const S = N.S, o = O.porId(+id);
@@ -12542,7 +12544,7 @@ IA.eventos = (function () {
     Object.keys(ef).forEach(function (k) {
       const v = ef[k];
       if (k === 'caja') { const m = Math.round(Math.abs(v) * tip()); if (v < 0) IA.negocio.pagar(0, 'eventos', m); else IA.negocio.cobrarEn(0, 'eventos', m); }
-      else if (k === 'fama') est.fama = N.redondear(N.limitar(est.fama + v, 0.01, 1), 3);
+      else if (k === 'fama') est.fama = N.redondear(N.limitar(est.fama + (v > 0 ? v * (1 - est.fama) : v), 0.01, 1), 3);
       else if (k === 'fans') S.fans = Math.max(0, Math.round((S.fans || 0) * (1 + v)));
       else if (k === 'moral' && o) O.idsEquipo(o).forEach(function (id) { const t = T.porId(id); if (t) T.cambiarMoral(t, v); });
       else if (k === 'pub' && o) o.dpub = (o.dpub || 0) + v;
@@ -17095,7 +17097,7 @@ IA.imperioUI = (function () {
     h += '<h3>Negocios para fans</h3><p>' + ['tienda', 'museo', 'parque', 'arena'].map(function (id) { const x = I.info(id); return x ? (I.tiene(id) ? '✔ ' : '✖ ') + esc(x.nombre) : ''; }).join(' · ') + '</p><p class="nota">Se construyen en Negocio › Construcciones.</p>' +
       (a >= 1950 ? '<div class="fila">' + sel('imEvObra', [['', 'Sin obra en especial']].concat(O.enProduccion(0).concat(O.delEstudio(0, ['lista'])).map(function (o) { return [o.id, o.tit]; })), '') + btn('Organizar convención · ' + dinero(I.costoEvento()), 'imEvento', '', 'primario') + '</div>' : '');
     const inv = I.investigando();
-    h += '<h3>Investigación</h3>' + (inv ? '<p class="bien">Investigas «' + esc(I.invento(inv.id).nombre) + '»: faltan ' + inv.sr + ' semanas.</p>' : '') + '<p class="nota">Un invento propio o licenciado da +2 a su departamento mientras es novedad (hasta 5 años después de llegar al mundo).</p><div class="col">' +
+    h += '<h3>Investigación</h3>' + (inv ? '<p class="bien">Investigas «' + esc(I.invento(inv.id).nombre) + '»: faltan ' + inv.sr + ' semanas.</p>' : '') + '<p class="nota">Un invento propio o licenciado da +1 a su departamento (hasta +3) mientras es novedad (hasta 5 años después de llegar al mundo).</p><div class="col">' +
       IA.historia.INVENTOS.filter(function (x) { const e = I.estadoInvento(x); return e !== 'mundo' || x.anio > a - 5; }).slice(0, 14).map(function (x) {
         const e = I.estadoInvento(x), nom = { tuyo: 'Tuyo', licencia: 'Licenciado', mundo: 'Ya llegó al mundo', rival: 'Lo tiene un rival', investigable: 'Investigable', futuro: 'Futuro' }[e];
         const accion = e === 'investigable' ? btn('Investigar · ' + dinero(I.costoInvento(x)) + ' · ' + I.semanasInvento(x) + ' sem', 'imInvestigar', x.id, 'primario', inv ? 'Ya investigas otra cosa' : '') : e === 'rival' ? btn('Licenciar · ' + dinero(I.costoLicenciaTec(x)), 'imLicTec', x.id) : '';
@@ -18289,7 +18291,7 @@ IA.pruebas = (function () {
     if (!b) return;
     if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6) return;
     const r = IA.juego.iniciarObra(b);
-    if (r.error && registroErrores && !/disponible|equipo/.test(r.error)) registroErrores.push('Bot V23 en ' + anio + ': ' + r.error);
+    if (r.error && registroErrores && !/disponible|equipo|exige/.test(r.error)) registroErrores.push('Bot V23 en ' + anio + ': ' + r.error);
   }
   function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x) c++; }); return c; }
   // La idea del bot (V17): a veces adapta un material, a veces produce un guion comprado, y si no, una idea propia

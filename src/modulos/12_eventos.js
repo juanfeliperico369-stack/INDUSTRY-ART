@@ -141,7 +141,7 @@ IA.eventos = (function () {
     Object.keys(ef).forEach(function (k) {
       const v = ef[k];
       if (k === 'caja') { const m = Math.round(Math.abs(v) * tip()); if (v < 0) IA.negocio.pagar(0, 'eventos', m); else IA.negocio.cobrarEn(0, 'eventos', m); }
-      else if (k === 'fama') est.fama = N.redondear(N.limitar(est.fama + v, 0.01, 1), 3);
+      else if (k === 'fama') est.fama = N.redondear(N.limitar(est.fama + (v > 0 ? v * (1 - est.fama) : v), 0.01, 1), 3);
       else if (k === 'fans') S.fans = Math.max(0, Math.round((S.fans || 0) * (1 + v)));
       else if (k === 'moral' && o) O.idsEquipo(o).forEach(function (id) { const t = T.porId(id); if (t) T.cambiarMoral(t, v); });
       else if (k === 'pub' && o) o.dpub = (o.dpub || 0) + v;

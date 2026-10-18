@@ -249,7 +249,7 @@ IA.economia = (function () {
   }
   function deseo(obra, famaEst, tendencia) {
     const promesa = [0, 1, 2, 4, 6][obra.nivM || 0];
-    return N.limitar(0.5 * obra.pub + 0.5 * 55 + promesa + famaEst * 8 + tendencia * 4, 1, 99);
+    return N.limitar(0.5 * obra.pub + 0.5 * 55 + promesa + famaEst * 3 + tendencia * 4, 1, 99);
   }
 
   // ---------- Atractivo por región (clasificación, edades, sede) ----------
@@ -273,7 +273,7 @@ IA.economia = (function () {
     // La aprobación del público por la estrella principal (V18) también vende entradas
     const lider = ctx.talento(obra.eq.int[0]);
     const apr = lider && lider.apr !== undefined ? (lider.apr - 50) / 10 : 0;
-    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + apr + (obra.ddes || 0) + IA.estreno.bonoDeseo(obra) + IA.franquicias.bonoDeseo(obra) + N.normal(0, 4), 1, 99));
+    obra.des = Math.round(N.limitar(deseo(obra, fe, tend) + apr + (obra.ddes || 0) + IA.estreno.bonoDeseo(obra) + IA.franquicias.bonoDeseo(obra) + N.normal(0, 3), 1, 99));
     obra.crit = Math.round(N.limitar((obra.crit || 0) + IA.estreno.ajusteCritica(obra), 1, 99));
     // Parte de lo que gana esta obra que llegará por las ventanas (video, TV, streaming) y no por la taquilla
     obra.fv = N.redondear(IA.ventanas.parteVentanas(anio), 3);
@@ -309,7 +309,7 @@ IA.economia = (function () {
       const dr = da.regiones[r.id];
       if (dr.publico <= 0) return;
       const temp = M.temporada(r.id, sem);
-      const mercado = dr.publico / 52 * temp * IA.historia.factorMercado(r.id); // guerras y crisis (V24)
+      const mercado = dr.publico / 52 * temp * IA.historia.factorMercado(r.id) * 0.93; // guerras y crisis (V24); V27: −7 % general
       const pesos = [];
       let suma = pesoOtras + pesoCasa;
       // Las festividades reparten el público entre familias (cuánta gente va al cine ya lo da la temporada)

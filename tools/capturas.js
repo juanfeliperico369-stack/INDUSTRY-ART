@@ -4,7 +4,7 @@
  * horizontal) y 1366×768 (PC). Guarda los PNG en pruebas/capturas/ y revisa que ningún control mida menos de
  * 44 px, que ningún texto mida menos de 14 px y que no haya desplazamiento horizontal.
  *
- * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v26.html]
+ * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v27.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 
 const RAIZ = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
-const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v26.html');
+const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v27.html');
 const SALIDA = path.join(RAIZ, 'pruebas', 'capturas');
 const TAMANOS = [[390, 844, 'celular_vertical'], [844, 390, 'celular_horizontal'], [1366, 768, 'pc']];
 

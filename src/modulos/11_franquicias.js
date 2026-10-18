@@ -195,14 +195,14 @@ IA.franquicias = (function () {
     const f = de(o);
     if (!f || !o.cam) return 0;
     const cam = camino(o.cam);
-    let b = hype(f) * (cam.des / 6) + cam.des * 0.5 - f.fat * 14 + (f.mente !== null ? 2 : 0);
+    let b = hype(f) * (cam.des / 6) * 0.5 + cam.des * 0.35 - f.fat * 14 + (f.mente !== null ? 1.5 : 0);
     if (o.cam === 'remake') { const ed = N.anio() - N.anio(f.t0 || N.S.t); b += ed > 15 ? 3 : -3; }
-    return Math.round(N.limitar(b, -15, 18));
+    return Math.round(N.limitar(b, -15, 10));
   }
   function bonoConocimiento(o) {
     const f = de(o);
     if (!f || !o.cam) return 0;
-    return N.limitar(0.025 * Math.min(6, estrenadas(f).length) + (o.fr2 ? 0.03 : 0), 0, 0.16) * (1 - f.fat * 0.5);
+    return N.limitar(0.012 * Math.min(6, estrenadas(f).length) + (o.fr2 ? 0.02 : 0), 0, 0.08) * (1 - f.fat * 0.5);
   }
   function alEstrenar(o) {
     const f = de(o);

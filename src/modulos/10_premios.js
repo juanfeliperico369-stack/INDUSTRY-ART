@@ -81,14 +81,14 @@ IA.premios = (function () {
       if (g.id === 'quimera') {
         ga.o.aw = ga.o.aw || []; ga.o.aw.push(c.id);
         nominados.forEach(function (n) { n.o.nom = (n.o.nom || 0) + 1; });
-        est.fama = N.redondear(N.limitar(est.fama + (c.id === 'pelicula' ? 0.05 : D.premios.principales.indexOf(c.id) >= 0 ? 0.02 : 0.008), 0, 1), 3);
+        est.fama = N.redondear(N.limitar(est.fama + (c.id === 'pelicula' ? 0.05 : D.premios.principales.indexOf(c.id) >= 0 ? 0.02 : 0.008) * (1 - est.fama), 0, 1), 3);
         if (t) { t.fama = N.redondear(N.limitar(t.fama + 0.12, 0, 1), 3); t.premios++; }
       } else if (g.id === 'bastard') {
         // Los peores: hunden la fama… o vuelven la obra de culto
         est.fama = N.redondear(N.limitar(est.fama - 0.01, 0.01, 1), 3);
         if (N.probabilidad(0.25)) ga.o.culto = 1;
       } else {
-        est.fama = N.redondear(N.limitar(est.fama + 0.01, 0, 1), 3);
+        est.fama = N.redondear(N.limitar(est.fama + 0.01 * (1 - est.fama), 0, 1), 3);
         if (t) t.fama = N.redondear(N.limitar(t.fama + 0.03, 0, 1), 3);
       }
       if (g.id !== 'quimera') { ga.o.galas = ga.o.galas || []; ga.o.galas.push({ g: g.id, c: c.id }); }
@@ -240,7 +240,7 @@ IA.premios = (function () {
         o.galas = o.galas || [];
         o.galas.push({ g: f.id, c: p[0] });
         const est = S.estudios[o.est];
-        est.fama = N.redondear(N.limitar(est.fama + (i === 0 ? 0.01 * f.prestigio : 0.004 * f.prestigio), 0, 1), 3);
+        est.fama = N.redondear(N.limitar(est.fama + (i === 0 ? 0.01 * f.prestigio : 0.004 * f.prestigio) * (1 - est.fama), 0, 1), 3);
         if (o.et === 'lista') o.ddes = (o.ddes || 0) + (i === 0 ? 2 + f.prestigio : 1);
         if (o.est === 0) N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» gana ' + (p[1] || f.premio) + ' en ' + f.nombre + '.', importante: true });
       }

@@ -1,0 +1,1521 @@
+{
+ "fecha": "2026-10-18",
+ "hasta": 2150,
+ "resultados": [
+  {
+   "estrategia": "prudente",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "bot-prudente-1900",
+   "obras": 17501,
+   "obrasJugador": 4897,
+   "multMediano": 2.414642740508317,
+   "sobre5": 0.07382435289412033,
+   "pierden": 0.26044226044226043,
+   "multMedianoJugador": 2.6212056015381346,
+   "pierdenJugador": 0.16602001225239943,
+   "crecimiento30": 0.08502903925482341,
+   "crecimientoArranque": 1.3346307637615538,
+   "crecimientoTotal": 0.016891548747605345,
+   "crecimientoMediano": 0.012012578123816509,
+   "premiosJugador": 0,
+   "premiosTotal": 1105,
+   "aniosAMajor": 32,
+   "cuotaMax": 0.1144,
+   "cuotaMedia": 0.07360440000000003,
+   "cajaFinal2025": 66993885222,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 364,
+   "ideas": {
+    "obras": 5079,
+    "material": 405,
+    "guion": 929,
+    "ia": 93,
+    "efectos": 0,
+    "aplaudidos": 0,
+    "repudiados": 0,
+    "clasificaciones": {
+     "16": 444,
+     "18": 161,
+     "PG-13": 2940,
+     "G": 388,
+     "N": 144,
+     "PG": 996,
+     "R": 6
+    },
+    "adaptacionesRivales": 101
+   },
+   "produccion": {
+    "obras": 5061,
+    "metodos": {
+     "mixto": 2403,
+     "set": 1869,
+     "locacion": 786,
+     "cgi": 3
+    },
+    "estilos": {
+     "clasico": 4960,
+     "documental": 18,
+     "contemplativo": 40,
+     "found": 43
+    },
+    "pruebas": {
+     "estrenar": 2758,
+     "reeditar": 680,
+     "pulir": 1576,
+     "regrabar": 44
+    },
+    "sets": 2155,
+    "externos": 0,
+    "dilemas": 839,
+    "sobrecosto": 0.09064904927659767
+   },
+   "lanzamiento": {
+    "obras": 5061,
+    "directos": 4,
+    "oro": 1384,
+    "platino": 704,
+    "diamante": 439,
+    "reestrenos": 52,
+    "parteVentanas": 0.5035307224988329,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.27433463614368137,
+    "sobre90": 0.0056315366049879325,
+    "perfectos": 0,
+    "vivos": 1243,
+    "ninos": 11,
+    "exclusivos": 1,
+    "relaciones": 528,
+    "parejas": 22,
+    "retiroMin": 70
+   },
+   "errores": [
+    "Bot V23 en 1912: Viktor Novak: exige ser protagonista.",
+    "Bot V23 en 1919: Daria Dubois: exige ser protagonista.",
+    "Bot V23 en 1926: Freya Petrov: exige ser protagonista.",
+    "Bot V23 en 1930: Viktor Smirnov: exige ser protagonista.",
+    "Bot V23 en 1936: Rahul Leung: exige ser protagonista.",
+    "Bot V23 en 1937: Anna Petrov: exige ser protagonista.",
+    "Bot V23 en 1938: Marta Moreau: exige ser protagonista.",
+    "Bot V23 en 1939: Mai Nakamura: exige ser protagonista.",
+    "Bot V23 en 1942: Evelyn Hughes: exige ser protagonista.",
+    "Bot V23 en 1944: Yasmin Adeyemi: exige ser protagonista.",
+    "Bot V23 en 1948: Beatriz Rodríguez: exige ser protagonista.",
+    "Bot V23 en 1955: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 1965: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 1968: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 1970: Xinyi Nguyen: exige ser protagonista.",
+    "Bot V23 en 1970: Xinyi Nguyen: exige ser protagonista.",
+    "Bot V23 en 1975: Daria Jensen: exige ser protagonista.",
+    "Bot V23 en 1986: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2003: Sophie Petrov: exige ser protagonista.",
+    "Bot V23 en 2012: Yuna Kim: exige ser protagonista.",
+    "Bot V23 en 2015: Matteo Smirnov: exige ser protagonista.",
+    "Bot V23 en 2016: Wei Wong: exige un director de habilidad 50 o más.",
+    "Bot V23 en 2039: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2046: Priya Cheung: exige ser protagonista.",
+    "Bot V23 en 2050: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2053: Amélie Navarro: exige un director de habilidad 54 o más.",
+    "Bot V23 en 2055: Falta contratar a quien interprete a Santiago Parker (protagonista).",
+    "Bot V23 en 2068: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2070: Thiago Quispe: exige ser protagonista.",
+    "Bot V23 en 2074: Haruto Chan: exige ser protagonista.",
+    "Bot V23 en 2076: Pierre Rossi: exige ser protagonista.",
+    "Bot V23 en 2081: Henrik Dubois: exige ser protagonista.",
+    "Bot V23 en 2083: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2095: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2099: Daria Weber: exige ser protagonista.",
+    "Bot V23 en 2101: Isabella Torres: exige ser protagonista.",
+    "Bot V23 en 2111: Matteo Petrov: exige ser protagonista.",
+    "Bot V23 en 2115: Arjun Zhang: exige ser protagonista.",
+    "Bot V23 en 2118: Rahul Kumar: exige ser protagonista.",
+    "Bot V23 en 2131: Klaus Dubois: exige ser protagonista.",
+    "Bot V23 en 2136: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2137: Minho Chen: exige ser protagonista.",
+    "Bot V23 en 2139: Olga Volkov: exige un director de habilidad 50 o más."
+   ],
+   "rendimiento": {
+    "msSemana": 10.444815384615463,
+    "peorSemana": 112.89999999990687,
+    "sAnio": 0.5431304000000041,
+    "peorAnio": 0.9787999999998137,
+    "guardado150": 11129167,
+    "guardadoFinal": 16779348
+   },
+   "guardado150": {
+    "json": 11129167,
+    "comprimido": 1953352
+   },
+   "guardadoFinal": {
+    "json": 16779348,
+    "comprimido": 2912688,
+    "comp": "gzip"
+   },
+   "memoria": 139000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "prudente",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "bot-prudente-2000",
+   "obras": 10625,
+   "obrasJugador": 2929,
+   "multMediano": 2.335150845825506,
+   "sobre5": 0.06597647058823529,
+   "pierden": 0.28498823529411765,
+   "multMedianoJugador": 2.6716942418888534,
+   "pierdenJugador": 0.1502219187435985,
+   "crecimiento30": 0.11585949819242347,
+   "crecimientoArranque": 0.19356398266073782,
+   "crecimientoTotal": 0.029488236204078033,
+   "crecimientoMediano": 0.014445971597628615,
+   "premiosJugador": 0,
+   "premiosTotal": 745,
+   "aniosAMajor": 9,
+   "cuotaMax": 0.1184,
+   "cuotaMedia": 0.07847866666666667,
+   "cajaFinal2025": 85781064176,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 137,
+   "ideas": {
+    "obras": 3123,
+    "material": 232,
+    "guion": 569,
+    "ia": 80,
+    "efectos": 1,
+    "aplaudidos": 1,
+    "repudiados": 0,
+    "clasificaciones": {
+     "16": 304,
+     "18": 100,
+     "G": 515,
+     "PG-13": 1591,
+     "PG": 540,
+     "N": 71,
+     "R": 2
+    },
+    "adaptacionesRivales": 113
+   },
+   "produccion": {
+    "obras": 3105,
+    "metodos": {
+     "set": 1389,
+     "mixto": 1195,
+     "locacion": 518,
+     "cgi": 3
+    },
+    "estilos": {
+     "clasico": 3033,
+     "found": 39,
+     "documental": 15,
+     "contemplativo": 18
+    },
+    "pruebas": {
+     "estrenar": 1609,
+     "pulir": 1044,
+     "reeditar": 414,
+     "regrabar": 35
+    },
+    "sets": 1390,
+    "externos": 0,
+    "dilemas": 503,
+    "sobrecosto": 0.09000028404212457
+   },
+   "lanzamiento": {
+    "obras": 3105,
+    "directos": 8,
+    "oro": 1317,
+    "platino": 643,
+    "diamante": 288,
+    "reestrenos": 16,
+    "parteVentanas": 0.5088904148728208,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2791552463184079,
+    "sobre90": 0.005559968228752979,
+    "perfectos": 0,
+    "vivos": 1259,
+    "ninos": 11,
+    "exclusivos": 7,
+    "relaciones": 571,
+    "parejas": 29,
+    "retiroMin": 70
+   },
+   "errores": [
+    "Bot V23 en 2002: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2015: Priya Cheung: exige ser protagonista.",
+    "Bot V23 en 2022: Lin Patel: exige ser protagonista.",
+    "Bot V23 en 2024: Anastasia Bianchi: exige ser protagonista.",
+    "Bot V23 en 2029: Karim El Amrani: exige ser protagonista.",
+    "Bot V23 en 2029: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2030: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2030: Walter Smith: exige ser protagonista.",
+    "Bot V23 en 2032: Kaia Brown: exige ser protagonista.",
+    "Bot V23 en 2033: Xinyi Singh: exige ser protagonista.",
+    "Bot V23 en 2034: Antonella Ramírez: exige ser protagonista.",
+    "Bot V23 en 2035: Losa Tui: exige un director de habilidad 56 o más.",
+    "Bot V23 en 2042: Mere Harris: exige ser protagonista.",
+    "Bot V23 en 2045: William Leota: exige ser protagonista.",
+    "Bot V23 en 2045: Ella Walker: exige ser protagonista.",
+    "Bot V23 en 2055: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2057: Haruto Kumar: exige un director de habilidad 58 o más.",
+    "Bot V23 en 2059: Olga Fischer: exige ser protagonista.",
+    "Bot V23 en 2065: James Reed: exige ser protagonista.",
+    "Bot V23 en 2085: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2098: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2101: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2105: Pierre Sokolov: exige ser protagonista.",
+    "Bot V23 en 2107: Lachlan Leota: exige un director de habilidad 54 o más.",
+    "Bot V23 en 2113: Oliver Kowalski: exige ser protagonista.",
+    "Bot V23 en 2116: James Reed: exige ser protagonista.",
+    "Bot V23 en 2117: Nikau Clarke: exige ser protagonista.",
+    "Bot V23 en 2120: Jun Tanaka: exige ser protagonista.",
+    "Bot V23 en 2134: Ka Ho Patel: exige ser protagonista.",
+    "Bot V23 en 2135: Ka Ho Patel: exige ser protagonista."
+   ],
+   "rendimiento": {
+    "msSemana": 9.272974358974263,
+    "peorSemana": 78.4000000001397,
+    "sAnio": 0.4821946666666617,
+    "peorAnio": 0.7348000000000465,
+    "guardado150": 12407196,
+    "guardadoFinal": 12407196
+   },
+   "guardado150": {
+    "json": 12407196,
+    "comprimido": 2226462
+   },
+   "guardadoFinal": {
+    "json": 12407196,
+    "comprimido": 2226462,
+    "comp": "gzip"
+   },
+   "memoria": 157000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "bot-normal-1900",
+   "obras": 17052,
+   "obrasJugador": 4329,
+   "multMediano": 2.2600467599287226,
+   "sobre5": 0.0632770349519118,
+   "pierden": 0.29580107905231057,
+   "multMedianoJugador": 2.648775689040355,
+   "pierdenJugador": 0.1543081543081543,
+   "crecimiento30": 0.09056926098362661,
+   "crecimientoArranque": 1.3177882310721318,
+   "crecimientoTotal": 0.017769615897229585,
+   "crecimientoMediano": 0.011753125678855003,
+   "premiosJugador": 0.0036199095022624436,
+   "premiosTotal": 1105,
+   "aniosAMajor": 29,
+   "cuotaMax": 0.1561,
+   "cuotaMedia": 0.08669639999999998,
+   "cajaFinal2025": 76657225216,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 245,
+   "ideas": {
+    "obras": 4489,
+    "material": 284,
+    "guion": 889,
+    "ia": 141,
+    "efectos": 8,
+    "aplaudidos": 5,
+    "repudiados": 3,
+    "clasificaciones": {
+     "16": 550,
+     "18": 143,
+     "G": 424,
+     "PG-13": 2329,
+     "PG": 884,
+     "N": 158,
+     "R": 1
+    },
+    "adaptacionesRivales": 123
+   },
+   "produccion": {
+    "obras": 4471,
+    "metodos": {
+     "locacion": 882,
+     "set": 1892,
+     "mixto": 1650,
+     "practicos": 17,
+     "cgi": 30
+    },
+    "estilos": {
+     "clasico": 4273,
+     "espectaculo": 109,
+     "documental": 12,
+     "contemplativo": 31,
+     "found": 46
+    },
+    "pruebas": {
+     "estrenar": 3628,
+     "reeditar": 148,
+     "pulir": 684,
+     "regrabar": 9
+    },
+    "sets": 1666,
+    "externos": 0,
+    "dilemas": 784,
+    "sobrecosto": 0.06824324324324316
+   },
+   "lanzamiento": {
+    "obras": 4471,
+    "directos": 0,
+    "oro": 1120,
+    "platino": 987,
+    "diamante": 567,
+    "reestrenos": 153,
+    "parteVentanas": 0.5206112295141452,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.25736736618040357,
+    "sobre90": 0.0008058017727639,
+    "perfectos": 0,
+    "vivos": 1241,
+    "ninos": 11,
+    "exclusivos": 5,
+    "relaciones": 517,
+    "parejas": 31,
+    "retiroMin": 70
+   },
+   "errores": [
+    "Bot V23 en 1909: Michael Morgan: exige ser protagonista.",
+    "Bot V23 en 1923: Charlotte Lindqvist: exige ser protagonista.",
+    "Bot V23 en 1937: Jack Brown: exige ser protagonista.",
+    "Bot V23 en 1940: Yuna Sato: exige ser protagonista.",
+    "Bot V23 en 1940: Riley Kauri: exige ser protagonista.",
+    "Bot V23 en 1949: Mia Fonoti: exige ser protagonista.",
+    "Bot V23 en 1955: Ximena Cárdenas: exige un director de habilidad 63 o más.",
+    "Bot V23 en 1963: Hugo Weber: exige ser protagonista.",
+    "Bot V23 en 1964: Olivia Tui: exige ser protagonista.",
+    "Bot V23 en 1966: Elena Moreau: exige ser protagonista.",
+    "Bot V23 en 1972: Lukas Volkov: exige ser protagonista.",
+    "Bot V23 en 1974: Hugo Navarro: exige ser protagonista.",
+    "Bot V23 en 1980: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 1992: Talia Kelly: exige ser protagonista.",
+    "Bot V23 en 1993: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2000: Charlotte Young: exige ser protagonista.",
+    "Bot V23 en 2000: Olga Dubois: exige ser protagonista.",
+    "Bot V23 en 2008: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2011: Arjun Zhang: exige ser protagonista.",
+    "Bot V23 en 2024: Kaia Tui: exige un director de habilidad 50 o más.",
+    "Bot V23 en 2028: Liam Clarke: exige ser protagonista.",
+    "Bot V23 en 2030: Hiroshi Wong: exige ser protagonista.",
+    "Bot V23 en 2032: Seojun Nguyen: exige un director de habilidad 43 o más.",
+    "Bot V23 en 2033: Henrik Weber: exige ser protagonista.",
+    "Bot V23 en 2033: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2038: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2040: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2054: Wanjiru Keita: exige ser protagonista.",
+    "Bot V23 en 2064: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2068: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2071: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2074: June Morgan no firma: es menor de edad: solo obras hasta pg-13.",
+    "Bot V23 en 2078: Tane Harris: exige ser protagonista.",
+    "Bot V23 en 2083: Oliver Kowalski: exige ser protagonista.",
+    "Bot V23 en 2100: Minho Wong: exige ser protagonista.",
+    "Bot V23 en 2101: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2109: Mia Walker: exige ser protagonista.",
+    "Bot V23 en 2116: Amélie Weber: exige ser protagonista.",
+    "Bot V23 en 2120: Hugo Petrov: exige ser protagonista.",
+    "Bot V23 en 2124: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2132: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2133: Luca Rossi: exige ser protagonista.",
+    "Bot V23 en 2137: Kai Harris: exige ser protagonista.",
+    "Bot V23 en 2137: Ava Taylor: exige ser protagonista.",
+    "Bot V23 en 2140: Nikau Anderson: exige ser protagonista.",
+    "Bot V23 en 2147: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2149: Dorothy Morgan: exige ser protagonista."
+   ],
+   "rendimiento": {
+    "msSemana": 9.687676923076568,
+    "peorSemana": 94.0999999998603,
+    "sAnio": 0.5037591999999815,
+    "peorAnio": 0.8858999999999069,
+    "guardado150": 10691532,
+    "guardadoFinal": 15803308
+   },
+   "guardado150": {
+    "json": 10691532,
+    "comprimido": 1894695
+   },
+   "guardadoFinal": {
+    "json": 15803308,
+    "comprimido": 2743687,
+    "comp": "gzip"
+   },
+   "memoria": 131000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "bot-normal-2000",
+   "obras": 10339,
+   "obrasJugador": 3281,
+   "multMediano": 2.293590840353972,
+   "sobre5": 0.06306219170132508,
+   "pierden": 0.2867782183963633,
+   "multMedianoJugador": 2.5871630808987582,
+   "pierdenJugador": 0.15940262115208778,
+   "crecimiento30": 0.11623146653611283,
+   "crecimientoArranque": 0.17416253996288433,
+   "crecimientoTotal": 0.029354703816649508,
+   "crecimientoMediano": 0.01124767728375109,
+   "premiosJugador": 0.009395973154362415,
+   "premiosTotal": 745,
+   "aniosAMajor": 9,
+   "cuotaMax": 0.1628,
+   "cuotaMedia": 0.10926866666666667,
+   "cajaFinal2025": 71503894766,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 198,
+   "ideas": {
+    "obras": 3446,
+    "material": 250,
+    "guion": 611,
+    "ia": 124,
+    "efectos": 6,
+    "aplaudidos": 3,
+    "repudiados": 3,
+    "clasificaciones": {
+     "16": 319,
+     "18": 116,
+     "PG-13": 1839,
+     "G": 423,
+     "PG": 639,
+     "N": 109,
+     "R": 1
+    },
+    "adaptacionesRivales": 89
+   },
+   "produccion": {
+    "obras": 3425,
+    "metodos": {
+     "mixto": 1302,
+     "set": 1404,
+     "locacion": 690,
+     "cgi": 29
+    },
+    "estilos": {
+     "clasico": 3218,
+     "found": 44,
+     "documental": 15,
+     "espectaculo": 107,
+     "contemplativo": 41
+    },
+    "pruebas": {
+     "estrenar": 2796,
+     "pulir": 502,
+     "reeditar": 118,
+     "regrabar": 7
+    },
+    "sets": 1600,
+    "externos": 0,
+    "dilemas": 615,
+    "sobrecosto": 0.06400003367199836
+   },
+   "lanzamiento": {
+    "obras": 3425,
+    "directos": 2,
+    "oro": 1335,
+    "platino": 1096,
+    "diamante": 456,
+    "reestrenos": 87,
+    "parteVentanas": 0.5273546457893519,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.25839830384052753,
+    "sobre90": 0.0016051364365971107,
+    "perfectos": 0,
+    "vivos": 1246,
+    "ninos": 11,
+    "exclusivos": 2,
+    "relaciones": 537,
+    "parejas": 19,
+    "retiroMin": 70
+   },
+   "errores": [
+    "Bot V23 en 2019: Alexéi Weber: exige ser protagonista.",
+    "Bot V23 en 2022: Tunde Otieno: exige ser protagonista.",
+    "Bot V23 en 2023: Chiamaka Ouma: exige ser protagonista.",
+    "Bot V23 en 2033: Lucas Brooks: exige ser protagonista.",
+    "Bot V23 en 2036: Ananya Nakamura: exige ser protagonista.",
+    "Bot V23 en 2036: Antonella Vargas: exige ser protagonista.",
+    "Bot V23 en 2049: Amélie Müller: exige ser protagonista.",
+    "Bot V23 en 2050: Amélie Müller: exige ser protagonista.",
+    "Bot V23 en 2053: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2057: Thandi Keita: exige un director de habilidad 55 o más.",
+    "Bot V23 en 2060: Karim Bello: exige ser protagonista.",
+    "Bot V23 en 2064: Chloe Dawson: exige ser protagonista.",
+    "Bot V23 en 2065: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2065: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2076: Camila Carter: exige ser protagonista.",
+    "Bot V23 en 2084: Emeka Ndlovu: exige ser protagonista.",
+    "Bot V23 en 2087: Matteo Larsson: exige un director de habilidad 56 o más.",
+    "Bot V23 en 2090: Lukas Moreau: exige ser protagonista.",
+    "Bot V23 en 2092: Emma Moreau: exige ser protagonista.",
+    "Bot V23 en 2094: Makena Otieno: exige ser protagonista.",
+    "Bot V23 en 2096: Olga Lindqvist: exige ser protagonista.",
+    "Bot V23 en 2098: Pablo Kowalski: exige ser protagonista.",
+    "Bot V23 en 2098: Losa Martin: exige ser protagonista.",
+    "Bot V23 en 2098: Viktor Romano: exige ser protagonista.",
+    "Bot V23 en 2098: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2101: Lucas García: exige ser protagonista.",
+    "Bot V23 en 2103: Imani Bello: exige un director de habilidad 50 o más.",
+    "Bot V23 en 2108: Luca Fischer: exige ser protagonista.",
+    "Bot V23 en 2126: Chiara Volkov: exige ser protagonista.",
+    "Bot V23 en 2131: Isabella Torres: exige ser protagonista.",
+    "Bot V23 en 2136: Ella Kelly: exige ser protagonista.",
+    "Bot V23 en 2137: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2143: Folake Ndlovu: exige ser protagonista.",
+    "Bot V23 en 2143: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2148: Yasmin Nkosi: exige ser protagonista."
+   ],
+   "rendimiento": {
+    "msSemana": 9.385884615384127,
+    "peorSemana": 88.30000000004657,
+    "sAnio": 0.4880659999999746,
+    "peorAnio": 0.9490999999998603,
+    "guardado150": 13105931,
+    "guardadoFinal": 13105931
+   },
+   "guardado150": {
+    "json": 13105931,
+    "comprimido": 2344805
+   },
+   "guardadoFinal": {
+    "json": 13105931,
+    "comprimido": 2344805,
+    "comp": "gzip"
+   },
+   "memoria": 167000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 1900,
+   "hasta": 2150,
+   "semilla": "bot-agresiva-1900",
+   "obras": 18988,
+   "obrasJugador": 4254,
+   "multMediano": 2.2487481898285324,
+   "sobre5": 0.06920160101116495,
+   "pierden": 0.30345481356646303,
+   "multMedianoJugador": 3.1131403811000027,
+   "pierdenJugador": 0.10202162670427832,
+   "crecimiento30": 0.09711953599168655,
+   "crecimientoArranque": 1.3532746429396973,
+   "crecimientoTotal": 0.018148110822685082,
+   "crecimientoMediano": 0.010430757890010467,
+   "premiosJugador": 0.04796380090497738,
+   "premiosTotal": 1105,
+   "aniosAMajor": 3,
+   "cuotaMax": 0.2033,
+   "cuotaMedia": 0.13270639999999997,
+   "cajaFinal2025": 97565551541,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 296,
+   "ideas": {
+    "obras": 4381,
+    "material": 289,
+    "guion": 888,
+    "ia": 493,
+    "efectos": 48,
+    "aplaudidos": 25,
+    "repudiados": 23,
+    "clasificaciones": {
+     "16": 331,
+     "18": 112,
+     "PG-13": 2363,
+     "N": 134,
+     "G": 488,
+     "PG": 948,
+     "R": 5
+    },
+    "adaptacionesRivales": 134
+   },
+   "produccion": {
+    "obras": 4364,
+    "metodos": {
+     "locacion": 866,
+     "mixto": 1268,
+     "set": 1785,
+     "practicos": 122,
+     "cgi": 323
+    },
+    "estilos": {
+     "clasico": 4099,
+     "espectaculo": 195,
+     "contemplativo": 36,
+     "documental": 17,
+     "found": 17
+    },
+    "pruebas": {
+     "estrenar": 4153,
+     "reeditar": 27,
+     "pulir": 181
+    },
+    "sets": 1532,
+    "externos": 0,
+    "dilemas": 756,
+    "sobrecosto": 0.05300000357557422
+   },
+   "lanzamiento": {
+    "obras": 4364,
+    "directos": 0,
+    "oro": 437,
+    "platino": 1176,
+    "diamante": 1300,
+    "reestrenos": 195,
+    "parteVentanas": 0.5434975629201946,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.25116800729000166,
+    "sobre90": 0.004022526146419952,
+    "perfectos": 0,
+    "vivos": 1243,
+    "ninos": 11,
+    "exclusivos": 3,
+    "relaciones": 540,
+    "parejas": 27,
+    "retiroMin": 70
+   },
+   "errores": [
+    "Bot V23 en 1902: Hao Cheung: exige ser protagonista.",
+    "Bot V23 en 1905: Ruth Brooks: exige un director de habilidad 64 o más.",
+    "Bot V23 en 1906: Lukas Dubois: exige ser protagonista.",
+    "Bot V23 en 1906: Elena Weber: exige ser protagonista.",
+    "Bot V23 en 1908: Charlotte Dubois: exige ser protagonista.",
+    "Bot V23 en 1909: Paula Salazar: exige ser protagonista.",
+    "Bot V23 en 1911: Alexéi Volkov: exige ser protagonista.",
+    "Bot V23 en 1914: Emiliano Ortega: exige ser protagonista.",
+    "Bot V23 en 1917: Mariana Ramírez: exige un director de habilidad 60 o más.",
+    "Bot V23 en 1921: Lupita Silva: exige ser protagonista.",
+    "Bot V23 en 1926: Anastasia Novak: exige ser protagonista.",
+    "Bot V23 en 1928: Pierre Weber: exige ser protagonista.",
+    "Bot V23 en 1929: Ayesha Sato: exige ser protagonista.",
+    "Bot V23 en 1929: Greta Jensen: exige ser protagonista.",
+    "Bot V23 en 1931: Rosa Pérez: exige ser protagonista.",
+    "Bot V23 en 1935: Anna Müller: exige ser protagonista.",
+    "Bot V23 en 1936: Luciana Rodríguez: exige ser protagonista.",
+    "Bot V23 en 1938: Matteo Kowalski: exige ser protagonista.",
+    "Bot V23 en 1941: Andrés Gómez: exige ser protagonista.",
+    "Bot V23 en 1944: Gabriela Vargas: exige ser protagonista.",
+    "Bot V23 en 1945: Pablo Volkov: exige ser protagonista.",
+    "Bot V23 en 1946: Rodrigo Quispe: exige ser protagonista.",
+    "Bot V23 en 1952: Renata Souza: exige ser protagonista.",
+    "Bot V23 en 1954: Alonso Quispe: exige ser protagonista.",
+    "Bot V23 en 1956: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 1957: Rodrigo Martínez: exige ser protagonista.",
+    "Bot V23 en 1958: Mariana Quispe: exige ser protagonista.",
+    "Bot V23 en 1958: Alexéi Sokolov: exige ser protagonista.",
+    "Bot V23 en 1958: Pablo Kowalski: exige ser protagonista.",
+    "Bot V23 en 1960: Viktor Volkov: exige ser protagonista.",
+    "Bot V23 en 1961: Viktor Volkov: exige ser protagonista.",
+    "Bot V23 en 1967: Lukas Bianchi: exige ser protagonista.",
+    "Bot V23 en 1976: Thiago Gómez: exige ser protagonista.",
+    "Bot V23 en 1976: Jackson Dawson: exige ser protagonista.",
+    "Bot V23 en 1979: Antonella Salazar: exige ser protagonista.",
+    "Bot V23 en 1979: Luciana Alves: exige ser protagonista.",
+    "Bot V23 en 1983: Dmitri Smirnov: exige ser protagonista.",
+    "Bot V23 en 1986: Ayesha Patel: exige ser protagonista.",
+    "Bot V23 en 1987: Isabella Gómez: exige ser protagonista.",
+    "Bot V23 en 1988: Klaus Kowalski: exige un director de habilidad 59 o más.",
+    "Bot V23 en 1988: Pierre Romano: exige ser protagonista.",
+    "Bot V23 en 1989: Hiroshi Li: exige ser protagonista.",
+    "Bot V23 en 1995: Luca Bianchi: exige ser protagonista.",
+    "Bot V23 en 1996: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 1996: Catalina Rodríguez: exige un director de habilidad 52 o más.",
+    "Bot V23 en 1997: Anna Volkov: exige un director de habilidad 57 o más.",
+    "Bot V23 en 1998: Amélie Smirnov: exige un director de habilidad 54 o más.",
+    "Bot V23 en 1998: Catalina Ortega: exige ser protagonista.",
+    "Bot V23 en 1999: Matteo Rossi: exige un director de habilidad 57 o más.",
+    "Bot V23 en 1999: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género."
+   ],
+   "rendimiento": {
+    "msSemana": 10.522461538461414,
+    "peorSemana": 125.39999999990687,
+    "sAnio": 0.5471679999999935,
+    "peorAnio": 1.1326999999999534,
+    "guardado150": 10905904,
+    "guardadoFinal": 16562578
+   },
+   "guardado150": {
+    "json": 10905904,
+    "comprimido": 1906679
+   },
+   "guardadoFinal": {
+    "json": 16562578,
+    "comprimido": 2860312,
+    "comp": "gzip"
+   },
+   "memoria": 269000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 2000,
+   "hasta": 2150,
+   "semilla": "bot-agresiva-2000",
+   "obras": 11806,
+   "obrasJugador": 3221,
+   "multMediano": 2.240577537017307,
+   "sobre5": 0.06073183127223446,
+   "pierden": 0.31500931729629,
+   "multMedianoJugador": 2.9198738715121166,
+   "pierdenJugador": 0.10742005588326607,
+   "crecimiento30": 0.07409301603325846,
+   "crecimientoArranque": 0.41716420526933096,
+   "crecimientoTotal": 0.02253253793264265,
+   "crecimientoMediano": 0.015757330346728438,
+   "premiosJugador": 0.08322147651006712,
+   "premiosTotal": 745,
+   "aniosAMajor": 5,
+   "cuotaMax": 0.2251,
+   "cuotaMedia": 0.16692133333333337,
+   "cajaFinal2025": 184901685416,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 212,
+   "ideas": {
+    "obras": 3404,
+    "material": 234,
+    "guion": 643,
+    "ia": 592,
+    "efectos": 59,
+    "aplaudidos": 34,
+    "repudiados": 22,
+    "clasificaciones": {
+     "16": 252,
+     "18": 115,
+     "PG-13": 1745,
+     "PG": 678,
+     "G": 521,
+     "N": 90,
+     "R": 3
+    },
+    "adaptacionesRivales": 108
+   },
+   "produccion": {
+    "obras": 3381,
+    "metodos": {
+     "set": 1472,
+     "mixto": 966,
+     "locacion": 644,
+     "cgi": 299
+    },
+    "estilos": {
+     "clasico": 3128,
+     "found": 40,
+     "espectaculo": 169,
+     "documental": 14,
+     "contemplativo": 30
+    },
+    "pruebas": {
+     "estrenar": 3165,
+     "pulir": 173,
+     "reeditar": 41,
+     "regrabar": 1
+    },
+    "sets": 1441,
+    "externos": 0,
+    "dilemas": 596,
+    "sobrecosto": 0.05492149738157259
+   },
+   "lanzamiento": {
+    "obras": 3381,
+    "directos": 0,
+    "oro": 529,
+    "platino": 1348,
+    "diamante": 1240,
+    "reestrenos": 132,
+    "parteVentanas": 0.5449603139575208,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.25936325553761164,
+    "sobre90": 0.0032310177705977385,
+    "perfectos": 0,
+    "vivos": 1238,
+    "ninos": 11,
+    "exclusivos": 8,
+    "relaciones": 542,
+    "parejas": 18,
+    "retiroMin": 70
+   },
+   "errores": [
+    "Bot V23 en 2005: Logan Dawson: exige ser protagonista.",
+    "Bot V23 en 2011: Andrés Castro: exige ser protagonista.",
+    "Bot V23 en 2012: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2013: Luca Müller: exige ser protagonista.",
+    "Bot V23 en 2013: Valeria Dawson: exige ser protagonista.",
+    "Bot V23 en 2014: Luca Müller: exige ser protagonista.",
+    "Bot V23 en 2014: Gabriel Ortega: exige ser protagonista.",
+    "Bot V23 en 2014: Wing Patel: exige ser protagonista.",
+    "Bot V23 en 2019: Caleb Hughes: exige ser protagonista.",
+    "Bot V23 en 2019: Priya Nakamura: exige ser protagonista.",
+    "Bot V23 en 2020: Mariana Rojas: exige ser protagonista.",
+    "Bot V23 en 2021: Jabari Adeyemi: exige ser protagonista.",
+    "Bot V23 en 2021: Noah López: exige ser protagonista.",
+    "Bot V23 en 2026: Renata Rojas: exige ser protagonista.",
+    "Bot V23 en 2027: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2027: Emily Smith: exige ser protagonista.",
+    "Bot V23 en 2029: Karim Nkosi: exige ser protagonista.",
+    "Bot V23 en 2029: Grace Hughes: exige ser protagonista.",
+    "Bot V23 en 2029: Matteo Bianchi: exige ser protagonista.",
+    "Bot V23 en 2030: Aiko Cheung: exige ser protagonista.",
+    "Bot V23 en 2031: Antonella Rodríguez: exige ser protagonista.",
+    "Bot V23 en 2032: Pierre Müller: exige ser protagonista.",
+    "Bot V23 en 2034: Mariana Rojas: exige ser protagonista.",
+    "Bot V23 en 2035: Alexéi Sokolov: exige ser protagonista.",
+    "Bot V23 en 2035: Viktor Volkov: exige ser protagonista.",
+    "Bot V23 en 2035: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2039: Marta Rossi: exige ser protagonista.",
+    "Bot V23 en 2039: Sione Wilson: exige ser protagonista.",
+    "Bot V23 en 2040: Greta Kowalski: exige ser protagonista.",
+    "Bot V23 en 2044: Mauricio Quispe: exige ser protagonista.",
+    "Bot V23 en 2046: Charlotte Dubois: exige ser protagonista.",
+    "Bot V23 en 2049: Alonso Cárdenas: exige ser protagonista.",
+    "Bot V23 en 2050: Ayana Keita: exige ser protagonista.",
+    "Bot V23 en 2050: Grace Bennett: exige ser protagonista.",
+    "Bot V23 en 2051: Salma Kamau: exige ser protagonista.",
+    "Bot V23 en 2054: Michael Miller: exige ser protagonista.",
+    "Bot V23 en 2055: Valeria Smith: exige un director de habilidad 57 o más.",
+    "Bot V23 en 2056: Tunde Nkosi: exige ser protagonista.",
+    "Bot V23 en 2060: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2060: Renata Ortega: exige ser protagonista.",
+    "Bot V23 en 2062: Chiamaka El Amrani: exige ser protagonista.",
+    "Bot V23 en 2063: Olga Lindqvist: exige ser protagonista.",
+    "Bot V23 en 2065: Wanjiru Mahmoud: exige ser protagonista.",
+    "Bot V23 en 2066: Kwame Kamau: exige un director de habilidad 57 o más.",
+    "Bot V23 en 2066: Felipe Vargas: exige ser protagonista.",
+    "Bot V23 en 2068: Valentina Castro: exige ser protagonista.",
+    "Bot V23 en 2072: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.",
+    "Bot V23 en 2072: June Hayes: exige un director de habilidad 45 o más.",
+    "Bot V23 en 2073: Ethan Carter: exige ser protagonista.",
+    "Bot V23 en 2073: Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género."
+   ],
+   "rendimiento": {
+    "msSemana": 10.237064102564085,
+    "peorSemana": 84.0999999998603,
+    "sAnio": 0.5323273333333324,
+    "peorAnio": 0.9786999999999534,
+    "guardado150": 13773518,
+    "guardadoFinal": 13773518
+   },
+   "guardado150": {
+    "json": 13773518,
+    "comprimido": 2468817
+   },
+   "guardadoFinal": {
+    "json": 13773518,
+    "comprimido": 2468817,
+    "comp": "gzip"
+   },
+   "memoria": 167000000,
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  }
+ ],
+ "lento": {
+  "abrir": 0.606,
+  "semanaConPantalla": 35.56153846152414,
+  "porSeccion": {
+   "estudio": 35.56153846152414,
+   "obras": 19.32307692307334,
+   "mundo": 35.753846153849736,
+   "negocio": 37.46153846155637,
+   "talento": 16.35384615383541
+  },
+  "anioSinPantalla": 0.7444000000001397
+ },
+ "reglas": [
+  {
+   "nombre": "Contenido nulo da G",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia leve da PG",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia moderada da PG-13",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Lenguaje rudo da 16",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Amor candente da NC-17 (17 años)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia gráfica da 18",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia sangrienta da R",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Amor explícito da X",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La parte más fuerte manda",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Contenido moderado puede ir como N",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "N no admite contenido fuerte",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Lo de adultos dice «siempre sugerido»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Antes de 1968 la censura limita a 16",
+   "ok": true,
+   "detalle": "16"
+  },
+  {
+   "nombre": "Gore sube la clasificación a R",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico es siempre de adultos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico no existe antes de 1968",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico nunca con familia y juventud",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico nunca con públicos infantiles",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico solo con personajes adultos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Con menores el amor no pasa de romántico",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Con niños en el elenco la obra no pasa de PG-13",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Drácula no es libre en 1982",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Drácula es libre desde 1983",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Comprar los derechos antes de liberarse cuesta",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La Odisea es libre siempre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay 82 obras de dominio público",
+   "ok": true,
+   "detalle": 82
+  },
+  {
+   "nombre": "La regla es ajustable (vida + 50 libera antes)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Inflación: ida y vuelta a dólares de hoy",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Inflación: un dólar de 1900 vale más de 25 de hoy",
+   "ok": true,
+   "detalle": "38.7"
+  },
+  {
+   "nombre": "Población 1900 ≈ 1.650 millones",
+   "ok": true,
+   "detalle": "1.65"
+  },
+  {
+   "nombre": "Población 2000 ≈ 6.150 millones",
+   "ok": true,
+   "detalle": "6.15"
+  },
+  {
+   "nombre": "Población 2024 ≈ 8.100 millones",
+   "ok": true,
+   "detalle": "8.16"
+  },
+  {
+   "nombre": "Listas completas: 227 temas, 86 subgéneros (con Western espacial), 53 problemáticas, 34 ficciones",
+   "ok": true,
+   "detalle": "{\"temas\":227,\"subgeneros\":86,\"problematicas\":53,\"ficcion\":34,\"dominio\":82,\"arcos\":7,\"subarcos\":10}"
+  },
+  {
+   "nombre": "Más de 1.000 talentos vivos",
+   "ok": true,
+   "detalle": 1210
+  },
+  {
+   "nombre": "Nadie tiene todo en 100",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un 90 o más es raro (3 % o menos)",
+   "ok": true,
+   "detalle": "0.5 %"
+  },
+  {
+   "nombre": "Un cargo cuesta 20 de energía y se recuperan 10 al mes",
+   "ok": true,
+   "detalle": "80 → 100"
+  },
+  {
+   "nombre": "Nadie trabaja en más de 2 proyectos a la vez",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Nadie se retira antes de los 70",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los niños actores solo hacen obras hasta PG-13",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una estrella rechaza a un estudio sin fama",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Con porcentaje, el salario fijo baja",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El salario exclusivo sigue a la época (1,8 veces la tarifa)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las tarifas suben con la época, no con el presupuesto de la obra",
+   "ok": true,
+   "detalle": "9832 → 295648"
+  },
+  {
+   "nombre": "La academia no pasa de +5 por oficio",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las notas de los departamentos van de F a A+",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El CGI no existe antes de 1973",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "IMAX y 3D llegan en su año",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los incentivos de Colombia rigen desde 2013",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El reparto ideal del presupuesto suma 100 %",
+   "ok": true,
+   "detalle": "100 %"
+  },
+  {
+   "nombre": "Vestuario y efectos pesan en la calidad",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Quitarle presupuesto a un departamento le baja la nota",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Reusar un set abarata la producción y acorta la preproducción",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Rodar en un terreno propio es más barato",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una obra animada necesita quien anime",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Pulir tras la prueba de público suma público y semanas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un dilema de rodaje aplica sus efectos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las festividades suben a su familia en su región",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El 1 de enero de 1850 fue martes",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Pascua de 2024: 31 de marzo",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Año Nuevo chino de 2024: 10 de febrero (luna nueva)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Acción de Gracias de 2024: 28 de noviembre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El factor semanal queda entre ×0,80 y ×1,40",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Ningún festival usa un nombre real",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una Leyenda viva pide prestigio 45",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay 56 premisas y tropos",
+   "ok": true,
+   "detalle": 56
+  },
+  {
+   "nombre": "Las ventanas llegan en su año (TV 1955, video 1977, streaming 2007)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Directo a video desde 1980 y a streaming desde 2010",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las certificaciones de video empiezan en 1979 y suben de oro a diamante",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Antes de la TV todo sale de la taquilla",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Retener una región: no se estrena allí y la campaña cuesta menos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El estreno escalonado llega 4 semanas después",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Doblar evita perder público por el idioma",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La mezcla de canales recomendada rinde al menos como la de siempre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un reestreno necesita 7 años desde el estreno",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El diseñador de arte y tecnología también pesa en vestuario",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los rivales también guardan sets",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay tres modos y cinco dificultades",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay cuatro retos finales",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay al menos 30 logros",
+   "ok": true,
+   "detalle": 30
+  },
+  {
+   "nombre": "Cada dificultad tiene su texto con humor",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El progreso de los retos va de 0 a 1",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El paquete del editor se puede leer",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay cuatro medios nuevos con su premio",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los formatos de música suman 1",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las cuotas de las plataformas suman 1",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un juego va a una a cuatro plataformas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La ocupación del teatro va de 5 % a 100 %",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Ninguna venta es negativa o infinita",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los motores tienen de 1 a 5 estrellas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay 80 eventos con decisiones",
+   "ok": true,
+   "detalle": 80
+  },
+  {
+   "nombre": "Cada evento tiene al menos dos opciones",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay al menos 50 inventos",
+   "ok": true,
+   "detalle": 52
+  },
+  {
+   "nombre": "Hay al menos 30 construcciones",
+   "ok": true,
+   "detalle": 37
+  },
+  {
+   "nombre": "El puntaje de crédito va de 300 a 850",
+   "ok": true,
+   "detalle": 340
+  },
+  {
+   "nombre": "La quiebra tiene tres salidas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los hitos están en orden de fecha",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El factor de guerras y crisis está acotado",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Ningún estudio quebrado sigue filmando obras nuevas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El socio nunca tiene la mayoría",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una temporada va de 2 a 300 episodios",
+   "ok": true,
+   "detalle": "300 / 2"
+  },
+  {
+   "nombre": "Un episodio va de 5 a 180 minutos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay siete caminos de continuación",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El reboot baja la fatiga y la secuela la sube",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El horario familiar multa el contenido para adultos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La parrilla tiene 7 días y 6 franjas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La plataforma tiene tres planes",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Toda franquicia viva tiene al menos una obra y un canon",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El efecto de la franquicia en el deseo está acotado",
+   "ok": true,
+   "detalle": ""
+  }
+ ]
+}

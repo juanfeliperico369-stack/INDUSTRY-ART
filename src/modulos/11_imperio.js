@@ -264,7 +264,7 @@ IA.imperio = (function () {
     IA.historia.INVENTOS.forEach(function (x) {
       const t = s.tec[x.id];
       const mio = t && (t.de === 0 || t.lic);
-      if (mio && a < x.anio + 5) suma[x.dep] = Math.min(6, (suma[x.dep] || 0) + 2);
+      if (mio && a < x.anio + 5) suma[x.dep] = Math.min(3, (suma[x.dep] || 0) + 1);
     });
     Object.keys(suma).forEach(function (k) { b[k] = (b[k] || 0) + suma[k]; });
   }

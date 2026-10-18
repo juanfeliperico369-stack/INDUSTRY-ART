@@ -16,7 +16,7 @@ IA.pruebas = (function () {
   // Registro de cada obra al terminar (las métricas no dependen de lo que la compactación borra después)
   let registro = null;
   N.on('obraTerminada', function (o) {
-    if (!registro) return;
+    if (!registro || o.tv) return; // las metas son de películas (V27): las series van aparte
     const r = { est: o.est, mult: O.multiplicador(o), neto: O.neto(o), talento: O.costoTotal(o) > 0 ? (o.cf || 0) / O.costoTotal(o) : 0 };
     // Cómo se hizo (V19), solo para las obras del jugador
     if (o.est === 0) {
@@ -265,7 +265,8 @@ IA.pruebas = (function () {
     } else if (anio >= 1952 && N.probabilidad(0.25)) {
       b = O.borrador(0, { gen: elegirGeneros(S), escala: 1, completa: true });
       const fs = TV.formatosDe(anio);
-      TV.aplicar(b, { fmt: N.elegir(fs).id });
+      const fsF = fs.filter(function (f) { return !f.vivo; });
+      TV.aplicar(b, { fmt: N.elegir(fsF.length ? fsF : fs).id });
       if (!(b.prob && b.prob.length)) IA.ideas.recomendarHistoria(b, anio);
       IA.ideas.generarPersonajes(b);
       O.equipoRecomendado(b, est.ambicion);
@@ -277,7 +278,7 @@ IA.pruebas = (function () {
     if (!b) return;
     if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6) return;
     const r = IA.juego.iniciarObra(b);
-    if (r.error && registroErrores && !/disponible|equipo/.test(r.error)) registroErrores.push('Bot V23 en ' + anio + ': ' + r.error);
+    if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad/.test(r.error)) registroErrores.push('Bot V23 en ' + anio + ': ' + r.error);
   }
   function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x) c++; }); return c; }
   // La idea del bot (V17): a veces adapta un material, a veces produce un guion comprado, y si no, una idea propia

@@ -68,6 +68,8 @@ IA.negocio = (function () {
     IA.sede.bonos(b, obra); // personal de oficina (V21)
     IA.carrera.bonos(b); // trasfondo y arquetipo de tu avatar (V21)
     IA.imperio.bonoTec(b); // inventos propios o licenciados mientras son novedad (V24)
+    // V27: rendimientos decrecientes; apilar instalaciones y personal rinde cada vez menos (tope suave de +10)
+    Object.keys(b).forEach(function (k) { if (k[0] !== '_' && b[k] > 0) b[k] = Math.round(10 * (1 - Math.exp(-b[k] / 10)) * 10) / 10; });
     return b;
   }
   function rapidez(estId) {
@@ -162,7 +164,7 @@ IA.negocio = (function () {
       famaTrasEstreno: function (o, mult) {
         const est = N.S.estudios[o.est];
         // La fama del estudio sube despacio con los éxitos y la buena crítica (cuesta más cuanto más alta)
-        const cambio = N.limitar(0.008 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 3000, -0.012, 0.02);
+        const cambio = N.limitar(0.004 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 6000, -0.012, 0.01); // V27: más lento
         est.fama = N.redondear(N.limitar(est.fama + (cambio > 0 ? cambio * (1 - est.fama) : cambio), 0.01, 1), 3);
       },
     };
@@ -241,7 +243,9 @@ IA.negocio = (function () {
     const puesto = ranking.map(function (r) { return r.id; }).indexOf(0) + 1;
     fila.puesto = puesto;
     const ultimos = S.fin.hist.slice(-3);
-    if (ultimos.length === 3 && ultimos.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.06; }) && !S.majorDesde) {
+    // V27: cuatro años seguidos entre los tres primeros con 4 % o más del mercado, prestigio de 70 y al menos 15 años de historia
+    const cinco = S.fin.hist.slice(-4);
+    if (cinco.length === 4 && cinco.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.04; }) && jug.fama >= 0.7 && S.fin.hist.length >= 16 && !S.majorDesde) {
       S.majorDesde = anioCerrado;
       N.emit('noticia', { tipo: 'estudio', texto: 'Tu estudio ya es una major: está entre los tres más taquilleros del mundo.', importante: true });
     }
