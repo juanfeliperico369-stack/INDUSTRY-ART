@@ -34,7 +34,45 @@ ART.rivales = (function () {
     { anio: 2058, nombre: 'Megaciudad Films', pais: 'ng', familia: 'DR', tam: 0.8, calidad: 2, riesgo: 0.5, texto: 'Historias de las nuevas megaciudades' },
     { anio: 2104, nombre: 'Órbita Baja', pais: 'us', familia: 'IM', tam: 0.7, calidad: 2, riesgo: 0.8, texto: 'Cine filmado en órbita' },
   ];
-  const SILABAS = ['Al', 'Bru', 'Ce', 'Do', 'Ka', 'Li', 'Mo', 'Ner', 'Or', 'Pa', 'Ri', 'Sa', 'Te', 'Vi', 'Zu'];
+  // ---------- Estudios que nacen solos ----------
+  // El mundo quiere más estudios a medida que crece el mercado. La mitad los funda una estrella o un director famoso
+  // con su apellido en la puerta (y se lleva su talento en exclusiva); el resto nace con un nombre de su región.
+  const META = [[1895, 7], [1920, 10], [1950, 12], [1980, 14], [2010, 16], [2100, 18], [2300, 20]];
+  const CON_APELLIDO = { lat: ['Producciones {a}', 'Estudios {a}', 'Cine {a}'], nam: ['{a} Pictures', '{a} Brothers', '{a} Films'], oce: ['{a} Pictures', '{a} Films'],
+    eur: ['Films {a}', '{a} Film', 'Studio {a}'], asi: ['{a} Pictures', '{a} Studios', '{a} Entertainment'], afr: ['{a} Films', '{a} Studios'] };
+  const RAICES = { lat: ['Cóndor', 'Alba', 'Faro', 'Volcán', 'Ceiba', 'Quetzal', 'Mar del Sur', 'Colibrí', 'Cielo Abierto', 'Andes'],
+    nam: ['Silver Lake', 'Red Oak', 'Blue Harbor', 'Northstar', 'Lighthouse', 'Ironwood', 'Summit', 'Prairie', 'Golden Hour', 'Bright Lane'],
+    oce: ['Southern Cross', 'Coral', 'Outback', 'Kiwi Hill'], eur: ['Aurora', 'Lumen', 'Atlas', 'Minerva', 'Orfeo', 'Borealis', 'Helios', 'Arlequín', 'Linterna', 'Vesta'],
+    asi: ['Loto', 'Jade', 'Sakura', 'Monzón', 'Tigre Blanco', 'Himalaya', 'Bambú', 'Dragón de Papel', 'Mekong', 'Perla'], afr: ['Baobab', 'Sahel', 'Kilimanjaro', 'Nilo', 'Sabana', 'Ébano', 'Atlas Sur'] };
+  const SUFIJOS = { lat: ['Films', 'Producciones', 'Cine', 'Estudios'], nam: ['Pictures', 'Studios', 'Films', 'Entertainment'], oce: ['Pictures', 'Films'], eur: ['Film', 'Films', 'Cinéma', 'Studio'], asi: ['Pictures', 'Studios', 'Films', 'Entertainment'], afr: ['Films', 'Studios', 'Pictures'] };
+  function apellido(nom) { const p = String(nom).split(' '); return p.length > 1 ? p.slice(1).join(' ') : p[0]; }
+  function fundador() {
+    const S = N.S, anio = N.anio(), T = ART.talentos;
+    const c = S.talentos.filter(function (t) {
+      const e = anio - t.nac;
+      return !t.ret && !t.mu && !t.funda && ['direccion', 'produccion', 'interprete', 'guion', 'animacion'].indexOf(t.of) >= 0 && t.fama >= 0.4 && e >= 32 && e <= 66 && T.exclusivoDe(t) === null && !T.ocupado(t);
+    }).sort(function (a, b) { return b.fama - a.fama; });
+    return c.length ? c[N.entero(0, Math.min(5, c.length - 1))] : null;
+  }
+  function nacerEstudio() {
+    const S = N.S, t = N.probabilidad(0.5) ? fundador() : null;
+    let r;
+    if (t) {
+      const af = t.af && t.af.length ? t.af : [0], i = af.indexOf(Math.max.apply(null, af));
+      const pais = D.pais(t.pais) || D.pais('us');
+      r = { nombre: N.elegir(CON_APELLIDO[pais.region] || CON_APELLIDO.nam).replace('{a}', apellido(t.nom)), pais: pais.id, familia: D.ORDEN_FAM[Math.max(0, i)], tam: N.redondear(0.45 + t.fama * 0.4, 2),
+        calidad: Math.round(N.limitar((t.hab - 60) / 8, -1, 4)), riesgo: N.redondear(0.45 + N.azar() * 0.35, 2), texto: 'Fundado por ' + t.nom };
+    } else {
+      const pais = D.paises[N.ponderado(D.paises.map(function (p) { return p.peso; }))], reg = RAICES[pais.region] ? pais.region : 'nam';
+      r = { nombre: N.elegir(RAICES[reg]) + ' ' + N.elegir(SUFIJOS[reg]), pais: pais.id, familia: N.elegir(D.ORDEN_FAM), tam: N.redondear(0.5 + N.azar() * 0.3, 2), calidad: N.entero(-1, 3),
+        riesgo: N.redondear(0.4 + N.azar() * 0.4, 2), texto: 'Un estudio joven de ' + pais.nombre };
+    }
+    if (S.estudios.some(function (e) { return e.nombre === r.nombre; })) return null;
+    const est = agregarEstudio(r, false);
+    if (t) { t.funda = est.id; ART.talentos.firmarExclusivo(t, est.id, 6); }
+    N.emit('noticia', { tipo: 'rival', texto: t ? t.nom + ' funda su propio estudio: ' + r.nombre + '.' : 'Nace un estudio nuevo: ' + r.nombre + ' (' + r.texto.charAt(0).toLowerCase() + r.texto.slice(1) + ').', importante: !!t });
+    return est;
+  }
   function agregarEstudio(r, nota) {
     const S = N.S, tipico = E.presupuestoTipico(N.anio()), pais = D.pais(r.pais) || D.pais('us');
     const id = S.estudios.length;
@@ -199,11 +237,9 @@ ART.rivales = (function () {
     }
     fusiones();
     EMERGENTES.forEach(function (x) { if (x.anio === anio && !S.estudios.some(function (e) { return e.nombre === x.nombre; })) agregarEstudio(x, true); });
-    // Después de 2150, o cuando el mundo se queda con pocos estudios, nacen estudios generados
-    if ((anio > 2150 && N.probabilidad(0.08)) || activos().length < 6) {
-      const nom = N.elegir(SILABAS) + N.elegir(SILABAS).toLowerCase() + ' ' + N.elegir(ART.datos.sufijosLogo);
-      agregarEstudio({ nombre: nom, pais: N.elegir(D.paises).id, familia: N.elegir(D.ORDEN_FAM), tam: 0.6, calidad: N.entero(-1, 3), riesgo: 0.6, texto: 'Un estudio joven' }, true);
-    }
+    // Nacen estudios cuando faltan para el tamaño del mercado (y a veces, aunque no falten); nunca quedan menos de seis
+    const n = activos().length;
+    if (n < 6 || (anio >= D.CINE_DESDE && N.probabilidad(n < Math.round(N.interp(META, anio)) ? 0.35 : 0.04))) nacerEstudio();
   }
   function quebrar(est) {
     const S = N.S;

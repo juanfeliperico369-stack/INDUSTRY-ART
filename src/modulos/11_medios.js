@@ -12,6 +12,7 @@ ART.medios = (function () {
   const N = ART.n, D = ART.datos, X = ART.taxonomia, T = ART.talentos;
   // Piso de costos en dólares de 2025. Antes de 1912 el cine es chico y su presupuesto típico no sirve de vara para
   // los demás medios; el teatro cobra entradas a precio de su época, así que su costo nunca baja de una sala de hoy.
+  const ESCALA_MUSICA = 0.22;
   const tip = function (a, med) { a = a || N.anio(); return Math.max(ART.economia.presupuestoTipico(a), ART.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
   function industria() { const e = N.S && N.S.estudios[0]; return D.industria(e && e.industria); }
   function especial(med) { return industria().meds.indexOf(med) >= 0; }
@@ -81,7 +82,7 @@ ART.medios = (function () {
     { id: 'tv', nombre: 'Canal TeleClip', desde: 1981, u: 'emisiones', pago: 300, w: [[1980, 0], [1986, 0.1], [2000, 0.08], [2012, 0.03], [2150, 0.01]], video: 1 },
     { id: 'descarga', nombre: 'Tienda Pulsar', desde: 2001, u: 'descargas', pago: 1, w: [[2000, 0], [2006, 0.2], [2012, 0.25], [2020, 0.03], [2030, 0]] },
     { id: 'audio', nombre: 'Sonora', desde: 2008, u: 'reproducciones', pago: 0.004, w: [[2007, 0], [2013, 0.15], [2020, 0.62], [2150, 0.66]] },
-    { id: 'video', nombre: 'ClipNet', desde: 2005, u: 'vistas', pago: 0.0015, w: [[2004, 0], [2010, 0.07], [2020, 0.12], [2150, 0.12]], video: 1 },
+    { id: 'video', nombre: 'ClipNet', desde: 2005, u: 'vistas', pago: 0.003, w: [[2004, 0], [2010, 0.07], [2020, 0.12], [2150, 0.12]], video: 1 },
   ];
   // Libros y teatro: extensión, primera tirada, gira de firmas y precio de la entrada
   const EXTENSIONES = [{ id: 'corta', nombre: 'Novela corta (120 páginas)', k: 0.7, sem: 0.7, f: 0.9 }, { id: 'novela', nombre: 'Novela (320 páginas)', k: 1, sem: 1, f: 1 }, { id: 'saga', nombre: 'Saga larga (640 páginas)', k: 1.6, sem: 1.5, f: 1.12 }];
@@ -143,7 +144,8 @@ ART.medios = (function () {
     return recalcular(b);
   }
   function recalcular(b) {
-    const a = N.anio(), m = MED[b.med], t = tip(a, b.med) * (especial(b.med) ? industria().rebaja || 1 : 1);
+    // La música trabaja a otra escala que el cine: un álbum de estudio cuesta cerca de una vigésima parte de una película típica
+    const a = N.anio(), m = MED[b.med], t = tip(a, b.med) * (especial(b.med) ? industria().rebaja || 1 : 1) * (b.med === 'musica' ? ESCALA_MUSICA : 1);
     let k = (m.base + (b.med === 'teatro' ? 0.005 : 0.06) * b.esc) * (b.esc === 2 && b.med !== 'juegos' ? 1.6 : 1), sem = 8;
     if (b.med === 'musica') {
       const tp = MED.musica.tipos.filter(function (x) { return x.id === b.tipo; })[0] || MED.musica.tipos[2]; k *= tp.k; sem = tp.sem;
@@ -220,7 +222,8 @@ ART.medios = (function () {
   }
   // Lo que puede ganar en total (repartido semana a semana con su caída)
   function potencial(p) {
-    let f = 1.15 * Math.pow(p.pub / 60, 2.2) // Rendían de más * Math.exp(N.normal(0, 0.35));
+    // En la música el éxito se concentra más: pocos discos se llevan casi todo
+    let f = 1.15 * Math.pow(p.pub / 60, p.med === 'musica' ? 3 : 2.2);
     const fam = famDe(p.med, p.gen); if (fam) f *= 1 + (N.S.mundo.tendencias[fam.eje] || 0) * 0.3;
     const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
     if (bd) { f *= 1 + Math.min(1, bd.fans / 2e6) * 0.5; if (bd.reu) { f *= 1.5; bd.reu = 0; } }
@@ -254,7 +257,6 @@ ART.medios = (function () {
     const a = N.anio(), v = p.vend, pir = ART.historia.pirateria(a);
     if (p.med === 'musica') {
       formatosMusica(a).forEach(function (f) { const digital = f.id === 'descarga' || f.id === 'stream'; v[f.id] = (v[f.id] || 0) + Math.round(monto * f.parte * (digital ? pir : 1) / ep(f.p, a)); });
-      if (p.tipo === 'banda' || p.cfg.banda) v.vistas = (v.vistas || 0) + (a >= 2005 ? Math.round(monto * 0.05 / ep(0.002, a)) : 0);
     } else if (p.med === 'juegos') {
       const dig = N.interp([[2003, 0], [2010, 0.3], [2020, 0.75], [2150, 0.95]], a);
       const precio = ep(p.cfg.modelo === 'gratis' ? 8 : 55, a);
@@ -325,6 +327,9 @@ ART.medios = (function () {
       r.u = Math.round(r.u + u); r.ing = Math.round(r.ing + ing); sem[x.id] = Math.round(u);
     });
     p.plSem = sem;
+    // Las cifras de la ficha salen de las mismas plataformas: reproducciones de Sonora y vistas de ClipNet
+    if (pl.audio) p.vend.stream = pl.audio.u;
+    if (pl.video) p.vend.vistas = pl.video.u;
     const S = N.S;
     if (S.canal && p.pw <= 26 && p.pub >= 55) { const n = S.canal.par.reduce(function (s2, d) { return s2 + d.filter(function (x) { return x && x.g === 'musical'; }).length; }, 0); if (n) { const r = pl.canal = pl.canal || { u: 0, ing: 0 }; r.u += n; sem.canal = n; } }
   }

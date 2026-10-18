@@ -588,7 +588,8 @@ ART.talentos = (function () {
       const pMuerte = 0.0008 + (e > 60 ? (e - 60) * 0.0012 : 0) + (e > 85 ? (e - 85) * 0.006 : 0);
       if (N.probabilidad(pMuerte) || e >= 105) {
         t.mu = anio; if (!t.ret) t.ret = anio;
-        if (t.fama > 0.35 || t.premios > 0) N.emit('noticia', { tipo: 'talento', texto: 'Fallece ' + t.nom + ' a los ' + e + ' años.', importante: t.fama > 0.6 });
+        const fe = t.funda && S.estudios[t.funda] ? ', ' + (t.sx === 'F' ? 'fundadora' : 'fundador') + ' de ' + S.estudios[t.funda].nombre + ',' : '';
+        if (t.fama > 0.35 || t.premios > 0 || fe) N.emit('noticia', { tipo: 'talento', texto: 'Fallece ' + t.nom + fe + ' a los ' + e + ' años.', importante: t.fama > 0.6 });
         continue;
       }
       if (t.ret) {
@@ -618,8 +619,10 @@ ART.talentos = (function () {
     Object.keys(D.poblacionTalentos).forEach(function (of) {
       const falta = D.poblacionTalentos[of] - (conteo[of] || 0);
       const extra = N.entero(0, 2);
-      for (let i = 0; i < falta + extra; i++) S.talentos.push(crear(of, N.entero(18, 26), anio));
+      for (let i = 0; i < falta + extra; i++) S.talentos.push(hijoDe(of, anio) || crear(of, N.entero(18, 26), anio));
     });
+    revelacion(anio);
+    centenarios(anio);
     // Siempre hay niños actores (un 3 % de los intérpretes) para los papeles infantiles
     const ninos = S.talentos.filter(function (t) { return !t.ret && t.of === 'interprete' && anio - t.nac < 16; }).length;
     for (let i = ninos; i < Math.round(D.poblacionTalentos.interprete * 0.03); i++) S.talentos.push(crear('interprete', N.entero(7, 12), anio));
@@ -628,6 +631,36 @@ ART.talentos = (function () {
     // Las relaciones con quien ya no está se olvidan
     reindexar();
     S.talentos.forEach(function (t) { if (t.rel) Object.keys(t.rel).forEach(function (k) { if (!indice[k]) delete t.rel[k]; }); });
+  }
+  // ---------- Vida del mundo: familias, revelaciones y aniversarios ----------
+  // A veces quien debuta trae un apellido conocido y algo del talento de la familia
+  function hijoDe(of, anio) {
+    if (!N.probabilidad(0.04)) return null;
+    const c = N.S.talentos.filter(function (t) { const e = anio - t.nac; return t.fama >= 0.45 && e >= 42 && e <= 85 && !t.mu && !(t.hijos >= 2); });
+    if (!c.length) return null;
+    const p = N.elegir(c), h = crear(of, N.entero(18, 24), anio, { reg: p.reg, pot: Math.round(N.limitar((p.pot + N.normal(60, 13)) / 2 + 4, 20, 99)), pasado: false });
+    const ap = p.nom.split(' ').slice(1).join(' '), pila = p.nom.split(' ')[0];
+    let nom = h.nom.split(' ')[0];
+    for (let i = 0; i < 6 && nom === pila; i++) nom = nombreNuevo(p.reg, h.sx).split(' ')[0]; // nunca el mismo nombre que su madre o su padre
+    if (ap && nom !== pila) h.nom = nom + ' ' + ap;
+    h.pais = p.pais; h.nomPadre = p.nom; h.fama = N.redondear(Math.max(h.fama, p.fama * 0.25), 3);
+    p.hijos = (p.hijos || 0) + 1;
+    if (p.fama > 0.6) N.emit('noticia', { tipo: 'talento', texto: 'Debuta ' + h.nom + ', ' + (h.sx === 'F' ? 'hija' : 'hijo') + ' de ' + p.nom + '.' });
+    return h;
+  }
+  // Cada año la prensa elige una revelación: joven, con mucho potencial y poca fama; desde ahí todos la conocen
+  function revelacion(anio) {
+    const c = N.S.talentos.filter(function (t) { const e = anio - t.nac; return !t.ret && !t.rev && e >= 17 && e <= 28 && t.pot >= 80 && t.fama < 0.2; });
+    if (!c.length || !N.probabilidad(0.7)) return;
+    const t = c.sort(function (a, b) { return b.pot - a.pot; })[N.entero(0, Math.min(3, c.length - 1))];
+    t.rev = anio; t.desc = 1; t.fama = N.redondear(Math.min(1, t.fama + 0.12), 3);
+    N.emit('noticia', { tipo: 'talento', texto: 'La prensa elige a ' + t.nom + ' (' + nombreOficio(t).toLowerCase() + ') como la revelación del año.' });
+  }
+  // Cien años del nacimiento de las leyendas del arte y de las de tu propia partida
+  function centenarios(anio) {
+    const H = ART.hitosArte, S = N.S;
+    if (H && H.PERSONAS && anio > S.y0) Object.keys(H.PERSONAS).forEach(function (k) { const p = H.PERSONAS[k]; if (p[4] + 100 === anio && p[5] && p[5] < anio) N.emit('noticia', { tipo: 'historia', texto: 'Se cumplen cien años del nacimiento de ' + p[0] + '.' }); });
+    S.talentos.forEach(function (t) { if (t.premios > 0 && t.mu && t.nac + 100 === anio) N.emit('noticia', { tipo: 'historia', texto: 'Se cumplen cien años del nacimiento de ' + t.nom + ', leyenda del oficio de ' + D.oficio(t.of).nombre.toLowerCase() + '.', importante: true }); });
   }
   // Los rivales firman exclusivos con algunas estrellas libres
   function exclusivosRivales() {
@@ -667,6 +700,10 @@ ART.talentos = (function () {
     if (t.idi) s += 'Habla ' + t.idi.map(function (x) { return x.toLowerCase(); }).join(', ').replace(/, ([^,]*)$/, ' y $1') + '. ';
     if (t.obras) s += 'Lleva ' + t.obras + ' obra' + (t.obras > 1 ? 's' : '') + (t.exitos ? (t.exitos === 1 ? ', una de ellas un éxito' : ', ' + t.exitos + ' de ellas éxitos') : '') + (t.premios ? ', y ' + t.premios + ' premio' + (t.premios > 1 ? 's' : '') : '') + '. ';
     else s += e < 18 ? 'Es una promesa que todavía no debuta. ' : 'Todavía no tiene obras en su carrera. ';
+    if (t.nomPadre) s += (t.sx === 'F' ? 'Hija' : 'Hijo') + ' de ' + t.nomPadre + ': el oficio le viene de familia. ';
+    if (t.hijos) s += t.hijos === 1 ? 'Uno de sus hijos siguió sus pasos. ' : 'Dos de sus hijos siguieron sus pasos. ';
+    if (t.funda && N.S.estudios[t.funda]) s += 'Fundó su propio estudio, ' + N.S.estudios[t.funda].nombre + '. ';
+    if (t.rev) s += 'La prensa ' + (t.sx === 'F' ? 'la' : 'lo') + ' eligió como la revelación de ' + t.rev + '. ';
     if (t.vu) s += 'Volvió del retiro' + (t.vu > 1 ? ' ' + t.vu + ' veces' : '') + '. ';
     if (t.ret && !t.mu) s += 'Se retiró en ' + t.ret + '. ';
     if (t.mu) s += 'Falleció en ' + t.mu + '. ';

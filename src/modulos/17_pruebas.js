@@ -65,9 +65,17 @@ ART.pruebas = (function () {
     if (p < 70) return 'pulir';
     return 'estrenar';
   }
+  // Modo austero: con dos años seguidos en pérdida o la caja corta, obras chicas, campañas medianas y nada de lujos
+  // (como haría un jugador con cabeza fría; sin esto, una mala racha al empezar arrastra al estudio a la quiebra)
+  function austero(tipico) {
+    const S = N.S, h = S.fin.hist.slice(-2);
+    if (S.t < 52 * 2) return false;
+    return NG.cajaLibre(0) < tipico * 1.5 || (h.length === 2 && h.every(function (x) { return x.util < 0; }));
+  }
   function decidir(est) {
     const S = N.S, jug = S.estudios[0];
     const tipico = E.presupuestoTipico(N.anio());
+    const aus = austero(tipico);
     // 0. Dilemas de rodaje y pruebas de público pendientes
     ART.juego.decisionesPendientes().forEach(function (o) {
       if (o.dil) ART.juego.decidirDilema(o.id, ART.rodaje.mejorOpcion(o));
@@ -84,7 +92,8 @@ ART.pruebas = (function () {
     O.delEstudio(0, ['lista']).forEach(function (o) {
       if (o.prog) return;
       const nota = o.prueba ? o.prueba.p : o.pub;
-      let nivM = S.t < 52 * 3 ? Math.min(est.marketing, 2) : est.marketing; // al principio, campañas medianas
+      let nivM = S.t < 52 * 3 || aus ? Math.min(est.marketing, 2) : est.marketing; // al principio (y en mala racha), campañas medianas
+      if (aus && nota < 55) nivM = Math.min(nivM, 1);
       // Con poca caja o una obra floja, campaña mediana: el dinero de las ventanas tarda en llegar
       if (nota < 48 || NG.cajaLibre(0) < tipico * 2) nivM = Math.min(nivM, 2);
       while (nivM > 0 && NG.cajaLibre(0) < E.marketingTipico(N.anio()) * D.nivelesMarketing[nivM].mult * 1.2) nivM--;
@@ -105,9 +114,9 @@ ART.pruebas = (function () {
       const c = ART.estreno.cadenas(jug.reg).filter(function (x) { return !ART.estreno.puedeFirmar(x.id, 2); }).sort(function (a, b) { return b.salas - a.salas; })[0];
       if (c) ART.estreno.firmar(c.id, 2);
     }
-    botTele(est, tipico); // series, canal, plataforma, franquicias y licencias
-    botImperio(est, tipico); // eventos, banco e imperio
-    botMedios(tipico); // música, videojuegos, teatro y libros
+    botTele(est, tipico, aus); // series, canal, plataforma, franquicias y licencias
+    botImperio(est, tipico, aus); // eventos, banco e imperio
+    if (!aus) botMedios(tipico); // música, videojuegos, teatro y libros
     // Con la caja en rojo no se arriesga más: espera a que entren los ingresos
     if (S.semanasEnRojo > 0) return;
     // 2. Construir cuando sobra caja
@@ -127,11 +136,12 @@ ART.pruebas = (function () {
       const gen = elegirGeneros(S);
       let escala = N.entero(est.escala[0], est.escala[1]) + (est.grande && N.probabilidad(est.grande) ? 1 : 0);
       if (S.t < 52 * 3) escala = Math.min(escala, 2); // los primeros tres años, sin superproducciones
+      if (aus || (S.t < 52 * 3 && jug.fama < 0.12)) escala = Math.min(escala, 1); // un estudio desconocido empieza con obras medianas
       let b = null, costo = 0, ok = false;
       const tono = N.elegir(D.tonos).id;
       const idea = ideaDelBot(S, gen);
       // Si no alcanza, baja la escala y después la ambición del equipo
-      [S.t < 52 * 3 ? Math.min(est.ambicion, 1.15) : est.ambicion, 0.6].forEach(function (amb) {
+      [S.t < 52 * 3 ? Math.min(est.ambicion, 1.15) : aus ? Math.min(est.ambicion, 0.9) : est.ambicion, 0.6].forEach(function (amb) {
         for (let e = escala; e >= 0 && !ok; e--) {
           b = O.borrador(0, Object.assign({ gen: idea.gen || gen, escala: e, tono: tono, completa: true }, idea.campos));
           O.equipoRecomendado(b, amb);
@@ -189,7 +199,7 @@ ART.pruebas = (function () {
     });
   }
   // Eventos, quiebra, banco, inversiones e imperio
-  function botImperio(est, tipico) {
+  function botImperio(est, tipico, aus) {
     const S = N.S, B = ART.banco, I = ART.imperio, anio = N.anio();
     ART.eventos.autoDecidir();
     if (S.quiebra) { const ops = B.salidasQuiebra().filter(function (x) { return x.id !== 'terminar' && x.ok !== false; }); if (ops.length) B.salir(ops[ops.length - 1].id); return; }
@@ -199,7 +209,7 @@ ART.pruebas = (function () {
     if (N.semana() === 45 && B.deuda() && NG.cajaLibre(0) > tipico * 15) B.prepagar(B.estado().deudas[0].id);
     if (N.semana() === 35 && N.probabilidad(0.3)) { const k = Object.keys(B.estado().acc)[0]; if (k) B.venderAccion(k); }
     if (S.socio && NG.cajaLibre(0) > tipico * 40) B.recomprar();
-    if (N.semana() !== 20) return;
+    if (N.semana() !== 20 || aus) return;
     const libre = NG.cajaLibre(0);
     if (libre > tipico * 12 && I.sedes().length < 2) { const p = N.elegir(ART.datos.paises.filter(function (x) { return x.id !== S.estudios[0].pais; })); I.abrirSede(p.id); }
     if (libre > tipico * 25 && I.filiales().length < 2) { const r = ART.rivales.activos().filter(function (e) { return !e.filial && !I.puedeComprar(e.id); }).sort(function (a, b) { return I.precioEstudio(a.id) - I.precioEstudio(b.id); })[0]; if (r && N.probabilidad(0.4)) I.comprarEstudio(r.id); }
@@ -217,7 +227,7 @@ ART.pruebas = (function () {
     if (!I.tiene('parque') && libre > tipico * 20 && !NG.puedeConstruir('terreno', 'parque')) NG.construir('terreno', 'parque');
   }
   // Lo que haría un jugador con la televisión, el streaming y sus franquicias
-  function botTele(est, tipico) {
+  function botTele(est, tipico, aus) {
     const S = N.S, anio = N.anio(), TV = ART.tv, ST = ART.streaming, F = ART.franquicias;
     (S.pilotos || []).filter(function (p) { return p.nota !== undefined; }).forEach(function (p) {
       if (p.nota >= 55 && O.enProduccion(0).length < NG.capacidad(0) && !TV.ordenarTemporada(p.id).error) return;
@@ -265,7 +275,7 @@ ART.pruebas = (function () {
     }
     if (S.ofFr && S.ofFr.length && N.probabilidad(0.2)) F.aceptarOferta(0);
     // Una vez al mes: continuar un éxito o producir una serie
-    if (N.semana() % 4 !== 2 || S.semanasEnRojo > 0 || O.enProduccion(0).length >= NG.capacidad(0)) return;
+    if (aus || N.semana() % 4 !== 2 || S.semanasEnRojo > 0 || O.enProduccion(0).length >= NG.capacidad(0)) return;
     const exito = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && o.pub >= 64 && S.t - o.fe < 52 * 5 && !o.cont2; }).sort(function (a, b) { return b.pub - a.pub; })[0];
     let b = null;
     if (exito && N.probabilidad(0.35)) {
@@ -280,13 +290,14 @@ ART.pruebas = (function () {
       TV.aplicar(b, { fmt: N.elegir(fsF.length ? fsF : fs).id });
       if (!(b.prob && b.prob.length)) ART.ideas.recomendarHistoria(b, anio);
       ART.ideas.generarPersonajes(b);
-      O.equipoRecomendado(b, est.ambicion);
+      O.equipoNegociado(b, est.ambicion);
       O.recalcular(b);
       const cs = TV.compradores(anio);
       if (cs.length && N.probabilidad(0.3)) TV.pitch(b, cs[0].id);
       if (!b.pitch && N.probabilidad(0.3) && NG.cajaLibre(0) > (b.pp + O.costoTalento(b)) * 1.6) { TV.rodarPiloto(b); return; }
     }
     if (!b) return;
+    O.resolverNegociaciones(b);
     if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6) return;
     const r = ART.juego.iniciarObra(b);
     if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad/.test(r.error)) registroErrores.push('Bot en ' + anio + ': ' + r.error);

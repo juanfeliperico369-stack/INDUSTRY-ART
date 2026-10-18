@@ -197,7 +197,7 @@ ART.mediosUI = (function () {
         const tot = Object.keys(p.pl).reduce(function (s2, k) { return s2 + (p.pl[k].ing || 0); }, 0) || 1, ico = { fisico: '💿', radio: '📻', tv: '📺', descarga: '⬇', audio: '🎧', video: '▶', canal: '📡' };
         const nom = { canal: 'Tu canal (Videos musicales)' };
         Md.PLAT_MUSICA.forEach(function (x) { nom[x.id] = x.nombre; });
-        h += '<h3>Plataformas</h3><div class="md-plats">' + Object.keys(p.pl).map(function (k) {
+        h += '<h3>Plataformas</h3><p class="nota info">Cada plataforma paga distinto por copia, emisión, descarga, reproducción o vista, y su peso cambia con la época: las tiendas y la radio mandan en el siglo XX; desde 2008, la escucha en línea. Una reproducción paga menos de un centavo, así que un éxito necesita millones. Las de video suman más si tu canal emite videos musicales.</p><div class="md-plats">' + Object.keys(p.pl).map(function (k) {
           const r = p.pl[k], x = Md.PLAT_MUSICA.filter(function (y) { return y.id === k; })[0], u = x ? x.u : 'emisiones';
           return '<div class="md-plat"><b>' + ico[k] + ' ' + esc(nom[k] || k) + '</b><span class="cifra">' + grande(r.u) + ' ' + u + '</span>' + (p.plSem && p.plSem[k] ? '<span class="chico tenue">+' + grande(p.plSem[k]) + ' esta semana</span>' : '') +
             (r.ing ? '<div class="tv-meta"><i style="width:' + Math.round(r.ing / tot * 100) + '%;background:var(--acento)"></i></div><span class="chico">' + dinero(r.ing) + '</span>' : '<span class="chico bien">Promoción: más gente lo escucha</span>') + '</div>';

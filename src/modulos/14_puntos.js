@@ -7,6 +7,14 @@ ART.puntos = (function () {
   const N = ART.n, U = ART.ui;
   // [palabras clave (expresión regular sobre la nota), sección de respaldo, dato]
   const DATOS = [
+    ['letrero|logo|fachada', 'estudio', 'El letrero de Hollywood se levantó en 1923 como anuncio de una urbanización y decía «Hollywoodland»; las últimas cuatro letras se quitaron en 1949.'],
+    ['radio|emisi', 'negocio', 'En los años 30 la radio llevó la música a millones de casas; las disqueras temían que nadie volviera a comprar discos, y con los años la radio se volvió su mejor vitrina.'],
+    ['reproducci|escucha|descarga|plataforma de música|vistas', 'negocio', 'Hacia 2016 la escucha en línea superó a las descargas; paga a los artistas una fracción de centavo por reproducción.'],
+    ['disco|copias|certifica|oro', 'negocio', 'El primer disco de oro certificado de la industria se entregó en 1958, por un millón de dólares en ventas.'],
+    ['financia|mecenas|aporte|inversor|socio', 'negocio', 'En los siglos XVII y XVIII casi todo el arte vivía de mecenas: nobles, reyes e iglesias pagaban a cambio de dedicatorias y funciones privadas.'],
+    ['taller|idea|logline|documento|guion', 'obras', 'La palabra «logline» viene de los registros de los estudios, donde cada guion se resumía en una sola frase para decidir si se leía entero.'],
+    ['material|derechos|licencia|dominio público', 'obras', 'Una obra entra al dominio público cuando vencen los derechos de autor; en muchos países, setenta años después de la muerte de quien la escribió.'],
+    ['canal|parrilla|franja|horario', 'obras', 'La primera parrilla regular de televisión empezó en Londres en 1936, con apenas unas horas de programas al día.'],
     ['cine|película|estreno|taquilla', 'obras', 'El 28 de diciembre de 1895, en París, se cobró por primera vez una entrada para ver cine proyectado.'],
     ['taquilla|entrada|salas?\\b|cines?\\b', 'negocio', 'Hacia 1905 abrieron en Norteamérica los nickelodeones, salas que cobraban cinco centavos; en pocos años eran miles.'],
     ['sonido|sonora|música|banda sonora', 'obras', 'En 1927 llegó el cine con diálogos sincronizados; en apenas tres años casi todas las salas se adaptaron al sonido.'],

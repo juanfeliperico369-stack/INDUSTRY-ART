@@ -172,7 +172,8 @@ ART.negocio = (function () {
       famaTrasEstreno: function (o, mult) {
         const est = N.S.estudios[o.est];
         // La fama del estudio sube despacio con los éxitos y la buena crítica (cuesta más cuanto más alta)
-        const cambio = N.limitar(0.004 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 6000, -0.012, 0.01); // Más lento
+        // (una obra correcta, de crítica 60, ya no resta: así un estudio chico no se hunde por estrenar obras medianas)
+        const cambio = N.limitar(0.004 * Math.log(Math.max(0.2, mult)) + (o.crit - 60) / 6000, -0.012, 0.01);
         est.fama = N.redondear(N.limitar(est.fama + (cambio > 0 ? cambio * (1 - est.fama) : cambio), 0.01, 1), 3);
       },
     };
@@ -261,7 +262,8 @@ ART.negocio = (function () {
     for (let i = 0; i < S.estudios.length; i++) {
       const e = S.estudios[i];
       e.ingAnio = 0; e.gasAnio = 0;
-      e.fama = N.redondear(N.limitar(e.fama * 0.95, 0.01, 1), 3);
+      // La fama se olvida un 5 % al año, pero nunca por debajo de lo que da tener un estudio abierto (0,06)
+      if (e.fama > 0.06) e.fama = N.redondear(N.limitar(0.06 + (e.fama - 0.06) * 0.95, 0.01, 1), 3);
     }
     S.fin.anio = libroVacio();
     m.anio = { total: 0, otras: 0, porEstudio: {} };
