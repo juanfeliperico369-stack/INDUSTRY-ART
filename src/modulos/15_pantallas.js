@@ -40,7 +40,7 @@ IA.pantallas = (function () {
       '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' +
       '<p class="tenue chico">' + t('creditos') + '</p></div>';
   }
-  const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'Felipe', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
+  const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'OneZero', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
     tipo: 'Estudio', industria: 'Cine', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
     region: 'losangeles', sufijo: 'Pictures', tf: 'escuela', arq: 'visionario', modo: 'dueno', oficio: 'direccion', enfG: ['Drama', 'Comedia', 'Aventura'], enfT: ['', '', ''] };
   const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville'];
@@ -57,7 +57,7 @@ IA.pantallas = (function () {
     if (!U.estado.logoNuevo) U.estado.logoNuevo = { s: 8, c: 6, b: 14, t: 3, f: 1 };
     const tipico2025 = E.presupuestoTipico2025(np.anio);
     const ops = function (lista, actual) { return lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (String(x[0]) === String(actual) ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join(''); };
-    const anios = [1850, 1870, 1895, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2026, 2040, 2060, 2080, 2100];
+    const anios = [1700, 1750, 1800, 1825, 1850, 1870, 1895, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2026, 2040, 2060, 2080, 2100];
     if (anios.indexOf(np.anio) < 0) anios.push(np.anio);
     anios.sort(function (a, b) { return a - b; });
     const capOps = J.CAPITALES.map(function (c) {
@@ -99,9 +99,9 @@ IA.pantallas = (function () {
       function () { // 3 · Tu estudio
         return '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
           '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Sufijo del logo</span><select data-c="np" data-k="sufijo">' + ops([['', 'Sin sufijo']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
-          '<h3>Logo y letrero</h3><div id="npLogoVista"><canvas data-letrero="nuevo" data-nombre="' + esc(np.nombre) + '" style="width:100%;height:64px" role="img" aria-label="Vista previa del letrero"></canvas>' +
+          '<h3>Logo y letrero</h3><div id="npLogoVista"><canvas data-letrero="nuevo" data-nombre="' + esc(np.nombre) + '" data-ind="' + esc(indNp().id) + '" style="width:100%;height:76px" role="img" aria-label="Vista previa del letrero"></canvas>' +
           '<div class="fila" style="margin-top:8px"><canvas data-logo="nuevo" style="width:56px;height:56px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div></div>' +
-          '<div class="tarjeta">' + num('s') + num('c') + num('b') + num('t') + num('f') + '</div>' +
+          '<div class="tarjeta">' + opcionesLetrero(L, 'np') + num('s') + num('c') + num('b') + num('t') + num('f') + '</div>' +
           '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:170px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
           '<label class="campo"><span>Tipo de industria</span><select data-c="npInd">' + ops(D.industrias.filter(function (x) { return x.desde <= np.anio; }).map(function (x) { return [x.id, x.id]; }), indNp().id) + '</select><span class="nota">' + esc(indNp().efecto) + '</span></label>' +
           '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
@@ -191,6 +191,19 @@ IA.pantallas = (function () {
   function deslizadorLogo(k, v, accion) {
     return '<label class="campo rango"><span>' + NOMBRES_LOGO[k] + ': <b id="lg-' + accion + '-' + k + '">' + esc(textoLogo(k, v)) + '</b></span><input type="range" min="0" max="19" step="1" value="' + v + '" data-i="' + accion + '" data-c="' + accion + 'Fin" data-k="' + k + '" aria-label="' + NOMBRES_LOGO[k] + '"></label>';
   }
+  // Panel, textura, posición del logo y la línea con la industria (como en la Final)
+  function opcionesLetrero(L, quien) {
+    const fila = function (k, lista, titulo) { return '<h4 style="margin:8px 0 4px">' + titulo + '</h4><div class="chips">' + lista.map(function (n, i) { return '<button class="chip' + ((L[k] | 0) === i ? ' on' : '') + '" data-a="lgOpt" data-v="' + quien + '|' + k + '|' + i + '">' + esc(n) + '</button>'; }).join('') + '</div>'; };
+    return fila('pa', IA.arte.PANELES, 'Panel del letrero') + fila('tx', IA.arte.TEXTURAS, 'Textura') + fila('po', IA.arte.POSICIONES, 'Logo y nombre') +
+      '<label class="interruptor"><span>Mostrar la industria bajo el nombre</span><input type="checkbox" data-c="lgInd" data-k="' + quien + '"' + (L.ind !== 0 ? ' checked' : '') + '></label>';
+  }
+  ac('lgOpt', function (v) {
+    const p = String(v).split('|'), L = p[0] === 'np' ? U.estado.logoNuevo : est0().logo;
+    if (!L) return;
+    L[p[1]] = +p[2]; cacheT = -1;
+    if (p[0] === 'np') redibujarNP(); else { U.refrescar(); if (U.renderBarra) U.renderBarra(); }
+  });
+  ac('lgInd', function (v, el) { const L = el.getAttribute('data-k') === 'np' ? U.estado.logoNuevo : est0().logo; if (!L) return; L.ind = v ? 1 : 0; cacheT = -1; if (el.getAttribute('data-k') === 'np') redibujarNP(); else U.refrescar(); });
   function moverLogo(L, el, accion, raiz) {
     const k = el.getAttribute('data-k');
     L[k] = N.limitar(Math.round(+el.value), 0, 19);
@@ -205,13 +218,13 @@ IA.pantallas = (function () {
   ac('npAnio', function (v) {
     const a = Math.round(+v);
     if (!isFinite(a)) return;
-    np.anio = N.limitar(a, J.ANIO_MIN, J.ANIO_MAX); np.capital = 0; cacheT = -1;
+    np.anio = N.limitar(a, J.ANIO_MIN, J.ANIO_MAX); np.capital = 0; cacheT = -1; U.estado.anioNP = np.anio; U.actualizarEpoca(np.anio);
     const y = document.getElementById('vista').scrollTop;
     U.acciones.nuevaPartida();
     document.getElementById('vista').scrollTop = y;
   });
   ac('npCapital', function (v) { np.capital = +v; U.acciones.nuevaPartida(); });
-  function redibujarNP() { const y = document.getElementById('vista').scrollTop; U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; }
+  function redibujarNP() { const y = document.getElementById('vista').scrollTop; U.estado.anioNP = np.anio; U.actualizarEpoca(np.anio); U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; }
   ac('npRegion', function (v) { np.region = v; np.capital = 0; const r = D.regionesInicio.filter(function (x) { return x.id === v; })[0]; if (r && r.pais) np.pais = r.pais; redibujarNP(); });
   ac('npModo', function (v) { np.modo = v; redibujarNP(); });
   ac('mtNp', function (v, el) { np[el.getAttribute('data-k')] = v; redibujarNP(); });
@@ -255,7 +268,7 @@ IA.pantallas = (function () {
       logo: U.estado.logoNuevo, pais: np.pais, capital: np.capital || J.capitalRecomendado(np.anio), dificultad: np.dificultad,
       escenario: np.escenario, personalidad: np.personalidad, creado: new Date().toISOString(),
       tipo: np.tipo, vision: np.vision, publico: np.publico, industria: indNp().id,
-      avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad, especialidades: np.esp, aspecto: aspectoNp() },
+      avatar: { nombre: (np.avNombre || '').trim() || 'OneZero', sexo: np.avSexo, edad: edad, especialidades: np.esp, aspecto: aspectoNp() },
       modoJuego: np.modoJuego, reto: np.reto === undefined ? undefined : np.reto || null, tutorial: !!np.tutorial, perso: np.perso,
       region: np.region, sufijo: np.sufijo, trasfondo: np.tf, arquetipo: np.arq, modo: np.modo, oficio: np.oficio,
       enfoque: { gen: np.enfG.filter(function (x, i, a) { return x && a.indexOf(x) === i; }), tem: np.enfT.filter(function (x, i, a) { return x && a.indexOf(x) === i; }) },
@@ -554,7 +567,7 @@ IA.pantallas = (function () {
   });
   ac('docTxt', function (v) {
     const o = O.porId(+v) || (IA.creacion.estado.b && !v ? IA.creacion.estado.b : null);
-    if (o) IA.publicacion.guardarArchivo('Idea - ' + (o.tit || 'sin titulo') + '.txt', IA.documento.texto(o), 'text/plain').then(function (r) { if (r.ok) U.aviso('Texto listo: ' + (r.ruta || r.nombre)); else if (!r.cancelado) U.aviso('Tampoco se pudo guardar: copia el texto.', 'mal'); });
+    if (o) IA.publicacion.guardarArchivo('Idea - ' + (o.tit || 'sin título') + '.txt', IA.documento.texto(o), 'text/plain').then(function (r) { if (r.ok) U.aviso('Texto listo: ' + (r.ruta || r.nombre)); else if (!r.cancelado) U.aviso('Tampoco se pudo guardar: copia el texto.', 'mal'); });
   });
   ac('catalogoMas', function () { U.estado.catalogoVer = (U.estado.catalogoVer || 30) + 30; U.refrescar(); });
 
@@ -593,13 +606,11 @@ IA.pantallas = (function () {
     }).join('') : vacio(t('nada_nuevo')));
   }
   function mTendencias() {
-    const S = N.S;
-    return '<h3>En el mundo</h3><p class="nota info">Las familias de géneros suben y bajan en olas; si todos estrenan lo mismo, el público se cansa.</p>' + D.familias.map(function (f) {
-      const v = S.mundo.tendencias[f.id] || 0;
-      const w = Math.round(Math.abs(v) * 50);
-      return '<div class="tarjeta"><div class="fila entre"><b>' + esc(f.nombre) + '</b><span class="' + (v > 0.2 ? 'bien' : v < -0.2 ? 'mal' : 'tenue') + '">' + (v > 0.2 ? 'en alza' : v < -0.2 ? 'en baja' : 'estable') + ' (' + (v >= 0 ? '+' : '') + U.decimal(v, 2) + ')</span></div>' +
-        '<div class="barra-p" style="position:relative"><i style="position:absolute;left:' + (v >= 0 ? 50 : 50 - w) + '%;width:' + w + '%;background:' + (v >= 0 ? 'var(--bien)' : 'var(--mal)') + '"></i></div><span class="nota">' + esc(f.generos.join(', ')) + '</span></div>';
-    }).join('') + IA.distribucion.tendenciasRegion();
+    const S = N.S, ICO = { AA: '⚔', IM: '✦', SM: '☾', DR: '🎭', HM: '♪', FJ: '★', AV: '◐', RD: '♥' };
+    return '<h3>Tendencias de géneros</h3><p class="nota info">Las familias de géneros suben y bajan en olas; si todos estrenan lo mismo, el público se cansa.</p><div class="tend-rej">' + D.familias.map(function (f) {
+      const v = S.mundo.tendencias[f.id] || 0, pop = Math.round(50 + v * 50), col = IA.tv.COLOR_FAM[f.id] || 'var(--acento)';
+      return '<div class="tend" style="--c:' + col + '"><div class="tend-ico">' + ICO[f.id] + '</div><div class="col crece"><b>' + esc(f.nombre) + '</b><span class="chico ' + (v > 0.2 ? 'bien' : v < -0.2 ? 'mal' : 'tenue') + '">' + (v > 0.2 ? '▲ en alza' : v < -0.2 ? '▼ en baja' : '● estable') + '</span><div class="tv-meta"><i style="width:' + pop + '%;background:' + col + '"></i></div></div><b class="tend-pct">' + pop + ' %</b></div>';
+    }).join('') + '</div>' + IA.distribucion.tendenciasRegion();
   }
   // Mapa del mundo: cada país con su público de cine; tu sede en dorado y las de los rivales en rosa
   function mMapa() {
@@ -722,8 +733,8 @@ IA.pantallas = (function () {
     }).join('') : '<p class="tenue">Los sets que construyas para tus obras se guardan aquí y se pueden reusar (más barato y una semana menos). Caben más con platós y backlots.</p>');
     // Editar la descripción del estudio (tu documento): logo con deslizadores, público, visión y tipo de industria
     const opsSel = function (k, lista, actual) { return '<select data-c="estEditar" data-k="' + k + '">' + lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === actual ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>'; };
-    h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div id="estLogoVista"><canvas data-letrero="0" style="width:100%;height:64px" role="img" aria-label="Tu letrero"></canvas><div class="fila" style="margin-top:6px"><canvas data-logo="0" style="width:56px;height:56px"></canvas><b>' + esc(est.nombre) + '</b></div></div>' +
-      ['s', 'c', 'b', 't', 'f'].map(function (k) { return deslizadorLogo(k, est.logo[k] || 0, 'estLogo'); }).join('') +
+    h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div id="estLogoVista"><canvas data-letrero="0" style="width:100%;height:76px" role="img" aria-label="Tu letrero"></canvas><div class="fila" style="margin-top:6px"><canvas data-logo="0" style="width:56px;height:56px"></canvas><b>' + esc(est.nombre) + '</b></div></div>' +
+      opcionesLetrero(est.logo, 'est') + ['s', 'c', 'b', 't', 'f'].map(function (k) { return deslizadorLogo(k, est.logo[k] || 0, 'estLogo'); }).join('') +
       '<div class="fila"><label class="btn">' + (U.logoPropio() ? 'Cambiar la imagen del logo' : 'Usar una imagen propia') + '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-c="estLogoImg" class="oculto"></label>' +
       (U.logoPropio() ? '<button class="btn" data-a="estLogoQuitar">Volver al logo dibujado</button>' : '') + '</div>' +
       '<p class="nota info">La imagen propia se guarda solo en este dispositivo: no viaja en la partida, en el archivo .iasave ni en los pósters.</p>' +

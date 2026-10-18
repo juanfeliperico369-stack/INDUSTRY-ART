@@ -153,6 +153,7 @@ IA.economia = (function () {
     let q = 0;
     const pesos = IA.ideas.pesos(obra, fam); // prioridad y tipo de obra reparten el peso de los departamentos
     Object.keys(pesos).forEach(function (dep) { q += pesos[dep] * habilidadDep(obra, dep, talentos, bonos || {}); });
+    if (obra.mus) q += (pesos.musica || 0.07) * IA.ideas.paqueteMusica(obra.mus).q * 2.5; // paquete de música
     // (las claves _crit y _pub de los bonos no son departamentos: se aplican en calificar)
     // Lo que cuesta la época, el formato o la animación no sube la calidad: solo el tamaño del presupuesto
     const tipica = produccionTipica(anio, fam.id) * escalaTono(obra) * IA.ideas.factorCosto(obra, anio);
@@ -160,6 +161,7 @@ IA.economia = (function () {
     q += encajeObra(obra);
     q += IA.ideas.ajusteCalidad(obra); // encaje de la idea, material, guion comprado, IA y personajes
     q += IA.talentos.quimica(obra); // amistades y rivalidades del equipo clave
+    q += IA.ideas.bonoMoraleja(obra); // la moraleja que encaja con el género
     eachTalento(obra, talentos, function (t) { if (IA.talentos.ventajas(t).some(function (v) { return v.id === 'Mentor'; })) q += 0.5; });
     // Tres géneros sin un líder de 90 o más es un desastre
     if (obra.gen.length >= 3) {

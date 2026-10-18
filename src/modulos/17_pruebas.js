@@ -142,7 +142,7 @@ IA.pruebas = (function () {
           if (NG.cajaLibre(0) - reservaMkt > costo * (S.t < 52 * 3 ? Math.max(est.colchon, 1.6) : est.colchon)) ok = true;
         }
       });
-      if (!ok || !b) break;
+      if (!ok || !b || N.anio() < D.CINE_DESDE) break; // antes del cine el bot solo hace teatro, libros y música
       const r = IA.juego.iniciarObra(b);
       if (r.error) { if (registroErrores) registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error); break; }
     }
@@ -239,7 +239,10 @@ IA.pruebas = (function () {
     if (S.canal) {
       if (S.canal.ofPat.length && S.canal.pat.length < 3) TV.aceptarPatrocinio(S.canal.ofPat[0].id);
       if (S.canal.ofNot.length && NG.cajaLibre(0) > tipico * 3 && N.probabilidad(0.3)) TV.comprarNoticia(S.canal.ofNot[0].id);
-      if (N.semana() % 4 === 0) TV.autocompletar(true);
+      if (N.semana() % 26 === 0) TV.autocompletar(false); else if (N.semana() % 4 === 0) TV.autocompletar(true);
+      if (N.semana() % 13 === 3 && S.canal.ofLic && S.canal.ofLic.length && NG.cajaLibre(0) > tipico * 4) { TV.comprarLic(S.canal.ofLic[0].o); TV.autocompletar(true); }
+      if (N.semana() === 20 && NG.cajaLibre(0) > tipico * 5) { const g = TV.GENERICOS.filter(function (x) { return x.desde <= anio; }); if (g.length) TV.mejorarPrograma(N.elegir(g).id); }
+      if (S.canal.ofModa && NG.cajaLibre(0) > tipico * 6 && N.probabilidad(0.2)) TV.comprarModa();
     } else if (anio >= 1952 && N.semana() === 26 && NG.cajaLibre(0) > tipico * 10) TV.comprarCanal('', 'DR');
     if (S.stream) {
       if (N.semana() % 4 === 1) {
@@ -247,6 +250,11 @@ IA.pruebas = (function () {
         if (S.stream.ofLic.length && NG.cajaLibre(0) > tipico * 4) ST.licenciar(0, N.probabilidad(0.5) ? 'temporal' : 'exclusiva', N.probabilidad(0.3) ? S.stream.ofLic[0].p * 0.8 : 0);
         if (!S.stream.lineas.length) ST.contratarLinea('anim');
         if (S.stream.cat.length >= S.stream.cap - 2 && NG.cajaLibre(0) > tipico * 3) ST.comprarBoveda();
+        const pl = ST.plataforma(), falta = Object.keys(ST.REGIONES).filter(function (r) { return pl.reg.indexOf(r) < 0; }).sort(function (x, y) { return ST.REGIONES[y] - ST.REGIONES[x]; });
+        if (falta.length && NG.cajaLibre(0) > tipico * 5) ST.abrirRegion(falta[0]);
+        if (pl.cat.length && (!pl.dest || N.semana() % 12 === 1)) { const mejor = pl.cat.slice().sort(function (x, y) { return ST.valorTitulo(y) - ST.valorTitulo(x); }); ST.ponerDestacado(mejor[0].id); pl.fila = mejor.slice(1, 9).map(function (x) { return x.id; }); }
+        if (pl.srv < 3 && NG.cajaLibre(0) > tipico * 8) ST.mejorarServidores();
+        if (pl.ult && pl.subs < pl.ult.obj * 0.7 && NG.cajaLibre(0) > tipico * 4) ST.campana();
       }
     } else if (ST.puede() && N.semana() === 30 && NG.cajaLibre(0) > tipico * 12) ST.lanzar('');
     // Licencias del personaje más popular de tu mejor franquicia
@@ -451,7 +459,7 @@ IA.pruebas = (function () {
       crecimiento30: crec30, crecimientoArranque: tasa(-1, 9), crecimientoTotal: tasa(9, hist.length - 1),
       crecimientoMediano: mediana(hist.slice(1).map(function (h, i) { return hist[i].caja2025 > 0 ? h.caja2025 / hist[i].caja2025 - 1 : 0; })),
       premiosJugador: premios.parte, premiosTotal: premios.total,
-      aniosAMajor: S.majorDesde ? S.majorDesde - op.desde : null,
+      aniosAMajor: S.majorDesde ? S.majorDesde - Math.max(op.desde, IA.datos.CINE_DESDE) : null, // antes del cine no hay majors: se cuenta desde 1895
       cuotaMax: cuotas.length ? Math.max.apply(null, cuotas) : 0,
       cuotaMedia: cuotas.length ? cuotas.reduce(function (a, b) { return a + b; }, 0) / cuotas.length : 0,
       cajaFinal2025: hist.length ? hist[hist.length - 1].caja2025 : 0,

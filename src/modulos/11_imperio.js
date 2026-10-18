@@ -177,15 +177,40 @@ IA.imperio = (function () {
     s.dist.push({ est: e.id, hasta: S.t + 52 * (+anios || 2) });
     return '';
   }
+  const FINANCIACION = [
+    { id: '', nombre: 'Solo con tu caja', desde: 1700, aporte: 0, texto: 'Todo el riesgo y toda la ganancia son tuyos.' },
+    { id: 'copro', nombre: 'Coproductor', desde: 1910, aporte: 0.3, texto: 'Pone el 30 % del costo ahora y se lleva el 30 % de todo lo que gane la obra.' },
+    { id: 'preventa', nombre: 'Preventa de derechos', desde: 1950, aporte: 0.2, texto: 'Cobras el 20 % del costo ahora y cedes la mitad de lo que dejen las ventanas (video, TV y streaming).' },
+    { id: 'inversores', nombre: 'Inversores privados', desde: 1920, aporte: 0.4, texto: 'Ponen el 40 % del costo y se llevan el 45 % de la ganancia; si la obra pierde, no les devuelves nada.' },
+    { id: 'suscripcion', nombre: 'Suscripción de fans', desde: 2010, aporte: 0, texto: 'Tus fans pagan por adelantado entre el 3 % y el 15 % del costo; no se devuelve, pero si la obra sale floja pierdes fans.' },
+  ];
+  function financiacionDe(id) { return FINANCIACION.filter(function (x) { return x.id === (id || ''); })[0] || FINANCIACION[0]; }
+  function aporteFin(id, costo) { const f = financiacionDe(id); if (f.id === 'suscripcion') return Math.round(costo * Math.min(0.15, 0.03 + (N.S.fans || 0) / 2e6 * 0.12)); return Math.round(costo * f.aporte); }
+  function financiar(o, id, costo) {
+    const f = financiacionDe(id);
+    if (!o || !f.id || f.desde > N.anio()) return;
+    const ap = aporteFin(f.id, costo);
+    if (ap <= 0) return;
+    IA.negocio.cobrarEn(0, 'coproduccion', ap);
+    o.finJ = { t: f.id, ap: ap };
+    N.emit('noticia', { tipo: 'estudio', texto: f.nombre + ' para «' + o.tit + '»: llegan ' + IA.ui.dinero(ap) + '.' });
+  }
   // Al terminar una obra se reparten coproducción, encargos, financiación y distribución
   function alTerminar(o) {
     const S = N.S, ing = O.ingresosTotales(o) || 0, s = st();
     const pasar = function (de, a, m, cat) {
       if (m <= 0) return;
       if (de === 0) IA.negocio.pagar(0, cat, m); else S.estudios[de].caja -= m;
-      if (a === 0) IA.negocio.cobrarEn(0, cat, m); else S.estudios[a].caja += m;
+      if (a === 0) IA.negocio.cobrarEn(0, cat, m); else if (a > 0) S.estudios[a].caja += m;
     };
     if (o.copro) pasar(0, o.copro.est, Math.round(ing * o.copro.parte), 'coproduccion');
+    if (o.finJ && o.est === 0) {
+      const f = o.finJ;
+      if (f.t === 'copro') pasar(0, -1, Math.round(ing * 0.3), 'socio');
+      else if (f.t === 'preventa') pasar(0, -1, Math.round((o.vt ? o.vt.total : 0) * 0.5), 'socio');
+      else if (f.t === 'inversores') pasar(0, -1, Math.round(Math.max(0, ing - O.costoTotal(o)) * 0.45), 'socio');
+      else if (f.t === 'suscripcion' && (o.pub || 0) < 50) { S.fans = Math.round((S.fans || 0) * 0.94); N.emit('noticia', { tipo: 'estudio', texto: 'Los fans que pagaron «' + o.tit + '» por adelantado están decepcionados.' }); }
+    }
     if (o.encargoDe !== undefined && o.est === 0) pasar(0, o.encargoDe, Math.round(ing * 0.7), 'encargos');
     if (o.encargo === 0 && o.est > 0) pasar(o.est, 0, Math.round(ing * 0.75), 'encargos');
     if (o.fin && o.est > 0) pasar(o.est, 0, Math.round((o.bruto || 0) * 0.5 * o.fin.pct), 'coproduccion');
@@ -282,7 +307,7 @@ IA.imperio = (function () {
     Object.keys(s.tec).forEach(function (id) { const x = invento(id), t = s.tec[id]; if (t.de === 0 && x && a < x.anio) IA.negocio.cobrarEn(0, 'investigacion', Math.round(tip() * 0.08 * N.entero(1, 3))); });
     anualFiliales();
   }
-  return { tiene: tiene, info: info, costoSede: costoSede, abrirSede: abrirSede, cerrarSede: cerrarSede, sedes: function () { return st().sedes; }, ahorroRodaje: ahorroRodaje,
+  return { FINANCIACION: FINANCIACION, financiacionDe: financiacionDe, aporteFin: aporteFin, financiar: financiar, tiene: tiene, info: info, costoSede: costoSede, abrirSede: abrirSede, cerrarSede: cerrarSede, sedes: function () { return st().sedes; }, ahorroRodaje: ahorroRodaje,
     precioEstudio: precioEstudio, puedeComprar: puedeComprar, comprarEstudio: comprarEstudio, filiales: filiales, costoFilial: costoFilial, venderFilial: venderFilial, inyectar: inyectar,
     socios: socios, coproducir: coproducir, encargar: encargar, ofertasEncargo: function () { return st().ofEnc; }, aceptarEncargo: aceptarEncargo, alCrear: alCrear,
     proyectosAjenos: proyectosAjenos, financiar: financiar, costoDistribucion: costoDistribucion, firmarDistribucion: firmarDistribucion, distribuciones: function () { return st().dist; },

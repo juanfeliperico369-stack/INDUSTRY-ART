@@ -7,7 +7,7 @@ IA.juego = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, M = IA.mundo, E = IA.economia, T = IA.talentos, O = IA.obras;
   const PR = IA.produccion, L = IA.lanzamiento, R = IA.rivales, PM = IA.premios, NG = IA.negocio;
-  const ANIO_MIN = 1850, ANIO_MAX = 2100;
+  const ANIO_MIN = 1700, ANIO_MAX = 2100;
   // Los valores de tu documento (de $500 a $1 B) con pasos intermedios para que el recomendado sea justo
   const CAPITALES = [500, 1e3, 2.5e3, 5e3, 1e4, 2.5e4, 5e4, 1e5, 2.5e5, 5e5, 1e6, 2.5e6, 5e6, 1e7, 2.5e7, 5e7, 1e8, 2.5e8, 5e8, 1e9];
   const DIFICULTADES = [
@@ -73,7 +73,7 @@ IA.juego = (function () {
     T.generarInicial();
     const av = op.avatar || {};
     const esp = (av.especialidades || ['produccion', 'direccion', 'guion']).filter(function (x, i, a) { return D.oficio(x) && a.indexOf(x) === i; }).slice(0, 3);
-    S.avatar = { nom: (av.nombre || 'Felipe').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
+    S.avatar = { nom: (av.nombre || 'OneZero').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
     if (av.aspecto) S.avatar.asp = aspectoValido(av.aspecto);
     const vis = D.visiones.filter(function (v) { return v.id === S.estudios[0].vision; })[0];
     if (vis && vis.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);

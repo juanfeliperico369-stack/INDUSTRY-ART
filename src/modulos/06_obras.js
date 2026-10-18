@@ -104,7 +104,7 @@ IA.obras = (function () {
     b.fam = D.familiaDe[b.gen[0]] || 'DR';
     if (b.cont || IA.ideas.hayNinos(b)) IA.ideas.normalizar(b, anio); else b.clas = IA.ideas.clasificar(b, anio);
     if (b.presM) b.esc = escalaCercana(b.presM);
-    b.pp = Math.round(IA.ideas.costoProduccion(b, anio));
+    b.pp = Math.round(IA.ideas.costoProduccion(b, anio) * (1 + IA.ideas.paqueteMusica(b.mus).k));
     return b;
   }
   function escalaCercana(m) {

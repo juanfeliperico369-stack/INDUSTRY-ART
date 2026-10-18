@@ -251,9 +251,9 @@ IA.datos = (function () {
     { id: 'Televisión', desde: 1936, plato: 1, meds: [], canal: 0.6, efecto: 'Plató incluido y tu canal propio cuesta 40 % menos' },
     { id: 'Música', desde: 1877, meds: ['musica'], rebaja: 0.85, efecto: 'Sin plató; en música, +1 proyecto a la vez y 15 % menos de costo' },
     { id: 'Videojuegos', desde: 1972, meds: ['juegos'], rebaja: 0.85, efecto: 'Sin plató; en videojuegos, +1 proyecto a la vez y 15 % menos de costo' },
-    { id: 'Teatro', desde: 1850, meds: ['teatro'], rebaja: 0.85, efecto: 'Sin plató; en teatro, +1 obra a la vez y 15 % menos de costo' },
-    { id: 'Editorial', desde: 1850, meds: ['libros'], rebaja: 0.85, efecto: 'Sin plató; en libros, +1 proyecto a la vez y 15 % menos de costo' },
-    { id: 'Mixto', desde: 1850, meds: ['musica', 'juegos', 'teatro', 'libros'], efecto: 'Sin plató; +1 proyecto a la vez en música, videojuegos, teatro y libros' },
+    { id: 'Teatro', desde: 1700, meds: ['teatro'], rebaja: 0.85, efecto: 'Sin plató; en teatro, +1 obra a la vez y 15 % menos de costo' },
+    { id: 'Editorial', desde: 1700, meds: ['libros'], rebaja: 0.85, efecto: 'Sin plató; en libros, +1 proyecto a la vez y 15 % menos de costo' },
+    { id: 'Mixto', desde: 1700, meds: ['musica', 'juegos', 'teatro', 'libros'], efecto: 'Sin plató; +1 proyecto a la vez en música, videojuegos, teatro y libros' },
   ];
   const CINE_DESDE = 1895;
   function industria(id) { return industrias.filter(function (x) { return x.id === id; })[0] || industrias[0]; }
@@ -363,6 +363,7 @@ IA.datos = (function () {
   // ---------- Cronología real 1850-2026 y eras de ficción hasta 2150 (pestaña Datos del mundo) ----------
   // Sin personas reales ni marcas. Fechas verificadas con fuentes.
   const cronologia = [
+    [1700, 'Ilustración: teatro, ópera y libros por suscripción; la música vive en partituras'],
     [1850, 'Teatro, libros y folletines por entregas dominan el entretenimiento'],
     [1877, 'Se inventa el fonógrafo: aparece la música grabada en cilindros'],
     [1887, 'Se inventa el disco plano'],
@@ -413,6 +414,7 @@ IA.datos = (function () {
   ];
   // Tecnologías del cine que cambian la calidad esperada
   const tecnologias = [
+    { anio: 1700, nombre: 'Teatro e imprenta' }, { anio: 1850, nombre: 'Teatro, libros y folletines' }, { anio: 1877, nombre: 'Fonógrafo' },
     { anio: 1895, nombre: 'Cine mudo' }, { anio: 1927, nombre: 'Cine sonoro' }, { anio: 1935, nombre: 'Color' },
     { anio: 1953, nombre: 'Pantalla ancha' }, { anio: 1977, nombre: 'Efectos de nueva generación' },
     { anio: 1995, nombre: 'Animación 3D' }, { anio: 2009, nombre: '3D digital' }, { anio: 2022, nombre: 'IA generativa' },
@@ -423,11 +425,11 @@ IA.datos = (function () {
   // capital: múltiplo del capital recomendado; prestigio: 0 a 100; competencia: 1 baja … 3 alta
   const regionesInicio = [
     { id: 'losangeles', nombre: 'Los Ángeles', pais: 'us', desde: 1910, mercado: 'El mercado más grande del mundo', competencia: 3, capital: 1, prestigio: 8, texto: 'Sol todo el año y las majors a la vuelta de la esquina.' },
-    { id: 'nuevayork', nombre: 'Nueva York', pais: 'us', desde: 1850, mercado: 'Grande y exigente', competencia: 3, capital: 1, prestigio: 7, texto: 'Teatro, prensa y dinero: todo pasa primero aquí.' },
-    { id: 'londres', nombre: 'Londres', pais: 'gb', desde: 1850, mercado: 'Grande, con tradición teatral', competencia: 2, capital: 1, prestigio: 8, texto: 'Escenarios centenarios y una crítica implacable.' },
-    { id: 'paris', nombre: 'París', pais: 'fr', desde: 1850, mercado: 'Mediano, amante del arte', competencia: 2, capital: 0.9, prestigio: 10, texto: 'Aquí nació el cine; la crítica pesa más que la taquilla.' },
-    { id: 'berlin', nombre: 'Berlín', pais: 'de', desde: 1850, mercado: 'Mediano y experimental', competencia: 2, capital: 0.9, prestigio: 7, texto: 'Vanguardia, sombras largas y cabarets.' },
-    { id: 'roma', nombre: 'Roma', pais: 'it', desde: 1850, mercado: 'Mediano', competencia: 2, capital: 0.85, prestigio: 7, texto: 'Grandes platós y una historia que se filma sola.' },
+    { id: 'nuevayork', nombre: 'Nueva York', pais: 'us', desde: 1700, mercado: 'Grande y exigente', competencia: 3, capital: 1, prestigio: 7, texto: 'Teatro, prensa y dinero: todo pasa primero aquí.' },
+    { id: 'londres', nombre: 'Londres', pais: 'gb', desde: 1700, mercado: 'Grande, con tradición teatral', competencia: 2, capital: 1, prestigio: 8, texto: 'Escenarios centenarios y una crítica implacable.' },
+    { id: 'paris', nombre: 'París', pais: 'fr', desde: 1700, mercado: 'Mediano, amante del arte', competencia: 2, capital: 0.9, prestigio: 10, texto: 'Aquí nació el cine; la crítica pesa más que la taquilla.' },
+    { id: 'berlin', nombre: 'Berlín', pais: 'de', desde: 1700, mercado: 'Mediano y experimental', competencia: 2, capital: 0.9, prestigio: 7, texto: 'Vanguardia, sombras largas y cabarets.' },
+    { id: 'roma', nombre: 'Roma', pais: 'it', desde: 1700, mercado: 'Mediano', competencia: 2, capital: 0.85, prestigio: 7, texto: 'Grandes platós y una historia que se filma sola.' },
     { id: 'bombay', nombre: 'Bombay', pais: 'in', desde: 1913, mercado: 'Enorme y musical', competencia: 2, capital: 0.6, prestigio: 4, texto: 'Canciones, familias numerosas y salas siempre llenas.' },
     { id: 'lagos', nombre: 'Lagos', pais: 'ng', desde: 1992, mercado: 'Joven y veloz', competencia: 1, capital: 0.4, prestigio: 2, texto: 'Se filma rápido, barato y para millones en video.' },
     { id: 'cdmx', nombre: 'Ciudad de México', pais: 'mx', desde: 1896, mercado: 'Grande en Latinoamérica', competencia: 2, capital: 0.6, prestigio: 5, texto: 'Melodramas, comedias y una época de oro por delante.' },
@@ -470,10 +472,11 @@ IA.datos = (function () {
     { id: 'bangkok', nombre: 'Bangkok', pais: 'th', desde: 1897, mercado: 'Mediano', competencia: 1, capital: 0.45, prestigio: 3, texto: 'Rodajes de acción, mercados flotantes y precios bajos.' },
     { id: 'melbourne', nombre: 'Melbourne', pais: 'au', desde: 1850, mercado: 'Pequeño y artístico', competencia: 1, capital: 0.8, prestigio: 5, texto: 'Aquí se rodó en 1906 el primer largometraje narrativo de la historia.' },
     { id: 'wellington', nombre: 'Wellington', pais: 'nz', desde: 1990, mercado: 'Pequeño', competencia: 1, capital: 0.6, prestigio: 5, texto: 'Talleres de efectos de primer nivel y paisajes de fantasía.' },
-    { id: 'independiente', nombre: 'Independiente (donde quieras)', pais: null, desde: 1850, mercado: 'El de tu país', competencia: 1, capital: 0.5, prestigio: 1, texto: 'Sin padrinos: poco dinero, toda la libertad.' },
+    { id: 'independiente', nombre: 'Independiente (donde quieras)', pais: null, desde: 1700, mercado: 'El de tu país', competencia: 1, capital: 0.5, prestigio: 1, texto: 'Sin padrinos: poco dinero, toda la libertad.' },
   ];
   // Tarjetas de era: 3 reglas del negocio de cada época (lo que ya hace la economía)
   const erasInicio = [
+    { desde: 1700, hasta: 1849, nombre: 'Ilustración y teatro', reglas: ['El teatro y la ópera son el gran espectáculo', 'Los libros se venden por suscripción y en folletos', 'La música vive en partituras y conciertos'] },
     { desde: 1850, hasta: 1894, nombre: 'Antes del cine', reglas: ['El teatro y la linterna mágica son el espectáculo', 'Los públicos son chicos y locales', 'La prensa decide qué se ve'] },
     { desde: 1895, hasta: 1926, nombre: 'Cine mudo', reglas: ['Películas cortas, baratas y rápidas', 'Las barreras de idioma casi no existen', 'Las estrellas nacen de un día para otro'] },
     { desde: 1927, hasta: 1947, nombre: 'Época de oro de los estudios', reglas: ['Todo el mundo va al cine cada semana', 'Los estudios tienen a sus estrellas bajo contrato', 'Llega el sonido: hay que doblar'] },

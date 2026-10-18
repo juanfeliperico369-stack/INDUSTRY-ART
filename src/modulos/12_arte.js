@@ -158,27 +158,85 @@ IA.arte = (function () {
     return { fam: FUENTES[f], peso: [700, 400, 900][f % 3], cursiva: f % 4 === 3, espacio: [0, 0.08, 0.18, -0.02, 0.04][f % 5] };
   }
   function fuenteLetra(f, px) { const e = estiloLetra(f); return (e.cursiva ? 'italic ' : '') + e.peso + ' ' + Math.round(px) + 'px ' + e.fam; }
-  // Letrero: el logo y el nombre con el fondo, el color de letras y el tipo de letra que eligió el jugador
-  function letrero(c, w, h, L, nombre, borde) {
-    L = L || { s: 8, c: 6, b: 14, t: 3, f: 1 };
-    c.fillStyle = colorFondo(L.b);
-    rectRedondo(c, 1, 1, w - 2, h - 2, h * 0.18);
+  // Letrero del estudio: 7 paneles, 6 texturas, 6 posiciones del logo y una línea con la industria
+  const PANELES = ['Moderno', 'Placa metálica', 'Madera', 'Marquesina', 'Neón', 'Art déco', 'Pantalla digital'];
+  const TEXTURAS = ['Lisa', 'Rayas', 'Puntos', 'Grano', 'Degradado', 'Cuadros'];
+  const POSICIONES = ['Logo a la izquierda', 'Logo arriba', 'Logo a la derecha', 'Solo logo', 'Solo nombre', 'Logo de fondo'];
+  function texturaLetrero(c, w, h, k, semilla) {
+    const cl = 'rgba(255,255,255,.08)', os = 'rgba(0,0,0,.16)';
+    c.save();
+    if (k === 1) { c.strokeStyle = cl; c.lineWidth = Math.max(2, h / 16); for (let x = -h; x < w + h; x += h / 3) { c.beginPath(); c.moveTo(x, h); c.lineTo(x + h, 0); c.stroke(); } }
+    else if (k === 2) { c.fillStyle = cl; const p = Math.max(5, h / 7); for (let y = p / 2; y < h; y += p) for (let x = p / 2 + ((y / p) % 2) * p / 2; x < w; x += p) { c.beginPath(); c.arc(x, y, p * 0.16, 0, TAU); c.fill(); } }
+    else if (k === 3) { const r = azar(semilla || 7); for (let i = 0; i < w * h / 9; i++) { c.fillStyle = r() < 0.5 ? cl : os; c.fillRect(r() * w, r() * h, 1, 1); } }
+    else if (k === 4) { const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(255,255,255,.18)'); g.addColorStop(0.5, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(0,0,0,.28)'); c.fillStyle = g; c.fillRect(0, 0, w, h); }
+    else if (k === 5) { const p = Math.max(6, h / 5); for (let y = 0; y < h; y += p) for (let x = ((y / p) % 2) * p; x < w; x += p * 2) { c.fillStyle = cl; c.fillRect(x, y, p, p); } }
+    c.restore();
+  }
+  function panelLetrero(c, w, h, L, borde) {
+    const pa = L.pa | 0, fondo = colorFondo(L.b), frente = borde || colorFrente(L.c), r = pa === 5 ? h * 0.05 : pa === 4 ? h * 0.25 : h * 0.18;
+    c.save();
+    rectRedondo(c, 1, 1, w - 2, h - 2, r);
+    if (pa === 1) { const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#f2f2f2'); g.addColorStop(0.45, '#9ea4ad'); g.addColorStop(0.55, '#c9ced6'); g.addColorStop(1, '#6d737c'); c.fillStyle = g; }
+    else if (pa === 2) { const g = c.createLinearGradient(0, 0, w, 0); g.addColorStop(0, '#5b3a1f'); g.addColorStop(0.5, '#8a5a32'); g.addColorStop(1, '#5b3a1f'); c.fillStyle = g; }
+    else if (pa === 4 || pa === 6) c.fillStyle = pa === 6 ? '#05080f' : '#0b0614';
+    else c.fillStyle = fondo;
     c.fill();
-    c.strokeStyle = borde || colorFrente(L.c);
-    c.lineWidth = Math.max(1, h * 0.04);
+    c.clip();
+    if (pa === 2) { c.strokeStyle = 'rgba(40,20,5,.35)'; c.lineWidth = 1; for (let y = h * 0.12; y < h; y += h * 0.14) { c.beginPath(); c.moveTo(0, y); for (let x = 0; x <= w; x += 12) c.lineTo(x, y + Math.sin(x / 23 + y) * 1.6); c.stroke(); } }
+    if (pa === 6) { c.fillStyle = 'rgba(80,160,255,.10)'; for (let y = 2; y < h; y += 4) for (let x = 2; x < w; x += 4) c.fillRect(x, y, 1.6, 1.6); }
+    texturaLetrero(c, w, h, L.tx | 0, (L.s | 0) * 31 + (L.b | 0));
+    c.restore();
+    c.save();
+    rectRedondo(c, 1, 1, w - 2, h - 2, r);
+    c.lineWidth = Math.max(1, h * (pa === 5 ? 0.03 : 0.04));
+    if (pa === 4) { c.shadowColor = frente; c.shadowBlur = h * 0.25; c.strokeStyle = frente; c.lineWidth = Math.max(2, h * 0.05); }
+    else c.strokeStyle = pa === 1 ? '#4b5058' : pa === 2 ? '#3a2410' : frente;
     c.stroke();
-    logo(c, h * 0.6, h / 2, h * 0.3, L);
-    const area = w - h * 1.35, e = estiloLetra(L.f), texto = String(nombre || '').toUpperCase();
-    let px = h * 0.5;
+    if (pa === 5) { c.shadowBlur = 0; rectRedondo(c, h * 0.1, h * 0.1, w - h * 0.2, h - h * 0.2, h * 0.03); c.lineWidth = 1; c.stroke(); [[0, 0], [w, 0], [0, h], [w, h]].forEach(function (p) { for (let i = 1; i <= 3; i++) { c.beginPath(); c.arc(p[0], p[1], h * 0.09 * i, 0, TAU); c.stroke(); } }); }
+    if (pa === 1) { c.fillStyle = '#5c626b'; [[h * 0.12, h * 0.18], [w - h * 0.12, h * 0.18], [h * 0.12, h * 0.82], [w - h * 0.12, h * 0.82]].forEach(function (p) { c.beginPath(); c.arc(p[0], p[1], h * 0.045, 0, TAU); c.fill(); }); }
+    if (pa === 3) { c.fillStyle = '#ffe9a8'; c.shadowColor = '#ffcf5a'; c.shadowBlur = h * 0.12; const paso = Math.max(9, h * 0.2); for (let x = paso / 2; x < w; x += paso) { [h * 0.07, h * 0.93].forEach(function (y) { c.beginPath(); c.arc(x, y, h * 0.035, 0, TAU); c.fill(); }); } }
+    c.restore();
+  }
+  function letrero(c, w, h, L, nombre, borde, sub) {
+    L = L || { s: 8, c: 6, b: 14, t: 3, f: 1 };
+    const po = L.po | 0, pa = L.pa | 0;
+    panelLetrero(c, w, h, L, borde);
+    const conSub = !!(sub && L.ind !== 0 && po !== 3);
+    const texto = String(nombre || '').toUpperCase(), e = estiloLetra(L.f);
+    const colorTx = pa === 1 ? '#22252b' : pa === 2 ? '#f6e3c3' : pa === 6 ? '#7cc4ff' : colorTexto(L.t);
+    if (po === 5) { c.save(); c.globalAlpha = 0.18; logo(c, w / 2, h / 2, h * 0.62, L); c.restore(); }
+    let lx = h * 0.6, area = w - h * 1.35, cx = h * 1.15 + area / 2, ty = conSub ? h * 0.44 : h * 0.54, r = h * 0.3;
+    if (po === 1) { r = h * 0.17; lx = w / 2; area = w - h * 0.4; cx = w / 2; ty = conSub ? h * 0.6 : h * 0.68; }
+    else if (po === 2) { lx = w - h * 0.6; cx = h * 0.2 + area / 2; }
+    else if (po === 4 || po === 5) { area = w - h * 0.5; cx = w / 2; }
+    if (po === 0 || po === 2) logo(c, lx, h / 2, r, L);
+    else if (po === 1) logo(c, lx, h * 0.25, r, L);
+    else if (po === 3) { logo(c, w / 2, h / 2, h * 0.36, L); return; }
+    let px = (po === 1 ? 0.34 : conSub ? 0.42 : 0.5) * h;
     c.font = fuenteLetra(L.f, px);
     if ('letterSpacing' in c) c.letterSpacing = Math.round(px * e.espacio) + 'px';
     const ancho = c.measureText(texto).width;
     if (ancho > area) { px *= area / ancho; c.font = fuenteLetra(L.f, px); if ('letterSpacing' in c) c.letterSpacing = Math.round(px * e.espacio) + 'px'; }
     c.textAlign = 'center';
     c.textBaseline = 'middle';
-    c.fillStyle = colorTexto(L.t);
-    c.fillText(texto, h * 1.15 + area / 2, h * 0.54, area);
+    c.save();
+    if (pa === 4 || pa === 6) { c.shadowColor = pa === 6 ? '#3da9ff' : colorTexto(L.t); c.shadowBlur = h * 0.18; }
+    if (pa === 1) { c.fillStyle = 'rgba(255,255,255,.55)'; c.fillText(texto, cx + 1, ty + 1, area); }
+    c.fillStyle = colorTx;
+    c.fillText(texto, cx, ty, area);
+    c.restore();
     if ('letterSpacing' in c) c.letterSpacing = '0px';
+    if (conSub) {
+      const s = String(sub).toUpperCase();
+      let ps = h * (po === 1 ? 0.13 : 0.16);
+      c.font = '600 ' + Math.round(ps) + 'px sans-serif';
+      if ('letterSpacing' in c) c.letterSpacing = Math.round(ps * 0.35) + 'px';
+      c.globalAlpha = 0.85;
+      c.fillStyle = colorTx;
+      c.fillText(s, cx, po === 1 ? h * 0.86 : h * 0.78, area);
+      c.globalAlpha = 1;
+      if ('letterSpacing' in c) c.letterSpacing = '0px';
+    }
   }
 
   // Figura base: 0 círculo, 1 cuadrado, 2 triángulo, 3 hexágono, 4 estrella.
@@ -3009,6 +3067,7 @@ IA.arte = (function () {
     activarSonido(v) { sonidoEncendido = !!v; },
     sonidoActivo() { return sonidoEncendido; },
     menosMovimiento: false,
+    PANELES: PANELES, TEXTURAS: TEXTURAS, POSICIONES: POSICIONES,
   };
   return api;
 })();

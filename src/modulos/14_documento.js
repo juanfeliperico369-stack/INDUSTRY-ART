@@ -308,7 +308,7 @@ IA.documento = (function () {
   }
   // Descarga (web y PC) o menú Compartir (app)
   function descargar(o) {
-    const nombre = 'Idea - ' + (o.tit || 'sin titulo') + '.docx';
+    const nombre = 'Idea - ' + (o.tit || 'sin título') + '.docx';
     return IA.publicacion.guardarArchivo(nombre, docx(o), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
   // Descarga con su aviso; si no se pudo (y no fue que el jugador cerró el menú), muestra la trama para copiarla

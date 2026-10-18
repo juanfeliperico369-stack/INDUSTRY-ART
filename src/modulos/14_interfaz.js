@@ -9,10 +9,11 @@ IA.ui = (function () {
   const SECCIONES = ['estudio', 'obras', 'talento', 'mundo', 'negocio'];
 
   // ---------- Ajustes del jugador (fuera de la partida) ----------
-  const AJUSTES_BASE = { tema: 'oscuro', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana', musica: false, dalton: false, idioma: 'es' };
+  const AJUSTES_BASE = { tema: 'epoca', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana', musica: false, dalton: false, idioma: 'es' };
   let ajustes = Object.assign({}, AJUSTES_BASE);
   function cargarAjustes() {
     try { const a = JSON.parse(localStorage.getItem(CLAVE_AJUSTES) || '{}'); ajustes = Object.assign({}, AJUSTES_BASE, a); } catch (e) { ajustes = Object.assign({}, AJUSTES_BASE); }
+    if (!ajustes.v3) { if (ajustes.tema === 'oscuro') ajustes.tema = 'epoca'; ajustes.v3 = 1; guardarAjustes(); } // la 3.0 estrena la estética por época
     aplicarAjustes();
   }
   function guardarAjustes() { try { localStorage.setItem(CLAVE_AJUSTES, JSON.stringify(ajustes)); } catch (e) { /* sin almacenamiento: los ajustes duran la sesión */ } }
@@ -33,10 +34,13 @@ IA.ui = (function () {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', getComputedStyle(r).getPropertyValue('--panel').trim() || '#0b1020');
   }
-  // El tema Época cambia con el año: sepia hasta 1949, neón hasta 1999, vidrio después
-  function actualizarEpoca() {
-    const anio = N.S ? N.anio() : 1930;
-    document.documentElement.setAttribute('data-epoca', anio < 1950 ? 'sepia' : anio < 2000 ? 'neon' : 'vidrio');
+  // Nueve estéticas, del papel de imprenta al holograma: cambian solas con el año de la partida
+  const EPOCAS = [[1895, 'imprenta', 'Imprenta y teatro'], [1927, 'mudo', 'Cine mudo'], [1948, 'oro', 'Época de oro'], [1967, 'tele', 'Televisión'], [1980, 'nuevo', 'Nuevo cine'],
+    [2000, 'video', 'Video y neón'], [2020, 'digital', 'Era digital'], [2050, 'stream', 'Streaming'], [99999, 'futuro', 'Futuro']];
+  function epoca(anio) { for (let i = 0; i < EPOCAS.length; i++) if (anio < EPOCAS[i][0]) return { id: EPOCAS[i][1], nombre: EPOCAS[i][2] }; return { id: 'futuro', nombre: 'Futuro' }; }
+  function actualizarEpoca(anioNP) {
+    const anio = N.S ? N.anio() : anioNP || estado.anioNP || 1930, e = epoca(anio).id, r = document.documentElement;
+    if (r.getAttribute('data-epoca') !== e) r.setAttribute('data-epoca', e);
   }
 
   // ---------- Formatos ----------
@@ -147,7 +151,13 @@ IA.ui = (function () {
   // ---------- Lienzos: pósters, retratos, logos y gráficas se dibujan después de cada render ----------
   // Los pósters y retratos se dibujan cuando están por verse (en un celular, un catálogo largo ya no se dibuja entero de golpe)
   function dibujarPoster(cv) {
-    const o = IA.obras.porId(+cv.getAttribute('data-poster'));
+    const v = cv.getAttribute('data-poster');
+    if (v === 'x') { // títulos sin obra (suministros, paquetes, piratas): cartel con los datos del lienzo
+      const tit = cv.getAttribute('data-tit') || '';
+      IA.arte.posterEn(cv, { id: N.hash(tit), titulo: tit, generos: [cv.getAttribute('data-gen') || 'Drama'], temas: [], anio: +cv.getAttribute('data-anio') || N.anio(), etapa: 'terminada', crit: null, pub: null, clas: cv.getAttribute('data-clas') || 'PG', premiosGanados: 0, creditos: {}, estudio: { nombre: cv.getAttribute('data-est') || '', logo: null } });
+      return;
+    }
+    const o = IA.obras.porId(+v);
     if (o) IA.arte.posterEn(cv, IA.obras.paraPoster(o));
   }
   function dibujarRetrato(cv) {
@@ -203,6 +213,8 @@ IA.ui = (function () {
     });
   }
   function quitarLogoPropio() { try { localStorage.removeItem(claveLogo()); } catch (e) { /* nada que quitar */ } logoClave = ''; logoImg = null; }
+  const SUB_IND = { Cine: 'Estudio de cine', 'Televisión': 'Cine y televisión', 'Música': 'Discográfica', Videojuegos: 'Estudio de videojuegos', Teatro: 'Compañía de teatro', Editorial: 'Casa editorial', Mixto: 'Grupo de medios' };
+  function subIndustria(id) { return SUB_IND[id] || id; }
   function dibujar(raiz) {
     const r = raiz || document;
     if (IA.puntos) IA.puntos.convertir(r);
@@ -230,7 +242,8 @@ IA.ui = (function () {
       cv.width = w * d; cv.height = h * d;
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
-      IA.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'));
+      const ind = est ? est.industria : cv.getAttribute('data-ind');
+      IA.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'), null, ind ? subIndustria(ind) : '');
     });
     r.querySelectorAll('canvas[data-grafica]').forEach(function (cv) {
       const g = graficas[cv.getAttribute('data-grafica')];
@@ -286,6 +299,7 @@ IA.ui = (function () {
     renderVista();
   }
   function renderBarra() {
+    actualizarEpoca();
     const S = N.S, est = S.estudios[0];
     const rojo = est.caja < 0 ? ' rojo' : '';
     const auto = !!estado.auto;
@@ -390,7 +404,7 @@ IA.ui = (function () {
   accion('alternarDinero', function () { ajuste('dineroHoy', !ajustes.dineroHoy); refrescar(); });
 
   return {
-    SECCIONES: SECCIONES, estado: estado, ajuste: ajuste, ajustes: function () { return ajustes; }, cargarAjustes: cargarAjustes,
+    SECCIONES: SECCIONES, estado: estado, epoca: epoca, actualizarEpoca: actualizarEpoca, ajuste: ajuste, ajustes: function () { return ajustes; }, cargarAjustes: cargarAjustes,
     aplicarAjustes: aplicarAjustes, dinero: dinero, numero: numero, grande: grande, pct: pct, fecha: fecha, fechaCorta: fechaCorta, fechaEstreno: fechaEstreno,
     decimal: decimal, icono: icono, aviso: aviso, abrirFicha: abrirFicha, refrescarFicha: refrescarFicha, cerrarFicha: cerrarFicha,
     fichaAbierta: fichaAbierta, modal: modal, cerrarModal: cerrarModal, modalAbierto: modalAbierto, dibujar: dibujar, logoPropio: logoPropio, ponerLogoPropio: ponerLogoPropio, quitarLogoPropio: quitarLogoPropio,

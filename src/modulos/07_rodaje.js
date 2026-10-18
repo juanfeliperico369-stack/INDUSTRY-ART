@@ -398,12 +398,14 @@ IA.rodaje = (function () {
 
   // ---------- Recomendaciones ----------
   function metodoRecomendado(o, a) {
-    const f = fam(o), fx = IA.ideas.nivelEfectos(o);
-    if (o.tipo === 'animacion') return 'set';
-    if ((f === 'AA' || f === 'IM') && fx >= 3) return a >= 1995 ? 'cgi' : 'practicos';
-    if (f === 'DR' || f === 'AV' || f === 'RD' || o.nat === 'r') return 'locacion';
-    if (f === 'SM' || f === 'HM' || f === 'FJ') return 'set';
-    return 'mixto';
+    const f = fam(o), fx = IA.ideas.nivelEfectos(o), anio = a || N.anio();
+    let m = 'mixto';
+    if (o.tipo === 'animacion') m = 'set';
+    else if ((f === 'AA' || f === 'IM') && fx >= 3) m = anio >= 1995 ? 'cgi' : 'practicos';
+    else if (f === 'DR' || f === 'AV' || f === 'RD' || o.nat === 'r') m = 'locacion';
+    else if (f === 'SM' || f === 'HM' || f === 'FJ') m = 'set';
+    const x = METODOS.filter(function (y) { return y.id === m; })[0];
+    return x && x.desde > anio ? 'mixto' : m; // antes de 1900 no hay sets ni efectos prácticos
   }
   function terrenoRecomendado(o) {
     const t = TERRENOS.filter(function (x) { return x.generos.some(function (g) { return o.gen.indexOf(g) >= 0; }); })[0];

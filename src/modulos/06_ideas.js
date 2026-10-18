@@ -734,6 +734,35 @@ IA.ideas = (function () {
     const m = o.mat && X.material(o.mat);
     return (m ? 0.08 * m.fama : 0) + (o.dcon || 0); // + convenciones y portadas
   }
+  // Moraleja: la lección que deja la historia. Si encaja con la familia del género suma 1; sin moraleja, las historias familiares pierden 1.
+  const MORALEJAS = [
+    { id: 'La honestidad siempre gana', fam: ['FJ', 'DR'] }, { id: 'El amor vence al miedo', fam: ['RD', 'FJ', 'IM'] }, { id: 'El poder corrompe', fam: ['DR', 'SM', 'AA'] },
+    { id: 'La familia es lo primero', fam: ['FJ', 'DR', 'HM'] }, { id: 'La venganza no cura nada', fam: ['SM', 'AA', 'DR'] }, { id: 'Hay que aceptar quién eres', fam: ['FJ', 'RD', 'AV'] },
+    { id: 'Juntos somos más fuertes', fam: ['AA', 'FJ', 'IM'] }, { id: 'Nunca es tarde para cambiar', fam: ['DR', 'HM', 'RD'] }, { id: 'Cuidado con lo que deseas', fam: ['IM', 'SM', 'HM'] },
+    { id: 'La codicia lo destruye todo', fam: ['DR', 'SM'] }, { id: 'Los sueños se cumplen con esfuerzo', fam: ['FJ', 'HM', 'DR'] }, { id: 'Las apariencias engañan', fam: ['SM', 'HM', 'RD'] },
+    { id: 'El conocimiento nos hace libres', fam: ['IM', 'DR', 'AV'] }, { id: 'La guerra no tiene ganadores', fam: ['DR', 'AA'] }, { id: 'La verdad siempre sale a la luz', fam: ['SM', 'DR'] },
+    { id: 'Hay que perdonar para seguir adelante', fam: ['DR', 'RD', 'FJ'] }, { id: 'Hay que cuidar la naturaleza', fam: ['IM', 'FJ', 'AV'] }, { id: 'Todo acto tiene consecuencias', fam: ['SM', 'DR', 'IM'] },
+    { id: 'La bondad es la mayor fuerza', fam: ['FJ', 'IM'] }, { id: 'El miedo se vence enfrentándolo', fam: ['SM', 'AA', 'FJ'] }, { id: 'La libertad tiene un precio', fam: ['AA', 'DR', 'AV'] },
+    { id: 'Sin moraleja: el final queda abierto', fam: ['AV', 'SM'] },
+  ];
+  function moraleja(id) { return MORALEJAS.filter(function (m) { return m.id === id; })[0] || null; }
+  function bonoMoraleja(o) {
+    if (!o || !o.mor) return 0;
+    const m = moraleja(o.mor), fam = o.fam || familia(o);
+    if (!m) return 0;
+    if (m.fam.indexOf(fam) >= 0) return 1;
+    return m.id.indexOf('Sin moraleja') === 0 && fam === 'FJ' ? -1 : 0;
+  }
+  // Música de la obra (de la Final): un paquete cambia el costo y la nota del departamento de música
+  const PAQUETES_MUSICA = [
+    { id: '', nombre: 'A tu medida', k: 0, q: 0, texto: 'El compositor del equipo hace todo con el reparto del presupuesto.' },
+    { id: 'basico', nombre: 'Básico', k: -0.02, q: -3, texto: 'Música de archivo y una canción conocida: barato y sin brillo.' },
+    { id: 'estandar', nombre: 'Estándar', k: 0.02, q: 1, texto: 'Partitura sencilla, una canción conocida y tres de nicho.' },
+    { id: 'autor', nombre: 'De autor', k: 0.05, q: 4, texto: 'Partitura original grabada con orquesta: a la crítica le encanta.', crit: 1 },
+    { id: 'exitos', nombre: 'De éxitos', k: 0.06, q: 3, texto: 'Canciones populares del momento: atraen público y venden la banda sonora.', pub: 1 },
+    { id: 'super', nombre: 'Superproducción', k: 0.1, q: 6, texto: 'Orquesta, coro y estrellas invitadas: lo mejor, a precio de oro.' },
+  ];
+  function paqueteMusica(id) { return PAQUETES_MUSICA.filter(function (x) { return x.id === (id || ''); })[0] || PAQUETES_MUSICA[0]; }
   // Estimación orientativa del retorno (multiplicador) antes de empezar
   function retornoEstimado(calidad) {
     const base = E().P.MULT_TIPICO;
@@ -753,7 +782,7 @@ IA.ideas = (function () {
     return r;
   }
 
-  return {
+  return { PAQUETES_MUSICA: PAQUETES_MUSICA, paqueteMusica: paqueteMusica, MORALEJAS: MORALEJAS, moraleja: moraleja, bonoMoraleja: bonoMoraleja,
     LIMITES: LIMITES, ANIO_IA: ANIO_IA, duracionTipica: duracionTipica, familia: familia, completar: completar,
     nivelMaximoEpoca: nivelMaximoEpoca, normalizar: normalizar, indiceClasificacion: indiceClasificacion, clasificar: clasificar,
     describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, nivelEfectos: nivelEfectos, validar: validar,

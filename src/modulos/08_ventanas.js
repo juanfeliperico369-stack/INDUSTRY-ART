@@ -118,7 +118,8 @@ IA.ventanas = (function () {
     o.et = 'terminada';
     o.anio = N.anio();
     o.sc = 0; o.bruto = 0; o.parte = 0; o.ent = 0; o.hs = [];
-    const total = estimarParteCines(o) * (via === 'streaming' ? 0.5 : 0.45) * rendimiento(o);
+    let total = estimarParteCines(o) * (via === 'streaming' ? 0.5 : 0.45) * rendimiento(o);
+    if (via === 'streaming' && o.est === 0 && N.S.stream) { total *= 0.6; IA.streaming.agregar(o.id, 'propio', { orig: 1 }); } // estreno original en tu plataforma: menos ventas a terceros, más suscriptores
     programar(o, total, N.anio());
     // Va todo a la ventana elegida primero (y lo demás después)
     N.emit('noticia', { tipo: o.est === 0 ? 'estudio' : 'rival', texto: '«' + o.tit + '» se estrena directo en ' + (via === 'video' ? 'video' : 'streaming') + '.' });

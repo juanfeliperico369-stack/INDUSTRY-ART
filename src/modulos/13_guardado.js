@@ -79,6 +79,7 @@ IA.guardado = (function () {
   MIGRACIONES[34] = function () { /* 1.4: sin datos nuevos obligatorios (notas del autor, material propio y logo propio son opcionales) */ };
   MIGRACIONES[35] = function () { /* 2.0: sin datos nuevos (los puntos «i» no se guardan) */ };
   MIGRACIONES[36] = function () { /* 2.1: el aspecto del avatar, los teatros propios y el talento del avatar se agregan solos cuando hacen falta */ };
+  MIGRACIONES[37] = function () { /* 3.0 Definitiva: el canal (24 horas, 8 franjas) y la plataforma se ponen al día solos al usarlos */ };
   MIGRACIONES[29] = function () { /* Errores e inglés, sin datos nuevos */ };
   MIGRACIONES[28] = function () { /* Interfaz y rendimiento, sin datos nuevos */ };
   MIGRACIONES[27] = function () { /* Solo balance, sin datos nuevos */ };

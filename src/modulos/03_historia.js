@@ -8,6 +8,34 @@ IA.historia = (function () {
   const N = IA.n;
   // [año, mes, día, texto, efecto]
   const HITOS = [
+    [1701, 7, 1, 'Empieza la Guerra de Sucesión Española'],
+    [1702, 3, 11, 'Sale el primer diario de Londres'],
+    [1709, 1, 1, 'Se inventa el pianoforte'],
+    [1710, 4, 10, 'Primera ley de derechos de autor'],
+    [1728, 1, 29, 'Una ópera de mendigos llena los teatros de Londres'],
+    [1731, 1, 1, 'Nace la revista ilustrada'],
+    [1737, 6, 21, 'Ley de licencias: censura previa para el teatro en Londres'],
+    [1752, 9, 14, 'Gran Bretaña adopta el calendario gregoriano'],
+    [1755, 11, 1, 'Terremoto de Lisboa'],
+    [1756, 5, 17, 'Empieza la Guerra de los Siete Años'],
+    [1776, 7, 4, 'Independencia de los Estados Unidos'],
+    [1778, 8, 3, 'Abre un gran teatro de ópera en Milán'],
+    [1783, 6, 4, 'Primer vuelo en globo'],
+    [1789, 7, 14, 'Toma de la Bastilla: empieza la Revolución francesa'],
+    [1791, 1, 13, 'Francia libera los teatros: cualquiera puede abrir uno'],
+    [1796, 1, 1, 'Se inventa la litografía'],
+    [1804, 12, 2, 'Francia se vuelve un imperio'],
+    [1810, 7, 20, 'Grito de independencia en Bogotá'],
+    [1814, 11, 29, 'Primer diario impreso con prensa de vapor'],
+    [1815, 6, 18, 'Termina la era napoleónica'],
+    [1816, 6, 1, 'El año sin verano'],
+    [1817, 9, 6, 'Luz de gas en los escenarios'],
+    [1825, 9, 27, 'Primer ferrocarril público de pasajeros'],
+    [1836, 7, 1, 'Nace la novela por entregas en los diarios'],
+    [1837, 1, 1, 'Luz de calcio en el escenario'],
+    [1839, 8, 19, 'Se presenta la fotografía al público'],
+    [1844, 5, 24, 'Primer mensaje por telégrafo'],
+    [1848, 2, 24, 'Revoluciones en toda Europa'],
     [1850, 1, 1, 'Teatro, libros y folletines por entregas dominan el entretenimiento'], [1877, 11, 21, 'Se anuncia el fonógrafo: aparece la música grabada en cilindros'],
     [1887, 11, 8, 'Se patenta el disco plano'], [1895, 12, 28, 'Primera proyección pública de cine con entrada pagada, en París: nace el cine mudo'],
     [1905, 6, 19, 'Abren las salas baratas de cine en Norteamérica: el público crece rápido'], [1912, 3, 1, 'Llegan los largometrajes y el sistema de estrellas'],
@@ -34,7 +62,7 @@ IA.historia = (function () {
     [2035, 1, 1, 'Era de la inmersión: realidad mixta y salas inmersivas'], [2050, 1, 1, 'Era del clima y las megaciudades: eventos climáticos cierran rodajes; sets virtuales', 'clima'],
     [2065, 1, 1, 'Pico de población: el mercado llega a su máximo y envejece'], [2085, 1, 1, 'Interfaces neuronales: obras que se sienten; debates éticos y censura nueva'],
     [2100, 1, 1, 'Era orbital: rodajes en órbita y pequeños públicos en colonias'], [2125, 1, 1, 'Arte posthumano: talentos sintéticos con derechos y obras eternas'],
-    [2150, 1, 1, 'Después de 2150: el mundo sigue con eventos generados por tu partida'],
+    [2150, 1, 1, 'Después de 2150: el mundo sigue con eventos generados por tu partida'], [2175, 5, 1, 'Primer festival de cine en Marte'], [2196, 2, 2, 'Hologramas sólidos: el teatro se puede tocar'], [2231, 9, 9, 'Traducción mental: todas las obras en todos los idiomas'], [2250, 3, 3, 'Abren los platós lunares'], [2290, 12, 12, 'Se inaugura el Archivo de la Humanidad'], [2300, 12, 31, 'Fin del recorrido: seis siglos de historia'],
   ];
   // Más historia real (sin personas ni marcas) e hitos de obras reconocidas. Solo se nombran obras de dominio
   // público (Registro: «reales solo los eventos, las tecnologías y las obras de dominio público»); las más recientes se

@@ -37,7 +37,7 @@ IA.textos = {
     // Obras
     obras_marcha: 'En marcha', obras_listas: 'Listas', obras_cartelera: 'En cartelera', obras_catalogo: 'Catálogo',
     crear_obra: 'Crear obra', programar: 'Programar estreno', sin_obras: 'Aún no hay obras aquí.',
-    paso_generos: 'Géneros', paso_tono: 'Tono y clasificación', paso_historia: 'Historia y tono', paso_escala: 'Producción y contenido', paso_equipo: 'Equipo', paso_titulo: 'Título',
+    paso_generos: 'Géneros', paso_tono: 'Tono y clasificación', paso_historia: 'Historia y tono', paso_escala: 'Producción y contenido', paso_equipo: 'Equipo', paso_titulo: 'Título', paso_resumen: 'Resumen y predicción',
     generos_ayuda: 'Elige de 1 a 3 géneros. La familia pesa en la calidad; el encaje entre familias se descubre usándolo.',
     encaje: 'Encaje', encaje_desconocido: 'Encaje por descubrir', tono: 'Tono', clasificacion: 'Clasificación',
     escala_ayuda: 'Más presupuesto ayuda, pero cada vez menos: duplicarlo siempre suma lo mismo.',

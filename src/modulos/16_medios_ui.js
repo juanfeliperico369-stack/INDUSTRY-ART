@@ -49,7 +49,7 @@ IA.mediosUI = (function () {
     let h = '<div class="kpis">' + kpi('Proyectos', ps.length) + kpi('En marcha', res.enMarcha + ' / ' + Md.capacidad(med)) + kpi('Ingresos del año', dinero(res.ing), 'bien') + kpi('Cuota del mercado', U.pct(Md.cuotaMercado(med))) + kpi(m.premio, res.premios) + '</div>';
     h += btn('Nuevo proyecto de ' + m.nombre.toLowerCase(), 'mdNuevo', med, 'primario bloque');
     if (med === 'teatro') h += teatrosUI();
-    if (med === 'musica') h += bandasUI();
+    if (med === 'musica') h += listaExitos() + bandasUI();
     if (med === 'juegos') h += juegosUI();
     if (med === 'libros') h += '<p class="nota">' + (IA.imperio.tiene('imprenta') ? 'Tienes imprenta propia: imprimir cuesta 30 % menos.' : 'Con una imprenta propia (Negocio › Construcciones) imprimir cuesta 30 % menos.') + ' Puedes hacer cómics o mangas de tus franquicias.</p>';
     h += '<h3>Tus proyectos</h3><div class="col">' + (ps.length ? ps.slice(0, 40).map(function (p) {
@@ -60,6 +60,14 @@ IA.mediosUI = (function () {
     h += '<h3>' + esc(m.premio) + '</h3>' + (a < m.premioDesde ? '<p class="tenue chico">Empiezan en ' + m.premioDesde + '.</p>' : pr.length ? pr.map(function (r) { return '<p class="chico"><b>' + (r.anio + 1) + '</b> · ' + r.cats.map(function (c) { return esc(c.nombre) + ': <span class="' + (c.est === 0 ? 'oro' : '') + '">«' + esc(c.tit) + '»</span>'; }).join(' · ') + '</p>'; }).join('') : '<p class="tenue chico">Todavía no hay ceremonias.</p>');
     dibujar();
     return h;
+  }
+  function listaExitos() {
+      const l = N.S.med && N.S.med.lista;
+      if (!l || !l.length) return '<p class="nota">La lista de éxitos semanal empieza en 1935.</p>';
+      return '<h3>Lista de éxitos de la semana</h3><div class="md-lista">' + l.map(function (x, i) {
+        const mov = !x.prev ? '<i class="nuevo">NUEVO</i>' : x.prev > i + 1 ? '<i class="sube">▲ ' + (x.prev - i - 1) + '</i>' : x.prev < i + 1 ? '<i class="baja">▼ ' + (i + 1 - x.prev) + '</i>' : '<i>=</i>';
+        return '<div class="md-li' + (x.tuyo ? ' tuyo' : '') + '"><b class="md-pos">' + (i + 1) + '</b><div class="col crece"><b>' + esc(x.nom) + '</b><span class="chico tenue">' + esc(x.art) + (x.tuyo ? ' · tuyo' : '') + '</span></div>' + mov + '</div>';
+      }).join('') + '</div>';
   }
   function tipoNom(p) { if (p.med === 'musica') { const t = Md.MED.musica.tipos.filter(function (x) { return x.id === p.tipo; })[0]; return t ? t.nombre : p.tipo; } return p.tipo; }
   // ---------- Música: bandas ----------
@@ -123,6 +131,11 @@ IA.mediosUI = (function () {
       h += '<label class="campo"><span>Banda o solista</span>' + sel('mdCfg', [['', '— ninguna —']].concat(Md.bandas().filter(function (x) { return !x.sep; }).map(function (x) { return [x.id, x.nom]; })), c.banda || '', 'banda') + '</label>';
       if (b.tipo === 'banda') h += '<label class="campo"><span>Película</span>' + sel('mdCfg', [['', '— elige —']].concat(N.S.obras.filter(function (o) { return o.est === 0 && !o.tv; }).slice(-15).map(function (o) { return [o.id, o.tit]; })), c.peli || '', 'peli') + '</label>';
       h += '<p class="tenue chico">Formatos de hoy: ' + Md.formatosMusica(a).map(function (f) { return f.nombre + ' ' + Math.round(f.parte * 100) + ' %'; }).join(' · ') + '</p>';
+      h += '<div class="fila"><label class="campo"><span>Grabación</span>' + sel('mdCfg', Md.ESTUDIOS_GRAB.map(function (x) { return [x.id, x.nombre + (x.q ? ' (calidad ' + (x.q > 0 ? '+' : '') + x.q + ')' : '')]; }), c.estudio || 'pro', 'estudio') + '</label>' +
+        '<label class="campo"><span>Promoción</span>' + sel('mdCfg', Md.PROMOS_M.filter(function (x) { return x.desde <= a; }).map(function (x) { return [x.id, x.nombre + (x.f > 1 ? ' (+' + Math.round((x.f - 1) * 100) + ' % de ventas)' : '')]; }), c.promo || 'ninguna', 'promo') + '</label></div>' +
+        '<div class="fila">' + (a >= 1981 ? '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="video"' + (c.video ? ' checked' : '') + '> Video musical (+12 %, más TV y ClipNet)</label>' : '') +
+        (a >= 2012 ? '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="exclusiva"' + (c.exclusiva ? ' checked' : '') + '> Exclusiva con Sonora (adelanto del 15 %)</label>' : '') + '</div>';
+      h += '<div class="md-plats">' + Md.partesMusica(a, b).map(function (x) { return '<div class="md-plat"><b>' + esc(x.nombre) + '</b><div class="tv-meta"><i style="width:' + Math.round(x.parte * 100) + '%;background:var(--acento)"></i></div><span class="chico">' + Math.round(x.parte * 100) + ' % de lo que gane</span></div>'; }).join('') + '</div>';
     }
     if (b.med === 'juegos') {
       h += '<b>Plataformas (hasta 4)</b><div class="fila">' + Md.plataformas().map(function (p) { return '<label class="chip"><input type="checkbox" data-c="mdPlat" data-v="' + p.id + '"' + (c.plats.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nombre) + ' ' + U.pct(p.cuota) + (p.kit ? '' : ' (sin kit)') + '</label>'; }).join('') + '</div>' +
@@ -131,18 +144,27 @@ IA.mediosUI = (function () {
         '<label class="campo"><span>Antipiratería</span>' + sel('mdCfg', [[0, 'Ninguna'], [1, 'Básica'], [2, 'Fuerte (molesta al público)']], c.anti, 'anti') + '</label></div>' +
         '<div class="fila"><label class="campo"><span>Modelo</span>' + sel('mdCfg', Md.MODELOS.filter(function (x) { return x.desde <= a; }).map(function (x) { return [x.id, x.nombre]; }), c.modelo, 'modelo') + '</label>' +
         '<label class="campo"><span>Edición</span>' + sel('mdCfg', [[0, 'Estándar'], [1, 'Estándar y de coleccionista']], c.edicion, 'edicion') + '</label></div>';
+      const dimSel = Md.de(Md.DIMENSIONES, c.dim, '2d');
+      h += '<h4>Tipo de videojuego</h4><div class="md-dims">' + Md.DIMENSIONES.map(function (x) {
+        const ok = x.desde <= a, g = ok ? Md.gustoDim(x.id, a) : 0;
+        return '<button class="md-dim' + (c.dim === x.id ? ' on' : '') + '" data-a="mdDim" data-v="' + x.id + '"' + (ok ? '' : ' disabled') + '><b>' + ({ texto: '⌨', '2d': '▦', iso: '◇', '3d': '⬢', rv: '◉', neuro: '✺' }[x.id]) + ' ' + esc(x.nombre) + '</b><span class="chico">' + (ok ? 'Público ×' + U.decimal(g, 2) + ' · costo ×' + U.decimal(x.k, 2) : 'Llega en ' + x.desde) + '</span></button>';
+      }).join('') + '</div><p class="nota info">' + esc(dimSel.texto) + '</p>';
+      h += '<label class="campo"><span>Modo de juego</span>' + sel('mdCfg', Md.MODOS_J.filter(function (x) { return x.desde <= a; }).map(function (x) { return [x.id, x.nombre + (x.id === 'masivo' ? ' (servidores: 8 % de lo que gane)' : x.d ? ' (dura más en venta)' : '')]; }), c.modo || 'solo', 'modo') + '</label>';
     }
     if (b.med === 'teatro') {
       h += '<div class="fila"><label class="campo"><span>Sala</span>' + sel('mdCfg', Md.SALAS.map(function (x) { return [x.id, x.nombre + ' (' + x.asientos + ')']; }), c.sala, 'sala') + '</label><label class="campo"><span>Funciones por semana</span><input type="number" min="3" max="10" data-c="mdCfg" data-v="funciones" value="' + c.funciones + '"></label></div>' +
-        '<div class="fila"><label class="campo"><span>Semanas de temporada</span><input type="number" min="4" max="52" data-c="mdCfg" data-v="semanas" value="' + c.semanas + '"></label><label class="campo"><span>Semanas de ensayo</span><input type="number" min="3" max="16" data-c="mdCfg" data-v="ensayo" value="' + c.ensayo + '"></label></div>';
+        '<div class="fila"><label class="campo"><span>Semanas de temporada</span><input type="number" min="4" max="52" data-c="mdCfg" data-v="semanas" value="' + c.semanas + '"></label><label class="campo"><span>Semanas de ensayo</span><input type="number" min="3" max="16" data-c="mdCfg" data-v="ensayo" value="' + c.ensayo + '"></label></div>' +
+        '<label class="campo"><span>Precio de la entrada</span>' + sel('mdCfg', Md.PRECIOS_T.map(function (x) { return [x.id, x.nombre + ' · ' + dinero(IA.mundo.aEpoca(x.p, a)) + (x.ocup ? ' · ocupación ' + (x.ocup > 0 ? '+' : '') + Math.round(x.ocup * 100) + ' %' : '')]; }), c.precio || 'normal', 'precio') + '</label>';
     }
     if (b.med === 'libros') {
       h += '<div class="fila"><label class="campo"><span>Tapa</span>' + sel('mdCfg', Md.TAPAS.map(function (x) { return [x.id, x.nombre]; }), c.tapa, 'tapa') + '</label><label class="campo"><span>Tamaño</span>' + sel('mdCfg', Md.TAMANOS.map(function (x) { return [x.id, x.nombre]; }), c.tam, 'tam') + '</label></div>' +
         '<div class="fila"><label class="campo"><span>Idiomas</span><input type="number" min="1" max="12" data-c="mdCfg" data-v="trad" value="' + c.trad + '"></label>' +
         (a >= 1950 ? '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="audio"' + (c.audio ? ' checked' : '') + '> Audiolibro</label>' : '') + (a >= 2007 ? '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="ebook"' + (c.ebook ? ' checked' : '') + '> Libro digital</label>' : '') + '</div>' +
-        '<label class="campo"><span>De una franquicia tuya</span>' + sel('mdCfg', [['', '— obra original —']].concat(IA.franquicias.lista().filter(function (f) { return f.est === 0; }).map(function (f) { return [f.id, f.nom]; })), c.fr || '', 'fr') + '</label>';
+        '<label class="campo"><span>De una franquicia tuya</span>' + sel('mdCfg', [['', '— obra original —']].concat(IA.franquicias.lista().filter(function (f) { return f.est === 0; }).map(function (f) { return [f.id, f.nom]; })), c.fr || '', 'fr') + '</label>' +
+        '<div class="fila"><label class="campo"><span>Extensión</span>' + sel('mdCfg', Md.EXTENSIONES.map(function (x) { return [x.id, x.nombre]; }), c.ext || 'novela', 'ext') + '</label><label class="campo"><span>Primera tirada</span>' + sel('mdCfg', Md.TIRADAS.map(function (x) { return [x.id, x.nombre]; }), c.tirada || 'normal', 'tirada') + '</label></div>' +
+        '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="firmas"' + (c.firmas ? ' checked' : '') + '> Gira de firmas (+8 % de ventas)</label><p class="nota info">Una tirada grande vende más si el libro gusta y deja cajas sin vender si no; la corta arriesga poco pero tarda en reimprimir.</p>';
     }
-    h += '<h3>Equipo</h3><div class="col">' + b.eq.map(function (id) { const t = T.porId(id); return t ? '<div class="fila entre"><span>' + esc(t.nom) + ' <span class="tenue chico">' + esc(t.of) + '</span></span><span class="cifra">' + Md.habMedio(t, b.med) + '</span></div>' : ''; }).join('') + '</div>' + btn('Buscar otro equipo', 'mdOtroEq');
+    h += '<h3>Equipo</h3><div class="col">' + b.eq.map(function (id) { const t = T.porId(id); return t ? '<div class="fila entre"><span>' + esc(t.nom) + ' <span class="tenue chico">' + esc((IA.datos.oficio(t.of) || { nombre: t.of }).nombre) + '</span></span><span class="cifra">' + Md.habMedio(t, b.med) + '</span></div>' : ''; }).join('') + '</div>' + btn('Buscar otro equipo', 'mdOtroEq');
     const err = Md.validar(b);
     h += '<div class="kpis">' + kpi('Costo', dinero(b.costo)) + kpi('Semanas', b.sem) + '</div>' + (err ? '<p class="mal chico">' + esc(err) + '</p>' : '') + btn('Empezar', 'mdIniciar', '', 'primario bloque', err) + btn('Cancelar', 'cerrarFicha', '', 'bloque');
     dibujar();
@@ -158,6 +180,7 @@ IA.mediosUI = (function () {
   ac('mdOtroEq', function () { const b = st.b; const otros = Md.equipoRecomendado(b.med, b.esc); b.eq = otros.map(function (id, i) { const alt = T.disponibles(T.porId(id).of, 0).filter(function (t) { return otros.indexOf(t.id) < 0; }); return alt.length ? N.elegir(alt.slice(0, 8)).id : id; }); refrescarNuevo(); });
   ac('mdCfg', function (v, el) { const k = el.getAttribute('data-v'); st.b.cfg[k] = ['idiomas', 'anti', 'edicion', 'funciones', 'semanas', 'ensayo', 'trad', 'banda', 'peli', 'motor', 'fr'].indexOf(k) >= 0 ? (v === '' ? null : +v) : v; if (k === 'idiomas') st.b.cfg.idiomas = N.limitar(st.b.cfg.idiomas || 1, 1, 10); refrescarNuevo(); });
   ac('mdCfgB', function (v, el) { st.b.cfg[el.getAttribute('data-v')] = v ? 1 : 0; refrescarNuevo(); });
+  ac('mdDim', function (v) { st.b.cfg.dim = v; const d = Md.de(Md.DIMENSIONES, v, '2d'); if (d.plat && st.b.cfg.plats.indexOf(d.plat) < 0 && Md.plataformas().some(function (p) { return p.id === d.plat; })) st.b.cfg.plats = st.b.cfg.plats.slice(0, 3).concat([d.plat]); refrescarNuevo(); });
   ac('mdPlat', function (v, el) { const id = el.getAttribute('data-v'), c = st.b.cfg; c.plats = v ? c.plats.concat([id]).slice(0, 4) : c.plats.filter(function (x) { return x !== id; }); refrescarNuevo(); });
   ac('mdIniciar', function () { const r = Md.iniciar(st.b); if (r.error) return avisar(r.error); st.b = null; U.cerrarFicha(); avisar('', '«' + r.proyecto.tit + '» empieza'); U.refrescar(); });
   // ---------- Ficha de un proyecto ----------
@@ -168,7 +191,20 @@ IA.mediosUI = (function () {
     let h = '<h2>' + esc(p.tit) + '</h2><div class="fila">' + caja(p, true) + '<div class="col crece"><span class="tenue">' + esc(Md.MED[p.med].nombre) + ' · ' + esc(tipoNom(p)) + ' · ' + esc(p.gen) + '</span><p class="chico">Portada: ' + esc(po.texto) + '</p>' +
       (p.pub !== undefined ? '<p>Crítica <b class="cifra">' + p.crit + '</b> · público <b class="cifra">' + p.pub + '</b></p>' : '<p>' + (p.et === 'ensayo' ? 'En ensayo' : 'En producción') + ': faltan ' + p.sr + ' semanas.</p>') + '</div></div>';
     h += '<div class="kpis">' + kpi('Ingresos', dinero(p.ing), 'bien') + kpi('Gastos', dinero(p.gas), 'mal') + kpi('Resultado', dinero(p.ing - p.gas), p.ing >= p.gas ? 'bien' : 'mal') + '</div>';
-    if (p.med === 'musica') h += '<p>' + Md.FMT_MUSICA.filter(function (f) { return v[f.id]; }).map(function (f) { return esc(f.nombre) + ': <b>' + grande(v[f.id]) + '</b>'; }).join(' · ') + (v.vistas ? ' · vistas: <b>' + grande(v.vistas) + '</b>' : '') + '</p>' + (p.cert ? '<p class="oro">Disco de ' + esc(Md.CERT.filter(function (c) { return c.id === p.cert; })[0].nombre.toLowerCase()) + '</p>' : '');
+    if (p.med === 'musica') {
+      h += '<p>' + Md.FMT_MUSICA.filter(function (f) { return v[f.id]; }).map(function (f) { return esc(f.nombre) + ': <b>' + grande(v[f.id]) + '</b>'; }).join(' · ') + (v.vistas ? ' · vistas: <b>' + grande(v.vistas) + '</b>' : '') + '</p>' + (p.cert ? '<p class="oro">Disco de ' + esc(Md.CERT.filter(function (c) { return c.id === p.cert; })[0].nombre.toLowerCase()) + '</p>' : '');
+      if (p.pl) {
+        const tot = Object.keys(p.pl).reduce(function (s2, k) { return s2 + (p.pl[k].ing || 0); }, 0) || 1, ico = { fisico: '💿', radio: '📻', tv: '📺', descarga: '⬇', audio: '🎧', video: '▶', canal: '📡' };
+        const nom = { canal: 'Tu canal (Videos musicales)' };
+        Md.PLAT_MUSICA.forEach(function (x) { nom[x.id] = x.nombre; });
+        h += '<h3>Plataformas</h3><div class="md-plats">' + Object.keys(p.pl).map(function (k) {
+          const r = p.pl[k], x = Md.PLAT_MUSICA.filter(function (y) { return y.id === k; })[0], u = x ? x.u : 'emisiones';
+          return '<div class="md-plat"><b>' + ico[k] + ' ' + esc(nom[k] || k) + '</b><span class="cifra">' + grande(r.u) + ' ' + u + '</span>' + (p.plSem && p.plSem[k] ? '<span class="chico tenue">+' + grande(p.plSem[k]) + ' esta semana</span>' : '') +
+            (r.ing ? '<div class="tv-meta"><i style="width:' + Math.round(r.ing / tot * 100) + '%;background:var(--acento)"></i></div><span class="chico">' + dinero(r.ing) + '</span>' : '<span class="chico bien">Promoción: más gente lo escucha</span>') + '</div>';
+        }).join('') + '</div>';
+      }
+    }
+    if (p.med === 'juegos') h += '<p class="chico">' + esc(Md.de(Md.DIMENSIONES, p.cfg.dim, '2d').nombre) + ' · ' + esc(Md.de(Md.MODOS_J, p.cfg.modo, 'solo').nombre) + '</p>';
     if (p.med === 'juegos') h += '<p>Copias físicas <b>' + grande(v.fisicas) + '</b> · digitales <b>' + grande(v.digitales) + '</b> · jugadores activos <b>' + grande(v.jugadores) + '</b></p><p class="chico">Plataformas: ' + p.cfg.plats.map(function (x) { return esc(Md.plat(x).nombre); }).join(', ') + ' · ' + p.cfg.idiomas + ' idiomas · ' + esc(Md.MODELOS.filter(function (x) { return x.id === p.cfg.modelo; })[0].nombre) + (p.dlc ? ' · ' + p.dlc + ' DLC' : '') + '</p>';
     if (p.med === 'teatro') h += '<p>Entradas <b>' + grande(v.entradas) + '</b> · funciones <b>' + grande(v.funciones) + '</b>' + (p.ocup !== undefined ? ' · ocupación <b>' + Math.round(p.ocup * 100) + ' %</b>' : '') + ' · ' + esc(Md.sala(p.cfg.sala).nombre) + (p.grab ? ' · grabada' : '') + '</p>';
     if (p.med === 'libros') h += '<p>Copias <b>' + grande(v.copias) + '</b>' + (v.digitales ? ' · digitales <b>' + grande(v.digitales) + '</b>' : '') + (v.audio ? ' · audiolibros <b>' + grande(v.audio) + '</b>' : '') + ' · ' + p.cfg.trad + ' idiomas</p>';
@@ -181,6 +217,7 @@ IA.mediosUI = (function () {
       if (!p.paq && otros.length) acc.push(btn('Paquete con «' + otros[otros.length - 1].tit + '»', 'mdPaquete', p.id + '|' + otros[otros.length - 1].id));
     }
     if (p.med === 'libros' && p.pub !== undefined) acc.push(btn('Traducir a otro idioma', 'mdTraducir', p.id));
+    if (p.med === 'musica' && p.pub !== undefined && N.S.stream && !p.conc) acc.push(btn('Concierto en tu plataforma · ' + dinero(Math.round(p.costo * 0.1)), 'mdConcierto', p.id));
     if (p.med === 'teatro' && p.et === 'catalogo') { acc.push(btn('Gira por 4 ciudades', 'mdGiraT', p.id)); if (!p.grab) { acc.push(btn('Grabar para TV', 'mdGrabar', p.id + '|tv')); if (N.S.stream) acc.push(btn('Grabar para tu plataforma', 'mdGrabar', p.id + '|stream')); } }
     h += acc.length ? '<div class="fila">' + acc.join('') + '</div>' : '';
     h += '<h3>Equipo</h3><p class="chico">' + p.eq.map(function (id) { const t = T.porId(id); return t ? esc(t.nom) : ''; }).join(', ') + (p.cfg.banda ? ' · ' + esc((Md.banda(p.cfg.banda) || {}).nom || '') : '') + '</p>';
@@ -193,6 +230,7 @@ IA.mediosUI = (function () {
   ac('mdSoporte', function (v) { const p = v.split('|'); avisar(Md.soporte(+p[0], p[1] === '1'), 'Listo'); refrescarProyecto(p[0]); });
   ac('mdPaquete', function (v) { const p = v.split('|'); avisar(Md.paquete(+p[0], +p[1]), 'Paquete a la venta'); refrescarProyecto(p[0]); });
   ac('mdTraducir', function (v) { avisar(Md.traducir(v), 'Traducción en camino'); refrescarProyecto(v); });
+  ac('mdConcierto', function (v) { avisar(Md.concierto(v), 'El concierto ya está en tu plataforma'); refrescarProyecto(v); });
   ac('mdGiraT', function (v) { avisar(Md.gira(v, 4), 'La obra sale de gira'); refrescarProyecto(v); });
   ac('mdGrabar', function (v) { const p = v.split('|'); avisar(Md.grabar(+p[0], p[1]), 'Obra grabada'); refrescarProyecto(p[0]); });
   return { medio: medio, fichaProyecto: fichaProyecto, dibujar: dibujar };
