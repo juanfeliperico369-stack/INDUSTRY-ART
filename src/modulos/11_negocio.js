@@ -1,16 +1,16 @@
 /* ==== módulo: negocio ==== */
 // Finanzas mes a mes por categoría, gastos fijos que crecen con el tamaño, impuesto del 25 % sobre utilidades
 // (no sobre la caja, fallo 18 de la V15), antimonopolio sobre el 35 %, construcciones básicas del estudio,
-// cuota de mercado y quiebra. Préstamos, sedes, filiales, inversiones y rescate llegan en la V28.
+// cuota de mercado y quiebra (con sus tres salidas en IA.banco, V24).
 IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
-  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera', 'licencias'];
-  const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'distribucion', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas', 'emision'];
+  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera', 'licencias', 'inversiones', 'filiales', 'coproduccion', 'encargos', 'fans', 'investigacion', 'eventos'];
+  const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'distribucion', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas', 'emision', 'deuda', 'socio', 'filiales', 'investigacion', 'inversiones', 'coproduccion', 'encargos', 'eventos'];
   const NOMBRES = {
     taquilla: 'Taquilla (parte del estudio)', video: 'Video doméstico', tv: 'Televisión', streaming: 'Streaming', merchandising: 'Juguetes y coleccionables',
     reestrenos: 'Reestrenos', carrera: 'Tus encargos como talento', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
-    personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)',
+    personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio',
   };
   function libroVacio() { return { ing: {}, gas: {} }; }
 
@@ -67,6 +67,7 @@ IA.negocio = (function () {
     });
     IA.sede.bonos(b, obra); // personal de oficina (V21)
     IA.carrera.bonos(b); // trasfondo y arquetipo de tu avatar (V21)
+    IA.imperio.bonoTec(b); // inventos propios o licenciados mientras son novedad (V24)
     return b;
   }
   function rapidez(estId) {
@@ -113,6 +114,8 @@ IA.negocio = (function () {
     const est = N.S.estudios[0];
     const info = tipo === 'piso' ? infoPiso(id) : infoTerreno(id);
     const costo = costoConstruccion(info);
+    const veto = IA.banco.opinar(costo, 'la construcción'); // el socio opina en lo grande (V24)
+    if (veto) return veto;
     pagar(0, 'construccion', costo);
     if (tipo === 'piso') est.pisos.push(id); else est.terrenos.push(id);
     est.valorObras = (est.valorObras || 0) + costo / E.presupuestoTipico(N.anio());
@@ -184,6 +187,7 @@ IA.negocio = (function () {
   function mensual() {
     const S = N.S;
     for (let i = 0; i < S.estudios.length; i++) {
+      if (S.estudios[i].quebrado) continue;
       const g = gastosFijosMes(i);
       pagar(i, 'personal', g.personal);
       pagar(i, 'mantenimiento', g.mantenimiento);

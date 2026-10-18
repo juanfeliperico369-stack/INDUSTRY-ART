@@ -265,7 +265,7 @@ IA.pantallas = (function () {
       kpi('Típico de la época', dinero(E.presupuestoTipico(N.anio()))) +
       kpi('Entrada de cine', dinero(M.precioEntrada('nam', N.anio()))) +
       '</div></div>' +
-      IA.prensaUI.banner() + IA.calendarioUI.tarjetasEstudio() +
+      IA.prensaUI.banner() + IA.imperioUI.bitacora() + IA.calendarioUI.tarjetasEstudio() +
       '<div class="tarjeta"><h3>' + t('mun_periodico') + '</h3>' + S.noticias.slice(0, 5).map(function (n) {
         return '<p style="margin:6px 0"><span class="tenue chico">' + esc(U.fechaCorta(n.t)) + '</span><br>' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>';
       }).join('') + '</div></div></div>';
@@ -457,8 +457,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function mundo() {
     const s = sub('mundo', 'cartelera');
-    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['festivales', 'Festivales'], ['revista', 'Revista'], ['redes', 'Redes'], ['rivales', t('mun_rivales')], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa'], ['taxonomia', 'Taxonomía']], s);
-    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: IA.prensaUI.premios, festivales: IA.prensaUI.festivales, revista: IA.prensaUI.revista, redes: IA.prensaUI.redes, rivales: mRivales, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa, taxonomia: IA.creacion.taxonomia }[s] || mCartelera)();
+    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['festivales', 'Festivales'], ['revista', 'Revista'], ['redes', 'Redes'], ['rivales', t('mun_rivales')], ['historia', 'Historia'], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa'], ['taxonomia', 'Taxonomía']], s);
+    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: IA.prensaUI.premios, festivales: IA.prensaUI.festivales, revista: IA.prensaUI.revista, redes: IA.prensaUI.redes, rivales: IA.imperioUI.rivales, historia: IA.imperioUI.historia, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa, taxonomia: IA.creacion.taxonomia }[s] || mCartelera)();
   }
   function mCartelera() {
     const S = N.S, sem = S.mercado.semana;
@@ -556,8 +556,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function negocio() {
     const s = sub('negocio', 'finanzas');
-    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['mercado', t('neg_mercado')]], s) +
-      ({ finanzas: nFinanzas, estudio: nEstudio, sede: IA.calendarioUI.negocioSede, distribucion: IA.distribucion.negocioDistribucion, canal: IA.teleUI.canal, streaming: IA.teleUI.streaming, mercado: nMercado }[s] || nFinanzas)();
+    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['banco', 'Banco'], ['imperio', 'Imperio'], ['mercado', t('neg_mercado')]], s) +
+      ({ finanzas: nFinanzas, estudio: nEstudio, sede: IA.calendarioUI.negocioSede, distribucion: IA.distribucion.negocioDistribucion, canal: IA.teleUI.canal, streaming: IA.teleUI.streaming, banco: IA.imperioUI.banco, imperio: IA.imperioUI.imperio, mercado: nMercado }[s] || nFinanzas)();
   }
   function tablaLibro(libro) {
     const filas = [];
@@ -591,12 +591,12 @@ IA.pantallas = (function () {
   }
   function nEstudio() {
     const est = est0(), anio = N.anio();
-    let h = '<p class="nota">Tu edificio crece piso a piso y los terrenos se llenan de sets. Cada construcción cuesta más que la anterior y sube los gastos fijos. Las 30 construcciones del documento llegan en la V28.</p>';
+    let h = '<p class="nota">Tu edificio crece piso a piso y los terrenos se llenan de sets. Cada construcción cuesta más que la anterior y sube los gastos fijos. Las futuras se ven con candado y su pista. Hay 33 construcciones.</p>';
     h += '<div class="kpis">' + kpi(t('est_capacidad'), NG.capacidad(0)) + kpi('Pisos', est.pisos.length + ' / ' + D.MAX_PISOS) + kpi('Terrenos', est.terrenos.length + ' / ' + D.MAX_TERRENOS) + kpi(t('caja_libre'), dinero(NG.cajaLibre(0))) + '</div>';
     const fila = function (info, tipo) {
       const err = NG.puedeConstruir(tipo, info.id);
       const n = (tipo === 'piso' ? est.pisos : est.terrenos).filter(function (x) { return x === info.id; }).length;
-      return '<div class="tarjeta fila entre"><div class="col crece"><b>' + esc(info.nombre) + (n ? ' <span class="etiqueta">tienes ' + n + '</span>' : '') + '</b><span class="chico">' + esc(info.efecto) + '</span>' + (info.desde > anio ? '<span class="tenue chico">Desde ' + info.desde + '</span>' : '') + '</div>' +
+      return '<div class="tarjeta fila entre"><div class="col crece"><b>' + esc(info.nombre) + (n ? ' <span class="etiqueta">tienes ' + n + '</span>' : '') + '</b><span class="chico">' + esc(info.efecto) + '</span>' + (info.desde > anio ? '<span class="tenue chico">Bloqueada hasta ' + info.desde + (info.pista ? ': ' + esc(info.pista.toLowerCase()) : '') + '</span>' : '') + (info.desde > anio ? '<span class="tenue chico">Desde ' + info.desde + '</span>' : '') + '</div>' +
         '<button class="btn' + (err ? '' : ' primario') + '" data-a="construir" data-v="' + tipo + ':' + info.id + '"' + (err ? ' disabled title="' + esc(err) + '"' : '') + '>' + dinero(NG.costoConstruccion(info)) + '</button></div>';
     };
     h += '<h3>Pisos del edificio</h3>' + D.pisos.filter(function (p) { return p.id !== 'oficinas'; }).map(function (p) { return fila(p, 'piso'); }).join('');
@@ -789,6 +789,7 @@ IA.pantallas = (function () {
     if (r && r.motivo === 'premios' && N.S.premios.length) mostrarPremios();
     else if (J.decisionesPendientes().length) IA.creacion.siguienteDecision(); // dilemas y pruebas de público (V19)
     else if (N.S.proyeccion && IA.prensaUI.proyeccion()) { /* reseñas (V22) */ }
+    else if (IA.imperioUI.mostrarEvento()) { /* evento con decisión (V24) */ }
     else if (IA.calendarioUI.mostrarPendientes()) { /* vida, heredero o recordatorio (V21) */ }
     else if (mostrarResumen && r && r.semanas > 1) {
       U.modal('<h2>' + t('resumen_titulo', { n: r.semanas }) + '</h2><div class="kpis">' + kpi(t('ingresos'), dinero(r.ingresos), 'bien') + kpi(t('gastos'), dinero(r.gastos), 'mal') + kpi('Cambio de caja', dinero(r.caja), r.caja >= 0 ? 'bien' : 'mal') + kpi(t('caja'), dinero(est0().caja)) + '</div>' +
@@ -809,6 +810,7 @@ IA.pantallas = (function () {
     }).join('') + '<button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
   }
   function modalQuiebra() {
+    return IA.imperioUI.quiebra(); // tres salidas (V24)
     U.modal('<h2>' + t('quiebra_titulo') + '</h2><p>' + t('quiebra_texto') + '</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + t('cargar') + '</button><button class="btn" data-a="salir">' + t('aj_salir') + '</button></div>');
   }
   ac('avanzar', function () {

@@ -309,7 +309,7 @@ IA.economia = (function () {
       const dr = da.regiones[r.id];
       if (dr.publico <= 0) return;
       const temp = M.temporada(r.id, sem);
-      const mercado = dr.publico / 52 * temp;
+      const mercado = dr.publico / 52 * temp * IA.historia.factorMercado(r.id); // guerras y crisis (V24)
       const pesos = [];
       let suma = pesoOtras + pesoCasa;
       // Las festividades reparten el público entre familias (cuánta gente va al cine ya lo da la temporada)

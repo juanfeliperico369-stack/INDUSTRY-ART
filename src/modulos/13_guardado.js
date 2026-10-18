@@ -72,6 +72,17 @@ IA.guardado = (function () {
 
   // V21 → V22: premios, festivales, crítica y prensa (todo empieza vacío)
   MIGRACIONES[22] = function (S) { ['galas', 'palmares', 'revista', 'cartas', 'hitos'].forEach(function (k) { if (!S[k]) S[k] = []; }); if (!S.fest) S.fest = {}; };
+  MIGRACIONES[24] = function (S) {
+    const ESTR = { DR: 'autor', AV: 'autor', AA: 'taquillero', SM: 'imitador', HM: 'economico', IM: 'franquicias', FJ: 'familiar', RD: 'economico' };
+    S.estudios.forEach(function (e, i) { if (i > 0) { if (e.base === undefined) e.base = (IA.datos.rivales[i - 1] || { tam: e.tam }).tam; if (!e.estr) e.estr = ESTR[e.familia] || 'imitador'; } });
+    // Hitos ya pasados (la semana del juego se calcula con el año de inicio de esta partida)
+    if (!S.hist) {
+      let v = 0;
+      IA.historia.HITOS.forEach(function (x, i) { const tx = (x[0] - S.y0) * 52 + IA.cal.semanaDeFecha(x[0], x[1], x[2]) - 1; if (tx < S.t) v = i + 1; });
+      S.hist = { gen: [], vistos: v, ultAnio: 0 };
+    }
+    if (!S.bitacora) S.bitacora = [];
+  };
   MIGRACIONES[23] = function (S) { if (!S.franq) S.franq = { lista: [], sig: 1 }; ['pilotos', 'ofFr'].forEach(function (k) { if (!S[k]) S[k] = []; }); };
 
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------

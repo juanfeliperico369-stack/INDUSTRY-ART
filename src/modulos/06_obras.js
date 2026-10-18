@@ -326,6 +326,7 @@ IA.obras = (function () {
     registrar(o);
     if (o.fr) IA.franquicias.alCrear(o); // franquicias (V23)
     if (o.tv) IA.tv.alCrear(o); // series vendidas con el pitch (V23)
+    IA.imperio.alCrear(o); // encargos recibidos (V24)
     return o;
   }
   // Créditos con nombre (quedan aunque el talento se retire y se borre del mundo)

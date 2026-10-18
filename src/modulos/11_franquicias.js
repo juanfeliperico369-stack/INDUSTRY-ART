@@ -258,17 +258,19 @@ IA.franquicias = (function () {
   // ---------- Mercado de derechos ----------
   function enVenta() {
     const S = N.S, anio = N.anio();
-    const vivas = st().lista.filter(function (f) { return f.est > 0 && estrenadas(f).length; }).map(function (f) { return { tipo: 'franquicia', f: f, nom: f.nom, est: f.est, precio: Math.round(valor(f) * 1.25) }; });
+    const vivas = st().lista.filter(function (f) { return f.est > 0 && estrenadas(f).length; }).map(function (f) { return { tipo: 'franquicia', f: f, nom: f.nom, est: f.est, precio: precioCompra(f) }; });
     const sueltas = S.obras.filter(function (o) { return o.est > 0 && !o.fr && o.et === 'terminada' && o.pub >= 60 && anio - N.anio(o.fe) <= 40 && o.der === undefined; })
       .sort(function (a, b) { return (b.pub + Math.log(1 + (b.bruto || 0))) - (a.pub + Math.log(1 + (a.bruto || 0))); }).slice(0, 12)
       .map(function (o) { return { tipo: 'obra', o: o, nom: o.tit, est: o.est, precio: Math.round(valor(o) * 1.25) }; });
     return vivas.slice(0, 10).concat(sueltas);
   }
+  // Las de estudios quebrados se venden con descuento (V24)
+  function precioCompra(f) { return Math.round(valor(f) * (N.S.estudios[f.est] && N.S.estudios[f.est].quebrado ? 0.6 : 1.25)); }
   function comprar(tipo, id) {
     const S = N.S;
     const f = tipo === 'franquicia' ? porId(+id) : null, o = tipo === 'obra' ? O.porId(+id) : null;
     if ((!f || f.est === 0) && (!o || dueno(o) === 0)) return 'Ya no está en venta.';
-    const precio = Math.round((f ? valor(f) : valor(o)) * 1.25);
+    const precio = f ? precioCompra(f) : Math.round(valor(o) * 1.25);
     if (S.estudios[0].caja < precio) return 'No alcanza la caja.';
     const vend = f ? f.est : o.est;
     IA.negocio.pagar(0, 'derechos', precio);

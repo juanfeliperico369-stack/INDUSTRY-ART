@@ -620,6 +620,7 @@ IA.talentos = (function () {
     const S = N.S;
     for (let i = 1; i < S.estudios.length; i++) {
       const est = S.estudios[i];
+      if (est.quebrado) continue;
       const tienen = S.talentos.filter(function (t) { return exclusivoDe(t) === i; }).length;
       if (tienen >= 2 || est.caja < IA.economia.presupuestoTipico(N.anio()) * est.tam * 8 || !N.probabilidad(0.35)) continue;
       const cand = S.talentos.filter(function (t) { return !t.ret && !t.mu && exclusivoDe(t) === null && t.fama >= 0.35 && t.fama - est.fama < 0.45 && t.of === 'interprete'; })

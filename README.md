@@ -5,16 +5,16 @@ programado junto a Claude, de Anthropic. El plan completo está en `docs/` (Plan
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v23.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
-Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21 y la V22 se abren en la V23 (se migran solas).
+Abre **`INDUSTRY_ART_v24.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22 y la V23 se abren en la V24 (se migran solas).
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v23.html` | El juego, versión 23 · Franquicias, TV y streaming (armado desde `src/`) |
+| `INDUSTRY_ART_v24.html` | El juego, versión 24 · Mundo vivo y negocio (armado desde `src/`) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
-| `bitacora_v23.md` | La bitácora corta de la V23 (modo rápido del Plan Maestro v2) |
+| `bitacora_v24.md` | La bitácora corta de la V24 (modo rápido del Plan Maestro v2) |
 | `bitacora_v20.md` | La bitácora de la V20 |
 | `bitacora_v19.md` | La bitácora de la V19 |
 | `bitacora_v18.md` | La bitácora de la V18 |
@@ -30,8 +30,8 @@ Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21 y la V2
 ## Para programar la siguiente versión
 
 ```bash
-python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v23.html
-node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1900 y 2000 + pruebas de reglas -> pruebas/informe_bot_v23.md
+python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v24.html
+node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1900 y 2000 + pruebas de reglas -> pruebas/informe_bot_v24.md
 node tools/capturas.js                       # capturas en 390×844, 844×390 y 1366×768 -> pruebas/capturas/
-python3 tools/desarmar.py INDUSTRY_ART_v23.html   # HTML -> src/ (la ida y vuelta es idéntica)
+python3 tools/desarmar.py INDUSTRY_ART_v24.html   # HTML -> src/ (la ida y vuelta es idéntica)
 ```

@@ -73,7 +73,7 @@ IA.textos = {
     aj_orientacion: 'Orientación', ori_auto: 'Automática', ori_vertical: 'Vertical', ori_horizontal: 'Horizontal',
     aj_laboratorio: 'Laboratorio (bot de pruebas)', aj_salir: 'Salir al inicio', aj_dinero: 'Mostrar el dinero',
     // Eventos
-    quiebra_titulo: 'Tu estudio quebró', quiebra_texto: 'Pasaste 26 semanas con la caja en rojo. En la V28 llegan el rescate y el socio; por ahora puedes cargar una partida o empezar otra.',
+    quiebra_titulo: 'Tu estudio quebró', quiebra_texto: 'Pasaste 26 semanas con la caja en rojo. Elige una salida: terminar, pedir un rescate al banco o buscar un socio.',
     resumen_titulo: 'Resumen de {n} semanas', premios_titulo: '{nombre} {anio}',
     nada_nuevo: 'Nada nuevo por ahora.',
     // Ayuda "i" de cada pantalla (texto con formato)

@@ -55,6 +55,7 @@ IA.produccion = (function () {
     for (let i = 0; i < lista.length; i++) {
       const o = lista[i];
       if (!SIGUIENTE[o.et]) continue;
+      if (IA.historia.pausa(o) || IA.historia.climaCierra(o)) continue; // huelgas y clima (V24)
       // Una decisión pendiente detiene la obra (sin gastar); sin respuesta, el equipo hace lo más prudente
       if (o.dil) {
         if (!R.vencido(o)) continue;

@@ -106,6 +106,7 @@ IA.pruebas = (function () {
       if (c) IA.estreno.firmar(c.id, 2);
     }
     botTele(est, tipico); // series, canal, plataforma, franquicias y licencias (V23)
+    botImperio(est, tipico); // eventos, banco e imperio (V24)
     // Con la caja en rojo no se arriesga más: espera a que entren los ingresos
     if (S.semanasEnRojo > 0) return;
     // 2. Construir cuando sobra caja
@@ -144,6 +145,34 @@ IA.pruebas = (function () {
       const r = IA.juego.iniciarObra(b);
       if (r.error) { if (registroErrores) registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error); break; }
     }
+  }
+  // V24: eventos, quiebra, banco, inversiones e imperio
+  function botImperio(est, tipico) {
+    const S = N.S, B = IA.banco, I = IA.imperio, anio = N.anio();
+    IA.eventos.autoDecidir();
+    if (S.quiebra) { const ops = B.salidasQuiebra().filter(function (x) { return x.id !== 'terminar' && x.ok !== false; }); if (ops.length) B.salir(ops[ops.length - 1].id); return; }
+    // Préstamo si la caja se pone fea y el banco presta; inversiones con lo que sobra
+    if (NG.cajaLibre(0) < tipico * 0.3 && B.limite() > tipico && !B.deuda()) B.pedir(Math.min(B.limite(), tipico * 2), 36);
+    if (N.semana() === 15 && NG.cajaLibre(0) > tipico * 20) { const c = B.companias(); if (c.length) B.comprarAccion(N.elegir(c).id, Math.round(tipico)); }
+    if (N.semana() === 45 && B.deuda() && NG.cajaLibre(0) > tipico * 15) B.prepagar(B.estado().deudas[0].id);
+    if (N.semana() === 35 && N.probabilidad(0.3)) { const k = Object.keys(B.estado().acc)[0]; if (k) B.venderAccion(k); }
+    if (S.socio && NG.cajaLibre(0) > tipico * 40) B.recomprar();
+    if (N.semana() !== 20) return;
+    const libre = NG.cajaLibre(0);
+    if (libre > tipico * 12 && I.sedes().length < 2) { const p = N.elegir(IA.datos.paises.filter(function (x) { return x.id !== S.estudios[0].pais; })); I.abrirSede(p.id); }
+    if (libre > tipico * 25 && I.filiales().length < 2) { const r = IA.rivales.activos().filter(function (e) { return !e.filial && !I.puedeComprar(e.id); }).sort(function (a, b) { return I.precioEstudio(a.id) - I.precioEstudio(b.id); })[0]; if (r && N.probabilidad(0.4)) I.comprarEstudio(r.id); }
+    const o = O.enProduccion(0).filter(function (x) { return x.et === 'desarrollo'; })[0];
+    if (o && N.probabilidad(0.3)) { const s = I.socios(o)[0]; if (s) I.coproducir(o.id, s.id); }
+    if (libre > tipico * 6 && N.probabilidad(0.3)) { const p = I.proyectosAjenos()[0]; if (p) I.financiar(p.id); }
+    if (libre > tipico * 8 && N.probabilidad(0.2)) { const r = N.elegir(IA.rivales.activos()); if (r) I.encargar(r.id, N.elegir(IA.datos.familia(r.familia).generos.filter(function (g) { return g !== 'Erótico'; })), 1); }
+    if (I.ofertasEncargo().length && !S.encargoPend && N.probabilidad(0.4)) I.aceptarEncargo(I.ofertasEncargo()[0].id);
+    if (libre > tipico * 10 && !I.distribuciones().length && N.probabilidad(0.3)) { const r = N.elegir(IA.rivales.activos()); if (r) I.firmarDistribucion(r.id, 2); }
+    if (!I.investigando() && libre > tipico * 5) { const x = IA.historia.INVENTOS.filter(function (y) { return I.estadoInvento(y) === 'investigable'; })[0]; if (x) I.investigar(x.id); }
+    const lic = IA.historia.INVENTOS.filter(function (y) { return I.estadoInvento(y) === 'rival'; })[0];
+    if (lic && libre > tipico * 4) I.licenciarTec(lic.id);
+    if (anio >= 1950 && libre > tipico * 4) I.organizarEvento(o ? o.id : null);
+    ['tienda', 'museo', 'animacion', 'cafeteria', 'laboratorio'].forEach(function (id) { const inf = I.info(id); if (inf && !I.tiene(id) && libre > tipico * 10 && !NG.puedeConstruir('piso', id)) NG.construir('piso', id); });
+    if (!I.tiene('parque') && libre > tipico * 20 && !NG.puedeConstruir('terreno', 'parque')) NG.construir('terreno', 'parque');
   }
   // V23: lo que haría un jugador con la televisión, el streaming y sus franquicias
   function botTele(est, tipico) {
@@ -623,6 +652,20 @@ IA.pruebas = (function () {
         prueba('El diseñador de arte y tecnología también pesa en vestuario', h2 < h1);
       }
       prueba('Los rivales también guardan sets', IA.rodaje.capacidadSets(1) >= 2);
+    }
+    // V24 · Mundo vivo y negocio
+    {
+      const B = IA.banco;
+      prueba('Hay 80 eventos con decisiones', IA.eventos.EV.length === 80, IA.eventos.EV.length);
+      prueba('Cada evento tiene al menos dos opciones', IA.eventos.EV.every(function (e) { return e[5].length >= 2; }));
+      prueba('Hay al menos 50 inventos', IA.historia.INVENTOS.length >= 50, IA.historia.INVENTOS.length);
+      prueba('Hay al menos 30 construcciones', D.pisos.length + D.terrenos.length >= 30, D.pisos.length + D.terrenos.length);
+      prueba('El puntaje de crédito va de 300 a 850', B.puntaje() >= 300 && B.puntaje() <= 850, B.puntaje());
+      prueba('La quiebra tiene tres salidas', B.salidasQuiebra().length === 3);
+      prueba('Los hitos están en orden de fecha', IA.historia.HITOS.every(function (x, i, a) { return !i || (a[i - 1][0] * 400 + a[i - 1][1] * 32 + a[i - 1][2]) <= (x[0] * 400 + x[1] * 32 + x[2]); }));
+      prueba('El factor de guerras y crisis está acotado', IA.datos.regiones.every(function (r) { const f = IA.historia.factorMercado(r.id); return f >= 0.3 && f <= 1.15; }));
+      prueba('Ningún estudio quebrado sigue filmando obras nuevas', O.activas().every(function (o) { const e = N.S.estudios[o.est]; return !e.quebrado || o.t0 <= (e.quebrado - N.S.y0 + 1) * 52; }));
+      prueba('El socio nunca tiene la mayoría', !N.S.socio || N.S.socio.parte < 0.5);
     }
     // V23 · Franquicias, TV y streaming
     {

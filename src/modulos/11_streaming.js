@@ -134,7 +134,7 @@ IA.streaming = (function () {
     let ing = 0;
     PLANES.forEach(function (p, i) { ing += s.subs * mix[i] / ms * s.precios[i] * 12 / 52; });
     ing += s.subs * mix[0] / ms * pt * 0.25 * 12 / 52; // anuncios del plan barato
-    const servidores = s.subs * pt * 0.12 * 12 / 52, almac = s.cat.length * tip() * 0.0002;
+    const servidores = s.subs * pt * 0.12 * 12 / 52 * (1 - IA.imperio.ahorroServidores()), almac = s.cat.length * tip() * 0.0002;
     let lineas = 0;
     s.lineas = s.lineas.filter(function (l) { return l.hasta > S.t; });
     if (N.mes(S.t) !== N.mes(S.t - 1)) {

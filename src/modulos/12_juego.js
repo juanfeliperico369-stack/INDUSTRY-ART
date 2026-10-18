@@ -77,6 +77,8 @@ IA.juego = (function () {
     S.fans = Math.round(e0.fama * 2000);
     S.recordatorios = [];
     IA.carrera.iniciar(op);
+    IA.historia.inicio(); // hitos ya pasados (V24)
+    IA.banco.semilla(pais.region, S.dificultad); // deuda semilla (V24)
     O.reindexar();
     noticia({ tipo: 'estudio', texto: 'Nace ' + S.estudios[0].nombre + ' en ' + pais.nombre + '. ' + M.era(anio) + '.', importante: true });
     // El mundo no arranca vacío: los rivales ya tienen obras en marcha y hay guiones en venta
@@ -91,7 +93,9 @@ IA.juego = (function () {
     conectado = true;
     N.on('noticia', noticia);
     N.on('aviso', function (a) { noticia({ tipo: a.tipo, texto: a.texto, importante: true }); });
+    N.on('hito', hito);
     N.on('obraLista', function (o) {
+      IA.historia.censurar(o); // Código de Producción (V24)
       if (o.tv) IA.tv.alQuedarLista(o); // tramas de la serie (V23)
       if (o.est !== 0) R.alQuedarLista(o, NG.contextoDe(o.est));
     });
@@ -107,6 +111,7 @@ IA.juego = (function () {
       IA.sede.alTerminar(o); // fans (V21)
       IA.critica.alTerminar(o); // cronología (V22)
       IA.franquicias.alTerminar(o); // popularidad de los personajes (V23)
+      IA.imperio.alTerminar(o); // coproducciones, encargos, financiación y distribución (V24)
       if (o.est === 0 && !o.tv) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });
     });
     N.on('premios', function (r) {
@@ -114,6 +119,20 @@ IA.juego = (function () {
       if (p && r.gala !== 'quimera') { if (p.ganador.est === 0) noticia({ tipo: 'premios', texto: r.nombre + ': «' + p.ganador.titulo + '» se lleva el premio mayor.', importante: true }); }
       else if (p) noticia({ tipo: 'premios', texto: D.premios.nombre + ' ' + (r.anio + 1) + ': «' + p.ganador.titulo + '» de ' + N.S.estudios[p.ganador.est].nombre + ' gana Mejor película.', importante: p.ganador.est === 0 });
     });
+  }
+  // Hitos con efecto (V24): el fallo antimonopolio obliga a vender los cines propios
+  function hito(id) {
+    const S = N.S, e0 = S.estudios[0];
+    if (id === 'antimonopolio') {
+      const n = e0.terrenos.filter(function (x) { return x === 'cine'; }).length;
+      if (n) {
+        e0.terrenos = e0.terrenos.filter(function (x) { return x !== 'cine'; });
+        const pago = Math.round(n * NG.costoConstruccion(NG.infoTerreno('cine')) * 0.7);
+        NG.cobrarEn(0, 'exhibicion', pago);
+        noticia({ tipo: 'negocio', texto: 'Por el fallo antimonopolio vendes tus ' + n + ' cadenas de cines: recibes {$}.', monto: pago, importante: true });
+      }
+      S.estudios.forEach(function (e) { e.cad = {}; });
+    }
   }
   function noticia(n) {
     const S = N.S;
@@ -157,6 +176,7 @@ IA.juego = (function () {
     // Un guion propio se usa una sola vez
     if (b.guionId) N.S.guionesPropios = (N.S.guionesPropios || []).filter(function (g) { return g.id !== b.guionId; });
     const o = PR.iniciar(b, NG.contextoDe(0));
+    if (IA.imperio.moral()) O.idsEquipo(o).forEach(function (id) { const ta = T.porId(id); if (ta) T.cambiarMoral(ta, IA.imperio.moral()); }); // cafetería (V24)
     IA.ideas.registrarPremisas(o, N.anio());
     // Arquetipo carismático: el equipo llega con más moral (V21)
     const ar = IA.carrera.arquetipo();
@@ -321,6 +341,7 @@ IA.juego = (function () {
     IA.carrera.semana(); // encargos y vida ligera de tu avatar (V21)
     IA.prensa.semana(); // rivales que mueven fechas (V22)
     IA.tv.semana(); IA.streaming.semana(); IA.franquicias.semana(); // series, canal, plataforma y licencias (V23)
+    IA.historia.semana(); IA.eventos.semana(); IA.banco.semana(); IA.imperio.semana(); // historia, eventos, banco e imperio (V24)
     const ceremonia = PM.semana();
     academia();
     S.t++;
@@ -340,6 +361,7 @@ IA.juego = (function () {
       IA.ideas.renovarGuiones();
       IA.critica.cartaMensual(); IA.critica.numeroRevista(); // cartas de fans y revista (V22)
       IA.franquicias.mensual(); IA.tv.mensual(); // ofertas por tus franquicias y patrocinadores (V23)
+      IA.banco.mensual(); IA.imperio.mensual(); // cuotas, junta, sedes, filiales y encargos (V24)
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;
@@ -351,8 +373,8 @@ IA.juego = (function () {
       IA.sede.anual();
       IA.carrera.anual();
       IA.franquicias.anual();
+      IA.banco.anual(S.estudios[0].util); IA.imperio.anual(); // dividendos, inventos y filiales (V24)
       O.compactar();
-      D.cronologia.forEach(function (c) { if (c[0] === N.anio()) noticia({ tipo: 'historia', texto: c[1], importante: true }); });
       if (S.fin.hist.length) N.emit('finAnio', S.fin.hist[S.fin.hist.length - 1]);
     }
     const r = { caja: S.estudios[0].caja - antes.caja, ceremonia: ceremonia, nuevoAnio: nuevoAnio };
@@ -385,6 +407,7 @@ IA.juego = (function () {
     if (listas.length) return 'lista';
     // Dilemas de rodaje y pruebas de público esperan tu decisión (V19)
     if (O.activas().some(function (o) { return o.est === 0 && (o.dil || (o.prueba && !o.prueba.ok)); })) return 'decision';
+    if (S.evento) return 'evento'; // eventos con decisión (V24)
     if (O.activas().some(function (o) { return o.est === 0 && o.et === 'lista' && o.prog && o.fe === S.t; })) return 'estreno';
     if (IA.cal.recordatoriosDeSemana(S.t).length) return 'recordatorio'; // tus recordatorios detienen el tiempo (V21)
     if (IA.carrera.pendiente()) return 'vida';

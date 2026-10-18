@@ -86,7 +86,7 @@ IA.ventanas = (function () {
   const ADELANTO = 0.35;
   // Cobra lo de una ventana; los talentos con porcentaje también cobran su parte (como en la taquilla)
   function cobrar(o, cat, monto) {
-    IA.negocio.cobrarEn(o.est, cat, monto);
+    IA.negocio.cobrarEn(o.est, cat, cat === 'video' || cat === 'streaming' ? monto * IA.historia.pirateria(N.anio()) : monto); // piratería por época (V24)
     if (!o.pctT) return;
     let pct = 0;
     Object.keys(o.pctT).forEach(function (id) { pct += o.pctT[id]; });
