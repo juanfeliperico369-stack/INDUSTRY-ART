@@ -261,3 +261,6 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 .nota.info.cerrada { display: none; }
 .nota.info .dato { display: block; margin-top: 6px; color: var(--tenue); }
 .nota.info .dato b { color: var(--dorado); }
+/* Editor Sandbox: campos etiquetados en una grilla que se acomoda al ancho */
+.rejilla-ed { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 6px; }
+.rejilla-ed input, .rejilla-ed select { width: 100%; }

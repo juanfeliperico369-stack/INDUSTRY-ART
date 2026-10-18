@@ -44,16 +44,27 @@ IA.carrera = (function () {
     a.salud = 90;
     const tf = trasfondo();
     if (tf && tf.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + tf.fama, 3);
-    // Modo carrera: tu avatar también es un talento del mundo, con su oficio, y recibe encargos
-    if (a.modo === 'carrera') {
-      const of = op.oficio && D.oficio(op.oficio) ? op.oficio : 'direccion';
-      const t = IA.talentos.crearPropio({ of: of, edad: edad(), sx: a.sx, nom: a.nom, pot: 66, reg: S.estudios[0].reg });
-      t.jugador = 1;
-      a.tal = t.id;
-      a.of = of;
-    }
+    // Tu avatar es también un talento con su oficio: trabaja gratis en tus obras. En modo carrera, además, recibe
+    // encargos de otros estudios; como dueño, solo trabaja para ti.
+    a.of = op.oficio && D.oficio(op.oficio) ? op.oficio : (a.esp && a.esp[0]) || 'direccion';
+    asegurarTalento();
   }
   function talentoAvatar() { const a = N.S.avatar; return a && a.tal ? IA.talentos.porId(a.tal) : null; }
+  // Crea el talento del avatar si falta (partidas de antes, o tras heredar el estudio)
+  function asegurarTalento() {
+    const S = N.S, a = S.avatar;
+    if (!a) return null;
+    let t = talentoAvatar();
+    if (t && !t.mu && !t.ret) return t;
+    const of = a.of && D.oficio(a.of) ? a.of : (a.esp && a.esp[0]) || 'direccion';
+    t = IA.talentos.crearPropio({ of: of, edad: edad(), sx: a.sx, nom: a.nom, pot: 66, reg: S.estudios[0].reg });
+    t.jugador = 1;
+    if (a.modo !== 'carrera') { t.ex = 0; t.exH = 1e9; } // como dueño no trabajas para los rivales
+    a.tal = t.id; a.of = of;
+    return t;
+  }
+  // Oficios en los que el avatar puede trabajar en tus obras: el suyo, sus especialidades y actuar
+  function oficiosAvatar() { const a = N.S.avatar; return a ? [a.of].concat(a.esp || [], ['interprete']).filter(function (x, i, l) { return x && l.indexOf(x) === i; }) : []; }
 
   // ---------- Modo carrera: encargos de los estudios ----------
   function tarifa() { const t = talentoAvatar(); return t ? IA.talentos.tarifaPara(t, 1) : 0; }
@@ -188,7 +199,7 @@ IA.carrera = (function () {
 
   return {
     TRASFONDOS: TRASFONDOS, ARQUETIPOS: ARQUETIPOS, VIDA: VIDA, trasfondo: trasfondo, arquetipo: arquetipo, edad: edad, bonos: bonos, ahorro: ahorro,
-    bonoMarketing: bonoMarketing, descuentoFijo: descuentoFijo, iniciar: iniciar, talentoAvatar: talentoAvatar, tarifa: tarifa,
+    bonoMarketing: bonoMarketing, descuentoFijo: descuentoFijo, iniciar: iniciar, talentoAvatar: talentoAvatar, asegurarTalento: asegurarTalento, oficiosAvatar: oficiosAvatar, tarifa: tarifa,
     aceptarOferta: aceptarOferta, rechazarOferta: rechazarOferta, vidaPendiente: vidaPendiente, decidirVida: decidirVida,
     retirarse: retirarse, elegirHeredero: elegirHeredero, pendiente: pendiente, semana: semana, anual: anual, autoDecidir: autoDecidir,
   };

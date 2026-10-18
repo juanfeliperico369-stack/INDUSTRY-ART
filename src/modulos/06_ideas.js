@@ -522,6 +522,16 @@ IA.ideas = (function () {
   }
   // Reparto inicial según la familia: protagonistas, sus aliados y antagonistas; extras y terceros como número
   function generarPersonajes(b) {
+    // Una obra libre lleva a sus personajes de siempre (en una erótica, todos mayores de edad)
+    const c = b.mat ? X.canon(X.material(b.mat)) : null;
+    if (c) {
+      const ero = (b.gen || []).indexOf('Erótico') >= 0;
+      b.pj = c.pj.map(function (p) { return { n: p.n, e: ero ? Math.max(21, p.e) : p.e, s: p.s, i: p.i, a: p.a, t: null }; });
+      if (b.extras === undefined) b.extras = 4;
+      if (b.terceros === undefined) b.terceros = 10;
+      asignarReparto(b);
+      return b;
+    }
     const fam = familia(b);
     const pj = [personajeNuevo(b, 'protagonista', fam === 'SM' ? 'Antihéroe' : fam === 'HM' ? 'Bufón' : fam === 'FJ' ? 'Inocente' : 'Héroe')];
     if (fam === 'RD') { const otro = personajeNuevo(b, 'protagonista', 'Amante'); otro.s = pj[0].s === 'F' ? 'M' : 'F'; otro.n = nombrePersonaje(regionDe(b), otro.s); pj.push(otro); }
@@ -563,6 +573,12 @@ IA.ideas = (function () {
   }
   function genero(s, txt) { return txt.split('{la}').join(s === 'F' ? 'la' : 'lo').split('{a}').join(s === 'F' ? 'a' : 'o'); }
   function sinopsis(b) {
+    // Una adaptación de una obra libre cuenta su historia de siempre
+    const cm = b.mat ? X.canon(X.material(b.mat)) : null;
+    if (cm) {
+      const m = X.material(b.mat), pre = (b.pre || []).slice(0, 2);
+      return cm.sin + (pre.length ? ' Con ' + pre.map(function (x) { return '«' + x + '»'; }).join(' y ') + '.' : '') + ' Basada en «' + m.tit + '»' + (m.autor && m.grupo !== 'tradicion' ? ', de ' + m.autor : '') + (b.suave ? ', adaptada con guiños por la censura de la época' : '') + '.';
+    }
     const pj = (b.pj || []).filter(function (p) { return p.i === 'protagonista'; })[0];
     const sx = pj ? pj.s : 'M';
     const g0 = (b.gen || ['Drama'])[0];

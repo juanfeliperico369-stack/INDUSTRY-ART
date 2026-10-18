@@ -40,6 +40,11 @@ IA.juego = (function () {
     };
   }
   // op: { semilla, anio, nombre, logo, pais, capital (dólares de hoy), dificultad, escenario, avatar, personalidad, tipo, vision, publico }
+  // Aspecto físico del avatar: solo números dentro de su rango y tres marcas sí/no
+  function aspectoValido(a) {
+    const n = function (x, max) { return N.limitar(Math.round(+x) || 0, 0, max); };
+    return { piel: n(a.piel, 7), pelo: n(a.pelo, 7), peinado: n(a.peinado, 6), ojos: n(a.ojos, 3), barba: n(a.barba, 3), gafas: !!a.gafas, aretes: !!a.aretes, pecas: !!a.pecas, calvicie: false };
+  }
   function nuevaPartida(op) {
     const anio = N.limitar(Math.round(op.anio || 1900), ANIO_MIN, ANIO_MAX);
     op.anio = anio;
@@ -69,6 +74,7 @@ IA.juego = (function () {
     const av = op.avatar || {};
     const esp = (av.especialidades || ['produccion', 'direccion', 'guion']).filter(function (x, i, a) { return D.oficio(x) && a.indexOf(x) === i; }).slice(0, 3);
     S.avatar = { nom: (av.nombre || 'Felipe').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
+    if (av.aspecto) S.avatar.asp = aspectoValido(av.aspecto);
     const vis = D.visiones.filter(function (v) { return v.id === S.estudios[0].vision; })[0];
     if (vis && vis.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);
     // Prestigio e influencia iniciales según la región y la dificultad; enfoque, sufijo, sede, fans y avatar
@@ -463,7 +469,7 @@ IA.juego = (function () {
   }
 
   return {
-    ANIO_MIN: ANIO_MIN, ANIO_MAX: ANIO_MAX, CAPITALES: CAPITALES, DIFICULTADES: DIFICULTADES,
+    ANIO_MIN: ANIO_MIN, ANIO_MAX: ANIO_MAX, aspectoValido: aspectoValido, CAPITALES: CAPITALES, DIFICULTADES: DIFICULTADES,
     capitalRecomendado: capitalRecomendado, nuevaPartida: nuevaPartida, conectar: conectar, noticia: noticia,
     puedeIniciar: puedeIniciar, iniciarObra: iniciarObra, programarEstreno: programarEstreno, comprarGuion: comprarGuion,
     firmarExclusivo: firmarExclusivo, comprarExclusividad: comprarExclusividad, cancelarExclusivo: cancelarExclusivo, estudiar: estudiar,

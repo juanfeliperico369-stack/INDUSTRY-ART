@@ -14,13 +14,15 @@ No usa npm ni librerías externas: solo Python 3.
 """
 import argparse
 import base64
+import gzip
+import json
 import os
 import re
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(RAIZ, "src")
-VERSION = "35"
+VERSION = "36"
 
 MARCA = re.compile(r"^/\* ==== módulo: ([a-z0-9_]+) ==== \*/\s*$", re.M)
 
@@ -30,7 +32,28 @@ def leer(ruta):
         return f.read()
 
 
-def modulos():
+# Los comentarios de línea entera (// …) no los necesita el juego: viajan comprimidos al final del HTML, en un
+# comentario que el navegador ignora, y desarmar.py los vuelve a poner en su lugar. Así el archivo pesa ~55 KB menos.
+COMENTARIO = re.compile(r"^\s*//")
+
+
+def apartar_comentarios(clave, texto, guardados):
+    lineas = texto.split("\n")
+    guardados[clave] = {"n": len(lineas), "c": [[i, l] for i, l in enumerate(lineas) if COMENTARIO.match(l)]}
+    return "\n".join(l for l in lineas if not COMENTARIO.match(l))
+
+
+def empacar(guardados):
+    crudo = json.dumps(guardados, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    try:
+        import zopfli.gzip
+        comprimido = zopfli.gzip.compress(crudo, numiterations=15)
+    except ImportError:
+        comprimido = gzip.compress(crudo, 9, mtime=0)
+    return "<!--comentarios:%s-->\n" % base64.b64encode(comprimido).decode("ascii")
+
+
+def modulos(guardados=None):
     carpeta = os.path.join(SRC, "modulos")
     nombres = sorted(n for n in os.listdir(carpeta) if n.endswith(".js"))
     partes = []
@@ -44,8 +67,21 @@ def modulos():
             sys.exit("La marca de %s no coincide con su nombre de archivo" % nombre)
         if "</script" in texto.lower():
             sys.exit("El módulo %s contiene '</script', que rompería el HTML" % nombre)
+        if guardados is not None:
+            texto = apartar_comentarios(clave, texto, guardados)
         partes.append(texto)
     return "\n".join(partes)
+
+
+# La sangría viaja como tabuladores (uno por cada dos espacios): el archivo pesa unos 38 KB menos y desarmar.py la
+# devuelve exacta. Ningún módulo tiene textos de varias líneas, así que el código se comporta igual.
+SANGRIA = re.compile(r"^((?:  )+)", re.M)
+
+
+def compactar(texto):
+    if "\t" in texto:
+        sys.exit("Las fuentes no deben tener tabuladores (la sangría compacta los usa)")
+    return SANGRIA.sub(lambda m: "\t" * (len(m.group(1)) // 2), texto)
 
 
 def fuente():
@@ -62,10 +98,11 @@ def fuente():
 def armar(salida):
     plantilla = leer(os.path.join(SRC, "plantilla.html"))
     estilos = fuente() + leer(os.path.join(SRC, "estilos.css"))
-    codigo = modulos()
+    guardados = {}
+    codigo = modulos(guardados)
     if "/*@ESTILOS@*/" not in plantilla or "/*@MODULOS@*/" not in plantilla:
         sys.exit("La plantilla debe tener /*@ESTILOS@*/ y /*@MODULOS@*/")
-    html = plantilla.replace("/*@ESTILOS@*/", estilos).replace("/*@MODULOS@*/", codigo)
+    html = plantilla.replace("/*@ESTILOS@*/", compactar(estilos)).replace("/*@MODULOS@*/", compactar(codigo)) + empacar(guardados)
     with open(salida, "w", encoding="utf-8", newline="\n") as f:
         f.write(html)
     kb = os.path.getsize(salida) / 1024

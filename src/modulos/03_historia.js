@@ -126,7 +126,7 @@ IA.historia = (function () {
     [1997, 12, 19, 'Un melodrama sobre un naufragio rompe todos los récords de taquilla', null, { fam: 'RD', v: 0.22 }],
     [1999, 3, 31, 'Una ciencia ficción con cámara lenta de 360 grados cambia el cine de acción', null, { fam: 'AA', v: 0.2 }],
     [2000, 3, 10, 'Estalla la burbuja de las empresas de internet'],
-    [2001, 9, 11, 'Atentados del 11 de septiembre: la industria pospone estrenos y cambia sus historias'],
+    [2001, 9, 11, 'Atentados del 11-S: la industria pospone estrenos y cambia sus historias'],
     [2001, 12, 19, 'Arranca la gran trilogía de fantasía filmada de una sola vez', null, { fam: 'IM', v: 0.22 }],
     [2003, 3, 12, 'Alerta mundial por el SRAS: se vacían las salas en Asia', 'sars'],
     [2004, 2, 4, 'Nacen las redes sociales masivas: el boca a boca se vuelve digital'],

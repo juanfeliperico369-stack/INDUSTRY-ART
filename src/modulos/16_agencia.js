@@ -76,7 +76,7 @@ IA.agencia = (function () {
     const bonos = (av.esp || []).map(function (x) { return D.oficio(x).nombre + ' +' + (1 + ((av.ac && av.ac[x]) || 0)); }).concat(Object.keys(av.ac || {}).filter(function (x) { return (av.esp || []).indexOf(x) < 0; }).map(function (x) { return D.oficio(x).nombre + ' +' + av.ac[x]; }));
     h += '<div class="tarjeta"><div class="fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece"><span class="tenue chico">' + t('tu_avatar') + '</span><h3 style="margin:2px 0">' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(N.S.estudios[0].personalidad) + '</span>' +
       '<span class="chico">En tus obras: ' + esc(bonos.join(' · ')) + '</span>' + (av.es && av.es.fin > S.t ? '<span class="chico oro">Estudiando ' + esc(T.curso(av.es.c).nombre) + ' hasta ' + esc(U.fechaCorta(av.es.fin)) + '</span>' : '') + '</div></div>' +
-      '<button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><span class="nota info"> Puedes ganar hasta +5 en cada oficio estudiando. Tu vida, tus encargos y tu retiro están en Estudio.</span></div>';
+      '<div class="fila envolver"><button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><button class="btn" data-a="agAspecto">Cambiar tu aspecto</button></div><span class="nota info"><span>Puedes ganar hasta +5 en cada oficio estudiando.</span> <span>En tus obras puedes ponerte en el equipo como ' + esc(IA.carrera.oficiosAvatar().map(function (x) { return D.oficio(x).nombre.toLowerCase(); }).join(', ')) + ' (sin cobrar).</span> <span>Tu vida, tus encargos y tu retiro están en Estudio.</span></span></div>';
     // Promesas
     const espera = S.tPromesas ? Math.max(0, J.ESPERA_PROMESAS - (S.t - S.tPromesas)) : 0;
     h += '<div class="tarjeta"><b>Buscar promesas</b><p class="nota" style="margin:2px 0">Tus cazatalentos encuentran 3 jóvenes con mucho potencial. Conocerás su potencial real, su primer contrato sale 30 % más barato y te tienen lealtad.</p><div class="fila envolver">' +
@@ -329,5 +329,22 @@ IA.agencia = (function () {
     if (p[0] === 'avatar') { U.cerrarModal(); U.refrescar(); } else cerrarPanel(+p[0]);
   });
 
+  // Cambiar el aspecto del avatar (se ve en su retrato y en el de su talento)
+  function formAspecto() {
+    const av = N.S.avatar, a = Object.assign({}, U.comoRetrato({ id: 999999, nom: av.nom, sx: av.sx, nac: av.nac, of: 'produccion', reg: N.S.estudios[0].reg }).aspecto);
+    return '<h2>Tu aspecto</h2><div class="fila" id="agAspVista" style="align-items:flex-start"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece">' +
+      IA.arte.OPCIONES_ASPECTO.filter(function (x) { return !x[3] || x[3] === av.sx; }).map(function (x) {
+        return '<label class="campo" style="margin:0"><span>' + x[1] + '</span><select data-c="agAsp" data-k="' + x[0] + '">' + x[2].map(function (n, i) { return '<option value="' + i + '"' + ((+a[x[0]] || 0) === i ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></label>';
+      }).join('') + '</div></div><button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>';
+  }
+  ac('agAspecto', function () { U.modal(formAspecto()); });
+  ac('agAsp', function (v, el) {
+    const av = N.S.avatar, k = el.getAttribute('data-k');
+    const base = U.comoRetrato({ id: 999999, nom: av.nom, sx: av.sx, nac: av.nac, of: 'produccion', reg: N.S.estudios[0].reg }).aspecto;
+    const a = Object.assign({}, base); a[k] = ['gafas', 'aretes', 'pecas'].indexOf(k) >= 0 ? +v === 1 : +v;
+    av.asp = IA.juego.aspectoValido(a);
+    U.dibujar(document.getElementById('agAspVista'));
+    U.dibujar(document.getElementById('vista'));
+  });
   return { talento: talento, fichaTalento: fichaTalento, filtros: ft };
 })();

@@ -48,6 +48,7 @@ IA.mediosUI = (function () {
     const ps = Md.proyectos(med).slice().reverse(), res = Md.resumen().filter(function (x) { return x.med === med; })[0];
     let h = '<div class="kpis">' + kpi('Proyectos', ps.length) + kpi('En marcha', res.enMarcha + ' / ' + Md.capacidad(med)) + kpi('Ingresos del año', dinero(res.ing), 'bien') + kpi('Cuota del mercado', U.pct(Md.cuotaMercado(med))) + kpi(m.premio, res.premios) + '</div>';
     h += btn('Nuevo proyecto de ' + m.nombre.toLowerCase(), 'mdNuevo', med, 'primario bloque');
+    if (med === 'teatro') h += teatrosUI();
     if (med === 'musica') h += bandasUI();
     if (med === 'juegos') h += juegosUI();
     if (med === 'libros') h += '<p class="nota">' + (IA.imperio.tiene('imprenta') ? 'Tienes imprenta propia: imprimir cuesta 30 % menos.' : 'Con una imprenta propia (Negocio › Construcciones) imprimir cuesta 30 % menos.') + ' Puedes hacer cómics o mangas de tus franquicias.</p>';
@@ -62,6 +63,19 @@ IA.mediosUI = (function () {
   }
   function tipoNom(p) { if (p.med === 'musica') { const t = Md.MED.musica.tipos.filter(function (x) { return x.id === p.tipo; })[0]; return t ? t.nombre : p.tipo; } return p.tipo; }
   // ---------- Música: bandas ----------
+  // Teatros propios: comprar, vender y ver si están en uso o alquilados
+  function teatrosUI() {
+    const tuyos = Md.teatros();
+    let h = '<h3>Tus teatros</h3><p class="nota info">Un teatro propio te ahorra la sala: cada función de una obra tuya de su tamaño cuesta 40 % menos. Cuando está libre, otras compañías lo alquilan y te pagan cada semana; mantenerlo cuesta 2 % de su valor al año. Al venderlo recuperas el 80 %.</p><div class="col">';
+    h += tuyos.length ? tuyos.map(function (t) {
+      const x = Md.TEATROS.filter(function (y) { return y.id === t.tipo; })[0];
+      return '<div class="cal-ev"><div class="col crece"><b>' + esc(x.nombre) + '</b><span class="tenue chico">' + x.asientos + ' butacas · ' + (Md.enUso(t) ? 'con una obra tuya en cartel' : 'libre: se alquila') + '</span></div>' + btn('Vender (' + dinero(Math.round(Md.precioTeatro(t.tipo) * 0.8)) + ')', 'mdVenderTeatro', t.id, '', Md.enUso(t) ? 'Hay una obra tuya en cartel' : '') + '</div>';
+    }).join('') : '<p class="tenue">Aún no tienes teatros: tus obras pagan la sala.</p>';
+    h += '</div><div class="fila envolver">' + Md.TEATROS.map(function (x) { return btn('Comprar ' + x.nombre.toLowerCase() + ' (' + x.asientos + ' butacas) · ' + dinero(Md.precioTeatro(x.id)), 'mdComprarTeatro', x.id); }).join('') + '</div>';
+    return h;
+  }
+  ac('mdComprarTeatro', function (v) { avisar(Md.comprarTeatro(v), 'Teatro comprado'); U.refrescar(); });
+  ac('mdVenderTeatro', function (v) { avisar(Md.venderTeatro(v), 'Teatro vendido'); U.refrescar(); });
   function bandasUI() {
     const bs = Md.bandas();
     let h = '<h3>Bandas y solistas</h3><div class="col">' + (bs.length ? bs.map(function (b) {

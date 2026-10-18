@@ -149,7 +149,37 @@ IA.arte = (function () {
   ];
   const colorFondo = (i) => `hsl(${(i | 0) * 18},40%,${12 + ((i | 0) % 4) * 3}%)`;
   const colorFrente = (i) => `hsl(${(i | 0) * 18},78%,60%)`;
-  const colorTexto = (i) => `hsl(${(i | 0) * 18},60%,82%)`;
+  // Color de las letras del letrero: 0 blanco, 1 crema, 2 dorado; el resto, un tono vivo de la rueda de color
+  const colorTexto = (i) => (i | 0) === 0 ? '#ffffff' : (i | 0) === 1 ? '#f3e2b8' : (i | 0) === 2 ? '#f5c542' : `hsl(${(i | 0) * 18},85%,72%)`;
+  // Tipo de letra: familia, grosor, cursiva y espaciado. Como muchos celulares no tienen esas fuentes, el grosor, la
+  // cursiva y el espaciado hacen que cada una de las 20 se vea distinta en cualquier aparato.
+  function estiloLetra(f) {
+    f = (f | 0) % 20;
+    return { fam: FUENTES[f], peso: [700, 400, 900][f % 3], cursiva: f % 4 === 3, espacio: [0, 0.08, 0.18, -0.02, 0.04][f % 5] };
+  }
+  function fuenteLetra(f, px) { const e = estiloLetra(f); return (e.cursiva ? 'italic ' : '') + e.peso + ' ' + Math.round(px) + 'px ' + e.fam; }
+  // Letrero: el logo y el nombre con el fondo, el color de letras y el tipo de letra que eligió el jugador
+  function letrero(c, w, h, L, nombre, borde) {
+    L = L || { s: 8, c: 6, b: 14, t: 3, f: 1 };
+    c.fillStyle = colorFondo(L.b);
+    rectRedondo(c, 1, 1, w - 2, h - 2, h * 0.18);
+    c.fill();
+    c.strokeStyle = borde || colorFrente(L.c);
+    c.lineWidth = Math.max(1, h * 0.04);
+    c.stroke();
+    logo(c, h * 0.6, h / 2, h * 0.3, L);
+    const area = w - h * 1.35, e = estiloLetra(L.f), texto = String(nombre || '').toUpperCase();
+    let px = h * 0.5;
+    c.font = fuenteLetra(L.f, px);
+    if ('letterSpacing' in c) c.letterSpacing = Math.round(px * e.espacio) + 'px';
+    const ancho = c.measureText(texto).width;
+    if (ancho > area) { px *= area / ancho; c.font = fuenteLetra(L.f, px); if ('letterSpacing' in c) c.letterSpacing = Math.round(px * e.espacio) + 'px'; }
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillStyle = colorTexto(L.t);
+    c.fillText(texto, h * 1.15 + area / 2, h * 0.54, area);
+    if ('letterSpacing' in c) c.letterSpacing = '0px';
+  }
 
   // Figura base: 0 círculo, 1 cuadrado, 2 triángulo, 3 hexágono, 4 estrella.
   function trazarForma(c, k, r) {
@@ -174,6 +204,8 @@ IA.arte = (function () {
     const v = ((L.s | 0) / 5) | 0;
     c.save();
     c.translate(x, y);
+    c.fillStyle = colorFondo(L.b);
+    c.beginPath(); c.arc(0, 0, r * 1.18, 0, TAU); c.fill();
     c.fillStyle = color;
     c.strokeStyle = color;
     c.lineWidth = r * 0.14;
@@ -801,6 +833,16 @@ IA.arte = (function () {
       semilla: hash('rasgos#' + semilla) % 1000000,
     };
   }
+
+  // Rasgos que el jugador elige para su avatar: [clave, nombre, opciones, solo para hombres]
+  const OPCIONES_ASPECTO = [
+    ['piel', 'Tono de piel', ['Muy claro', 'Claro', 'Claro cálido', 'Trigueño', 'Moreno claro', 'Moreno medio', 'Oscuro', 'Muy oscuro']],
+    ['pelo', 'Color de pelo', ['Negro', 'Castaño muy oscuro', 'Castaño oscuro', 'Castaño', 'Castaño claro', 'Rubio', 'Rubio claro', 'Pelirrojo']],
+    ['peinado', 'Peinado', ['Estilo 1', 'Estilo 2', 'Estilo 3', 'Estilo 4', 'Estilo 5', 'Estilo 6', 'Afro']],
+    ['ojos', 'Ojos', ['Oscuros', 'Café', 'Verdes', 'Azules']],
+    ['barba', 'Barba', ['Sin barba', 'Barba', 'Bigote', 'Sombra de barba'], 'M'],
+    ['gafas', 'Gafas', ['No', 'Sí']], ['aretes', 'Aretes', ['No', 'Sí']], ['pecas', 'Pecas', ['No', 'Sí']],
+  ];
 
   const epocaRetrato = (a) => (a < 1920 ? 0 : a < 1950 ? 1 : a < 1980 ? 2 : a < 2000 ? 3 : a < 2030 ? 4 : 5);
 
@@ -2273,20 +2315,8 @@ IA.arte = (function () {
     const lz = crearLienzo(w * esc, h * esc);
     const c = lz.getContext('2d');
     c.setTransform(esc, 0, 0, esc, 0, 0);
-    c.fillStyle = ['#3a2718', '#141a33', 'rgba(20,8,30,.85)', '#120a24', 'rgba(10,20,35,.92)', 'rgba(53,240,208,.14)'][ep];
-    rectRedondo(c, 1, 1, w - 2, h - 2, ep >= 4 ? h * 0.25 : 2);
-    c.fill();
-    c.strokeStyle = E.adorno;
-    c.lineWidth = ep === 0 ? 2 : 1.2;
-    c.stroke();
-    logo(c, h * 0.6, h / 2, h * 0.3, L);
-    const area = w - h * 1.35;
-    c.font = `${Math.round(h * 0.66)}px 'Titulos', Impact, sans-serif`;
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
-    if (ep >= 2) { c.shadowColor = E.adorno; c.shadowBlur = h * 0.3; }
-    c.fillStyle = ['#f3e2b8', '#ffd98a', '#fff1f8', '#ffffff', '#ffffff', '#c9fff4'][ep];
-    c.fillText(String(nombre || '').toUpperCase(), h * 1.15 + area / 2, h * 0.54, area);
+    if (ep >= 2) { c.shadowColor = E.adorno; c.shadowBlur = h * 0.3; } // desde los años 50, el letrero es de neón
+    letrero(c, w, h, L, nombre, E.adorno);
     return lz;
   }
 
@@ -2960,6 +2990,9 @@ IA.arte = (function () {
     colorLogo,
     colorFondoLogo: colorFondo,
     colorTextoLogo: colorTexto,
+    letrero,
+    OPCIONES_ASPECTO,
+    fuenteLetra,
     poster,
     posterEn,
     aspectoNuevo,

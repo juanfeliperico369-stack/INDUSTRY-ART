@@ -86,7 +86,7 @@ IA.imperioUI = (function () {
   }
   ac('imSede', function () { avisar(I.abrirSede(val('imPais')), 'Sede abierta'); });
   ac('imCerrarSede', function (v) { I.cerrarSede(v); U.refrescar(); });
-  ac('imComprarEst', function (v) { avisar(I.comprarEstudio(+v), 'Estudio comprado'); });
+  ac('imComprarEst', function (v) { avisar(I.comprarEstudio(+v), 'Estudio comprado: ahora es tu filial'); U.refrescar(); });
   ac('imVenderFil', function (v) { avisar(I.venderFilial(v), 'Filial vendida'); });
   ac('imCopro', function () { avisar(I.coproducir(+val('imCoObra'), +val('imCoEst')), 'Coproducción firmada'); });
   ac('imEncargar', function () { avisar(IA.creacion.conAzarUI(function () { return I.encargar(+val('imEnEst'), val('imEnGen'), 2); }), 'Encargo hecho'); });
@@ -119,7 +119,8 @@ IA.imperioUI = (function () {
       return '<div class="tarjeta' + (e.id === 0 ? ' oro' : '') + '"><div class="fila"><canvas data-logo="' + e.id + '" style="width:30px;height:30px"></canvas><div class="col crece"><b>' + (i + 1) + '. ' + esc(e.nombre) + '</b><span class="tenue chico">' +
         (e.quebrado ? (e.fusion !== undefined ? 'Se fusionó en ' + e.quebrado : 'Quebró en ' + e.quebrado) : estrellas(IA.rivales.estrellas(e)) + (es ? ' · ' + esc(es.nombre) : e.id === 0 ? ' · tu estudio' : '') + (e.filial ? ' · tu filial' : '')) +
         ' · ' + esc((D.pais(e.pais) || {}).nombre || '') + '</span></div><span class="cifra">' + U.pct(f.cuota) + '</span></div><span class="chico">Ingresos ' + dinero(f.ingresos) + ' · ' + f.obras + ' obras · crítica ' + f.calif + ' · prestigio ' + Math.round(f.prestigio * 100) + '</span>' +
-        (e.texto ? '<span class="tenue chico"> · ' + esc(e.texto) + '</span>' : '') + '</div>';
+        (e.texto ? '<span class="tenue chico"> · ' + esc(e.texto) + '</span>' : '') +
+        (e.id !== 0 && !e.quebrado && !e.filial ? '<div class="fila" style="margin-top:6px">' + btn('Comprar este estudio · ' + dinero(IA.imperio.precioEstudio(e.id)), 'imComprarEst', e.id, '', IA.imperio.puedeComprar(e.id)) + '</div>' : '') + '</div>';
     }).join('') + '</div>';
     const anio = S.obras.filter(function (o) { return o.anio === a && o.bruto; }).sort(function (x, y) { return y.bruto - x.bruto; }).slice(0, 10);
     const siempre = S.obras.filter(function (o) { return o.bruto; }).sort(function (x, y) { return IA.mundo.aHoy(y.bruto, y.anio || a) - IA.mundo.aHoy(x.bruto, x.anio || a); }).slice(0, 10);

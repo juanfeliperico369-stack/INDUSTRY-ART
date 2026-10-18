@@ -117,29 +117,62 @@ IA.publicacion = (function () {
     for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 32768));
     return btoa(s);
   }
-  function nombreSeguro(n) { return String(n || 'archivo').replace(/[^A-Za-z0-9_.-]+/g, '_').slice(0, 80) || 'archivo'; }
+  function nombreSeguro(n) { return String(n || 'archivo').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9_.-]+/g, '_').slice(0, 80) || 'archivo'; }
+  // Dentro del enlace de claude.ai el visor no deja descargar directo: se pide con su permiso de descargas
+  let descargasVisor;
+  function visor() {
+    if (descargasVisor === undefined) descargasVisor = typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function' ? Promise.resolve(window.claude.use('downloads')).catch(function () { return null; }) : Promise.resolve(null);
+    return descargasVisor;
+  }
+  const EXT_VISOR = /\.(docx|txt|json|md|csv|pdf|zip|png|jpg)$/i;
   function guardarArchivo(nombre, contenido, tipo) {
     nombre = nombreSeguro(nombre);
     const bytes = typeof contenido === 'string' ? new TextEncoder().encode(contenido) : contenido;
+    const listo = function (extra) { return Object.assign({ ok: true, nombre: nombre, bytes: bytes.length }, extra || {}); };
+    const fallo = function (e, extra) { return Object.assign({ ok: false, nombre: nombre, error: (e && (e.message || e.code)) || String(e) }, extra || {}); };
+    const cancelado = function (e) { return /cancel|declined|abort/i.test(String(e && (e.code || e.message || e.name || e))); };
+    // 1. App de Android o iPhone: se escribe en la app y se abre Compartir; si eso falla, se guarda en Documentos
     const P = enApp() && window.Capacitor.Plugins;
-    if (P && P.Filesystem && P.Share) {
-      return P.Filesystem.writeFile({ path: nombre, data: aBase64(bytes), directory: 'CACHE' })
-        .then(function (r) {
-          return P.Share.share({ title: nombre, files: [r.uri], dialogTitle: 'Guardar o compartir' })
-            .catch(function (e) { if (!/cancel/i.test(String(e && (e.message || e)))) throw e; }); // cerrar el menú no es un error
-        })
-        .then(function () { return { ok: true, nombre: nombre, bytes: bytes.length }; })
-        .catch(function (e) { return { ok: false, nombre: nombre, error: (e && e.message) || String(e) }; });
+    if (P && P.Filesystem) {
+      const b64 = aBase64(bytes);
+      const enDocumentos = function () {
+        return P.Filesystem.writeFile({ path: 'INDUSTRY ART/' + nombre, data: b64, directory: 'DOCUMENTS', recursive: true })
+          .then(function () { return listo({ ruta: 'Documentos/INDUSTRY ART/' + nombre }); });
+      };
+      if (!P.Share) return enDocumentos().catch(function (e) { return fallo(e); });
+      return P.Filesystem.writeFile({ path: nombre, data: b64, directory: 'CACHE' })
+        .then(function (r) { return P.Share.share({ title: nombre, files: [r.uri], dialogTitle: 'Guardar o compartir' }); })
+        .then(function () { return listo(); }, function (e) { return cancelado(e) ? fallo(e, { cancelado: true }) : enDocumentos(); })
+        .catch(function (e) { return fallo(e); });
     }
-    try {
-      const url = URL.createObjectURL(new Blob([bytes], { type: tipo || 'application/octet-stream' }));
-      const a = document.createElement('a');
-      a.href = url; a.download = nombre; a.rel = 'noopener';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-      return Promise.resolve({ ok: true, nombre: nombre, bytes: bytes.length });
-    } catch (e) {
-      return Promise.resolve({ ok: false, nombre: nombre, error: (e && e.message) || String(e) });
+    return visor().then(function (d) {
+      // 2. Enlace de claude.ai: el visor pide confirmación y guarda (solo ciertas extensiones: la partida va como .json)
+      if (d && typeof d.save === 'function') {
+        const nom = EXT_VISOR.test(nombre) ? nombre : nombre + '.json';
+        return d.save({ filename: nom, data: new Blob([bytes]) }).then(function () { return listo({ nombre: nom }); }, function (e) { return cancelado(e) ? fallo(e, { cancelado: true }) : fallo(e); });
+      }
+      // 3. Celular: el menú Compartir del sistema (Drive, Archivos, correo) si el navegador sabe compartir archivos
+      try {
+        const archivo = typeof File === 'function' ? new File([bytes], nombre, { type: tipo || 'application/octet-stream' }) : null;
+        const tactil = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+        if (archivo && tactil && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+          return navigator.share({ files: [archivo], title: nombre }).then(function () { return listo(); }, function (e) { return cancelado(e) ? fallo(e, { cancelado: true }) : descargaNormal(); });
+        }
+      } catch (e) { /* sin Compartir: descarga normal */ }
+      return descargaNormal();
+    });
+    // 4. Navegador y PC: descarga normal
+    function descargaNormal() {
+      try {
+        const url = URL.createObjectURL(new Blob([bytes], { type: tipo || 'application/octet-stream' }));
+        const a = document.createElement('a');
+        a.href = url; a.download = nombre; a.rel = 'noopener';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        return listo();
+      } catch (e) {
+        return fallo(e);
+      }
     }
   }
   const CREDITOS = ['Ideado y creado por OneZero', 'Programado junto a Lumen'];

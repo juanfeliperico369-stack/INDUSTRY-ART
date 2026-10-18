@@ -294,6 +294,7 @@ IA.talentos = (function () {
     if (estudiando(t)) return { estado: 'rechaza', texto: 'Está estudiando' };
     if (!disponible(t, c.est || 0)) return { estado: 'rechaza', texto: (t.act || 0) >= MAX_PROYECTOS ? 'Ya está en ' + MAX_PROYECTOS + ' proyectos' : 'Sin energía (recupera 10 al mes)' };
     const e = N.anio() - t.nac;
+    if (t.jugador && (c.est || 0) === 0) return e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2) ? { estado: 'rechaza', texto: 'Eres menor de edad: solo obras hasta PG-13' } : { estado: 'acepta', texto: 'Eres tú: trabajas gratis en tu propia obra' };
     if (c.clas !== undefined && c.clas > t.cmax) return { estado: 'rechaza', texto: 'No hace obras de clasificación ' + IA.taxonomia.ORDEN_CLAS[c.clas] };
     if (e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2)) return { estado: 'rechaza', texto: 'Es menor de edad: solo obras hasta PG-13' };
     const m = moral(t);

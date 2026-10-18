@@ -79,31 +79,71 @@ IA.metasUI = (function () {
     setTimeout(creditos, 0);
   });
   // ---------- Mundo › Editor ----------
+  // Pestañas con conteo, buscador por nombre y tarjetas con cada dato etiquetado; se ven de 20 en 20.
+  function listaEditor() {
+    const S = N.S, q = (st.q || '').toLowerCase(), n = st.n || 20;
+    const campo = function (tipo, id, k, v, nombre, op) {
+      op = op || {};
+      return '<label class="campo" style="margin:0"><span>' + nombre + '</span><input ' + (op.num ? 'type="number" step="any" inputmode="decimal" ' : '') + (op.min !== undefined ? 'min="' + op.min + '" max="' + op.max + '" ' : '') + 'value="' + esc(v) + '" data-c="edCampo" data-v="' + tipo + '|' + id + '|' + k + '"' + (op.por ? ' data-por="' + op.por + '"' : '') + '></label>';
+    };
+    const filtra = function (l, nom) { return q ? l.filter(function (x) { return String(nom(x) || '').toLowerCase().indexOf(q) >= 0; }) : l; };
+    const mas = function (total) { return total > n ? '<button class="btn bloque" data-a="edMas">Ver más (' + (total - n) + ')</button>' : ''; };
+    let lista = [], h = '';
+    if (st.ed === 'talento') {
+      lista = filtra(S.talentos.filter(function (t) { return !t.mu && !t.ret; }).sort(function (a, b) { return b.fama - a.fama; }), function (t) { return t.nom; });
+      h = lista.slice(0, n).map(function (t) {
+        return '<div class="tarjeta"><div class="fila" style="align-items:flex-start"><canvas class="retrato" data-retrato="' + t.id + '"></canvas><div class="col crece">' + campo('talento', t.id, 'nom', t.nom, 'Nombre') +
+          '<span class="tenue chico">' + esc(IA.datos.oficio(t.of).nombre) + ' · ' + (N.anio() - t.nac) + ' años</span></div></div><div class="rejilla-ed">' +
+          campo('talento', t.id, 'hab', t.hab, 'Habilidad (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'pot', t.pot, 'Potencial (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'fama', Math.round(t.fama * 100), 'Fama (%)', { num: 1, min: 0, max: 100, por: 100 }) + '</div></div>';
+      }).join('') + '<div class="tarjeta"><b>Crear talento</b><div class="rejilla-ed"><label class="campo" style="margin:0"><span>Nombre</span><input id="edTNom" maxlength="40"></label><label class="campo" style="margin:0"><span>Oficio</span><select id="edTOf">' + IA.datos.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label></div>' + btn('Crear', 'edCrearT', '', 'primario') + '</div>';
+    } else if (st.ed === 'estudio') {
+      lista = filtra(S.estudios.slice(), function (e) { return e.nombre; });
+      h = lista.slice(0, n).map(function (e) {
+        return '<div class="tarjeta"><div class="fila" style="align-items:flex-start"><canvas data-logo="' + e.id + '" style="width:40px;height:40px"></canvas><div class="col crece">' + campo('estudio', e.id, 'nombre', e.nombre, 'Nombre') + '<span class="tenue chico">' + (e.id === 0 ? 'Tu estudio' : e.quebrado ? 'Quebrado' : e.filial ? 'Tu filial' : 'Rival') + '</span></div></div><div class="rejilla-ed">' +
+          campo('estudio', e.id, 'caja', Math.round(e.caja), 'Caja (dinero de la época)', { num: 1 }) + campo('estudio', e.id, 'tam', e.tam || 1, 'Tamaño (0,1–5)', { num: 1, min: 0.1, max: 5 }) +
+          campo('estudio', e.id, 'calidad', e.calidad || 0, 'Calidad', { num: 1 }) + campo('estudio', e.id, 'fama', Math.round((e.fama || 0) * 100), 'Fama (%)', { num: 1, min: 0, max: 100, por: 100 }) + '</div></div>';
+      }).join('');
+    } else if (st.ed === 'obra') {
+      lista = filtra(S.obras.filter(function (o) { return o.pub !== undefined; }).slice().reverse(), function (o) { return o.tit; });
+      h = lista.slice(0, n).map(function (o) {
+        return '<div class="tarjeta"><div class="fila" style="align-items:flex-start"><canvas data-poster="' + o.id + '" style="width:44px;height:66px"></canvas><div class="col crece">' + campo('obra', o.id, 'tit', o.tit, 'Título') +
+          '<span class="tenue chico">' + esc((S.estudios[o.est] || {}).nombre || '') + (o.anio ? ' · ' + o.anio : '') + '</span></div></div><div class="rejilla-ed">' +
+          campo('obra', o.id, 'crit', o.crit, 'Crítica (1–100)', { num: 1, min: 1, max: 100 }) + campo('obra', o.id, 'pub', o.pub, 'Público (1–100)', { num: 1, min: 1, max: 100 }) + '</div></div>';
+      }).join('');
+    } else if (st.ed === 'franquicia') {
+      lista = filtra(IA.franquicias.lista().slice().reverse(), function (f) { return f.nom; });
+      h = lista.slice(0, n).map(function (f) {
+        return '<div class="tarjeta"><div class="rejilla-ed">' + campo('franquicia', f.id, 'nom', f.nom, 'Nombre') + campo('franquicia', f.id, 'gen', f.gen, 'Género') + '</div>' +
+          (f.pers.length ? '<span class="tenue chico">Personajes y popularidad</span>' + f.pers.map(function (p) { return '<div class="rejilla-ed"><label class="campo" style="margin:0"><span>Personaje</span><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"></label><label class="campo" style="margin:0"><span>Popularidad (0–100)</span><input type="number" min="0" max="100" value="' + Math.round(p.pop) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop"></label></div>'; }).join('') : '') + '</div>';
+      }).join('') + '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota info">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
+        '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + IA.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
+        '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') +
+        ((S.edit && S.edit.mat || []).length ? '<p class="chico">Tus materiales: ' + S.edit.mat.map(function (m) { return '«' + esc(m.tit) + '» (' + esc(m.gen.join(', ')) + ')'; }).join(' · ') + '</p>' : '') + '</div>';
+    } else if (st.ed === 'precio') {
+      const pr = (S.edit && S.edit.precio) || 1;
+      return '<div class="tarjeta"><label class="campo"><span>Precio de las entradas: ×' + pr + ' (1 = el de la época)</span><input type="range" min="0.2" max="5" step="0.1" value="' + pr + '" data-c="edCampo" data-v="precio|0|x"></label><p class="nota info">Cambia lo que paga el público en todos los cines del mundo: más caro da más por entrada pero aleja a la gente.</p></div>';
+    }
+    return (lista.length || st.ed === 'talento' || st.ed === 'franquicia' ? '' : '<p class="tenue">Nada coincide con la búsqueda.</p>') + h + mas(lista.length);
+  }
   function editor() {
     const S = N.S;
     if (!S.sandbox) return '<div class="tarjeta"><b>Editor Sandbox</b><p>Cambia franquicias, obras, personajes, precios, talentos y estudios, e importa o exporta paquetes. Al activarlo se apagan los logros y los retos de esta partida.</p>' + btn('Activar el Editor', 'edActivar', '', 'primario') + '</div>' + paquetesUI();
+    const cuenta = { talento: S.talentos.filter(function (t) { return !t.mu && !t.ret; }).length, estudio: S.estudios.length, obra: S.obras.filter(function (o) { return o.pub !== undefined; }).length, franquicia: IA.franquicias.lista().length };
     const tipos = [['talento', 'Talentos'], ['estudio', 'Estudios'], ['obra', 'Obras'], ['franquicia', 'Franquicias'], ['precio', 'Precios']];
-    let h = '<div class="fila">' + tipos.map(function (x) { return '<button class="chip' + (st.ed === x[0] ? ' on' : '') + '" data-a="edTipo" data-v="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
-    const campo = function (tipo, id, k, v, num) { return '<input ' + (num ? 'type="number" step="any" ' : '') + 'value="' + esc(v) + '" data-c="edCampo" data-v="' + tipo + '|' + id + '|' + k + '" style="max-width:110px">'; };
-    if (st.ed === 'talento') h += '<div class="col">' + S.talentos.filter(function (t) { return !t.mu && !t.ret; }).sort(function (a, b) { return b.fama - a.fama; }).slice(0, 25).map(function (t) { return '<div class="fila">' + campo('talento', t.id, 'nom', t.nom) + '<span class="tenue chico">' + esc(t.of) + '</span> hab ' + campo('talento', t.id, 'hab', t.hab, 1) + ' fama ' + campo('talento', t.id, 'fama', t.fama, 1) + '</div>'; }).join('') + '</div>' +
-      '<div class="tarjeta"><b>Crear talento</b><label class="campo"><span>Nombre</span><input id="edTNom" maxlength="40"></label><label class="campo"><span>Oficio</span><select id="edTOf">' + IA.datos.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label>' + btn('Crear', 'edCrearT', '', 'primario') + '</div>';
-    if (st.ed === 'estudio') h += '<div class="col">' + S.estudios.map(function (e) { return '<div class="fila">' + campo('estudio', e.id, 'nombre', e.nombre) + ' caja ' + campo('estudio', e.id, 'caja', Math.round(e.caja), 1) + ' calidad ' + campo('estudio', e.id, 'calidad', e.calidad || 0, 1) + '</div>'; }).join('') + '</div>';
-    if (st.ed === 'obra') h += '<div class="col">' + S.obras.filter(function (o) { return o.pub !== undefined; }).slice(-25).reverse().map(function (o) { return '<div class="fila">' + campo('obra', o.id, 'tit', o.tit) + ' crít ' + campo('obra', o.id, 'crit', o.crit, 1) + ' púb ' + campo('obra', o.id, 'pub', o.pub, 1) + '</div>'; }).join('') + '</div>';
-    if (st.ed === 'franquicia') h += '<div class="col">' + IA.franquicias.lista().slice(-20).map(function (f) { return '<div class="tarjeta"><div class="fila">' + campo('franquicia', f.id, 'nom', f.nom) + campo('franquicia', f.id, 'gen', f.gen) + '</div>' + f.pers.map(function (p) { return '<div class="fila"><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"> pop <input type="number" value="' + p.pop + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop" style="max-width:70px"></div>'; }).join('') + '</div>'; }).join('') + '</div>';
-    if (st.ed === 'franquicia') h += '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota info">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
-      '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + IA.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
-      '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') +
-      ((S.edit && S.edit.mat || []).length ? '<p class="chico">Tus materiales: ' + S.edit.mat.map(function (m) { return '«' + esc(m.tit) + '» (' + esc(m.gen.join(', ')) + ')'; }).join(' · ') + '</p>' : '') + '</div>';
-    if (st.ed === 'precio') h += '<label class="campo"><span>Precio de la entrada ×' + ((S.edit && S.edit.precio) || 1) + '</span><input type="range" min="0.2" max="5" step="0.1" value="' + ((S.edit && S.edit.precio) || 1) + '" data-c="edCampo" data-v="precio|0|x"></label>';
-    return h + paquetesUI();
+    let h = '<div class="tarjeta"><b>Editor Sandbox activo</b><span class="tenue chico"> · los logros y los retos de esta partida están apagados. Cada cambio se guarda al salir del campo.</span></div>';
+    h += '<div class="chips">' + tipos.map(function (x) { return '<button class="chip' + (st.ed === x[0] ? ' on' : '') + '" data-a="edTipo" data-v="' + x[0] + '">' + x[1] + (cuenta[x[0]] !== undefined ? ' · ' + cuenta[x[0]] : '') + '</button>'; }).join('') + '</div>';
+    if (st.ed !== 'precio') h += '<input type="search" placeholder="Buscar por nombre" value="' + esc(st.q || '') + '" data-i="edBuscar" style="margin:8px 0;width:100%">';
+    return h + '<div id="edLista">' + listaEditor() + '</div>' + paquetesUI();
   }
+  ac('edBuscar', function (v) { st.q = v; st.n = 20; const l = document.getElementById('edLista'); if (l) { l.innerHTML = listaEditor(); U.dibujar(l); } });
+  ac('edMas', function () { st.n = (st.n || 20) + 20; const l = document.getElementById('edLista'); if (l) { l.innerHTML = listaEditor(); U.dibujar(l); } });
   function paquetesUI() {
     return '<h3>Paquetes</h3><p class="nota info">Un paquete guarda tus talentos creados, los nombres de los estudios, las franquicias, tus materiales propios y los precios. Copia el texto para compartirlo o pega uno para importarlo: las franquicias llegan como material para adaptar.</p>' +
       '<textarea id="edPaquete" rows="4" style="width:100%"></textarea><div class="fila">' + btn('Exportar', 'edExportar') + btn('Descargar archivo', 'edDescargar') + btn('Importar', 'edImportar', '', 'primario') + '</div>';
   }
   ac('edActivar', function () { M.activarSandbox(); U.refrescar(); });
-  ac('edTipo', function (v) { st.ed = v; U.refrescar(); });
-  ac('edCampo', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.editar(p[0], p[1], p[2], v); U.aviso(e || 'Guardado', e ? 'mal' : ''); if (p[0] === 'precio') U.refrescar(); });
+  ac('edTipo', function (v) { st.ed = v; st.q = ''; st.n = 20; U.refrescar(); });
+  ac('edCampo', function (v, el) { const p = el.getAttribute('data-v').split('|'), por = +el.getAttribute('data-por') || 1; const e = M.editar(p[0], p[1], p[2], por > 1 ? +v / por : v); U.aviso(e || 'Guardado', e ? 'mal' : ''); if (p[0] === 'precio') U.refrescar(); });
   ac('edPers', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.personaje(p[0], p[1], p[2] === 'n' ? v : '', p[2] === 'pop' ? v : undefined); U.aviso(e || 'Guardado', e ? 'mal' : ''); });
   ac('edCrearT', function () { const e = M.crearTalento({ nom: document.getElementById('edTNom').value, of: document.getElementById('edTOf').value, edad: 30, pot: 70 }); U.aviso(e || 'Talento creado', e ? 'mal' : ''); U.refrescar(); });
   ac('edExportar', function () { document.getElementById('edPaquete').value = M.exportarPaquete(); });

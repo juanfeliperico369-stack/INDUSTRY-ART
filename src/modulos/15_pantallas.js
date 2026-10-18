@@ -44,12 +44,20 @@ IA.pantallas = (function () {
     tipo: 'Estudio', industria: 'Cine', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
     region: 'losangeles', sufijo: 'Pictures', tf: 'escuela', arq: 'visionario', modo: 'dueno', oficio: 'direccion', enfG: ['Drama', 'Comedia', 'Aventura'], enfT: ['', '', ''] };
   const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville'];
+  // Nueva partida en cinco pasos: época, lugar, tu estudio, tú y la partida. Solo se abre un paso a la vez; los
+  // demás muestran en una línea lo que ya elegiste. «Empezar» está siempre al final.
+  const PASOS_NP = ['Época', 'Lugar', 'Tu estudio', 'Tu avatar', 'La partida'];
+  const ASPECTO_NP = IA.arte.OPCIONES_ASPECTO;
+  function aspectoNp() {
+    if (!np.asp) np.asp = IA.arte.aspectoNuevo(N.hash('avatar|' + np.avNombre + '|' + np.avSexo), (D.pais(np.pais) || D.pais('us')).region);
+    return np.asp;
+  }
   function nuevaPartida() {
     const cap = np.capital || J.capitalRecomendado(np.anio);
     if (!U.estado.logoNuevo) U.estado.logoNuevo = { s: 8, c: 6, b: 14, t: 3, f: 1 };
     const tipico2025 = E.presupuestoTipico2025(np.anio);
     const ops = function (lista, actual) { return lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (String(x[0]) === String(actual) ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join(''); };
-    const anios = [1895, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2026, 2040, 2060, 2080, 2100];
+    const anios = [1850, 1870, 1895, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2026, 2040, 2060, 2080, 2100];
     if (anios.indexOf(np.anio) < 0) anios.push(np.anio);
     anios.sort(function (a, b) { return a - b; });
     const capOps = J.CAPITALES.map(function (c) {
@@ -59,9 +67,9 @@ IA.pantallas = (function () {
     const nTipicas = cap / tipico2025;
     const L = U.estado.logoNuevo;
     const num = function (k) { return deslizadorLogo(k, L[k], 'npLogo'); };
-    // Inicio al azar, tarjetas de región y de era, enfoque, trasfondo, arquetipo y modo carrera
     const regs = D.regionesInicio.filter(function (r) { return r.desde <= np.anio; });
     if (!regs.some(function (r) { return r.id === np.region; })) np.region = 'independiente';
+    const region = D.regionesInicio.filter(function (r) { return r.id === np.region; })[0];
     const era = D.erasInicio.filter(function (e) { return np.anio >= e.desde && np.anio <= e.hasta; })[0];
     const generos = [];
     D.familias.forEach(function (f) { f.generos.forEach(function (g) { if (generos.indexOf(g) < 0) generos.push(g); }); });
@@ -69,49 +77,81 @@ IA.pantallas = (function () {
     const temas = [];
     IA.taxonomia.familiasTema.forEach(function (f) { f.items.forEach(function (x) { temas.push(x); }); });
     temas.sort(function (a, b) { return a.localeCompare(b, 'es'); });
-    const r7 = '<button class="btn bloque" data-a="npAzar">' + icono('dado') + ' Inicio al azar (un dado arma toda la partida)</button>' +
-      '<h3>Región de inicio</h3><div class="col">' + regs.map(function (r) {
-        return '<button class="tarjeta toque" style="text-align:left;width:100%;margin:0;' + (r.id === np.region ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="npRegion" data-v="' + r.id + '"><b>' + esc(r.nombre) + '</b>' + (r.pais ? ' <span class="tenue chico">' + esc(D.pais(r.pais).nombre) + '</span>' : '') +
-          '<br><span class="chico">' + esc(r.mercado) + ' · competencia ' + ['', 'baja', 'media', 'alta'][r.competencia] + ' · capital ×' + U.decimal(r.capital, 2) + ' · prestigio ' + r.prestigio + '</span><br><span class="nota">' + esc(r.texto) + '</span></button>';
-      }).join('') + '</div>' +
-      (era ? '<div class="tarjeta"><b>Era: ' + esc(era.nombre) + '</b><ul style="margin:6px 0 0 18px;padding:0">' + era.reglas.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>' : '') +
-      '<h3>Enfoque del estudio</h3><p class="nota info">3 géneros y 3 temas: tus obras con ellos ganan público y crítica, y cada 5 obras del enfoque suman experiencia.</p><div class="fila envolver">' + [0, 1, 2].map(function (i) {
-        return '<label class="campo crece"><span>Género ' + (i + 1) + '</span><select data-c="npEnf" data-k="g' + i + '">' + ops(generos.map(function (g) { return [g, g]; }), np.enfG[i]) + '</select></label>';
-      }).join('') + '</div><div class="fila envolver">' + [0, 1, 2].map(function (i) {
-        return '<label class="campo crece"><span>Tema ' + (i + 1) + '</span><select data-c="npEnf" data-k="t' + i + '">' + ops([['', '—']].concat(temas.map(function (x) { return [x, x]; })), np.enfT[i]) + '</select></label>';
-      }).join('') + '</div>';
-    const avatar2 = '<label class="campo"><span>Trasfondo</span><select data-c="np" data-k="tf">' + ops(IA.carrera.TRASFONDOS.map(function (x) { return [x.id, x.nombre + ' · ' + x.texto]; }), np.tf) + '</select></label>' +
-      '<label class="campo"><span>Arquetipo de liderazgo</span><select data-c="np" data-k="arq">' + ops(IA.carrera.ARQUETIPOS.map(function (x) { return [x.id, x.nombre + ' · ' + x.texto]; }), np.arq) + '</select></label>' +
-      '<label class="campo"><span>Cómo empiezas</span><select data-c="npModo">' + ops([['dueno', 'Dueño de estudio'], ['carrera', 'Modo carrera: también eres un talento y recibes encargos']], np.modo) + '</select></label>' +
-      (np.modo === 'carrera' ? '<label class="campo"><span>Tu oficio como talento</span><select data-c="np" data-k="oficio">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.oficio) + '</select></label>' : '');
-    return '<div class="portada" style="text-align:left">' + titulo(t('np_titulo'), 'nueva') + r7 +
-      '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:200px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
-      '<div class="fila" style="margin-top:8px" id="npLogoVista"><canvas data-logo="nuevo" style="width:64px;height:64px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div>' +
-      '<div class="tarjeta">' + num('s') + num('c') + num('b') + num('t') + num('f') + '</div>' +
-      '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
-      '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Sufijo del logo</span><select data-c="np" data-k="sufijo">' + ops([['', 'Sin sufijo']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
-      '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select>' +
-      '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota info">' + t('np_anio_ayuda') + '</span></label>' +
-      '<label class="campo"><span>Tipo de industria</span><select data-c="npInd">' + ops(D.industrias.filter(function (x) { return x.desde <= np.anio; }).map(function (x) { return [x.id, x.id]; }), indNp().id) + '</select><span class="nota">' + esc(indNp().efecto) + '</span></label>' +
-      '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
-      '<label class="campo"><span>Visión de la industria</span><select data-c="np" data-k="vision">' + ops(D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.vision) + '</select></label>' +
-      '<label class="campo"><span>Público objetivo</span><select data-c="np" data-k="publico">' + ops(D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.publico) + '</select></label>' +
-      (np.region === 'independiente' ? '<label class="campo"><span>' + t('np_pais') + '</span><select data-c="np" data-k="pais">' + ops(paises, np.pais) + '</select></label>' : '') +
-      '<label class="campo"><span>' + t('np_capital') + '</span><select data-c="npCapital">' + ops(capOps, cap) + '</select><span class="nota">' +
-      t('np_capital_ayuda', { epoca: esc(U.dinero(M.aEpoca(cap, np.anio)).replace(/^\$/, '$')), anio: np.anio, n: U.decimal(nTipicas, nTipicas < 10 ? 1 : 0) }) + '</span></label>' +
-      IA.metasUI.opcionesNueva(np) + '<label class="campo"><span>' + t('np_dificultad') + '</span><select data-c="np" data-k="dificultad">' + ops(IA.metasUI.dificultades().map(function (d) { return [d.id, d.nombre]; }), np.dificultad) + '</select></label>' +
-      '<label class="campo"><span>' + t('np_escenario') + '</span><select data-c="np" data-k="escenario">' + ops([['medio', t('escenario_medio')], ['alto', t('escenario_alto')], ['bajo', t('escenario_bajo')]], np.escenario) + '</select></label>' +
-      '<h3>' + t('np_avatar') + '</h3>' +
-      '<label class="campo"><span>' + t('np_tu_nombre') + '</span><input type="text" maxlength="30" value="' + esc(np.avNombre) + '" data-i="np" data-k="avNombre"></label>' +
-      '<div class="fila"><label class="campo crece"><span>' + t('np_sexo') + '</span><select data-c="np" data-k="avSexo">' + ops([['F', t('mujer')], ['M', t('hombre')]], np.avSexo) + '</select></label>' +
-      '<label class="campo crece"><span>' + t('np_edad') + '</span><input type="number" min="16" max="80" value="' + np.avEdad + '" data-i="np" data-k="avEdad"></label></div>' +
-      '<button class="btn" data-a="npDadoAvatar">' + icono('dado') + ' Otro nombre para tu avatar</button>' + avatar2 +
-      '<label class="campo"><span>' + t('np_personalidad') + '</span><select data-c="np" data-k="personalidad">' + ops(D.personalidades.map(function (p) { return [p.id, p.id]; }), np.personalidad) + '</select></label>' +
-      '<span class="nota info">Tus tres especialidades (+1 en esos departamentos de tus obras):</span><div class="fila envolver">' + [0, 1, 2].map(function (i) {
-        return '<label class="campo crece"><span>Especialidad ' + (i + 1) + '</span><select data-c="npEsp" data-k="' + i + '">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.esp[i]) + '</select></label>';
-      }).join('') + '</div>' +
-      '<label class="campo"><span>' + t('np_semilla') + '</span><input type="text" maxlength="24" value="' + esc(np.semilla) + '" data-i="np" data-k="semilla" placeholder="' + t('dado') + '"><span class="nota info">' + t('np_semilla_ayuda') + '</span></label>' +
-      '<button class="btn primario bloque" data-a="empezar">' + t('np_empezar') + '</button><p></p><button class="btn bloque" data-a="volverPortada">' + t('volver') + '</button></div>';
+    const marcada = function (si) { return si ? 'border-color:var(--acento);border-width:2px' : ''; };
+    const asp = aspectoNp();
+    U.estado.avatarNuevo = { id: 999998, nombre: np.avNombre, sexo: np.avSexo, edad: N.limitar(+np.avEdad || 30, 16, 80), oficio: np.oficio, aspecto: asp, anio: np.anio };
+    const cuerpos = [
+      function () { // 1 · Época
+        return '<div class="col">' + D.erasInicio.map(function (e) {
+          const si = np.anio >= e.desde && np.anio <= e.hasta, hasta = e.hasta > 2150 ? '' : '–' + e.hasta;
+          return '<button class="tarjeta toque" style="text-align:left;width:100%;margin:0;' + marcada(si) + '" data-a="npEra" data-v="' + e.desde + '"><b>' + esc(e.nombre) + '</b> <span class="tenue chico">' + e.desde + hasta + '</span><br><span class="chico">' + esc(e.reglas.join(' · ')) + '</span></button>';
+        }).join('') + '</div>' +
+          '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select>' +
+          '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota info">' + t('np_anio_ayuda') + '</span></label>';
+      },
+      function () { // 2 · Lugar
+        return '<div class="col">' + regs.map(function (r) {
+          return '<button class="tarjeta toque" style="text-align:left;width:100%;margin:0;' + marcada(r.id === np.region) + '" data-a="npRegion" data-v="' + r.id + '"><b>' + esc(r.nombre) + '</b>' + (r.pais ? ' <span class="tenue chico">' + esc(D.pais(r.pais).nombre) + '</span>' : '') +
+            '<br><span class="chico">' + esc(r.mercado) + ' · competencia ' + ['', 'baja', 'media', 'alta'][r.competencia] + ' · capital ×' + U.decimal(r.capital, 2) + ' · prestigio ' + r.prestigio + '</span><br><span class="tenue chico">' + esc(r.texto) + '</span></button>';
+        }).join('') + '</div>' +
+          (np.region === 'independiente' ? '<label class="campo"><span>' + t('np_pais') + '</span><select data-c="np" data-k="pais">' + ops(paises, np.pais) + '</select></label>' : '');
+      },
+      function () { // 3 · Tu estudio
+        return '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
+          '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Sufijo del logo</span><select data-c="np" data-k="sufijo">' + ops([['', 'Sin sufijo']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
+          '<h3>Logo y letrero</h3><div id="npLogoVista"><canvas data-letrero="nuevo" data-nombre="' + esc(np.nombre) + '" style="width:100%;height:64px" role="img" aria-label="Vista previa del letrero"></canvas>' +
+          '<div class="fila" style="margin-top:8px"><canvas data-logo="nuevo" style="width:56px;height:56px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div></div>' +
+          '<div class="tarjeta">' + num('s') + num('c') + num('b') + num('t') + num('f') + '</div>' +
+          '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:170px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
+          '<label class="campo"><span>Tipo de industria</span><select data-c="npInd">' + ops(D.industrias.filter(function (x) { return x.desde <= np.anio; }).map(function (x) { return [x.id, x.id]; }), indNp().id) + '</select><span class="nota">' + esc(indNp().efecto) + '</span></label>' +
+          '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
+          '<label class="campo"><span>Visión de la industria</span><select data-c="np" data-k="vision">' + ops(D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.vision) + '</select></label>' +
+          '<label class="campo"><span>Público objetivo</span><select data-c="np" data-k="publico">' + ops(D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.publico) + '</select></label>' +
+          '<h3>Enfoque del estudio</h3><p class="nota info">3 géneros y 3 temas: tus obras con ellos ganan público y crítica, y cada 5 obras del enfoque suman experiencia.</p><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+            return '<label class="campo crece"><span>Género ' + (i + 1) + '</span><select data-c="npEnf" data-k="g' + i + '">' + ops(generos.map(function (g) { return [g, g]; }), np.enfG[i]) + '</select></label>';
+          }).join('') + '</div><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+            return '<label class="campo crece"><span>Tema ' + (i + 1) + '</span><select data-c="npEnf" data-k="t' + i + '">' + ops([['', '—']].concat(temas.map(function (x) { return [x, x]; })), np.enfT[i]) + '</select></label>';
+          }).join('') + '</div>';
+      },
+      function () { // 4 · Tú (avatar)
+        return '<label class="campo"><span>' + t('np_tu_nombre') + '</span><input type="text" maxlength="30" value="' + esc(np.avNombre) + '" data-i="np" data-k="avNombre"></label>' +
+          '<div class="fila"><label class="campo crece"><span>' + t('np_sexo') + '</span><select data-c="npSexo">' + ops([['F', t('mujer')], ['M', t('hombre')]], np.avSexo) + '</select></label>' +
+          '<label class="campo crece"><span>' + t('np_edad') + '</span><input type="number" min="16" max="80" value="' + np.avEdad + '" data-c="npEdad"></label></div>' +
+          '<button class="btn" data-a="npDadoAvatar">' + icono('dado') + ' Otro nombre para tu avatar</button>' +
+          '<h3>Tu aspecto</h3><div class="fila" id="npAvatarVista" style="align-items:flex-start"><canvas class="retrato grande" data-retrato="nuevo" role="img" aria-label="Tu avatar"></canvas>' +
+          '<div class="col crece">' + ASPECTO_NP.filter(function (x) { return !x[3] || x[3] === np.avSexo; }).map(function (x) {
+            return '<label class="campo" style="margin:0"><span>' + x[1] + '</span><select data-c="npAsp" data-k="' + x[0] + '">' + ops(x[2].map(function (n, i) { return [i, n]; }), +asp[x[0]] || 0) + '</select></label>';
+          }).join('') + '<button class="btn" data-a="npAspDado">' + icono('dado') + ' Otro aspecto</button></div></div>' +
+          '<label class="campo"><span>Trasfondo</span><select data-c="np" data-k="tf">' + ops(IA.carrera.TRASFONDOS.map(function (x) { return [x.id, x.nombre + ' · ' + x.texto]; }), np.tf) + '</select></label>' +
+          '<label class="campo"><span>Arquetipo de liderazgo</span><select data-c="np" data-k="arq">' + ops(IA.carrera.ARQUETIPOS.map(function (x) { return [x.id, x.nombre + ' · ' + x.texto]; }), np.arq) + '</select></label>' +
+          '<label class="campo"><span>Cómo empiezas</span><select data-c="npModo">' + ops([['dueno', 'Dueño de estudio'], ['carrera', 'Modo carrera: también recibes encargos de otros estudios']], np.modo) + '</select></label>' +
+          '<label class="campo"><span>Tu oficio cuando trabajas en una obra</span><select data-c="np" data-k="oficio">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.oficio) + '</select><span class="nota info">Puedes ponerte en el equipo de tus obras en este oficio (y en tus especialidades), sin cobrar. En modo carrera, además, otros estudios te contratan.</span></label>' +
+          '<label class="campo"><span>' + t('np_personalidad') + '</span><select data-c="np" data-k="personalidad">' + ops(D.personalidades.map(function (p) { return [p.id, p.id]; }), np.personalidad) + '</select></label>' +
+          '<span class="nota info">Tus tres especialidades (+1 en esos departamentos de tus obras):</span><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+            return '<label class="campo crece"><span>Especialidad ' + (i + 1) + '</span><select data-c="npEsp" data-k="' + i + '">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.esp[i]) + '</select></label>';
+          }).join('') + '</div>';
+      },
+      function () { // 5 · La partida
+        return '<label class="campo"><span>' + t('np_capital') + '</span><select data-c="npCapital">' + ops(capOps, cap) + '</select><span class="nota">' +
+          t('np_capital_ayuda', { epoca: esc(U.dinero(M.aEpoca(cap, np.anio)).replace(/^\$/, '$')), anio: np.anio, n: U.decimal(nTipicas, nTipicas < 10 ? 1 : 0) }) + '</span></label>' +
+          IA.metasUI.opcionesNueva(np) + '<label class="campo"><span>' + t('np_dificultad') + '</span><select data-c="np" data-k="dificultad">' + ops(IA.metasUI.dificultades().map(function (d) { return [d.id, d.nombre]; }), np.dificultad) + '</select></label>' +
+          '<label class="campo"><span>' + t('np_escenario') + '</span><select data-c="np" data-k="escenario">' + ops([['medio', t('escenario_medio')], ['alto', t('escenario_alto')], ['bajo', t('escenario_bajo')]], np.escenario) + '</select></label>' +
+          '<label class="campo"><span>' + t('np_semilla') + '</span><input type="text" maxlength="24" value="' + esc(np.semilla) + '" data-i="np" data-k="semilla" placeholder="' + t('dado') + '"><span class="nota info">' + t('np_semilla_ayuda') + '</span></label>';
+      },
+    ];
+    const dif = IA.metasUI.dificultades().filter(function (d) { return d.id === np.dificultad; })[0];
+    const resumen = [np.anio + (era ? ' · ' + era.nombre : ''), (region ? region.nombre : '') + (np.region === 'independiente' ? ' · ' + (D.pais(np.pais) || {}).nombre : ''),
+      (np.nombre || '') + ' · ' + indNp().id, (np.avNombre || '') + ' · ' + np.avEdad + ' años', U.dinero(cap, 2025) + (dif ? ' · ' + dif.nombre : '')];
+    const paso = N.limitar(np.paso || 0, 0, PASOS_NP.length - 1);
+    return '<div class="portada" style="text-align:left">' + titulo(t('np_titulo'), 'nueva') +
+      '<button class="btn bloque" data-a="npAzar">' + icono('dado') + ' Inicio al azar (un dado arma toda la partida)</button>' +
+      PASOS_NP.map(function (nom, i) {
+        const abierto = i === paso;
+        return '<div class="tarjeta seccion-cr"><button class="cab-seccion toque" data-a="npPaso" data-v="' + i + '" aria-expanded="' + abierto + '"><b>' + (i + 1) + ' · ' + esc(nom) + '</b><span class="tenue chico">' + esc(abierto ? '' : resumen[i]) + '</span><span aria-hidden="true">' + (abierto ? '▲' : '▼') + '</span></button>' +
+          (abierto ? '<div>' + cuerpos[i]() + '<div class="fila entre" style="margin-top:10px">' + (i > 0 ? '<button class="btn" data-a="npPaso" data-v="' + (i - 1) + '">' + t('atras') + '</button>' : '<span></span>') +
+            (i < PASOS_NP.length - 1 ? '<button class="btn primario" data-a="npPaso" data-v="' + (i + 1) + '">Siguiente: ' + esc(PASOS_NP[i + 1]) + '</button>' : '') + '</div></div>' : '') + '</div>';
+      }).join('') +
+      '<button class="btn primario bloque" data-a="empezar" style="margin-top:10px">' + t('np_empezar') + '</button><p></p><button class="btn bloque" data-a="volverPortada">' + t('volver') + '</button></div>';
   }
   ac('nuevaPartida', function () { U.estado.np = true; cacheT = -1; document.getElementById('vista').innerHTML = nuevaPartida(); U.dibujar(document.getElementById('vista')); alMostrar('nueva'); });
   ac('volverPortada', function () { U.estado.np = false; U.render(); });
@@ -125,7 +165,26 @@ IA.pantallas = (function () {
   // Tipo de industria; si el año elegido es anterior a ese medio, se usa el que corresponde a la época
   function indNp() { const x = D.industria(np.industria); return x.desde <= np.anio && x.id === np.industria ? x : D.industria(np.anio >= D.CINE_DESDE ? 'Cine' : 'Teatro'); }
   ac('npInd', function (v) { np.industria = v; const y = document.getElementById('vista').scrollTop; U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; });
-  ac('npNombre', function (v) { np.nombre = v; cacheT = -1; });
+  ac('npNombre', function (v) {
+    np.nombre = v; cacheT = -1;
+    const cv = document.querySelector('canvas[data-letrero="nuevo"]');
+    if (cv) { cv.setAttribute('data-nombre', v); U.dibujar(document.getElementById('npLogoVista')); }
+  });
+  ac('npPaso', function (v) {
+    np.paso = N.limitar(+v || 0, 0, PASOS_NP.length - 1);
+    U.acciones.nuevaPartida();
+    const p = document.querySelectorAll('#vista .seccion-cr')[np.paso];
+    if (p && p.scrollIntoView) p.scrollIntoView({ block: 'start' });
+  });
+  ac('npEra', function (v) { np.anio = N.limitar(+v, J.ANIO_MIN, J.ANIO_MAX); np.capital = 0; cacheT = -1; redibujarNP(); });
+  ac('npSexo', function (v) { np.avSexo = v === 'F' ? 'F' : 'M'; if (np.asp && v === 'F') np.asp.barba = 0; redibujarNP(); });
+  ac('npEdad', function (v) { np.avEdad = N.limitar(Math.round(+v) || 30, 16, 80); U.estado.avatarNuevo.edad = np.avEdad; U.dibujar(document.getElementById('npAvatarVista')); });
+  ac('npAsp', function (v, el) {
+    const k = el.getAttribute('data-k'), a = aspectoNp();
+    a[k] = ['gafas', 'aretes', 'pecas'].indexOf(k) >= 0 ? +v === 1 : +v;
+    U.dibujar(document.getElementById('npAvatarVista'));
+  });
+  ac('npAspDado', function () { dadoN = (dadoN * 41 + 5) % 9973; np.asp = IA.arte.aspectoNuevo(dadoN, (D.pais(np.pais) || D.pais('us')).region); if (np.avSexo === 'F') np.asp.barba = 0; redibujarNP(); });
   // Deslizadores de identidad (a pedido): 20 estilos de logo, 20 colores de logo, de fondo y de letras, 20 tipografías
   const NOMBRES_LOGO = { s: 'Tipo de logo', c: 'Color del logo', b: 'Color de fondo', t: 'Color de letras', f: 'Tipo de letra' };
   function textoLogo(k, v) { return k === 'f' ? NOMBRES_FUENTE[v] : String(+v + 1) + ' de 20'; }
@@ -185,7 +244,7 @@ IA.pantallas = (function () {
     np.enfG = [pick(gens), pick(gens), pick(gens)];
     np.tf = pick(IA.carrera.TRASFONDOS).id; np.arq = pick(IA.carrera.ARQUETIPOS).id;
     np.vision = pick(D.visiones).id; np.publico = pick(D.publicos).id; np.tipo = pick(D.tiposEstudio);
-    np.sufijo = pick(D.sufijosLogo); np.nombre = nombreDado(); np.capital = 0;
+    np.sufijo = pick(D.sufijosLogo); np.nombre = nombreDado(); np.capital = 0; np.asp = null;
     np.logoN = (np.logoN * 7 + 13) % 997; U.estado.logoNuevo = IA.arte.logoAleatorio(np.logoN);
     cacheT = -1; redibujarNP();
   });
@@ -196,7 +255,7 @@ IA.pantallas = (function () {
       logo: U.estado.logoNuevo, pais: np.pais, capital: np.capital || J.capitalRecomendado(np.anio), dificultad: np.dificultad,
       escenario: np.escenario, personalidad: np.personalidad, creado: new Date().toISOString(),
       tipo: np.tipo, vision: np.vision, publico: np.publico, industria: indNp().id,
-      avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad, especialidades: np.esp },
+      avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad, especialidades: np.esp, aspecto: aspectoNp() },
       modoJuego: np.modoJuego, reto: np.reto === undefined ? undefined : np.reto || null, tutorial: !!np.tutorial, perso: np.perso,
       region: np.region, sufijo: np.sufijo, trasfondo: np.tf, arquetipo: np.arq, modo: np.modo, oficio: np.oficio,
       enfoque: { gen: np.enfG.filter(function (x, i, a) { return x && a.indexOf(x) === i; }), tem: np.enfT.filter(function (x, i, a) { return x && a.indexOf(x) === i; }) },
@@ -480,11 +539,22 @@ IA.pantallas = (function () {
   ac('docIdea', function (v) {
     const o = O.porId(+v);
     if (!o) return;
-    IA.documento.descargar(o).then(function (r) { U.aviso(r.ok ? 'Documento listo: ' + r.nombre : 'No se pudo guardar el documento: usa «Ver la trama» y cópiala.', r.ok ? '' : 'mal'); });
+    IA.documento.descargarYAvisar(o);
   });
   ac('docTexto', function (v) {
     const o = O.porId(+v);
-    if (o) U.modal('<h2>' + esc(o.tit) + '</h2><textarea rows="18" style="width:100%" readonly>' + esc(IA.documento.texto(o)) + '</textarea><button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
+    if (o) IA.documento.mostrarTexto(o);
+  });
+  ac('docCopiar', function () {
+    const ta = document.getElementById('docTextoIdea');
+    if (!ta) return;
+    const ok = function () { U.aviso('Texto copiado'); };
+    const aMano = function () { ta.select(); try { document.execCommand('copy'); } catch (e) { /* sin portapapeles: queda seleccionado */ } ok(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(ok, aMano); else aMano();
+  });
+  ac('docTxt', function (v) {
+    const o = O.porId(+v) || (IA.creacion.estado.b && !v ? IA.creacion.estado.b : null);
+    if (o) IA.publicacion.guardarArchivo('Idea - ' + (o.tit || 'sin titulo') + '.txt', IA.documento.texto(o), 'text/plain').then(function (r) { if (r.ok) U.aviso('Texto listo: ' + (r.ruta || r.nombre)); else if (!r.cancelado) U.aviso('Tampoco se pudo guardar: copia el texto.', 'mal'); });
   });
   ac('catalogoMas', function () { U.estado.catalogoVer = (U.estado.catalogoVer || 30) + 30; U.refrescar(); });
 
@@ -652,7 +722,7 @@ IA.pantallas = (function () {
     }).join('') : '<p class="tenue">Los sets que construyas para tus obras se guardan aquí y se pueden reusar (más barato y una semana menos). Caben más con platós y backlots.</p>');
     // Editar la descripción del estudio (tu documento): logo con deslizadores, público, visión y tipo de industria
     const opsSel = function (k, lista, actual) { return '<select data-c="estEditar" data-k="' + k + '">' + lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === actual ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>'; };
-    h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div class="fila" id="estLogoVista"><canvas data-logo="0" style="width:64px;height:64px"></canvas><b>' + esc(est.nombre) + '</b></div>' +
+    h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div id="estLogoVista"><canvas data-letrero="0" style="width:100%;height:64px" role="img" aria-label="Tu letrero"></canvas><div class="fila" style="margin-top:6px"><canvas data-logo="0" style="width:56px;height:56px"></canvas><b>' + esc(est.nombre) + '</b></div></div>' +
       ['s', 'c', 'b', 't', 'f'].map(function (k) { return deslizadorLogo(k, est.logo[k] || 0, 'estLogo'); }).join('') +
       '<div class="fila"><label class="btn">' + (U.logoPropio() ? 'Cambiar la imagen del logo' : 'Usar una imagen propia') + '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-c="estLogoImg" class="oculto"></label>' +
       (U.logoPropio() ? '<button class="btn" data-a="estLogoQuitar">Volver al logo dibujado</button>' : '') + '</div>' +
@@ -663,7 +733,7 @@ IA.pantallas = (function () {
       '<p class="nota">Industria de origen: <b>' + esc(D.industria(est.industria).id) + '</b> · ' + esc(D.industria(est.industria).efecto) + '. Cambiar la visión o el público cambia sus efectos en tus próximas obras.</p></div>';
     return h;
   }
-  ac('estLogo', function (v, el) { const est = est0(); est.logo = Object.assign({}, est.logo); moverLogo(est.logo, el, 'estLogo', 'estLogoVista'); });
+  ac('estLogo', function (v, el) { const est = est0(); est.logo = Object.assign({}, est.logo); moverLogo(est.logo, el, 'estLogo', 'estLogoVista'); cacheT = -1; if (U.renderBarra) U.renderBarra(); });
   ac('estLogoFin', function () { U.refrescar(); });
   ac('desarmarSet', function (v) {
     const est = est0(), id = +v;

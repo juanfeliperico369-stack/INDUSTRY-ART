@@ -151,6 +151,7 @@ IA.ui = (function () {
     if (o) IA.arte.posterEn(cv, IA.obras.paraPoster(o));
   }
   function dibujarRetrato(cv) {
+    if (cv.getAttribute('data-retrato') === 'nuevo') { if (estado.avatarNuevo) IA.arte.retratoEn(cv, estado.avatarNuevo, estado.avatarNuevo.anio); return; }
     const id = +cv.getAttribute('data-retrato');
     const tal = id === 999999 ? avatarComoTalento() : IA.talentos.porId(id);
     if (tal) IA.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
@@ -220,7 +221,16 @@ IA.ui = (function () {
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
       if (img && est && est.id === 0) { const q = Math.min(w, h) * 0.46; c.save(); c.beginPath(); c.arc(w / 2, h / 2, q, 0, Math.PI * 2); c.clip(); c.drawImage(img, w / 2 - q, h / 2 - q, q * 2, q * 2); c.restore(); }
-      else IA.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.42, L);
+      else IA.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.36, L);
+    });
+    // Vista previa del letrero (logo, fondo, color de letras y tipo de letra)
+    r.querySelectorAll('canvas[data-letrero]').forEach(function (cv) {
+      const est = N.S && cv.getAttribute('data-letrero') === '0' ? N.S.estudios[0] : null;
+      const d = Math.min(2, window.devicePixelRatio || 1), w = cv.clientWidth || 300, h = cv.clientHeight || 64;
+      cv.width = w * d; cv.height = h * d;
+      const c = cv.getContext('2d');
+      c.setTransform(d, 0, 0, d, 0, 0);
+      IA.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'));
     });
     r.querySelectorAll('canvas[data-grafica]').forEach(function (cv) {
       const g = graficas[cv.getAttribute('data-grafica')];
@@ -249,7 +259,8 @@ IA.ui = (function () {
   function comoRetrato(tal) {
     const clave = (N.S ? N.S.semilla : '') + '|' + tal.id;
     if (!cacheAspecto[clave]) cacheAspecto[clave] = IA.arte.aspectoNuevo(N.hash(clave), tal.reg || 'nam');
-    return { id: tal.id, nombre: tal.nom, sexo: tal.sx, edad: N.anio() - tal.nac, oficio: tal.of, aspecto: cacheAspecto[clave] };
+    const propio = (tal.id === 999999 || tal.jugador) && N.S && N.S.avatar && N.S.avatar.asp;
+    return { id: tal.id, nombre: tal.nom, sexo: tal.sx, edad: N.anio() - tal.nac, oficio: tal.of, aspecto: propio ? Object.assign({}, cacheAspecto[clave], N.S.avatar.asp) : cacheAspecto[clave] };
   }
   function avatarComoTalento() {
     const a = N.S.avatar;
@@ -280,7 +291,7 @@ IA.ui = (function () {
     const auto = !!estado.auto;
     const etiquetaRitmo = { semana: t('ritmo_semana'), mes: t('ritmo_mes'), evento: t('ritmo_evento'), auto: t('ritmo_auto') }[ajustes.ritmo];
     document.getElementById('barra').innerHTML =
-      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b>' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
+      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b style="font:' + esc(IA.arte.fuenteLetra((est.logo || {}).f, 16)) + '">' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
       '<button class="fecha" data-a="abrirCalendario" aria-label="Abrir el calendario"><b>' + esc(IA.cal.texto(IA.cal.hoy())) + '</b><span class="tenue">' + t('semana') + ' ' + N.semana() + '</span></button>' +
       '<button class="fans" data-a="verFans" aria-label="Fans"><b class="cifra">' + grande(S.fans || 0) + '</b><span>fans</span></button>' +
       '<button class="dinero' + rojo + '" data-a="alternarDinero" aria-label="' + t('toca_dinero') + '"><b class="cifra">' + dinero(est.caja) + '</b><span>' + (ajustes.dineroHoy ? t('hoy') : t('epoca')) + '</span></button>' +

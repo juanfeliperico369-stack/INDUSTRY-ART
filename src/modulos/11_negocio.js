@@ -5,7 +5,7 @@
 IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
-  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera', 'licencias', 'inversiones', 'filiales', 'coproduccion', 'encargos', 'fans', 'investigacion', 'eventos', 'musica', 'juegos', 'teatro', 'libros'];
+  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera', 'licencias', 'inversiones', 'filiales', 'coproduccion', 'encargos', 'fans', 'investigacion', 'eventos', 'musica', 'juegos', 'teatro', 'libros', 'alquilerTeatros', 'ventaTeatros'];
   const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'distribucion', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas', 'emision', 'deuda', 'socio', 'filiales', 'investigacion', 'inversiones', 'coproduccion', 'encargos', 'eventos'];
   const NOMBRES = {
     taquilla: 'Taquilla (parte del estudio)', video: 'Video doméstico', tv: 'Televisión', streaming: 'Streaming', merchandising: 'Juguetes y coleccionables',
@@ -15,7 +15,7 @@ IA.negocio = (function () {
   // Movimientos de capital. Entran y salen de la caja (flujo de caja), pero no son ingresos ni gastos del año:
   // no cambian la utilidad ni el impuesto (antes el capital de los préstamos se descontaba como gasto).
   const CAPITAL = { prestamo: 1, amortizacion: 1, aportes: 1, recompra: 1, socio: 1, acciones: 1, aporteFilial: 1 };
-  Object.assign(NOMBRES, { prestamo: 'Préstamos recibidos', amortizacion: 'Pago de capital de deudas', aportes: 'Aportes del socio',
+  Object.assign(NOMBRES, { alquilerTeatros: 'Alquiler de tus teatros', ventaTeatros: 'Venta de teatros', prestamo: 'Préstamos recibidos', amortizacion: 'Pago de capital de deudas', aportes: 'Aportes del socio',
     recompra: 'Recompra de la parte del socio', acciones: 'Compra y venta de acciones (capital)', aporteFilial: 'Aportes a filiales', deuda: 'Intereses de deudas' });
   function esCapital(cat) { return !!CAPITAL[cat]; }
   function libroVacio() { return { ing: {}, gas: {} }; }

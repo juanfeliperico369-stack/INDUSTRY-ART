@@ -16,6 +16,8 @@ para leerla y rescatar piezas. No usa npm ni librerías externas: solo Python 3.
 """
 import argparse
 import base64
+import gzip
+import json
 import os
 import re
 import sys
@@ -35,13 +37,25 @@ def escribir(ruta, texto, binario=False):
             f.write(texto)
 
 
+COMENTARIOS = re.compile(r"<!--comentarios:([A-Za-z0-9+/=]+)-->\n$")
+
+
 def desarmar(html_ruta, destino):
     html = open(html_ruta, encoding="utf-8").read()
+    # Comentarios de línea que armar.py apartó (comprimidos al final): se devuelven a su lugar en cada módulo
+    guardados = {}
+    cm = COMENTARIOS.search(html)
+    if cm:
+        guardados = json.loads(gzip.decompress(base64.b64decode(cm.group(1))).decode("utf-8"))
+        html = html[: cm.start()]
     est = re.search(r"<style>(.*?)</style>", html, re.S)
     scr = re.search(r"<script>(.*)</script>", html, re.S)
     if not est or not scr:
         sys.exit("No encontré <style> y <script> en %s" % html_ruta)
     estilos, codigo = est.group(1), scr.group(1)
+    if MARCA.search(codigo):  # armar.py lleva la sangría como tabuladores (uno por cada dos espacios): se devuelve
+        expandir = lambda t: re.sub(r"^(\t+)", lambda m: "  " * len(m.group(1)), t, flags=re.M)
+        estilos, codigo = expandir(estilos), expandir(codigo)
 
     def bordes(texto):
         """Espacios antes y después del contenido (para que armar.py rehaga el HTML idéntico)."""
@@ -82,7 +96,12 @@ def desarmar(html_ruta, destino):
         fin = marcas[i + 1].start() if i + 1 < len(marcas) else len(codigo)
         nombre = m.group(1)
         numero = orden.get(nombre, 50 + i)
-        escribir(os.path.join(carpeta, "%02d_%s.js" % (numero, nombre)), codigo[m.start() : fin].rstrip() + "\n")
+        texto = codigo[m.start() : fin].rstrip() + "\n"
+        g = guardados.get(nombre)
+        if g:
+            quedan, com = iter(texto.split("\n")), {i: l for i, l in g["c"]}
+            texto = "\n".join(com[i] if i in com else next(quedan, "") for i in range(g["n"]))
+        escribir(os.path.join(carpeta, "%02d_%s.js" % (numero, nombre)), texto)
     print("Desarmados %d módulos en %s" % (len(marcas), carpeta))
 
 

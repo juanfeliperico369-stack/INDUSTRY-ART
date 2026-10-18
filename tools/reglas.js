@@ -265,6 +265,31 @@
       prueba('El capital recomendado alcanza para una obra de teatro chica', IA.juego.capitalRecomendado(1850) >= 1e6 && IA.juego.capitalRecomendado(1900) === 2.5e5);
       N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
     }
+    // V36: obras libres con sus personajes, avatar en tus obras, teatros propios, letrero, ciudades y aspecto
+    {
+      const antes = N.S, Md = IA.medios;
+      prueba('Las 82 obras libres tienen sinopsis y personajes de siempre', [...Array(82).keys()].every(function (i) { const c = X.canon(X.material('dp' + (i + 1))); return c && c.sin && c.pj.length >= 3 && c.pj.some(function (p) { return p.i === 'protagonista'; }); }));
+      IA.juego.nuevaPartida({ semilla: 'reglas-36', anio: 1990, bot: true, avatar: { nombre: 'Ana', sexo: 'F', edad: 30, aspecto: { piel: 99, pelo: -3, gafas: 1 } } });
+      IA.carrera.iniciar({ modo: 'dueno', oficio: 'direccion' });
+      const asp = N.S.avatar.asp;
+      prueba('El aspecto del avatar se guarda dentro de sus rangos', asp && asp.piel === 7 && asp.pelo === 0 && asp.gafas === true);
+      const b = IA.obras.borrador(0, { gen: ['Romance'], escala: 1, completa: true });
+      I.usarMaterial(b, 'dp8', 1990); I.generarPersonajes(b);
+      prueba('Romeo y Julieta trae a Romeo y a Julieta', b.pj.some(function (p) { return p.n === 'Romeo'; }) && b.pj.some(function (p) { return p.n === 'Julieta'; }) && /Verona/.test(I.sinopsis(b)));
+      const av = IA.carrera.talentoAvatar();
+      prueba('Tu avatar es un talento tuyo: trabaja gratis y acepta tus obras', av && av.jugador && T.tarifaPara(av, 0) === 0 && T.negociar(av, { est: 0, rol: 'direccion' }).estado === 'acepta' && IA.carrera.oficiosAvatar().indexOf('interprete') >= 0);
+      prueba('Como dueño, tu avatar no trabaja para los rivales', !T.disponible(av, 1) && T.disponible(av, 0));
+      const caja0 = N.S.estudios[0].caja = 1e12;
+      prueba('Se compra un teatro y queda en tu lista', Md.comprarTeatro('mediana') === '' && Md.teatros().length === 1 && N.S.estudios[0].caja < caja0);
+      const ing0 = N.S.fin.mes.ing.alquilerTeatros || 0;
+      Md.semana();
+      prueba('Un teatro libre se alquila y deja dinero cada semana', (N.S.fin.mes.ing.alquilerTeatros || 0) > ing0);
+      prueba('Se puede vender un teatro propio', Md.venderTeatro(Md.teatros()[0].id) === '' && Md.teatros().length === 0);
+      prueba('El letrero usa el tipo de letra elegido (cada una distinta)', new Set([...Array(20).keys()].map(function (f) { return IA.arte.fuenteLetra(f, 20); })).size === 20);
+      prueba('Hay 40 ciudades o más para empezar, todas en países del juego', D.regionesInicio.length >= 40 && D.regionesInicio.every(function (r) { return !r.pais || D.pais(r.pais); }));
+      prueba('Cada rival activo se puede comprar o explica por qué no', N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }).every(function (e) { return typeof IA.imperio.puedeComprar(e.id) === 'string'; }));
+      N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
+    }
     return r;
   }
   IA.pruebas.reglas = reglas;

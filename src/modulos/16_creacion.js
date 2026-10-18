@@ -146,7 +146,7 @@ IA.creacion = (function () {
   }
   // Los totales quedan fijos al final de la creación (no persiguen el desplazamiento)
   // La idea todavía en borrador también se puede descargar como documento
-  ac('crDocIdea', function () { if (cr.b) IA.documento.descargar(cr.b).then(function (r) { U.aviso(r.ok ? 'Documento listo: ' + r.nombre : 'No se pudo guardar el documento.', r.ok ? '' : 'mal'); }); });
+  ac('crDocIdea', function () { if (cr.b) IA.documento.descargarYAvisar(cr.b); });
   function pie(b) { return '<div id="crPie" class="tarjeta totales" style="margin-top:12px;padding:8px 10px">' + piezaPie(b) + '</div>'; }
   function refrescarPie() {
     const p = document.getElementById('crPie');
@@ -209,6 +209,7 @@ IA.creacion = (function () {
       const libre = I.esLibre(m, a), der = I.costoDerechos(m, a), at = I.atractivo(m), usos = I.usosRecientes(m.id, a);
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(m.tit) + '</b>' + (libre ? '<span class="etiqueta bien">Libre</span>' : '<span class="etiqueta">Derechos ' + dinero(der) + '</span>') + '</div>' +
         '<span class="chico">' + esc(m.autor) + ' · ' + esc(m.anio) + ' · ' + esc(m.gen.join(', ')) + '</span>' +
+        (X.canon(m) ? '<p style="margin:6px 0 2px">' + esc(X.canon(m).sin) + '</p><span class="chico tenue">Personajes: ' + esc(X.canon(m).pj.map(function (p) { return p.n; }).join(', ')) + '</span><br>' : '') +
         (libre ? '' : '<br><span class="tenue chico">Queda libre en ' + I.anioLibre(m) + ' (vida del autor + ' + I.reglaDominio() + ' años)</span>') +
         '<div class="chico" style="margin-top:4px">Fama ' + mini(m.fama * 1.5) + ' · ' + EDADES.map(function (e, i) { return e + ' ' + mini(at.edades[i]); }).join(' ') + ' · Hombres ' + mini(at.sexo[0]) + ' Mujeres ' + mini(at.sexo[1]) + '</div>' +
         (usos ? '<span class="mal chico">Adaptada ' + usos + ' ' + (usos > 1 ? 'veces' : 'vez') + ' en los últimos 15 años: el público está cansado.</span><br>' : '') +
@@ -474,6 +475,9 @@ IA.creacion = (function () {
       titulo = D.oficio(rol).nombre;
       lista = T.disponibles(rol, 0).filter(function (x) { return usados.indexOf(x.id) < 0; }).sort(function (a, c) { return (c.hab + c.fama * 12 + T.afinidad(c, b.fam)) - (a.hab + a.fama * 12 + T.afinidad(a, b.fam)); }).slice(0, 30);
     }
+    // Tu avatar va primero si puede hacer ese trabajo (su oficio, sus especialidades o actuar) y no está ocupado
+    const av = IA.carrera.asegurarTalento();
+    if (av && IA.carrera.oficiosAvatar().indexOf(of) >= 0 && usados.indexOf(av.id) < 0 && T.disponible(av, 0)) lista = [av].concat(lista.filter(function (x) { return x.id !== av.id; }));
     const k = X.ORDEN_CLAS.indexOf(b.clas);
     const d = T.porId(b.eq.direccion);
     return '<div class="tarjeta"><h4>Elige: ' + esc(titulo) + '</h4>' + (lista.length ? lista.map(function (x) {
@@ -1128,6 +1132,6 @@ IA.creacion = (function () {
 
   // Abre la creación con un borrador ya armado (continuaciones, series y adaptaciones)
   function abrirCon(b) { cr.b = ajustar(b); cr.etapa = 'idea'; cr.paso = 3; cr.rol = null; cr.picker = null; U.abrirFicha(fichaCrear(), 'crear'); }
-  return { abrirCon: abrirCon, refrescar: refrescar, fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon,
+  return { abrirCon: abrirCon, refrescar: refrescar, fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon, listaCandidatos: listaCandidatos,
     bloqueProduccion: bloqueProduccion, abrirDecision: abrirDecision, siguienteDecision: siguienteDecision };
 })();

@@ -172,6 +172,7 @@ IA.pruebas = (function () {
       if (p.med === 'teatro' && p.et === 'catalogo' && p.pub >= 65 && !p.giro) { p.giro = 1; Md.gira(p.id, 4); }
       if (p.med === 'teatro' && p.et === 'catalogo' && !p.grab) Md.grabar(p.id, S.stream ? 'stream' : 'tv');
     });
+    if (Md.teatros().length < 2 && NG.cajaLibre(0) > Md.precioTeatro('mediana') * 6) Md.comprarTeatro('mediana');
     ['musica', 'juegos', 'teatro', 'libros'].forEach(function (med) {
       if (!Md.disponible(med) || Md.enMarcha(med) >= 1) return;
       const op = { esc: NG.cajaLibre(0) > tipico * 15 ? 2 : 1 };

@@ -277,7 +277,7 @@ IA.medios = (function () {
     const ing = Math.round(entradas * ep(p.gira ? 60 : 90, a));
     // Cada función cuesta (elenco, sala, técnicos): unos 45 dólares de hoy por butaca, 35 en gira; sin esto una obra
     // chica rendía 20 a 50 veces lo invertido. Con la sala llena al 50 % se cubren los gastos.
-    const gas = Math.round(p.costo * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 35 : 45, a));
+    const gas = Math.round(p.costo * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 35 : 45, a) * (enTeatroPropio(p) ? 0.6 : 1));
     cobrar(p, ing); IA.negocio.pagar(0, 'produccion', gas); p.gas += gas;
     p.vend.entradas = (p.vend.entradas || 0) + entradas;
     p.vend.funciones = (p.vend.funciones || 0) + p.cfg.funciones;
@@ -473,7 +473,59 @@ IA.medios = (function () {
     });
     s.ing = {};
   }
-  function semanaTodo() { semana(); semanaGiras(); }
+  function semanaTodo() { semana(); semanaGiras(); semanaTeatros(); }
+  // ---------- Teatros propios ----------
+  // Se compran y se venden; en tus obras de su tamaño no pagas la sala (cada función cuesta 40 % menos) y, cuando
+  // están libres, otras compañías los alquilan. Precios en dólares de hoy.
+  const TEATROS = [
+    { id: 'chica', nombre: 'Sala de barrio', asientos: 200, precio: 1.5e6 },
+    { id: 'mediana', nombre: 'Teatro de la ciudad', asientos: 800, precio: 6e6 },
+    { id: 'grande', nombre: 'Gran teatro', asientos: 2000, precio: 18e6 },
+  ];
+  function teatroTipo(id) { return TEATROS.filter(function (x) { return x.id === id; })[0] || null; }
+  function teatros() { const s = st(); if (!s.teatros) s.teatros = []; return s.teatros; }
+  function precioTeatro(id) { const x = teatroTipo(id); return x ? Math.round(ep(x.precio)) : 0; }
+  function comprarTeatro(id) {
+    const x = teatroTipo(id), S = N.S;
+    if (!x) return 'Ese teatro no existe.';
+    if (teatros().length >= 6) return 'Ya tienes 6 teatros.';
+    const c = precioTeatro(id);
+    if (IA.negocio.cajaLibre(0) < c) return 'No alcanza la caja.';
+    IA.negocio.pagar(0, 'construccion', c);
+    teatros().push({ id: N.sigId(), tipo: id, desde: S.t });
+    N.emit('noticia', { tipo: 'estudio', texto: 'Compras un ' + x.nombre.toLowerCase() + ': tus obras de ese tamaño ahorran la sala y, cuando está libre, se alquila.', importante: true });
+    return '';
+  }
+  function venderTeatro(idT) {
+    const l = teatros(), t = l.filter(function (x) { return x.id === +idT; })[0];
+    if (!t) return 'No es tu teatro.';
+    if (enUso(t)) return 'Hay una obra tuya en cartel en ese teatro.';
+    IA.negocio.cobrarEn(0, 'ventaTeatros', Math.round(precioTeatro(t.tipo) * 0.8));
+    st().teatros = l.filter(function (x) { return x !== t; });
+    return '';
+  }
+  // Tus obras en temporada ocupan tus teatros del mismo tamaño (una obra por teatro)
+  function ocupacion() {
+    const libres = teatros().slice(), uso = {};
+    proyectos('teatro').filter(function (p) { return p.et === 'temporada' && !p.gira; }).forEach(function (p) {
+      const i = libres.findIndex(function (t) { return t.tipo === p.cfg.sala; });
+      if (i >= 0) { uso[libres[i].id] = p.id; libres.splice(i, 1); }
+    });
+    return uso;
+  }
+  function enUso(t) { return ocupacion()[t.id] !== undefined; }
+  function enTeatroPropio(p) { const u = ocupacion(); return Object.keys(u).some(function (k) { return u[k] === p.id; }); }
+  function semanaTeatros() {
+    const l = teatros();
+    if (!l.length) return;
+    const u = ocupacion();
+    l.forEach(function (t) {
+      const x = teatroTipo(t.tipo);
+      if (!x) return;
+      IA.negocio.pagar(0, 'mantenimiento', Math.round(ep(x.precio) * 0.02 / 52)); // impuestos y arreglos: 2 % al año
+      if (u[t.id] === undefined) IA.negocio.cobrarEn(0, 'alquilerTeatros', Math.round(x.asientos * 7 * ep(2.5) * N.limitar(0.55 + N.normal(0, 0.15), 0.2, 0.9)));
+    });
+  }
   function cuotaMercado(med) { const a = N.anio(), v = (st().ing[med] || 0) * 52 / Math.max(1, N.semana()); return v / (ep(N.interp(MERCADO[med], a) * 1e9, a)); }
   // ---------- Portadas: descripción (el dibujo lo hace la interfaz con la misma semilla) ----------
   const COLORES = ['rojo', 'azul noche', 'dorado', 'verde selva', 'violeta', 'naranja', 'negro', 'blanco', 'turquesa', 'rosa'];
@@ -495,5 +547,6 @@ IA.medios = (function () {
     plat: plat, cuota: cuota, plataformas: plataformas, costoKit: costoKit, comprarKit: comprarKit, motor: motor, motores: function () { return st().motores.concat(st().motorLic); },
     ofertasMotor: function () { return st().ofMot; }, funcionesDe: funcionesDe, estrellasMotor: estrellasMotor, costoMotor: costoMotor, crearMotor: crearMotor, licenciarMotor: licenciarMotor,
     dlc: dlc, soporte: soporte, paquete: paquete, traducir: traducir, premios: function (med) { return st().premios.filter(function (r) { return !med || r.med === med; }); },
+    TEATROS: TEATROS, teatros: teatros, precioTeatro: precioTeatro, comprarTeatro: comprarTeatro, venderTeatro: venderTeatro, enUso: enUso, enTeatroPropio: enTeatroPropio,
     semana: semanaTodo, mensual: mensualBandas, anual: anual, cuotaMercado: cuotaMercado, portada: portada, resumen: resumen, sala: sala };
 })();

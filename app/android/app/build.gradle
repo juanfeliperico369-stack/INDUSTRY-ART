@@ -9,7 +9,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // La receta de GitHub sube el número en cada versión (VERSION_CODE); en tu PC queda en 1
         versionCode Integer.parseInt(System.getenv("VERSION_CODE") ?: "1")
-        versionName "2.0"
+        versionName "2.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

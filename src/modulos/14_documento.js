@@ -311,5 +311,19 @@ IA.documento = (function () {
     const nombre = 'Idea - ' + (o.tit || 'sin titulo') + '.docx';
     return IA.publicacion.guardarArchivo(nombre, docx(o), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
-  return { filasIdea: filasIdea, trama: trama, texto: texto, docx: docx, zip: zip, crc32: crc32, descargar: descargar };
+  // Descarga con su aviso; si no se pudo (y no fue que el jugador cerró el menú), muestra la trama para copiarla
+  function descargarYAvisar(o) {
+    const U = IA.ui;
+    return descargar(o).then(function (r) {
+      if (r.ok) U.aviso('Documento listo: ' + (r.ruta || r.nombre));
+      else if (!r.cancelado) mostrarTexto(o, 'No se pudo guardar el documento en este aparato. Aquí está la trama completa para copiarla:');
+      return r;
+    });
+  }
+  function mostrarTexto(o, aviso) {
+    const U = IA.ui, esc = N.esc;
+    U.modal('<h2>' + esc(o.tit || '') + '</h2>' + (aviso ? '<p class="mal chico">' + esc(aviso) + '</p>' : '') + '<textarea id="docTextoIdea" rows="16" style="width:100%" readonly>' + esc(texto(o)) + '</textarea>' +
+      '<div class="fila envolver"><button class="btn" data-a="docCopiar">Copiar el texto</button><button class="btn" data-a="docTxt" data-v="' + (o.id || '') + '">Guardar como texto (.txt)</button><button class="btn primario" data-a="cerrarModal">' + IA.t('aceptar') + '</button></div>');
+  }
+  return { filasIdea: filasIdea, trama: trama, texto: texto, docx: docx, zip: zip, crc32: crc32, descargar: descargar, descargarYAvisar: descargarYAvisar, mostrarTexto: mostrarTexto };
 })();
