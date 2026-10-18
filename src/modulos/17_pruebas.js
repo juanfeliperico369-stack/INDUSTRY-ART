@@ -107,6 +107,7 @@ IA.pruebas = (function () {
     }
     botTele(est, tipico); // series, canal, plataforma, franquicias y licencias (V23)
     botImperio(est, tipico); // eventos, banco e imperio (V24)
+    botMedios(tipico); // música, videojuegos, teatro y libros (V25)
     // Con la caja en rojo no se arriesga más: espera a que entren los ingresos
     if (S.semanasEnRojo > 0) return;
     // 2. Construir cuando sobra caja
@@ -145,6 +146,44 @@ IA.pruebas = (function () {
       const r = IA.juego.iniciarObra(b);
       if (r.error) { if (registroErrores) registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error); break; }
     }
+  }
+  // V25: un proyecto a la vez en cada medio, bandas, giras, kits, motores, DLC, traducciones y teatro grabado
+  function botMedios(tipico) {
+    const S = N.S, Md = IA.medios, anio = N.anio();
+    if (N.semana() % 4 !== 3 || NG.cajaLibre(0) < tipico * 2) return;
+    if (Md.disponible('musica') && !Md.bandas().filter(function (b) { return !b.sep; }).length) {
+      const ids = IA.talentos.disponibles('interprete', 0).sort(function (a, b) { return Md.habMedio(b, 'musica') - Md.habMedio(a, 'musica'); }).slice(0, N.probabilidad(0.5) ? 1 : 3).map(function (t) { return t.id; });
+      Md.firmarBanda('', ids, ids.length === 1 ? 'solista' : 'banda');
+    }
+    Md.bandas().forEach(function (b) {
+      if (b.sep) { Md.reunir(b.id); return; }
+      if (N.probabilidad(0.3)) Md.practicar(b.id);
+      if (!b.gira && N.probabilidad(0.15)) Md.irDeGira(b.id, NG.cajaLibre(0) > tipico * 10 ? 'nacional' : 'local');
+    });
+    if (Md.disponible('juegos')) {
+      Md.plataformas().sort(function (a, b) { return b.cuota - a.cuota; }).slice(0, 2).forEach(function (p) { if (!p.kit) Md.comprarKit(p.id); });
+      if (!Md.motores().length && NG.cajaLibre(0) > tipico * 4) Md.crearMotor('', Md.funcionesDe().map(function (f) { return f.id; }));
+      if (Md.ofertasMotor().length && Md.motores().length < 2 && N.probabilidad(0.2)) Md.licenciarMotor(0);
+    }
+    Md.proyectos().forEach(function (p) {
+      if (p.med === 'juegos' && p.et === 'lanzado' && p.pw > 20 && !p.dlc && p.pub >= 60) Md.dlc(p.id);
+      if (p.med === 'juegos' && p.et === 'lanzado' && p.pw === 2) Md.soporte(p.id, p.pub >= 55);
+      if (p.med === 'libros' && p.et === 'lanzado' && p.pub >= 65 && p.cfg.trad < 6) Md.traducir(p.id);
+      if (p.med === 'teatro' && p.et === 'catalogo' && p.pub >= 65 && !p.giro) { p.giro = 1; Md.gira(p.id, 4); }
+      if (p.med === 'teatro' && p.et === 'catalogo' && !p.grab) Md.grabar(p.id, S.stream ? 'stream' : 'tv');
+    });
+    ['musica', 'juegos', 'teatro', 'libros'].forEach(function (med) {
+      if (!Md.disponible(med) || Md.enMarcha(med) >= 1) return;
+      const op = { esc: NG.cajaLibre(0) > tipico * 15 ? 2 : 1 };
+      const fams = Md.familias(med), f = N.elegir(fams);
+      if (f) op.gen = N.elegir(f.generos.filter(function (g) { return g !== 'Erótico' && g !== 'Erótica'; }));
+      if (med !== 'musica') op.tipo = N.elegir(Md.tipos(med)).id;
+      if (med === 'musica') { const b = Md.bandas().filter(function (x) { return !x.sep; })[0]; if (b) op.banda = b.id; else op.tipo = 'jingle'; }
+      if (med === 'libros') { const fr = IA.franquicias.lista().filter(function (x) { return x.est === 0; })[0]; if (fr && N.probabilidad(0.3)) op.fr = fr.id; }
+      const b = Md.borrador(med, op);
+      if (med === 'juegos') { const m = Md.motores()[0]; if (m) { b.cfg.motor = m.id; Md.recalcular(b); } if (anio >= 2017 && N.probabilidad(0.2)) b.cfg.modelo = 'suscripcion'; else if (anio >= 2009 && N.probabilidad(0.25)) b.cfg.modelo = 'gratis'; }
+      if (b.costo < NG.cajaLibre(0) * 0.3) Md.iniciar(b);
+    });
   }
   // V24: eventos, quiebra, banco, inversiones e imperio
   function botImperio(est, tipico) {
@@ -652,6 +691,17 @@ IA.pruebas = (function () {
         prueba('El diseñador de arte y tecnología también pesa en vestuario', h2 < h1);
       }
       prueba('Los rivales también guardan sets', IA.rodaje.capacidadSets(1) >= 2);
+    }
+    // V25 · Música, videojuegos, teatro y libros
+    {
+      const Md = IA.medios;
+      prueba('Hay cuatro medios nuevos con su premio', Object.keys(Md.MED).length === 4 && Object.keys(Md.MED).every(function (k) { return !!Md.MED[k].premio; }));
+      prueba('Los formatos de música suman 1', Math.abs(Md.formatosMusica(N.anio()).reduce(function (s, f) { return s + f.parte; }, 0) - 1) < 1e-6 || N.anio() < 1877);
+      prueba('Las cuotas de las plataformas suman 1', N.anio() < 1972 || Math.abs(Md.plataformas().reduce(function (s, p) { return s + p.cuota; }, 0) - 1) < 1e-6);
+      prueba('Un juego va a una a cuatro plataformas', Md.proyectos('juegos').every(function (p) { return p.cfg.plats.length >= 1 && p.cfg.plats.length <= 4; }));
+      prueba('La ocupación del teatro va de 5 % a 100 %', Md.proyectos('teatro').every(function (p) { return p.ocup === undefined || (p.ocup >= 0.05 && p.ocup <= 1); }));
+      prueba('Ninguna venta es negativa o infinita', Md.proyectos().every(function (p) { return Object.keys(p.vend).every(function (k) { return isFinite(p.vend[k]) && p.vend[k] >= 0; }) && isFinite(p.ing); }));
+      prueba('Los motores tienen de 1 a 5 estrellas', Md.motores().every(function (m) { return m.est >= 1 && m.est <= 5; }));
     }
     // V24 · Mundo vivo y negocio
     {

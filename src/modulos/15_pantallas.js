@@ -350,7 +350,7 @@ IA.pantallas = (function () {
     const s = sub('obras', 'marcha');
     const marcha = O.enProduccion(0), listas = O.delEstudio(0, ['lista']), cart = O.delEstudio(0, ['cartelera', 'emision']);
     let h = titulo(t('sec_obras'), 'obras', '<button class="btn primario" data-a="crearObra">' + icono('mas') + t('crear_obra') + '</button>' + (IA.tv.puedeTV(N.anio()) ? '<button class="btn" data-a="tvNuevaSerie">' + icono('mas') + 'Nueva serie</button>' : '')) +
-      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')], ['franquicias', 'Franquicias'], ['adquisicion', 'Adquisición'], ['filmografia', 'Filmografía'], ['panel', 'Panel']], s);
+      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')], ['franquicias', 'Franquicias'], ['adquisicion', 'Adquisición'], ['musica', 'Música'], ['juegos', 'Videojuegos'], ['teatro', 'Teatro'], ['libros', 'Libros'], ['filmografia', 'Filmografía'], ['panel', 'Panel']], s);
     h += '<div class="lista-obras">';
     if (s === 'marcha') {
       h += IA.teleUI.pilotos();
@@ -368,6 +368,8 @@ IA.pantallas = (function () {
         const ult = o.hs && o.hs.length ? o.hs[o.hs.length - 1] : 0;
         return tarjetaObra(o, '<span>' + t('bruto') + ': <b>' + dinero(o.bruto) + '</b> · última semana ' + dinero(ult) + '</span><span class="tenue chico">' + t('semanas_cartelera') + ': ' + o.sc + ' · ' + t('critica') + ' ' + o.crit + ' · ' + t('publico') + ' ' + o.pub + '</span>');
       }).join('') : vacio();
+    } else if (['musica', 'juegos', 'teatro', 'libros'].indexOf(s) >= 0) {
+      h += '</div>' + IA.mediosUI.medio(s) + '<div>';
     } else if (s === 'franquicias' || s === 'adquisicion') {
       h += '</div>' + (s === 'franquicias' ? IA.teleUI.franquicias() : IA.teleUI.adquisicion()) + '<div>';
     } else if (s === 'filmografia' || s === 'panel') {

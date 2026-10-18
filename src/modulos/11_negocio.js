@@ -5,12 +5,12 @@
 IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
-  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera', 'licencias', 'inversiones', 'filiales', 'coproduccion', 'encargos', 'fans', 'investigacion', 'eventos'];
+  const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera', 'licencias', 'inversiones', 'filiales', 'coproduccion', 'encargos', 'fans', 'investigacion', 'eventos', 'musica', 'juegos', 'teatro', 'libros'];
   const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'distribucion', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas', 'emision', 'deuda', 'socio', 'filiales', 'investigacion', 'inversiones', 'coproduccion', 'encargos', 'eventos'];
   const NOMBRES = {
     taquilla: 'Taquilla (parte del estudio)', video: 'Video doméstico', tv: 'Televisión', streaming: 'Streaming', merchandising: 'Juguetes y coleccionables',
     reestrenos: 'Reestrenos', carrera: 'Tus encargos como talento', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
-    personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio',
+    personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio', musica: 'Música', juegos: 'Videojuegos', teatro: 'Teatro', libros: 'Libros',
   };
   function libroVacio() { return { ing: {}, gas: {} }; }
 

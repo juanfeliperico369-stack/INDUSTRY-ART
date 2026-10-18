@@ -342,6 +342,7 @@ IA.juego = (function () {
     IA.prensa.semana(); // rivales que mueven fechas (V22)
     IA.tv.semana(); IA.streaming.semana(); IA.franquicias.semana(); // series, canal, plataforma y licencias (V23)
     IA.historia.semana(); IA.eventos.semana(); IA.banco.semana(); IA.imperio.semana(); // historia, eventos, banco e imperio (V24)
+    IA.medios.semana(); // música, videojuegos, teatro y libros (V25)
     const ceremonia = PM.semana();
     academia();
     S.t++;
@@ -362,6 +363,7 @@ IA.juego = (function () {
       IA.critica.cartaMensual(); IA.critica.numeroRevista(); // cartas de fans y revista (V22)
       IA.franquicias.mensual(); IA.tv.mensual(); // ofertas por tus franquicias y patrocinadores (V23)
       IA.banco.mensual(); IA.imperio.mensual(); // cuotas, junta, sedes, filiales y encargos (V24)
+      IA.medios.mensual(); // bandas (V25)
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;
@@ -374,6 +376,7 @@ IA.juego = (function () {
       IA.carrera.anual();
       IA.franquicias.anual();
       IA.banco.anual(S.estudios[0].util); IA.imperio.anual(); // dividendos, inventos y filiales (V24)
+      IA.medios.anual(); // premios Vinilo, Cartucho, Telón y Pluma; motores (V25)
       O.compactar();
       if (S.fin.hist.length) N.emit('finAnio', S.fin.hist[S.fin.hist.length - 1]);
     }

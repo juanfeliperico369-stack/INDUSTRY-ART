@@ -76,7 +76,7 @@ def desarmar(html_ruta, destino):
     orden = {
         "nucleo": 0, "textos": 1, "datos": 2, "taxonomia": 2, "calendario": 3, "mundo": 3, "economia": 4, "talentos": 5, "ideas": 6, "obras": 6,
         "produccion": 7, "rodaje": 7, "estreno": 8, "lanzamiento": 8, "ventanas": 8, "rivales": 9, "premios": 10, "critica": 10, "prensa": 10, "negocio": 11, "sede": 11, "arte": 12, "juego": 12, "carrera": 12,
-        "guardado": 13, "interfaz": 14, "pantallas": 15, "agencia": 16, "creacion": 16, "distribucion": 16, "calendario_ui": 16, "prensa_ui": 16, "tele_ui": 16, "franquicias": 11, "banco": 11, "imperio": 11, "historia": 3, "eventos": 12, "imperio_ui": 16, "tv": 11, "streaming": 11, "pruebas": 17, "arranque": 99,
+        "guardado": 13, "interfaz": 14, "pantallas": 15, "agencia": 16, "creacion": 16, "distribucion": 16, "calendario_ui": 16, "prensa_ui": 16, "tele_ui": 16, "franquicias": 11, "banco": 11, "imperio": 11, "historia": 3, "eventos": 12, "imperio_ui": 16, "medios": 11, "medios_ui": 16, "tv": 11, "streaming": 11, "pruebas": 17, "arranque": 99,
     }
     for i, m in enumerate(marcas):
         fin = marcas[i + 1].start() if i + 1 < len(marcas) else len(codigo)
