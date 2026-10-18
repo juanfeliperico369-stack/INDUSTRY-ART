@@ -2,3 +2,12 @@ node_modules/
 __pycache__/
 *.pyc
 .DS_Store
+# App de Android (V30): dependencias y salidas se generan
+app/node_modules/
+app/www/index.html
+app/android/local.properties
+app/android/app/build/
+app/android/build/
+app/android/.gradle/
+*.jks
+*.keystore

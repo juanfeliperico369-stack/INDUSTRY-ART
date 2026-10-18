@@ -104,7 +104,7 @@ IA.idioma = (function () {
     if (lienzo || typeof CanvasRenderingContext2D === 'undefined') return;
     lienzo = true;
     const f = CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string') a[0] = texto(s); return f.apply(this, a); };
+    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string' && mapa) { const t = s.trim(); if (mapa[t] !== undefined) a[0] = s.replace(t, mapa[t]); } return f.apply(this, a); }; // en los lienzos, solo frases completas (V30): un póster no queda a medio traducir
   }
   function poner(id) {
     actual = id === 'en' ? 'en' : 'es';

@@ -6,6 +6,7 @@
     IA.ui.cargarAjustes();
     IA.ui.enlazar();
     IA.ui.render();
+    IA.publicacion.alAbrir(); // un solo anuncio al abrir, solo en la app gratuita de Android (V30)
     // Guardado automático al ocultar la app (sin avisos de "cambios sin guardar")
     document.addEventListener('visibilitychange', function () {
       if (document.hidden && IA.pantallas.detenerAuto) { IA.pantallas.detenerAuto(); if (IA.n.S) IA.ui.renderBarra(); }

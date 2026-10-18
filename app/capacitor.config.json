@@ -1,0 +1,6 @@
+{
+  "appId": "com.industryart.juego",
+  "appName": "INDUSTRY ART",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}

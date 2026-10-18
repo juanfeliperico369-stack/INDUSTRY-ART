@@ -1,0 +1,18 @@
+{
+  "name": "industry-art",
+  "version": "1.0.0",
+  "private": true,
+  "description": "INDUSTRY ART para Android (Capacitor)",
+  "scripts": {
+    "preparar": "python3 ../tools/preparar_app.py",
+    "sync": "npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor-community/admob": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}
