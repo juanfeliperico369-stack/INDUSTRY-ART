@@ -145,22 +145,42 @@ IA.ui = (function () {
   function modalAbierto() { return document.getElementById('modal').classList.contains('on'); }
 
   // ---------- Lienzos: pósters, retratos, logos y gráficas se dibujan después de cada render ----------
+  // V33: los pósters y retratos se dibujan cuando están por verse (en un celular, un catálogo largo ya no se dibuja entero de golpe)
+  function dibujarPoster(cv) {
+    const o = IA.obras.porId(+cv.getAttribute('data-poster'));
+    if (o) IA.arte.posterEn(cv, IA.obras.paraPoster(o));
+  }
+  function dibujarRetrato(cv) {
+    const id = +cv.getAttribute('data-retrato');
+    const tal = id === 999999 ? avatarComoTalento() : IA.talentos.porId(id);
+    if (tal) IA.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
+  }
+  let vigia = null;
+  const vigilados = new Set();
+  function vigiaPosters() {
+    if (vigia || typeof IntersectionObserver !== 'function') return vigia;
+    vigia = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        vigia.unobserve(e.target); vigilados.delete(e.target);
+        if (e.target.hasAttribute('data-poster')) dibujarPoster(e.target); else dibujarRetrato(e.target);
+      });
+    }, { rootMargin: '300px' });
+    return vigia;
+  }
+  function vigilar(cv) { vigia.observe(cv); vigilados.add(cv); }
   function dibujar(raiz) {
     const r = raiz || document;
-    r.querySelectorAll('canvas[data-poster]').forEach(function (cv) {
-      const o = IA.obras.porId(+cv.getAttribute('data-poster'));
-      if (o) IA.arte.posterEn(cv, IA.obras.paraPoster(o));
-    });
-    r.querySelectorAll('canvas[data-retrato]').forEach(function (cv) {
-      const id = +cv.getAttribute('data-retrato');
-      const tal = id === 999999 ? avatarComoTalento() : IA.talentos.porId(id);
-      if (tal) IA.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
-    });
+    const v = vigiaPosters();
+    // Los lienzos que ya salieron de la página (otra vista) se sueltan para no guardarlos en memoria
+    if (v) vigilados.forEach(function (cv) { if (!cv.isConnected) { v.unobserve(cv); vigilados.delete(cv); } });
+    r.querySelectorAll('canvas[data-poster]').forEach(function (cv) { if (v) vigilar(cv); else dibujarPoster(cv); });
+    r.querySelectorAll('canvas[data-retrato]').forEach(function (cv) { if (v) vigilar(cv); else dibujarRetrato(cv); });
     r.querySelectorAll('canvas[data-logo]').forEach(function (cv) {
       const est = N.S && N.S.estudios[+cv.getAttribute('data-logo')];
       const L = est ? est.logo : estado.logoNuevo;
       if (!L) return;
-      const d = window.devicePixelRatio || 1, w = cv.clientWidth || 34, h = cv.clientHeight || 34;
+      const d = Math.min(2, window.devicePixelRatio || 1), w = cv.clientWidth || 34, h = cv.clientHeight || 34;
       cv.width = w * d; cv.height = h * d;
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);

@@ -56,9 +56,10 @@ IA.arte = (function () {
   }
 
   // Ajusta un <canvas> a su tamaño CSS × devicePixelRatio y lo deja listo en px CSS.
+  // V33: como mucho ×2 (en pantallas de ×3 se ve igual y cuesta la mitad de memoria y de batería)
   function prepararLienzo(canvas, wDef, hDef) {
     if (!canvas || !canvas.getContext) return null;
-    const d = window.devicePixelRatio || 1;
+    const d = Math.min(2, window.devicePixelRatio || 1);
     const w = canvas.clientWidth || wDef || 0;
     const h = canvas.clientHeight || hDef || 0;
     if (!w || !h) return null;

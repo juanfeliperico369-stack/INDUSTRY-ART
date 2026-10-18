@@ -5,16 +5,16 @@ programado junto a Claude, de Anthropic. El plan completo está en `docs/` (Plan
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v32.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
-Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30 y la V31 se abren en la V32 (se migran solas).
+Abre **`INDUSTRY_ART_v33.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31 y la V32 se abren en la V33 (se migran solas).
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v32.html` | El juego, versión 1.2 (V32, armado desde `src/`) |
+| `INDUSTRY_ART_v33.html` | El juego, versión 1.3 (V33, armado desde `src/`) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
-| `bitacora_v32.md` | La bitácora corta de la V32 · 1.2, compra «Versión completa» (las de la V21 a la V31 también están) |
+| `bitacora_v33.md` | La bitácora corta de la V33 · 1.3, celulares lentos (las de la V21 a la V32 también están) |
 | `app/` | Las apps: Android e iPhone (Capacitor 8: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
 | `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone (TestFlight), la app de PC y la versión web |
 | `docs/publicar_google_play.md`, `docs/publicar_app_store.md`, `docs/publicar_pc.md` | Guías para publicar en cada tienda |
@@ -34,10 +34,10 @@ Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22
 ## Para programar la siguiente versión
 
 ```bash
-python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v32.html
-node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1900 y 2000 + pruebas de reglas -> pruebas/informe_bot_v32.md
+python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v33.html
+node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1900 y 2000 + pruebas de reglas -> pruebas/informe_bot_v33.md
 node tools/capturas.js                       # capturas en 390×844, 844×390 y 1366×768 -> pruebas/capturas/
-python3 tools/desarmar.py INDUSTRY_ART_v32.html   # HTML -> src/ (la ida y vuelta es idéntica)
+python3 tools/desarmar.py INDUSTRY_ART_v33.html   # HTML -> src/ (la ida y vuelta es idéntica)
 python3 tools/preparar_app.py                # HTML más nuevo -> app/www y app/escritorio/www (modo y AdMob de app/config.json)
 node tools/imagenes_app.js                   # íconos, pantallas de inicio e imágenes de la tienda
 ```

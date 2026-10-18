@@ -311,25 +311,34 @@ IA.pantallas = (function () {
       rodajes: prods.filter(function (o) { return o.et === 'rodaje' || o.et === 'preproduccion'; }).map(function (o) { return { titulo: o.tit, progreso: PR.progreso(o) }; }),
     };
   }
-  // Animación del edificio (unos 30 cuadros por segundo, solo si se ve)
-  let anim = null, ultimoCuadro = 0, cacheDatos = null, cacheT = -1;
+  // Animación del edificio, solo si se ve. V33 (celulares): 20 cuadros por segundo a ×1,5 como mucho; el ciclo se apaga
+  // cuando el lienzo no está en pantalla, y con «Menos animación» solo se redibuja cuando cambia algo.
+  let anim = null, ultimoCuadro = 0, cacheDatos = null, cacheT = -1, firmaQuieta = '';
+  let ultimoToque = Date.now();
+  if (typeof document !== 'undefined') ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, function () { ultimoToque = Date.now(); }, { passive: true, capture: true }); });
   function animar(ts) {
-    anim = requestAnimationFrame(animar);
-    if (document.hidden || ts - ultimoCuadro < 33) return;
-    ultimoCuadro = ts;
     const cv = document.getElementById('lienzoEstudio');
-    if (!cv) return;
-    const d = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+    if (!cv) { anim = null; return; }
+    anim = requestAnimationFrame(animar);
+    // 20 cuadros por segundo; tras 30 s sin tocar la pantalla, 4 (ahorra batería con el juego abierto y quieto)
+    if (document.hidden || ts - ultimoCuadro < (Date.now() - ultimoToque > 30000 ? 250 : 50)) return;
+    ultimoCuadro = ts;
+    const d = Math.min(1.5, window.devicePixelRatio || 1), w = cv.clientWidth, h = cv.clientHeight;
     if (!w || !h) return;
+    const tt = N.S ? N.S.t : -2;
+    if (U.ajustes().movimiento) {
+      const firma = w + 'x' + h + '|' + tt + '|' + cacheT;
+      if (firma === firmaQuieta) return;
+      firmaQuieta = firma;
+    }
     if (cv.width !== Math.round(w * d) || cv.height !== Math.round(h * d)) { cv.width = Math.round(w * d); cv.height = Math.round(h * d); }
     const c = cv.getContext('2d');
     c.setTransform(d, 0, 0, d, 0, 0);
-    const tt = N.S ? N.S.t : -2;
     if (!cacheDatos || cacheT !== tt) { cacheDatos = datosEstudio(); cacheT = tt; }
     IA.arte.estudio(c, w, h, ts, cacheDatos);
   }
   function alMostrar(sec) {
-    cacheT = -1;
+    cacheT = -1; firmaQuieta = '';
     if (!anim) anim = requestAnimationFrame(animar);
     if (sec === 'portada') {
       IA.guardado.masReciente().then(function (r) {
@@ -380,11 +389,12 @@ IA.pantallas = (function () {
       h += '</div>' + (s === 'panel' ? IA.prensaUI.panel() : IA.prensaUI.filmografia()) + '<div>';
     } else {
       const cat = N.S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada'; }).sort(function (a, b) { return b.fe - a.fe; });
-      h += cat.length ? '<div class="rejilla">' + cat.slice(0, 120).map(function (o) {
+      const tope = U.estado.catalogoVer || 30; // V33: de 30 en 30 (un catálogo de cientos de obras pesaba en el celular)
+      h += cat.length ? '<div class="rejilla">' + cat.slice(0, tope).map(function (o) {
         const m = O.multiplicador(o);
         return '<button class="tarjeta toque" style="text-align:left;display:block" data-a="verObra" data-v="' + o.id + '"><canvas class="poster" style="width:100%;height:auto;aspect-ratio:2/3" data-poster="' + o.id + '"></canvas><b>' + esc(o.tit) + '</b><br><span class="tenue chico">' + o.anio + '</span> <span class="etiqueta ' + (m >= 2.5 ? 'bien' : m < 1.4 ? 'mal' : '') + '">' + mult(o) + '</span>' + ((o.aw || []).length ? ' <span class="etiqueta oro">' + o.aw.length + ' premio' + (o.aw.length > 1 ? 's' : '') + '</span>' : '') +
           (o.cert ? ' <span class="etiqueta oro">' + esc(o.cert) + '</span>' : '') + (o.bov ? ' <span class="etiqueta">bóveda</span>' : '') + (o.dir ? ' <span class="etiqueta">directo a ' + (o.dir === 'video' ? 'video' : 'streaming') + '</span>' : '') + '</button>';
-      }).join('') + '</div>' : vacio();
+      }).join('') + '</div>' + (cat.length > tope ? '<button class="btn bloque" data-a="catalogoMas">Ver más (' + (cat.length - tope) + ')</button>' : '') : vacio();
     }
     return h + '</div>';
   }
@@ -449,6 +459,7 @@ IA.pantallas = (function () {
   }
   function estrenadaYa(o) { return o.et === 'cartelera' || o.et === 'terminada'; }
   ac('verObra', function (v) { U.abrirFicha(fichaObra(+v), 'obra:' + v); });
+  ac('catalogoMas', function () { U.estado.catalogoVer = (U.estado.catalogoVer || 30) + 30; U.refrescar(); }); // V33
 
   // ---------- Programar estreno: el plan de lanzamiento vive en IA.distribucion (V20) ----------
 
@@ -811,13 +822,20 @@ IA.pantallas = (function () {
     for (let i = 0; i < N.S.noticias.length && N.S.noticias[i] !== notiAntes; i++) nuevas.push(N.S.noticias[i]);
     return { r: r, nuevas: nuevas };
   }
+  // V33: el autoguardado espera a que el teléfono esté libre (la semana se ve primero) y nunca se encima con otro
+  let guardando = false;
+  function cuandoLibre(fn) { if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: 3000 }); else setTimeout(fn, 60); }
   function autoguardarSiToca(anioAntes, mesAntes) {
     let modo = U.ajustes().autoguardado;
-    if (modo === 'no') return;
+    if (modo === 'no' || guardando) return;
     // Sin compresión nativa (navegadores viejos) comprimir cuesta: se autoguarda cada año y al salir
     if (modo === 'mes' && !IA.guardado.hayGzip()) modo = 'anio';
     if ((modo === 'mes' && N.mes() !== mesAntes) || N.anio() !== anioAntes) {
-      IA.guardado.autoguardar().then(function (g) { if (!g.ok) U.aviso(t('gua_error', { e: g.error }), 'mal'); });
+      guardando = true;
+      cuandoLibre(function () {
+        if (!N.S) { guardando = false; return; }
+        IA.guardado.autoguardar().then(function (g) { guardando = false; if (!g.ok) U.aviso(t('gua_error', { e: g.error }), 'mal'); }, function () { guardando = false; });
+      });
     }
   }
   function despuesDeAvanzar(res, mostrarResumen) {

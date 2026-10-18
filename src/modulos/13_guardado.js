@@ -75,6 +75,7 @@ IA.guardado = (function () {
   MIGRACIONES[30] = function () { /* 1.0: sin datos nuevos */ };
   MIGRACIONES[31] = function () { /* 1.1 (iPhone y PC): sin datos nuevos */ };
   MIGRACIONES[32] = function () { /* 1.2 (compra «Versión completa»): sin datos nuevos; la compra vive en la tienda */ };
+  MIGRACIONES[33] = function () { /* 1.3 (celulares lentos): sin datos nuevos */ };
   MIGRACIONES[29] = function () { /* V29: errores e inglés, sin datos nuevos */ };
   MIGRACIONES[28] = function () { /* V28: interfaz y rendimiento, sin datos nuevos */ };
   MIGRACIONES[27] = function () { /* V27: solo balance, sin datos nuevos */ };
