@@ -44,4 +44,4 @@ if os.path.exists(plist):
     with open(plist, 'wb') as f:
         plistlib.dump(p, f, sort_keys=False)
 
-print('Listo:', os.path.basename(htmls[-1]), '→ app/www y app/escritorio/www · modo', cfg['modo'])
+print('Listo:', os.path.basename(htmls[-1]), '-> app/www y app/escritorio/www - modo', cfg['modo'])  # solo ASCII: la consola de Windows no imprime flechas
