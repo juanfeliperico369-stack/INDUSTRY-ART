@@ -713,7 +713,7 @@ IA.ideas = (function () {
   // Una historia conocida ya tiene público que la espera
   function bonoConocimiento(o) {
     const m = o.mat && X.material(o.mat);
-    return m ? 0.08 * m.fama : 0;
+    return (m ? 0.08 * m.fama : 0) + (o.dcon || 0); // + convenciones y portadas (V22)
   }
   // Estimación orientativa del retorno (multiplicador) antes de empezar
   function retornoEstimado(calidad) {

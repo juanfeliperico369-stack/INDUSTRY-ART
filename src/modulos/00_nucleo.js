@@ -2,8 +2,8 @@
 // Arranque del espacio de nombres, azar con semilla, reloj semanal, mensajes entre módulos y utilidades.
 // La partida vive en IA.n.S: un solo objeto de datos, sin funciones adentro.
 var IA = {};
-IA.VERSION = '21.0';
-IA.VERSION_GUARDADO = 21;
+IA.VERSION = '22.0';
+IA.VERSION_GUARDADO = 22;
 // Banderas de edición en un solo lugar (completa o gratuita). Todas en "completa" hasta la V35.
 IA.EDICION = { nombre: 'completa', ranurasManuales: 5, autoguardados: 3, bot: true };
 

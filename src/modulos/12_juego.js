@@ -95,17 +95,21 @@ IA.juego = (function () {
       if (o.est !== 0) R.alQuedarLista(o, NG.contextoDe(o.est));
     });
     N.on('estreno', function (o) {
+      IA.prensa.alEstrenar(o); // promesas de la rueda de prensa (V22)
+      if (o.est === 0) IA.critica.resenar(o); // reseñas y proyección para la prensa (V22)
       const m = N.S.mercado;
       m.famMes[o.fam] = (m.famMes[o.fam] || 0) + 1;
       if (o.est === 0) noticia({ tipo: 'estreno', texto: N.S.avatar.nom + ' presenta «' + o.tit + '»: llega a los cines.' });
     });
     N.on('obraTerminada', function (o) {
       IA.sede.alTerminar(o); // fans (V21)
+      IA.critica.alTerminar(o); // cronología (V22)
       if (o.est === 0) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });
     });
     N.on('premios', function (r) {
-      const p = r.categorias.filter(function (c) { return c.id === 'pelicula'; })[0];
-      if (p) noticia({ tipo: 'premios', texto: D.premios.nombre + ' ' + (r.anio + 1) + ': «' + p.ganador.titulo + '» de ' + N.S.estudios[p.ganador.est].nombre + ' gana Mejor película.', importante: p.ganador.est === 0 });
+      const p = r.categorias.filter(function (c) { return c.id === 'pelicula' || c.id === 'mayor'; })[0];
+      if (p && r.gala !== 'quimera') { if (p.ganador.est === 0) noticia({ tipo: 'premios', texto: r.nombre + ': «' + p.ganador.titulo + '» se lleva el premio mayor.', importante: true }); }
+      else if (p) noticia({ tipo: 'premios', texto: D.premios.nombre + ' ' + (r.anio + 1) + ': «' + p.ganador.titulo + '» de ' + N.S.estudios[p.ganador.est].nombre + ' gana Mejor película.', importante: p.ganador.est === 0 });
     });
   }
   function noticia(n) {
@@ -289,6 +293,7 @@ IA.juego = (function () {
   function programarEstreno(o, t, nivM, plan) {
     if (o.et !== 'lista' || o.est !== 0) return 'La obra no está lista.';
     if (o.prog) return 'La obra ya tiene fecha de estreno.';
+    if (o.fest && o.fest.hasta > t) return 'Está inscrita en un festival: no puede estrenarse antes de que termine.';
     const p = IA.estreno.normalizar(o, plan, N.anio(t));
     if (p.via !== 'cines' && !IA.ventanas.viasDirectas(N.anio(t)).some(function (v) { return v.id === p.via; })) return 'Esa vía de estreno todavía no existe.';
     if (p.via === 'cines' && Object.keys(p.reg).every(function (r) { return p.reg[r] === 'retener'; })) return 'Si retienes todas las regiones, no hay estreno en cines: elige al menos una o estrena directo.';
@@ -310,6 +315,7 @@ IA.juego = (function () {
     NG.semana();
     IA.sede.semana(); // reclutamiento y capacitación (V21)
     IA.carrera.semana(); // encargos y vida ligera de tu avatar (V21)
+    IA.prensa.semana(); // rivales que mueven fechas (V22)
     const ceremonia = PM.semana();
     academia();
     S.t++;
@@ -327,6 +333,7 @@ IA.juego = (function () {
       IA.estreno.mensual(NG.contexto()); // cadenas de cines y cines propios (V20)
       // El mercado de guiones se renueva cada mes (V21)
       IA.ideas.renovarGuiones();
+      IA.critica.cartaMensual(); IA.critica.numeroRevista(); // cartas de fans y revista (V22)
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;

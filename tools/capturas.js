@@ -4,7 +4,7 @@
  * horizontal) y 1366×768 (PC). Guarda los PNG en pruebas/capturas/ y revisa que ningún control mida menos de
  * 44 px, que ningún texto mida menos de 14 px y que no haya desplazamiento horizontal.
  *
- * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v21.html]
+ * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v22.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 
 const RAIZ = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
-const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v21.html');
+const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v22.html');
 const SALIDA = path.join(RAIZ, 'pruebas', 'capturas');
 const TAMANOS = [[390, 844, 'celular_vertical'], [844, 390, 'celular_horizontal'], [1366, 768, 'pc']];
 
@@ -38,7 +38,7 @@ const PANTALLAS = [
   ['08b_ficha_produccion', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0] || IA.n.S.obras.filter((x) => x.est === 0 && x.lp).pop(); if (o) { IA.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Producción')[0]; if (h) h.scrollIntoView(); } }); }],
   ['08c_dilema', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = { id: 'escenaClave', t: IA.n.S.t, n: { d: o.eq.direccion } }; IA.creacion.abrirDecision(o.id); } }); }],
   ['08d_prueba_publico', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = null; o.prueba = { p: 57, com: ['La música emociona.', 'El ritmo decae a la mitad.'], t: IA.n.S.t }; IA.creacion.abrirDecision(o.id); } }); }],
-  // V21 · Lanzamiento: el plan de estreno, el dinero en cadena y las ventanas
+  // V22 · Lanzamiento: el plan de estreno, el dinero en cadena y las ventanas
   ['08e_plan_lanzamiento', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.prueba = null; o.dil = null; IA.distribucion.abrir(o.id); } }); }],
   ['08f_plan_regiones', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Estreno por región')[0]; if (h) h.scrollIntoView(); }); }],
   ['08g_plan_campana', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h4')].filter((x) => x.textContent.indexOf('Mezcla de canales') === 0)[0]; if (h) h.scrollIntoView(); }); }],
@@ -108,7 +108,7 @@ async function medir(p) {
     await p.close();
   }
   await navegador.close();
-  let md = '# Capturas automáticas · INDUSTRY ART V21\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
+  let md = '# Capturas automáticas · INDUSTRY ART V22\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
   resumen.filter((r) => r.pantalla).forEach((r) => { md += `| ${r.tamano} | ${r.pantalla} | ${r.controles}${r.controles ? ' (' + r.detalle.join(', ') + ')' : ''} | ${r.textos} | ${r.desborde ? 'sí' : 'no'} |\n`; });
   const errores = resumen.filter((r) => r.errores);
   md += '\nErrores de página: ' + (errores.length ? errores.map((r) => r.tamano + ': ' + r.errores.join('; ')).join(' / ') : 'ninguno') + '\n';

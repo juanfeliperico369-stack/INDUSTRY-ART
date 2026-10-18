@@ -265,7 +265,7 @@ IA.pantallas = (function () {
       kpi('Típico de la época', dinero(E.presupuestoTipico(N.anio()))) +
       kpi('Entrada de cine', dinero(M.precioEntrada('nam', N.anio()))) +
       '</div></div>' +
-      IA.calendarioUI.tarjetasEstudio() +
+      IA.prensaUI.banner() + IA.calendarioUI.tarjetasEstudio() +
       '<div class="tarjeta"><h3>' + t('mun_periodico') + '</h3>' + S.noticias.slice(0, 5).map(function (n) {
         return '<p style="margin:6px 0"><span class="tenue chico">' + esc(U.fechaCorta(n.t)) + '</span><br>' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>';
       }).join('') + '</div></div></div>';
@@ -350,7 +350,7 @@ IA.pantallas = (function () {
     const s = sub('obras', 'marcha');
     const marcha = O.enProduccion(0), listas = O.delEstudio(0, ['lista']), cart = O.delEstudio(0, ['cartelera']);
     let h = titulo(t('sec_obras'), 'obras', '<button class="btn primario" data-a="crearObra">' + icono('mas') + t('crear_obra') + '</button>') +
-      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')]], s);
+      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')], ['filmografia', 'Filmografía'], ['panel', 'Panel']], s);
     h += '<div class="lista-obras">';
     if (s === 'marcha') {
       h += marcha.length ? marcha.map(function (o) {
@@ -366,6 +366,8 @@ IA.pantallas = (function () {
         const ult = o.hs && o.hs.length ? o.hs[o.hs.length - 1] : 0;
         return tarjetaObra(o, '<span>' + t('bruto') + ': <b>' + dinero(o.bruto) + '</b> · última semana ' + dinero(ult) + '</span><span class="tenue chico">' + t('semanas_cartelera') + ': ' + o.sc + ' · ' + t('critica') + ' ' + o.crit + ' · ' + t('publico') + ' ' + o.pub + '</span>');
       }).join('') : vacio();
+    } else if (s === 'filmografia' || s === 'panel') {
+      h += '</div>' + (s === 'panel' ? IA.prensaUI.panel() : IA.prensaUI.filmografia()) + '<div>';
     } else {
       const cat = N.S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada'; }).sort(function (a, b) { return b.fe - a.fe; });
       h += cat.length ? '<div class="rejilla">' + cat.slice(0, 120).map(function (o) {
@@ -405,6 +407,7 @@ IA.pantallas = (function () {
     if (o.inf) h += '<h3>' + t('informe') + '</h3><ul>' + o.inf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
     // Lanzamiento (V20): dinero en cadena, ventanas y acciones del catálogo
     if (vis) h += IA.distribucion.bloqueDinero(o) + IA.distribucion.bloqueVentanas(o) + IA.distribucion.bloqueCatalogo(o);
+    if (vis || o.est === 0) h += IA.prensaUI.bloqueObra(o);
     if (o.est === 0 || estrenada) h += IA.creacion.bloqueIdea(o);
     if (o.est === 0) h += IA.creacion.bloqueProduccion(o);
     if (o.est === 0 && o.et !== 'terminada' && o.et !== 'cartelera') {
@@ -449,8 +452,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function mundo() {
     const s = sub('mundo', 'cartelera');
-    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['rivales', t('mun_rivales')], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa'], ['taxonomia', 'Taxonomía']], s);
-    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: mPremios, rivales: mRivales, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa, taxonomia: IA.creacion.taxonomia }[s] || mCartelera)();
+    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['festivales', 'Festivales'], ['revista', 'Revista'], ['redes', 'Redes'], ['rivales', t('mun_rivales')], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa'], ['taxonomia', 'Taxonomía']], s);
+    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: IA.prensaUI.premios, festivales: IA.prensaUI.festivales, revista: IA.prensaUI.revista, redes: IA.prensaUI.redes, rivales: mRivales, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa, taxonomia: IA.creacion.taxonomia }[s] || mCartelera)();
   }
   function mCartelera() {
     const S = N.S, sem = S.mercado.semana;
@@ -463,19 +466,6 @@ IA.pantallas = (function () {
     return h;
   }
   function mCalendario() { return IA.calendarioUI.calendario(); }
-  function mPremios() {
-    const S = N.S, ult = S.premios[S.premios.length - 1];
-    const pj = IA.premios.parteJugador();
-    let h = '<p class="nota">' + D.premios.nombre + ' (versión básica; la completa, con festivales, jurados y ceremonias, llega en la V22). Cada año, en la semana ' + D.premios.semana + ', premian las películas del año anterior de todos los estudios.</p>';
-    h += '<div class="kpis">' + kpi('Premios tuyos', pj.jugador + ' de ' + pj.total) + kpi('Tu parte', U.pct(pj.parte)) + '</div>';
-    if (!ult) return h + vacio('Todavía no hay ceremonias.');
-    h += '<h3>' + D.premios.nombre + ' ' + (ult.anio + 1) + ' · películas de ' + ult.anio + '</h3>';
-    ult.categorias.forEach(function (c) {
-      h += '<div class="tarjeta"><b>' + esc(c.nombre) + '</b><p class="' + (c.ganador.est === 0 ? 'oro' : '') + '" style="margin:4px 0">«' + esc(c.ganador.titulo) + '»' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + ' · ' + esc(nombreEstudio(c.ganador.est)) + '</p>' +
-        '<span class="tenue chico">Nominados: ' + c.nominados.slice(1).map(function (n) { return '«' + esc(n.titulo) + '»' + (n.quien ? ' (' + esc(n.quien) + ')' : ''); }).join(', ') + '</span></div>';
-    });
-    return h;
-  }
   function mRivales() {
     const S = N.S, m = S.mercado, ult = m.hist[m.hist.length - 1];
     let h = '<p class="nota">Estudios rivales con obras de verdad en la misma cartelera. Estrategias, compras y quiebras llegan en la V26.</p><div class="desliza"><table class="tabla"><tr><th>Estudio</th><th class="n">Cuota ' + N.anio() + '</th><th class="n">Cuota ' + (ult ? ult.anio : '') + '</th><th class="n">En marcha</th><th class="n">Fama</th></tr>';
@@ -793,6 +783,7 @@ IA.pantallas = (function () {
     if (N.S.quiebra) { detenerAuto(); modalQuiebra(); IA.arte.sonido('fracaso'); return; }
     if (r && r.motivo === 'premios' && N.S.premios.length) mostrarPremios();
     else if (J.decisionesPendientes().length) IA.creacion.siguienteDecision(); // dilemas y pruebas de público (V19)
+    else if (N.S.proyeccion && IA.prensaUI.proyeccion()) { /* reseñas (V22) */ }
     else if (IA.calendarioUI.mostrarPendientes()) { /* vida, heredero o recordatorio (V21) */ }
     else if (mostrarResumen && r && r.semanas > 1) {
       U.modal('<h2>' + t('resumen_titulo', { n: r.semanas }) + '</h2><div class="kpis">' + kpi(t('ingresos'), dinero(r.ingresos), 'bien') + kpi(t('gastos'), dinero(r.gastos), 'mal') + kpi('Cambio de caja', dinero(r.caja), r.caja >= 0 ? 'bien' : 'mal') + kpi(t('caja'), dinero(est0().caja)) + '</div>' +
@@ -803,6 +794,7 @@ IA.pantallas = (function () {
   function mostrarPremios() {
     const res = N.S.premios[N.S.premios.length - 1];
     if (!res) return;
+    return IA.prensaUI.ceremonia(res);
     const tuyos = res.categorias.filter(function (c) { return c.ganador.est === 0; }).length;
     if (tuyos) IA.arte.sonido('premio');
     U.modal('<h2>' + t('premios_titulo', { nombre: D.premios.nombre, anio: res.anio + 1 }) + '</h2>' + res.categorias.map(function (c) {

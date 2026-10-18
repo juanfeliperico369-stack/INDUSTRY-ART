@@ -340,7 +340,16 @@ IA.datos = (function () {
       { id: 'guion', nombre: 'Mejor guion' },
       { id: 'actriz', nombre: 'Mejor actriz' },
       { id: 'actor', nombre: 'Mejor actor' },
+      // V22: más categorías por cargo (las 5 primeras son las principales para la meta de balance)
+      { id: 'animada', nombre: 'Mejor obra animada', desde: 1937 },
+      { id: 'fotografia', nombre: 'Mejor fotografía', rol: 'fotografia' },
+      { id: 'musica', nombre: 'Mejor música', rol: 'musica', desde: 1934 },
+      { id: 'edicion', nombre: 'Mejor edición', rol: 'edicion', desde: 1934 },
+      { id: 'arte', nombre: 'Mejor diseño de arte', rol: 'arte' },
+      { id: 'vestuario', nombre: 'Mejor vestuario', rol: 'vestuario', desde: 1948 },
+      { id: 'efectos', nombre: 'Mejores efectos', rol: 'efectos', desde: 1939 },
     ],
+    principales: ['pelicula', 'direccion', 'guion', 'actriz', 'actor'],
   };
 
   // ---------- Cronología real 1850-2026 y eras de ficción hasta 2150 (pestaña Datos del mundo) ----------

@@ -212,7 +212,7 @@ IA.ventanas = (function () {
     const premios = 1 + 0.15 * (o.aw || []).length;
     const rem = o.rem ? 1.4 : 1;
     const bov = 1 + Math.min(1.5, (o.bovA || 0) * 0.12);
-    const veces = Math.pow(0.5, o.re || 0);
+    const veces = Math.pow(0.5, o.re || 0) * IA.critica.factorEtiquetas(o); // etiquetas (V22)
     return Math.round(orig * 0.05 * calidad * nostalgia * premios * rem * bov * veces * [0.6, 1, 1.4][nivel] * 0.6);
   }
   function costoReestreno(nivel) { return Math.round(E.marketingTipico(N.anio()) * [0.4, 0.8, 1.5][nivel]); }

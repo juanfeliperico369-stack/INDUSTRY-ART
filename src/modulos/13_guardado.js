@@ -70,6 +70,9 @@ IA.guardado = (function () {
     if (a) { if (!a.tf) a.tf = 'escuela'; if (!a.arq) a.arq = 'visionario'; if (!a.modo) a.modo = 'dueno'; if (a.salud === undefined) a.salud = 85; }
   };
 
+  // V21 → V22: premios, festivales, crítica y prensa (todo empieza vacío)
+  MIGRACIONES[22] = function (S) { ['galas', 'palmares', 'revista', 'cartas', 'hitos'].forEach(function (k) { if (!S[k]) S[k] = []; }); if (!S.fest) S.fest = {}; };
+
   // ---------- Suma de verificación (FNV-1a de 32 bits) ----------
   function suma(texto) {
     let h = 2166136261;
