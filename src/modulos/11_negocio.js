@@ -10,11 +10,11 @@ ART.negocio = (function () {
   const NOMBRES = {
     taquilla: 'Taquilla (parte del estudio)', video: 'Video doméstico', tv: 'Televisión', streaming: 'Streaming', merchandising: 'Juguetes y coleccionables',
     reestrenos: 'Reestrenos', carrera: 'Tus encargos como talento', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
-    personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio', musica: 'Música', juegos: 'Videojuegos', teatro: 'Teatro', libros: 'Libros',
+    personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio', fondos: 'Fondos de cine', familia: 'Retiros de la familia', musica: 'Música', juegos: 'Videojuegos', teatro: 'Teatro', libros: 'Libros',
   };
   // Movimientos de capital. Entran y salen de la caja (flujo de caja), pero no son ingresos ni gastos del año:
   // no cambian la utilidad ni el impuesto (antes el capital de los préstamos se descontaba como gasto).
-  const CAPITAL = { prestamo: 1, amortizacion: 1, aportes: 1, recompra: 1, socio: 1, acciones: 1, aporteFilial: 1 };
+  const CAPITAL = { prestamo: 1, amortizacion: 1, aportes: 1, recompra: 1, socio: 1, acciones: 1, aporteFilial: 1, familia: 1 };
   Object.assign(NOMBRES, { alquilerTeatros: 'Alquiler de tus teatros', ventaTeatros: 'Venta de teatros', prestamo: 'Préstamos recibidos', amortizacion: 'Pago de capital de deudas', aportes: 'Aportes del socio',
     recompra: 'Recompra de la parte del socio', acciones: 'Compra y venta de acciones (capital)', aporteFilial: 'Aportes a filiales', deuda: 'Intereses de deudas' });
   function esCapital(cat) { return !!CAPITAL[cat]; }

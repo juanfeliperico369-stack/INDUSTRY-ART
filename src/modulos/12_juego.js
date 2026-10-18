@@ -182,6 +182,15 @@ ART.juego = (function () {
     if (S.estudios[0].caja < costo) return b.derechos ? 'No alcanza la caja para los contratos y los derechos.' : 'No alcanza la caja para los contratos.';
     return '';
   }
+  // Fondos e incentivos de cine: un estudio chico recibe una parte del costo de cada obra, como con los fondos nacionales
+  // que nacieron en Francia en 1946 y los incentivos fiscales de hoy. Es para independientes: se pierde con más del
+  // 1,5 % del mercado.
+  function fondoCine(b) {
+    const S = N.S, a = N.anio(), h = S.fin.hist[S.fin.hist.length - 1];
+    if (a < 1946 || (h && h.cuota >= 0.015)) return 0;
+    const pct = a < 1990 ? 0.08 : 0.12;
+    return Math.round(Math.min((O.costoTalento(b) + (b.pp || 0)) * pct, ART.economia.presupuestoTipico(a) * 0.15));
+  }
   function iniciarObra(b) {
     const err = puedeIniciar(b);
     if (err) return { error: err };
@@ -191,6 +200,8 @@ ART.juego = (function () {
     // Un guion propio se usa una sola vez
     if (b.guionId) N.S.guionesPropios = (N.S.guionesPropios || []).filter(function (g) { return g.id !== b.guionId; });
     const o = PR.iniciar(b, NG.contextoDe(0));
+    const fondo = fondoCine(b);
+    if (fondo) { NG.cobrarEn(0, 'fondos', fondo); noticia({ tipo: 'negocio', texto: 'El fondo de cine de ' + (D.pais(N.S.estudios[0].pais) || { nombre: 'tu país' }).nombre + ' aporta {$} a «' + o.tit + '».', monto: fondo }); }
     if (ART.imperio.moral()) O.idsEquipo(o).forEach(function (id) { const ta = T.porId(id); if (ta) T.cambiarMoral(ta, ART.imperio.moral()); }); // cafetería
     ART.ideas.registrarPremisas(o, N.anio());
     // Arquetipo carismático: el equipo llega con más moral
@@ -469,7 +480,7 @@ ART.juego = (function () {
   }
 
   return {
-    ANIO_MIN: ANIO_MIN, ANIO_MAX: ANIO_MAX, aspectoValido: aspectoValido, CAPITALES: CAPITALES, DIFICULTADES: DIFICULTADES,
+    fondoCine: fondoCine, ANIO_MIN: ANIO_MIN, ANIO_MAX: ANIO_MAX, aspectoValido: aspectoValido, CAPITALES: CAPITALES, DIFICULTADES: DIFICULTADES,
     capitalRecomendado: capitalRecomendado, nuevaPartida: nuevaPartida, conectar: conectar, noticia: noticia,
     puedeIniciar: puedeIniciar, iniciarObra: iniciarObra, programarEstreno: programarEstreno, comprarGuion: comprarGuion,
     firmarExclusivo: firmarExclusivo, comprarExclusividad: comprarExclusividad, cancelarExclusivo: cancelarExclusivo, estudiar: estudiar,

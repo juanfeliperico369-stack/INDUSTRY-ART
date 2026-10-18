@@ -37,7 +37,7 @@ ART.rivales = (function () {
   // ---------- Estudios que nacen solos ----------
   // El mundo quiere más estudios a medida que crece el mercado. La mitad los funda una estrella o un director famoso
   // con su apellido en la puerta (y se lleva su talento en exclusiva); el resto nace con un nombre de su región.
-  const META = [[1895, 7], [1920, 10], [1950, 12], [1980, 14], [2010, 16], [2100, 18], [2300, 20]];
+  const META = [[1895, 7], [1920, 9], [1950, 11], [1980, 12], [2010, 14], [2100, 15], [2300, 17]];
   const CON_APELLIDO = { lat: ['Producciones {a}', 'Estudios {a}', 'Cine {a}'], nam: ['{a} Pictures', '{a} Brothers', '{a} Films'], oce: ['{a} Pictures', '{a} Films'],
     eur: ['Films {a}', '{a} Film', 'Studio {a}'], asi: ['{a} Pictures', '{a} Studios', '{a} Entertainment'], afr: ['{a} Films', '{a} Studios'] };
   const RAICES = { lat: ['Cóndor', 'Alba', 'Faro', 'Volcán', 'Ceiba', 'Quetzal', 'Mar del Sur', 'Colibrí', 'Cielo Abierto', 'Andes'],
@@ -239,7 +239,7 @@ ART.rivales = (function () {
     EMERGENTES.forEach(function (x) { if (x.anio === anio && !S.estudios.some(function (e) { return e.nombre === x.nombre; })) agregarEstudio(x, true); });
     // Nacen estudios cuando faltan para el tamaño del mercado (y a veces, aunque no falten); nunca quedan menos de seis
     const n = activos().length;
-    if (n < 6 || (anio >= D.CINE_DESDE && N.probabilidad(n < Math.round(N.interp(META, anio)) ? 0.35 : 0.04))) nacerEstudio();
+    if (n < 6 || (anio >= D.CINE_DESDE && N.probabilidad(n < Math.round(N.interp(META, anio)) ? 0.25 : 0.03))) nacerEstudio();
   }
   function quebrar(est) {
     const S = N.S;

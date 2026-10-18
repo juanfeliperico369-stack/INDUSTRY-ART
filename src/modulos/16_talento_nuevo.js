@@ -55,7 +55,7 @@ ART.talentoNuevo = (function () {
         campo('Rasgo', '<select data-c="tnCampo" data-k="rasgo">' + ops([['', 'Sin rasgo']].concat(Object.keys(D.rasgos).sort().map(function (r) { return [r, r]; })), f.rasgo) + '</select>') +
         campo('Brilla en', '<select data-c="tnCampo" data-k="fuerte"' + (f.editar ? ' disabled' : '') + '>' + ops(fams, f.fuerte) + '</select>') +
         campo('Le cuesta', '<select data-c="tnCampo" data-k="debil"' + (f.editar ? ' disabled' : '') + '>' + ops(fams, f.debil) + '</select>') + '</div>';
-      h += campo('Potencial: <b id="tnPot">' + f.pot + '</b> de ' + tope, '<input type="range" min="30" max="' + tope + '" step="1" value="' + f.pot + '" data-i="tnPot" data-c="tnCampo" data-k="pot">', 'rango');
+      h += campo('Potencial: <b id="tnPot">' + f.pot + '</b> / ' + tope, '<input type="range" min="30" max="' + tope + '" step="1" value="' + f.pot + '" data-i="tnPot" data-c="tnCampo" data-k="pot">', 'rango');
       const r = D.rasgos[f.rasgo];
       if (r) h += '<p class="nota">' + esc(f.rasgo) + ': calidad ' + (r[0] > 0 ? '+' : '') + r[0] + ', sobrecosto ' + (r[1] > 0 ? '+' : '') + Math.round(r[1] * 100) + ' %, tarifa ×' + U.decimal(r[2], 2) + '.</p>';
     }

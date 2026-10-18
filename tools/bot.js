@@ -19,7 +19,7 @@ const HASTA = +arg('hasta', 2150);
 const SEMILLAS = arg('semillas', 'bot,b2').split(',');
 const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_Definitiva.html'));
 const ESTRATEGIAS = ['prudente', 'normal', 'agresiva'];
-const DESDE = [1900, 2000];
+const DESDE = [1700, 1900, 2000];
 
 async function partida(navegador, estrategia, desde, semilla) {
   const pagina = await navegador.newPage();

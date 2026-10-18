@@ -1,17 +1,18 @@
 # Código fuente de INDUSTRY ART
 
-El juego se entrega como **un solo archivo HTML** (`INDUSTRY_ART_vXX.html`) que funciona sin internet.
+El juego se entrega como **un solo archivo HTML** (`INDUSTRY_ART_Definitiva.html`) que funciona sin internet.
 Aquí vive el mismo código separado por módulos para leerlo y continuarlo por partes.
 
-- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_v21.html`.
-- `python3 tools/desarmar.py INDUSTRY_ART_v21.html` vuelve a separar un HTML armado en `src/`.
+- `python3 tools/armar.py` une `src/` en `INDUSTRY_ART_Definitiva.html`.
+- `python3 tools/desarmar.py INDUSTRY_ART_Definitiva.html` vuelve a separar un HTML armado en `src/`.
+- `python3 tools/ingles.py` comprime `tools/ingles/diccionario.json` en `modulos/01_ingles.js` (antes de armar).
 
 ## Estructura
 
 | Archivo | Qué es |
 |---|---|
 | `plantilla.html` | Esqueleto del HTML con las marcas `/*@ESTILOS@*/` y `/*@MODULOS@*/` |
-| `estilos.css` | Estilos y temas (variables CSS) |
+| `estilos.css` | Estilos, temas por época y color por sección (variables CSS) |
 | `recursos/titulos.woff2` | Tipografía de títulos (Bebas Neue, licencia OFL), se incrusta en base64 |
 | `modulos/NN_nombre.js` | Un módulo por archivo; el número fija el orden de armado |
 
@@ -30,29 +31,35 @@ ART.nombre = (function () {
 })();
 ```
 
-- `ART` lo declara `00_nucleo.js` (`var IA = {};`); el diccionario de textos es `01_textos.js`.
+- `ART` lo declara `00_nucleo.js` (`var ART = {};`, con la versión y la versión del guardado); el diccionario de
+  textos es `01_textos.js` y el inglés comprimido, `01_ingles.js`.
 - **Sin `Math.random()`** en la simulación: todo azar sale de `ART.n.azar` (generador con semilla) para que la misma
   semilla con las mismas decisiones dé la misma partida. El arte usa su propio hash determinista.
 - La partida es **un solo objeto de datos** (`ART.n.S`) sin funciones adentro: se guarda, comprime y migra fácil.
-- Los textos visibles salen del diccionario `ART.textos` (`ART.t('clave')`).
-- Los datos (listas, países, épocas) van en `02_datos.js` y la taxonomía completa de la fábrica de ideas (V17) en
-  `02_taxonomia.js`, separados de la lógica. Las reglas de la idea (clasificación, encaje, sinopsis, personajes,
-  dominio público, guiones, IA) están en `06_ideas.js`, y su pantalla en `16_creacion.js`.
-- Los talentos (V18 · Talentos 2.0: capacidades, afinidades, energía y moral, negociación, salario más porcentaje,
-  exclusivos, academia, promesas, relaciones y química, ventajas, ciclo de vida y biografía) viven en
-  `05_talentos.js`; su pantalla (buscador avanzado, ficha, contratar, exclusivos, academia) en `16_agencia.js`.
-  El elenco de cada obra se negocia en `06_obras.js` (`equipoNegociado`).
-- Cómo se hace cada película (V19 · Cine a fondo: departamentos con nota, reparto del presupuesto, método,
-  terreno, país, sets reutilizables, estilos de producción, estudios externos, incidentes, dilemas, prueba de público
-  y línea de producción) vive en `07_rodaje.js`; `07_produccion.js` lo usa semana a semana.
-- El lanzamiento (V20): el plan de estreno de cada obra (modo por región, doblaje, mezcla de canales, promociones,
-  cadenas de cines con contrato y cines propios) vive en `08_estreno.js`; las ventanas después de los cines (video
-  doméstico con sus formatos y certificaciones, TV, streaming, estrenos directos, reestrenos, remasterizaciones y la
-  bóveda) en `08_ventanas.js`; las festividades, estaciones y tendencias por región en `03_mundo.js`. Su pantalla
-  (plan de lanzamiento, dinero en cadena, ventanas, catálogo, distribución, calendario) está en `16_distribucion.js`.
-- Los módulos de simulación (núcleo, mundo, economía, talentos, obras, producción, lanzamiento, rivales, premios,
-  negocio) **no tocan el DOM**; solo la interfaz, el arte y el guardado lo hacen.
-- V21 (Plan Maestro v2): el calendario real vive en `03_calendario.js` (ART.cal) y su pantalla en `16_calendario_ui.js`,
-  junto con la sede, el avatar y el menú de pausa; la sede y el personal de oficina en `11_sede.js`; el avatar (modo
-  carrera, vida ligera y heredero) en `12_carrera.js`. Desde la V21 se trabaja en modo rápido (ver
-  `docs/INDUSTRY_ART_Especificacion_v2.md`).
+  Cada cambio de forma lleva su migración en `13_guardado.js` (`MIGRACIONES[n]`).
+- Los módulos de simulación **no tocan el DOM**; solo la interfaz (`14_*`, `15_*`, `16_*`), el arte y el guardado lo hacen.
+- Los textos de la interfaz se escriben en español; el inglés sale del diccionario (frases enteras o plantillas con
+  `{o}`, `{t}`, `{p}`, `{f}`, `{n}`). Lo que no se debe traducir lleva `data-fijo`.
+
+## Mapa de módulos
+
+| Módulos | Qué hacen |
+|---|---|
+| `00_nucleo` | Azar con semilla, fechas, eventos internos, utilidades (`cuenta`, `lista`, `esc`) |
+| `02_datos`, `02_taxonomia`, `02_titulos` | Países, oficios, épocas; la fábrica de ideas; títulos con concordancia en español e inglés |
+| `03_calendario`, `03_mundo`, `03_historia` | Calendario real, población y mercados por región, hitos, crisis y épocas |
+| `03_hitos_arte`, `03_curiosidades` | Obras y personas que marcaron cada arte; lo que todos saben y lo que pocos saben |
+| `04_economia` | Taquilla, conocimiento y deseo del público, tarifas de talentos, inflación |
+| `05_talentos` | Capacidades, negociación, exclusivos, academia, relaciones, familias, revelaciones, retiro y biografía |
+| `06_ideas`, `06_obras` | Reglas de la idea (clasificación, sinopsis, personajes, dominio público) y cada obra con su equipo |
+| `07_rodaje`, `07_produccion` | Cómo se filma: departamentos, método, sets, dilemas, prueba de público |
+| `08_estreno`, `08_lanzamiento`, `08_ventanas` | Plan de estreno por región, cadenas de cines, video, TV, streaming, reestrenos |
+| `09_rivales` | Estudios rivales: estrategias, estudios que nacen (algunos fundados por estrellas), fusiones y quiebras |
+| `10_critica`, `10_premios`, `10_prensa` | Crítica, premios y festivales, prensa y promesas |
+| `11_*` | Banco y socio, franquicias, imperio, música, teatro, libros y videojuegos, negocio, sede, streaming, TV |
+| `12_*` | Arte de pósters y letreros, carrera del avatar, eventos con decisiones, el bucle del juego, metas y editor |
+| `13_guardado` | Guardado comprimido, ranuras, exportar e importar, migraciones |
+| `14_*` | Documento de la idea (Word, web, Markdown, texto), idioma, interfaz, publicación, puntos «i» |
+| `15_pantallas`, `16_*` | Pantallas: portada, estudio, crear obra, agencia, calendario, distribución, imperio, medios, editores, taller |
+| `17_pruebas` | El bot (3 estrategias, modo austero) y las métricas de balance |
+| `99_arranque` | Arranque de la página |

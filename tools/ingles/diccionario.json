@@ -6733,5 +6733,11 @@
  "La primera parrilla regular de televisión empezó en Londres en 1936, con apenas unas horas de programas al día.": "The first regular television schedule began in London in 1936, with only a few hours of programs a day.",
  "El primer disco de oro certificado de la industria se entregó en 1958, por un millón de dólares en ventas.": "The industry’s first certified gold record was awarded in 1958, for a million dollars in sales.",
  "En los años 30 la radio llevó la música a millones de casas; las disqueras temían que nadie volviera a comprar discos, y con los años la radio se volvió su mejor vitrina.": "In the 1930s radio brought music into millions of homes; record labels feared nobody would buy records again, and over the years radio became their best shop window.",
- "Hacia 2016 la escucha en línea superó a las descargas; paga a los artistas una fracción de centavo por reproducción.": "Around 2016 online streaming overtook downloads; it pays artists a fraction of a cent per stream."
+ "Hacia 2016 la escucha en línea superó a las descargas; paga a los artistas una fracción de centavo por reproducción.": "Around 2016 online streaming overtook downloads; it pays artists a fraction of a cent per stream.",
+ "Retiros de la familia": "Family withdrawals",
+ "{n} guiones en venta. Ya están escritos, con su calificación y su precio.": "{n} scripts for sale. They're already written, with their rating and price.",
+ "{n} guiones en venta · {m} tuyos sin producir. Ya están escritos, con su calificación y su precio.": "{n} scripts for sale · {m} of yours not yet produced. They're already written, with their rating and price.",
+ "Fondos de cine": "Film funds",
+ "El fondo de cine de {p} aporta {$} a «{o}».": "The {p} film fund contributes {$} to “{o}”.",
+ "Fondo de cine para independientes: recibes {$} al empezar": "Film fund for independents: you get {$} when you start"
 }

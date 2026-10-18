@@ -325,7 +325,8 @@ ART.hitosArte = (function () {
     const h = HITOS[i];
     if (!h || h[1] !== 'o') return null;
     const t = (h[3].match(/«([^»]+)»/) || [])[1] || '', p = PERSONAS[h[5]], o = h[6];
-    return { tit: o ? o[0] : t, autor: p ? p[0] : '', anio: h[0], tipo: o ? o[1] : TIPOS[h[2]] || 'Novela', gen: (o ? o[2] : GENEROS_TIPO[h[2]] || ['Drama']).slice(), sin: h[3] };
+    const en = h[4] ? (h[4].match(/[«“]([^»”]+)[»”]/) || [])[1] : '';
+    return { tit: o ? o[0] : t, titEN: en || '', autor: p ? p[0] : '', anio: h[0], tipo: o ? o[1] : TIPOS[h[2]] || 'Novela', gen: (o ? o[2] : GENEROS_TIPO[h[2]] || ['Drama']).slice(), sin: h[3], sinEN: h[4] || '' };
   }
   function obrasHasta(anio) { const out = []; HITOS.forEach(function (h, i) { if (h[1] === 'o' && h[0] <= anio && obra(i).tit) out.push({ i: i, h: h, o: obra(i) }); }); return out.reverse(); }
   // Personas reales que viven ese año y tienen de 6 a 95 años; «ya» si su gran momento ya pasó

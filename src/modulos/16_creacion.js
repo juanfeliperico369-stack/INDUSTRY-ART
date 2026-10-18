@@ -686,6 +686,8 @@ ART.creacion = (function () {
     if (fam.inclina === 'crit') r.push([0, 'Género de crítica: brilla más en premios que en taquilla']);
     const mor = I.bonoMoraleja(b);
     if (mor > 0) r.push([1, 'La moraleja encaja con el género']); else if (mor < 0) r.push([-1, 'Al público familiar le gustan los finales con lección']);
+    const fondo = ART.juego.fondoCine && !N.S.taller ? ART.juego.fondoCine(b) : 0;
+    if (fondo) r.push([1, 'Fondo de cine para independientes: recibes ' + dinero(fondo) + ' al empezar']);
     if (p.est.total > NG.cajaLibre(0)) r.push([-1, 'No alcanza la caja libre: recorta o pide un préstamo']);
     return r;
   }

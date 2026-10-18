@@ -1,48 +1,58 @@
 # INDUSTRY ART (Industria del Arte)
 
-Simulador 2D de gestión y rol de un estudio de arte, de 1850 a 2150 y más. Ideado y creado por OneZero;
-programado junto a Lumen. El plan completo está en `docs/` (Plan Maestro en Word, PDF y texto).
+Videojuego 2D de gestión y rol por texto: diriges un estudio de arte (teatro, libros, música, cine, televisión,
+videojuegos y streaming) desde 1700 hasta 2300. Ideado y creado por OneZero; programado por Faro.
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v36.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
-Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34 y la V35 se abren en la V36 (se migran solas).
+Abre **`INDUSTRY_ART_Definitiva.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin
+internet. Las partidas de todas las versiones anteriores (desde la V16) se abren y se migran solas.
+
+## Qué trae la Definitiva (4.0)
+
+- **Mundo vivo**: estudios que nacen, crecen, se fusionan y quiebran en todas las épocas (algunos fundados por
+  estrellas con su apellido en la puerta), hijos de famosos que debutan, la revelación de cada año, centenarios,
+  184 eventos con decisiones y más de 400 hitos históricos reales.
+- **Taller creativo** (desde la portada): crea historias con toda la fábrica de ideas sin jugar una partida, guárdalas
+  en tu biblioteca y descárgalas en Word, web, Markdown o texto, con logline y predicción del mercado.
+- **Editores**: material propio, con licencia u obras famosas de los hitos del arte; talentos nuevos o personajes
+  históricos; edición de lo creado.
+- **Archivo de curiosidades**: lo que todos saben y lo que pocos saben de cada arte.
+- Interfaz de videojuego con colores por sección y por época, español e inglés completos.
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v36.html` | El juego, versión 2.1 (V36, armado desde `src/`) |
-| `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
-| `bitacora_v36.md` | La bitácora corta de la V36 · 2.1, inicio por pasos, tu avatar en tus obras y clásicos con sus personajes (las de la V21 a la V35 también están) |
-| `app/` | Las apps: Android e iPhone (Capacitor 8: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
-| `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone (TestFlight), la app de PC y la versión web |
+| `INDUSTRY_ART_Definitiva.html` | El juego, versión 4.0 (armado desde `src/`) |
+| `INDUSTRY_ART_v16.html` a `INDUSTRY_ART_v36.html` | Las versiones anteriores, para comparar |
+| `bitacora_Definitiva.md` | La bitácora corta de la Definitiva (las de la V16 a la V36 también están) |
+| `app/` | Las apps: Android e iPhone (Capacitor: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
+| `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone, la app de PC y la versión web |
 | `docs/publicar_google_play.md`, `docs/publicar_app_store.md`, `docs/publicar_pc.md` | Guías para publicar en cada tienda |
 | `docs/tienda.md`, `docs/tienda/`, `docs/privacidad.html` | Fichas de las tiendas, imágenes y política de privacidad |
-| `bitacora_v20.md` | La bitácora de la V20 |
-| `bitacora_v19.md` | La bitácora de la V19 |
-| `bitacora_v18.md` | La bitácora de la V18 |
-| `bitacora_v17.md` | La bitácora de la V17 |
-| `bitacora_v16.md` | La bitácora de la V16 |
 | `src/` | El código separado por módulos (ver `src/LEEME.md`) |
-| `tools/armar.py`, `tools/desarmar.py` | Unen los módulos en el HTML y lo vuelven a separar (solo Python 3, sin npm) |
+| `tools/armar.py`, `tools/desarmar.py` | Unen los módulos en el HTML y lo vuelven a separar (solo Python 3) |
+| `tools/ingles.py`, `tools/ingles/diccionario.json` | El diccionario inglés (español → inglés) y su compresión al módulo `01_ingles.js` |
 | `tools/bot.js`, `tools/capturas.js` | Bot de pruebas y capturas automáticas en un navegador real (usan Playwright) |
-| `tools/reglas.js` | Pruebas de reglas (desde la V34 fuera del juego; el bot las carga en la página) |
-| `pruebas/` | Informes del bot, capturas en 3 tamaños y los scripts de la auditoría de la V15 y de la revisión de la V16 |
-| `docs/` | Plan Maestro v2 (Word), su Especificación y sus Datos, el análisis del plan v2 frente a lo construido (`analisis_plan_v2.md`), el plan v1, la auditoría de la V15 y la revisión de la V16 |
+| `tools/reglas.js` | Pruebas de reglas (el bot las carga en la página) |
+| `pruebas/` | Informes del bot y capturas |
+| `docs/` | Plan Maestro, especificación, datos, auditorías y revisiones |
 | `legado/` | La V15 original (sigue jugable aparte) y su código desarmado |
 
-## Para programar la siguiente versión
+## Para programar
 
 ```bash
-python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v36.html
-node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1900 y 2000 + pruebas de reglas -> pruebas/informe_bot_v36.md
+python3 tools/armar.py                       # src/ -> INDUSTRY_ART_Definitiva.html
+python3 tools/ingles.py                      # diccionario inglés -> src/modulos/01_ingles.js (antes de armar)
+node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1700, 1900 y 2000 + pruebas de reglas
 node tools/capturas.js                       # capturas en 390×844, 844×390 y 1366×768 -> pruebas/capturas/
-python3 tools/desarmar.py INDUSTRY_ART_v36.html   # HTML -> src/ (la ida y vuelta es idéntica: el HTML lleva la sangría como tabuladores y los comentarios comprimidos al final, y desarmar los devuelve)
-python3 tools/preparar_app.py                # HTML más nuevo -> app/www y app/escritorio/www (modo y AdMob de app/config.json)
+python3 tools/desarmar.py INDUSTRY_ART_Definitiva.html   # HTML -> src/ (ida y vuelta idéntica)
+python3 tools/preparar_app.py                # HTML -> app/www y app/escritorio/www
 node tools/imagenes_app.js                   # íconos, pantallas de inicio e imágenes de la tienda
 ```
 
 ## Publicar
 
-Paso a paso: [Google Play](docs/publicar_google_play.md) · [App Store](docs/publicar_app_store.md) · [PC](docs/publicar_pc.md). Precio (decidido en la V32): gratis con un anuncio al abrir, y una compra única «Versión completa» que solo quita el anuncio.
+Paso a paso: [Google Play](docs/publicar_google_play.md) · [App Store](docs/publicar_app_store.md) · [PC](docs/publicar_pc.md).
+Precio: gratis con un anuncio al abrir, y una compra única «Versión completa» que solo quita el anuncio.

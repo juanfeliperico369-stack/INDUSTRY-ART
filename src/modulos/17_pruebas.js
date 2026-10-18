@@ -300,7 +300,7 @@ ART.pruebas = (function () {
     O.resolverNegociaciones(b);
     if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6) return;
     const r = ART.juego.iniciarObra(b);
-    if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad/.test(r.error)) registroErrores.push('Bot en ' + anio + ': ' + r.error);
+    if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad|contratar/.test(r.error)) registroErrores.push('Bot en ' + anio + ': ' + r.error);
   }
   function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x) c++; }); return c; }
   // La idea del bot: a veces adapta un material, a veces produce un guion comprado, y si no, una idea propia

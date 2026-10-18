@@ -17,7 +17,8 @@ ART.materialUI = (function () {
     h += '<p class="nota info">' + (nuevo ? 'Agrega un material propio o uno con licencia (por ejemplo, un universo de personajes de otra empresa). Con licencia pagas los derechos una vez.' :
       libre ? 'Es de dominio público: puedes cambiar sus temas, personajes y sinopsis para tus adaptaciones.' : 'Cambia lo que quieras: se usa en tus próximas adaptaciones.') + '</p>';
     const obras = nuevo ? ART.hitosArte.obrasHasta(a) : [];
-    if (obras.length) h += campo('¿Es tu contenido un hito histórico?', '<select data-c="mtHito"><option value="">— no —</option>' + obras.map(function (x) { return '<option value="' + x.i + '"' + (ed.hito === x.i ? ' selected' : '') + '>' + x.h[0] + ' · ' + esc(x.o.tit) + '</option>'; }).join('') + '</select>');
+    const en = ART.idioma && ART.idioma.actual() === 'en';
+    if (obras.length) h += campo('¿Es tu contenido un hito histórico?', '<select data-c="mtHito" data-fijo="' + (en ? '1' : '') + '"><option value="">' + (en ? '— no —' : '— no —') + '</option>' + obras.map(function (x) { return '<option value="' + x.i + '"' + (ed.hito === x.i ? ' selected' : '') + '>' + x.h[0] + ' · ' + esc(en && x.o.titEN ? x.o.titEN : x.o.tit) + '</option>'; }).join('') + '</select>');
     const fijo = libre ? ' disabled' : '';
     h += campo('Título', '<input type="text" maxlength="60" data-c="mtCampo" data-k="tit" value="' + esc(d.tit) + '"' + fijo + '>');
     h += campo('Autor o dueño', '<input type="text" maxlength="50" data-c="mtCampo" data-k="autor" value="' + esc(d.autor) + '"' + fijo + '>');
@@ -69,7 +70,8 @@ ART.materialUI = (function () {
     if (v === '') { ed.hito = null; return; }
     const o = ART.hitosArte.obra(+v);
     if (!o) return;
-    Object.assign(ed.d, { tit: o.tit, autor: o.autor, anio: o.anio, tipo: M().TIPOS_MATERIAL.indexOf(o.tipo) >= 0 ? o.tipo : 'Novela', gen: o.gen.filter(function (g) { return D.familiaDe[g]; }).slice(0, 3), lic: 1, fama: 90, sin: o.sin });
+    const en = ART.idioma && ART.idioma.actual() === 'en';
+    Object.assign(ed.d, { tit: en && o.titEN ? o.titEN : o.tit, autor: o.autor, anio: o.anio, tipo: M().TIPOS_MATERIAL.indexOf(o.tipo) >= 0 ? o.tipo : 'Novela', gen: o.gen.filter(function (g) { return D.familiaDe[g]; }).slice(0, 3), lic: 1, fama: 90, sin: en && o.sinEN ? o.sinEN : o.sin });
     ed.hito = +v;
     U.aviso('Hito histórico cargado: revisa y agrega');
     redibujar();
