@@ -1,8 +1,8 @@
 /* ==== módulo: datos ==== */
 // Listas y tablas del juego, separadas de la lógica para que el Editor y las traducciones las cambien
-// sin tocar el código. Rescatado del juego original: nombres por región (NMR), países (CY), rasgos (TRA),
+// sin tocar el código: nombres por región, países, rasgos,
 // personalidades (TI), tonos (TO), prioridades (PR), clasificaciones (AG), rivales (RV), temas (DX.tm).
-IA.datos = (function () {
+ART.datos = (function () {
   'use strict';
   const sp = function (s) { return s.split(','); };
 
@@ -117,7 +117,7 @@ IA.datos = (function () {
   // Cuántos talentos de cada oficio hay en el mundo (se mantiene con nuevas generaciones)
   const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 90, interprete: 380, vestuario: 60, efectos: 60, animacion: 60 };
 
-  // ---------- Familias y géneros del cine (pestaña Taxonomía del plan) ----------
+  // ---------- Familias y géneros del cine (pestaña Taxonomía) ----------
   // edades: afinidad de cada grupo [niños 0-12, adolescentes 13-17, jóvenes 18-34, adultos 35-59, mayores 60+]
   // inclina: 'pub' (público), 'crit' (crítica) o 'eq' (equilibrio). costo: producción típica relativa.
   // semanas: temporada favorable (bono de género). pesos: reparto ideal de los departamentos.
@@ -184,7 +184,7 @@ IA.datos = (function () {
     return ENCAJE[i][j];
   }
 
-  // ---------- Clasificaciones (las de tu documento, con tus palabras) ----------
+  // ---------- Clasificaciones por edad ----------
   // acceso: parte de cada grupo de edad que puede entrar [niños, adolescentes, jóvenes, adultos, mayores]
   // NC-17 es para 17 años y se queda en el grupo de adolescentes (decidido). Las de adultos agregan "siempre sugerido".
   // Tu documento da cuánto rinde cada una: G 60 %, PG 70 %, PG-13 100 %, 16 90 %, NC-17 80 %, 18 50 %, R 40 %, X 30 %
@@ -264,7 +264,7 @@ IA.datos = (function () {
     { nombre: 'Aurora Films', pais: 'us', familia: 'DR', tam: 1.4, calidad: 4, riesgo: 0.4, logo: 3 },
     { nombre: 'Nova Pictures', pais: 'us', familia: 'AA', tam: 1.6, calidad: 0, riesgo: 0.7, logo: 11 },
     { nombre: 'Kappa Studios', pais: 'gb', familia: 'SM', tam: 1.0, calidad: 2, riesgo: 0.5, logo: 22 },
-    { nombre: 'Lumen Corp', pais: 'fr', familia: 'AV', tam: 0.7, calidad: 5, riesgo: 0.3, logo: 37 },
+    { nombre: 'Albor Corp', pais: 'fr', familia: 'AV', tam: 0.7, calidad: 5, riesgo: 0.3, logo: 37 },
     { nombre: 'Tigre Media', pais: 'mx', familia: 'HM', tam: 0.8, calidad: -1, riesgo: 0.5, logo: 45 },
     { nombre: 'Órbita Games', pais: 'kr', familia: 'IM', tam: 0.9, calidad: 1, riesgo: 0.8, logo: 58 },
     { nombre: 'Sol Naciente', pais: 'jp', familia: 'FJ', tam: 1.0, calidad: 2, riesgo: 0.4, logo: 66 },

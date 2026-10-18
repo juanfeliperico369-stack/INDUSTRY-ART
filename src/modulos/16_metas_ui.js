@@ -2,9 +2,9 @@
 // Opciones de modo en la partida nueva (modo, reto, tutorial, personalizado y dificultades desbloqueables),
 // tarjetas del Estudio (tutorial, consejos, década, misiones y reto), Mundo › Metas (logros, campaña, misiones,
 // reto y resumen), Mundo › Editor (Sandbox y paquetes), créditos finales y música de fondo opcional.
-IA.metasUI = (function () {
+ART.metasUI = (function () {
   'use strict';
-  const N = IA.n, U = IA.ui, M = IA.metas, esc = N.esc;
+  const N = ART.n, U = ART.ui, M = ART.metas, esc = N.esc;
   const dinero = U.dinero, ac = U.accion;
   const st = { ed: 'talento' };
   function btn(txt, a, v, cl, dis) { return '<button class="btn ' + (cl || '') + '" data-a="' + a + '" data-v="' + esc(v === undefined ? '' : v) + '"' + (dis ? ' disabled title="' + esc(dis) + '"' : '') + '>' + esc(txt) + '</button>'; }
@@ -26,11 +26,11 @@ IA.metasUI = (function () {
         '<label class="campo"><span>Fuerza de los rivales ' + (p.rivales > 0 ? '+' : '') + p.rivales + '</span><input type="range" min="-6" max="9" step="1" value="' + p.rivales + '" data-c="mtPerso" data-k="rivales"></label>' +
         '<label class="campo"><span>Eventos ×' + p.eventos + '</span><input type="range" min="0" max="3" step="0.5" value="' + p.eventos + '" data-c="mtPerso" data-k="eventos"></label></div>';
     }
-    const d = IA.juego.DIFICULTADES.filter(function (x) { return x.id === np.dificultad; })[0];
-    h += '<p class="nota">' + esc(M.HUMOR[np.dificultad] || '') + '</p>' + IA.juego.DIFICULTADES.filter(function (x) { return !dificultadDisponible(x); }).map(function (x) { return '<p class="tenue chico">🔒 ' + esc(x.nombre) + ': ' + esc(x.bloqueo) + '.</p>'; }).join('');
+    const d = ART.juego.DIFICULTADES.filter(function (x) { return x.id === np.dificultad; })[0];
+    h += '<p class="nota">' + esc(M.HUMOR[np.dificultad] || '') + '</p>' + ART.juego.DIFICULTADES.filter(function (x) { return !dificultadDisponible(x); }).map(function (x) { return '<p class="tenue chico">🔒 ' + esc(x.nombre) + ': ' + esc(x.bloqueo) + '.</p>'; }).join('');
     return d ? h : h;
   }
-  function dificultades() { return IA.juego.DIFICULTADES.filter(dificultadDisponible); }
+  function dificultades() { return ART.juego.DIFICULTADES.filter(dificultadDisponible); }
   // ---------- Tarjetas del Estudio ----------
   function tarjetas() {
     if (!N.S) return '';
@@ -93,9 +93,9 @@ IA.metasUI = (function () {
       lista = filtra(S.talentos.filter(function (t) { return !t.mu && !t.ret; }).sort(function (a, b) { return b.fama - a.fama; }), function (t) { return t.nom; });
       h = lista.slice(0, n).map(function (t) {
         return '<div class="tarjeta"><div class="fila" style="align-items:flex-start"><canvas class="retrato" data-retrato="' + t.id + '"></canvas><div class="col crece">' + campo('talento', t.id, 'nom', t.nom, 'Nombre') +
-          '<span class="tenue chico">' + esc(IA.datos.oficio(t.of).nombre) + ' · ' + (N.anio() - t.nac) + ' años</span></div></div><div class="rejilla-ed">' +
+          '<span class="tenue chico">' + esc(ART.datos.oficio(t.of).nombre) + ' · ' + (N.anio() - t.nac) + ' años</span></div></div><div class="rejilla-ed">' +
           campo('talento', t.id, 'hab', t.hab, 'Habilidad (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'pot', t.pot, 'Potencial (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'fama', Math.round(t.fama * 100), 'Fama (%)', { num: 1, min: 0, max: 100, por: 100 }) + '</div></div>';
-      }).join('') + '<div class="tarjeta"><b>Crear talento</b><div class="rejilla-ed"><label class="campo" style="margin:0"><span>Nombre</span><input id="edTNom" maxlength="40"></label><label class="campo" style="margin:0"><span>Oficio</span><select id="edTOf">' + IA.datos.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label></div>' + btn('Crear', 'edCrearT', '', 'primario') + '</div>';
+      }).join('') + '<div class="tarjeta"><b>Crear talento</b><div class="rejilla-ed"><label class="campo" style="margin:0"><span>Nombre</span><input id="edTNom" maxlength="40"></label><label class="campo" style="margin:0"><span>Oficio</span><select id="edTOf">' + ART.datos.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label></div>' + btn('Crear', 'edCrearT', '', 'primario') + '</div>';
     } else if (st.ed === 'estudio') {
       lista = filtra(S.estudios.slice(), function (e) { return e.nombre; });
       h = lista.slice(0, n).map(function (e) {
@@ -111,12 +111,12 @@ IA.metasUI = (function () {
           campo('obra', o.id, 'crit', o.crit, 'Crítica (1–100)', { num: 1, min: 1, max: 100 }) + campo('obra', o.id, 'pub', o.pub, 'Público (1–100)', { num: 1, min: 1, max: 100 }) + '</div></div>';
       }).join('');
     } else if (st.ed === 'franquicia') {
-      lista = filtra(IA.franquicias.lista().slice().reverse(), function (f) { return f.nom; });
+      lista = filtra(ART.franquicias.lista().slice().reverse(), function (f) { return f.nom; });
       h = lista.slice(0, n).map(function (f) {
         return '<div class="tarjeta"><div class="rejilla-ed">' + campo('franquicia', f.id, 'nom', f.nom, 'Nombre') + campo('franquicia', f.id, 'gen', f.gen, 'Género') + '</div>' +
           (f.pers.length ? '<span class="tenue chico">Personajes y popularidad</span>' + f.pers.map(function (p) { return '<div class="rejilla-ed"><label class="campo" style="margin:0"><span>Personaje</span><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"></label><label class="campo" style="margin:0"><span>Popularidad (0–100)</span><input type="number" min="0" max="100" value="' + Math.round(p.pop) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop"></label></div>'; }).join('') : '') + '</div>';
       }).join('') + '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota info">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
-        '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + IA.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
+        '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + ART.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
         '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') +
         ((S.edit && S.edit.mat || []).length ? '<p class="chico">Tus materiales: ' + S.edit.mat.map(function (m) { return '«' + esc(m.tit) + '» (' + esc(m.gen.join(', ')) + ')'; }).join(' · ') + '</p>' : '') + '</div>';
     } else if (st.ed === 'precio') {
@@ -128,7 +128,7 @@ IA.metasUI = (function () {
   function editor() {
     const S = N.S;
     if (!S.sandbox) return '<div class="tarjeta"><b>Editor Sandbox</b><p>Cambia franquicias, obras, personajes, precios, talentos y estudios, e importa o exporta paquetes. Al activarlo se apagan los logros y los retos de esta partida.</p>' + btn('Activar el Editor', 'edActivar', '', 'primario') + '</div>' + paquetesUI();
-    const cuenta = { talento: S.talentos.filter(function (t) { return !t.mu && !t.ret; }).length, estudio: S.estudios.length, obra: S.obras.filter(function (o) { return o.pub !== undefined; }).length, franquicia: IA.franquicias.lista().length };
+    const cuenta = { talento: S.talentos.filter(function (t) { return !t.mu && !t.ret; }).length, estudio: S.estudios.length, obra: S.obras.filter(function (o) { return o.pub !== undefined; }).length, franquicia: ART.franquicias.lista().length };
     const tipos = [['talento', 'Talentos'], ['estudio', 'Estudios'], ['obra', 'Obras'], ['franquicia', 'Franquicias'], ['precio', 'Precios']];
     let h = '<div class="tarjeta"><b>Editor Sandbox activo</b><span class="tenue chico"> · los logros y los retos de esta partida están apagados. Cada cambio se guarda al salir del campo.</span></div>';
     h += '<div class="chips">' + tipos.map(function (x) { return '<button class="chip' + (st.ed === x[0] ? ' on' : '') + '" data-a="edTipo" data-v="' + x[0] + '">' + x[1] + (cuenta[x[0]] !== undefined ? ' · ' + cuenta[x[0]] : '') + '</button>'; }).join('') + '</div>';
@@ -147,7 +147,7 @@ IA.metasUI = (function () {
   ac('edPers', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.personaje(p[0], p[1], p[2] === 'n' ? v : '', p[2] === 'pop' ? v : undefined); U.aviso(e || 'Guardado', e ? 'mal' : ''); });
   ac('edCrearT', function () { const e = M.crearTalento({ nom: document.getElementById('edTNom').value, of: document.getElementById('edTOf').value, edad: 30, pot: 70 }); U.aviso(e || 'Talento creado', e ? 'mal' : ''); U.refrescar(); });
   ac('edExportar', function () { document.getElementById('edPaquete').value = M.exportarPaquete(); });
-  ac('edDescargar', function () { IA.publicacion.guardarArchivo('paquete_industry_art.json', M.exportarPaquete(), 'application/json').then(function (r) { if (!r.ok) U.aviso('No se pudo descargar: copia el texto.', 'mal'); }); });
+  ac('edDescargar', function () { ART.publicacion.guardarArchivo('paquete_industry_art.json', M.exportarPaquete(), 'application/json').then(function (r) { if (!r.ok) U.aviso('No se pudo descargar: copia el texto.', 'mal'); }); });
   ac('edMaterial', function () {
     const e = M.agregarMaterial({ tit: document.getElementById('edMTit').value, gen: [document.getElementById('edMGen').value], pers: document.getElementById('edMPers').value.split(',') });
     U.aviso(e || 'Material agregado', e ? 'mal' : ''); if (!e) U.refrescar();

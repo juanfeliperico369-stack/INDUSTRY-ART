@@ -3,9 +3,9 @@
 // mueven el mercado por región; Código de Producción (censura de 1934 a 1968); fallo antimonopolio de 1948;
 // piratería por época; huelgas que detienen guiones y rodajes; las eras de ficción (2026–2150) y, después,
 // eventos generados con lo que pasó en tu partida. También los 50 inventos del cine y los del futuro.
-IA.historia = (function () {
+ART.historia = (function () {
   'use strict';
-  const N = IA.n;
+  const N = ART.n;
   // [año, mes, día, texto, efecto]
   const HITOS = [
     [1701, 7, 1, 'Empieza la Guerra de Sucesión Española'],
@@ -203,7 +203,7 @@ IA.historia = (function () {
     [2040, 'Salas de realidad mixta', 'fotografia'], [2048, 'Hologramas en escena', 'efectos'], [2060, 'Sets climáticos virtuales', 'arte'], [2075, 'Guion asistido por emociones', 'guion'],
     [2088, 'Interfaz neuronal de rodaje', 'direccion'], [2105, 'Cámaras orbitales', 'fotografia'], [2130, 'Talentos sintéticos con derechos', 'interprete'], [2145, 'Montaje por pensamiento', 'edicion'],
   ].map(function (x, i) { return { id: 'inv' + i, anio: x[0], nombre: x[1], dep: x[2] }; });
-  function tDe(y, m, d) { return IA.cal.tDeFecha(y, m - 1, d); } // los hitos usan meses 1–12; el calendario, 0–11
+  function tDe(y, m, d) { return ART.cal.tDeFecha(y, m - 1, d); } // los hitos usan meses 1–12; el calendario, 0–11
   // La partida recuerda hasta qué semana procesó los hitos (tv), no su posición en la lista: así se pueden agregar
   // hitos en cualquier fecha sin repetir avisos en partidas viejas (al cargarlas, todo lo anterior cuenta como visto)
   function st() {
@@ -257,14 +257,14 @@ IA.historia = (function () {
     else if (N.probabilidad(0.1)) avisar(nuevo('auge', N.entero(40, 90), { f: 1.06 }), 'Auge económico: el público tiene más dinero para el cine.');
     if (N.probabilidad(0.015)) avisar(nuevo('pandemia', N.entero(12, 30), { f: 0.45 }), 'Una pandemia cierra salas en todo el mundo.');
     if (N.probabilidad(0.04)) avisar(nuevo('huelga', N.entero(8, 20), { pausa: N.probabilidad(0.5) ? 'desarrollo' : 'rodaje' }), 'Huelga en la industria: se detienen proyectos.');
-    if (N.probabilidad(0.02)) { const r = N.elegir(IA.datos.regiones).id; avisar(nuevo('guerra', N.entero(52, 160), { f: 0.6, reg: [r] }), 'Un conflicto regional cierra mercados en ' + IA.datos.regiones.filter(function (x) { return x.id === r; })[0].nombre + '.'); }
+    if (N.probabilidad(0.02)) { const r = N.elegir(ART.datos.regiones).id; avisar(nuevo('guerra', N.entero(52, 160), { f: 0.6, reg: [r] }), 'Un conflicto regional cierra mercados en ' + ART.datos.regiones.filter(function (x) { return x.id === r; })[0].nombre + '.'); }
     if (anio >= 2050 && N.probabilidad(0.08)) avisar(nuevo('clima', N.entero(4, 12), { clima: 1 }), 'Tormentas extremas cierran los rodajes en locación.');
     // Después de 2150: eventos que salen de tu propia partida
     if (anio > 2150 && N.probabilidad(0.5)) {
       const mejor = S.obras.filter(function (o) { return o.est === 0 && o.pub !== undefined; }).sort(function (a, b) { return (b.pub + (b.crit || 0)) - (a.pub + (a.crit || 0)); })[0];
       const opciones = [];
       if (mejor) opciones.push('Se celebra el aniversario de «' + mejor.tit + '»: el público vuelve a pedirla.');
-      const fr = IA.franquicias.lista().filter(function (f) { return f.est === 0; })[0];
+      const fr = ART.franquicias.lista().filter(function (f) { return f.est === 0; })[0];
       if (fr) opciones.push('Nace un movimiento de fans alrededor de «' + fr.nom + '».');
       opciones.push('Una nueva generación descubre el cine de ' + (anio - 100) + '.');
       const g = nuevo('generado', N.entero(10, 26), { f: 1.04 });
@@ -280,7 +280,7 @@ IA.historia = (function () {
       const tx = tHito(i);
       if (tx <= h.tv || tx > S.t) return;
       if (tx < S.t - 1) return; // lo de antes del inicio no se anuncia
-      N.emit('noticia', { tipo: 'historia', texto: IA.cal.texto({ y: x[0], m: x[1] - 1, d: x[2] }) + ': ' + x[3] + '.', importante: true });
+      N.emit('noticia', { tipo: 'historia', texto: ART.cal.texto({ y: x[0], m: x[1] - 1, d: x[2] }) + ': ' + x[3] + '.', importante: true });
       if (x[4]) N.emit('hito', x[4]);
       // Un éxito reconocido crea una ola en su familia de géneros
       if (x[5] && S.mundo && S.mundo.tendencias) { const f = x[5].fam; S.mundo.tendencias[f] = N.redondear(N.limitar((S.mundo.tendencias[f] || 0) + x[5].v, -1, 1), 3); }
@@ -290,7 +290,7 @@ IA.historia = (function () {
   }
   function inicio() { const h = st(); h.tv = N.S.t - 1; } // lo anterior al inicio de la partida no se anuncia
   function lineaDeTiempo() {
-    return HITOS.map(function (x) { return { y: x[0], m: x[1] - 1, d: x[2], txt: x[3], fx: x[4] || '' }; }).concat(generados().map(function (g) { const f = IA.cal.inicioDeT ? IA.cal.inicioDeT(g.ini) : null; return { y: N.anio(g.ini), m: f ? f.m : 0, d: f ? f.d : 1, txt: g.txt || g.tipo, gen: 1 }; }))
+    return HITOS.map(function (x) { return { y: x[0], m: x[1] - 1, d: x[2], txt: x[3], fx: x[4] || '' }; }).concat(generados().map(function (g) { const f = ART.cal.inicioDeT ? ART.cal.inicioDeT(g.ini) : null; return { y: N.anio(g.ini), m: f ? f.m : 0, d: f ? f.d : 1, txt: g.txt || g.tipo, gen: 1 }; }))
       .sort(function (a, b) { return (a.y - b.y) || (a.m - b.m) || (a.d - b.d); });
   }
   return { HITOS: HITOS, PERIODOS: PERIODOS, INVENTOS: INVENTOS, activos: activos, factorMercado: factorMercado, censura: censura, censurar: censurar, pausa: pausa,

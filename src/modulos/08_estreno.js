@@ -4,9 +4,9 @@
 // canales de marketing (cada uno llega mejor a unas edades, con rendimientos decrecientes), las promociones
 // (alfombra roja, comida, juguetes, coleccionables, ediciones exclusivas), las cadenas de cines con contrato y
 // los cines propios. Todo es dato plano en la obra (o.plan) y en el estudio (est.cad).
-IA.estreno = (function () {
+ART.estreno = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia;
+  const N = ART.n, D = ART.datos, E = ART.economia;
 
   // ---------- Datos ----------
   const MODOS = [
@@ -55,7 +55,7 @@ IA.estreno = (function () {
   // ¿Hace falta doblar en esa región? Solo con sonido y si el idioma de la obra no es de allí
   function necesitaDoblaje(o, reg, anio) {
     if (anio < ANIO_SONORO || (o.fmt && o.fmt.sonido === 'Mudo')) return false;
-    const idi = IA.taxonomia.idioma(o.idio);
+    const idi = ART.taxonomia.idioma(o.idio);
     if (!idi || idi.universal) return false;
     return !(idi.regiones.indexOf(reg) >= 0 || idi.paises.some(function (p) { const x = D.pais(p); return x && x.region === reg; }));
   }
@@ -64,7 +64,7 @@ IA.estreno = (function () {
   function edadesObra(o) {
     const fam = D.familia(o.fam || D.familiaDe[o.gen[0]] || 'DR');
     const cl = D.clasificacion(o.clas) || D.clasificacion('PG-13');
-    const ex = IA.ideas.edadesExtra(o);
+    const ex = ART.ideas.edadesExtra(o);
     const v = [];
     for (let g = 0; g < 5; g++) v.push(fam.edades[g] * E.PROPENSION[g] * cl.acceso[g] * (ex ? ex[g] : 1));
     return v;
@@ -252,7 +252,7 @@ IA.estreno = (function () {
       const casa = da.regiones[est.reg] ? da.regiones[est.reg].publico * da.regiones[est.reg].precio : 0;
       // Tus salas cobran una parte de las entradas de las obras ajenas en tu región
       const g = (S.mercado.semana.bruto || 0) * (tot > 0 ? casa / tot : 0) * 0.012 * n * 4.33;
-      if (g > 0) IA.negocio.cobrarEn(0, 'exhibicion', g);
+      if (g > 0) ART.negocio.cobrarEn(0, 'exhibicion', g);
     }
   }
 

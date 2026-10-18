@@ -2,10 +2,10 @@
 // 80 eventos con decisiones (escándalos, quejas del elenco, propuestas de talentos y productores, fans que
 // piden secuelas, huelgas, negocio, prensa, tecnología, momentos históricos y vida del estudio) y la bitácora del
 // estudio con cada mini decisión, al estilo de una vida que se escribe sola.
-IA.eventos = (function () {
+ART.eventos = (function () {
   'use strict';
-  const N = IA.n, O = IA.obras, T = IA.talentos;
-  const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
+  const N = ART.n, O = ART.obras, T = ART.talentos;
+  const tip = function () { return ART.economia.presupuestoTipico(N.anio()); };
   // [id, requisito, desde, hasta, texto, [[opción, efectos], ...]]
   // requisito: obra (tuya en producción), estrella (talento de una obra tuya en marcha), exito (obra tuya querida),
   // franq (franquicia viva tuya), rival, '' (nada). Efectos: caja (× presupuesto típico), fama, fans (proporción),
@@ -104,12 +104,12 @@ IA.eventos = (function () {
       if (!conInt.length) return null;
       const o = N.elegir(conInt), t = T.porId(o.eq.int[0]);
       if (!t) return null;
-      const r = req === 'rival' ? N.elegir(IA.rivales.activos()) : null;
+      const r = req === 'rival' ? N.elegir(ART.rivales.activos()) : null;
       if (req === 'rival' && !r) return null;
       return { o: o, t: t, r: r };
     }
     if (req === 'exito') { const c = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && o.pub >= 62 && S.t - (o.fe || 0) < 52 * 4; }); return c.length ? { o: N.elegir(c) } : null; }
-    if (req === 'franq') { const c = IA.franquicias.lista().filter(function (f) { return f.est === 0; }); return c.length ? { f: N.elegir(c) } : null; }
+    if (req === 'franq') { const c = ART.franquicias.lista().filter(function (f) { return f.est === 0; }); return c.length ? { f: N.elegir(c) } : null; }
     return {};
   }
   function texto(e, s) {
@@ -122,7 +122,7 @@ IA.eventos = (function () {
     if (S.evento) { if (S.t - S.evento.t0 >= 6) decidir(S.evento.ops.length - 1, true); return; }
     if (S.evProx === undefined) S.evProx = S.t + N.entero(3, 8);
     if (S.t < S.evProx) return;
-    const fr = IA.metas.frecEventos();
+    const fr = ART.metas.frecEventos();
     S.evProx = S.t + (fr > 0 ? Math.round(N.entero(4, 9) / fr) : 99999);
     const a = N.anio(), ult = S.evUlt || (S.evUlt = {});
     const cand = EV.filter(function (e) { return a >= e[2] && a <= e[3] && !(ult[e[0]] > S.t - 104); });
@@ -140,7 +140,7 @@ IA.eventos = (function () {
     const out = [];
     Object.keys(ef).forEach(function (k) {
       const v = ef[k];
-      if (k === 'caja') { const m = Math.round(Math.abs(v) * tip()); if (v < 0) IA.negocio.pagar(0, 'eventos', m); else IA.negocio.cobrarEn(0, 'eventos', m); }
+      if (k === 'caja') { const m = Math.round(Math.abs(v) * tip()); if (v < 0) ART.negocio.pagar(0, 'eventos', m); else ART.negocio.cobrarEn(0, 'eventos', m); }
       else if (k === 'fama') est.fama = N.redondear(N.limitar(est.fama + (v > 0 ? v * (1 - est.fama) : v), 0.01, 1), 3);
       else if (k === 'fans') S.fans = Math.max(0, Math.round((S.fans || 0) * (1 + v)));
       else if (k === 'moral' && o) O.idsEquipo(o).forEach(function (id) { const t = T.porId(id); if (t) T.cambiarMoral(t, v); });
@@ -150,15 +150,15 @@ IA.eventos = (function () {
       else if (k === 'sem' && o && o.sr !== undefined && o.et !== 'lista' && o.et !== 'terminada') o.sr = Math.max(1, o.sr + v);
       else if (k === 'apr' && ta) ta.apr = Math.round(N.limitar((ta.apr === undefined ? 50 : ta.apr) + v, 0, 100));
       else if (k === 'idea') {
-        const idea = IA.ideas.ideaAleatoria(N.anio(), ta ? ta.hab : 65), c = Math.round(N.limitar(N.normal(66, 10), 40, 92));
+        const idea = ART.ideas.ideaAleatoria(N.anio(), ta ? ta.hab : 65), c = Math.round(N.limitar(N.normal(66, 10), 40, 92));
         S.guionesPropios = S.guionesPropios || [];
         S.guionesPropios.push({ id: N.sigId(), idea: idea, autor: ta ? ta.id : null, nomAutor: ta ? ta.nom : 'Propuesta', calif: c, lect: c, margen: 6, pags: 110, precio: 0, vence: S.t + 520 });
         out.push('Te deja una idea en tus guiones.');
       }
       else if (k === 'pedida' && (o || ev.f)) { if (o) o.pedida = 1; }
-      else if (k === 'junta') IA.banco.estado().junta = N.limitar(IA.banco.junta() + v, 0, 100);
-      else if (k === 'credito') IA.banco.estado().pagados += 10;
-      else if (k === 'socio') IA.banco.entraSocio(Math.round(IA.banco.valorEstudio() * v), v);
+      else if (k === 'junta') ART.banco.estado().junta = N.limitar(ART.banco.junta() + v, 0, 100);
+      else if (k === 'credito') ART.banco.estado().pagados += 10;
+      else if (k === 'socio') ART.banco.entraSocio(Math.round(ART.banco.valorEstudio() * v), v);
       else if (k === 'riesgo') { if (N.probabilidad(v[0])) { aplicar(v[1], ev); out.push('Salió mal.'); } else out.push('Salió bien.'); }
     });
     return out;

@@ -3,10 +3,10 @@
 // su modo y su doblaje, campaña con la mezcla de canales, promociones, expectativa frente a calidad), las ventanas
 // y el dinero en cadena en la ficha de la obra, las acciones del catálogo (reestrenar, remasterizar, bóveda),
 // las cadenas de cines y tus cines en Negocio, y el calendario de 12 meses y las tendencias por región en Mundo.
-IA.distribucion = (function () {
+ART.distribucion = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, O = IA.obras, T = IA.talentos;
-  const L = IA.lanzamiento, ES = IA.estreno, V = IA.ventanas, U = IA.ui, esc = N.esc;
+  const N = ART.n, D = ART.datos, E = ART.economia, M = ART.mundo, O = ART.obras, T = ART.talentos;
+  const L = ART.lanzamiento, ES = ART.estreno, V = ART.ventanas, U = ART.ui, esc = N.esc;
   const dinero = U.dinero, ac = U.accion;
   const est0 = function () { return N.S.estudios[0]; };
 
@@ -63,7 +63,7 @@ IA.distribucion = (function () {
       const comp = L.competenciaPrevista(tt, o.id);
       const fs = M.festividades(sem, est.reg, N.anio(tt)).map(function (f) { return f.nombre; });
       h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.t === tt ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="plSemana" data-v="' + tt + '"><span>' + esc(U.fechaEstreno(tt)) + ' <span class="tenue chico">· en ' + k + ' sem.</span>' + (fs.length ? '<br><span class="chico oro">' + esc(fs.join(', ')) + '</span>' : '') + (tt === mejor ? ' <span class="etiqueta oro">mejor</span>' : '') + '</span>' +
-        '<span class="chico" style="text-align:right">×' + U.decimal(temp, 2) + ' temporada<br>' + IA.cal.competencia(tt, o.id).nombre + ' (' + U.decimal(comp, 1) + ')</span></button>';
+        '<span class="chico" style="text-align:right">×' + U.decimal(temp, 2) + ' temporada<br>' + ART.cal.competencia(tt, o.id).nombre + ' (' + U.decimal(comp, 1) + ')</span></button>';
     }
     h += '</div>';
 
@@ -88,7 +88,7 @@ IA.distribucion = (function () {
     const fe = E.famaEstrellas(o, T.porId);
     const prueba = Object.assign({}, o, { plan: p, cm: c.total, campana: Math.round(base * D.nivelesMarketing[pg.nivM].mult * (p.via === 'cines' ? 1 : 0.3)), anio: anio });
     prueba.plan = Object.assign({}, p, { anuncio: pg.t - S.t });
-    const con = E.conocimiento(prueba, anio, est.fama, fe, IA.negocio.bonoMarketing(0));
+    const con = E.conocimiento(prueba, anio, est.fama, fe, ART.negocio.bonoMarketing(0));
     if (p.via === 'cines') {
       const cs = E.canalesDe(anio);
       const ev = ES.evaluarMix(o, p.mix, anio);
@@ -136,7 +136,7 @@ IA.distribucion = (function () {
     if (orden[0][0] - orden[4][0] < 0.15) return 'todas las edades';
     return orden.slice(0, 2).map(function (x) { return M.GRUPOS[x[1]].toLowerCase(); }).join(' y ');
   }
-  ac('programar', function (v) { const o = IA.obras.porId(+v); if (o && o.tv) { U.abrirFicha(IA.pantallas.fichaObra(+v), 'obra:' + v); return; } abrir(v); });
+  ac('programar', function (v) { const o = ART.obras.porId(+v); if (o && o.tv) { U.abrirFicha(ART.pantallas.fichaObra(+v), 'obra:' + v); return; } abrir(v); });
   ac('plVia', function (v) { pg.plan.via = v; refrescar(); });
   ac('plSemana', function (v) { pg.t = +v; refrescar(); });
   ac('plNivel', function (v) { pg.nivM = +v; refrescar(); });
@@ -174,9 +174,9 @@ IA.distribucion = (function () {
   });
   ac('plConfirmar', function () {
     const o = obra();
-    const err = IA.juego.programarEstreno(o, pg.t, pg.nivM, pg.plan);
+    const err = ART.juego.programarEstreno(o, pg.t, pg.nivM, pg.plan);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('dinero');
+    ART.arte.sonido('dinero');
     U.cerrarFicha();
     U.aviso(o.plan.via === 'cines' ? 'Estreno anunciado: ' + U.fechaCorta(pg.t) : 'Estreno directo: ' + U.fechaCorta(pg.t));
     U.refrescar();
@@ -247,9 +247,9 @@ IA.distribucion = (function () {
   }
   function trasAccion(id, err, ok) {
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('dinero');
+    ART.arte.sonido('dinero');
     U.aviso(ok);
-    U.refrescarFicha(IA.pantallas.fichaObra(+id));
+    U.refrescarFicha(ART.pantallas.fichaObra(+id));
   }
   ac('catReestreno', function (v) { const p = v.split(':'); trasAccion(p[0], V.reestrenar(+p[0], +p[1]), 'Vuelve a los cines'); });
   ac('catRemaster', function (v) { trasAccion(v, V.remasterizar(+v), 'Remasterizada'); });
@@ -279,7 +279,7 @@ IA.distribucion = (function () {
     });
     return h;
   }
-  ac('cadFirmar', function (v) { const p = v.split(':'); const e = ES.firmar(p[0], +p[1]); if (e) { U.aviso(e, 'mal'); return; } IA.arte.sonido('exito'); U.aviso('Contrato firmado'); U.refrescar(); });
+  ac('cadFirmar', function (v) { const p = v.split(':'); const e = ES.firmar(p[0], +p[1]); if (e) { U.aviso(e, 'mal'); return; } ART.arte.sonido('exito'); U.aviso('Contrato firmado'); U.refrescar(); });
   ac('cadCancelar', function (v) { const e = ES.cancelar(v); if (e) { U.aviso(e, 'mal'); return; } U.aviso('Contrato cancelado'); U.refrescar(); });
 
   // =====================================================================

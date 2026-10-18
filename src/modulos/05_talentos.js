@@ -6,15 +6,15 @@
 // +10 al mes) y moral, relaciones (amistad, rivalidad, pareja), negociación, contratos exclusivos, academia,
 // promesas que se descubren y ciclo de vida (niños actores, retiro entre 70 y 100 con regresos, muerte poco
 // probable). La tarifa sale del mercado (economia.tarifa). Los que no trabajan se actualizan una vez al año.
-IA.talentos = (function () {
+ART.talentos = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos;
+  const N = ART.n, D = ART.datos;
   const PESO_REGION = { nam: 0.28, eur: 0.25, asi: 0.2, lat: 0.14, afr: 0.08, oce: 0.05 };
   const CAPACIDADES = ['Excelencia', 'Creatividad', 'Inteligencia', 'Liderazgo', 'Paciencia'];
   const EJES = ['Acción', 'Imaginación', 'Suspenso', 'Drama', 'Humor', 'Familia', 'Arte', 'Romance']; // = D.ORDEN_FAM
   const MEDIOS = ['cine', 'tv', 'musica', 'juegos', 'teatro', 'libros'];
-  const ENERGIA_CARGO = 20, ENERGIA_MES = 10, MAX_PROYECTOS = 2; // tu documento: casi siempre en 2 proyectos a la vez
-  const MAX_ACADEMIA = 5; // hasta +5 de experiencia por estudios en cada oficio (tu documento)
+  const ENERGIA_CARGO = 20, ENERGIA_MES = 10, MAX_PROYECTOS = 2; // casi siempre en 2 proyectos a la vez
+  const MAX_ACADEMIA = 5; // hasta +5 de experiencia por estudios en cada oficio
   let indice = null; // id -> talento (se reconstruye al cargar)
   let porOficio = null; // oficio -> talentos en el mismo orden de la lista (para buscar rápido)
 
@@ -80,7 +80,7 @@ IA.talentos = (function () {
       if (t.dob === undefined) t.dob = Math.round(N.limitar(nz(45, 16), 5, 99));
       if (!t.pap) {
         const a = D.ORDEN_FAM.indexOf(D.ORDEN_FAM[t.af.indexOf(Math.max.apply(null, t.af))]);
-        const lista = IA.taxonomia ? IA.taxonomia.arquetipos.map(function (x) { return x.id; }) : ['Héroe'];
+        const lista = ART.taxonomia ? ART.taxonomia.arquetipos.map(function (x) { return x.id; }) : ['Héroe'];
         t.pap = [lista[(a * 3 + Math.floor(azar() * 5)) % lista.length], lista[Math.floor(azar() * lista.length)]].filter(function (x, i, l) { return l.indexOf(x) === i; });
       }
     }
@@ -168,7 +168,7 @@ IA.talentos = (function () {
     return energia(t) >= ENERGIA_CARGO && (t.act || 0) < MAX_PROYECTOS;
   }
   function ocupado(t) { return (t.act || 0) > 0; }
-  function tarifa(t) { return IA.economia.tarifa(t, N.anio()); }
+  function tarifa(t) { return ART.economia.tarifa(t, N.anio()); }
   // Lo que le cuesta a un estudio: el exclusivo ya cobra su salario y los becados hacen precio
   function tarifaPara(t, estId) {
     if (!t) return 0;
@@ -295,7 +295,7 @@ IA.talentos = (function () {
     if (!disponible(t, c.est || 0)) return { estado: 'rechaza', texto: (t.act || 0) >= MAX_PROYECTOS ? 'Ya está en ' + MAX_PROYECTOS + ' proyectos' : 'Sin energía (recupera 10 al mes)' };
     const e = N.anio() - t.nac;
     if (t.jugador && (c.est || 0) === 0) return e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2) ? { estado: 'rechaza', texto: 'Eres menor de edad: solo obras hasta PG-13' } : { estado: 'acepta', texto: 'Eres tú: trabajas gratis en tu propia obra' };
-    if (c.clas !== undefined && c.clas > t.cmax) return { estado: 'rechaza', texto: 'No hace obras de clasificación ' + IA.taxonomia.ORDEN_CLAS[c.clas] };
+    if (c.clas !== undefined && c.clas > t.cmax) return { estado: 'rechaza', texto: 'No hace obras de clasificación ' + ART.taxonomia.ORDEN_CLAS[c.clas] };
     if (e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2)) return { estado: 'rechaza', texto: 'Es menor de edad: solo obras hasta PG-13' };
     const m = moral(t);
     if (m < 22) return { estado: 'rechaza', texto: 'Está desmotivado' };
@@ -345,7 +345,7 @@ IA.talentos = (function () {
       const valor = t.hab + t.fama * 12 + (o.fam ? afinidad(t, o.fam) * 0.4 : 0);
       // La tarifa solo se calcula si podría entrar entre los mejores (es lo más caro de la búsqueda)
       if (top.length >= k && valor <= top[top.length - 1].v) continue;
-      const f = exclusivoDe(t) === estId ? 0 : IA.economia.tarifa(t, anio);
+      const f = exclusivoDe(t) === estId ? 0 : ART.economia.tarifa(t, anio);
       if (f > tope) continue;
       {
         top.push({ t: t, v: valor });
@@ -410,7 +410,7 @@ IA.talentos = (function () {
   // ---------- Después del estreno: fama, moral, alcance, relaciones e historial ----------
   function trasEstreno(obra, rendimiento) {
     const ids = [obra.eq.direccion, obra.eq.guion].concat(obra.eq.int || []);
-    const bruto2025 = IA.mundo.aHoy(obra.bruto || 0, obra.anio || N.anio());
+    const bruto2025 = ART.mundo.aHoy(obra.bruto || 0, obra.anio || N.anio());
     ids.forEach(function (id, k) {
       const t = porId(id);
       if (!t) return;
@@ -423,7 +423,7 @@ IA.talentos = (function () {
       cambiarMoral(t, rendimiento >= 2 ? 10 : rendimiento < 1 ? -8 : 2);
     });
     // Todo el equipo suma taquilla a su carrera
-    IA.obras.idsEquipo(obra).forEach(function (id) {
+    ART.obras.idsEquipo(obra).forEach(function (id) {
       const t = porId(id);
       if (!t) return;
       t.tq = Math.round((t.tq || 0) + bruto2025);
@@ -442,7 +442,7 @@ IA.talentos = (function () {
     }
   }
   // Ingresos de carrera (dólares de hoy) al firmar
-  function pagarA(id, monto) { const t = porId(id); if (t && monto > 0) t.gan = Math.round((t.gan || 0) + IA.mundo.aHoy(monto, N.anio())); }
+  function pagarA(id, monto) { const t = porId(id); if (t && monto > 0) t.gan = Math.round((t.gan || 0) + ART.mundo.aHoy(monto, N.anio())); }
 
   // ---------- Contratos exclusivos (el salario anual sigue a la época: sale de la tarifa) ----------
   function salarioExclusivo(t) { return Math.round(tarifa(t) * 1.8); }
@@ -472,7 +472,7 @@ IA.talentos = (function () {
       }
       const m = (t.exS || 0) / 12;
       ctx.pagar(t.ex, 'exclusivos', m);
-      t.gan = Math.round((t.gan || 0) + IA.mundo.aHoy(m, N.anio()));
+      t.gan = Math.round((t.gan || 0) + ART.mundo.aHoy(m, N.anio()));
     }
   }
   // Comprar la exclusividad que tiene un rival: se le paga lo que falta por 1,3
@@ -490,7 +490,7 @@ IA.talentos = (function () {
     if (area.indexOf('fam:') === 0) return 50 + afinidad(t, area.slice(4)) * 5;
     return t.h2 && t.h2[area] ? t.h2[area] : 20;
   }
-  function costoCurso(t, c, area) { return Math.round(IA.economia.presupuestoTipico(N.anio()) * 0.0006 * c.costo * Math.max(0.25, Math.pow(nivelEn(t, area) / 50, 2))); }
+  function costoCurso(t, c, area) { return Math.round(ART.economia.presupuestoTipico(N.anio()) * 0.0006 * c.costo * Math.max(0.25, Math.pow(nivelEn(t, area) / 50, 2))); }
   function puedeEstudiar(t, c, area) {
     if (!t || t.ret || t.mu) return 'Está retirado.';
     if (estudiando(t)) return 'Ya está estudiando.';
@@ -622,7 +622,7 @@ IA.talentos = (function () {
       const est = S.estudios[i];
       if (est.quebrado) continue;
       const tienen = S.talentos.filter(function (t) { return exclusivoDe(t) === i; }).length;
-      if (tienen >= 2 || est.caja < IA.economia.presupuestoTipico(N.anio()) * est.tam * 8 || !N.probabilidad(0.35)) continue;
+      if (tienen >= 2 || est.caja < ART.economia.presupuestoTipico(N.anio()) * est.tam * 8 || !N.probabilidad(0.35)) continue;
       const cand = S.talentos.filter(function (t) { return !t.ret && !t.mu && exclusivoDe(t) === null && t.fama >= 0.35 && t.fama - est.fama < 0.45 && t.of === 'interprete'; })
         .sort(function (a, b) { return b.fama - a.fama; }).slice(0, 5);
       if (!cand.length) continue;

@@ -4,12 +4,12 @@
 // contenido y resultados), con el póster, la curva del arco y las notas del autor. Así el juego también sirve para
 // desarrollar ideas. El .docx se arma a mano (XML de Office dentro de un ZIP sin comprimir): sin librerías ni internet.
 // El texto usa su propio azar (sale del título), así que generar el documento nunca cambia la partida.
-IA.documento = (function () {
+ART.documento = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, X = IA.taxonomia;
-  const I = function () { return IA.ideas; };
+  const N = ART.n, D = ART.datos, X = ART.taxonomia;
+  const I = function () { return ART.ideas; };
   function v(o, k, d) { return o[k] === undefined || o[k] === null ? d : o[k]; }
-  function tr(s) { return IA.idioma ? IA.idioma.texto(s) : s; } // en inglés, lo que el diccionario conozca
+  function tr(s) { return ART.idioma ? ART.idioma.texto(s) : s; } // en inglés, lo que el diccionario conozca
   function generoTxt(sx, t) { return t.split('{la}').join(sx === 'F' ? 'la' : 'lo').split('{a}').join(sx === 'F' ? 'a' : 'o'); }
   function lista(l) { return l.length > 1 ? l.slice(0, -1).join(', ') + ' y ' + l[l.length - 1] : l[0] || ''; }
   function minus(t) { return /^[A-ZÁÉÍÓÚ]{2}|^(Dios|IA)$/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1); }
@@ -125,30 +125,30 @@ IA.documento = (function () {
   }
 
   // ---------- Datos técnicos ----------
-  function nombreTalento(id) { const t = id !== undefined && id !== null ? IA.talentos.porId(id) : null; return t ? t.nom : ''; }
+  function nombreTalento(id) { const t = id !== undefined && id !== null ? ART.talentos.porId(id) : null; return t ? t.nom : ''; }
   function equipo(o) {
     const eq = o.eq || {}, filas = [];
-    IA.obras.TODOS_ROLES.forEach(function (r) { const n = nombreTalento(eq[r]); if (n) filas.push([D.oficio(r).dep, n]); });
+    ART.obras.TODOS_ROLES.forEach(function (r) { const n = nombreTalento(eq[r]); if (n) filas.push([D.oficio(r).dep, n]); });
     const ints = (eq.int || []).map(nombreTalento).filter(Boolean);
     if (ints.length) filas.push(['Reparto', ints.join(', ')]);
     return filas;
   }
   function tecnicos(o) {
-    const din = function (x) { return IA.ui ? IA.ui.dinero(x) : '$' + Math.round(x); };
+    const din = function (x) { return ART.ui ? ART.ui.dinero(x) : '$' + Math.round(x); };
     const f = [];
     if (o.med) f.push(['Medio', (X.medios.filter(function (m) { return m.id === o.med; })[0] || { nombre: o.med }).nombre]);
-    if (o.et) f.push(['Etapa', IA.obras.NOMBRE_ETAPA[o.et] || o.et]);
+    if (o.et) f.push(['Etapa', ART.obras.NOMBRE_ETAPA[o.et] || o.et]);
     if (o.pp) f.push(['Presupuesto de producción', din(o.pp)]);
     if (o.cf) f.push(['Contratos de talento', din(o.cf)]);
     if (o.cm) f.push(['Marketing', din(o.cm)]);
-    if (o.met && IA.rodaje.metodo) { const m = IA.rodaje.metodo(o.met); if (m) f.push(['Cómo se filma', m.nombre]); }
-    if (o.ter && IA.rodaje.terreno) { const t = IA.rodaje.terreno(o.ter); if (t) f.push(['Terreno de la locación', t.nombre]); }
-    if (o.pst && IA.rodaje.estilo) { const e = IA.rodaje.estilo(o.pst); if (e) f.push(['Estilo de producción', e.nombre]); }
+    if (o.met && ART.rodaje.metodo) { const m = ART.rodaje.metodo(o.met); if (m) f.push(['Cómo se filma', m.nombre]); }
+    if (o.ter && ART.rodaje.terreno) { const t = ART.rodaje.terreno(o.ter); if (t) f.push(['Terreno de la locación', t.nombre]); }
+    if (o.pst && ART.rodaje.estilo) { const e = ART.rodaje.estilo(o.pst); if (e) f.push(['Estilo de producción', e.nombre]); }
     if (o.fmt) f.push(['Formato', typeof o.fmt === 'object' ? [o.fmt.color, o.fmt.visual, o.fmt.sonido].filter(Boolean).join(' · ') : String(o.fmt)]);
     if (o.extras !== undefined) f.push(['Extras y figurantes', (o.extras || 0) + ' extras · ' + (o.terceros || 0) + ' terceros']);
     if (o.notas) f.push(['Notas por departamento', Object.keys(o.notas).map(function (k) { return (D.oficio(k) ? D.oficio(k).dep : k) + ' ' + o.notas[k]; }).join(' · ')]);
-    if (o.fe && (o.et === 'cartelera' || o.et === 'terminada' || o.prog)) f.push(['Estreno', IA.ui ? IA.ui.fecha(o.fe) : String(o.fe)]);
-    if (o.bruto) f.push(['Taquilla', din(o.bruto) + ' · multiplicador ×' + IA.obras.multiplicador(o).toFixed(2)]);
+    if (o.fe && (o.et === 'cartelera' || o.et === 'terminada' || o.prog)) f.push(['Estreno', ART.ui ? ART.ui.fecha(o.fe) : String(o.fe)]);
+    if (o.bruto) f.push(['Taquilla', din(o.bruto) + ' · multiplicador ×' + ART.obras.multiplicador(o).toFixed(2)]);
     if (o.crit !== undefined && (o.et === 'cartelera' || o.et === 'terminada')) f.push(['Crítica y público', o.crit + ' / ' + o.pub]);
     if ((o.aw || []).length) f.push(['Premios', o.aw.length + '']);
     if (o.cert) f.push(['Certificación', o.cert]);
@@ -183,8 +183,8 @@ IA.documento = (function () {
   function lienzo(w, h) { if (typeof document === 'undefined') return null; const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
   function imagenPoster(o) {
     const cv = lienzo(600, 900);
-    if (!cv || !IA.arte || !N.S || !o.gen) return null;
-    try { const c = cv.getContext('2d'); c.scale(1.5, 1.5); IA.arte.poster(c, 400, 600, IA.obras.paraPoster(Object.assign({}, o, { id: o.id || N.hash(o.tit || 'idea') }))); return { datos: pngDe(cv, true), ext: 'jpeg' }; } catch (e) { return null; }
+    if (!cv || !ART.arte || !N.S || !o.gen) return null;
+    try { const c = cv.getContext('2d'); c.scale(1.5, 1.5); ART.arte.poster(c, 400, 600, ART.obras.paraPoster(Object.assign({}, o, { id: o.id || N.hash(o.tit || 'idea') }))); return { datos: pngDe(cv, true), ext: 'jpeg' }; } catch (e) { return null; }
   }
   function imagenCurva(tm) {
     const cv = lienzo(1200, 420);
@@ -288,7 +288,7 @@ IA.documento = (function () {
     const tc = tecnicos(o);
     if (tc.length) b += p('Datos técnicos', 'Heading1') + tabla(tc);
     if (o.diario) { b += p('Notas del autor', 'Heading1'); String(o.diario).split(/\n+/).forEach(function (x) { b += p(x); }); }
-    b += p('Ideado y creado por OneZero · Programado junto a Lumen · INDUSTRY ART ' + IA.VERSION, 'Small', true);
+    b += p('Ideado y creado por OneZero · INDUSTRY ART ' + ART.VERSION, 'Small', true);
     const ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"';
     const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + ns + '><w:body>' + b +
       '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>';
@@ -309,11 +309,11 @@ IA.documento = (function () {
   // Descarga (web y PC) o menú Compartir (app)
   function descargar(o) {
     const nombre = 'Idea - ' + (o.tit || 'sin título') + '.docx';
-    return IA.publicacion.guardarArchivo(nombre, docx(o), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    return ART.publicacion.guardarArchivo(nombre, docx(o), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
   // Descarga con su aviso; si no se pudo (y no fue que el jugador cerró el menú), muestra la trama para copiarla
   function descargarYAvisar(o) {
-    const U = IA.ui;
+    const U = ART.ui;
     return descargar(o).then(function (r) {
       if (r.ok) U.aviso('Documento listo: ' + (r.ruta || r.nombre));
       else if (!r.cancelado) mostrarTexto(o, 'No se pudo guardar el documento en este aparato. Aquí está la trama completa para copiarla:');
@@ -321,9 +321,9 @@ IA.documento = (function () {
     });
   }
   function mostrarTexto(o, aviso) {
-    const U = IA.ui, esc = N.esc;
+    const U = ART.ui, esc = N.esc;
     U.modal('<h2>' + esc(o.tit || '') + '</h2>' + (aviso ? '<p class="mal chico">' + esc(aviso) + '</p>' : '') + '<textarea id="docTextoIdea" rows="16" style="width:100%" readonly>' + esc(texto(o)) + '</textarea>' +
-      '<div class="fila envolver"><button class="btn" data-a="docCopiar">Copiar el texto</button><button class="btn" data-a="docTxt" data-v="' + (o.id || '') + '">Guardar como texto (.txt)</button><button class="btn primario" data-a="cerrarModal">' + IA.t('aceptar') + '</button></div>');
+      '<div class="fila envolver"><button class="btn" data-a="docCopiar">Copiar el texto</button><button class="btn" data-a="docTxt" data-v="' + (o.id || '') + '">Guardar como texto (.txt)</button><button class="btn primario" data-a="cerrarModal">' + ART.t('aceptar') + '</button></div>');
   }
   return { filasIdea: filasIdea, trama: trama, texto: texto, docx: docx, zip: zip, crc32: crc32, descargar: descargar, descargarYAvisar: descargarYAvisar, mostrarTexto: mostrarTexto };
 })();

@@ -1,4 +1,4 @@
-# Publica la versión web (GitHub Pages) con el HTML más nuevo del juego y la política de privacidad.
+# Publica la versión web (GitHub Pages) con la versión definitiva del juego (o el HTML numerado más nuevo) y la política de privacidad.
 # Ojo: GitHub Pages no funciona en repositorios privados con la cuenta gratuita (ver docs/publicar_google_play.md).
 name: Versión web
 on:
@@ -10,7 +10,7 @@ jobs:
     environment: { name: github-pages }
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir -p sitio && cp "$(ls INDUSTRY_ART_v*.html | sort -t v -k2 -n | tail -1)" sitio/index.html && cp docs/privacidad.html sitio/privacidad.html
+      - run: mkdir -p sitio && cp "$(ls INDUSTRY_ART_Definitiva.html 2>/dev/null || ls INDUSTRY_ART_v*.html | sort -t v -k2 -n | tail -1)" sitio/index.html && cp docs/privacidad.html sitio/privacidad.html
       - uses: actions/upload-pages-artifact@v3
         with: { path: sitio }
       - uses: actions/deploy-pages@v4

@@ -2,8 +2,8 @@
 """Desarma un HTML de INDUSTRY ART en módulos.
 
 Uso:
-    python3 tools/desarmar.py INDUSTRY_ART_v17.html            # reescribe src/ desde el HTML
-    python3 tools/desarmar.py INDUSTRY_ART_v18.html --destino carpeta
+    python3 tools/desarmar.py INDUSTRY_ART_Definitiva.html            # reescribe src/ desde el HTML
+    python3 tools/desarmar.py INDUSTRY_ART_Definitiva.html --destino carpeta
     python3 tools/desarmar.py legado/INDUSTRY_ART_v15.html --destino legado/v15
 
 Con un HTML armado (V16 en adelante) separa:

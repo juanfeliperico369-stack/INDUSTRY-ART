@@ -4,8 +4,8 @@
  * horizontal) y 1366×768 (PC). Guarda los PNG en pruebas/capturas/ y revisa que ningún control mida menos de
  * 44 px, que ningún texto mida menos de 14 px y que no haya desplazamiento horizontal.
  *
- * Uso:  node tools/capturas.js [--html INDUSTRY_ART_v36.html]
- * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
+ * Uso:  node tools/capturas.js [--html INDUSTRY_ART_Definitiva.html]
+ * Necesita Playwright (npm install -g playwright, o NODE_PATH apuntando a una instalación existente).
  */
 const path = require('path');
 const fs = require('fs');
@@ -13,62 +13,62 @@ const { chromium } = require('playwright');
 
 const RAIZ = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
-const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_v36.html');
+const HTML = path.resolve(RAIZ, args.indexOf('--html') >= 0 ? args[args.indexOf('--html') + 1] : 'INDUSTRY_ART_Definitiva.html');
 const SALIDA = path.join(RAIZ, 'pruebas', 'capturas');
 const TAMANOS = [[390, 844, 'celular_vertical'], [844, 390, 'celular_horizontal'], [1366, 768, 'pc']];
 
 const PANTALLAS = [
-  ['01_portada', async (p) => { await p.evaluate(() => { IA.n.S = null; IA.ui.estado.np = false; IA.ui.render(); }); }],
-  ['02_nueva_partida', async (p) => { await p.evaluate(() => { IA.n.S = null; IA.ui.estado.np = true; IA.ui.render(); }); }],
-  ['03_estudio', async (p) => { await partida(p); await p.evaluate(() => IA.ui.irA('estudio')); }],
-  ['04_obras', async (p) => { await p.evaluate(() => IA.ui.irA('obras', 'marcha')); }],
+  ['01_portada', async (p) => { await p.evaluate(() => { ART.n.S = null; ART.ui.estado.np = false; ART.ui.render(); }); }],
+  ['02_nueva_partida', async (p) => { await p.evaluate(() => { ART.n.S = null; ART.ui.estado.np = true; ART.ui.render(); }); }],
+  ['03_estudio', async (p) => { await partida(p); await p.evaluate(() => ART.ui.irA('estudio')); }],
+  ['04_obras', async (p) => { await p.evaluate(() => ART.ui.irA('obras', 'marcha')); }],
   // (para la captura se agrega un plató si la capacidad está llena)
-  ['05_crear_obra', async (p) => { await p.evaluate(() => { if (IA.obras.enProduccion(0).length >= IA.negocio.capacidad(0)) IA.n.S.estudios[0].pisos.push('plato'); IA.ui.irA('obras'); IA.ui.acciones.crearObra(); }); }],
-  ['05b_crear_historia', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('rapido'); IA.ui.acciones.crCamino('nueva'); IA.ui.acciones.crPaso('1'); }); }],
-  ['06_crear_equipo', async (p) => { await p.evaluate(() => { for (let i = 0; i < 2; i++) IA.ui.acciones.crPaso('1'); }); }],
-  ['06b_crear_detallado', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('detallado'); ['obra', 'generos', 'historia'].forEach((s) => { if (IA.creacion.estado.abiertas[s]) IA.ui.acciones.crSeccion(s); }); IA.ui.acciones.crSeccion('forma'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
-  ['06c_crear_personajes', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('forma'); IA.ui.acciones.crSeccion('personajes'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
-  ['06f_crear_rodaje', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('personajes'); IA.ui.acciones.crSeccion('rodaje'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
-  ['06g_crear_presupuesto', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('rodaje'); IA.ui.acciones.crSeccion('presupuesto'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
-  ['06h_crear_pie', async (p) => { await p.evaluate(() => { IA.ui.acciones.crSeccion('presupuesto'); IA.ui.acciones.crPieDetalle(); document.getElementById('crPie').scrollIntoView(); }); }],
-  ['06d_usar_material', async (p) => { await p.evaluate(() => { IA.ui.acciones.crModo('rapido'); IA.ui.acciones.crVolverCamino(); IA.ui.acciones.crCamino('material'); }); }],
-  ['06e_comprar_guion', async (p) => { await p.evaluate(() => { IA.ui.acciones.crVolverCamino(); IA.ui.acciones.crCamino('guion'); }); }],
-  ['07_catalogo', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('obras', 'catalogo'); }); }],
-  ['08_ficha_obra', async (p) => { await p.evaluate(() => { const o = IA.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada').pop(); if (o) IA.ui.acciones.verObra(String(o.id)); }); }],
-  ['08b_ficha_produccion', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0] || IA.n.S.obras.filter((x) => x.est === 0 && x.lp).pop(); if (o) { IA.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Producción')[0]; if (h) h.scrollIntoView(); } }); }],
-  ['08c_dilema', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = { id: 'escenaClave', t: IA.n.S.t, n: { d: o.eq.direccion } }; IA.creacion.abrirDecision(o.id); } }); }],
-  ['08d_prueba_publico', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.dil = null; o.prueba = { p: 57, com: ['La música emociona.', 'El ritmo decae a la mitad.'], t: IA.n.S.t }; IA.creacion.abrirDecision(o.id); } }); }],
-  // V22 · Lanzamiento: el plan de estreno, el dinero en cadena y las ventanas
-  ['08e_plan_lanzamiento', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.prueba = null; o.dil = null; IA.distribucion.abrir(o.id); } }); }],
+  ['05_crear_obra', async (p) => { await p.evaluate(() => { if (ART.obras.enProduccion(0).length >= ART.negocio.capacidad(0)) ART.n.S.estudios[0].pisos.push('plato'); ART.ui.irA('obras'); ART.ui.acciones.crearObra(); }); }],
+  ['05b_crear_historia', async (p) => { await p.evaluate(() => { ART.ui.acciones.crModo('rapido'); ART.ui.acciones.crCamino('nueva'); ART.ui.acciones.crPaso('1'); }); }],
+  ['06_crear_equipo', async (p) => { await p.evaluate(() => { for (let i = 0; i < 2; i++) ART.ui.acciones.crPaso('1'); }); }],
+  ['06b_crear_detallado', async (p) => { await p.evaluate(() => { ART.ui.acciones.crModo('detallado'); ['obra', 'generos', 'historia'].forEach((s) => { if (ART.creacion.estado.abiertas[s]) ART.ui.acciones.crSeccion(s); }); ART.ui.acciones.crSeccion('forma'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06c_crear_personajes', async (p) => { await p.evaluate(() => { ART.ui.acciones.crSeccion('forma'); ART.ui.acciones.crSeccion('personajes'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06f_crear_rodaje', async (p) => { await p.evaluate(() => { ART.ui.acciones.crSeccion('personajes'); ART.ui.acciones.crSeccion('rodaje'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06g_crear_presupuesto', async (p) => { await p.evaluate(() => { ART.ui.acciones.crSeccion('rodaje'); ART.ui.acciones.crSeccion('presupuesto'); document.querySelector('#ficha [aria-expanded=true]').scrollIntoView(); }); }],
+  ['06h_crear_pie', async (p) => { await p.evaluate(() => { ART.ui.acciones.crSeccion('presupuesto'); ART.ui.acciones.crPieDetalle(); document.getElementById('crPie').scrollIntoView(); }); }],
+  ['06d_usar_material', async (p) => { await p.evaluate(() => { ART.ui.acciones.crModo('rapido'); ART.ui.acciones.crVolverCamino(); ART.ui.acciones.crCamino('material'); }); }],
+  ['06e_comprar_guion', async (p) => { await p.evaluate(() => { ART.ui.acciones.crVolverCamino(); ART.ui.acciones.crCamino('guion'); }); }],
+  ['07_catalogo', async (p) => { await p.evaluate(() => { ART.ui.cerrarFicha(); ART.ui.irA('obras', 'catalogo'); }); }],
+  ['08_ficha_obra', async (p) => { await p.evaluate(() => { const o = ART.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada').pop(); if (o) ART.ui.acciones.verObra(String(o.id)); }); }],
+  ['08b_ficha_produccion', async (p) => { await p.evaluate(() => { ART.ui.cerrarFicha(); const o = ART.obras.enProduccion(0)[0] || ART.n.S.obras.filter((x) => x.est === 0 && x.lp).pop(); if (o) { ART.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Producción')[0]; if (h) h.scrollIntoView(); } }); }],
+  ['08c_dilema', async (p) => { await p.evaluate(() => { ART.ui.cerrarFicha(); const o = ART.obras.enProduccion(0)[0]; if (o) { o.dil = { id: 'escenaClave', t: ART.n.S.t, n: { d: o.eq.direccion } }; ART.creacion.abrirDecision(o.id); } }); }],
+  ['08d_prueba_publico', async (p) => { await p.evaluate(() => { ART.ui.cerrarModal(); const o = ART.obras.enProduccion(0)[0]; if (o) { o.dil = null; o.prueba = { p: 57, com: ['La música emociona.', 'El ritmo decae a la mitad.'], t: ART.n.S.t }; ART.creacion.abrirDecision(o.id); } }); }],
+  // Lanzamiento: el plan de estreno, el dinero en cadena y las ventanas
+  ['08e_plan_lanzamiento', async (p) => { await p.evaluate(() => { ART.ui.cerrarModal(); const o = ART.obras.enProduccion(0)[0]; if (o) { o.prueba = null; o.dil = null; ART.distribucion.abrir(o.id); } }); }],
   ['08f_plan_regiones', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Estreno por región')[0]; if (h) h.scrollIntoView(); }); }],
   ['08g_plan_campana', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h4')].filter((x) => x.textContent.indexOf('Mezcla de canales') === 0)[0]; if (h) h.scrollIntoView(); }); }],
   ['08h_plan_promociones', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Promociones')[0]; if (h) h.scrollIntoView(); }); }],
-  ['08i_ficha_dinero', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); const o = IA.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada' && x.vt).sort((a, b) => b.bruto - a.bruto)[0]; if (o) { IA.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Dinero en cadena')[0]; if (h) h.scrollIntoView(); } }); }],
+  ['08i_ficha_dinero', async (p) => { await p.evaluate(() => { ART.ui.cerrarFicha(); const o = ART.n.S.obras.filter((x) => x.est === 0 && x.et === 'terminada' && x.vt).sort((a, b) => b.bruto - a.bruto)[0]; if (o) { ART.ui.acciones.verObra(String(o.id)); const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Dinero en cadena')[0]; if (h) h.scrollIntoView(); } }); }],
   ['08j_ficha_catalogo', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#ficha h3')].filter((x) => x.textContent === 'Ventanas')[0]; if (h) h.scrollIntoView(); }); }],
-  ['09_talento', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('talento'); }); }],
-  ['10_ficha_talento', async (p) => { await p.evaluate(() => { const t = IA.n.S.talentos.filter((x) => !x.ret).sort((a, b) => b.fama - a.fama)[0]; IA.ui.acciones.verTalento(String(t.id)); }); }],
-  ['11_mundo_cartelera', async (p) => { await p.evaluate(() => { IA.ui.cerrarFicha(); IA.ui.irA('mundo', 'cartelera'); }); }],
-  ['12_mundo_poblacion', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'poblacion')); }],
-  ['13_mundo_premios', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'premios')); }],
-  ['13b_mundo_mapa', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'mapa')); }],
-  ['13c_mundo_taxonomia', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'taxonomia')); }],
-  ['13d_mundo_calendario', async (p) => { await p.evaluate(() => IA.ui.irA('mundo', 'calendario')); }],
-  ['13e_mundo_tendencias', async (p) => { await p.evaluate(() => { IA.ui.irA('mundo', 'tendencias'); const h = [...document.querySelectorAll('#vista h3')].filter((x) => x.textContent === 'Por región')[0]; if (h) h.scrollIntoView(); }); }],
-  ['14_negocio_finanzas', async (p) => { await p.evaluate(() => IA.ui.irA('negocio', 'finanzas')); }],
-  ['15_negocio_construcciones', async (p) => { await p.evaluate(() => { IA.ui.cerrarModal(); const o = IA.obras.enProduccion(0)[0]; if (o) { o.prueba = null; } IA.ui.irA('negocio', 'estudio'); }); }],
+  ['09_talento', async (p) => { await p.evaluate(() => { ART.ui.cerrarFicha(); ART.ui.irA('talento'); }); }],
+  ['10_ficha_talento', async (p) => { await p.evaluate(() => { const t = ART.n.S.talentos.filter((x) => !x.ret).sort((a, b) => b.fama - a.fama)[0]; ART.ui.acciones.verTalento(String(t.id)); }); }],
+  ['11_mundo_cartelera', async (p) => { await p.evaluate(() => { ART.ui.cerrarFicha(); ART.ui.irA('mundo', 'cartelera'); }); }],
+  ['12_mundo_poblacion', async (p) => { await p.evaluate(() => ART.ui.irA('mundo', 'poblacion')); }],
+  ['13_mundo_premios', async (p) => { await p.evaluate(() => ART.ui.irA('mundo', 'premios')); }],
+  ['13b_mundo_mapa', async (p) => { await p.evaluate(() => ART.ui.irA('mundo', 'mapa')); }],
+  ['13c_mundo_taxonomia', async (p) => { await p.evaluate(() => ART.ui.irA('mundo', 'taxonomia')); }],
+  ['13d_mundo_calendario', async (p) => { await p.evaluate(() => ART.ui.irA('mundo', 'calendario')); }],
+  ['13e_mundo_tendencias', async (p) => { await p.evaluate(() => { ART.ui.irA('mundo', 'tendencias'); const h = [...document.querySelectorAll('#vista h3')].filter((x) => x.textContent === 'Por región')[0]; if (h) h.scrollIntoView(); }); }],
+  ['14_negocio_finanzas', async (p) => { await p.evaluate(() => ART.ui.irA('negocio', 'finanzas')); }],
+  ['15_negocio_construcciones', async (p) => { await p.evaluate(() => { ART.ui.cerrarModal(); const o = ART.obras.enProduccion(0)[0]; if (o) { o.prueba = null; } ART.ui.irA('negocio', 'estudio'); }); }],
   ['15b_almacen_sets', async (p) => { await p.evaluate(() => { const h = [...document.querySelectorAll('#vista h3')].filter((x) => x.textContent.indexOf('Almacén') === 0)[0]; if (h) h.scrollIntoView(); }); }],
-  ['15c_negocio_distribucion', async (p) => { await p.evaluate(() => { window.scrollTo(0, 0); IA.ui.irA('negocio', 'distribucion'); }); }],
-  ['16_ajustes', async (p) => { await p.evaluate(() => IA.ui.acciones.abrirAjustes()); }],
+  ['15c_negocio_distribucion', async (p) => { await p.evaluate(() => { window.scrollTo(0, 0); ART.ui.irA('negocio', 'distribucion'); }); }],
+  ['16_ajustes', async (p) => { await p.evaluate(() => ART.ui.acciones.abrirAjustes()); }],
 ];
 
 // Una partida con historia: el bot juega 12 años desde 1990
 async function partida(p) {
   await p.evaluate(() => {
-    IA.juego.nuevaPartida({ semilla: 'capturas', anio: 1990, nombre: 'Estudio Aurora Boreal', avatar: { nombre: 'Felipe', sexo: 'M', edad: 32 } });
-    for (let i = 0; i < 52 * 12; i++) { IA.pruebas.decidir(IA.pruebas.ESTRATEGIAS.normal); IA.juego.avanzarSemana(); }
-    const lista = IA.obras.delEstudio(0, ['lista'])[0];
-    IA.ui.estado.np = false;
-    IA.ui.render();
+    ART.juego.nuevaPartida({ semilla: 'capturas', anio: 1990, nombre: 'Estudio Aurora Boreal', avatar: { nombre: 'Felipe', sexo: 'M', edad: 32 } });
+    for (let i = 0; i < 52 * 12; i++) { ART.pruebas.decidir(ART.pruebas.ESTRATEGIAS.normal); ART.juego.avanzarSemana(); }
+    const lista = ART.obras.delEstudio(0, ['lista'])[0];
+    ART.ui.estado.np = false;
+    ART.ui.render();
     return !!lista;
   });
 }
@@ -102,13 +102,13 @@ async function medir(p) {
       const m = await medir(p);
       await p.screenshot({ path: path.join(SALIDA, `${nombre}_${clave}.png`) });
       resumen.push({ tamano: `${w}x${h}`, pantalla: clave, ...m });
-      if (clave === '16_ajustes') await p.evaluate(() => IA.ui.cerrarModal());
+      if (clave === '16_ajustes') await p.evaluate(() => ART.ui.cerrarModal());
     }
     if (errores.length) resumen.push({ tamano: `${w}x${h}`, errores });
     await p.close();
   }
   await navegador.close();
-  let md = '# Capturas automáticas · INDUSTRY ART V22\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
+  let md = '# Capturas automáticas · INDUSTRY ART 4.0\n\n| Tamaño | Pantalla | Controles < 44 px | Textos < 14 px | Desplazamiento horizontal |\n|---|---|---|---|---|\n';
   resumen.filter((r) => r.pantalla).forEach((r) => { md += `| ${r.tamano} | ${r.pantalla} | ${r.controles}${r.controles ? ' (' + r.detalle.join(', ') + ')' : ''} | ${r.textos} | ${r.desborde ? 'sí' : 'no'} |\n`; });
   const errores = resumen.filter((r) => r.errores);
   md += '\nErrores de página: ' + (errores.length ? errores.map((r) => r.tamano + ': ' + r.errores.join('; ')).join(' / ') : 'ninguno') + '\n';

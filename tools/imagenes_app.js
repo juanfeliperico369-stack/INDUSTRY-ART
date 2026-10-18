@@ -23,7 +23,7 @@ function pngRGB(w, h, rgba) {
   const b = await chromium.launch();
   const p = await b.newPage();
   await p.goto('file://' + path.join(RAIZ, 'app/www/index.html'));
-  await p.waitForFunction(() => window.IA && IA.arte);
+  await p.waitForFunction(() => window.ART && ART.arte);
   const dibujar = (w, h, tipo, rgb) => p.evaluate(([w, h, tipo, rgb]) => {
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
     const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#16213e'); g.addColorStop(1, '#0b1020');
@@ -32,7 +32,7 @@ function pngRGB(w, h, rgba) {
     const L = { s: 12, c: 3, b: 0, t: 0, f: 0 };
     const r = tipo === 'frente' ? m * 0.2 : tipo === 'destacada' ? h * 0.26 : tipo === 'inicio' ? m * 0.16 : m * 0.3;
     const cx = tipo === 'destacada' ? w * 0.2 : w / 2, cy = tipo === 'destacada' ? h / 2 : tipo === 'inicio' ? h * 0.45 : h / 2;
-    IA.arte.logo(c, cx, cy, r, L);
+    ART.arte.logo(c, cx, cy, r, L);
     if (tipo === 'destacada' || tipo === 'inicio') {
       c.fillStyle = '#ffc857'; c.textAlign = tipo === 'destacada' ? 'left' : 'center';
       c.font = 'bold ' + Math.round(tipo === 'destacada' ? h * 0.16 : m * 0.09) + 'px sans-serif';
@@ -70,10 +70,10 @@ function pngRGB(w, h, rgba) {
   for (const [pre, vw, vh, esc, tipo, idiomas, cuantas] of JUEGOS) for (const idioma of idiomas) {
     const q = await b.newPage({ viewport: { width: vw, height: vh }, deviceScaleFactor: esc });
     await q.goto('file://' + path.join(RAIZ, 'app/www/index.html'));
-    await q.evaluate(async (id) => { IA.juego.nuevaPartida({ semilla: 'tienda', anio: 1985, bot: true, nombre: 'Estudio Aurora' }); for (let i = 0; i < 52 * 12; i++) { IA.pruebas.decidir(IA.pruebas.ESTRATEGIAS.normal); IA.juego.avanzarSemana(); } IA.n.S.bot = false; IA.ui.ajuste('idioma', id); IA.ui.aplicarAjustes(); await new Promise((r) => setTimeout(r, 1500)); }, idioma);
+    await q.evaluate(async (id) => { ART.juego.nuevaPartida({ semilla: 'tienda', anio: 1985, bot: true, nombre: 'Estudio Aurora' }); for (let i = 0; i < 52 * 12; i++) { ART.pruebas.decidir(ART.pruebas.ESTRATEGIAS.normal); ART.juego.avanzarSemana(); } ART.n.S.bot = false; ART.ui.ajuste('idioma', id); ART.ui.aplicarAjustes(); await new Promise((r) => setTimeout(r, 1500)); }, idioma);
     const vistas = [['estudio'], ['obras', 'catalogo'], ['mundo', 'cartelera'], ['obras', 'franquicias'], ['negocio', 'canal'], ['mundo', 'rivales']];
     for (let i = 0; i < cuantas; i++) {
-      await q.evaluate((v) => { IA.ui.cerrarModal(); IA.ui.irA(v[0], v[1]); }, vistas[i]); await q.waitForTimeout(400);
+      await q.evaluate((v) => { ART.ui.cerrarModal(); ART.ui.irA(v[0], v[1]); }, vistas[i]); await q.waitForTimeout(400);
       const nombre = (pre === 'tienda' ? 'captura_' : pre === 'ios' ? 'iphone_' : 'pc_') + idioma + '_' + (i + 1) + (tipo === 'jpeg' ? '.jpg' : '.png');
       await q.screenshot(Object.assign({ path: path.join(TIENDA, nombre), type: tipo }, tipo === 'jpeg' ? { quality: 92 } : {}));
     }

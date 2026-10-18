@@ -1,12 +1,12 @@
 /* ==== módulo: publicacion ==== */
 // La 1.0 en Google Play: un solo anuncio al abrir (solo dentro de la app, con AdMob por Capacitor),
-// versión gratuita o de pago según IA_CONFIG (lo pone tools/preparar_app.py al armar la app) y créditos.
+// versión gratuita o de pago según ART_CONFIG (lo pone tools/preparar_app.py al armar la app) y créditos.
 // IPhone y PC: la misma app en iOS (con el permiso de rastreo de Apple) y en Windows, macOS y Linux (Electron, sin anuncios).
 // Antes del anuncio se pide el consentimiento que exige Google en Europa (UMP); en Ajustes queda «Privacidad de los anuncios».
 // Compra única «Versión completa» (Google Play y App Store) que solo quita el anuncio; el juego es el mismo para todos.
 // La compra se consulta a la tienda cada vez que se abre la app (un reembolso la quita); sin internet vale la última respuesta.
 // En el navegador y en PC no hay anuncios ni compras.
-IA.publicacion = (function () {
+ART.publicacion = (function () {
   'use strict';
   // Identificadores de prueba de Google (no pagan); los reales llegan por app/config.json
   const BASE = {
@@ -24,14 +24,14 @@ IA.publicacion = (function () {
   function leerCompra() { try { return localStorage.getItem(CLAVE_COMPRA) === 'si'; } catch (e) { return false; } }
   function anotarCompra(si) { completa = !!si; try { if (si) localStorage.setItem(CLAVE_COMPRA, 'si'); else localStorage.removeItem(CLAVE_COMPRA); } catch (e) { /* sin almacenamiento: vale la sesión */ } }
   function config() {
-    const c = (typeof window !== 'undefined' && window.IA_CONFIG) || {}, a = c.admob || {};
+    const c = (typeof window !== 'undefined' && (window.ART_CONFIG || window.IA_CONFIG)) || {}, a = c.admob || {};
     return Object.assign({}, BASE, c, { admob: { prueba: a.prueba !== undefined ? a.prueba : BASE.admob.prueba,
       android: Object.assign({}, BASE.admob.android, a.android), ios: Object.assign({}, BASE.admob.ios, a.ios) } });
   }
   function enApp() { return typeof window !== 'undefined' && !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
   function plataforma() {
     if (enApp()) return window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'ios' ? 'ios' : 'android';
-    if (typeof window !== 'undefined' && (window.IA_ESCRITORIO || /Electron\//.test(navigator.userAgent || ''))) return 'pc';
+    if (typeof window !== 'undefined' && (window.ART_ESCRITORIO || /Electron\//.test(navigator.userAgent || ''))) return 'pc';
     return 'web';
   }
   function nombrePlataforma() { return NOMBRES[plataforma()]; }
@@ -118,7 +118,7 @@ IA.publicacion = (function () {
     return btoa(s);
   }
   function nombreSeguro(n) { return String(n || 'archivo').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9_.-]+/g, '_').slice(0, 80) || 'archivo'; }
-  // Dentro del enlace de claude.ai el visor no deja descargar directo: se pide con su permiso de descargas
+  // Dentro de un visor web embebido no se puede descargar directo: se pide con el permiso de descargas del visor
   let descargasVisor;
   function visor() {
     if (descargasVisor === undefined) descargasVisor = typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function' ? Promise.resolve(window.claude.use('downloads')).catch(function () { return null; }) : Promise.resolve(null);
@@ -146,7 +146,7 @@ IA.publicacion = (function () {
         .catch(function (e) { return fallo(e); });
     }
     return visor().then(function (d) {
-      // 2. Enlace de claude.ai: el visor pide confirmación y guarda (solo ciertas extensiones: la partida va como .json)
+      // 2. Visor web embebido: pide confirmación y guarda (solo ciertas extensiones: la partida va como .json)
       if (d && typeof d.save === 'function') {
         const nom = EXT_VISOR.test(nombre) ? nombre : nombre + '.json';
         return d.save({ filename: nom, data: new Blob([bytes]) }).then(function () { return listo({ nombre: nom }); }, function (e) { return cancelado(e) ? fallo(e, { cancelado: true }) : fallo(e); });
@@ -175,7 +175,7 @@ IA.publicacion = (function () {
       }
     }
   }
-  const CREDITOS = ['Ideado y creado por OneZero', 'Programado junto a Lumen'];
+  const CREDITOS = ['Ideado y creado por OneZero'];
   function creditos() { return CREDITOS.slice(); }
   return { config: config, enApp: enApp, plataforma: plataforma, nombrePlataforma: nombrePlataforma, alAbrir: alAbrir,
     privacidadDisponible: privacidadDisponible, abrirPrivacidad: abrirPrivacidad, creditos: creditos,

@@ -3,16 +3,16 @@
 // contenido (respetando la censura de la época y la regla del género Erótico), el encaje entre familias que se
 // descubre jugando, la sinopsis y las frases, los personajes, el costo y las semanas que suman las decisiones, el
 // efecto en la calidad, la crítica y el público, el dominio público, los guiones en venta y la idea automática con IA.
-// No toca el DOM. Todo azar sale de IA.n (la interfaz lo redirige a su propio azar cuando solo se está mirando).
-IA.ideas = (function () {
+// No toca el DOM. Todo azar sale de ART.n (la interfaz lo redirige a su propio azar cuando solo se está mirando).
+ART.ideas = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, X = IA.taxonomia;
+  const N = ART.n, D = ART.datos, X = ART.taxonomia;
   const LIMITES = { gen: 3, sub: 6, tem: 9, prob: 3, sarc: 2, pubs: 5 };
   const ANIO_IA = 2022;
   const ANIO_SIN_CENSURA = D.ANIO_CLASIFICACION_POR_EDADES; // 1968
   const CLAS_MAX_CENSURA = 3; // antes de 1968, lo más fuerte que se estrena es "16"
-  const E = function () { return IA.economia; };
-  const T = function () { return IA.talentos; };
+  const E = function () { return ART.economia; };
+  const T = function () { return ART.talentos; };
 
   // ---------- Valores de una idea (con los de siempre cuando falta un campo) ----------
   function familia(o) { return D.familiaDe[o.gen && o.gen[0]] || 'DR'; }
@@ -42,8 +42,8 @@ IA.ideas = (function () {
     if (b.cx === undefined) b.cx = 2;
     // Cómo se filma (método, terreno y estilo de producción); se recomiendan según la idea
     if (!b.pst) b.pst = 'clasico';
-    if (!b.met) b.met = IA.rodaje.metodoRecomendado(b, anio);
-    if (!b.ter) b.ter = IA.rodaje.terrenoRecomendado(b);
+    if (!b.met) b.met = ART.rodaje.metodoRecomendado(b, anio);
+    if (!b.ter) b.ter = ART.rodaje.terrenoRecomendado(b);
     if (b.rit === undefined) b.rit = 2;
     if (b.fx === undefined) b.fx = 2;
     if (b.ia === undefined) b.ia = 0;
@@ -96,11 +96,11 @@ IA.ideas = (function () {
   }
   function clasificar(o, anio) {
     const k = Math.min(indiceClasificacion(o), nivelMaximoEpoca(anio));
-    // N (tu documento): general, para personas ya desarrolladas, con contenido moderado y controlado (hasta PG-13)
+    // N: general, para personas ya desarrolladas, con contenido moderado y controlado (hasta PG-13)
     if (o.clasN && k <= 2 && (o.gen || []).indexOf('Erótico') < 0) return 'N';
     return X.ORDEN_CLAS[k];
   }
-  // Descripción del contenido con las palabras de tu documento (lo de adultos dice "siempre sugerido")
+  // Descripción del contenido (lo de adultos dice "siempre sugerido")
   function describirContenido(o) {
     const cont = contenidoDe(o);
     return X.contenido.map(function (c) {
@@ -112,7 +112,7 @@ IA.ideas = (function () {
   // ---------- Reglas ----------
   function validar(b, anio) {
     const gen = b.gen || [];
-    const err = IA.obras.validarGeneros(gen, anio);
+    const err = ART.obras.validarGeneros(gen, anio);
     if (err) return err;
     const erotico = gen.indexOf('Erótico') >= 0;
     if (erotico && (b.pubs || []).some(function (p) { const x = X.publico(p); return x && x.infantil; })) return 'Lo erótico nunca va con públicos infantiles, familiares o adolescentes.';
@@ -175,7 +175,7 @@ IA.ideas = (function () {
   }
   function clavesEncaje(o) {
     const c = [];
-    const fams = IA.economia.familiasDe(o);
+    const fams = ART.economia.familiasDe(o);
     for (let i = 0; i < fams.length; i++) for (let j = i + 1; j < fams.length; j++) c.push(fams[i] + fams[j]);
     partesEncaje(o).forEach(function (p) { c.push(p.clave); });
     return c;
@@ -191,7 +191,7 @@ IA.ideas = (function () {
   function estrellas(o) {
     const visto = N.S.encajeVisto;
     const nuevas = clavesEncaje(o).filter(function (k) { return !visto[k]; });
-    const total = IA.economia.encajeObra(o) + encajeIdea(o);
+    const total = ART.economia.encajeObra(o) + encajeIdea(o);
     const n = total >= 6 ? 5 : total >= 3 ? 4 : total >= 1 ? 3 : total >= -1 ? 2 : 1;
     return { n: nuevas.length ? null : n, nuevas: nuevas.length, total: total };
   }
@@ -206,15 +206,15 @@ IA.ideas = (function () {
     f *= X.epoca(o.epo || 'actualidad').costo;
     if (o.corr && o.corr !== X.ESTANDAR) f *= X.efectoCorriente(o.corr, anio, fam).costo;
     f *= X.estilo(o.estilo).costo || 1;
-    if (o.tv) f *= IA.tv.factorCosto(o);
-    f *= IA.imperio.ahorroRodaje(o); // sede propia en el país del rodaje // episodios, sala de guionistas y tramas
+    if (o.tv) f *= ART.tv.factorCosto(o);
+    f *= ART.imperio.ahorroRodaje(o); // sede propia en el país del rodaje // episodios, sala de guionistas y tramas
     f *= N.limitar(Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.55), 0.35, 2.2);
     if (o.rod) {
       const p = D.pais(o.rod), casa = N.S && N.S.estudios[o.est] ? D.pais(N.S.estudios[o.est].pais) : null;
       if (p && casa) f *= N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8);
     }
     if (o.ia) f *= 1 - 0.4 * o.ia / 100; // la IA abarata la producción
-    f *= IA.rodaje.factorCosto(o, anio); // método, terreno, estilo, sets, viaje, incentivos y estudios externos
+    f *= ART.rodaje.factorCosto(o, anio); // método, terreno, estilo, sets, viaje, incentivos y estudios externos
     // Extras y terceros (figurantes, dobles y personal de apoyo): un número, cada uno suma un poco al costo
     if (o.pj) {
       let extras = o.extras || 0;
@@ -225,14 +225,14 @@ IA.ideas = (function () {
   }
   function costoProduccion(o, anio) {
     const tipica = E().produccionTipica(anio, familia(o));
-    return Math.round(tipica * v(o, 'presM', D.escalas[v(o, 'esc', 2)].mult) * IA.obras.escalaTono(o.tono) * factorCosto(o, anio));
+    return Math.round(tipica * v(o, 'presM', D.escalas[v(o, 'esc', 2)].mult) * ART.obras.escalaTono(o.tono) * factorCosto(o, anio));
   }
   // Semanas extra o de menos por etapa (animación, duración, efectos, IA)
   function ajusteSemanas(o, anio) {
     const tc = X.tipoCine(o.tipo || 'real');
     const largo = Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.4);
     const fx = v(o, 'fx', 2);
-    const r = IA.rodaje.ajusteSemanas(o); // sets, viaje, estilo, método y terreno
+    const r = ART.rodaje.ajusteSemanas(o); // sets, viaje, estilo, método y terreno
     return {
       desarrollo: o.ideaIA ? -2 : 0,
       rodaje: tc.semanas * N.limitar(largo, 0.5, 1.6),
@@ -357,7 +357,7 @@ IA.ideas = (function () {
       gen = gen.filter(function (g) { return g !== 'Erótico'; }).concat(gen.indexOf('Romance') < 0 ? ['Romance'] : []).slice(0, 3);
       b.suave = true;
     }
-    if (IA.obras.validarGeneros(gen, anio)) gen = gen.filter(function (g) { return g !== 'Erótico'; });
+    if (ART.obras.validarGeneros(gen, anio)) gen = gen.filter(function (g) { return g !== 'Erótico'; });
     b.mat = id;
     b.gen = gen.length ? gen : ['Drama'];
     b.tit = m.tit;
@@ -397,7 +397,7 @@ IA.ideas = (function () {
     if (g.margen <= 4) return 'Ya tienes su informe.';
     const c = costoInforme(g);
     if (S.estudios[0].caja < c) return 'No alcanza la caja para el informe.';
-    IA.negocio.pagar(0, 'derechos', c);
+    ART.negocio.pagar(0, 'derechos', c);
     g.margen = conAnalista ? 1 : 4;
     g.lect = Math.round(N.limitar(g.calif + N.normal(0, g.margen / 2), 20, 99));
     return '';
@@ -460,7 +460,7 @@ IA.ideas = (function () {
       const otra = bueno ? D.ORDEN_FAM.filter(function (f) { return D.encaje(fam, f) >= 3; }) : D.ORDEN_FAM;
       const f2 = otra.length ? N.elegir(otra) : N.elegir(fams);
       const g2 = N.elegir(D.familia(f2).generos);
-      if (gen.indexOf(g2) < 0 && !IA.obras.validarGeneros(gen.concat([g2]), anio)) gen.push(g2);
+      if (gen.indexOf(g2) < 0 && !ART.obras.validarGeneros(gen.concat([g2]), anio)) gen.push(g2);
     }
     const idea = { gen: gen, tem: [temaRecomendado(fam, !bueno)], prob: [bueno ? problemaRecomendado(fam) : N.elegir(TODAS_PROB)], arco: bueno ? arcoRecomendado(fam) : N.elegir(X.arcos).id };
     if (N.probabilidad(0.5)) idea.tem.push(temaRecomendado(fam, !bueno));
@@ -470,7 +470,7 @@ IA.ideas = (function () {
     }
     idea.tono = N.elegir(D.tonos).id;
     idea.pre = bueno ? premisasRecomendadas(fam) : (N.probabilidad(0.5) ? [N.elegir(TODAS_PREMISAS)] : []);
-    idea.tit = IA.obras.tituloNuevo(gen);
+    idea.tit = ART.obras.tituloNuevo(gen);
     return idea;
   }
   function aplicarIdea(b, idea) {
@@ -489,7 +489,7 @@ IA.ideas = (function () {
     const idea = ideaAleatoria(anio, nivel);
     const genes = D.familia(mejor).generos.filter(function (x) { return x !== 'Erótico'; });
     idea.gen = [N.elegir(genes)].concat(idea.gen.filter(function (x) { return D.familiaDe[x] !== mejor; }).slice(0, 1));
-    if (IA.obras.validarGeneros(idea.gen, anio)) idea.gen = idea.gen.slice(0, 1);
+    if (ART.obras.validarGeneros(idea.gen, anio)) idea.gen = idea.gen.slice(0, 1);
     idea.tem = [temaRecomendado(mejor), temaRecomendado(mejor)].filter(function (x, i, a) { return a.indexOf(x) === i; });
     idea.prob = [problemaRecomendado(mejor)];
     idea.arco = arcoRecomendado(mejor);
@@ -620,12 +620,12 @@ IA.ideas = (function () {
   // Reparto de pesos de los departamentos: prioridad y tipo de obra (se normaliza para sumar 1)
   function pesos(o, famObj) {
     const pr = X.prioridad(o.prio).pesos, tc = X.tipoCine(o.tipo || 'real').pesos || {};
-    if (!Object.keys(pr).length && !Object.keys(tc).length) return IA.rodaje.pesosDep(o, famObj.pesos);
+    if (!Object.keys(pr).length && !Object.keys(tc).length) return ART.rodaje.pesosDep(o, famObj.pesos);
     const r = {};
     let s = 0;
     Object.keys(famObj.pesos).forEach(function (k) { r[k] = famObj.pesos[k] * (pr[k] || 1) * (tc[k] || 1); s += r[k]; });
     Object.keys(r).forEach(function (k) { r[k] /= s; });
-    return IA.rodaje.pesosDep(o, r); // vestuario, efectos y animación
+    return ART.rodaje.pesosDep(o, r); // vestuario, efectos y animación
   }
   function habilidad(id) { const t = id !== undefined && id !== null ? T().porId(id) : null; return t ? t.hab : 45; }
   function equipoCreativo(o) { return (habilidad(o.eq.guion) + habilidad(o.eq.direccion) + habilidad(o.eq.arte)) / 3; }
@@ -681,7 +681,7 @@ IA.ideas = (function () {
     if (fam === 'SM' && contenidoDe(o).terror >= 2) pub += 1;
     // Multitudes: muchos extras lucen en la acción y en las épocas pasadas
     if ((o.extras || 0) >= 12 && (fam === 'AA' || (o.epo && o.epo !== 'actualidad'))) pub += 1;
-    add(IA.rodaje.ajusteNotas(o, anio)); // estilo de producción, método, terreno y sets
+    add(ART.rodaje.ajusteNotas(o, anio)); // estilo de producción, método, terreno y sets
     pub += efectoPremisas(o, anio); // premisas y tropos
     add(efectoEnfoque(o)); // enfoque del estudio
     return { crit: crit, pub: pub };
@@ -710,7 +710,7 @@ IA.ideas = (function () {
   function edadesExtra(o) {
     const tc = X.tipoCine(o.tipo || 'real').edades;
     const focos = (o.pubs || []).map(X.publico).filter(function (x) { return x && x.edades; });
-    const ep = IA.rodaje.edades(o); // estilo de producción: unos lo aman y otros lo rechazan
+    const ep = ART.rodaje.edades(o); // estilo de producción: unos lo aman y otros lo rechazan
     if (!tc && !focos.length && !ep) return null;
     const r = ep || [1, 1, 1, 1, 1];
     if (tc) tc.forEach(function (x, i) { r[i] *= x; });
@@ -753,7 +753,7 @@ IA.ideas = (function () {
     if (m.fam.indexOf(fam) >= 0) return 1;
     return m.id.indexOf('Sin moraleja') === 0 && fam === 'FJ' ? -1 : 0;
   }
-  // Música de la obra (de la Final): un paquete cambia el costo y la nota del departamento de música
+  // Música de la obra: un paquete cambia el costo y la nota del departamento de música
   const PAQUETES_MUSICA = [
     { id: '', nombre: 'A tu medida', k: 0, q: 0, texto: 'El compositor del equipo hace todo con el reparto del presupuesto.' },
     { id: 'basico', nombre: 'Básico', k: -0.02, q: -3, texto: 'Música de archivo y una canción conocida: barato y sin brillo.' },
@@ -775,7 +775,7 @@ IA.ideas = (function () {
     if (o.fxr === 'aplaudidos') r.push('Los efectos especiales fueron aplaudidos.');
     if (o.fxr === 'repudiados') r.push('Los efectos especiales fueron repudiados: el equipo no tenía el nivel.');
     if (o.iar) r.push('Uso de IA (' + o.ia + ' %): resultado ' + o.iar + '.');
-    const enc = (o.gen ? IA.economia.encajeObra(o) : 0) + (o.gen ? encajeIdea(o) : 0);
+    const enc = (o.gen ? ART.economia.encajeObra(o) : 0) + (o.gen ? encajeIdea(o) : 0);
     if (enc >= 4) r.push('La combinación de géneros, temas y época encajó muy bien.');
     else if (enc <= -2) r.push('La combinación de géneros, temas y época chocó.');
     if (o.mat) { const m = X.material(o.mat); if (m) r.push('Basada en «' + m.tit + '»: una historia que el público ya conocía.'); }

@@ -7,15 +7,15 @@
 // antipiratería, ediciones, DLC, gratis con compras o suscripción, soporte, arcade y móviles. Teatro: temporadas en
 // sala con funciones y ocupación, giras y obra grabada. Libros: tapas, tamaños, audiolibro, libro digital,
 // traducciones, imprenta propia y cómics o mangas de tus franquicias. Cada proyecto tiene su portada.
-IA.medios = (function () {
+ART.medios = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, X = IA.taxonomia, T = IA.talentos;
+  const N = ART.n, D = ART.datos, X = ART.taxonomia, T = ART.talentos;
   // Piso de costos en dólares de 2025. Antes de 1912 el cine es chico y su presupuesto típico no sirve de vara para
   // los demás medios; el teatro cobra entradas a precio de su época, así que su costo nunca baja de una sala de hoy.
-  const tip = function (a, med) { a = a || N.anio(); return Math.max(IA.economia.presupuestoTipico(a), IA.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
+  const tip = function (a, med) { a = a || N.anio(); return Math.max(ART.economia.presupuestoTipico(a), ART.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
   function industria() { const e = N.S && N.S.estudios[0]; return D.industria(e && e.industria); }
   function especial(med) { return industria().meds.indexOf(med) >= 0; }
-  const ep = function (v, a) { return IA.mundo.aEpoca(v, a || N.anio()); };
+  const ep = function (v, a) { return ART.mundo.aEpoca(v, a || N.anio()); };
   // ---------- Datos de cada medio ----------
   const MED = {
     musica: { nombre: 'Música', desde: 1700, of: ['interprete', 'musica', 'produccion'], decae: 0.9, base: 0.05, eqk: 0.15, premio: 'Premios Vinilo', premioDesde: 1959, cap: 'sonido',
@@ -113,7 +113,7 @@ IA.medios = (function () {
   function famDe(med, gen) { return familias(med).filter(function (f) { return f.generos.indexOf(gen) >= 0; })[0] || familias(med)[0]; }
   function porId(id) { return st().p.filter(function (p) { return p.id === +id; })[0] || null; }
   function proyectos(med) { return st().p.filter(function (p) { return !med || p.med === med; }); }
-  function capacidad(med) { return 2 + (IA.imperio.tiene(MED[med].cap) ? 1 : 0) + (especial(med) ? 1 : 0); }
+  function capacidad(med) { return 2 + (ART.imperio.tiene(MED[med].cap) ? 1 : 0) + (especial(med) ? 1 : 0); }
   function enMarcha(med) { return proyectos(med).filter(function (p) { return p.et === 'produccion' || p.et === 'ensayo'; }).length; }
   function habMedio(t, med) { return T.perfilExtra(t).medios[med] || t.hab; }
   // Equipo recomendado: lo mejor disponible en ese medio dentro del presupuesto
@@ -134,7 +134,7 @@ IA.medios = (function () {
   function borrador(med, op) {
     const a = N.anio(), o = op || {};
     const tp = tipos(med)[0], fam = familias(med)[0];
-    const b = { med: med, tipo: o.tipo || (med === 'musica' ? (a >= 1900 ? 'album' : tp.id) : tp.id), gen: o.gen || (fam ? fam.generos[0] : 'General'), esc: o.esc === undefined ? 1 : o.esc, tit: o.tit || IA.obras.tituloNuevo(['Drama']), cfg: {} };
+    const b = { med: med, tipo: o.tipo || (med === 'musica' ? (a >= 1900 ? 'album' : tp.id) : tp.id), gen: o.gen || (fam ? fam.generos[0] : 'General'), esc: o.esc === undefined ? 1 : o.esc, tit: o.tit || ART.obras.tituloNuevo(['Drama']), cfg: {} };
     if (med === 'musica') b.cfg = { banda: o.banda || null, peli: o.peli || null, estudio: 'pro', video: a >= 1983 ? 1 : 0, promo: a >= 1922 ? 'radio' : 'ninguna', exclusiva: 0 };
     if (med === 'juegos') b.cfg = { plats: platsRecomendadas(a), motor: null, idiomas: a >= 1990 ? 3 : 1, anti: 0, modelo: 'completo', edicion: 0, dim: dimRecomendada(a), modo: 'solo' };
     if (med === 'teatro') b.cfg = { sala: 'mediana', funciones: 7, semanas: 12, ensayo: 6, precio: 'normal' };
@@ -161,7 +161,7 @@ IA.medios = (function () {
     if (b.med === 'teatro') { const s = sala(b.cfg.sala); k *= s.k * (b.cfg.precio === 'premium' ? 1.1 : 1); sem = b.cfg.ensayo; }
     if (b.med === 'libros') {
       const tp = TAPAS.filter(function (x) { return x.id === b.cfg.tapa; })[0], tm = TAMANOS.filter(function (x) { return x.id === b.cfg.tam; })[0];
-      k *= tp.k * tm.k * (IA.imperio.tiene('imprenta') ? 0.7 : 1) * (1 + (b.cfg.trad - 1) * 0.08) * (b.cfg.audio ? 1.15 : 1);
+      k *= tp.k * tm.k * (ART.imperio.tiene('imprenta') ? 0.7 : 1) * (1 + (b.cfg.trad - 1) * 0.08) * (b.cfg.audio ? 1.15 : 1);
       sem = ['Novela', 'Novela gráfica', 'Manga'].indexOf(b.tipo) >= 0 ? 20 : 12;
       const ex = de(EXTENSIONES, b.cfg.ext, 'novela'), ti = de(TIRADAS, b.cfg.tirada, 'normal');
       k *= ex.k * ti.k * (b.cfg.firmas ? 1.1 : 1); sem = Math.round(sem * ex.sem);
@@ -192,10 +192,10 @@ IA.medios = (function () {
     if (e) return { error: e };
     const S = N.S, p = N.copiar(b);
     p.id = N.sigId(); p.est = 0; p.t0 = S.t; p.sr = p.sem; p.et = p.med === 'teatro' ? 'ensayo' : 'produccion'; p.ing = 0; p.gas = p.costo; p.vend = {}; p.hs = []; p.port = N.hash('p' + p.id + p.tit) % 100000;
-    IA.negocio.pagar(0, 'produccion', p.costo);
+    ART.negocio.pagar(0, 'produccion', p.costo);
     T.ocupar(p.eq, S.t + p.sem);
     // Jingle: es un encargo, te pagan al empezar
-    if (p.tipo === 'jingle') { const pago = Math.round(p.costo * 1.6); IA.negocio.cobrarEn(0, 'musica', pago); p.ing += pago; }
+    if (p.tipo === 'jingle') { const pago = Math.round(p.costo * 1.6); ART.negocio.cobrarEn(0, 'musica', pago); p.ing += pago; }
     st().p.push(p);
     N.emit('noticia', { tipo: 'estudio', texto: 'Empieza ' + (p.med === 'teatro' ? 'el ensayo de' : 'la producción de') + ' «' + p.tit + '» (' + MED[p.med].nombre.toLowerCase() + ').' });
     return { proyecto: p };
@@ -229,9 +229,9 @@ IA.medios = (function () {
       f *= (0.3 + 1.4 * Math.min(1, sh)) * (1 + (p.cfg.idiomas - 1) * 0.12) * (p.cfg.edicion ? 1.08 : 1) * (p.cfg.modelo === 'gratis' ? 1.15 : p.cfg.modelo === 'suscripcion' ? 0.9 : 1);
       f *= gustoDim(p.cfg.dim || '2d', N.anio()) * de(MODOS_J, p.cfg.modo, 'solo').f;
     }
-    if (p.med === 'libros') { f *= de(EXTENSIONES, p.cfg.ext, 'novela').f * (p.cfg.tirada === 'grande' ? (p.pub >= 65 ? 1.15 : 0.9) : de(TIRADAS, p.cfg.tirada, 'normal').f) * (p.cfg.firmas ? 1.08 : 1); f *= (1 + (p.cfg.trad - 1) * 0.12) * (p.cfg.ebook ? 1.1 : 1) * (p.cfg.audio ? 1.12 : 1); if (p.cfg.fr) { const fr = IA.franquicias.porId(p.cfg.fr); if (fr) f *= 1 + fr.pers.reduce(function (s, x) { return Math.max(s, x.pop); }, 0) / 100; } }
+    if (p.med === 'libros') { f *= de(EXTENSIONES, p.cfg.ext, 'novela').f * (p.cfg.tirada === 'grande' ? (p.pub >= 65 ? 1.15 : 0.9) : de(TIRADAS, p.cfg.tirada, 'normal').f) * (p.cfg.firmas ? 1.08 : 1); f *= (1 + (p.cfg.trad - 1) * 0.12) * (p.cfg.ebook ? 1.1 : 1) * (p.cfg.audio ? 1.12 : 1); if (p.cfg.fr) { const fr = ART.franquicias.porId(p.cfg.fr); if (fr) f *= 1 + fr.pers.reduce(function (s, x) { return Math.max(s, x.pop); }, 0) / 100; } }
     if (p.med === 'musica') f *= de(PROMOS_M, p.cfg.promo, 'ninguna').f * (p.cfg.video && N.anio() >= 1981 ? 1.12 : 1);
-    if (p.med === 'musica' && p.tipo === 'banda' && p.cfg.peli) { const o = IA.obras.porId(p.cfg.peli); if (o && o.bruto) f *= 1 + Math.min(1.5, o.bruto / tip() * 0.2); }
+    if (p.med === 'musica' && p.tipo === 'banda' && p.cfg.peli) { const o = ART.obras.porId(p.cfg.peli); if (o && o.bruto) f *= 1 + Math.min(1.5, o.bruto / tip() * 0.2); }
     return Math.round(p.costo * f);
   }
   function lanzar(p) {
@@ -241,8 +241,8 @@ IA.medios = (function () {
     p.fe = S.t; p.anio = N.anio(); p.pw = 0;
     if (p.med === 'teatro') { p.et = 'temporada'; p.semT = 0; p.ocup = N.redondear(N.limitar(Math.pow(p.pub / 70, 1.5) * 0.8, 0.15, 1), 3); p.malas = 0; }
     else { p.et = 'lanzado'; p.R = p.tipo === 'jingle' ? 0 : potencial(p); }
-    if (p.med === 'musica' && p.cfg.exclusiva && N.anio() >= 2012 && p.R) { const ad = Math.round(p.R * 0.15); IA.negocio.cobrarEn(0, 'musica', ad); p.ing += ad; p.R = Math.round(p.R * 0.92); N.emit('noticia', { tipo: 'estudio', texto: 'Sonora paga ' + IA.ui.dinero(ad) + ' por la exclusiva de «' + p.tit + '».' }); }
-    if (p.cfg.fr && p.med === 'libros') { const fr = IA.franquicias.porId(p.cfg.fr); if (fr) fr.pers.forEach(function (x) { x.pop = Math.min(99, x.pop + 2); }); }
+    if (p.med === 'musica' && p.cfg.exclusiva && N.anio() >= 2012 && p.R) { const ad = Math.round(p.R * 0.15); ART.negocio.cobrarEn(0, 'musica', ad); p.ing += ad; p.R = Math.round(p.R * 0.92); N.emit('noticia', { tipo: 'estudio', texto: 'Sonora paga ' + ART.ui.dinero(ad) + ' por la exclusiva de «' + p.tit + '».' }); }
+    if (p.cfg.fr && p.med === 'libros') { const fr = ART.franquicias.porId(p.cfg.fr); if (fr) fr.pers.forEach(function (x) { x.pop = Math.min(99, x.pop + 2); }); }
     N.emit('noticia', { tipo: 'estudio', texto: '«' + p.tit + '» sale a la venta: crítica ' + p.crit + ', público ' + p.pub + '.', importante: true });
   }
   // ---------- Ventas por formato ----------
@@ -251,7 +251,7 @@ IA.medios = (function () {
     return FMT_MUSICA.map(function (f, i) { return { id: f.id, nombre: f.nombre, parte: ws[i] / s, p: f.p }; }).filter(function (f) { return f.parte > 0.001; });
   }
   function registrarVentas(p, monto) {
-    const a = N.anio(), v = p.vend, pir = IA.historia.pirateria(a);
+    const a = N.anio(), v = p.vend, pir = ART.historia.pirateria(a);
     if (p.med === 'musica') {
       formatosMusica(a).forEach(function (f) { const digital = f.id === 'descarga' || f.id === 'stream'; v[f.id] = (v[f.id] || 0) + Math.round(monto * f.parte * (digital ? pir : 1) / ep(f.p, a)); });
       if (p.tipo === 'banda' || p.cfg.banda) v.vistas = (v.vistas || 0) + (a >= 2005 ? Math.round(monto * 0.05 / ep(0.002, a)) : 0);
@@ -295,14 +295,14 @@ IA.medios = (function () {
       let m = p.et === 'catalogo' ? p.R * 0.0004 : p.R * (1 - d) * Math.pow(d, p.pw - 1);
       // Una plataforma que muere se lleva las ventas
       if (p.med === 'juegos') m *= N.limitar(p.cfg.plats.reduce(function (x, id) { return x + (plat(id).hasta >= a ? 1 : 0); }, 0) / p.cfg.plats.length, 0, 1);
-      if (p.med === 'musica' || p.med === 'juegos') m *= p.cfg.anti === 1 ? (1 + IA.historia.pirateria(a)) / 2 + 0.05 : p.cfg.anti === 2 ? 1 : IA.historia.pirateria(a) * 0.5 + 0.5;
-      if (p.sop) { IA.negocio.pagar(0, 'produccion', Math.round(p.costo * 0.004)); p.gas += Math.round(p.costo * 0.004); }
+      if (p.med === 'musica' || p.med === 'juegos') m *= p.cfg.anti === 1 ? (1 + ART.historia.pirateria(a)) / 2 + 0.05 : p.cfg.anti === 2 ? 1 : ART.historia.pirateria(a) * 0.5 + 0.5;
+      if (p.sop) { ART.negocio.pagar(0, 'produccion', Math.round(p.costo * 0.004)); p.gas += Math.round(p.costo * 0.004); }
       m = Math.round(m);
       if (m > 0) {
         cobrar(p, m);
         registrarVentas(p, m);
         if (p.med === 'musica') repartirPlataformas(p, m);
-        if (p.med === 'juegos' && p.cfg.modo === 'masivo') { const sv = Math.round(m * 0.08); IA.negocio.pagar(0, 'emision', sv); p.gas += sv; }
+        if (p.med === 'juegos' && p.cfg.modo === 'masivo') { const sv = Math.round(m * 0.08); ART.negocio.pagar(0, 'emision', sv); p.gas += sv; }
         p.hs.push(m); if (p.hs.length > 30) p.hs.shift();
         certificar(p);
       }
@@ -336,9 +336,9 @@ IA.medios = (function () {
     if (p.conc) return 'Ya tiene su concierto en tu plataforma.';
     const c = Math.round(p.costo * 0.1);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    const e = IA.streaming.agregar(null, 'propio', { nom: 'Concierto: ' + p.tit, gen: 'Musical', q: Math.round(p.pub), ed: 0, orig: 1 });
+    const e = ART.streaming.agregar(null, 'propio', { nom: 'Concierto: ' + p.tit, gen: 'Musical', q: Math.round(p.pub), ed: 0, orig: 1 });
     if (e) return e;
-    IA.negocio.pagar(0, 'produccion', c); p.gas += c; p.conc = 1;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c; p.conc = 1;
     if (p.et === 'lanzado') p.R = Math.round(p.R * 1.08);
     return '';
   }
@@ -360,13 +360,13 @@ IA.medios = (function () {
   function tituloCancion(n) { const a = PALABRAS_CANCION[n % 16], b = PALABRAS_CANCION[(n >> 4) % 16]; return n % 3 === 0 ? a : n % 3 === 1 ? a + ' de ' + b.toLowerCase() : 'Mi ' + a.toLowerCase(); }
   function cobrar(p, m) {
     const cat = p.med;
-    IA.negocio.cobrarEn(0, cat, m);
+    ART.negocio.cobrarEn(0, cat, m);
     p.ing += m;
     st().ing[cat] = (st().ing[cat] || 0) + m;
     // Regalías de la banda (15 %) y de los autores (10 %)
     const reg = p.cfg.banda ? 0.15 : 0.1;
     const ids = p.cfg.banda ? (banda(p.cfg.banda) || { m: [] }).m : p.eq.slice(0, 1);
-    if (ids.length) { const r = Math.round(m * reg); IA.negocio.pagar(0, 'talento', r); ids.forEach(function (id) { T.pagarA(id, r / ids.length); }); p.gas += r; }
+    if (ids.length) { const r = Math.round(m * reg); ART.negocio.pagar(0, 'talento', r); ids.forEach(function (id) { T.pagarA(id, r / ids.length); }); p.gas += r; }
   }
   // ---------- Teatro ----------
   function semanaTeatro(p) {
@@ -379,7 +379,7 @@ IA.medios = (function () {
     // Cada función cuesta (elenco, sala, técnicos): unos 45 dólares de hoy por butaca, 35 en gira; sin esto una obra
     // chica rendía 20 a 50 veces lo invertido. Con la sala llena al 50 % se cubren los gastos.
     const gas = Math.round(p.costo * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 35 : 45, a) * (enTeatroPropio(p) ? 0.6 : 1));
-    cobrar(p, ing); IA.negocio.pagar(0, 'produccion', gas); p.gas += gas;
+    cobrar(p, ing); ART.negocio.pagar(0, 'produccion', gas); p.gas += gas;
     p.vend.entradas = (p.vend.entradas || 0) + entradas;
     p.vend.funciones = (p.vend.funciones || 0) + p.cfg.funciones;
     p.hs.push(ing); if (p.hs.length > 30) p.hs.shift();
@@ -398,15 +398,15 @@ IA.medios = (function () {
     if (!p || p.med !== 'teatro' || p.et !== 'catalogo') return 'La obra debe haber terminado su temporada.';
     const c = Math.round(p.costo * 0.25);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c); p.gas += c;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c;
     p.gira = N.limitar(+ciudades || 4, 2, 12); p.et = 'temporada'; p.semT = 0; p.malas = 0; p.ocup = N.limitar(p.ocup + 0.1, 0.2, 1);
     return '';
   }
   function grabar(id, destino) {
     const p = porId(id), S = N.S;
     if (!p || p.med !== 'teatro' || p.grab) return 'No se puede grabar.';
-    if (destino === 'stream') { if (!S.stream) return 'No tienes plataforma.'; const e = IA.streaming.agregar(null, 'propio', { nom: p.tit + ' (teatro grabado)', q: p.pub, ed: 0 }); if (e) return e; }
-    else { if (N.anio() < 1950) return 'La televisión todavía no compra obras de teatro.'; const pago = Math.round(p.costo * 0.3); IA.negocio.cobrarEn(0, 'teatro', pago); p.ing += pago; }
+    if (destino === 'stream') { if (!S.stream) return 'No tienes plataforma.'; const e = ART.streaming.agregar(null, 'propio', { nom: p.tit + ' (teatro grabado)', q: p.pub, ed: 0 }); if (e) return e; }
+    else { if (N.anio() < 1950) return 'La televisión todavía no compra obras de teatro.'; const pago = Math.round(p.costo * 0.3); ART.negocio.cobrarEn(0, 'teatro', pago); p.ing += pago; }
     p.grab = destino;
     return '';
   }
@@ -423,7 +423,7 @@ IA.medios = (function () {
     if (ids.some(function (id) { return st().bandas.some(function (b) { return !b.sep && b.m.indexOf(id) >= 0; }); })) return 'Alguien ya está en otra banda tuya.';
     const c = costoContrato(ids);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'talento', c);
+    ART.negocio.pagar(0, 'talento', c);
     const t0 = T.porId(ids[0]);
     st().bandas.push({ id: N.sigId(), nom: (nom || (tipo === 'solista' ? t0.nom : 'Los ' + N.elegir(D.titulo2))).slice(0, 40), tipo: tipo === 'solista' ? 'solista' : 'banda', m: ids, rel: 70, prac: 0, fans: Math.round(5000 + t0.fama * 2e5), t0: S.t, hasta: S.t + 52 * 5, sep: null });
     return '';
@@ -434,7 +434,7 @@ IA.medios = (function () {
     if (b.pr > S.t) return 'Ya practicaron este mes.';
     const c = Math.round(tip() * 0.003);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c);
+    ART.negocio.pagar(0, 'produccion', c);
     b.prac = Math.min(30, b.prac + 5); b.rel = Math.min(100, b.rel + 2); b.pr = S.t + 4;
     return '';
   }
@@ -446,7 +446,7 @@ IA.medios = (function () {
     if (b.gira) return 'Ya están de gira.';
     const c = costoGira(b, g);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c);
+    ART.negocio.pagar(0, 'produccion', c);
     const ult = st().p.filter(function (p) { return p.cfg.banda === b.id && p.pub !== undefined; }).pop();
     const q = ult ? ult.pub : 50;
     const total = Math.round(c * g.f / (g.f > 1 ? 2.2 : 1) * Math.pow(q / 60, 1.5) * (0.6 + Math.min(2, b.fans / 1e6)) * (b.reu ? 1.5 : 1));
@@ -461,7 +461,7 @@ IA.medios = (function () {
     if (b.m.some(function (x) { const t = T.porId(x); return !t || t.mu; })) return 'Falta alguien que ya no está.';
     const c = Math.round(tip() * 0.3);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'talento', c);
+    ART.negocio.pagar(0, 'talento', c);
     b.sep = null; b.rel = 60; b.reu = 1; b.hasta = S.t + 52 * 3; b.fans = Math.round(b.fans * 1.3);
     N.emit('noticia', { tipo: 'estudio', texto: '¡' + b.nom + ' vuelve a reunirse!', importante: true });
     return '';
@@ -473,13 +473,13 @@ IA.medios = (function () {
       b.rel = Math.round(N.limitar(b.rel + N.normal(-1, 2), 0, 100));
       b.fans = Math.round(b.fans * (0.995 + Math.max(0, b.rel - 50) / 5000));
       if (b.tipo === 'banda' && b.rel < 20 && N.probabilidad(0.15)) { b.sep = S.t; N.emit('noticia', { tipo: 'estudio', texto: b.nom + ' se separa: ya no se soportan.', importante: true }); }
-      if (b.hasta < S.t && b.tipo !== 'x') { b.hasta = S.t + 52 * 2; IA.negocio.pagar(0, 'talento', Math.round(costoContrato(b.m) * 0.5)); }
+      if (b.hasta < S.t && b.tipo !== 'x') { b.hasta = S.t + 52 * 2; ART.negocio.pagar(0, 'talento', Math.round(costoContrato(b.m) * 0.5)); }
     });
   }
   function semanaGiras() {
     st().bandas.forEach(function (b) {
       if (!b.gira) return;
-      IA.negocio.cobrarEn(0, 'musica', b.gira.porSem); st().ing.musica = (st().ing.musica || 0) + b.gira.porSem;
+      ART.negocio.cobrarEn(0, 'musica', b.gira.porSem); st().ing.musica = (st().ing.musica || 0) + b.gira.porSem;
       b.fans = Math.round(b.fans * 1.01 + 200);
       if (--b.gira.sem <= 0) { b.gira = null; b.reu = 0; }
     });
@@ -491,7 +491,7 @@ IA.medios = (function () {
   function plataformas(anio) { const a = anio || N.anio(); return PLAT.filter(function (p) { return p.desde <= a && p.hasta >= a; }).map(function (p) { return { id: p.id, nombre: p.nombre, cuota: cuota(p.id, a), kit: !!st().kits[p.id], muere: p.hasta, costoKit: costoKit(p) }; }); }
   function platsRecomendadas(a) { return plataformas(a).sort(function (x, y) { return y.cuota - x.cuota; }).slice(0, 2).map(function (p) { return p.id; }); }
   function costoKit() { return Math.round(tip() * 0.04); }
-  function comprarKit(id) { const S = N.S; if (st().kits[id]) return 'Ya tienes ese kit.'; const p = plat(id); if (!p || p.desde > N.anio() || p.hasta < N.anio()) return 'Esa plataforma no está a la venta.'; if (S.estudios[0].caja < costoKit()) return 'No alcanza la caja.'; IA.negocio.pagar(0, 'investigacion', costoKit()); st().kits[id] = N.S.t; return ''; }
+  function comprarKit(id) { const S = N.S; if (st().kits[id]) return 'Ya tienes ese kit.'; const p = plat(id); if (!p || p.desde > N.anio() || p.hasta < N.anio()) return 'Esa plataforma no está a la venta.'; if (S.estudios[0].caja < costoKit()) return 'No alcanza la caja.'; ART.negocio.pagar(0, 'investigacion', costoKit()); st().kits[id] = N.S.t; return ''; }
   function motor(id) { return id ? st().motores.concat(st().motorLic).filter(function (m) { return m.id === +id; })[0] || null : null; }
   function funcionesDe(a) { return FUNCIONES.filter(function (f) { return f.desde <= (a || N.anio()); }); }
   function estrellasMotor(fun, anio) { const disp = funcionesDe(anio).length; return N.limitar(Math.round(1 + 4 * fun.length / Math.max(1, disp)), 1, 5); }
@@ -503,7 +503,7 @@ IA.medios = (function () {
     if (!fun.length) return 'Elige al menos una función.';
     const c = costoMotor(fun);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'investigacion', c);
+    ART.negocio.pagar(0, 'investigacion', c);
     st().motores.push({ id: N.sigId(), nom: (nom || 'Motor ' + N.elegir(D.titulo1)).slice(0, 30), fun: fun, est: estrellasMotor(fun), anio: N.anio(), de: 0 });
     return '';
   }
@@ -511,7 +511,7 @@ IA.medios = (function () {
     const S = N.S, of = st().ofMot[+i];
     if (!of) return 'Esa oferta venció.';
     if (S.estudios[0].caja < of.precio) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'investigacion', of.precio); if (S.estudios[of.est]) S.estudios[of.est].caja += of.precio;
+    ART.negocio.pagar(0, 'investigacion', of.precio); if (S.estudios[of.est]) S.estudios[of.est].caja += of.precio;
     st().motorLic.push({ id: N.sigId(), nom: of.nom, fun: of.fun, est: of.est5, anio: N.anio(), de: of.est, hasta: S.t + 52 * 3 });
     st().ofMot.splice(+i, 1);
     return '';
@@ -523,7 +523,7 @@ IA.medios = (function () {
     if (N.anio() < 2005) return 'El contenido descargable llega con las tiendas digitales.';
     const c = Math.round(p.costo * 0.15);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c); p.gas += c;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c;
     p.R = Math.round(p.R * 0.3 + c * 1.8 * Math.pow(p.pub / 60, 2)); p.pw = 1; p.et = 'lanzado'; p.dlc = (p.dlc || 0) + 1;
     return '';
   }
@@ -543,7 +543,7 @@ IA.medios = (function () {
     if (p.cfg.trad >= 12) return 'Ya está en todos los idiomas.';
     const c = Math.round(tip() * 0.004);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c); p.gas += c;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c;
     p.cfg.trad++; p.R = Math.round(p.R * 1.06 + c * 1.5); if (p.et === 'catalogo') { p.et = 'lanzado'; p.pw = 20; }
     return '';
   }
@@ -552,8 +552,8 @@ IA.medios = (function () {
     const S = N.S, m = MED[med];
     if (anio < m.premioDesde) return;
     const mios = st().p.filter(function (p) { return p.med === med && p.anio === anio && p.pub !== undefined; });
-    const rivs = IA.rivales.activos();
-    const nom = function () { return { tit: IA.obras.tituloNuevo(['Drama']), est: rivs.length ? N.elegir(rivs).id : -1, crit: Math.round(N.normal(76, 8)), pub: Math.round(N.normal(76, 8)) }; };
+    const rivs = ART.rivales.activos();
+    const nom = function () { return { tit: ART.obras.tituloNuevo(['Drama']), est: rivs.length ? N.elegir(rivs).id : -1, crit: Math.round(N.normal(76, 8)), pub: Math.round(N.normal(76, 8)) }; };
     const cand = mios.map(function (p) { return { tit: p.tit, est: 0, crit: p.crit, pub: p.pub, p: p }; }).concat([nom(), nom(), nom(), nom(), nom(), nom()]);
     const cats = [['mejor', 'Mejor ' + (med === 'musica' ? 'álbum' : med === 'juegos' ? 'juego' : med === 'teatro' ? 'obra' : 'libro') + ' del año', function (x) { return x.crit + x.pub; }], ['critica', 'Premio de la crítica', function (x) { return x.crit; }], ['publico', 'Favorito del público', function (x) { return x.pub; }]];
     const r = { med: med, nombre: m.premio, anio: anio, cats: cats.map(function (c) { const g = cand.slice().sort(function (a, b) { return c[2](b) - c[2](a); })[0]; if (g.p) { g.p.prem = (g.p.prem || 0) + 1; S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + 0.003 * (1 - S.estudios[0].fama)), 3); } return { nombre: c[1], tit: g.tit, est: g.est }; }) };
@@ -565,10 +565,10 @@ IA.medios = (function () {
     const S = N.S, a = N.anio(), s = st();
     Object.keys(MED).forEach(function (med) { premiar(med, a - 1); });
     // Tus motores: los rivales te los licencian
-    s.motores.forEach(function (m) { if (N.probabilidad(0.15 * m.est) && a - m.anio < 12) { const pago = Math.round(tip() * 0.03 * m.est); IA.negocio.cobrarEn(0, 'juegos', pago); s.ing.juegos = (s.ing.juegos || 0) + pago; } });
+    s.motores.forEach(function (m) { if (N.probabilidad(0.15 * m.est) && a - m.anio < 12) { const pago = Math.round(tip() * 0.03 * m.est); ART.negocio.cobrarEn(0, 'juegos', pago); s.ing.juegos = (s.ing.juegos || 0) + pago; } });
     s.motorLic = s.motorLic.filter(function (m) { return m.hasta > S.t; });
     s.ofMot = [];
-    if (a >= 1980) IA.rivales.activos().slice(0, 3).forEach(function (e) {
+    if (a >= 1980) ART.rivales.activos().slice(0, 3).forEach(function (e) {
       const fun = funcionesDe(a).filter(function () { return N.probabilidad(0.7); }).map(function (f) { return f.id; });
       if (fun.length) s.ofMot.push({ est: e.id, nom: 'Motor ' + e.nombre.split(' ')[0], fun: fun, est5: estrellasMotor(fun, a), precio: Math.round(tip() * 0.06 * estrellasMotor(fun, a)) });
     });
@@ -591,8 +591,8 @@ IA.medios = (function () {
     if (!x) return 'Ese teatro no existe.';
     if (teatros().length >= 6) return 'Ya tienes 6 teatros.';
     const c = precioTeatro(id);
-    if (IA.negocio.cajaLibre(0) < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'construccion', c);
+    if (ART.negocio.cajaLibre(0) < c) return 'No alcanza la caja.';
+    ART.negocio.pagar(0, 'construccion', c);
     teatros().push({ id: N.sigId(), tipo: id, desde: S.t });
     N.emit('noticia', { tipo: 'estudio', texto: 'Compras un ' + x.nombre.toLowerCase() + ': tus obras de ese tamaño ahorran la sala y, cuando está libre, se alquila.', importante: true });
     return '';
@@ -601,7 +601,7 @@ IA.medios = (function () {
     const l = teatros(), t = l.filter(function (x) { return x.id === +idT; })[0];
     if (!t) return 'No es tu teatro.';
     if (enUso(t)) return 'Hay una obra tuya en cartel en ese teatro.';
-    IA.negocio.cobrarEn(0, 'ventaTeatros', Math.round(precioTeatro(t.tipo) * 0.8));
+    ART.negocio.cobrarEn(0, 'ventaTeatros', Math.round(precioTeatro(t.tipo) * 0.8));
     st().teatros = l.filter(function (x) { return x !== t; });
     return '';
   }
@@ -623,8 +623,8 @@ IA.medios = (function () {
     l.forEach(function (t) {
       const x = teatroTipo(t.tipo);
       if (!x) return;
-      IA.negocio.pagar(0, 'mantenimiento', Math.round(ep(x.precio) * 0.02 / 52)); // impuestos y arreglos: 2 % al año
-      if (u[t.id] === undefined) IA.negocio.cobrarEn(0, 'alquilerTeatros', Math.round(x.asientos * 7 * ep(2.5) * N.limitar(0.55 + N.normal(0, 0.15), 0.2, 0.9)));
+      ART.negocio.pagar(0, 'mantenimiento', Math.round(ep(x.precio) * 0.02 / 52)); // impuestos y arreglos: 2 % al año
+      if (u[t.id] === undefined) ART.negocio.cobrarEn(0, 'alquilerTeatros', Math.round(x.asientos * 7 * ep(2.5) * N.limitar(0.55 + N.normal(0, 0.15), 0.2, 0.9)));
     });
   }
   function cuotaMercado(med) { const a = N.anio(), v = (st().ing[med] || 0) * 52 / Math.max(1, N.semana()); return v / (ep(N.interp(MERCADO[med], a) * 1e9, a)); }

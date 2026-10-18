@@ -8,13 +8,16 @@ Uso: python3 tools/preparar_app.py"""
 import glob, json, os, plistlib, re
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP = os.path.join(RAIZ, 'app')
+# La versión definitiva manda; si no está, el HTML numerado más nuevo
 htmls = sorted(glob.glob(os.path.join(RAIZ, 'INDUSTRY_ART_v*.html')), key=lambda p: int(re.search(r'_v(\d+)', p).group(1)))
+if os.path.exists(os.path.join(RAIZ, 'INDUSTRY_ART_Definitiva.html')):
+    htmls.append(os.path.join(RAIZ, 'INDUSTRY_ART_Definitiva.html'))
 cfg = json.load(open(os.path.join(APP, 'config.json'), encoding='utf-8'))
 base = open(htmls[-1], encoding='utf-8').read()
 
 def escribir(ruta, extra):
     c = dict(cfg, **extra)
-    html = base.replace('<head>', '<head>\n<script>window.IA_CONFIG = ' + json.dumps(c, ensure_ascii=False) + ';</script>', 1)
+    html = base.replace('<head>', '<head>\n<script>window.ART_CONFIG = ' + json.dumps(c, ensure_ascii=False) + ';</script>', 1)
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     open(ruta, 'w', encoding='utf-8').write(html)
 

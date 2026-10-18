@@ -4,9 +4,9 @@
 // Continuación con los siete caminos y la llamada al elenco, nueva serie (formato, episodios, sala, tramas,
 // piloto y pitch), dónde se emite, renovar o cancelar; canal propio (parrilla, autocompletar, público por grupos,
 // patrocinadores, tema y noticias) y plataforma de streaming (planes, catálogo, licencias, bóvedas, suministro).
-IA.teleUI = (function () {
+ART.teleUI = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, O = IA.obras, U = IA.ui, F = IA.franquicias, TV = IA.tv, ST = IA.streaming, esc = N.esc;
+  const N = ART.n, D = ART.datos, O = ART.obras, U = ART.ui, F = ART.franquicias, TV = ART.tv, ST = ART.streaming, esc = N.esc;
   const dinero = U.dinero, ac = U.accion;
   const st = { fr: null, dia: 0, cont: null };
   function kpi(n, v, c) { return '<div class="kpi"><span>' + esc(n) + '</span><b class="cifra ' + (c || '') + '">' + esc(v) + '</b></div>'; }
@@ -14,7 +14,7 @@ IA.teleUI = (function () {
   function sel(c, ops, val, dv) { return '<select data-c="' + c + '"' + (dv !== undefined ? ' data-v="' + esc(dv) + '"' : '') + '>' + ops.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(val) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
   function nomEst(i) { return N.S.estudios[i] ? N.S.estudios[i].nombre : '—'; }
   function avisar(e, ok) { U.aviso(e || ok, e ? 'mal' : ''); }
-  function refrescarFicha(id) { if (id && U.fichaAbierta()) U.refrescarFicha(IA.pantallas.fichaObra(+id)); else U.refrescar(); }
+  function refrescarFicha(id) { if (id && U.fichaAbierta()) U.refrescarFicha(ART.pantallas.fichaObra(+id)); else U.refrescar(); }
   function m(x) { return N.redondear(x, 1) + ' M'; }
 
   // ---------- Obras › Franquicias ----------
@@ -82,14 +82,14 @@ IA.teleUI = (function () {
     st.borr = r.b;
     U.modal(h + '<button class="btn primario bloque" data-a="tvAbrirCrear">Seguir en la creación</button>');
   }
-  ac('tvAbrirCrear', function () { U.cerrarModal(); if (st.borr) IA.creacion.abrirCon(st.borr); st.borr = null; });
+  ac('tvAbrirCrear', function () { U.cerrarModal(); if (st.borr) ART.creacion.abrirCon(st.borr); st.borr = null; });
   ac('tvVerFr', function (v) { st.fr = +v; U.modal(fichaFranquicia(v)); });
   ac('tvContinuar', function (v) { const e = F.puedeContinuar(O.porId(+v)); if (e) return avisar(e); st.cont = null; U.modal(modalContinuar(v)); });
   ac('tvCam', function (v) { st.cont.cam = v; U.modal(modalContinuar(st.cont.o)); });
   ac('tvMed', function (v) { st.cont.med = v; });
   ac('tvPersK', function (v) { st.cont.k = +v; });
   ac('tvLlamar', function () {
-    const c = st.cont, r = IA.creacion.conAzarUI(function () { return F.continuar(c.o, c.cam, c.med, c.cam === 'spinoff' ? c.k : undefined); });
+    const c = st.cont, r = ART.creacion.conAzarUI(function () { return F.continuar(c.o, c.cam, c.med, c.cam === 'spinoff' ? c.k : undefined); });
     if (r.error) return avisar(r.error);
     abrirBorrador(r);
   });
@@ -111,7 +111,7 @@ IA.teleUI = (function () {
   ac('tvXo', function (v) { st.xo = +v; });
   ac('tvUnir', function (v) { const f = F.porId(+v), otras = F.lista().filter(function (x) { return x.est === 0 && x !== f; }); avisar(F.crossover(+v, st.xo || otras[0].id), 'Universos unidos'); U.modal(fichaFranquicia(v)); });
   ac('tvSeparar', function (v) { const p = v.split('|'); F.separar(+p[0], +p[1]); U.modal(fichaFranquicia(p[0])); });
-  ac('tvCruce', function (v) { const p = v.split('|'), r = IA.creacion.conAzarUI(function () { return F.continuarCruce(+p[0], +p[1]); }); if (r.error) return avisar(r.error); abrirBorrador(r); });
+  ac('tvCruce', function (v) { const p = v.split('|'), r = ART.creacion.conAzarUI(function () { return F.continuarCruce(+p[0], +p[1]); }); if (r.error) return avisar(r.error); abrirBorrador(r); });
   ac('tvVendA', function (v) { st.vendA = +v; });
   ac('tvVender', function (v) { const cs = N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }); avisar(F.vender(+v, st.vendA || cs[0].id), 'Franquicia vendida'); U.cerrarModal(); U.refrescar(); });
   ac('tvVenderOf', function (v) { avisar(F.aceptarOferta(+v), 'Franquicia vendida'); U.refrescar(); });
@@ -125,24 +125,24 @@ IA.teleUI = (function () {
     h += v.length ? v.map(function (x) {
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(x.nom) + '</b><span class="tenue chico">' + (x.tipo === 'franquicia' ? 'Franquicia' : 'Obra suelta') + ' · ' + esc(nomEst(x.est)) + '</span></div><div class="fila entre"><span class="cifra">' + dinero(x.precio) + '</span>' + btn('Comprar', 'tvComprar', x.tipo + '|' + (x.f ? x.f.id : x.o.id), 'primario') + '</div></div>';
     }).join('') : '<p class="tenue">Nada a la venta por ahora.</p>';
-    const mats = IA.ideas.materialesDisponibles(a);
-    const libres = mats.filter(function (x) { return IA.ideas.esLibre(x, a); }).slice(0, 10), libros = mats.filter(function (x) { return !IA.ideas.esLibre(x, a); }).slice(0, 10);
-    const fila = function (x, libre) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(x.tit) + '</b><span class="tenue chico">' + esc(x.autor || '') + (x.anio ? ' · ' + x.anio : '') + '</span></div>' + (libre ? '<span class="etiqueta">Libre</span>' : '<span class="cifra">' + dinero(IA.ideas.costoDerechos(x, a)) + '</span>') + btn('Adaptar', 'tvAdaptar', x.id, 'primario') + '</div>'; };
+    const mats = ART.ideas.materialesDisponibles(a);
+    const libres = mats.filter(function (x) { return ART.ideas.esLibre(x, a); }).slice(0, 10), libros = mats.filter(function (x) { return !ART.ideas.esLibre(x, a); }).slice(0, 10);
+    const fila = function (x, libre) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(x.tit) + '</b><span class="tenue chico">' + esc(x.autor || '') + (x.anio ? ' · ' + x.anio : '') + '</span></div>' + (libre ? '<span class="etiqueta">Libre</span>' : '<span class="cifra">' + dinero(ART.ideas.costoDerechos(x, a)) + '</span>') + btn('Adaptar', 'tvAdaptar', x.id, 'primario') + '</div>'; };
     h += '</div><h3>Libros con derechos</h3><div class="col">' + (libros.length ? libros.map(function (x) { return fila(x, false); }).join('') : '<p class="tenue">No hay libros con derechos en este año.</p>') + '</div>';
     h += '<h3>Dominio público</h3><div class="col">' + (libres.length ? libres.map(function (x) { return fila(x, true); }).join('') : '<p class="tenue">Nada libre todavía.</p>') + '</div>';
     return h;
   }
   ac('tvComprar', function (v) { const p = v.split('|'); avisar(F.comprar(p[0], +p[1]), 'Derechos comprados: ya puedes continuarla'); U.refrescar(); });
   ac('tvAdaptar', function (v) {
-    const b = IA.creacion.conAzarUI(function () { const x = O.borrador(0, { gen: ['Drama'], escala: 2, completa: true }); IA.ideas.usarMaterial(x, v, N.anio()); if (!(x.prob && x.prob.length)) IA.ideas.recomendarHistoria(x, N.anio()); IA.ideas.generarPersonajes(x); O.equipoRecomendado(x, 1); O.recalcular(x); return x; });
-    IA.creacion.abrirCon(b);
+    const b = ART.creacion.conAzarUI(function () { const x = O.borrador(0, { gen: ['Drama'], escala: 2, completa: true }); ART.ideas.usarMaterial(x, v, N.anio()); if (!(x.prob && x.prob.length)) ART.ideas.recomendarHistoria(x, N.anio()); ART.ideas.generarPersonajes(x); O.equipoRecomendado(x, 1); O.recalcular(x); return x; });
+    ART.creacion.abrirCon(b);
   });
 
   // ---------- Nueva serie y su configuración en la creación ----------
   function nuevaSerie() {
     if (!TV.puedeTV(N.anio())) return avisar('La televisión llega en ' + TV.ANIO_TV + '.');
-    const b = IA.creacion.conAzarUI(function () { const x = O.borrador(0, { gen: ['Drama'], escala: 1, completa: true }); TV.aplicar(x); if (!(x.prob && x.prob.length)) IA.ideas.recomendarHistoria(x, N.anio()); IA.ideas.generarPersonajes(x); O.equipoRecomendado(x, 1); O.recalcular(x); return x; });
-    IA.creacion.abrirCon(b);
+    const b = ART.creacion.conAzarUI(function () { const x = O.borrador(0, { gen: ['Drama'], escala: 1, completa: true }); TV.aplicar(x); if (!(x.prob && x.prob.length)) ART.ideas.recomendarHistoria(x, N.anio()); ART.ideas.generarPersonajes(x); O.equipoRecomendado(x, 1); O.recalcular(x); return x; });
+    ART.creacion.abrirCon(b);
   }
   ac('tvNuevaSerie', nuevaSerie);
   function bannerCrear(b) {
@@ -165,8 +165,8 @@ IA.teleUI = (function () {
     }
     return h + '</div>';
   }
-  function cb() { return IA.creacion.estado.b; }
-  function reaplicar(c) { const b = cb(); if (!b) return; TV.aplicar(b, c); O.recalcular(b); IA.creacion.refrescar(); }
+  function cb() { return ART.creacion.estado.b; }
+  function reaplicar(c) { const b = cb(); if (!b) return; TV.aplicar(b, c); O.recalcular(b); ART.creacion.refrescar(); }
   ac('tvFmt', function (v) { reaplicar({ fmt: v, eps: TV.formato(v).def }); });
   ac('tvSub', function (v) { reaplicar({ sub: v }); });
   ac('tvModo', function (v) { reaplicar({ modo: v }); });
@@ -174,7 +174,7 @@ IA.teleUI = (function () {
   ac('tvMin', function (v) { const b = cb(); if (b) { b.min = +v; reaplicar({}); } });
   ac('tvSala', function (v) { reaplicar({ sala: +v }); });
   ac('tvTramas', function (v) { reaplicar({ tramas: +v }); });
-  ac('tvPitch', function (v) { const b = cb(); const e = IA.creacion.conAzarUI(function () { return TV.pitch(b, v); }); avisar(e, '¡Compraron la idea!'); IA.creacion.refrescar(); });
+  ac('tvPitch', function (v) { const b = cb(); const e = ART.creacion.conAzarUI(function () { return TV.pitch(b, v); }); avisar(e, '¡Compraron la idea!'); ART.creacion.refrescar(); });
   ac('tvPiloto', function () { const e = TV.rodarPiloto(cb()); avisar(e, 'Piloto en rodaje: en cuatro semanas sabrás qué opina el público'); if (!e) { U.cerrarFicha(); U.refrescar(); } });
 
   // Pilotos esperando decisión (en Obras › En marcha)
@@ -218,7 +218,7 @@ IA.teleUI = (function () {
     return h;
   }
   ac('tvEmitir', function (v) { const p = v.split('|'), e = TV.emitir(+p[0], p[1], { completa: p[2] === '1' }); avisar(e, 'Empieza la emisión'); refrescarFicha(p[0]); });
-  ac('tvRenovar', function (v) { const r = IA.creacion.conAzarUI(function () { return TV.renovar(+v); }); if (r.error) return avisar(r.error); U.cerrarFicha(); abrirBorrador(r); });
+  ac('tvRenovar', function (v) { const r = ART.creacion.conAzarUI(function () { return TV.renovar(+v); }); if (r.error) return avisar(r.error); U.cerrarFicha(); abrirBorrador(r); });
   ac('tvCancelar', function (v) { TV.cancelar(+v); refrescarFicha(v); });
 
   /* ---------- Canal de TV: parrilla de 24 horas, programación, comercial e informe ---------- */
@@ -388,11 +388,11 @@ IA.teleUI = (function () {
     let h = '';
     if (c.hist.length > 1) {
       const hs = c.hist.slice(-52);
-      const g1 = U.grafica('tvHist', function (cv) { IA.arte.linea(cv, [{ nombre: 'Audiencia (M)', color: acento, valores: hs.map(function (x) { return x.aud; }) }], hs.map(function (x) { return U.fechaCorta(x.t); }), { formato: function (v) { return U.decimal(v, 1) + ' M'; } }); });
-      const g2 = U.grafica('tvDinero', function (cv) { IA.arte.linea(cv, [{ nombre: 'Ingresos', valores: hs.map(function (x) { return x.ing; }) }, { nombre: 'Gastos', valores: hs.map(function (x) { return x.gas; }) }], hs.map(function (x) { return U.fechaCorta(x.t); }), { formato: function (v) { return dinero(v); } }); });
+      const g1 = U.grafica('tvHist', function (cv) { ART.arte.linea(cv, [{ nombre: 'Audiencia (M)', color: acento, valores: hs.map(function (x) { return x.aud; }) }], hs.map(function (x) { return U.fechaCorta(x.t); }), { formato: function (v) { return U.decimal(v, 1) + ' M'; } }); });
+      const g2 = U.grafica('tvDinero', function (cv) { ART.arte.linea(cv, [{ nombre: 'Ingresos', valores: hs.map(function (x) { return x.ing; }) }, { nombre: 'Gastos', valores: hs.map(function (x) { return x.gas; }) }], hs.map(function (x) { return U.fechaCorta(x.t); }), { formato: function (v) { return dinero(v); } }); });
       h += '<h3>Audiencia del último año</h3><canvas class="lienzo" data-grafica="' + g1 + '"></canvas><h3>Ingresos y gastos</h3><canvas class="lienzo" data-grafica="' + g2 + '"></canvas>';
     }
-    const g3 = U.grafica('tvFranjas', function (cv) { IA.arte.barras(cv, c.porFranja, TV.FRANJAS.map(function (f) { return f.corto; }), { formato: function (v) { return U.decimal(v, 2) + ' M'; }, colores: TV.FRANJAS.map(function (f) { return f.fam ? '#ffc857' : acento; }) }); });
+    const g3 = U.grafica('tvFranjas', function (cv) { ART.arte.barras(cv, c.porFranja, TV.FRANJAS.map(function (f) { return f.corto; }), { formato: function (v) { return U.decimal(v, 2) + ' M'; }, colores: TV.FRANJAS.map(function (f) { return f.fam ? '#ffc857' : acento; }) }); });
     h += '<h3>Audiencia media por franja</h3><canvas class="lienzo" data-grafica="' + g3 + '"></canvas><p class="nota">Amarillo: horario familiar.</p>';
     h += '<h3>Cuota de pantalla por franja</h3><div class="col">' + TV.FRANJAS.map(function (fr, j) { return '<div class="tv-cf"><span>' + esc(fr.corto) + '</span><div class="tv-meta"><i style="width:' + Math.round(u.cuota[j] * 100) + '%;background:var(--acento)"></i></div><b class="cifra">' + Math.round(u.cuota[j] * 100) + ' %</b></div>'; }).join('') + '</div>';
     h += '<h3>Lo más visto de la semana</h3><div class="col">' + u.top.map(function (p, i) { return '<div class="tv-top" style="--c:' + p.col + '"><b class="tv-n">' + (i + 1) + '</b><div class="col crece"><b>' + esc(p.nom) + '</b><span class="chico tenue">' + TIPO_TV[p.tipo] + ' · ' + p.n + ' emisiones</span></div><b class="cifra">' + m(p.mx) + '</b></div>'; }).join('') + '</div>';
@@ -554,8 +554,8 @@ IA.teleUI = (function () {
     let h = '';
     if (s.hist.length > 1) {
       const hs = s.hist.slice(-52), et = hs.map(function (x) { return U.fechaCorta(x.t); });
-      const g1 = U.grafica('svSubs', function (cv) { IA.arte.linea(cv, [{ nombre: 'Suscriptores', color: acento, valores: hs.map(function (x) { return x.subs; }) }], et, { formato: function (v) { return U.grande(v); } }); });
-      const g2 = U.grafica('svAltas', function (cv) { IA.arte.linea(cv, [{ nombre: 'Altas', color: '#4ade80', valores: hs.map(function (x) { return x.nv || 0; }) }, { nombre: 'Bajas', color: '#ff6b6b', valores: hs.map(function (x) { return x.bj || 0; }) }], et, { formato: function (v) { return U.grande(v); } }); });
+      const g1 = U.grafica('svSubs', function (cv) { ART.arte.linea(cv, [{ nombre: 'Suscriptores', color: acento, valores: hs.map(function (x) { return x.subs; }) }], et, { formato: function (v) { return U.grande(v); } }); });
+      const g2 = U.grafica('svAltas', function (cv) { ART.arte.linea(cv, [{ nombre: 'Altas', color: '#4ade80', valores: hs.map(function (x) { return x.nv || 0; }) }, { nombre: 'Bajas', color: '#ff6b6b', valores: hs.map(function (x) { return x.bj || 0; }) }], et, { formato: function (v) { return U.grande(v); } }); });
       h += '<h3>Suscriptores</h3><canvas class="lienzo" data-grafica="' + g1 + '"></canvas><h3>Altas y bajas por semana</h3><canvas class="lienzo" data-grafica="' + g2 + '"></canvas>';
     }
     h += '<p class="chico">Meta del mercado: <b>' + U.grande(r.obj) + '</b> suscriptores con tu catálogo y precios. Esta semana: +' + U.grande(r.nuevos) + ' altas, −' + U.grande(r.bajas) + ' bajas.</p>';
@@ -579,7 +579,7 @@ IA.teleUI = (function () {
     let h = '<div class="kpis">' + kpi('Ingreso por suscriptor/mes', dinero(r.arpu)) + kpi('Valor de un suscriptor', dinero(r.ltv)) + kpi('Horas vistas/sem', u ? U.decimal(u.horas, 1) + ' M' : '—') + kpi('Novedades', Math.round(r.novedad * 100) + ' % del catálogo') + kpi('Originales', String(r.originales)) + kpi('Propios', String(r.propios)) + '</div>';
     if (s.hist.length > 1) {
       const hs = s.hist.slice(-52);
-      const g = U.grafica('svDinero', function (cv) { IA.arte.linea(cv, [{ nombre: 'Ingresos', valores: hs.map(function (x) { return x.ing; }) }, { nombre: 'Gastos', valores: hs.map(function (x) { return x.gas; }) }], hs.map(function (x) { return U.fechaCorta(x.t); }), { formato: function (v) { return dinero(v); } }); });
+      const g = U.grafica('svDinero', function (cv) { ART.arte.linea(cv, [{ nombre: 'Ingresos', valores: hs.map(function (x) { return x.ing; }) }, { nombre: 'Gastos', valores: hs.map(function (x) { return x.gas; }) }], hs.map(function (x) { return U.fechaCorta(x.t); }), { formato: function (v) { return dinero(v); } }); });
       h += '<h3>Ingresos y gastos</h3><canvas class="lienzo" data-grafica="' + g + '"></canvas>';
     }
     if (u && u.top.length) {

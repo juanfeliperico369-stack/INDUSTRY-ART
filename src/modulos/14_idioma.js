@@ -1,8 +1,8 @@
 /* ==== módulo: idioma ==== */
 // Inglés: el juego se escribe en español y, con el idioma en inglés, todo lo que aparece en pantalla pasa por el
-// diccionario (IA.INGLES, armado desde todos los textos del juego): primero la frase completa y, si no, cada
+// diccionario (ART.INGLES, armado desde todos los textos del juego): primero la frase completa y, si no, cada
 // fragmento conocido (las frases que el juego arma con datos). Un observador traduce lo nuevo en cuanto aparece.
-IA.idioma = (function () {
+ART.idioma = (function () {
   'use strict';
   let actual = 'es', mapa = null, re = null, obs = null;
   const LETRA = 'A-Za-zÁÉÍÓÚÜÑáéíóúüñ';
@@ -23,10 +23,10 @@ IA.idioma = (function () {
   let cargando = null;
   function cargar() {
     if (mapa || cargando) return cargando || Promise.resolve();
-    if (!(IA.INGLES_Z85 || IA.INGLES_GZ) || typeof DecompressionStream === 'undefined') { mapa = IA.INGLES || {}; return Promise.resolve(); }
+    if (!(ART.INGLES_Z85 || ART.INGLES_GZ) || typeof DecompressionStream === 'undefined') { mapa = ART.INGLES || {}; return Promise.resolve(); }
     let u;
-    if (IA.INGLES_Z85) u = deZ85(IA.INGLES_Z85, IA.INGLES_LEN);
-    else { const bin = atob(IA.INGLES_GZ); u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); }
+    if (ART.INGLES_Z85) u = deZ85(ART.INGLES_Z85, ART.INGLES_LEN);
+    else { const bin = atob(ART.INGLES_GZ); u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); }
     cargando = new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(function (txt) {
       const m = {};
       txt.split('\n').forEach(function (l) { const k = l.indexOf('\t'); if (k > 0) m[l.slice(0, k)] = l.slice(k + 1); });

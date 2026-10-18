@@ -3,10 +3,10 @@
 // con costos y talentos locales, comprar estudios (con límite antimonopolio) que quedan como filiales con costo
 // mensual y voluntad propia, coproducciones, encargos de ida y vuelta, financiar proyectos ajenos, contratos
 // exclusivos de distribución, tienda, museo, parque y convenciones propias, e investigación de los inventos.
-IA.imperio = (function () {
+ART.imperio = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, O = IA.obras;
-  const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
+  const N = ART.n, D = ART.datos, O = ART.obras;
+  const tip = function () { return ART.economia.presupuestoTipico(N.anio()); };
   // Construcciones nuevas (se suman a las básicas)
   [
     { id: 'animacion', nombre: 'Departamento de animación', desde: 1915, costo: 0.5, bono: { animacion: 4 }, efecto: '+4 a la animación de tus obras' },
@@ -40,8 +40,8 @@ IA.imperio = (function () {
     if (pais === S.estudios[0].pais || s.sedes.some(function (x) { return x.pais === pais; })) return 'Ya tienes sede ahí.';
     const c = costoSede(pais);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    const v = IA.banco.opinar(c, 'abrir una sede'); if (v) return v;
-    IA.negocio.pagar(0, 'construccion', c);
+    const v = ART.banco.opinar(c, 'abrir una sede'); if (v) return v;
+    ART.negocio.pagar(0, 'construccion', c);
     s.sedes.push({ pais: pais, t0: S.t });
     N.emit('noticia', { tipo: 'estudio', texto: 'Abres una sede en ' + p.nombre + ': rodar ahí sale más barato y llegan talentos locales.', importante: true });
     return '';
@@ -52,23 +52,23 @@ IA.imperio = (function () {
   function precioEstudio(id) {
     const e = N.S.estudios[id];
     if (!e) return 0;
-    const fr = IA.franquicias.lista().filter(function (f) { return f.est === id; }).reduce(function (s, f) { return s + IA.franquicias.valor(f); }, 0);
+    const fr = ART.franquicias.lista().filter(function (f) { return f.est === id; }).reduce(function (s, f) { return s + ART.franquicias.valor(f); }, 0);
     return Math.round(Math.max(0, e.caja) + e.tam * tip() * 5 * (0.6 + e.fama) + fr);
   }
   function puedeComprar(id) {
     const S = N.S, e = S.estudios[id];
     if (!e || id === 0 || e.quebrado) return 'Ese estudio no está a la venta.';
     if (e.filial) return 'Ya es tu filial.';
-    const cuota = IA.negocio.cuotaAnioActual(0) + IA.negocio.cuotaAnioActual(id);
-    if (cuota > IA.economia.P.ANTIMONOPOLIO) return 'Antimonopolio: juntos tendrían el ' + Math.round(cuota * 100) + ' % del mercado.';
+    const cuota = ART.negocio.cuotaAnioActual(0) + ART.negocio.cuotaAnioActual(id);
+    if (cuota > ART.economia.P.ANTIMONOPOLIO) return 'Antimonopolio: juntos tendrían el ' + Math.round(cuota * 100) + ' % del mercado.';
     if (S.estudios[0].caja < precioEstudio(id)) return 'No alcanza la caja.';
-    return IA.banco.opinar(precioEstudio(id), 'la compra') || '';
+    return ART.banco.opinar(precioEstudio(id), 'la compra') || '';
   }
   function comprarEstudio(id) {
     const err = puedeComprar(id);
     if (err) return err;
     const S = N.S, e = S.estudios[id], p = precioEstudio(id);
-    IA.negocio.pagar(0, 'construccion', p);
+    ART.negocio.pagar(0, 'construccion', p);
     e.filial = 1; e.filialDesde = S.t;
     N.emit('noticia', { tipo: 'estudio', texto: 'Compras ' + e.nombre + ': ahora es tu filial y sigue filmando con su estilo.', importante: true });
     return '';
@@ -78,15 +78,15 @@ IA.imperio = (function () {
   function venderFilial(id) {
     const e = N.S.estudios[+id];
     if (!e || !e.filial) return 'No es tu filial.';
-    IA.negocio.cobrarEn(0, 'filiales', Math.round(precioEstudio(e.id) * 0.8));
+    ART.negocio.cobrarEn(0, 'filiales', Math.round(precioEstudio(e.id) * 0.8));
     e.filial = 0;
     return '';
   }
-  function inyectar(id, monto) { const S = N.S, e = S.estudios[+id]; monto = Math.round(+monto || 0); if (!e || !e.filial || S.estudios[0].caja < monto || monto <= 0) return 'No se puede.'; IA.negocio.pagar(0, 'aporteFilial', monto); e.caja += monto; return ''; }
+  function inyectar(id, monto) { const S = N.S, e = S.estudios[+id]; monto = Math.round(+monto || 0); if (!e || !e.filial || S.estudios[0].caja < monto || monto <= 0) return 'No se puede.'; ART.negocio.pagar(0, 'aporteFilial', monto); e.caja += monto; return ''; }
   // Filiales: cada año entregan dividendos si ganaron y a veces deciden algo por su cuenta
   function anualFiliales() {
     filiales().forEach(function (e) {
-      if (e.util > 0) { const d = Math.round(e.util * 0.4); e.caja -= d; IA.negocio.cobrarEn(0, 'filiales', d); }
+      if (e.util > 0) { const d = Math.round(e.util * 0.4); e.caja -= d; ART.negocio.cobrarEn(0, 'filiales', d); }
       if (N.probabilidad(0.25)) {
         const fams = D.ORDEN_FAM.filter(function (f) { return f !== e.familia; });
         const nueva = N.elegir(fams);
@@ -104,7 +104,7 @@ IA.imperio = (function () {
     if (!e || e.quebrado || e.id === 0) return 'Elige un estudio.';
     const aporte = Math.round(O.costoTotal(o) * 0.4);
     if (e.caja < aporte * 1.5 || !N.probabilidad(N.limitar(0.35 + N.S.estudios[0].fama * 0.5, 0.2, 0.9))) return e.nombre + ' no quiere coproducir esta vez.';
-    e.caja -= aporte; IA.negocio.cobrarEn(0, 'coproduccion', aporte);
+    e.caja -= aporte; ART.negocio.cobrarEn(0, 'coproduccion', aporte);
     o.copro = { est: e.id, parte: 0.4 };
     return '';
   }
@@ -112,14 +112,14 @@ IA.imperio = (function () {
   function encargar(estId, gen, escala) {
     const S = N.S, e = S.estudios[+estId];
     if (!e || e.quebrado || e.id === 0) return 'Elige un estudio.';
-    if (N.anio() < IA.datos.CINE_DESDE) return 'El cine nace en ' + IA.datos.CINE_DESDE + '.';
+    if (N.anio() < ART.datos.CINE_DESDE) return 'El cine nace en ' + ART.datos.CINE_DESDE + '.';
     const b = O.borrador(e.id, { gen: [gen || 'Drama'], escala: escala === undefined ? 2 : +escala, completa: true });
     O.equipoRecomendado(b, 1);
     if (!O.equipoCompleto(b)) return 'No consiguen equipo ahora.';
     const precio = Math.round((b.pp + O.costoTalento(b)) * 1.15);
     if (S.estudios[0].caja < precio) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', precio); e.caja += precio;
-    const o = IA.produccion.iniciar(b, IA.negocio.contextoDe(e.id));
+    ART.negocio.pagar(0, 'produccion', precio); e.caja += precio;
+    const o = ART.produccion.iniciar(b, ART.negocio.contextoDe(e.id));
     o.encargo = 0;
     N.emit('noticia', { tipo: 'estudio', texto: e.nombre + ' filma «' + o.tit + '» por encargo tuyo: te quedarás con el 75 % de lo que gane.', importante: true });
     return '';
@@ -131,11 +131,11 @@ IA.imperio = (function () {
       const e = N.elegir(S.estudios.filter(function (x) { return x.id > 0 && !x.quebrado; }));
       if (e) s.ofEnc.push({ id: N.sigId(), est: e.id, gen: N.elegir(D.familia(e.familia).generos.filter(function (g) { return g !== 'Erótico'; })), pago: Math.round(tip() * (0.8 + N.azar() * 0.6)), hasta: S.t + 6 });
     }
-    filiales().forEach(function (e) { IA.negocio.pagar(0, 'filiales', costoFilial(e)); });
+    filiales().forEach(function (e) { ART.negocio.pagar(0, 'filiales', costoFilial(e)); });
     s.sedes.forEach(function (x) {
-      IA.negocio.pagar(0, 'personal', Math.round(tip() * 0.015));
+      ART.negocio.pagar(0, 'personal', Math.round(tip() * 0.015));
       // Talentos locales: cada tanto aparece una promesa de la región de tu sede
-      if (N.probabilidad(0.35)) { const p = D.pais(x.pais); const t = IA.talentos.crearPropio({ of: N.elegir(['interprete', 'interprete', 'direccion', 'guion']), edad: N.entero(18, 30), reg: p.region, pot: N.entero(55, 80) }); t.propio = 0; t.local = x.pais; }
+      if (N.probabilidad(0.35)) { const p = D.pais(x.pais); const t = ART.talentos.crearPropio({ of: N.elegir(['interprete', 'interprete', 'direccion', 'guion']), edad: N.entero(18, 30), reg: p.region, pot: N.entero(55, 80) }); t.propio = 0; t.local = x.pais; }
     });
   }
   // Aceptar un encargo: abre un compromiso; la próxima obra que inicies con ese género lo cumple
@@ -149,7 +149,7 @@ IA.imperio = (function () {
   function alCrear(o) {
     const S = N.S, p = S.encargoPend;
     if (o.est === 0 && p && o.gen.indexOf(p.gen) >= 0) {
-      o.encargoDe = p.est; IA.negocio.cobrarEn(0, 'encargos', p.pago);
+      o.encargoDe = p.est; ART.negocio.cobrarEn(0, 'encargos', p.pago);
       N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» cumple el encargo de ' + S.estudios[p.est].nombre + ': te pagan y se quedan con el 70 % de lo que gane.' });
       delete S.encargoPend;
     }
@@ -161,7 +161,7 @@ IA.imperio = (function () {
     if (!o || o.est === 0 || o.fin) return 'No se puede financiar.';
     const m = Math.round(O.costoTotal(o) * 0.25);
     if (S.estudios[0].caja < m) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', m); S.estudios[o.est].caja += m;
+    ART.negocio.pagar(0, 'produccion', m); S.estudios[o.est].caja += m;
     o.fin = { m: m, pct: 0.3 };
     return '';
   }
@@ -173,7 +173,7 @@ IA.imperio = (function () {
     if (s.dist.some(function (d) { return d.est === e.id && d.hasta > S.t; })) return 'Ya distribuyes sus obras.';
     const c = costoDistribucion(e.id) * (+anios || 2);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'distribucion', c);
+    ART.negocio.pagar(0, 'distribucion', c);
     s.dist.push({ est: e.id, hasta: S.t + 52 * (+anios || 2) });
     return '';
   }
@@ -191,17 +191,17 @@ IA.imperio = (function () {
     if (!o || !f.id || f.desde > N.anio()) return;
     const ap = aporteFin(f.id, costo);
     if (ap <= 0) return;
-    IA.negocio.cobrarEn(0, 'coproduccion', ap);
+    ART.negocio.cobrarEn(0, 'coproduccion', ap);
     o.finJ = { t: f.id, ap: ap };
-    N.emit('noticia', { tipo: 'estudio', texto: f.nombre + ' para «' + o.tit + '»: llegan ' + IA.ui.dinero(ap) + '.' });
+    N.emit('noticia', { tipo: 'estudio', texto: f.nombre + ' para «' + o.tit + '»: llegan ' + ART.ui.dinero(ap) + '.' });
   }
   // Al terminar una obra se reparten coproducción, encargos, financiación y distribución
   function alTerminar(o) {
     const S = N.S, ing = O.ingresosTotales(o) || 0, s = st();
     const pasar = function (de, a, m, cat) {
       if (m <= 0) return;
-      if (de === 0) IA.negocio.pagar(0, cat, m); else S.estudios[de].caja -= m;
-      if (a === 0) IA.negocio.cobrarEn(0, cat, m); else if (a > 0) S.estudios[a].caja += m;
+      if (de === 0) ART.negocio.pagar(0, cat, m); else S.estudios[de].caja -= m;
+      if (a === 0) ART.negocio.cobrarEn(0, cat, m); else if (a > 0) S.estudios[a].caja += m;
     };
     if (o.copro) pasar(0, o.copro.est, Math.round(ing * o.copro.parte), 'coproduccion');
     if (o.finJ && o.est === 0) {
@@ -220,13 +220,13 @@ IA.imperio = (function () {
   function semana() {
     const S = N.S, est = S.estudios[0], fans = S.fans || 0, t = tip();
     let ing = 0;
-    if (tiene('tienda')) ing += Math.min(t * 0.02, fans * IA.mundo.aEpoca(0.02, N.anio()));
-    if (tiene('museo')) ing += Math.min(t * 0.01, fans * IA.mundo.aEpoca(0.01, N.anio()));
+    if (tiene('tienda')) ing += Math.min(t * 0.02, fans * ART.mundo.aEpoca(0.02, N.anio()));
+    if (tiene('museo')) ing += Math.min(t * 0.01, fans * ART.mundo.aEpoca(0.01, N.anio()));
     if (tiene('parque')) {
-      const pop = IA.franquicias.lista().filter(function (f) { return f.est === 0; }).reduce(function (s, f) { return s + f.pers.slice(0, 3).reduce(function (a, p) { return a + p.pop; }, 0); }, 0);
+      const pop = ART.franquicias.lista().filter(function (f) { return f.est === 0; }).reduce(function (s, f) { return s + f.pers.slice(0, 3).reduce(function (a, p) { return a + p.pop; }, 0); }, 0);
       ing += t * (0.004 + Math.min(0.06, pop / 6000)) - t * 0.006;
     }
-    if (ing) IA.negocio.cobrarEn(0, 'fans', Math.round(Math.max(0, ing)));
+    if (ing) ART.negocio.cobrarEn(0, 'fans', Math.round(Math.max(0, ing)));
     // Investigación en curso
     const s = st();
     if (s.inv && --s.inv.sr <= 0) {
@@ -244,16 +244,16 @@ IA.imperio = (function () {
     if (st().eventos > S.t) return 'Ya organizaste una convención este trimestre.';
     const c = costoEvento();
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'marketing', c);
+    ART.negocio.pagar(0, 'marketing', c);
     const entradas = Math.round(c * (tiene('arena') ? 1.3 : 0.7) * (0.6 + Math.min(1, (S.fans || 0) / 2e6)));
-    IA.negocio.cobrarEn(0, 'fans', entradas);
+    ART.negocio.cobrarEn(0, 'fans', entradas);
     S.fans = Math.round((S.fans || 0) * 1.03 + 500);
     if (o && o.est === 0 && o.et !== 'terminada') o.ddes = (o.ddes || 0) + 3;
     st().eventos = S.t + 13;
     return '';
   }
   // ---------- Investigación de inventos ----------
-  function invento(id) { return IA.historia.INVENTOS.filter(function (x) { return x.id === id; })[0]; }
+  function invento(id) { return ART.historia.INVENTOS.filter(function (x) { return x.id === id; })[0]; }
   function estadoInvento(x) {
     const s = st(), a = N.anio(), t = s.tec[x.id];
     if (t && t.de === 0) return 'tuyo';
@@ -270,7 +270,7 @@ IA.imperio = (function () {
     if (s.inv) return 'Tu laboratorio ya investiga otra cosa.';
     const c = costoInvento(x);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'investigacion', c);
+    ART.negocio.pagar(0, 'investigacion', c);
     s.inv = { id: id, sr: semanasInvento(x) };
     return '';
   }
@@ -280,14 +280,14 @@ IA.imperio = (function () {
     if (!x || !t || t.de === 0 || t.lic) return 'No hay quién te la licencie.';
     const c = costoLicenciaTec(x);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'investigacion', c); S.estudios[t.de].caja += c;
+    ART.negocio.pagar(0, 'investigacion', c); S.estudios[t.de].caja += c;
     t.lic = 1;
     return '';
   }
   // +2 al departamento mientras el invento es novedad (lo tienes antes que el mundo o hasta 5 años después); tope +6
   function bonoTec(b) {
     const s = st(), a = N.anio(), suma = {};
-    IA.historia.INVENTOS.forEach(function (x) {
+    ART.historia.INVENTOS.forEach(function (x) {
       const t = s.tec[x.id];
       const mio = t && (t.de === 0 || t.lic);
       if (mio && a < x.anio + 5) suma[x.dep] = Math.min(3, (suma[x.dep] || 0) + 1);
@@ -297,14 +297,14 @@ IA.imperio = (function () {
   // Rivales: inventan antes de tiempo y te pueden licenciar; tus inventos se los licencias tú
   function anual() {
     const S = N.S, s = st(), a = N.anio();
-    IA.historia.INVENTOS.forEach(function (x) {
+    ART.historia.INVENTOS.forEach(function (x) {
       if (s.tec[x.id] || x.anio <= a || x.anio > a + 8) return;
       if (N.probabilidad(0.08)) {
         const e = N.elegir(S.estudios.filter(function (y) { return y.id > 0 && !y.quebrado; }));
         if (e) { s.tec[x.id] = { de: e.id, t: S.t }; N.emit('noticia', { tipo: 'rival', texto: e.nombre + ' presenta «' + x.nombre + '» antes que nadie. Puedes licenciarlo.' }); }
       }
     });
-    Object.keys(s.tec).forEach(function (id) { const x = invento(id), t = s.tec[id]; if (t.de === 0 && x && a < x.anio) IA.negocio.cobrarEn(0, 'investigacion', Math.round(tip() * 0.08 * N.entero(1, 3))); });
+    Object.keys(s.tec).forEach(function (id) { const x = invento(id), t = s.tec[id]; if (t.de === 0 && x && a < x.anio) ART.negocio.cobrarEn(0, 'investigacion', Math.round(tip() * 0.08 * N.entero(1, 3))); });
     anualFiliales();
   }
   return { FINANCIACION: FINANCIACION, financiacionDe: financiacionDe, aporteFin: aporteFin, financiar: financiar, tiene: tiene, info: info, costoSede: costoSede, abrirSede: abrirSede, cerrarSede: cerrarSede, sedes: function () { return st().sedes; }, ahorroRodaje: ahorroRodaje,

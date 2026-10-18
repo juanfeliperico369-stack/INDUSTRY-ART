@@ -1,9 +1,9 @@
 /* ==== módulo: mundo ==== */
 // Población real por región y edad, inflación (IPC), acceso y frecuencia del cine, precio de la entrada,
 // calendario con estaciones por hemisferio y tendencias de géneros.
-IA.mundo = (function () {
+ART.mundo = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos;
+  const N = ART.n, D = ART.datos;
 
   // ---------- Población (millones) ----------
   // Real hasta 2024, proyección media de la ONU (World Population Prospects 2024) hasta 2100 y ficción del
@@ -185,10 +185,10 @@ IA.mundo = (function () {
     }
     return 1;
   }
-  // Festividades con fechas reales: viven en IA.cal con su regla (fija, Pascua, luna nueva, calendario
+  // Festividades con fechas reales: viven en ART.cal con su regla (fija, Pascua, luna nueva, calendario
   // islámico). Aquí quedan los atajos que usan la economía y las pantallas.
-  function festividades(sem, reg, anio) { return IA.cal.fiestasSemana(sem, reg, anio || N.anio()); }
-  function bonoRegion(famId, reg, sem, anio) { return IA.cal.bonoFiesta(famId, reg, sem, anio || N.anio()); }
+  function festividades(sem, reg, anio) { return ART.cal.fiestasSemana(sem, reg, anio || N.anio()); }
+  function bonoRegion(famId, reg, sem, anio) { return ART.cal.bonoFiesta(famId, reg, sem, anio || N.anio()); }
   const NOMBRES_MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   function nombreMes(m) { return NOMBRES_MES[m]; }
   // Nombre de las festividades de una semana en una región (la de tu sede si no se dice)

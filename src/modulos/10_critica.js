@@ -5,9 +5,9 @@
 // Invaluable) que cambian con el tiempo; insignias (Hype, Oro, De autor, Blockbuster, Media, Independiente);
 // cartas de fans; la revista de la industria (Boletín, Rincón de la crítica y Editorial); la cronología del
 // estudio y su biografía pública.
-IA.critica = (function () {
+ART.critica = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, O = IA.obras, E = IA.economia;
+  const N = ART.n, D = ART.datos, O = ART.obras, E = ART.economia;
 
   // gustos: familias que ama (+6) y que no soporta (−6); valora: autor (crítica alta y público bajo), espectaculo, risa
   const CRITICOS = [
@@ -185,7 +185,7 @@ IA.critica = (function () {
     const max = function (f) { return mias.reduce(function (a, o) { return !a || f(o) > f(a) ? o : a; }, null); };
     const fams = {}; mias.forEach(function (o) { fams[o.fam] = (fams[o.fam] || 0) + 1; });
     const famTop = Object.keys(fams).sort(function (a, b) { return fams[b] - fams[a]; })[0];
-    const clas = mias.map(function (o) { return IA.taxonomia.ORDEN_CLAS.indexOf(o.clas); });
+    const clas = mias.map(function (o) { return ART.taxonomia.ORDEN_CLAS.indexOf(o.clas); });
     const prom = clas.reduce(function (a, x) { return a + Math.max(0, x); }, 0) / clas.length;
     return {
       mejor: max(function (o) { return o.crit; }), taquillera: max(function (o) { return o.bruto || 0; }), cara: max(function (o) { return O.costoTotal(o); }),

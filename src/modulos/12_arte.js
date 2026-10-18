@@ -3,7 +3,7 @@
 // gráficas y sonidos. No lee el estado del juego: todo llega por parámetros.
 // Todo el azar sale de hash()/azar(): la misma obra o talento se ve siempre igual.
 // Las funciones que reciben ctx dibujan en px CSS (el ctx ya viene escalado).
-IA.arte = (function () {
+ART.arte = (function () {
   'use strict';
 
   const TAU = Math.PI * 2;

@@ -2,10 +2,10 @@
 // Convenciones (cultura pop desde 1970; antes, exposiciones universales) con salas por familia y tres
 // acciones por convención; rueda de prensa con promesas que castigan si la obra no cumple; ánimo de los fans;
 // paquetes de prensa (portada); radar de redes (desde 1995; antes, columnas de chismes); rivales que mueven fechas.
-IA.prensa = (function () {
+ART.prensa = (function () {
   'use strict';
-  const N = IA.n, O = IA.obras, D = IA.datos;
-  const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
+  const N = ART.n, O = ART.obras, D = ART.datos;
+  const tip = function () { return ART.economia.presupuestoTipico(N.anio()); };
   const ACCIONES = [
     { id: 'panel', nombre: 'Panel con adelanto', des: 3, con: 0.02, texto: 'Muestras escenas: +3 a la expectativa.' },
     { id: 'reparto', nombre: 'Anuncio de reparto', des: 1, con: 0.04, texto: 'Presentas a tus estrellas: más gente se entera.' },
@@ -18,8 +18,8 @@ IA.prensa = (function () {
   ];
   // Convención de esta semana (del circuito o, antes de 1970, una exposición universal)
   function convencionActual() {
-    const y = N.anio(), sem = N.semana(), rg = IA.cal.rangoSemana(y, sem);
-    return IA.cal.circuitoAnio(y).filter(function (x) { return (x.tipo === 'convencion' || x.tipo === 'expo') && x.ini <= rg[1] && x.fin >= rg[0]; })[0] || null;
+    const y = N.anio(), sem = N.semana(), rg = ART.cal.rangoSemana(y, sem);
+    return ART.cal.circuitoAnio(y).filter(function (x) { return (x.tipo === 'convencion' || x.tipo === 'expo') && x.ini <= rg[1] && x.fin >= rg[0]; })[0] || null;
   }
   // Obras que pueden ir: en desarrollo, en cartelera o estrenadas hace menos de 12 meses
   function elegibles() {
@@ -66,7 +66,7 @@ IA.prensa = (function () {
     if (!o || o.est !== 0 || ['terminada'].indexOf(o.et) >= 0) return 'Solo obras que aún no terminan.';
     if (o.portada) return 'Ya tuvo portada.';
     if (N.S.estudios[0].caja < costoPortada()) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'marketing', costoPortada());
+    ART.negocio.pagar(0, 'marketing', costoPortada());
     o.portada = 1; o.dcon = Math.min(0.12, (o.dcon || 0) + 0.03);
     return '';
   }
@@ -75,7 +75,7 @@ IA.prensa = (function () {
     const S = N.S, out = [], red = N.anio() >= 1995;
     S.obras.forEach(function (o) {
       if (o.est === 0) { if (o.prog && o.et === 'lista') out.push({ tipo: 'propio', txt: 'Tu adelanto de «' + o.tit + '» da que hablar.' }); return; }
-      if (o.prog && o.et === 'lista' && o.fe - S.t <= 8) out.push({ tipo: 'anuncio', txt: S.estudios[o.est].nombre + ' anuncia «' + o.tit + '» para ' + IA.cal.texto(IA.cal.viernesDeT(o.fe)) + '.' });
+      if (o.prog && o.et === 'lista' && o.fe - S.t <= 8) out.push({ tipo: 'anuncio', txt: S.estudios[o.est].nombre + ' anuncia «' + o.tit + '» para ' + ART.cal.texto(ART.cal.viernesDeT(o.fe)) + '.' });
       else if (o.et === 'rodaje' && N.hash('r' + o.id) % 5 === 0) out.push({ tipo: 'rumor', txt: (red ? 'Filtración: ' : 'Se rumorea que ') + S.estudios[o.est].nombre + ' rueda algo de ' + o.gen[0].toLowerCase() + '.' });
     });
     const t = D.familias.slice().sort(function (a, b) { return (S.mundo.tendencias[b.id] || 0) - (S.mundo.tendencias[a.id] || 0); })[0];
@@ -87,7 +87,7 @@ IA.prensa = (function () {
     const S = N.S;
     S.obras.forEach(function (o) {
       if (o.est === 0 || !o.prog || o.et !== 'lista' || o.movida || o.fe - S.t < 3 || o.fe - S.t > 10) return;
-      if (IA.lanzamiento.competenciaPrevista(o.fe, o.id) >= 2.5 && N.probabilidad(0.3)) {
+      if (ART.lanzamiento.competenciaPrevista(o.fe, o.id) >= 2.5 && N.probabilidad(0.3)) {
         const d = N.probabilidad(0.5) ? 2 : -1;
         o.fe = Math.max(S.t + 2, o.fe + d); o.movida = 1;
         if (S.obras.some(function (x) { return x.est === 0 && x.prog && Math.abs(x.fe - o.fe) <= 2; })) N.emit('noticia', { tipo: 'rival', texto: S.estudios[o.est].nombre + ' mueve el estreno de «' + o.tit + '».' });

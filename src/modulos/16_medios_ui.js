@@ -3,9 +3,9 @@
 // (tipo, género, tamaño, equipo y opciones del medio), ficha con ventas por formato, certificaciones, jugadores,
 // ocupación o copias y sus acciones (gira, DLC, soporte, paquete, traducción, grabar), bandas y solistas,
 // plataformas con su cuota y kits, motores propios y licenciados, y los premios de cada medio.
-IA.mediosUI = (function () {
+ART.mediosUI = (function () {
   'use strict';
-  const N = IA.n, U = IA.ui, Md = IA.medios, T = IA.talentos, esc = N.esc;
+  const N = ART.n, U = ART.ui, Md = ART.medios, T = ART.talentos, esc = N.esc;
   const dinero = U.dinero, ac = U.accion;
   const st = { b: null, banda: [], motorFun: {} };
   const PALETA = ['#c0392b', '#1b2a4a', '#d4a017', '#1e6b3a', '#6c3483', '#e67e22', '#111111', '#f4f1ea', '#1abc9c', '#e84393'];
@@ -51,7 +51,7 @@ IA.mediosUI = (function () {
     if (med === 'teatro') h += teatrosUI();
     if (med === 'musica') h += listaExitos() + bandasUI();
     if (med === 'juegos') h += juegosUI();
-    if (med === 'libros') h += '<p class="nota">' + (IA.imperio.tiene('imprenta') ? 'Tienes imprenta propia: imprimir cuesta 30 % menos.' : 'Con una imprenta propia (Negocio › Construcciones) imprimir cuesta 30 % menos.') + ' Puedes hacer cómics o mangas de tus franquicias.</p>';
+    if (med === 'libros') h += '<p class="nota">' + (ART.imperio.tiene('imprenta') ? 'Tienes imprenta propia: imprimir cuesta 30 % menos.' : 'Con una imprenta propia (Negocio › Construcciones) imprimir cuesta 30 % menos.') + ' Puedes hacer cómics o mangas de tus franquicias.</p>';
     h += '<h3>Tus proyectos</h3><div class="col">' + (ps.length ? ps.slice(0, 40).map(function (p) {
       const est = p.et === 'produccion' || p.et === 'ensayo' ? (p.et === 'ensayo' ? 'Ensayo' : 'Producción') + ': faltan ' + p.sr + ' sem.' : p.et === 'temporada' ? 'En temporada · ' + Math.round(p.ocup * 100) + ' % de ocupación' : (p.et === 'lanzado' ? 'A la venta' : 'Catálogo') + ' · público ' + p.pub;
       return '<div class="tarjeta fila" data-a="mdVer" data-v="' + p.id + '" style="cursor:pointer">' + caja(p) + '<div class="col crece"><b>' + esc(p.tit) + (p.cert ? ' <span class="etiqueta oro">' + esc(Md.CERT.filter(function (c) { return c.id === p.cert; })[0].nombre) + '</span>' : '') + (p.prem ? ' <span class="etiqueta oro">★' + p.prem + '</span>' : '') + '</b><span class="tenue chico">' + esc(tipoNom(p)) + ' · ' + esc(p.gen) + '</span><span class="chico">' + esc(est) + ' · ingresos ' + dinero(p.ing) + '</span></div></div>';
@@ -88,7 +88,7 @@ IA.mediosUI = (function () {
     const bs = Md.bandas();
     let h = '<h3>Bandas y solistas</h3><div class="col">' + (bs.length ? bs.map(function (b) {
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(b.nom) + '</b><span class="tenue chico">' + (b.tipo === 'solista' ? 'Solista' : b.m.length + ' integrantes') + (b.sep ? ' · separada' : '') + '</span></div><span class="chico">Relación ' + b.rel + ' · práctica ' + b.prac + ' · fans ' + grande(b.fans) + (b.gira ? ' · de gira (' + b.gira.sem + ' sem.)' : '') + '</span>' +
-        '<div class="fila">' + (b.sep ? btn('Reunirlos · ' + dinero(Math.round(IA.economia.presupuestoTipico(N.anio()) * 0.3)), 'mdReunir', b.id) : btn('Practicar', 'mdPracticar', b.id) + Md.GIRAS.map(function (g) { return btn(g.nombre + ' · ' + dinero(Md.costoGira(b, g)), 'mdGira', b.id + '|' + g.id, '', b.gira ? 'Ya están de gira' : ''); }).join('')) + '</div></div>';
+        '<div class="fila">' + (b.sep ? btn('Reunirlos · ' + dinero(Math.round(ART.economia.presupuestoTipico(N.anio()) * 0.3)), 'mdReunir', b.id) : btn('Practicar', 'mdPracticar', b.id) + Md.GIRAS.map(function (g) { return btn(g.nombre + ' · ' + dinero(Md.costoGira(b, g)), 'mdGira', b.id + '|' + g.id, '', b.gira ? 'Ya están de gira' : ''); }).join('')) + '</div></div>';
     }).join('') : '<p class="tenue chico">Firma una banda o un solista para grabar discos.</p>') + '</div>';
     const cand = T.disponibles('interprete', 0).concat(T.disponibles('musica', 0)).sort(function (a, b) { return Md.habMedio(b, 'musica') - Md.habMedio(a, 'musica'); }).slice(0, 12);
     h += '<div class="tarjeta"><b>Firmar banda o solista</b><div class="col">' + cand.map(function (t) {
@@ -154,26 +154,26 @@ IA.mediosUI = (function () {
     if (b.med === 'teatro') {
       h += '<div class="fila"><label class="campo"><span>Sala</span>' + sel('mdCfg', Md.SALAS.map(function (x) { return [x.id, x.nombre + ' (' + x.asientos + ')']; }), c.sala, 'sala') + '</label><label class="campo"><span>Funciones por semana</span><input type="number" min="3" max="10" data-c="mdCfg" data-v="funciones" value="' + c.funciones + '"></label></div>' +
         '<div class="fila"><label class="campo"><span>Semanas de temporada</span><input type="number" min="4" max="52" data-c="mdCfg" data-v="semanas" value="' + c.semanas + '"></label><label class="campo"><span>Semanas de ensayo</span><input type="number" min="3" max="16" data-c="mdCfg" data-v="ensayo" value="' + c.ensayo + '"></label></div>' +
-        '<label class="campo"><span>Precio de la entrada</span>' + sel('mdCfg', Md.PRECIOS_T.map(function (x) { return [x.id, x.nombre + ' · ' + dinero(IA.mundo.aEpoca(x.p, a)) + (x.ocup ? ' · ocupación ' + (x.ocup > 0 ? '+' : '') + Math.round(x.ocup * 100) + ' %' : '')]; }), c.precio || 'normal', 'precio') + '</label>';
+        '<label class="campo"><span>Precio de la entrada</span>' + sel('mdCfg', Md.PRECIOS_T.map(function (x) { return [x.id, x.nombre + ' · ' + dinero(ART.mundo.aEpoca(x.p, a)) + (x.ocup ? ' · ocupación ' + (x.ocup > 0 ? '+' : '') + Math.round(x.ocup * 100) + ' %' : '')]; }), c.precio || 'normal', 'precio') + '</label>';
     }
     if (b.med === 'libros') {
       h += '<div class="fila"><label class="campo"><span>Tapa</span>' + sel('mdCfg', Md.TAPAS.map(function (x) { return [x.id, x.nombre]; }), c.tapa, 'tapa') + '</label><label class="campo"><span>Tamaño</span>' + sel('mdCfg', Md.TAMANOS.map(function (x) { return [x.id, x.nombre]; }), c.tam, 'tam') + '</label></div>' +
         '<div class="fila"><label class="campo"><span>Idiomas</span><input type="number" min="1" max="12" data-c="mdCfg" data-v="trad" value="' + c.trad + '"></label>' +
         (a >= 1950 ? '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="audio"' + (c.audio ? ' checked' : '') + '> Audiolibro</label>' : '') + (a >= 2007 ? '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="ebook"' + (c.ebook ? ' checked' : '') + '> Libro digital</label>' : '') + '</div>' +
-        '<label class="campo"><span>De una franquicia tuya</span>' + sel('mdCfg', [['', '— obra original —']].concat(IA.franquicias.lista().filter(function (f) { return f.est === 0; }).map(function (f) { return [f.id, f.nom]; })), c.fr || '', 'fr') + '</label>' +
+        '<label class="campo"><span>De una franquicia tuya</span>' + sel('mdCfg', [['', '— obra original —']].concat(ART.franquicias.lista().filter(function (f) { return f.est === 0; }).map(function (f) { return [f.id, f.nom]; })), c.fr || '', 'fr') + '</label>' +
         '<div class="fila"><label class="campo"><span>Extensión</span>' + sel('mdCfg', Md.EXTENSIONES.map(function (x) { return [x.id, x.nombre]; }), c.ext || 'novela', 'ext') + '</label><label class="campo"><span>Primera tirada</span>' + sel('mdCfg', Md.TIRADAS.map(function (x) { return [x.id, x.nombre]; }), c.tirada || 'normal', 'tirada') + '</label></div>' +
         '<label class="chip"><input type="checkbox" data-c="mdCfgB" data-v="firmas"' + (c.firmas ? ' checked' : '') + '> Gira de firmas (+8 % de ventas)</label><p class="nota info">Una tirada grande vende más si el libro gusta y deja cajas sin vender si no; la corta arriesga poco pero tarda en reimprimir.</p>';
     }
-    h += '<h3>Equipo</h3><div class="col">' + b.eq.map(function (id) { const t = T.porId(id); return t ? '<div class="fila entre"><span>' + esc(t.nom) + ' <span class="tenue chico">' + esc((IA.datos.oficio(t.of) || { nombre: t.of }).nombre) + '</span></span><span class="cifra">' + Md.habMedio(t, b.med) + '</span></div>' : ''; }).join('') + '</div>' + btn('Buscar otro equipo', 'mdOtroEq');
+    h += '<h3>Equipo</h3><div class="col">' + b.eq.map(function (id) { const t = T.porId(id); return t ? '<div class="fila entre"><span>' + esc(t.nom) + ' <span class="tenue chico">' + esc((ART.datos.oficio(t.of) || { nombre: t.of }).nombre) + '</span></span><span class="cifra">' + Md.habMedio(t, b.med) + '</span></div>' : ''; }).join('') + '</div>' + btn('Buscar otro equipo', 'mdOtroEq');
     const err = Md.validar(b);
     h += '<div class="kpis">' + kpi('Costo', dinero(b.costo)) + kpi('Semanas', b.sem) + '</div>' + (err ? '<p class="mal chico">' + esc(err) + '</p>' : '') + btn('Empezar', 'mdIniciar', '', 'primario bloque', err) + btn('Cancelar', 'cerrarFicha', '', 'bloque');
     dibujar();
     return h;
   }
   function refrescarNuevo() { Md.recalcular(st.b); U.refrescarFicha(fichaNuevo()); }
-  ac('mdNuevo', function (v) { st.b = IA.creacion.conAzarUI(function () { return Md.borrador(v); }); U.abrirFicha(fichaNuevo(), 'medio'); });
+  ac('mdNuevo', function (v) { st.b = ART.creacion.conAzarUI(function () { return Md.borrador(v); }); U.abrirFicha(fichaNuevo(), 'medio'); });
   ac('mdTit', function (v) { st.b.tit = v.slice(0, 48); });
-  ac('mdOtroTit', function () { st.b.tit = IA.creacion.conAzarUI(function () { return IA.obras.tituloNuevo(['Drama']); }); refrescarNuevo(); });
+  ac('mdOtroTit', function () { st.b.tit = ART.creacion.conAzarUI(function () { return ART.obras.tituloNuevo(['Drama']); }); refrescarNuevo(); });
   ac('mdTipo', function (v) { st.b.tipo = v; refrescarNuevo(); });
   ac('mdGen', function (v) { st.b.gen = v; });
   ac('mdEsc', function (v) { st.b.esc = +v; st.b.eq = Md.equipoRecomendado(st.b.med, st.b.esc); refrescarNuevo(); });

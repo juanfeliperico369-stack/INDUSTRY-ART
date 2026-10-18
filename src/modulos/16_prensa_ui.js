@@ -3,10 +3,10 @@
 // revista, radar de redes, filmografía, panel, cronología y biografía del estudio; en la ficha de la obra, la
 // crítica con sus etiquetas e insignias, campañas y festivales; convención en vivo, proyección para la prensa y
 // ceremonias con sobre.
-IA.prensaUI = (function () {
+ART.prensaUI = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, O = IA.obras, U = IA.ui, PM = IA.premios, CR = IA.critica, PR = IA.prensa, esc = N.esc;
-  const dinero = U.dinero, ac = U.accion, t = IA.t;
+  const N = ART.n, D = ART.datos, O = ART.obras, U = ART.ui, PM = ART.premios, CR = ART.critica, PR = ART.prensa, esc = N.esc;
+  const dinero = U.dinero, ac = U.accion, t = ART.t;
   function kpi(n, v, c) { return '<div class="kpi"><span>' + esc(n) + '</span><b class="cifra ' + (c || '') + '">' + esc(v) + '</b></div>'; }
   function chip(txt, a, v, on) { return '<button class="chip' + (on ? ' on' : '') + '" data-a="' + a + '" data-v="' + esc(v) + '">' + esc(txt) + '</button>'; }
   function nomEst(i) { return i >= 0 && N.S.estudios[i] ? N.S.estudios[i].nombre : 'Otras productoras'; }
@@ -54,7 +54,7 @@ IA.prensaUI = (function () {
     lista.forEach(function (f) {
       const e = PM.estado(f.id), tf = PM.tFest(f);
       h += '<div class="tarjeta"><div class="fila entre"><b>' + esc(f.nombre) + '</b><span class="etiqueta' + (f.prestigio === 3 ? ' oro' : '') + '">' + ['', 'independiente', 'intermedio', 'circuito mayor'][f.prestigio] + '</span></div>' +
-        '<span class="chico">' + esc(IA.cal.texto(IA.cal.inicioDeT(tf))) + ' · convocatoria ' + f.conv + ' · inscripción ' + dinero(PM.costoInscripcion(f)) + ' · jurado: ' + f.jurado + ' · prefiere ' + f.gen.map(function (g) { return D.familia(g).nombre.toLowerCase(); }).join(' y ') + ' · premio: ' + esc(f.premio) + '</span>' +
+        '<span class="chico">' + esc(ART.cal.texto(ART.cal.inicioDeT(tf))) + ' · convocatoria ' + f.conv + ' · inscripción ' + dinero(PM.costoInscripcion(f)) + ' · jurado: ' + f.jurado + ' · prefiere ' + f.gen.map(function (g) { return D.familia(g).nombre.toLowerCase(); }).join(' y ') + ' · premio: ' + esc(f.premio) + '</span>' +
         '<p class="chico tenue">Rumor del circuito: este año el jurado busca ' + esc(D.familia(PM.rumor(f, anio)).nombre.toLowerCase()) + '.</p>';
       if (e.fase === 'convocatoria' && S.t <= tf - 3) h += listas.length ? '<div class="chips">' + listas.map(function (o) { return chip('Inscribir «' + o.tit + '»', 'prPostular', f.id + ':' + o.id); }).join('') + '</div>' : '<span class="tenue chico">No tienes obras listas sin fecha.</span>';
       if (e.sel) h += '<p class="chico"><b>Selección oficial:</b> ' + e.sel.map(function (x) { return '<span class="' + (x.est === 0 ? 'oro' : '') + '">«' + esc(x.tit) + '»</span>'; }).join(', ') + '</p>';
@@ -112,20 +112,20 @@ IA.prensaUI = (function () {
     // Obras por medio (cine, TV y los otros cuatro medios)
     const todas = S.obras.filter(function (o) { return o.est === 0; });
     const porMedio = [['Cine', todas.filter(function (o) { return !o.tv && (o.med || 'cine') === 'cine'; }).length], ['Televisión', todas.filter(function (o) { return o.tv || o.med === 'tv'; }).length]]
-      .concat(['musica', 'juegos', 'teatro', 'libros'].map(function (m) { return [IA.medios.MED[m].nombre, IA.medios.proyectos(m).length]; }));
+      .concat(['musica', 'juegos', 'teatro', 'libros'].map(function (m) { return [ART.medios.MED[m].nombre, ART.medios.proyectos(m).length]; }));
     if (porMedio.some(function (x) { return x[1] > 0; })) {
-      const gm = U.grafica('panelMedios', function (cv) { IA.arte.anillo(cv, porMedio.map(function (x) { return { nombre: x[0], valor: x[1] }; }), { centro: porMedio.reduce(function (a, x) { return a + x[1]; }, 0) }); });
+      const gm = U.grafica('panelMedios', function (cv) { ART.arte.anillo(cv, porMedio.map(function (x) { return { nombre: x[0], valor: x[1] }; }), { centro: porMedio.reduce(function (a, x) { return a + x[1]; }, 0) }); });
       h += '<h3>Obras por medio</h3><canvas class="lienzo" style="height:170px" data-grafica="' + gm + '"></canvas>';
     }
     if (S.fin.hist.length) {
       const hist = S.fin.hist.slice(-40);
-      const g = U.grafica('panelIng', function (cv) { IA.arte.linea(cv, [{ nombre: 'Ingresos (hoy)', color: getComputedStyle(document.documentElement).getPropertyValue('--acento').trim(), valores: hist.map(function (x) { return IA.mundo.aHoy(x.ing, x.anio); }) }], hist.map(function (x) { return String(x.anio); }), { formato: function (v) { return U.dinero(v, 2025); } }); });
+      const g = U.grafica('panelIng', function (cv) { ART.arte.linea(cv, [{ nombre: 'Ingresos (hoy)', color: getComputedStyle(document.documentElement).getPropertyValue('--acento').trim(), valores: hist.map(function (x) { return ART.mundo.aHoy(x.ing, x.anio); }) }], hist.map(function (x) { return String(x.anio); }), { formato: function (v) { return U.dinero(v, 2025); } }); });
       h += '<h3>Trayectoria de ingresos</h3><canvas class="lienzo" data-grafica="' + g + '"></canvas>';
     }
     h += '<h3>Cronología del estudio</h3>' + ((S.hitos || []).slice().reverse().slice(0, 40).map(function (x) { return '<div class="cal-ev"><span class="ic">◆</span><div class="col crece"><span>' + esc(x.txt) + '</span><span class="tenue chico">' + x.anio + ' · prestigio ' + x.fama + '</span></div></div>'; }).join('') || '<p class="tenue">Tu historia empieza con tu primer estreno.</p>');
     return h;
   }
-  function U_hoy(v, a) { return IA.mundo.aHoy(v || 0, a || N.anio()); }
+  function U_hoy(v, a) { return ART.mundo.aHoy(v || 0, a || N.anio()); }
   ac('prMascota', function (v) { N.S.estudios[0].mascota = String(v).slice(0, 30); });
 
   // ---------- Ficha de la obra: crítica, etiquetas, premios ----------
@@ -142,14 +142,14 @@ IA.prensaUI = (function () {
     if (o.est === 0 && o.et !== 'terminada' && !o.portada) h += '<button class="btn" data-a="prPortada" data-v="' + o.id + '">Portada en la revista · ' + dinero(PR.costoPortada()) + '</button>';
     return h;
   }
-  ac('prCitar', function (v) { const p = v.split(':'); const e = CR.citar(+p[0], +p[1]); U.aviso(e || 'Cita en la campaña', e ? 'mal' : ''); U.refrescarFicha(IA.pantallas.fichaObra(+p[0])); });
-  ac('prPortada', function (v) { const e = PR.portada(+v); U.aviso(e || 'Portada lista', e ? 'mal' : ''); U.refrescarFicha(IA.pantallas.fichaObra(+v)); });
+  ac('prCitar', function (v) { const p = v.split(':'); const e = CR.citar(+p[0], +p[1]); U.aviso(e || 'Cita en la campaña', e ? 'mal' : ''); U.refrescarFicha(ART.pantallas.fichaObra(+p[0])); });
+  ac('prPortada', function (v) { const e = PR.portada(+v); U.aviso(e || 'Portada lista', e ? 'mal' : ''); U.refrescarFicha(ART.pantallas.fichaObra(+v)); });
 
   // ---------- Convención en vivo, proyección y ceremonias ----------
   function banner() {
     const c = PR.convencionActual(), S = N.S;
-    const rg = IA.cal.rangoSemana(N.anio(), N.semana());
-    const ev = IA.cal.circuitoAnio(N.anio()).filter(function (x) { return x.tipo !== 'expo' && x.ini <= rg[1] && x.fin >= rg[0]; })[0];
+    const rg = ART.cal.rangoSemana(N.anio(), N.semana());
+    const ev = ART.cal.circuitoAnio(N.anio()).filter(function (x) { return x.tipo !== 'expo' && x.ini <= rg[1] && x.fin >= rg[0]; })[0];
     if (!c && !ev) return '';
     const st0 = c ? PR.estado() : null;
     return '<div class="tarjeta" style="border-color:var(--dorado)"><b>En vivo esta semana: ' + esc((c || ev).nombre) + '</b>' + (c && PR.elegibles().length ? '<p class="chico">Te quedan ' + (3 - st0.usadas) + ' acciones.</p><button class="btn primario" data-a="prConvencion">Ir a la convención</button>' : '') + (!c ? '<button class="btn" data-a="sub" data-s="mundo" data-v="festivales">Ver</button>' : '') + '</div>';
@@ -186,10 +186,10 @@ IA.prensaUI = (function () {
     const paso = function (abierto) {
       const c = res.categorias[i];
       U.modal('<h2>' + esc(res.nombre) + '</h2><p class="tenue">' + esc(c.nombre) + ' · ' + (i + 1) + ' de ' + res.categorias.length + '</p><p class="chico">Nominados: ' + c.nominados.map(function (n) { return '«' + esc(n.titulo) + '»'; }).join(', ') + '</p>' +
-        (abierto ? '<p class="' + (c.ganador.est === 0 ? 'oro' : '') + '"><b>«' + esc(c.ganador.titulo) + '»</b>' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + ' · ' + esc(nomEst(c.ganador.est)) + '</p>' + (c.ganador.est === 0 ? '<p class="nota">«' + esc(IA.ideas.frasePremio(O.porId(c.ganador.obra) || {})) + ' Gracias a todo el equipo.»</p>' : '') +
+        (abierto ? '<p class="' + (c.ganador.est === 0 ? 'oro' : '') + '"><b>«' + esc(c.ganador.titulo) + '»</b>' + (c.ganador.quien ? ' · ' + esc(c.ganador.quien) : '') + ' · ' + esc(nomEst(c.ganador.est)) + '</p>' + (c.ganador.est === 0 ? '<p class="nota">«' + esc(ART.ideas.frasePremio(O.porId(c.ganador.obra) || {})) + ' Gracias a todo el equipo.»</p>' : '') +
           '<button class="btn primario bloque" data-a="prCerSig">' + (i + 1 < res.categorias.length ? 'Siguiente' : t('aceptar')) + '</button>' : '<button class="btn primario bloque" data-a="prCerAbrir">Abrir el sobre</button>'));
     };
-    ac('prCerAbrir', function () { paso(true); if (res.categorias[i].ganador.est === 0) IA.arte.sonido('premio'); });
+    ac('prCerAbrir', function () { paso(true); if (res.categorias[i].ganador.est === 0) ART.arte.sonido('premio'); });
     ac('prCerSig', function () { i++; if (i < res.categorias.length) paso(false); else U.cerrarModal(); });
     paso(false);
   }

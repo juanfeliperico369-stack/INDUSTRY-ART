@@ -3,17 +3,17 @@
 (function () {
   'use strict';
   function iniciar() {
-    IA.ui.cargarAjustes();
-    IA.ui.enlazar();
-    IA.ui.render();
-    IA.publicacion.alAbrir(); // un solo anuncio al abrir, solo en la app gratuita de Android
+    ART.ui.cargarAjustes();
+    ART.ui.enlazar();
+    ART.ui.render();
+    ART.publicacion.alAbrir(); // un solo anuncio al abrir, solo en la app gratuita de Android
     // Guardado automático al ocultar la app (sin avisos de "cambios sin guardar")
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden && IA.pantallas.detenerAuto) { IA.pantallas.detenerAuto(); if (IA.n.S) IA.ui.renderBarra(); }
-      if (document.hidden && IA.n.S && !IA.n.S.bot && !IA.n.S.quiebra && IA.ui.ajustes().autoguardado !== 'no') IA.guardado.autoguardar();
+      if (document.hidden && ART.pantallas.detenerAuto) { ART.pantallas.detenerAuto(); if (ART.n.S) ART.ui.renderBarra(); }
+      if (document.hidden && ART.n.S && !ART.n.S.bot && !ART.n.S.quiebra && ART.ui.ajustes().autoguardado !== 'no') ART.guardado.autoguardar();
     });
     window.addEventListener('error', function (e) {
-      if (IA.ui && IA.ui.aviso) IA.ui.aviso('Error: ' + (e.message || 'desconocido'), 'mal');
+      if (ART.ui && ART.ui.aviso) ART.ui.aviso('Error: ' + (e.message || 'desconocido'), 'mal');
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);

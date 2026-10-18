@@ -3,9 +3,9 @@
 // Imperio (sedes, filiales y compra de estudios, coproducciones, encargos, financiar, distribución, negocios para
 // fans e investigación), Rivales (ranking ordenable con filtros, estrellas y taquillas) e Historia (hitos con su
 // día); la bitácora del estudio, los eventos con decisión y la quiebra con sus tres salidas.
-IA.imperioUI = (function () {
+ART.imperioUI = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, O = IA.obras, U = IA.ui, B = IA.banco, I = IA.imperio, esc = N.esc;
+  const N = ART.n, D = ART.datos, O = ART.obras, U = ART.ui, B = ART.banco, I = ART.imperio, esc = N.esc;
   const dinero = U.dinero, ac = U.accion;
   const st = { orden: 'ingresos', filtro: 'activos', hist: 'cerca' };
   function kpi(n, v, c) { return '<div class="kpi"><span>' + esc(n) + '</span><b class="cifra ' + (c || '') + '">' + esc(v) + '</b></div>'; }
@@ -22,7 +22,7 @@ IA.imperioUI = (function () {
     const S = N.S, e = B.escalon(), p = B.puntaje(), b = B.estado();
     let h = '<div class="kpis">' + kpi('Puntaje de crédito', p, p >= 650 ? 'bien' : p < 450 ? 'mal' : '') + kpi('Tu banco', e.nombre) + kpi('Te presta hasta', dinero(B.limite())) + kpi('Tasa anual', Math.round(B.tasa() * 1000) / 10 + ' %') + kpi('Deuda', dinero(B.deuda()), B.deuda() ? 'mal' : '') + '</div>';
     h += '<p class="nota info">Con más prestigio subes de banco (' + B.ESCALONES.map(function (x) { return x.nombre + ' desde ' + Math.round(x.fama * 100); }).join(' · ') + '). Pagar a tiempo sube tu puntaje; los atrasos lo bajan.</p>';
-    h += '<div class="tarjeta"><h3>Pedir un préstamo</h3><div class="fila"><label class="campo crece"><span>Monto</span><input id="bnMonto" type="number" value="' + Math.round(Math.min(B.limite(), IA.economia.presupuestoTipico(N.anio()))) + '"></label>' +
+    h += '<div class="tarjeta"><h3>Pedir un préstamo</h3><div class="fila"><label class="campo crece"><span>Monto</span><input id="bnMonto" type="number" value="' + Math.round(Math.min(B.limite(), ART.economia.presupuestoTipico(N.anio()))) + '"></label>' +
       '<label class="campo"><span>Plazo</span>' + sel('bnPlazo', [[12, '1 año'], [24, '2 años'], [36, '3 años'], [60, '5 años'], [120, '10 años']], 36) + '</label></div>' + btn('Pedir', 'bnPedir', '', 'primario bloque') + '</div>';
     h += '<h3>Cuentas por pagar este mes</h3>' + (B.cuentasDelMes().length ? B.cuentasDelMes().map(function (c) {
       return '<div class="cal-ev"><div class="col crece"><b>' + esc(c.txt) + '</b>' + (c.d ? '<span class="tenue chico">Saldo ' + dinero(c.d.saldo) + ' · ' + Math.round(c.d.tasa * 1000) / 10 + ' % anual</span>' : '') + '</div><span class="cifra">' + dinero(c.monto) + '</span>' + (c.d ? btn('Pagar todo', 'bnPrepagar', c.d.id) : '') + '</div>';
@@ -34,7 +34,7 @@ IA.imperioUI = (function () {
       const a = b.acc[c.id];
       return '<div class="cal-ev"><div class="col crece"><b>' + esc(c.nombre) + '</b><span class="tenue chico">Índice ' + B.precio(c.id) + (a ? ' · tienes ' + dinero(B.valorAccion(c.id)) + ' (pagaste ' + dinero(a.costo) + ')' : '') + '</span></div>' +
         (a ? btn('Vender', 'bnVender', c.id) : '') + btn('Comprar', 'bnComprar', c.id, 'primario') + '</div>';
-    }).join('') + '</div><label class="campo"><span>Monto por compra</span><input id="bnAcc" type="number" value="' + Math.round(IA.economia.presupuestoTipico(N.anio()) * 0.5) + '"></label>';
+    }).join('') + '</div><label class="campo"><span>Monto por compra</span><input id="bnAcc" type="number" value="' + Math.round(ART.economia.presupuestoTipico(N.anio()) * 0.5) + '"></label>';
     const bl = B.balance();
     h += '<h3>Estado anual (balance)</h3><div class="col">' + Object.keys(bl.activos).map(function (k) { return '<div class="fila entre"><span>' + k[0].toUpperCase() + k.slice(1) + '</span><span class="cifra">' + dinero(bl.activos[k]) + '</span></div>'; }).join('') +
       '<div class="fila entre"><b>Activos</b><b class="cifra">' + dinero(bl.totalA) + '</b></div><div class="fila entre"><span>Deudas y caja en rojo</span><span class="cifra mal">' + dinero(bl.totalP) + '</span></div>' +
@@ -52,11 +52,11 @@ IA.imperioUI = (function () {
 
   // ---------- Negocio › Imperio ----------
   function imperio() {
-    const S = N.S, a = N.anio(), rivs = IA.rivales.activos();
+    const S = N.S, a = N.anio(), rivs = ART.rivales.activos();
     let h = '<h3>Sedes en otros países</h3><p class="nota info">Rodar donde tienes sede cuesta 15 % menos y aparecen talentos locales.</p>' +
       (I.sedes().length ? '<p>' + I.sedes().map(function (x) { const p = D.pais(x.pais); return esc(p.nombre) + ' ' + btn('Cerrar', 'imCerrarSede', x.pais); }).join(' · ') + '</p>' : '') +
       '<div class="fila">' + sel('imPais', D.paises.filter(function (p) { return p.id !== S.estudios[0].pais; }).map(function (p) { return [p.id, p.nombre + ' · ' + dinero(I.costoSede(p.id))]; }), '') + btn('Abrir sede', 'imSede', '', 'primario') + '</div>';
-    h += '<h3>Filiales y compra de estudios</h3><p class="nota info">Una filial sigue filmando con su estilo, te cuesta cada mes y te da dividendos si gana. No puedes comprar si juntos superan el ' + Math.round(IA.economia.P.ANTIMONOPOLIO * 100) + ' % del mercado.</p><div class="col">' +
+    h += '<h3>Filiales y compra de estudios</h3><p class="nota info">Una filial sigue filmando con su estilo, te cuesta cada mes y te da dividendos si gana. No puedes comprar si juntos superan el ' + Math.round(ART.economia.P.ANTIMONOPOLIO * 100) + ' % del mercado.</p><div class="col">' +
       rivs.map(function (e) {
         if (e.filial) return '<div class="cal-ev"><div class="col crece"><b class="oro">' + esc(e.nombre) + '</b><span class="tenue chico">Filial · caja ' + dinero(e.caja) + ' · ' + dinero(I.costoFilial(e)) + '/mes</span></div>' + btn('Vender', 'imVenderFil', e.id) + '</div>';
         const err = I.puedeComprar(e.id);
@@ -77,7 +77,7 @@ IA.imperioUI = (function () {
       (a >= 1950 ? '<div class="fila">' + sel('imEvObra', [['', 'Sin obra en especial']].concat(O.enProduccion(0).concat(O.delEstudio(0, ['lista'])).map(function (o) { return [o.id, o.tit]; })), '') + btn('Organizar convención · ' + dinero(I.costoEvento()), 'imEvento', '', 'primario') + '</div>' : '');
     const inv = I.investigando();
     h += '<h3>Investigación</h3>' + (inv ? '<p class="bien">Investigas «' + esc(I.invento(inv.id).nombre) + '»: faltan ' + inv.sr + ' semanas.</p>' : '') + '<p class="nota info">Un invento propio o licenciado da +1 a su departamento (hasta +3) mientras es novedad (hasta 5 años después de llegar al mundo).</p><div class="col">' +
-      IA.historia.INVENTOS.filter(function (x) { const e = I.estadoInvento(x); return e !== 'mundo' || x.anio > a - 5; }).slice(0, 14).map(function (x) {
+      ART.historia.INVENTOS.filter(function (x) { const e = I.estadoInvento(x); return e !== 'mundo' || x.anio > a - 5; }).slice(0, 14).map(function (x) {
         const e = I.estadoInvento(x), nom = { tuyo: 'Tuyo', licencia: 'Licenciado', mundo: 'Ya llegó al mundo', rival: 'Lo tiene un rival', investigable: 'Investigable', futuro: 'Futuro' }[e];
         const accion = e === 'investigable' ? btn('Investigar · ' + dinero(I.costoInvento(x)) + ' · ' + I.semanasInvento(x) + ' sem', 'imInvestigar', x.id, 'primario', inv ? 'Ya investigas otra cosa' : '') : e === 'rival' ? btn('Licenciar · ' + dinero(I.costoLicenciaTec(x)), 'imLicTec', x.id) : '';
         return '<div class="cal-ev"><b class="cifra">' + x.anio + '</b><div class="col crece"><span>' + esc(x.nombre) + '</span><span class="tenue chico">' + esc(nom) + ' · ' + esc(x.dep) + '</span></div>' + accion + '</div>';
@@ -89,7 +89,7 @@ IA.imperioUI = (function () {
   ac('imComprarEst', function (v) { avisar(I.comprarEstudio(+v), 'Estudio comprado: ahora es tu filial'); U.refrescar(); });
   ac('imVenderFil', function (v) { avisar(I.venderFilial(v), 'Filial vendida'); });
   ac('imCopro', function () { avisar(I.coproducir(+val('imCoObra'), +val('imCoEst')), 'Coproducción firmada'); });
-  ac('imEncargar', function () { avisar(IA.creacion.conAzarUI(function () { return I.encargar(+val('imEnEst'), val('imEnGen'), 2); }), 'Encargo hecho'); });
+  ac('imEncargar', function () { avisar(ART.creacion.conAzarUI(function () { return I.encargar(+val('imEnEst'), val('imEnGen'), 2); }), 'Encargo hecho'); });
   ac('imAceptarEnc', function (v) { avisar(I.aceptarEncargo(v), 'Encargo aceptado'); });
   ac('imFinanciar', function (v) { avisar(I.financiar(v), 'Proyecto financiado'); });
   ac('imDistrib', function () { avisar(I.firmarDistribucion(+val('imDiEst'), 2), 'Contrato firmado'); });
@@ -103,7 +103,7 @@ IA.imperioUI = (function () {
     const recientes = function (e) { return S.obras.filter(function (o) { return o.est === e.id && o.pub !== undefined && o.anio >= a - 5; }); };
     const filas = S.estudios.map(function (e) {
       const r = recientes(e);
-      return { e: e, cuota: IA.negocio.cuotaAnioActual(e.id), patrimonio: e.caja + (e.tam || 1) * IA.economia.presupuestoTipico(a) * 4, ingresos: e.ingAnio || 0, obras: r.length,
+      return { e: e, cuota: ART.negocio.cuotaAnioActual(e.id), patrimonio: e.caja + (e.tam || 1) * ART.economia.presupuestoTipico(a) * 4, ingresos: e.ingAnio || 0, obras: r.length,
         calif: r.length ? Math.round(r.reduce(function (s, o) { return s + (o.crit || 50); }, 0) / r.length) : 0, prestigio: e.fama };
     });
     const vis = filas.filter(function (f) { return st.filtro === 'todos' || (st.filtro === 'activos' && !f.e.quebrado) || (st.filtro === 'quebrados' && f.e.quebrado) || (st.filtro === 'emergentes' && f.e.desde > S.y0) || (st.filtro === 'filiales' && f.e.filial); })
@@ -115,16 +115,16 @@ IA.imperioUI = (function () {
     h += '<div class="fila">' + [['ingresos', 'Ingresos'], ['patrimonio', 'Patrimonio'], ['obras', 'Obras'], ['calif', 'Calificación'], ['prestigio', 'Prestigio'], ['cuota', 'Cuota']].map(function (x) { return chip(x[1], 'rvOrden', x[0], st.orden === x[0]); }).join('') + '</div>';
     h += '<div class="fila">' + [['activos', 'Activos'], ['todos', 'Todos'], ['quebrados', 'Quebrados'], ['emergentes', 'Emergentes'], ['filiales', 'Tus filiales']].map(function (x) { return chip(x[1], 'rvFiltro', x[0], st.filtro === x[0]); }).join('') + '</div><div class="col">';
     h += vis.map(function (f, i) {
-      const e = f.e, es = IA.rivales.ESTRATEGIAS[e.estr];
+      const e = f.e, es = ART.rivales.ESTRATEGIAS[e.estr];
       return '<div class="tarjeta' + (e.id === 0 ? ' oro' : '') + '"><div class="fila"><canvas data-logo="' + e.id + '" style="width:30px;height:30px"></canvas><div class="col crece"><b>' + (i + 1) + '. ' + esc(e.nombre) + '</b><span class="tenue chico">' +
-        (e.quebrado ? (e.fusion !== undefined ? 'Se fusionó en ' + e.quebrado : 'Quebró en ' + e.quebrado) : estrellas(IA.rivales.estrellas(e)) + (es ? ' · ' + esc(es.nombre) : e.id === 0 ? ' · tu estudio' : '') + (e.filial ? ' · tu filial' : '')) +
+        (e.quebrado ? (e.fusion !== undefined ? 'Se fusionó en ' + e.quebrado : 'Quebró en ' + e.quebrado) : estrellas(ART.rivales.estrellas(e)) + (es ? ' · ' + esc(es.nombre) : e.id === 0 ? ' · tu estudio' : '') + (e.filial ? ' · tu filial' : '')) +
         ' · ' + esc((D.pais(e.pais) || {}).nombre || '') + '</span></div><span class="cifra">' + U.pct(f.cuota) + '</span></div><span class="chico">Ingresos ' + dinero(f.ingresos) + ' · ' + f.obras + ' obras · crítica ' + f.calif + ' · prestigio ' + Math.round(f.prestigio * 100) + '</span>' +
         (e.texto ? '<span class="tenue chico"> · ' + esc(e.texto) + '</span>' : '') +
-        (e.id !== 0 && !e.quebrado && !e.filial ? '<div class="fila" style="margin-top:6px">' + btn('Comprar este estudio · ' + dinero(IA.imperio.precioEstudio(e.id)), 'imComprarEst', e.id, '', IA.imperio.puedeComprar(e.id)) + '</div>' : '') + '</div>';
+        (e.id !== 0 && !e.quebrado && !e.filial ? '<div class="fila" style="margin-top:6px">' + btn('Comprar este estudio · ' + dinero(ART.imperio.precioEstudio(e.id)), 'imComprarEst', e.id, '', ART.imperio.puedeComprar(e.id)) + '</div>' : '') + '</div>';
     }).join('') + '</div>';
     const anio = S.obras.filter(function (o) { return o.anio === a && o.bruto; }).sort(function (x, y) { return y.bruto - x.bruto; }).slice(0, 10);
-    const siempre = S.obras.filter(function (o) { return o.bruto; }).sort(function (x, y) { return IA.mundo.aHoy(y.bruto, y.anio || a) - IA.mundo.aHoy(x.bruto, x.anio || a); }).slice(0, 10);
-    const lista = function (l, hoy) { return '<div class="col">' + l.map(function (o, i) { return '<div class="cal-ev" data-a="verObra" data-v="' + o.id + '" style="cursor:pointer"><b class="cifra">' + (i + 1) + '</b><div class="col crece"><span' + (o.est === 0 ? ' class="oro"' : '') + '>' + esc(o.tit) + '</span><span class="tenue chico">' + esc((S.estudios[o.est] || {}).nombre || '') + ' · ' + (o.anio || '') + '</span></div><span class="cifra">' + dinero(hoy ? IA.mundo.aHoy(o.bruto, o.anio || a) : o.bruto) + '</span></div>'; }).join('') + '</div>'; };
+    const siempre = S.obras.filter(function (o) { return o.bruto; }).sort(function (x, y) { return ART.mundo.aHoy(y.bruto, y.anio || a) - ART.mundo.aHoy(x.bruto, x.anio || a); }).slice(0, 10);
+    const lista = function (l, hoy) { return '<div class="col">' + l.map(function (o, i) { return '<div class="cal-ev" data-a="verObra" data-v="' + o.id + '" style="cursor:pointer"><b class="cifra">' + (i + 1) + '</b><div class="col crece"><span' + (o.est === 0 ? ' class="oro"' : '') + '>' + esc(o.tit) + '</span><span class="tenue chico">' + esc((S.estudios[o.est] || {}).nombre || '') + ' · ' + (o.anio || '') + '</span></div><span class="cifra">' + dinero(hoy ? ART.mundo.aHoy(o.bruto, o.anio || a) : o.bruto) + '</span></div>'; }).join('') + '</div>'; };
     h += '<h3>Taquilla del año</h3>' + (anio.length ? lista(anio) : '<p class="tenue">Aún no hay estrenos este año.</p>') + '<h3>Taquilla de todos los tiempos (en dólares de hoy)</h3>' + lista(siempre, true);
     if (m.anio.total) h += '<p class="tenue chico">Otras productoras: ' + U.pct(m.anio.otras / m.anio.total) + ' del mercado este año.</p>';
     return h;
@@ -134,16 +134,16 @@ IA.imperioUI = (function () {
 
   // ---------- Mundo › Historia ----------
   function historia() {
-    const a = N.anio(), hoy = IA.cal.inicioDeT(N.S.t);
-    const l = IA.historia.lineaDeTiempo();
+    const a = N.anio(), hoy = ART.cal.inicioDeT(N.S.t);
+    const l = ART.historia.lineaDeTiempo();
     const pasado = function (x) { return x.y < hoy.y || (x.y === hoy.y && (x.m < hoy.m || (x.m === hoy.m && x.d <= hoy.d))); };
     const vis = st.hist === 'todo' ? l : l.filter(function (x) { return x.y >= a - 15 && x.y <= a + 25; });
     let h = '<p class="nota info">La historia real llega hasta 2026 (sin personas reales); después siguen las eras de ficción y, desde 2150, eventos que salen de tu partida.</p>' +
       '<div class="fila">' + chip('Cerca de hoy', 'hsVer', 'cerca', st.hist === 'cerca') + chip('Toda la historia', 'hsVer', 'todo', st.hist === 'todo') + '</div>';
-    const act = IA.historia.activos();
+    const act = ART.historia.activos();
     if (act.length) h += '<div class="tarjeta"><b>Ahora mismo:</b> ' + act.map(function (p) { return esc(p.txt || { guerra1: 'Primera Guerra Mundial', guerra2: 'Segunda Guerra Mundial', depresion: 'Gran Depresión', hays: 'Código de Producción (censura)', huelgaG: 'Huelga de guionistas', huelgaA: 'Huelga de actores' }[p.id] || p.tipo || p.id); }).join(' · ') + '</div>';
     h += '<div class="col">' + vis.map(function (x) {
-      return '<div class="cal-ev' + (pasado(x) ? '' : ' tenue') + '"><b class="cifra">' + x.y + '</b><div class="col crece"><span>' + esc(x.txt) + '</span><span class="tenue chico">' + esc(IA.cal.texto({ y: x.y, m: x.m, d: x.d }, true)) + (x.gen ? ' · generado' : '') + '</span></div></div>';
+      return '<div class="cal-ev' + (pasado(x) ? '' : ' tenue') + '"><b class="cifra">' + x.y + '</b><div class="col crece"><span>' + esc(x.txt) + '</span><span class="tenue chico">' + esc(ART.cal.texto({ y: x.y, m: x.m, d: x.d }, true)) + (x.gen ? ' · generado' : '') + '</span></div></div>';
     }).join('') + '</div>';
     return h;
   }
@@ -160,22 +160,22 @@ IA.imperioUI = (function () {
 
   // ---------- Evento con decisión ----------
   function mostrarEvento() {
-    const ev = IA.eventos.pendiente();
+    const ev = ART.eventos.pendiente();
     if (!ev) return false;
     U.modal('<h2>Decide</h2><p>' + esc(ev.txt) + '</p><div class="col">' + ev.ops.map(function (o, i) { return btn(o, 'evDecidir', i, i === 0 ? 'primario' : ''); }).join('') + '</div>');
     return true;
   }
-  ac('evDecidir', function (v) { const r = IA.eventos.decidir(+v); U.cerrarModal(); U.aviso(r || 'Anotado en la bitácora'); U.refrescar(); });
+  ac('evDecidir', function (v) { const r = ART.eventos.decidir(+v); U.cerrarModal(); U.aviso(r || 'Anotado en la bitácora'); U.refrescar(); });
 
   // ---------- Quiebra: tres salidas ----------
   function quiebra() {
     const S = N.S;
     if (!S.quiebra) return;
     if (S.quiebra.fin) {
-      U.modal('<h2>' + IA.t('quiebra_titulo') + '</h2><p>El estudio cerró.</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + IA.t('cargar') + '</button><button class="btn" data-a="salir">' + IA.t('aj_salir') + '</button></div>');
+      U.modal('<h2>' + ART.t('quiebra_titulo') + '</h2><p>El estudio cerró.</p><div class="col"><button class="btn primario" data-a="abrirGuardado">' + ART.t('cargar') + '</button><button class="btn" data-a="salir">' + ART.t('aj_salir') + '</button></div>');
       return;
     }
-    U.modal('<h2>' + IA.t('quiebra_titulo') + '</h2><p>' + IA.t('quiebra_texto') + '</p><div class="col">' + B.salidasQuiebra().map(function (x) {
+    U.modal('<h2>' + ART.t('quiebra_titulo') + '</h2><p>' + ART.t('quiebra_texto') + '</p><div class="col">' + B.salidasQuiebra().map(function (x) {
       return '<div class="tarjeta"><b>' + esc(x.nombre) + '</b><p class="chico">' + esc(x.texto) + '</p>' + btn('Elegir', 'qbSalir', x.id, x.id === 'terminar' ? '' : 'primario', x.ok === false ? 'No disponible' : '') + '</div>';
     }).join('') + '</div>');
   }

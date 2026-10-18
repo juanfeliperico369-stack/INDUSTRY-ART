@@ -1,16 +1,16 @@
 /* ==== módulo: taxonomia ==== */
 // La fábrica de ideas: todas las listas del documento, sin duplicados, agrupadas en familias y en orden alfabético
-// (pestaña Taxonomía del plan). La familia pesa en la matemática; cada elemento da sabor, palabras para la sinopsis,
+// (pestaña Taxonomía). La familia pesa en la matemática; cada elemento da sabor, palabras para la sinopsis,
 // frases de crítica y etiquetas. También el contenido que decide la clasificación, los formatos de época, las épocas
 // y lugares de la historia, los idiomas, los públicos, los arquetipos de personajes y las 82 obras de dominio público.
-IA.taxonomia = (function () {
+ART.taxonomia = (function () {
   'use strict';
-  const D = IA.datos;
+  const D = ART.datos;
   const sp = function (s) { return s.split(','); };
   const alfa = function (a) { return a.slice().sort(function (x, y) { return x.localeCompare(y, 'es'); }); };
 
   // ---------- Medios y tipos de obra ----------
-  // Cada medio con su taxonomía completa; su economía vive en la producción de cine, IA.tv e IA.medios.
+  // Cada medio con su taxonomía completa; su economía vive en la producción de cine, ART.tv e ART.medios.
   const medios = [
     { id: 'cine', nombre: 'Cine', desde: 1895, activo: true },
     { id: 'tv', nombre: 'Televisión', desde: 1936 },
@@ -35,7 +35,7 @@ IA.taxonomia = (function () {
     { id: 'jugable', nombre: 'Historia jugable', desde: 2018, costo: 1.2, semanas: 1.2, pub: 1, edades: [0.8, 1.4, 1.3, 0.8, 0.5], efecto: 'El público elige el camino: +1 al público joven' },
   ];
 
-  // ---------- Géneros de los demás medios (el cine usa IA.datos.familias) ----------
+  // ---------- Géneros de los demás medios (el cine usa ART.datos.familias) ----------
   // eje: el eje de afinidad del cine más parecido; con él se arma la tabla de encaje propia de cada medio.
   const fam = function (id, nombre, generos, nucleo, inclina, eje) { return { id: id, nombre: nombre, generos: alfa(sp(generos)), nucleo: nucleo, inclina: inclina, eje: eje }; };
   const generosMedio = {
@@ -256,7 +256,7 @@ IA.taxonomia = (function () {
   }
 
   // ---------- Tono, estilo artístico y prioridad ----------
-  // Los tonos están en IA.datos.tonos; aquí se agregan los que faltaban.
+  // Los tonos están en ART.datos.tonos; aquí se agregan los que faltaban.
   [{ id: 'Deprimente', crit: 2, pub: -3 }, { id: 'Melancólico', crit: 2, pub: -1 }, { id: 'Luminoso', crit: 0, pub: 2 }].forEach(function (x) {
     if (!D.tonos.some(function (y) { return y.id === x.id; })) D.tonos.push(x);
   });
@@ -279,7 +279,7 @@ IA.taxonomia = (function () {
     { id: 'Técnico', nombre: 'Técnico', pesos: { arte: 1.3, edicion: 1.25, fotografia: 1.2 }, efecto: 'Pesan más los efectos, la edición y la imagen' },
   ];
 
-  // ---------- Formatos de época del cine (tu documento) ----------
+  // ---------- Formatos de época del cine ----------
   const formatos = {
     color: [
       { id: 'Blanco y negro', desde: 1895 }, { id: 'Tecnicolor', desde: 1935 }, { id: 'Híbrido', desde: 1939 },
@@ -338,7 +338,7 @@ IA.taxonomia = (function () {
     AV: { violencia: 1, lenguaje: 1, amor: 1, consumo: 2, terror: 1 }, RD: { violencia: 0, lenguaje: 1, amor: 1, consumo: 1, terror: 0 },
   };
 
-  // ---------- Duración (tu documento: de 1 a 300 minutos) ----------
+  // ---------- Duración (de 1 a 300 minutos) ----------
   const DURACION_TIPICA = [[1895, 4], [1905, 12], [1912, 45], [1916, 75], [1930, 85], [1960, 110], [2000, 115], [2020, 125], [2150, 120]];
   function categoriaDuracion(min) { return min <= 60 ? 'Cortometraje' : min <= 120 ? 'Película normal' : min <= 180 ? 'Película extendida' : 'Épica'; }
   const complejidad = sp('Ninguna,Leve,Normal,Verosímil,Inteligente,Compleja');
@@ -355,7 +355,7 @@ IA.taxonomia = (function () {
     { id: 'Demasiados', nombre: 'Demasiados (CGI e IA generativa)', costo: 1.5, desde: 1993, riesgo: true },
   ];
 
-  // ---------- Épocas y lugares de la historia (deslizador del tiempo de tu documento) ----------
+  // ---------- Épocas y lugares de la historia (deslizador del tiempo) ----------
   // desde/hasta: años que cubre (para saber si es pasado, presente o futuro); costo: vestuario, sets y efectos.
   const epocas = [
     { id: 'prehistoria', nombre: 'Inicio de la humanidad', texto: 'En el inicio de la humanidad', desde: -300000, hasta: -3500, costo: 1.12, afines: ['IM', 'AA'] },
@@ -630,7 +630,7 @@ IA.taxonomia = (function () {
     familiasFiccion.forEach(function (f) { fic += f.items.length; });
     return { temas: temas, subgeneros: sub, problematicas: prob, ficcion: fic, dominio: dominio.length, arcos: arcos.length, subarcos: subarcos.length };
   }
-  // Ordena cada familia en orden alfabético (las familias quedan en el orden del plan)
+  // Ordena cada familia en orden alfabético (las familias quedan en su orden fijo)
   familiasTema.forEach(function (f) { f.items = alfa(f.items); });
   // La lista plana de temas del resto del juego pasa a ser la completa de la taxonomía (227)
   D.temas = alfa([].concat.apply([], familiasTema.map(function (f) { return f.items; })));
@@ -658,7 +658,7 @@ IA.taxonomia = (function () {
     material: function (id) {
       const d = dominio.filter(function (x) { return x.id === id; })[0];
       if (d) return d;
-      const S = IA.n && IA.n.S; // Material propio del Editor (vive en la partida)
+      const S = ART.n && ART.n.S; // Material propio del Editor (vive en la partida)
       return (S && S.edit && S.edit.mat || []).filter(function (x) { return x.id === id; })[0] || null;
     },
     estilo: function (id) { return estilos.filter(function (x) { return x.id === id; })[0] || estilos[0]; },

@@ -1,7 +1,7 @@
 /* ==== módulo: textos ==== */
-// Diccionario de los textos visibles en español (el inglés lo pone IA.idioma con su diccionario).
-// Uso: IA.t('clave') o IA.t('clave', { n: 3 }) con {n} dentro del texto.
-IA.textos = {
+// Diccionario de los textos visibles en español (el inglés lo pone ART.idioma con su diccionario).
+// Uso: ART.t('clave') o ART.t('clave', { n: 3 }) con {n} dentro del texto.
+ART.textos = {
   idioma: 'es',
   es: {
     // Generales
@@ -18,7 +18,7 @@ IA.textos = {
     toca_dinero: 'Toca la caja para verla en dólares de hoy',
     // Inicio
     nueva_partida: 'Nueva partida', continuar: 'Continuar', cargar: 'Cargar partida', importar: 'Importar archivo .iasave',
-    creditos: 'Ideado y creado por OneZero · Programado junto a Lumen',
+    creditos: 'Ideado y creado por OneZero',
     // Nueva partida
     np_titulo: 'Funda tu estudio', np_nombre: 'Nombre del estudio', np_logo: 'Logo', np_logo_otro: 'Otro logo',
     np_anio: 'Año de inicio', np_pais: 'País de la sede', np_capital: 'Capital inicial (en dólares de hoy)',
@@ -70,7 +70,7 @@ IA.textos = {
     aj_tema: 'Tema', tema_oscuro: 'Oscuro', tema_claro: 'Claro', tema_epoca: 'Época', tema_contraste: 'Alto contraste',
     aj_texto: 'Tamaño del texto', aj_movimiento: 'Menos animación', aj_sonido: 'Efectos de sonido', aj_vibracion: 'Vibración',
     aj_orientacion: 'Orientación', ori_auto: 'Automática', ori_vertical: 'Vertical', ori_horizontal: 'Horizontal',
-    aj_laboratorio: 'Laboratorio (bot de pruebas)', aj_salir: 'Salir al inicio', aj_dinero: 'Mostrar el dinero',
+    aj_laboratorio: 'Laboratorio de simulación', aj_salir: 'Salir al inicio', aj_dinero: 'Mostrar el dinero',
     // Eventos
     quiebra_titulo: 'Tu estudio quebró', quiebra_texto: 'Pasaste 26 semanas con la caja en rojo. Elige una salida: terminar, pedir un rescate al banco o buscar un socio.',
     resumen_titulo: 'Resumen de {n} semanas', premios_titulo: '{nombre} {anio}',
@@ -86,10 +86,10 @@ IA.textos = {
     ayuda_negocio: '<p>Las finanzas van por categoría y por mes. El impuesto es del 25 % sobre las utilidades del año, no sobre la caja.</p><p><b>Comprometido</b> es lo que falta pagar de tus producciones; <b>Caja libre</b> descuenta eso y tres meses de gastos fijos.</p><p>Construye pisos y terrenos para hacer más obras a la vez y mejorar departamentos; cada construcción cuesta más y sube los gastos fijos. Con 35 % o más del mercado se abre una investigación antimonopolio.</p><p><b>Distribución</b>: firma con cadenas de cines de cada región (más salas, más parte de la taquilla y semanas mínimas, a cambio de una cuota) y construye hasta 3 cines propios en tu sede. Lo que ganas por video, TV y streaming aparece en Finanzas con su propia categoría.</p><p><b>Sede y personal</b>: tu sede crece del cuarto alquilado al complejo; cada nivel sube el tope de personal y el gasto fijo. Recluta productor, guionista de planta, editor, mercadeo y analista (cuenta el mejor de cada rol), capacítalos y súmalos a una producción.</p>',
   },
 };
-IA.t = function (clave, vars) {
-  const dic = IA.textos[IA.textos.idioma] || IA.textos.es;
+ART.t = function (clave, vars) {
+  const dic = ART.textos[ART.textos.idioma] || ART.textos.es;
   let s = dic[clave];
-  if (s === undefined) s = IA.textos.es[clave];
+  if (s === undefined) s = ART.textos.es[clave];
   if (s === undefined) return clave;
   if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(String(vars[k])); });
   return s;

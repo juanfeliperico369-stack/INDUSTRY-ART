@@ -3,10 +3,10 @@
 // servidores e ingresos; catálogo propio, comprado y licenciado (exclusiva, global o temporal) con propuestas de ida
 // y vuelta y contratos que se extienden; capacidad de biblioteca con costo de almacenamiento y bóvedas; líneas de
 // suministro y mercado negro de contenido.
-IA.streaming = (function () {
+ART.streaming = (function () {
   'use strict';
-  const N = IA.n, O = IA.obras;
-  const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
+  const N = ART.n, O = ART.obras;
+  const tip = function () { return ART.economia.presupuestoTipico(N.anio()); };
   const ANIO = 2007;
   const PLANES = [{ id: 'anuncios', nombre: 'Con anuncios', k: 0.6, mix: 0.35 }, { id: 'estandar', nombre: 'Estándar', k: 1, mix: 0.45 }, { id: 'premium', nombre: 'Premium', k: 1.6, mix: 0.2 }];
   const MODOS = [{ id: 'temporal', nombre: 'Temporal (1 año)', k: 1, sem: 52, ex: 0 }, { id: 'global', nombre: 'Global (2 años, sin exclusiva)', k: 1.5, sem: 104, ex: 0 }, { id: 'exclusiva', nombre: 'Exclusiva (2 años)', k: 2.4, sem: 104, ex: 1 }, { id: 'comprado', nombre: 'Compra para siempre', k: 5, sem: 0, ex: 1 }];
@@ -20,7 +20,7 @@ IA.streaming = (function () {
   const REGIONES = { nam: 0.3, eur: 0.24, asi: 0.26, lat: 0.1, afr: 0.04, oce: 0.06 };
   const HORAS = 4.5; // horas que ve cada suscriptor por semana
   const CHURN = 0.011; // abandono semanal típico (unos 4,5 % al mes)
-  function precioTipico(anio) { return IA.mundo.aEpoca(11, anio); } // al mes, plan estándar
+  function precioTipico(anio) { return ART.mundo.aEpoca(11, anio); } // al mes, plan estándar
   function mercado(anio) { return N.interp([[2007, 1], [2012, 30], [2016, 110], [2020, 350], [2025, 550], [2150, 1100]], anio) * 1e6; }
   function rivales(anio) { return N.interp([[2007, 6], [2015, 40], [2020, 90], [2030, 110], [2150, 150]], anio); }
   function puede() { return N.anio() >= ANIO; }
@@ -47,7 +47,7 @@ IA.streaming = (function () {
     if (S.stream) return 'Ya tienes plataforma.';
     if (!puede()) return 'El streaming llega en ' + ANIO + '.';
     if (S.estudios[0].caja < costoLanzar()) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'construccion', costoLanzar());
+    ART.negocio.pagar(0, 'construccion', costoLanzar());
     const p = precioTipico(N.anio()), casa = S.estudios[0].reg || 'nam';
     S.stream = { nom: (nom || S.estudios[0].nombre + '+').slice(0, 30), t0: S.t, precios: PLANES.map(function (x) { return N.redondear(p * x.k, 2); }), subs: 0, cat: [], cap: 40, bov: 0, lineas: [], ofLic: [], hist: [], negro: 0,
       reg: [REGIONES[casa] ? casa : 'nam'], srv: 1, prueba: false, camp: null, dest: null, fila: [], pt0: p, v: 3 };
@@ -60,7 +60,7 @@ IA.streaming = (function () {
   function obraDe(x) { return x && x.o ? O.porId(x.o) : null; }
   function calidad(x) { const o = obraDe(x); return o ? (o.tv && o.tv.q) || o.pub || 50 : x.q || 50; }
   function generoDe(x) { const o = obraDe(x); return o ? o.gen[0] : x.gen || 'Drama'; }
-  function famDe(x) { const o = obraDe(x); return o ? o.fam : IA.datos.familiaDe ? IA.datos.familiaDe[generoDe(x)] || 'DR' : 'DR'; }
+  function famDe(x) { const o = obraDe(x); return o ? o.fam : ART.datos.familiaDe ? ART.datos.familiaDe[generoDe(x)] || 'DR' : 'DR'; }
   function edadTitulo(x) { const o = obraDe(x); return o && o.fe !== undefined ? Math.max(0, N.S.t - o.fe) / 52 : x.ed || 5; }
   function esNuevo(x) { return N.S.t - (x.t0 || 0) < 8; }
   // Valor de un título para atraer suscriptores: calidad, novedad, series y exclusiva
@@ -88,7 +88,7 @@ IA.streaming = (function () {
     const S = N.S, s = plataforma();
     if (!s) return 'No tienes plataforma.';
     if (S.estudios[0].caja < costoBoveda()) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'construccion', costoBoveda());
+    ART.negocio.pagar(0, 'construccion', costoBoveda());
     s.bov++; s.cap += 40;
     return '';
   }
@@ -111,14 +111,14 @@ IA.streaming = (function () {
       // Propuesta de ida y vuelta: aceptan, contraofertan o se retiran
       of.r++;
       if (pago >= pedido * 0.85) { /* aceptan */ }
-      else if (pago >= pedido * 0.65 && of.r < 3) { of.p = Math.round(of.p * ((pago / pedido + 1) / 2)); return 'Contraoferta: piden ' + IA.ui.dinero(Math.round(of.p * m.k)) + ' por la licencia ' + m.nombre.toLowerCase() + '.'; }
+      else if (pago >= pedido * 0.65 && of.r < 3) { of.p = Math.round(of.p * ((pago / pedido + 1) / 2)); return 'Contraoferta: piden ' + ART.ui.dinero(Math.round(of.p * m.k)) + ' por la licencia ' + m.nombre.toLowerCase() + '.'; }
       else { s.ofLic.splice(+i, 1); return 'Se retiraron de la negociación.'; }
     }
     if (S.estudios[0].caja < pago) return 'No alcanza la caja.';
     const e = agregar(of.o, m.id === 'comprado' ? 'comprado' : 'licencia', { modo: m.id, ex: m.ex, hasta: m.sem ? S.t + m.sem : 0, p: pago, est: of.est });
     if (e) return e;
-    IA.negocio.pagar(0, 'derechos', pago);
-    IA.negocio.cobrarEn(of.est, 'streaming', pago);
+    ART.negocio.pagar(0, 'derechos', pago);
+    ART.negocio.cobrarEn(of.est, 'streaming', pago);
     s.ofLic.splice(+i, 1);
     return '';
   }
@@ -128,7 +128,7 @@ IA.streaming = (function () {
     if (!x || !x.hasta) return 'Ese título no tiene contrato que extender.';
     const c = costoExtension(x);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'derechos', c);
+    ART.negocio.pagar(0, 'derechos', c);
     x.hasta += 52;
     return '';
   }
@@ -141,7 +141,7 @@ IA.streaming = (function () {
     return '';
   }
   function cuotaLinea(p) { return Math.round(tip() * p.k / 12); }
-  function generoAzar() { return N.elegir(IA.datos.familias).generos[0]; }
+  function generoAzar() { return N.elegir(ART.datos.familias).generos[0]; }
   function costoPaquete(id, modoId) { const p = PAQUETES.filter(function (x) { return x.id === id; })[0], m = MODOS.filter(function (x) { return x.id === modoId; })[0] || MODOS[0]; return p ? Math.round(tip() * 0.012 * p.k * p.n * m.k * 0.6) : 0; }
   function comprarPaquete(id, modoId) {
     const S = N.S, s = plataforma(), p = PAQUETES.filter(function (x) { return x.id === id; })[0], m = MODOS.filter(function (x) { return x.id === modoId; })[0] || MODOS[0];
@@ -149,7 +149,7 @@ IA.streaming = (function () {
     if (s.cat.length + p.n > s.cap) return 'No caben en la biblioteca: compra una bóveda.';
     const c = costoPaquete(id, m.id);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'derechos', c);
+    ART.negocio.pagar(0, 'derechos', c);
     for (let k = 0; k < p.n; k++) { const g = generoAzar(); agregar(null, 'licencia', { nom: O.tituloNuevo([g]), gen: g, q: Math.round(N.limitar(p.q + N.normal(0, 4), 30, 95)), ed: p.id === 'estrenos' ? 0.5 : 3, modo: m.id, ex: m.ex, hasta: m.sem ? S.t + m.sem : 0, p: Math.round(c / p.n), paq: p.id }); }
     return '';
   }
@@ -159,7 +159,7 @@ IA.streaming = (function () {
     if (!s) return 'No tienes plataforma.';
     if (S.estudios[0].caja < costoNegro()) return 'No alcanza la caja.';
     if (s.cat.length + 3 > s.cap) return 'No caben en la biblioteca.';
-    IA.negocio.pagar(0, 'derechos', costoNegro());
+    ART.negocio.pagar(0, 'derechos', costoNegro());
     for (let k = 0; k < 3; k++) { const g = generoAzar(); agregar(null, 'negro', { nom: O.tituloNuevo([g]) + ' (copia pirata)', gen: g, q: 62 + N.entero(0, 15), ed: 1, hasta: S.t + 26 }); }
     return '';
   }
@@ -181,9 +181,9 @@ IA.streaming = (function () {
     if (!REGIONES[id] || s.reg.indexOf(id) >= 0) return 'Ya estás en esa región.';
     const c = costoRegion(id);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'construccion', c);
+    ART.negocio.pagar(0, 'construccion', c);
     s.reg.push(id);
-    N.emit('noticia', { tipo: 'estudio', texto: s.nom + ' llega a ' + IA.datos.region(id).nombre + '.', importante: true });
+    N.emit('noticia', { tipo: 'estudio', texto: s.nom + ' llega a ' + ART.datos.region(id).nombre + '.', importante: true });
     return '';
   }
   function parteMercado(s) { return (s.reg || []).reduce(function (a, r) { return a + (REGIONES[r] || 0); }, 0); }
@@ -194,7 +194,7 @@ IA.streaming = (function () {
     if (s.srv >= 5) return 'Ya tienes la mejor red.';
     const c = costoServidores();
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'construccion', c);
+    ART.negocio.pagar(0, 'construccion', c);
     s.srv++;
     return '';
   }
@@ -206,7 +206,7 @@ IA.streaming = (function () {
     if (s.camp && s.camp.hasta > S.t) return 'Ya tienes una campaña en marcha.';
     const c = costoCampana();
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'marketing', c);
+    ART.negocio.pagar(0, 'marketing', c);
     s.camp = { hasta: S.t + 8 };
     return '';
   }
@@ -244,7 +244,7 @@ IA.streaming = (function () {
     PLANES.forEach(function (p, i) { ing += s.subs * mix[i] * s.precios[i] * 12 / 52; });
     ing += s.subs * mix[0] * pt * 0.25 * 12 / 52; // anuncios del plan barato
     if (s.prueba) ing *= 0.93; // el mes gratis de los recién llegados
-    const servidores = s.subs * pt * 0.12 * 12 / 52 * (1 - IA.imperio.ahorroServidores()) * (1 + 0.15 * ((s.srv || 1) - 1)), almac = s.cat.length * tip() * 0.0002;
+    const servidores = s.subs * pt * 0.12 * 12 / 52 * (1 - ART.imperio.ahorroServidores()) * (1 + 0.15 * ((s.srv || 1) - 1)), almac = s.cat.length * tip() * 0.0002;
     let lineas = 0;
     s.lineas = s.lineas.filter(function (l) { return l.hasta > S.t; });
     if (N.mes(S.t) !== N.mes(S.t - 1)) {
@@ -258,7 +258,7 @@ IA.streaming = (function () {
       const negros = s.cat.filter(function (x) { return x.tipo === 'negro'; });
       if (negros.length && N.probabilidad(0.12)) {
         const multa = Math.round(tip() * 0.25);
-        IA.negocio.pagar(0, 'multas', multa);
+        ART.negocio.pagar(0, 'multas', multa);
         S.estudios[0].fama = N.redondear(Math.max(0.01, S.estudios[0].fama - 0.01), 3);
         s.cat = s.cat.filter(function (x) { return x.tipo !== 'negro'; });
         N.emit('noticia', { tipo: 'estudio', texto: 'Demanda contra ' + s.nom + ' por contenido pirata: multa y títulos retirados.', importante: true });
@@ -271,8 +271,8 @@ IA.streaming = (function () {
     const sem = s.cat.map(function (x, i) { const v = horas * pesos[i] / sp; x.vs = N.redondear((x.vs || 0) + v, 3); return { id: x.id, nom: x.nom, v: N.redondear(v, 3) }; }).sort(function (p, q) { return q.v - p.v; });
     ing = Math.round(ing);
     const gas = Math.round(servidores + almac + lineas);
-    IA.negocio.cobrarEn(0, 'streaming', ing);
-    IA.negocio.pagar(0, 'emision', gas);
+    ART.negocio.cobrarEn(0, 'streaming', ing);
+    ART.negocio.pagar(0, 'emision', gas);
     s.ult = { top: sem.slice(0, 10), nuevos: Math.round(nuevos), bajas: Math.round(bajas), churn: N.redondear(ch, 4), obj: Math.round(objetivo), horas: N.redondear(horas, 2), mix: mix.map(function (x) { return N.redondear(x, 3); }) };
     s.hist.push({ t: S.t, subs: s.subs, ing: ing, gas: gas, nv: Math.round(nuevos), bj: Math.round(bajas) });
     if (s.hist.length > 104) s.hist.shift();

@@ -265,7 +265,7 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 .rejilla-ed { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 6px; }
 .rejilla-ed input, .rejilla-ed select { width: 100%; }
 
-/* ===== Definitiva: canal de TV ===== */
+/* ===== canal de TV ===== */
 .seg { display: inline-flex; background: var(--panel2); border: 1px solid var(--borde); border-radius: 12px; padding: 3px; gap: 3px; }
 .seg button { min-height: 38px; padding: 6px 12px; border: 0; border-radius: 9px; background: transparent; color: var(--texto); cursor: pointer; font: inherit; font-size: 14px; }
 .seg button.on { background: var(--acento); color: var(--acento-tx); font-weight: 700; }
@@ -333,7 +333,7 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 .tv-n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); flex: none; }
 .dorado { color: var(--dorado); }
 .tv-ahora { display: flex; flex-direction: column; gap: 3px; }
-/* ===== Definitiva: plataforma de streaming ===== */
+/* ===== plataforma de streaming ===== */
 .sv-cab { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radio); background: linear-gradient(120deg, #1a0b2e, #3b0d4f 55%, #7a1149); color: #fff; margin-bottom: 10px; box-shadow: var(--sombra); }
 .sv-cab .tenue { color: rgba(255, 255, 255, .78); }
 .sv-logo { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, #ff4f81, #ffc857); color: #1b0b1f; font-family: var(--titulos); font-size: 22px; font-weight: 800; flex: none; }
@@ -383,7 +383,7 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 .sv-reg { padding: 10px; border-radius: 14px; background: var(--panel2); display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--borde); }
 .sv-reg.on { border-color: var(--bien); background: linear-gradient(160deg, rgba(74, 222, 128, .14), var(--panel2)); }
 .sv-reg .btn { min-height: 40px; padding: 6px 10px; }
-/* ===== Definitiva: crear obra ===== */
+/* ===== crear obra ===== */
 .cr-pasos { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: thin; }
 .cr-paso { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 4px 12px 4px 4px; border-radius: 22px; border: 1px solid var(--borde); background: var(--panel2); color: var(--texto); cursor: pointer; font: inherit; font-size: 14px; }
 .cr-paso b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); font-size: 14px; }
@@ -412,7 +412,7 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 .cr-por { margin: 0; padding-left: 4px; list-style: none; display: flex; flex-direction: column; gap: 4px; }
 .sv-t, .tv-rejilla, .sv-hero { isolation: isolate; }
 
-/* ===== Definitiva: estética por época (tema «Época», el de serie) ===== */
+/* ===== estética por época (tema «Época», el de serie) ===== */
 :root[data-tema="epoca"] body { background-color: var(--fondo); background-image: var(--textura, none); background-size: var(--textura-tam, auto); background-attachment: fixed; transition: background-color .6s; }
 :root[data-tema="epoca"] #barra, :root[data-tema="epoca"] #menu { background: var(--barra-fondo, var(--panel)); }
 :root[data-tema="epoca"][data-epoca="imprenta"] {
@@ -478,7 +478,7 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 :root[data-tema="epoca"][data-epoca="futuro"] .tarjeta { background: linear-gradient(160deg, rgba(18, 26, 70, .9), rgba(11, 16, 48, .9)); box-shadow: 0 0 0 1px rgba(124, 247, 255, .22), 0 0 22px rgba(255, 107, 255, .08); }
 :root[data-tema="epoca"][data-epoca="futuro"] h2, :root[data-tema="epoca"][data-epoca="futuro"] h3 { background: linear-gradient(90deg, var(--acento), var(--rosa)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .sello-epoca { display: inline-block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--acento); border: 1px solid var(--borde); border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; }
-/* ===== Definitiva: medios ===== */
+/* ===== medios ===== */
 .md-dims { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 6px 0; }
 .md-dim { display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--borde); background: var(--panel2); color: var(--texto); cursor: pointer; font: inherit; min-height: 64px; }
 .md-dim.on { border-color: var(--acento); box-shadow: 0 0 0 2px var(--acento) inset; }

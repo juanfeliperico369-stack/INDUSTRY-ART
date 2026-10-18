@@ -1,13 +1,13 @@
 /* ==== módulo: nucleo ==== */
 // Arranque del espacio de nombres, azar con semilla, reloj semanal, mensajes entre módulos y utilidades.
-// La partida vive en IA.n.S: un solo objeto de datos, sin funciones adentro.
-var IA = {};
-IA.VERSION = '3.0';
-IA.VERSION_GUARDADO = 37;
+// La partida vive en ART.n.S: un solo objeto de datos, sin funciones adentro.
+var ART = {};
+ART.VERSION = '4.0';
+ART.VERSION_GUARDADO = 38;
 // Banderas de edición en un solo lugar (completa o gratuita).
-IA.EDICION = { nombre: 'completa', ranurasManuales: 5, autoguardados: 3, bot: true };
+ART.EDICION = { nombre: 'completa', ranurasManuales: 5, autoguardados: 3, bot: true };
 
-IA.n = (function () {
+ART.n = (function () {
   'use strict';
   const nucleo = { S: null };
 

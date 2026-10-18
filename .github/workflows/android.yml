@@ -7,7 +7,7 @@ name: App de Android
 on:
   push:
     branches: [main, claude/industry-art-v16-analysis-dbf0iv]
-    paths: ['INDUSTRY_ART_v*.html', 'app/config.json', 'app/package.json', 'app/android/**', 'tools/preparar_app.py', '.github/workflows/android.yml']
+    paths: ['INDUSTRY_ART_Definitiva.html', 'INDUSTRY_ART_v*.html', 'app/config.json', 'app/package.json', 'app/android/**', 'tools/preparar_app.py', '.github/workflows/android.yml']
   workflow_dispatch:
     inputs:
       modo:

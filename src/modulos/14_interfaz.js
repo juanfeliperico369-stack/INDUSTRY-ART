@@ -2,9 +2,9 @@
 // Marco de la interfaz: cinco secciones (Estudio, Obras, Talento, Mundo, Negocio) y la barra superior; fichas
 // deslizables en celular y panel lateral en PC y horizontal; avisos; íconos propios en lugar de emojis; temas y
 // accesibilidad. Nada depende de pasar el mouse: todo se abre tocando.
-IA.ui = (function () {
+ART.ui = (function () {
   'use strict';
-  const N = IA.n, t = IA.t;
+  const N = ART.n, t = ART.t;
   const CLAVE_AJUSTES = 'industryart.v16.ajustes';
   const SECCIONES = ['estudio', 'obras', 'talento', 'mundo', 'negocio'];
 
@@ -25,9 +25,9 @@ IA.ui = (function () {
     r.setAttribute('data-movimiento', ajustes.movimiento ? 'menos' : 'normal');
     r.setAttribute('data-orientacion', ajustes.orientacion);
     r.setAttribute('data-dalton', ajustes.dalton ? 'si' : 'no'); // daltonismo
-    IA.idioma.poner(ajustes.idioma); // español o inglés
+    ART.idioma.poner(ajustes.idioma); // español o inglés
     actualizarEpoca();
-    if (IA.arte) { IA.arte.menosMovimiento = !!ajustes.movimiento; IA.arte.activarSonido(!!ajustes.sonido); }
+    if (ART.arte) { ART.arte.menosMovimiento = !!ajustes.movimiento; ART.arte.activarSonido(!!ajustes.sonido); }
     if (ajustes.orientacion !== 'auto' && window.screen && screen.orientation && screen.orientation.lock) {
       screen.orientation.lock(ajustes.orientacion === 'vertical' ? 'portrait' : 'landscape').catch(function () { /* solo en pantalla completa o en la app */ });
     }
@@ -48,7 +48,7 @@ IA.ui = (function () {
   // Notación anglosajona: K, M, B (Billion = mil millones) y T
   function dinero(v, anio) {
     if (v === undefined || v === null || !isFinite(v)) return '—';
-    if (ajustes.dineroHoy && N.S) v = IA.mundo.aHoy(v, anio === undefined ? N.anio() : anio);
+    if (ajustes.dineroHoy && N.S) v = ART.mundo.aHoy(v, anio === undefined ? N.anio() : anio);
     const s = v < 0 ? '−$' : '$';
     const a = Math.abs(v);
     const corto = function (x, suf) { return s + decimal(x, x < 10 ? 2 : x < 100 ? 1 : 0) + ' ' + suf; };
@@ -69,9 +69,9 @@ IA.ui = (function () {
   }
   function pct(x, d) { return decimal(x * 100, d === undefined ? 1 : d) + ' %'; }
   // Fechas reales: la semana del juego empieza en su primer día; los estrenos de cine caen en su viernes
-  function fecha(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs), true) + ' · ' + t('semana') + ' ' + N.semana(tAbs); }
-  function fechaCorta(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs)); }
-  function fechaEstreno(tAbs) { return IA.cal.textoCorto(IA.cal.viernesDeT(tAbs)) + ' ' + N.anio(tAbs); }
+  function fecha(tAbs) { return ART.cal.texto(ART.cal.inicioDeT(tAbs), true) + ' · ' + t('semana') + ' ' + N.semana(tAbs); }
+  function fechaCorta(tAbs) { return ART.cal.texto(ART.cal.inicioDeT(tAbs)); }
+  function fechaEstreno(tAbs) { return ART.cal.textoCorto(ART.cal.viernesDeT(tAbs)) + ' ' + N.anio(tAbs); }
   const esc = N.esc;
 
   // ---------- Íconos propios (SVG) ----------
@@ -154,17 +154,17 @@ IA.ui = (function () {
     const v = cv.getAttribute('data-poster');
     if (v === 'x') { // títulos sin obra (suministros, paquetes, piratas): cartel con los datos del lienzo
       const tit = cv.getAttribute('data-tit') || '';
-      IA.arte.posterEn(cv, { id: N.hash(tit), titulo: tit, generos: [cv.getAttribute('data-gen') || 'Drama'], temas: [], anio: +cv.getAttribute('data-anio') || N.anio(), etapa: 'terminada', crit: null, pub: null, clas: cv.getAttribute('data-clas') || 'PG', premiosGanados: 0, creditos: {}, estudio: { nombre: cv.getAttribute('data-est') || '', logo: null } });
+      ART.arte.posterEn(cv, { id: N.hash(tit), titulo: tit, generos: [cv.getAttribute('data-gen') || 'Drama'], temas: [], anio: +cv.getAttribute('data-anio') || N.anio(), etapa: 'terminada', crit: null, pub: null, clas: cv.getAttribute('data-clas') || 'PG', premiosGanados: 0, creditos: {}, estudio: { nombre: cv.getAttribute('data-est') || '', logo: null } });
       return;
     }
-    const o = IA.obras.porId(+v);
-    if (o) IA.arte.posterEn(cv, IA.obras.paraPoster(o));
+    const o = ART.obras.porId(+v);
+    if (o) ART.arte.posterEn(cv, ART.obras.paraPoster(o));
   }
   function dibujarRetrato(cv) {
-    if (cv.getAttribute('data-retrato') === 'nuevo') { if (estado.avatarNuevo) IA.arte.retratoEn(cv, estado.avatarNuevo, estado.avatarNuevo.anio); return; }
+    if (cv.getAttribute('data-retrato') === 'nuevo') { if (estado.avatarNuevo) ART.arte.retratoEn(cv, estado.avatarNuevo, estado.avatarNuevo.anio); return; }
     const id = +cv.getAttribute('data-retrato');
-    const tal = id === 999999 ? avatarComoTalento() : IA.talentos.porId(id);
-    if (tal) IA.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
+    const tal = id === 999999 ? avatarComoTalento() : ART.talentos.porId(id);
+    if (tal) ART.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
   }
   let vigia = null;
   const vigilados = new Set();
@@ -217,7 +217,7 @@ IA.ui = (function () {
   function subIndustria(id) { return SUB_IND[id] || id; }
   function dibujar(raiz) {
     const r = raiz || document;
-    if (IA.puntos) IA.puntos.convertir(r);
+    if (ART.puntos) ART.puntos.convertir(r);
     const v = vigiaPosters();
     // Los lienzos que ya salieron de la página (otra vista) se sueltan para no guardarlos en memoria
     if (v) vigilados.forEach(function (cv) { if (!cv.isConnected) { v.unobserve(cv); vigilados.delete(cv); } });
@@ -233,7 +233,7 @@ IA.ui = (function () {
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
       if (img && est && est.id === 0) { const q = Math.min(w, h) * 0.46; c.save(); c.beginPath(); c.arc(w / 2, h / 2, q, 0, Math.PI * 2); c.clip(); c.drawImage(img, w / 2 - q, h / 2 - q, q * 2, q * 2); c.restore(); }
-      else IA.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.36, L);
+      else ART.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.36, L);
     });
     // Vista previa del letrero (logo, fondo, color de letras y tipo de letra)
     r.querySelectorAll('canvas[data-letrero]').forEach(function (cv) {
@@ -243,7 +243,7 @@ IA.ui = (function () {
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
       const ind = est ? est.industria : cv.getAttribute('data-ind');
-      IA.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'), null, ind ? subIndustria(ind) : '');
+      ART.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'), null, ind ? subIndustria(ind) : '');
     });
     r.querySelectorAll('canvas[data-grafica]').forEach(function (cv) {
       const g = graficas[cv.getAttribute('data-grafica')];
@@ -271,7 +271,7 @@ IA.ui = (function () {
   const cacheAspecto = {};
   function comoRetrato(tal) {
     const clave = (N.S ? N.S.semilla : '') + '|' + tal.id;
-    if (!cacheAspecto[clave]) cacheAspecto[clave] = IA.arte.aspectoNuevo(N.hash(clave), tal.reg || 'nam');
+    if (!cacheAspecto[clave]) cacheAspecto[clave] = ART.arte.aspectoNuevo(N.hash(clave), tal.reg || 'nam');
     const propio = (tal.id === 999999 || tal.jugador) && N.S && N.S.avatar && N.S.avatar.asp;
     return { id: tal.id, nombre: tal.nom, sexo: tal.sx, edad: N.anio() - tal.nac, oficio: tal.of, aspecto: propio ? Object.assign({}, cacheAspecto[clave], N.S.avatar.asp) : cacheAspecto[clave] };
   }
@@ -285,10 +285,10 @@ IA.ui = (function () {
     const app = document.getElementById('app');
     if (!N.S) {
       app.classList.add('sin-juego');
-      document.getElementById('vista').innerHTML = estado.np ? IA.pantallas.nuevaPartida() : IA.pantallas.portada();
+      document.getElementById('vista').innerHTML = estado.np ? ART.pantallas.nuevaPartida() : ART.pantallas.portada();
       document.getElementById('vista').scrollTop = 0;
       dibujar(document.getElementById('vista'));
-      IA.pantallas.alMostrar('portada');
+      ART.pantallas.alMostrar('portada');
       return;
     }
     app.classList.remove('sin-juego');
@@ -305,8 +305,8 @@ IA.ui = (function () {
     const auto = !!estado.auto;
     const etiquetaRitmo = { semana: t('ritmo_semana'), mes: t('ritmo_mes'), evento: t('ritmo_evento'), auto: t('ritmo_auto') }[ajustes.ritmo];
     document.getElementById('barra').innerHTML =
-      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b style="font:' + esc(IA.arte.fuenteLetra((est.logo || {}).f, 16)) + '">' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
-      '<button class="fecha" data-a="abrirCalendario" aria-label="Abrir el calendario"><b>' + esc(IA.cal.texto(IA.cal.hoy())) + '</b><span class="tenue">' + t('semana') + ' ' + N.semana() + '</span></button>' +
+      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b style="font:' + esc(ART.arte.fuenteLetra((est.logo || {}).f, 16)) + '">' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
+      '<button class="fecha" data-a="abrirCalendario" aria-label="Abrir el calendario"><b>' + esc(ART.cal.texto(ART.cal.hoy())) + '</b><span class="tenue">' + t('semana') + ' ' + N.semana() + '</span></button>' +
       '<button class="fans" data-a="verFans" aria-label="Fans"><b class="cifra">' + grande(S.fans || 0) + '</b><span>fans</span></button>' +
       '<button class="dinero' + rojo + '" data-a="alternarDinero" aria-label="' + t('toca_dinero') + '"><b class="cifra">' + dinero(est.caja) + '</b><span>' + (ajustes.dineroHoy ? t('hoy') : t('epoca')) + '</span></button>' +
       '<span class="espacio"></span>' +
@@ -318,7 +318,7 @@ IA.ui = (function () {
   }
   function renderMenu() {
     const ic = { estudio: 'estudio', obras: 'obras', talento: 'talento', mundo: 'mundo', negocio: 'negocio' };
-    const vis = IA.metas && N.S ? IA.metas.seccionesVisibles() : null; // tutorial
+    const vis = ART.metas && N.S ? ART.metas.seccionesVisibles() : null; // tutorial
     document.getElementById('menu').innerHTML = SECCIONES.filter(function (s) { return !vis || vis.indexOf(s) >= 0; }).map(function (s) {
       return '<button class="nav' + (estado.seccion === s ? ' on' : '') + '" data-a="seccion" data-v="' + s + '"' + (estado.seccion === s ? ' aria-current="page"' : '') + '>' + icono(ic[s]) + '<span>' + t('sec_' + s) + '</span></button>';
     }).join('');
@@ -326,11 +326,11 @@ IA.ui = (function () {
   function renderVista(mantenerScroll) {
     const v = document.getElementById('vista');
     const y = v.scrollTop;
-    v.innerHTML = IA.pantallas[estado.seccion]();
+    v.innerHTML = ART.pantallas[estado.seccion]();
     // La pestaña activa siempre a la vista (en el celular las pestañas se deslizan)
     const pa = v.querySelector('.pestanas .pestana.on'); if (pa && pa.scrollIntoView && pa.parentNode.scrollWidth > pa.parentNode.clientWidth) { const c = pa.parentNode; c.scrollLeft = pa.offsetLeft - c.offsetLeft - 16; }
     dibujar(v);
-    IA.pantallas.alMostrar(estado.seccion);
+    ART.pantallas.alMostrar(estado.seccion);
     v.scrollTop = mantenerScroll ? y : 0;
   }
   // Refresco ligero tras avanzar: barra, vista (manteniendo el scroll) y ficha abierta
@@ -339,7 +339,7 @@ IA.ui = (function () {
     renderBarra();
     // La lista de talentos (40 retratos) no se redibuja con cada semana: se actualiza al volver a entrar
     if (estado.seccion !== 'talento') renderVista(true);
-    if (fichaAbierta() && estado.fichaActual && IA.pantallas.refrescarFicha) IA.pantallas.refrescarFicha(estado.fichaActual);
+    if (fichaAbierta() && estado.fichaActual && ART.pantallas.refrescarFicha) ART.pantallas.refrescarFicha(estado.fichaActual);
   }
   function irA(seccion, sub) {
     estado.seccion = seccion;
@@ -361,7 +361,7 @@ IA.ui = (function () {
       const fn = acciones[el.getAttribute('data-a')];
       if (!fn) return;
       ev.preventDefault();
-      if (IA.arte && el.tagName === 'BUTTON') IA.arte.sonido('clic');
+      if (ART.arte && el.tagName === 'BUTTON') ART.arte.sonido('clic');
       try { fn(el.getAttribute('data-v'), el, ev); } catch (e) { console.error(e); aviso('Error: ' + e.message, 'mal'); }
     });
     document.addEventListener('change', function (ev) {

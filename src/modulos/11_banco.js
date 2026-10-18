@@ -3,11 +3,11 @@
 // con pago automático (y atrasos que cuestan); deuda semilla según la región y la dificultad; socio que toma parte
 // del control y opina en lo grande; paciencia de la junta o del socio; quiebra con tres salidas (terminar, rescate
 // o socio); inversiones en compañías inventadas que suben y bajan; estado anual (balance) y cambio de marca.
-IA.banco = (function () {
+ART.banco = (function () {
   'use strict';
-  const N = IA.n;
-  const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
-  const din = function (x) { return IA.ui && IA.ui.dinero ? IA.ui.dinero(x) : '$' + Math.round(x); };
+  const N = ART.n;
+  const tip = function () { return ART.economia.presupuestoTipico(N.anio()); };
+  const din = function (x) { return ART.ui && ART.ui.dinero ? ART.ui.dinero(x) : '$' + Math.round(x); };
   const ESCALONES = [
     { nombre: 'Caja de ahorros del barrio', fama: 0, limite: 2, tasa: 0.12 },
     { nombre: 'Banco regional', fama: 0.15, limite: 6, tasa: 0.09 },
@@ -46,7 +46,7 @@ IA.banco = (function () {
     const ta = motivo === 'rescate' ? tasa() + 0.06 : motivo === 'semilla' ? escalon().tasa : tasa();
     const d = { id: N.sigId(), banco: motivo === 'semilla' ? 'Deuda semilla' : motivo === 'rescate' ? 'Rescate bancario' : escalon().nombre, capital: monto, saldo: monto, tasa: ta, cuota: cuota(monto, ta, meses), meses: meses, t0: S.t };
     b.deudas.push(d);
-    if (motivo !== 'semilla') IA.negocio.cobrarEn(0, 'prestamo', monto); // el préstamo no es ingreso: es capital y no paga impuestos
+    if (motivo !== 'semilla') ART.negocio.cobrarEn(0, 'prestamo', monto); // el préstamo no es ingreso: es capital y no paga impuestos
     return '';
   }
   function prepagar(id, monto) {
@@ -54,7 +54,7 @@ IA.banco = (function () {
     if (!d) return 'No existe.';
     const m = Math.min(d.saldo, Math.round(+monto || d.saldo));
     if (S.estudios[0].caja < m) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'amortizacion', m); d.saldo -= m;
+    ART.negocio.pagar(0, 'amortizacion', m); d.saldo -= m;
     if (d.saldo <= 0) st().deudas = st().deudas.filter(function (x) { return x !== d; });
     return '';
   }
@@ -69,8 +69,8 @@ IA.banco = (function () {
     cuentasDelMes().forEach(function (c) {
       if (est.caja >= c.monto || c.d && est.caja > -tip()) {
         // El interés es gasto (baja la utilidad); el capital que se devuelve no lo es
-        if (c.d) { const interes = Math.min(c.monto, Math.round(c.d.saldo * c.d.tasa / 12)); IA.negocio.pagar(0, 'deuda', interes); IA.negocio.pagar(0, 'amortizacion', c.monto - interes); c.d.saldo = Math.max(0, c.d.saldo - (c.monto - interes)); b.pagados++; }
-        else { IA.negocio.pagar(0, 'personal', c.monto); }
+        if (c.d) { const interes = Math.min(c.monto, Math.round(c.d.saldo * c.d.tasa / 12)); ART.negocio.pagar(0, 'deuda', interes); ART.negocio.pagar(0, 'amortizacion', c.monto - interes); c.d.saldo = Math.max(0, c.d.saldo - (c.monto - interes)); b.pagados++; }
+        else { ART.negocio.pagar(0, 'personal', c.monto); }
       } else {
         b.atrasos++; b.junta = Math.max(0, b.junta - 5);
         if (c.d) c.d.saldo = Math.round(c.d.saldo * 1.05);
@@ -91,7 +91,7 @@ IA.banco = (function () {
     const S = N.S;
     if (S.socio) { S.socio.parte = N.redondear(Math.min(0.49, S.socio.parte + parte), 3); S.socio.aporte += aporte; }
     else S.socio = { nom: nom || N.elegir(SOCIOS), parte: N.redondear(Math.min(0.49, parte), 3), aporte: aporte, t0: S.t };
-    IA.negocio.cobrarEn(0, 'aportes', aporte); // capital: no es ingreso del año
+    ART.negocio.cobrarEn(0, 'aportes', aporte); // capital: no es ingreso del año
     st().junta = 50;
     N.emit('noticia', { tipo: 'negocio', texto: S.socio.nom + ' entra como socio con el ' + Math.round(S.socio.parte * 100) + ' % del estudio.', importante: true });
   }
@@ -115,7 +115,7 @@ IA.banco = (function () {
     if (!S.socio) return 'No tienes socio.';
     const p = Math.round(valorEstudio() * S.socio.parte * 1.2);
     if (S.estudios[0].caja < p) return 'Necesitas ' + din(p) + '.';
-    IA.negocio.pagar(0, 'recompra', p);
+    ART.negocio.pagar(0, 'recompra', p);
     N.emit('noticia', { tipo: 'negocio', texto: 'Recompras la parte de ' + S.socio.nom + ': el estudio vuelve a ser solo tuyo.', importante: true });
     S.socio = null;
     return '';
@@ -123,9 +123,9 @@ IA.banco = (function () {
   // Dividendos del socio al cerrar el año
   function anual(util) {
     const S = N.S;
-    if (S.socio && util > 0) { const d = Math.round(util * 0.75 * S.socio.parte); IA.negocio.pagar(0, 'socio', d); }
+    if (S.socio && util > 0) { const d = Math.round(util * 0.75 * S.socio.parte); ART.negocio.pagar(0, 'socio', d); }
     // Dividendos de las inversiones (2 % del valor)
-    Object.keys(st().acc).forEach(function (id) { const v = valorAccion(id); if (v > 0) IA.negocio.cobrarEn(0, 'inversiones', Math.round(v * 0.02)); });
+    Object.keys(st().acc).forEach(function (id) { const v = valorAccion(id); if (v > 0) ART.negocio.cobrarEn(0, 'inversiones', Math.round(v * 0.02)); });
   }
   // ---------- Quiebra: tres salidas ----------
   function salidasQuiebra() {
@@ -154,7 +154,7 @@ IA.banco = (function () {
   function companias() { const a = N.anio(); return COMPANIAS.filter(function (c) { return c.desde <= a && c.hasta >= a; }); }
   function precio(id) { const p = st().precios[id]; return p === undefined ? 100 : p; }
   function precios() {
-    const b = st(), crisis = IA.historia.factorMercado('nam');
+    const b = st(), crisis = ART.historia.factorMercado('nam');
     COMPANIAS.forEach(function (c) {
       if (c.desde > N.anio()) return;
       let p = precio(c.id);
@@ -163,25 +163,25 @@ IA.banco = (function () {
       b.precios[c.id] = N.redondear(N.limitar(p, 1, 1e6), 2);
     });
   }
-  function valorAccion(id) { const a = st().acc[id]; return a ? Math.round(a.n * precio(id) * IA.mundo.aEpoca(1, N.anio()) * 1000) / 1000 : 0; }
+  function valorAccion(id) { const a = st().acc[id]; return a ? Math.round(a.n * precio(id) * ART.mundo.aEpoca(1, N.anio()) * 1000) / 1000 : 0; }
   function valorInversiones() { return Object.keys(st().acc).reduce(function (s, id) { return s + valorAccion(id); }, 0); }
   function comprarAccion(id, monto) {
     const S = N.S, b = st(), c = companias().filter(function (x) { return x.id === id; })[0];
     monto = Math.round(+monto || 0);
     if (!c) return 'No cotiza.';
     if (monto <= 0 || S.estudios[0].caja < monto) return 'No alcanza la caja.';
-    const n = monto / (precio(id) * IA.mundo.aEpoca(1, N.anio()));
+    const n = monto / (precio(id) * ART.mundo.aEpoca(1, N.anio()));
     b.acc[id] = b.acc[id] || { n: 0, costo: 0 };
     b.acc[id].n += n; b.acc[id].costo += monto;
-    IA.negocio.pagar(0, 'acciones', monto);
+    ART.negocio.pagar(0, 'acciones', monto);
     return '';
   }
   function venderAccion(id) {
     const S = N.S, b = st(), a = b.acc[id];
     if (!a) return 'No tienes acciones.';
     const v = valorAccion(id), gan = v - a.costo;
-    IA.negocio.cobrarEn(0, 'acciones', a.costo);
-    if (gan > 0) IA.negocio.cobrarEn(0, 'inversiones', gan); else IA.negocio.pagar(0, 'inversiones', -gan);
+    ART.negocio.cobrarEn(0, 'acciones', a.costo);
+    if (gan > 0) ART.negocio.cobrarEn(0, 'inversiones', gan); else ART.negocio.pagar(0, 'inversiones', -gan);
     delete b.acc[id];
     return '';
   }
@@ -208,7 +208,7 @@ IA.banco = (function () {
     nombre = (nombre || '').trim().slice(0, 40);
     if (!nombre) return 'Ponle un nombre.';
     if (est.caja < costoMarca()) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'marketing', costoMarca());
+    ART.negocio.pagar(0, 'marketing', costoMarca());
     const antes = est.nombre;
     est.nombre = nombre;
     if (avatarNom && S.avatar) S.avatar.nom = String(avatarNom).slice(0, 40);

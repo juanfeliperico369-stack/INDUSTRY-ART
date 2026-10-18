@@ -3,9 +3,9 @@
 // (gzip) o un compresor propio (LZW) cuando no existe; 5 ranuras manuales y 3 autoguardados rotativos;
 // archivo .iasave para pasar la partida del celular al PC. Cada guardado lleva versión y suma de verificación,
 // y las migraciones van en orden. Nunca falla en silencio.
-IA.guardado = (function () {
+ART.guardado = (function () {
   'use strict';
-  const N = IA.n;
+  const N = ART.n;
   // (el prefijo se queda en v16 a propósito: así la V17 encuentra las partidas guardadas por la V16)
   const BD = 'industryart', ALMACEN = 'partidas', PREFIJO = 'industryart.v16.';
   const MANUALES = ['m1', 'm2', 'm3', 'm4', 'm5'], AUTOS = ['a1', 'a2', 'a3'];
@@ -25,7 +25,7 @@ IA.guardado = (function () {
     S.talentos.forEach(function (t) {
       let k = 0;
       const azar = function () { k++; return (N.hash(t.id + '|v18|' + k) % 10007) / 10007; };
-      IA.talentos.completar(t, azar);
+      ART.talentos.completar(t, azar);
       t.enT = S.t; t.moT = S.t; t.act = 0;
       // En la V17 morir y retirarse se marcaban igual: quien "se retiró" antes de los 70 en realidad falleció
       if (t.ret && !t.mu && t.ret - t.nac < 70) t.mu = t.ret;
@@ -79,7 +79,14 @@ IA.guardado = (function () {
   MIGRACIONES[34] = function () { /* 1.4: sin datos nuevos obligatorios (notas del autor, material propio y logo propio son opcionales) */ };
   MIGRACIONES[35] = function () { /* 2.0: sin datos nuevos (los puntos «i» no se guardan) */ };
   MIGRACIONES[36] = function () { /* 2.1: el aspecto del avatar, los teatros propios y el talento del avatar se agregan solos cuando hacen falta */ };
-  MIGRACIONES[37] = function () { /* 3.0 Definitiva: el canal (24 horas, 8 franjas) y la plataforma se ponen al día solos al usarlos */ };
+  // 4.0: los hitos de la historia se cuentan otra vez (hay hitos nuevos entre los viejos)
+  MIGRACIONES[38] = function (S) {
+    if (!S.hist) return;
+    let v = 0;
+    ART.historia.HITOS.forEach(function (x, i) { const tx = (x[0] - S.y0) * 52 + ART.cal.semanaDeFecha(x[0], x[1] - 1, x[2]) - 1; if (tx < S.t) v = i + 1; });
+    S.hist.vistos = v;
+  };
+  MIGRACIONES[37] = function () { /* 3.0: el canal (24 horas, 8 franjas) y la plataforma se ponen al día solos al usarlos */ };
   MIGRACIONES[29] = function () { /* Errores e inglés, sin datos nuevos */ };
   MIGRACIONES[28] = function () { /* Interfaz y rendimiento, sin datos nuevos */ };
   MIGRACIONES[27] = function () { /* Solo balance, sin datos nuevos */ };
@@ -87,11 +94,11 @@ IA.guardado = (function () {
   MIGRACIONES[25] = function (S) { if (!S.med) S.med = { p: [], bandas: [], kits: {}, motores: [], motorLic: [], ofMot: [], premios: [], ing: {} }; };
   MIGRACIONES[24] = function (S) {
     const ESTR = { DR: 'autor', AV: 'autor', AA: 'taquillero', SM: 'imitador', HM: 'economico', IM: 'franquicias', FJ: 'familiar', RD: 'economico' };
-    S.estudios.forEach(function (e, i) { if (i > 0) { if (e.base === undefined) e.base = (IA.datos.rivales[i - 1] || { tam: e.tam }).tam; if (!e.estr) e.estr = ESTR[e.familia] || 'imitador'; } });
+    S.estudios.forEach(function (e, i) { if (i > 0) { if (e.base === undefined) e.base = (ART.datos.rivales[i - 1] || { tam: e.tam }).tam; if (!e.estr) e.estr = ESTR[e.familia] || 'imitador'; } });
     // Hitos ya pasados (la semana del juego se calcula con el año de inicio de esta partida)
     if (!S.hist) {
       let v = 0;
-      IA.historia.HITOS.forEach(function (x, i) { const tx = (x[0] - S.y0) * 52 + IA.cal.semanaDeFecha(x[0], x[1] - 1, x[2]) - 1; if (tx < S.t) v = i + 1; });
+      ART.historia.HITOS.forEach(function (x, i) { const tx = (x[0] - S.y0) * 52 + ART.cal.semanaDeFecha(x[0], x[1] - 1, x[2]) - 1; if (tx < S.t) v = i + 1; });
       S.hist = { gen: [], vistos: v, ultAnio: 0 };
     }
     if (!S.bitacora) S.bitacora = [];
@@ -340,7 +347,7 @@ IA.guardado = (function () {
     const est = S.estudios[0];
     return {
       nombre: est.nombre, anio: N.anio(), semana: N.semana(), caja: Math.round(est.caja), version: S.v,
-      semilla: S.semilla, fecha: new Date().toISOString(), juego: IA.VERSION,
+      semilla: S.semilla, fecha: new Date().toISOString(), juego: ART.VERSION,
     };
   }
   async function empaquetar(S) {
@@ -362,8 +369,8 @@ IA.guardado = (function () {
   }
   function migrar(S) {
     if (!S || S.juego !== 'INDUSTRY ART' || typeof S.v !== 'number') throw new Error('no es una partida de INDUSTRY ART');
-    if (S.v > IA.VERSION_GUARDADO) throw new Error('la partida es de una versión más nueva (V' + S.v + ')');
-    while (S.v < IA.VERSION_GUARDADO) {
+    if (S.v > ART.VERSION_GUARDADO) throw new Error('la partida es de una versión más nueva (V' + S.v + ')');
+    while (S.v < ART.VERSION_GUARDADO) {
       const m = MIGRACIONES[S.v + 1];
       if (!m) throw new Error('no hay migración desde la V' + S.v);
       m(S);
@@ -374,10 +381,10 @@ IA.guardado = (function () {
   // Pone una partida cargada en juego
   function activar(S) {
     N.S = S;
-    IA.juego.conectar();
-    if (S.faltanOficios) { IA.talentos.poblarOficios(S.faltanOficios); delete S.faltanOficios; }
-    IA.talentos.reindexar();
-    IA.obras.reindexar();
+    ART.juego.conectar();
+    if (S.faltanOficios) { ART.talentos.poblarOficios(S.faltanOficios); delete S.faltanOficios; }
+    ART.talentos.reindexar();
+    ART.obras.reindexar();
     N.emit('partidaCargada', S);
   }
 
@@ -431,7 +438,7 @@ IA.guardado = (function () {
       const est = N.S.estudios[0];
       const nombre = ('industryart_' + est.nombre + '_' + N.anio()).toLowerCase().replace(/[^a-z0-9_]+/g, '_') + '.iasave';
       // En la app de Android y iPhone se guarda con el menú Compartir (antes no bajaba nada)
-      const r = await IA.publicacion.guardarArchivo(nombre, texto, 'application/json');
+      const r = await ART.publicacion.guardarArchivo(nombre, texto, 'application/json');
       if (!r.ok) throw new Error(r.error || 'no se pudo guardar el archivo');
       return { ok: true, nombre: nombre, bytes: texto.length };
     } catch (e) {
@@ -443,7 +450,7 @@ IA.guardado = (function () {
       if (typeof texto !== 'string' || texto.length > TOPE_ARCHIVO) throw new Error(GRANDE);
       let o = null;
       try { o = JSON.parse(texto); } catch (e) { o = null; }
-      if (!o || o.formato !== 'iasave' || o.juego !== 'INDUSTRY ART' || typeof o.datos !== 'string' || typeof o.comp !== 'string') throw new Error(IA.t('gua_corrupto'));
+      if (!o || o.formato !== 'iasave' || o.juego !== 'INDUSTRY ART' || typeof o.datos !== 'string' || typeof o.comp !== 'string') throw new Error(ART.t('gua_corrupto'));
       const S = await desempaquetar({ comp: o.comp, datos: deBase64(o.datos), suma: o.suma }, true);
       activar(S);
       return { ok: true };

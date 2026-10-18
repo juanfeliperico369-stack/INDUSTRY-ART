@@ -5,10 +5,10 @@
 // cadena de un rival, tu plataforma o una ajena); audiencias por episodio; renovar o cancelar. Canal propio con
 // parrilla de 7 días × 6 franjas, autocompletar, horario familiar con multa, público por grupos, frescura de lo
 // repetido, patrocinadores con metas, tema del canal y noticias que se compran y vencen.
-IA.tv = (function () {
+ART.tv = (function () {
   'use strict';
-  const N = IA.n, O = IA.obras, D = IA.datos;
-  const tip = function (a) { return IA.economia.presupuestoTipico(a || N.anio()); };
+  const N = ART.n, O = ART.obras, D = ART.datos;
+  const tip = function (a) { return ART.economia.presupuestoTipico(a || N.anio()); };
   const ANIO_TV = 1940, ANIO_CANAL = 1946;
   const FORMATOS = [
     { id: 'larga', nombre: 'Temporada larga', desde: 1950, eps: [20, 26], def: 22, min: 44, rmin: [22, 60], k: 1, sem: 1 },
@@ -107,11 +107,11 @@ IA.tv = (function () {
   function rodarPiloto(b) {
     const S = N.S;
     if (!b.tv) return 'Solo las series tienen piloto.';
-    const err = IA.juego.puedeIniciar ? IA.juego.puedeIniciar(b) : '';
+    const err = ART.juego.puedeIniciar ? ART.juego.puedeIniciar(b) : '';
     if (err) return err;
     const c = costoPiloto(b);
     if (S.estudios[0].caja < c) return 'No alcanza la caja para el piloto.';
-    IA.negocio.pagar(0, 'produccion', c);
+    ART.negocio.pagar(0, 'produccion', c);
     S.pilotos = S.pilotos || [];
     S.pilotos.push({ id: N.sigId(), b: N.copiar(b), sr: 4, costo: c });
     return '';
@@ -122,7 +122,7 @@ IA.tv = (function () {
       if (p.nota !== undefined) return;
       if (--p.sr > 0) return;
       const x = N.copiar(p.b);
-      IA.economia.calificar(x, IA.talentos.porId, IA.negocio.contexto().bonos(0, x.fam, x));
+      ART.economia.calificar(x, ART.talentos.porId, ART.negocio.contexto().bonos(0, x.fam, x));
       p.nota = Math.round(N.limitar(x.pub + N.normal(0, 5), 1, 99));
       p.hasta = S.t + 8;
       N.emit('noticia', { tipo: 'estudio', texto: 'El piloto de «' + p.b.tit + '» saca ' + p.nota + ' con el público de prueba. ¿Pides la temporada?', importante: true });
@@ -134,11 +134,11 @@ IA.tv = (function () {
     if (!p || p.nota === undefined) return { error: 'El piloto no está listo.' };
     p.b.tv.pil = p.nota;
     // Quien se fue a otro proyecto mientras tanto se reemplaza (el personaje queda para el nuevo casting)
-    const b = p.b, disp = function (id) { const t = IA.talentos.porId(id); return !!t && IA.talentos.disponible(t, 0); };
+    const b = p.b, disp = function (id) { const t = ART.talentos.porId(id); return !!t && ART.talentos.disponible(t, 0); };
     Object.keys(b.eq).forEach(function (k) { if (Array.isArray(b.eq[k])) b.eq[k] = b.eq[k].filter(disp); else if (b.eq[k] !== null && b.eq[k] !== undefined && !disp(b.eq[k])) b.eq[k] = null; });
     (b.pj || []).forEach(function (q) { if (q.t !== null && q.t !== undefined && !disp(q.t)) q.t = null; });
     O.equipoRecomendado(b, 1); O.recalcular(b);
-    const r = IA.juego.iniciarObra(b);
+    const r = ART.juego.iniciarObra(b);
     if (r.error) return r;
     S.pilotos = S.pilotos.filter(function (x) { return x !== p; });
     return r;
@@ -162,7 +162,7 @@ IA.tv = (function () {
     return '';
   }
   function alCrear(o) {
-    if (o.tv && o.tv.pitch === undefined && o.pitch) { IA.negocio.cobrarEn(0, o.pitch.c === 'ajena' ? 'streaming' : 'tv', o.pitch.monto); }
+    if (o.tv && o.tv.pitch === undefined && o.pitch) { ART.negocio.cobrarEn(0, o.pitch.c === 'ajena' ? 'streaming' : 'tv', o.pitch.monto); }
   }
   // ---------- Audiencia ----------
   function hogares(anio) { return N.interp([[1940, 0.3], [1950, 8], [1960, 60], [1970, 110], [1980, 170], [1990, 250], [2000, 330], [2010, 420], [2025, 520], [2150, 800]], anio); }
@@ -170,7 +170,7 @@ IA.tv = (function () {
   // Lo que paga un millón de espectadores en una franja (calibrado con el costo típico de un episodio)
   function valorAud(anio) { return tip(anio) * 0.12 * 1.3 / Math.max(0.5, hogares(anio) * 0.06 * competencia(anio)); }
   function encaje(ed, fr) { let s = 0, w = 0; for (let g = 0; g < 5; g++) { s += ed[g] * fr.ed[g]; w += ed[g]; } return w ? s / w : 1; }
-  function edades(o) { const v = IA.estreno.edadesObra(o), s = v.reduce(function (a, b) { return a + b; }, 0) || 1; return v.map(function (x) { return x * 5 / s; }); }
+  function edades(o) { const v = ART.estreno.edadesObra(o), s = v.reduce(function (a, b) { return a + b; }, 0) || 1; return v.map(function (x) { return x * 5 / s; }); }
   function calidadBase(o) { return o.tv && o.tv.q !== undefined ? o.tv.q : o.pub || 50; }
   function calidadEp(o) {
     const m = o.tv && o.tv.em ? o.tv.em.m || 0 : 0;
@@ -194,11 +194,11 @@ IA.tv = (function () {
     if (o.pitch && donde !== o.pitch.c) return 'Vendiste la idea: se emite donde la compraron.';
     if (!opcionesEmision(o).some(function (x) { return x.id === donde; })) return 'Ese lugar no está disponible.';
     const pago = donde === 'cable' || donde === 'ajena' ? pagoVenta(o, donde) : 0;
-    if (pago) IA.negocio.cobrarEn(0, donde === 'ajena' ? 'streaming' : 'tv', pago);
+    if (pago) ART.negocio.cobrarEn(0, donde === 'ajena' ? 'streaming' : 'tv', pago);
     o.tv.em = { d: donde, t0: S.t, ep: 0, aud: [], ing: pago, m: 0, comp: donde === 'ajena' || (donde === 'stream' && !!(op && op.completa)) ? 1 : 0 };
     o.et = 'emision'; o.fe = S.t; o.prog = 0;
     O.tocar();
-    if (donde === 'stream') IA.streaming.agregar(o.id, 'propio', { orig: 1 });
+    if (donde === 'stream') ART.streaming.agregar(o.id, 'propio', { orig: 1 });
     if (donde === 'canal' && !(op && op.sinParrilla)) autocompletar(true);
     N.emit('estreno', o);
     return '';
@@ -218,7 +218,7 @@ IA.tv = (function () {
         else if (em.d === 'ajena') aud = hogares(a) * 0.05 * Math.pow(q / 60, 1.4);
         else if (em.d === 'cable') aud = hogares(a) * 0.06 * competencia(a) * Math.pow(q / 60, 1.6);
         else aud = 0; // en tu canal la audiencia la calcula la parrilla
-        if (em.d === 'cable' && q >= 70) { const b = Math.round(valorAud(a) * aud * 0.15); IA.negocio.cobrarEn(0, 'tv', b); em.ing += b; }
+        if (em.d === 'cable' && q >= 70) { const b = Math.round(valorAud(a) * aud * 0.15); ART.negocio.cobrarEn(0, 'tv', b); em.ing += b; }
         if (em.d !== 'canal') em.aud.push(N.redondear(aud, 2));
         if (o.tv.modo === 'serial') em.m = N.redondear(N.limitar(em.m + (q - 60) / 400, -0.3, 0.4), 3);
         em.ep++;
@@ -234,7 +234,7 @@ IA.tv = (function () {
     const c = N.S.canal;
     let hueco = false;
     if (c) { c.par.forEach(function (dia) { dia.forEach(function (x, j) { if (x && x.o === o.id) { dia[j] = null; hueco = true; } }); }); if (hueco) autocompletar(true); }
-    IA.talentos.trasEstreno(o, O.multiplicador(o));
+    ART.talentos.trasEstreno(o, O.multiplicador(o));
     N.emit('obraTerminada', o);
     N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» termina su temporada: ' + (promedioAud(o) ? N.redondear(promedioAud(o), 1) + ' millones por episodio. ' : '') + '¿La renuevas?', importante: true });
   }
@@ -242,7 +242,7 @@ IA.tv = (function () {
   function renovar(id) {
     const o = O.porId(+id);
     if (!o || !o.tv || o.tv.ren !== 'pendiente') return { error: 'No hay nada que renovar.' };
-    const r = IA.franquicias.continuar(o.id, 'temporada');
+    const r = ART.franquicias.continuar(o.id, 'temporada');
     if (r.error) return r;
     o.tv.ren = 'renovada';
     return r;
@@ -285,7 +285,7 @@ IA.tv = (function () {
     if (s.canal) return 'Ya tienes canal.';
     if (N.anio() < ANIO_CANAL) return 'La televisión comercial empieza en ' + ANIO_CANAL + '.';
     if (s.estudios[0].caja < costoCanal()) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'construccion', costoCanal());
+    ART.negocio.pagar(0, 'construccion', costoCanal());
     s.canal = asegurar({ nom: (nom || s.estudios[0].nombre + ' TV').slice(0, 30), tema: tema || null, t0: s.t, alc: 0.35, par: vacia(),
       pat: [], ofPat: [], notis: [], ofNot: [], fres: {}, hist: [], grupos: [0, 0, 0, 0, 0], porFranja: FRANJAS.map(function () { return 0; }) });
     autocompletar(false);
@@ -344,7 +344,7 @@ IA.tv = (function () {
     if (!c) return 'No tienes canal.';
     if (c.tema === fam) return '';
     if (c.tema && N.S.estudios[0].caja < costoCambioTema()) return 'No alcanza la caja.';
-    if (c.tema) IA.negocio.pagar(0, 'marketing', costoCambioTema());
+    if (c.tema) ART.negocio.pagar(0, 'marketing', costoCambioTema());
     c.tema = fam || null;
     return '';
   }
@@ -362,7 +362,7 @@ IA.tv = (function () {
     if (nivel(gid) >= 5) return 'Ya está en el nivel máximo.';
     const k = costoMejora(gid);
     if (N.S.estudios[0].caja < k) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', k);
+    ART.negocio.pagar(0, 'produccion', k);
     c.prog[gid] = nivel(gid) + 1;
     return '';
   }
@@ -397,7 +397,7 @@ IA.tv = (function () {
     if (inf.tipo === 'g') {
       q = calidadGenerico(inf.g); ed = inf.g.ed; gas = costoGenerico(inf.g);
       if (inf.g.id === 'noticiero') q += ctx.bonoNot * 40;
-      if (inf.g.id === 'musical' && IA.medios.bonoTV) q += Math.min(8, IA.medios.bonoTV() * 2); // tus éxitos musicales suben el programa
+      if (inf.g.id === 'musical' && ART.medios.bonoTV) q += Math.min(8, ART.medios.bonoTV() * 2); // tus éxitos musicales suben el programa
       if (inf.g.bono && inf.g.bono[fr.id]) bono *= inf.g.bono[fr.id];
       if (inf.g.finde && d >= 5) bono *= inf.g.finde;
     } else {
@@ -542,8 +542,8 @@ IA.tv = (function () {
     c.alc = N.redondear(Math.min(1, c.alc + 0.002 * (c.ads <= 10 ? 1.25 : c.ads <= 14 ? 1 : 0.5)), 3);
     c.grupos = grupos.map(function (x) { return N.redondear(x, 2); }); c.porFranja = porFranja.map(function (x) { return N.redondear(x, 2); });
     ing = Math.round(ing); gas = Math.round(gas);
-    IA.negocio.cobrarEn(0, 'tv', ing); IA.negocio.pagar(0, 'emision', gas);
-    if (multas) { IA.negocio.pagar(0, 'multas', multas); if (!c.avisoMulta || S.t - c.avisoMulta > 8) { c.avisoMulta = S.t; N.emit('noticia', { tipo: 'estudio', texto: 'Multa a ' + c.nom + ': emitiste contenido para adultos en horario familiar.', importante: true }); } }
+    ART.negocio.cobrarEn(0, 'tv', ing); ART.negocio.pagar(0, 'emision', gas);
+    if (multas) { ART.negocio.pagar(0, 'multas', multas); if (!c.avisoMulta || S.t - c.avisoMulta > 8) { c.avisoMulta = S.t; N.emit('noticia', { tipo: 'estudio', texto: 'Multa a ' + c.nom + ': emitiste contenido para adultos en horario familiar.', importante: true }); } }
     // Ranking de la semana frente a los canales rivales
     const tot = porFranja.reduce(function (p, v) { return p + v; }, 0);
     const cuota = FRANJAS.map(function (fr, j) { const sr = audRival(c, ctx, j).reduce(function (a, b) { return a + b; }, 0); return N.redondear(porFranja[j] / Math.max(0.001, porFranja[j] + sr), 3); });
@@ -559,7 +559,7 @@ IA.tv = (function () {
     const S = N.S, c = canal(), x = c ? c.ofNot.filter(function (n) { return n.id === +id; })[0] : null;
     if (!x) return 'Esa noticia ya no está.';
     if (S.estudios[0].caja < x.costo) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'emision', x.costo);
+    ART.negocio.pagar(0, 'emision', x.costo);
     c.notis.push({ txt: x.txt, bono: x.bono, hasta: S.t + x.sem });
     c.ofNot = c.ofNot.filter(function (n) { return n !== x; });
     return '';
@@ -568,7 +568,7 @@ IA.tv = (function () {
     const S = N.S, c = canal(), m = c ? c.ofModa : null;
     if (!m) return 'Esa oferta venció.';
     if (S.estudios[0].caja < m.costo) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'marketing', m.costo);
+    ART.negocio.pagar(0, 'marketing', m.costo);
     c.moda = { fam: m.fam, nom: m.nom, k: m.k, hasta: S.t + m.sem };
     c.ofModa = null;
     return '';
@@ -587,8 +587,8 @@ IA.tv = (function () {
     const S = N.S, c = canal(), of = c ? c.ofLic.filter(function (x) { return x.o === +oid; })[0] : null, o = of ? O.porId(of.o) : null;
     if (!of || !o) return 'Esa oferta ya no está.';
     if (S.estudios[0].caja < of.p) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'derechos', of.p);
-    IA.negocio.cobrarEn(o.est, 'tv', of.p);
+    ART.negocio.pagar(0, 'derechos', of.p);
+    ART.negocio.cobrarEn(o.est, 'tv', of.p);
     c.lic.push({ id: N.sigId(), o: o.id, hasta: S.t + 104, p: of.p });
     c.ofLic = c.ofLic.filter(function (x) { return x !== of; });
     return '';

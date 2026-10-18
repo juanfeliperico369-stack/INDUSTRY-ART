@@ -1,15 +1,15 @@
 /* ==== módulo: lanzamiento ==== */
 // Fecha de estreno, marketing, la cartelera de cada semana y el cierre de cada obra con su informe.
-// El plan de estreno (regiones, doblaje, canales, promociones) vive en IA.estreno; las ventanas, en IA.ventanas.
-IA.lanzamiento = (function () {
+// El plan de estreno (regiones, doblaje, canales, promociones) vive en ART.estreno; las ventanas, en ART.ventanas.
+ART.lanzamiento = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, T = IA.talentos, O = IA.obras;
+  const N = ART.n, D = ART.datos, E = ART.economia, T = ART.talentos, O = ART.obras;
 
   // Programa el estreno: la campaña se paga ahora y el estreno ocurre en la semana elegida
   function programar(o, tEstreno, nivM, ctx, plan) {
     o.fe = Math.max(N.S.t, tEstreno);
     o.nivM = nivM;
-    const anio = N.anio(o.fe), ES = IA.estreno;
+    const anio = N.anio(o.fe), ES = ART.estreno;
     o.plan = o.est === 0 ? ES.normalizar(o, plan, anio) : ES.planRival(o, anio);
     o.plan.anuncio = o.fe - N.S.t; // la cuenta regresiva: anunciar con tiempo arma expectativa
     const c = ES.costos(o, o.plan, nivM, anio);
@@ -48,7 +48,7 @@ IA.lanzamiento = (function () {
     lista.forEach(function (o) {
       // Estreno directo en video o en streaming: sin cines
       if (o.plan && o.plan.via && o.plan.via !== 'cines') {
-        IA.ventanas.estrenarDirecto(o, o.plan.via);
+        ART.ventanas.estrenarDirecto(o, o.plan.via);
         cerrar(o, ctx);
         return;
       }
@@ -79,14 +79,14 @@ IA.lanzamiento = (function () {
     if (o.part) o.part = Math.round(o.part);
     delete o.feR;
     // Juguetes y coleccionables venden según la taquilla
-    const merch = o.plan && o.plan.promo ? o.plan.promo.reduce(function (s, id) { const x = IA.estreno.promo(id); return s + (x && x.merch ? x.merch : 0); }, 0) : 0;
+    const merch = o.plan && o.plan.promo ? o.plan.promo.reduce(function (s, id) { const x = ART.estreno.promo(id); return s + (x && x.merch ? x.merch : 0); }, 0) : 0;
     if (merch > 0 && o.bruto > 0) {
       const m = Math.round(o.bruto * merch * (['FJ', 'IM', 'AA'].indexOf(o.fam) >= 0 ? 1 : 0.4));
       o.merch = m;
-      IA.negocio.cobrarEn(o.est, 'merchandising', m);
+      ART.negocio.cobrarEn(o.est, 'merchandising', m);
     }
     // Lo que falta llega por las ventanas: video, TV y streaming
-    IA.ventanas.alTerminar(o);
+    ART.ventanas.alTerminar(o);
     cerrar(o, ctx);
   }
   function cerrar(o, ctx) {
@@ -113,7 +113,7 @@ IA.lanzamiento = (function () {
     if (O.costoTotal(o) > tipico * 2.5) r.push('Fue muy cara para su época: cuesta más recuperarla.');
     const acc = o.acc ? o.acc.nam : 1;
     if (acc < 0.6) r.push('Su clasificación (' + o.clas + ') dejó fuera a parte del público.');
-    return r.concat(IA.ideas.informe(o));
+    return r.concat(ART.ideas.informe(o));
   }
 
   return {

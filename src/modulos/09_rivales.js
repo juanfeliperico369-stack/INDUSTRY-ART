@@ -2,12 +2,12 @@
 // Estudios rivales simples que hacen obras de verdad: contratan talentos del mismo mundo, eligen fechas mirando
 // la temporada y la competencia, estrenan en la misma cartelera y ganan o pierden dinero como tú.
 // Identidad y estrategia, robo de fechas, quiebras de verdad, fusiones, estudios emergentes y estrellas.
-IA.rivales = (function () {
+ART.rivales = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, P = IA.produccion, L = IA.lanzamiento;
+  const N = ART.n, D = ART.datos, E = ART.economia, O = ART.obras, P = ART.produccion, L = ART.lanzamiento;
 
   function logoDe(n) {
-    if (IA.arte && IA.arte.logoAleatorio) return IA.arte.logoAleatorio(n);
+    if (ART.arte && ART.arte.logoAleatorio) return ART.arte.logoAleatorio(n);
     return { s: n % 25, c: (n * 7) % 20, b: (n * 3) % 20, t: (n * 11) % 20, f: n % 20 };
   }
   const ESTRATEGIAS = {
@@ -100,30 +100,30 @@ IA.rivales = (function () {
     const op = { gen: gen, escala: escala, tono: tono };
     // A veces adaptan una obra libre de derechos y, desde 2022, algunos usan IA para abaratar
     if (!prestigio && N.probabilidad(0.07)) {
-      const libres = IA.ideas.materialesDisponibles(anio).filter(function (m) { return IA.ideas.esLibre(m, anio); });
+      const libres = ART.ideas.materialesDisponibles(anio).filter(function (m) { return ART.ideas.esLibre(m, anio); });
       if (libres.length) {
-        const m = IA.ideas.usarMaterial({ est: est.id }, N.elegir(libres).id, anio);
+        const m = ART.ideas.usarMaterial({ est: est.id }, N.elegir(libres).id, anio);
         op.gen = m.gen; op.mat = m.mat; op.tit = m.tit; op.epo = m.epo;
         if (m.cont) op.cont = m.cont;
       }
     }
-    if (anio >= IA.ideas.ANIO_IA && N.probabilidad(0.3)) op.ia = N.entero(10, 60);
+    if (anio >= ART.ideas.ANIO_IA && N.probabilidad(0.3)) op.ia = N.entero(10, 60);
     // La historia: los estudios con buen ojo (y los proyectos de prestigio) eligen lo que encaja con su género
     const famIdea = D.familiaDe[op.gen[0]] || 'DR';
     const buenOjo = N.probabilidad(N.limitar(0.45 + est.calidad / 20 + (prestigio ? 0.3 : 0), 0.2, 0.92));
-    op.tem = [buenOjo ? IA.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
-    op.prob = [buenOjo ? IA.ideas.problemaRecomendado(famIdea) : IA.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
-    op.arco = buenOjo ? IA.ideas.arcoRecomendado(famIdea) : N.elegir(IA.taxonomia.arcos).id;
-    const sec = IA.franquicias.secuelaRival(est); // a veces continúan su éxito
+    op.tem = [buenOjo ? ART.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
+    op.prob = [buenOjo ? ART.ideas.problemaRecomendado(famIdea) : ART.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
+    op.arco = buenOjo ? ART.ideas.arcoRecomendado(famIdea) : N.elegir(ART.taxonomia.arcos).id;
+    const sec = ART.franquicias.secuelaRival(est); // a veces continúan su éxito
     if (sec) { op.gen = sec.gen.slice(); delete op.mat; }
     let b = O.borrador(est.id, op);
     // Con poca caja hacen una obra más chica en vez de quedarse sin filmar
     while (b.pp * 1.4 > est.caja && op.escala > AJ.minEscala) { op.escala--; b = O.borrador(est.id, op); }
-    if (sec) IA.franquicias.prepararRival(b, sec);
+    if (sec) ART.franquicias.prepararRival(b, sec);
     const pobre = b.pp * 2 > est.caja;
     b.prest = prestigio ? 1 : 0;
     // Cómo filman: el método y el terreno recomendados y, si tienen uno que sirva, un set guardado
-    const R = IA.rodaje;
+    const R = ART.rodaje;
     b.met = R.metodoRecomendado(b, anio); b.ter = R.terrenoRecomendado(b); b.pst = 'clasico';
     const sets = R.usaSet(b) ? R.setsQueSirven(b) : [];
     if (sets.length && sets[0].q >= 50) b.setR = sets[0].id;
@@ -134,10 +134,10 @@ IA.rivales = (function () {
     const costo = O.costoTalento(b) + b.pp;
     if (est.caja < costo * 0.9) return null;
     const o = P.iniciar(b, ctx);
-    IA.ideas.registrarPremisas(o, anio);
+    ART.ideas.registrarPremisas(o, anio);
     if (o.mat) {
-      IA.ideas.registrarUso(o.mat, anio);
-      N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' adapta «' + IA.taxonomia.material(o.mat).tit + '».' });
+      ART.ideas.registrarUso(o.mat, anio);
+      N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' adapta «' + ART.taxonomia.material(o.mat).tit + '».' });
     }
     return o;
   }
@@ -195,24 +195,24 @@ IA.rivales = (function () {
         est.tam = N.redondear(Math.max(base * 0.5, est.tam * 0.96), 3);
       }
       est.tam = N.redondear(est.tam + (base - est.tam) * 0.05, 3);
-      if (est.filial && est.caja < 0) { const c = -est.caja + Math.round(tipico * 0.5); IA.negocio.pagar(0, 'filiales', c); est.caja += c; }
+      if (est.filial && est.caja < 0) { const c = -est.caja + Math.round(tipico * 0.5); ART.negocio.pagar(0, 'filiales', c); est.caja += c; }
     }
     fusiones();
     EMERGENTES.forEach(function (x) { if (x.anio === anio && !S.estudios.some(function (e) { return e.nombre === x.nombre; })) agregarEstudio(x, true); });
     // Después de 2150, o cuando el mundo se queda con pocos estudios, nacen estudios generados
     if ((anio > 2150 && N.probabilidad(0.08)) || activos().length < 6) {
-      const nom = N.elegir(SILABAS) + N.elegir(SILABAS).toLowerCase() + ' ' + N.elegir(IA.datos.sufijosLogo);
+      const nom = N.elegir(SILABAS) + N.elegir(SILABAS).toLowerCase() + ' ' + N.elegir(ART.datos.sufijosLogo);
       agregarEstudio({ nombre: nom, pais: N.elegir(D.paises).id, familia: N.elegir(D.ORDEN_FAM), tam: 0.6, calidad: N.entero(-1, 3), riesgo: 0.6, texto: 'Un estudio joven' }, true);
     }
   }
   function quebrar(est) {
     const S = N.S;
     est.quebrado = N.anio();
-    O.activas().forEach(function (o) { if (o.est === est.id && ['desarrollo', 'preproduccion'].indexOf(o.et) >= 0) { o.et = 'terminada'; o.cancelada = 1; o.pub = o.pub || 0; IA.talentos.liberar(O.idsEquipo(o)); } });
+    O.activas().forEach(function (o) { if (o.est === est.id && ['desarrollo', 'preproduccion'].indexOf(o.et) >= 0) { o.et = 'terminada'; o.cancelada = 1; o.pub = o.pub || 0; ART.talentos.liberar(O.idsEquipo(o)); } });
     // Sus franquicias quedan a la venta; otro rival se queda con la mejor
-    const fr = IA.franquicias.lista().filter(function (f) { return f.est === est.id; });
+    const fr = ART.franquicias.lista().filter(function (f) { return f.est === est.id; });
     const comprador = activos().sort(function (a, b) { return b.caja - a.caja; })[0];
-    if (fr.length && comprador) { const f = fr.sort(function (a, b) { return IA.franquicias.valor(b) - IA.franquicias.valor(a); })[0]; f.est = comprador.id; }
+    if (fr.length && comprador) { const f = fr.sort(function (a, b) { return ART.franquicias.valor(b) - ART.franquicias.valor(a); })[0]; f.est = comprador.id; }
     N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' quiebra y cierra sus puertas' + (fr.length ? '; sus franquicias salen a la venta' : '') + '.', importante: true });
   }
   // Dos estudios chicos y en apuros se fusionan
@@ -223,12 +223,12 @@ IA.rivales = (function () {
     const a = chicos[1], b = chicos[0];
     a.caja += b.caja; a.tam = N.redondear(a.tam + b.tam * 0.6, 3); a.base = N.redondear((a.base || a.tam) + (b.base || b.tam) * 0.5, 3);
     b.quebrado = N.anio(); b.fusion = a.id;
-    IA.franquicias.lista().forEach(function (f) { if (f.est === b.id) f.est = a.id; });
+    ART.franquicias.lista().forEach(function (f) { if (f.est === b.id) f.est = a.id; });
     N.emit('noticia', { tipo: 'rival', texto: a.nombre + ' y ' + b.nombre + ' se fusionan.', importante: true });
   }
   // Estrellas de 1 a 5 por cuota, prestigio y calidad
   function estrellas(e) {
-    const c = IA.negocio.cuotaAnioActual(e.id);
+    const c = ART.negocio.cuotaAnioActual(e.id);
     const p = c * 40 + e.fama * 2 + (e.calidad || 0) * 0.15 + (e.id === 0 ? 0 : 0);
     return e.quebrado ? 0 : N.limitar(Math.round(1 + p * 1.2), 1, 5);
   }

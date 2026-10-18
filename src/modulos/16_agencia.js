@@ -4,13 +4,13 @@
 // talento (biografía, desempeño por familia, capacidades, medios, otras habilidades, fama por región, relaciones,
 // ventajas, historial, premios e ingresos) con sus acciones: contratar para una obra en marcha o nueva, contrato
 // exclusivo, comprar la exclusividad a un rival y academia con beca.
-IA.agencia = (function () {
+ART.agencia = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, X = IA.taxonomia, E = IA.economia, M = IA.mundo, O = IA.obras, T = IA.talentos;
-  const J = IA.juego, U = IA.ui, t = IA.t, esc = N.esc;
+  const N = ART.n, D = ART.datos, X = ART.taxonomia, E = ART.economia, M = ART.mundo, O = ART.obras, T = ART.talentos;
+  const J = ART.juego, U = ART.ui, t = ART.t, esc = N.esc;
   const dinero = U.dinero, icono = U.icono, ac = U.accion;
 
-  // ---------- Filtros del buscador (tu documento: nombre, overall, costo, sexo, talento, retirado o activo, orden) ----------
+  // ---------- Filtros del buscador (nombre, overall, costo, sexo, talento, retirado o activo, orden) ----------
   const ft = { of: '', q: '', sx: '', estado: 'activos', disp: false, ovMin: 0, ovMax: 100, cMin: '', cMax: '', orden: 'valor', dir: 'desc', avanzado: false, n: 40, solo: '' };
   const ORDENES = [['valor', 'Recomendado'], ['overall', 'Overall'], ['fama', 'Popularidad'], ['costo', 'Costo'], ['taquilla', 'Taquilla de su carrera'], ['nombre', 'Nombre'], ['edad', 'Edad'], ['energia', 'Energía'], ['disponible', 'Disponibilidad']];
   function barra(v, max, clase) { return '<span class="mini" style="width:60px"><i class="' + (clase || '') + '" style="width:' + Math.round(N.limitar(v / (max || 100), 0, 1) * 100) + '%"></i></span>'; }
@@ -76,7 +76,7 @@ IA.agencia = (function () {
     const bonos = (av.esp || []).map(function (x) { return D.oficio(x).nombre + ' +' + (1 + ((av.ac && av.ac[x]) || 0)); }).concat(Object.keys(av.ac || {}).filter(function (x) { return (av.esp || []).indexOf(x) < 0; }).map(function (x) { return D.oficio(x).nombre + ' +' + av.ac[x]; }));
     h += '<div class="tarjeta"><div class="fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece"><span class="tenue chico">' + t('tu_avatar') + '</span><h3 style="margin:2px 0">' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(N.S.estudios[0].personalidad) + '</span>' +
       '<span class="chico">En tus obras: ' + esc(bonos.join(' · ')) + '</span>' + (av.es && av.es.fin > S.t ? '<span class="chico oro">Estudiando ' + esc(T.curso(av.es.c).nombre) + ' hasta ' + esc(U.fechaCorta(av.es.fin)) + '</span>' : '') + '</div></div>' +
-      '<div class="fila envolver"><button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><button class="btn" data-a="agAspecto">Cambiar tu aspecto</button></div><span class="nota info"><span>Puedes ganar hasta +5 en cada oficio estudiando.</span> <span>En tus obras puedes ponerte en el equipo como ' + esc(IA.carrera.oficiosAvatar().map(function (x) { return D.oficio(x).nombre.toLowerCase(); }).join(', ')) + ' (sin cobrar).</span> <span>Tu vida, tus encargos y tu retiro están en Estudio.</span></span></div>';
+      '<div class="fila envolver"><button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><button class="btn" data-a="agAspecto">Cambiar tu aspecto</button></div><span class="nota info"><span>Puedes ganar hasta +5 en cada oficio estudiando.</span> <span>En tus obras puedes ponerte en el equipo como ' + esc(ART.carrera.oficiosAvatar().map(function (x) { return D.oficio(x).nombre.toLowerCase(); }).join(', ')) + ' (sin cobrar).</span> <span>Tu vida, tus encargos y tu retiro están en Estudio.</span></span></div>';
     // Promesas
     const espera = S.tPromesas ? Math.max(0, J.ESPERA_PROMESAS - (S.t - S.tPromesas)) : 0;
     h += '<div class="tarjeta"><b>Buscar promesas</b><p class="nota" style="margin:2px 0">Tus cazatalentos encuentran 3 jóvenes con mucho potencial. Conocerás su potencial real, su primer contrato sale 30 % más barato y te tienen lealtad.</p><div class="fila envolver">' +
@@ -140,7 +140,7 @@ IA.agencia = (function () {
   ac('agPromesas', function () {
     const r = J.buscarPromesas(ft.promOf || '');
     if (r.error) { U.aviso(r.error, 'mal'); return; }
-    IA.arte.sonido('exito');
+    ART.arte.sonido('exito');
     ft.solo = 'promesas'; ft.avanzado = true; ft.estado = 'activos'; ft.of = ''; ft.q = '';
     U.aviso('Tus cazatalentos encontraron ' + r.talentos.length + ' promesas');
     U.refrescar();
@@ -169,7 +169,7 @@ IA.agencia = (function () {
     const pares = S.talentos.filter(function (y) { return y.of === x.of && !y.ret && !y.mu && y.cp; }).slice(0, 300);
     const prom = T.CAPACIDADES.map(function (_, i) { return pares.length ? pares.reduce(function (a, y) { return a + y.cp[i]; }, 0) / pares.length : 50; });
     const gr = U.grafica('radarT' + x.id, function (cv) {
-      IA.arte.radar(cv, [T.CAPACIDADES.map(function (_, i) { return x.cp ? x.cp[i] : x.hab; }), prom], T.CAPACIDADES, { leyenda: [x.nom.split(' ')[0], 'Promedio de su oficio'] });
+      ART.arte.radar(cv, [T.CAPACIDADES.map(function (_, i) { return x.cp ? x.cp[i] : x.hab; }), prom], T.CAPACIDADES, { leyenda: [x.nom.split(' ')[0], 'Promedio de su oficio'] });
     });
     h += '<canvas class="lienzo" style="height:230px;max-width:420px;margin:0 auto;display:block" data-grafica="' + gr + '" role="img" aria-label="Radar de capacidades"></canvas>';
     const nv = T.nivel(x), falta = T.faltaPrestigio(x, 0);
@@ -247,7 +247,7 @@ IA.agencia = (function () {
     const p = v.split('|');
     const err = J.contratarEnObra(+p[0], +p[1], p[2], p[3] || undefined);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('dinero');
+    ART.arte.sonido('dinero');
     U.aviso('Contratado');
     ui.panel = null;
     U.renderBarra();
@@ -255,7 +255,7 @@ IA.agencia = (function () {
   });
   ac('agNuevaObra', function (v) {
     ui.panel = null;
-    if (IA.creacion.crearCon) IA.creacion.crearCon(+v);
+    if (ART.creacion.crearCon) ART.creacion.crearCon(+v);
   });
   // ---------- Contratos exclusivos ----------
   ac('agExclusivo', function (v) {
@@ -272,14 +272,14 @@ IA.agencia = (function () {
     const p = v.split('|');
     const err = J.firmarExclusivo(+p[0], +p[1]);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('exito');
+    ART.arte.sonido('exito');
     U.aviso('Contrato exclusivo firmado');
     cerrarPanel(+p[0]);
   });
   ac('agComprarEx', function (v) {
     const err = J.comprarExclusividad(+v);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('dinero');
+    ART.arte.sonido('dinero');
     U.aviso('Ahora está libre: puedes contratarlo o firmarle un exclusivo');
     U.renderBarra();
     cerrarPanel(+v);
@@ -323,7 +323,7 @@ IA.agencia = (function () {
     const p = v.split('|');
     const err = J.estudiar(p[0] === 'avatar' ? 'avatar' : +p[0], p[1], p[2]);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('exito');
+    ART.arte.sonido('exito');
     U.aviso(p[0] === 'avatar' ? 'Empiezas a estudiar' : 'Beca pagada: empieza a estudiar');
     U.renderBarra();
     if (p[0] === 'avatar') { U.cerrarModal(); U.refrescar(); } else cerrarPanel(+p[0]);
@@ -333,7 +333,7 @@ IA.agencia = (function () {
   function formAspecto() {
     const av = N.S.avatar, a = Object.assign({}, U.comoRetrato({ id: 999999, nom: av.nom, sx: av.sx, nac: av.nac, of: 'produccion', reg: N.S.estudios[0].reg }).aspecto);
     return '<h2>Tu aspecto</h2><div class="fila" id="agAspVista" style="align-items:flex-start"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece">' +
-      IA.arte.OPCIONES_ASPECTO.filter(function (x) { return !x[3] || x[3] === av.sx; }).map(function (x) {
+      ART.arte.OPCIONES_ASPECTO.filter(function (x) { return !x[3] || x[3] === av.sx; }).map(function (x) {
         return '<label class="campo" style="margin:0"><span>' + x[1] + '</span><select data-c="agAsp" data-k="' + x[0] + '">' + x[2].map(function (n, i) { return '<option value="' + i + '"' + ((+a[x[0]] || 0) === i ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></label>';
       }).join('') + '</div></div><button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>';
   }
@@ -342,7 +342,7 @@ IA.agencia = (function () {
     const av = N.S.avatar, k = el.getAttribute('data-k');
     const base = U.comoRetrato({ id: 999999, nom: av.nom, sx: av.sx, nac: av.nac, of: 'produccion', reg: N.S.estudios[0].reg }).aspecto;
     const a = Object.assign({}, base); a[k] = ['gafas', 'aretes', 'pecas'].indexOf(k) >= 0 ? +v === 1 : +v;
-    av.asp = IA.juego.aspectoValido(a);
+    av.asp = ART.juego.aspectoValido(a);
     U.dibujar(document.getElementById('agAspVista'));
     U.dibujar(document.getElementById('vista'));
   });

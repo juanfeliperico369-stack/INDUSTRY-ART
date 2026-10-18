@@ -1,10 +1,10 @@
 /* ==== módulo: negocio ==== */
 // Finanzas mes a mes por categoría, gastos fijos que crecen con el tamaño, impuesto del 25 % sobre utilidades
 // (no sobre la caja), antimonopolio sobre el 35 %, construcciones básicas del estudio,
-// cuota de mercado y quiebra (con sus tres salidas en IA.banco).
-IA.negocio = (function () {
+// cuota de mercado y quiebra (con sus tres salidas en ART.banco).
+ART.negocio = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
+  const N = ART.n, D = ART.datos, E = ART.economia, M = ART.mundo, T = ART.talentos;
   const INGRESOS = ['taquilla', 'video', 'tv', 'streaming', 'merchandising', 'reestrenos', 'exhibicion', 'carrera', 'licencias', 'inversiones', 'filiales', 'coproduccion', 'encargos', 'fans', 'investigacion', 'eventos', 'musica', 'juegos', 'teatro', 'libros', 'alquilerTeatros', 'ventaTeatros'];
   const GASTOS = ['talento', 'exclusivos', 'academia', 'derechos', 'produccion', 'marketing', 'distribucion', 'personal', 'mantenimiento', 'construccion', 'impuestos', 'multas', 'emision', 'deuda', 'socio', 'filiales', 'investigacion', 'inversiones', 'coproduccion', 'encargos', 'eventos'];
   const NOMBRES = {
@@ -73,9 +73,9 @@ IA.negocio = (function () {
       const p = infoTerreno(id);
       if (p.bono && (!p.familias || p.familias.indexOf(famId) >= 0)) Object.keys(p.bono).forEach(function (k) { b[k] = (b[k] || 0) + p.bono[k]; });
     });
-    IA.sede.bonos(b, obra); // personal de oficina
-    IA.carrera.bonos(b); // trasfondo y arquetipo de tu avatar
-    IA.imperio.bonoTec(b); // inventos propios o licenciados mientras son novedad
+    ART.sede.bonos(b, obra); // personal de oficina
+    ART.carrera.bonos(b); // trasfondo y arquetipo de tu avatar
+    ART.imperio.bonoTec(b); // inventos propios o licenciados mientras son novedad
     // Rendimientos decrecientes; apilar instalaciones y personal rinde cada vez menos (tope suave de +10)
     Object.keys(b).forEach(function (k) { if (k[0] !== '_' && b[k] > 0) b[k] = Math.round(10 * (1 - Math.exp(-b[k] / 10)) * 10) / 10; });
     return b;
@@ -92,14 +92,14 @@ IA.negocio = (function () {
     if (estId !== 0) return AJ.ahorroRivales;
     let a = 0;
     N.S.estudios[0].terrenos.forEach(function (id) { a += infoTerreno(id).ahorro || 0; });
-    return Math.min(0.26, a + IA.sede.ahorroProductor() + IA.carrera.ahorro());
+    return Math.min(0.26, a + ART.sede.ahorroProductor() + ART.carrera.ahorro());
   }
   function bonoMarketing(estId) {
     if (estId !== 0) return 0;
     let a = 0;
     N.S.estudios[0].pisos.forEach(function (id) { a += infoPiso(id).marketing || 0; });
     const vis = D.visiones.filter(function (v) { return v.id === N.S.estudios[0].vision; })[0];
-    return a + (vis && vis.marketing ? vis.marketing : 0) + IA.sede.bonoMarketing() + IA.carrera.bonoMarketing();
+    return a + (vis && vis.marketing ? vis.marketing : 0) + ART.sede.bonoMarketing() + ART.carrera.bonoMarketing();
   }
   // Cada construcción encarece la siguiente (terreno más caro, permisos, obras más grandes)
   function costoConstruccion(info) {
@@ -124,7 +124,7 @@ IA.negocio = (function () {
     const est = N.S.estudios[0];
     const info = tipo === 'piso' ? infoPiso(id) : infoTerreno(id);
     const costo = costoConstruccion(info);
-    const veto = IA.banco.opinar(costo, 'la construcción'); // el socio opina en lo grande
+    const veto = ART.banco.opinar(costo, 'la construcción'); // el socio opina en lo grande
     if (veto) return veto;
     pagar(0, 'construccion', costo);
     if (tipo === 'piso') est.pisos.push(id); else est.terrenos.push(id);
@@ -142,7 +142,7 @@ IA.negocio = (function () {
     est.pisos.forEach(function (id) { reduccion += -(infoPiso(id).fijo || 0); });
     const f = 1 - Math.min(0.3, reduccion);
     return {
-      personal: (tipico * (0.006 + 0.004 * partes) * f + IA.sede.gastoFijoMes()) * (1 - IA.carrera.descuentoFijo()), // sede y personal de oficina
+      personal: (tipico * (0.006 + 0.004 * partes) * f + ART.sede.gastoFijoMes()) * (1 - ART.carrera.descuentoFijo()), // sede y personal de oficina
       mantenimiento: tipico * 0.008 * (est.valorObras || 0) * f,
     };
   }
@@ -164,7 +164,7 @@ IA.negocio = (function () {
           if (p > 0) { pagar(o.est, 'talento', p); o.part = (o.part || 0) + p; Object.keys(o.pctT).forEach(function (id) { T.pagarA(+id, parte * o.pctT[id] / 100); }); }
         }
       },
-      terminar: function (o) { IA.lanzamiento.terminar(o, ctxCache); },
+      terminar: function (o) { ART.lanzamiento.terminar(o, ctxCache); },
       famaDe: function (estId) { return N.S.estudios[estId].fama; },
       bonoMarketingDe: bonoMarketing,
       regionEstudio: function (estId) { return N.S.estudios[estId].reg; },
@@ -269,7 +269,7 @@ IA.negocio = (function () {
   // Dinero ya comprometido: lo que falta pagar de las producciones en marcha
   function comprometido(estId) {
     let s = 0;
-    IA.obras.enProduccion(estId).forEach(function (o) { s += Math.max(0, o.pp * (o.sobre || 1) - (o.gp || 0)); });
+    ART.obras.enProduccion(estId).forEach(function (o) { s += Math.max(0, o.pp * (o.sobre || 1) - (o.gp || 0)); });
     return s;
   }
   // Impuesto que se deberá pagar al cerrar el año (25 % de la utilidad que lleva el año)

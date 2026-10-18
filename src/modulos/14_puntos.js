@@ -1,10 +1,10 @@
 /* ==== módulo: puntos ==== */
 // Puntos «i»: cada nota que explica una mecánica se guarda detrás de un botón «i». Al tocarlo se abre ahí mismo
-// con su explicación y un dato histórico real del tema (sin personas reales ni marcas, como manda el plan).
+// con su explicación y un dato histórico real del tema (sin personas vivas ni marcas).
 // Las notas que muestran datos de la partida (cifras, fechas, contratos) siguen a la vista.
-IA.puntos = (function () {
+ART.puntos = (function () {
   'use strict';
-  const N = IA.n, U = IA.ui;
+  const N = ART.n, U = ART.ui;
   // [palabras clave (expresión regular sobre la nota), sección de respaldo, dato]
   const DATOS = [
     ['cine|película|estreno|taquilla', 'obras', 'El 28 de diciembre de 1895, en París, se cobró por primera vez una entrada para ver cine proyectado.'],

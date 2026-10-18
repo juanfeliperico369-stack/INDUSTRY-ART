@@ -3,9 +3,9 @@
 // 2150 con semillas fijas, y revisa las metas de balance, los errores, el tiempo por semana y el tamaño del
 // guardado. Crea sus obras con la fábrica de ideas (historia, personajes, material, guiones comprados, efectos e IA);
 // las pruebas de reglas viven en tools/reglas.js, fuera del juego. Ninguna versión se entrega si el bot falla.
-IA.pruebas = (function () {
+ART.pruebas = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, T = IA.talentos, L = IA.lanzamiento, NG = IA.negocio, X = IA.taxonomia;
+  const N = ART.n, D = ART.datos, E = ART.economia, O = ART.obras, T = ART.talentos, L = ART.lanzamiento, NG = ART.negocio, X = ART.taxonomia;
 
   const ESTRATEGIAS = {
     prudente: { escala: [1, 2], marketing: 2, ambicion: 1.0, colchon: 1.7, construir: 8, pisos: 5 },
@@ -20,7 +20,7 @@ IA.pruebas = (function () {
     const r = { est: o.est, mult: O.multiplicador(o), neto: O.neto(o), talento: O.costoTotal(o) > 0 ? (o.cf || 0) / O.costoTotal(o) : 0 };
     // Cómo se hizo, solo para las obras del jugador
     if (o.est === 0) {
-      const l = IA.rodaje.linea(o);
+      const l = ART.rodaje.linea(o);
       r.met = o.met || 'mixto'; r.pst = o.pst || 'clasico'; r.set = o.setR ? 1 : 0; r.ext = o.ext ? Object.keys(o.ext).length : 0;
       r.pr = o.prueba ? o.prueba.ok : null; r.dil = o.lp && o.lp.dv ? o.lp.dv.length : 0;
       r.sobre = l && l.plan ? l.real / l.plan - 1 : 0;
@@ -55,10 +55,10 @@ IA.pruebas = (function () {
   }
   // Prueba de público: con un puntaje flojo reedita o regraba; con uno bueno estrena
   function pruebaBot(o) {
-    const p = o.prueba.p, ops = IA.rodaje.opcionesPrueba(o);
+    const p = o.prueba.p, ops = ART.rodaje.opcionesPrueba(o);
     const ok = function (id) { const x = ops.filter(function (q) { return q.id === id; })[0]; return x && !x.no; };
     const holgura = NG.cajaLibre(0) > E.presupuestoTipico(N.anio()) * 3;
-    const ed = (IA.rodaje.notas(o).filter(function (n) { return n.dep === 'edicion'; })[0] || { v: 50 }).v;
+    const ed = (ART.rodaje.notas(o).filter(function (n) { return n.dep === 'edicion'; })[0] || { v: 50 }).v;
     if (!holgura) return p < 55 && ed >= 60 ? 'reeditar' : 'estrenar';
     if (p < 50 && ok('regrabar')) return 'regrabar';
     if (p < 62) return ed >= 55 ? 'reeditar' : 'pulir';
@@ -69,16 +69,16 @@ IA.pruebas = (function () {
     const S = N.S, jug = S.estudios[0];
     const tipico = E.presupuestoTipico(N.anio());
     // 0. Dilemas de rodaje y pruebas de público pendientes
-    IA.juego.decisionesPendientes().forEach(function (o) {
-      if (o.dil) IA.juego.decidirDilema(o.id, IA.rodaje.mejorOpcion(o));
-      else if (o.prueba && !o.prueba.ok) IA.juego.decidirPrueba(o.id, pruebaBot(o));
+    ART.juego.decisionesPendientes().forEach(function (o) {
+      if (o.dil) ART.juego.decidirDilema(o.id, ART.rodaje.mejorOpcion(o));
+      else if (o.prueba && !o.prueba.ok) ART.juego.decidirPrueba(o.id, pruebaBot(o));
     });
     // 0b. Vida del avatar y heredero; personal de oficina cuando sobra caja
-    IA.carrera.autoDecidir();
-    if ((S.candidatos || []).length) { IA.sede.aceptar(S.candidatos[0].id); S.candidatos = []; }
+    ART.carrera.autoDecidir();
+    if ((S.candidatos || []).length) { ART.sede.aceptar(S.candidatos[0].id); S.candidatos = []; }
     if (N.semana() === 30 && NG.cajaLibre(0) > tipico * 8) {
-      if (IA.sede.personal().length >= IA.sede.nivelSede().tope && !IA.sede.puedeMejorar()) IA.sede.mejorar();
-      else if (!S.recl && IA.sede.personal().length < IA.sede.nivelSede().tope) IA.sede.reclutar('estandar', IA.sede.ROLES[IA.sede.personal().length % IA.sede.ROLES.length].id);
+      if (ART.sede.personal().length >= ART.sede.nivelSede().tope && !ART.sede.puedeMejorar()) ART.sede.mejorar();
+      else if (!S.recl && ART.sede.personal().length < ART.sede.nivelSede().tope) ART.sede.reclutar('estandar', ART.sede.ROLES[ART.sede.personal().length % ART.sede.ROLES.length].id);
     }
     // 1. Estrenar lo que esté listo en la mejor semana próxima
     O.delEstudio(0, ['lista']).forEach(function (o) {
@@ -90,20 +90,20 @@ IA.pruebas = (function () {
       while (nivM > 0 && NG.cajaLibre(0) < E.marketingTipico(N.anio()) * D.nivelesMarketing[nivM].mult * 1.2) nivM--;
       const t = L.mejorSemana(o, S.t + 1, S.t + 10);
       // Una obra muy floja va directo a video o a streaming: ahorra la campaña de cines
-      const vias = IA.ventanas.viasDirectas(N.anio());
+      const vias = ART.ventanas.viasDirectas(N.anio());
       const plan = nota < 42 && vias.length ? { via: vias[vias.length - 1].id } : null;
-      while (nivM >= 0 && IA.juego.programarEstreno(o, t, nivM, plan)) nivM--;
+      while (nivM >= 0 && ART.juego.programarEstreno(o, t, nivM, plan)) nivM--;
     });
     // Reestreno de un clásico de tu catálogo cuando sobra caja
     if (N.semana() === 10 && NG.cajaLibre(0) > tipico * 6) {
-      const cand = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && !IA.ventanas.puedeReestrenar(o); })
-        .sort(function (a, b) { return IA.ventanas.valorReestreno(b, 1) - IA.ventanas.valorReestreno(a, 1); })[0];
-      if (cand && IA.ventanas.valorReestreno(cand, 1) > IA.ventanas.costoReestreno(1) * 1.5) IA.ventanas.reestrenar(cand.id, 1);
+      const cand = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && !ART.ventanas.puedeReestrenar(o); })
+        .sort(function (a, b) { return ART.ventanas.valorReestreno(b, 1) - ART.ventanas.valorReestreno(a, 1); })[0];
+      if (cand && ART.ventanas.valorReestreno(cand, 1) > ART.ventanas.costoReestreno(1) * 1.5) ART.ventanas.reestrenar(cand.id, 1);
     }
     // Contrato con una cadena de cines de tu región cuando sobra caja
     if (N.semana() === 20 && NG.cajaLibre(0) > tipico * 8 && !(jug.cad && jug.cad[jug.reg])) {
-      const c = IA.estreno.cadenas(jug.reg).filter(function (x) { return !IA.estreno.puedeFirmar(x.id, 2); }).sort(function (a, b) { return b.salas - a.salas; })[0];
-      if (c) IA.estreno.firmar(c.id, 2);
+      const c = ART.estreno.cadenas(jug.reg).filter(function (x) { return !ART.estreno.puedeFirmar(x.id, 2); }).sort(function (a, b) { return b.salas - a.salas; })[0];
+      if (c) ART.estreno.firmar(c.id, 2);
     }
     botTele(est, tipico); // series, canal, plataforma, franquicias y licencias
     botImperio(est, tipico); // eventos, banco e imperio
@@ -143,16 +143,16 @@ IA.pruebas = (function () {
         }
       });
       if (!ok || !b || N.anio() < D.CINE_DESDE) break; // antes del cine el bot solo hace teatro, libros y música
-      const r = IA.juego.iniciarObra(b);
+      const r = ART.juego.iniciarObra(b);
       if (r.error) { if (registroErrores) registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error); break; }
     }
   }
   // Un proyecto a la vez en cada medio, bandas, giras, kits, motores, DLC, traducciones y teatro grabado
   function botMedios(tipico) {
-    const S = N.S, Md = IA.medios, anio = N.anio();
+    const S = N.S, Md = ART.medios, anio = N.anio();
     if (N.semana() % 4 !== 3 || NG.cajaLibre(0) < tipico * 2) return;
     if (Md.disponible('musica') && !Md.bandas().filter(function (b) { return !b.sep; }).length) {
-      const ids = IA.talentos.disponibles('interprete', 0).sort(function (a, b) { return Md.habMedio(b, 'musica') - Md.habMedio(a, 'musica'); }).slice(0, N.probabilidad(0.5) ? 1 : 3).map(function (t) { return t.id; });
+      const ids = ART.talentos.disponibles('interprete', 0).sort(function (a, b) { return Md.habMedio(b, 'musica') - Md.habMedio(a, 'musica'); }).slice(0, N.probabilidad(0.5) ? 1 : 3).map(function (t) { return t.id; });
       Md.firmarBanda('', ids, ids.length === 1 ? 'solista' : 'banda');
     }
     Md.bandas().forEach(function (b) {
@@ -180,7 +180,7 @@ IA.pruebas = (function () {
       if (f) op.gen = N.elegir(f.generos.filter(function (g) { return g !== 'Erótico' && g !== 'Erótica'; }));
       if (med !== 'musica') op.tipo = N.elegir(Md.tipos(med)).id;
       if (med === 'musica') { const b = Md.bandas().filter(function (x) { return !x.sep; })[0]; if (b) op.banda = b.id; else op.tipo = 'jingle'; }
-      if (med === 'libros') { const fr = IA.franquicias.lista().filter(function (x) { return x.est === 0; })[0]; if (fr && N.probabilidad(0.3)) op.fr = fr.id; }
+      if (med === 'libros') { const fr = ART.franquicias.lista().filter(function (x) { return x.est === 0; })[0]; if (fr && N.probabilidad(0.3)) op.fr = fr.id; }
       let b = Md.borrador(med, op);
       // Si no alcanza, prueba una versión chica (sala chica, escala 0): antes de 1895 el teatro y los libros son todo
       if (b.costo >= NG.cajaLibre(0) * 0.3 && med !== 'musica') { op.esc = 0; b = Md.borrador(med, op); if (med === 'teatro') { b.cfg.sala = 'chica'; Md.recalcular(b); } }
@@ -190,8 +190,8 @@ IA.pruebas = (function () {
   }
   // Eventos, quiebra, banco, inversiones e imperio
   function botImperio(est, tipico) {
-    const S = N.S, B = IA.banco, I = IA.imperio, anio = N.anio();
-    IA.eventos.autoDecidir();
+    const S = N.S, B = ART.banco, I = ART.imperio, anio = N.anio();
+    ART.eventos.autoDecidir();
     if (S.quiebra) { const ops = B.salidasQuiebra().filter(function (x) { return x.id !== 'terminar' && x.ok !== false; }); if (ops.length) B.salir(ops[ops.length - 1].id); return; }
     // Préstamo si la caja se pone fea y el banco presta; inversiones con lo que sobra
     if (NG.cajaLibre(0) < tipico * 0.3 && B.limite() > tipico && !B.deuda()) B.pedir(Math.min(B.limite(), tipico * 2), 36);
@@ -201,16 +201,16 @@ IA.pruebas = (function () {
     if (S.socio && NG.cajaLibre(0) > tipico * 40) B.recomprar();
     if (N.semana() !== 20) return;
     const libre = NG.cajaLibre(0);
-    if (libre > tipico * 12 && I.sedes().length < 2) { const p = N.elegir(IA.datos.paises.filter(function (x) { return x.id !== S.estudios[0].pais; })); I.abrirSede(p.id); }
-    if (libre > tipico * 25 && I.filiales().length < 2) { const r = IA.rivales.activos().filter(function (e) { return !e.filial && !I.puedeComprar(e.id); }).sort(function (a, b) { return I.precioEstudio(a.id) - I.precioEstudio(b.id); })[0]; if (r && N.probabilidad(0.4)) I.comprarEstudio(r.id); }
+    if (libre > tipico * 12 && I.sedes().length < 2) { const p = N.elegir(ART.datos.paises.filter(function (x) { return x.id !== S.estudios[0].pais; })); I.abrirSede(p.id); }
+    if (libre > tipico * 25 && I.filiales().length < 2) { const r = ART.rivales.activos().filter(function (e) { return !e.filial && !I.puedeComprar(e.id); }).sort(function (a, b) { return I.precioEstudio(a.id) - I.precioEstudio(b.id); })[0]; if (r && N.probabilidad(0.4)) I.comprarEstudio(r.id); }
     const o = O.enProduccion(0).filter(function (x) { return x.et === 'desarrollo'; })[0];
     if (o && N.probabilidad(0.3)) { const s = I.socios(o)[0]; if (s) I.coproducir(o.id, s.id); }
     if (libre > tipico * 6 && N.probabilidad(0.3)) { const p = I.proyectosAjenos()[0]; if (p) I.financiar(p.id); }
-    if (libre > tipico * 8 && N.probabilidad(0.2)) { const r = N.elegir(IA.rivales.activos()); if (r) I.encargar(r.id, N.elegir(IA.datos.familia(r.familia).generos.filter(function (g) { return g !== 'Erótico'; })), 1); }
+    if (libre > tipico * 8 && N.probabilidad(0.2)) { const r = N.elegir(ART.rivales.activos()); if (r) I.encargar(r.id, N.elegir(ART.datos.familia(r.familia).generos.filter(function (g) { return g !== 'Erótico'; })), 1); }
     if (I.ofertasEncargo().length && !S.encargoPend && N.probabilidad(0.4)) I.aceptarEncargo(I.ofertasEncargo()[0].id);
-    if (libre > tipico * 10 && !I.distribuciones().length && N.probabilidad(0.3)) { const r = N.elegir(IA.rivales.activos()); if (r) I.firmarDistribucion(r.id, 2); }
-    if (!I.investigando() && libre > tipico * 5) { const x = IA.historia.INVENTOS.filter(function (y) { return I.estadoInvento(y) === 'investigable'; })[0]; if (x) I.investigar(x.id); }
-    const lic = IA.historia.INVENTOS.filter(function (y) { return I.estadoInvento(y) === 'rival'; })[0];
+    if (libre > tipico * 10 && !I.distribuciones().length && N.probabilidad(0.3)) { const r = N.elegir(ART.rivales.activos()); if (r) I.firmarDistribucion(r.id, 2); }
+    if (!I.investigando() && libre > tipico * 5) { const x = ART.historia.INVENTOS.filter(function (y) { return I.estadoInvento(y) === 'investigable'; })[0]; if (x) I.investigar(x.id); }
+    const lic = ART.historia.INVENTOS.filter(function (y) { return I.estadoInvento(y) === 'rival'; })[0];
     if (lic && libre > tipico * 4) I.licenciarTec(lic.id);
     if (anio >= 1950 && libre > tipico * 4) I.organizarEvento(o ? o.id : null);
     ['tienda', 'museo', 'animacion', 'cafeteria', 'laboratorio'].forEach(function (id) { const inf = I.info(id); if (inf && !I.tiene(id) && libre > tipico * 10 && !NG.puedeConstruir('piso', id)) NG.construir('piso', id); });
@@ -218,7 +218,7 @@ IA.pruebas = (function () {
   }
   // Lo que haría un jugador con la televisión, el streaming y sus franquicias
   function botTele(est, tipico) {
-    const S = N.S, anio = N.anio(), TV = IA.tv, ST = IA.streaming, F = IA.franquicias;
+    const S = N.S, anio = N.anio(), TV = ART.tv, ST = ART.streaming, F = ART.franquicias;
     (S.pilotos || []).filter(function (p) { return p.nota !== undefined; }).forEach(function (p) {
       if (p.nota >= 55 && O.enProduccion(0).length < NG.capacidad(0) && !TV.ordenarTemporada(p.id).error) return;
       TV.descartarPiloto(p.id);
@@ -233,7 +233,7 @@ IA.pruebas = (function () {
       if (o.est !== 0 || !o.tv || o.tv.ren !== 'pendiente') return;
       if ((o.tv.q || 0) >= 58 && O.enProduccion(0).length < NG.capacidad(0) && NG.cajaLibre(0) > (o.gp || 0) * 1.5) {
         const r = TV.renovar(o.id);
-        if (!r.error && IA.juego.iniciarObra(r.b).error) o.tv.ren = 'cancelada';
+        if (!r.error && ART.juego.iniciarObra(r.b).error) o.tv.ren = 'cancelada';
       } else TV.cancelar(o.id);
     });
     if (S.canal) {
@@ -278,8 +278,8 @@ IA.pruebas = (function () {
       const fs = TV.formatosDe(anio);
       const fsF = fs.filter(function (f) { return !f.vivo; });
       TV.aplicar(b, { fmt: N.elegir(fsF.length ? fsF : fs).id });
-      if (!(b.prob && b.prob.length)) IA.ideas.recomendarHistoria(b, anio);
-      IA.ideas.generarPersonajes(b);
+      if (!(b.prob && b.prob.length)) ART.ideas.recomendarHistoria(b, anio);
+      ART.ideas.generarPersonajes(b);
       O.equipoRecomendado(b, est.ambicion);
       O.recalcular(b);
       const cs = TV.compradores(anio);
@@ -288,7 +288,7 @@ IA.pruebas = (function () {
     }
     if (!b) return;
     if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6) return;
-    const r = IA.juego.iniciarObra(b);
+    const r = ART.juego.iniciarObra(b);
     if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad/.test(r.error)) registroErrores.push('Bot en ' + anio + ': ' + r.error);
   }
   function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x) c++; }); return c; }
@@ -305,10 +305,10 @@ IA.pruebas = (function () {
     const holgado = NG.cajaLibre(0) > E.presupuestoTipico(anio) * 4;
     const guiones = (S.guiones || []).filter(function (g) { return g.calif >= 70 && g.precio < NG.cajaLibre(0) * 0.05; });
     if (holgado && guiones.length && N.probabilidad(0.25)) {
-      if (!IA.juego.comprarGuion(guiones[0].id)) { r.gen = guiones[0].idea.gen; r.guion = guiones[0]; return r; }
+      if (!ART.juego.comprarGuion(guiones[0].id)) { r.gen = guiones[0].idea.gen; r.guion = guiones[0]; return r; }
     }
     if (N.probabilidad(0.1)) {
-      const libres = IA.ideas.materialesDisponibles(anio).filter(function (m) { return IA.ideas.esLibre(m, anio) || (holgado && IA.ideas.costoDerechos(m, anio) < NG.cajaLibre(0) * 0.03); });
+      const libres = ART.ideas.materialesDisponibles(anio).filter(function (m) { return ART.ideas.esLibre(m, anio) || (holgado && ART.ideas.costoDerechos(m, anio) < NG.cajaLibre(0) * 0.03); });
       if (libres.length) { r.mat = N.elegir(libres).id; return r; }
     }
     return r;
@@ -316,29 +316,29 @@ IA.pruebas = (function () {
   // Completa la historia, los personajes y algunas decisiones del modo detallado
   function detallar(b, idea, amb) {
     const anio = N.anio();
-    if (idea.mat) IA.ideas.usarMaterial(b, idea.mat, anio);
+    if (idea.mat) ART.ideas.usarMaterial(b, idea.mat, anio);
     if (idea.guion) {
-      IA.ideas.aplicarIdea(b, idea.guion.idea);
+      ART.ideas.aplicarIdea(b, idea.guion.idea);
       b.guionC = idea.guion.calif; b.guionId = idea.guion.id;
       if (T.disponible(T.porId(idea.guion.autor))) { b.eq.guion = idea.guion.autor; b.guionPagado = 1; }
     }
     if (!(b.prob && b.prob.length)) {
       const tit = b.tit, epo = b.epo;
-      IA.ideas.recomendarHistoria(b, anio);
+      ART.ideas.recomendarHistoria(b, anio);
       if (idea.mat) { b.tit = tit; b.epo = epo; }
     }
-    if (!b.arco) b.arco = IA.ideas.arcoRecomendado(b.fam);
-    IA.ideas.generarPersonajes(b);
+    if (!b.arco) b.arco = ART.ideas.arcoRecomendado(b.fam);
+    ART.ideas.generarPersonajes(b);
     const dir = T.porId(b.eq.direccion), arte = T.porId(b.eq.arte);
     // Efectos grandes solo si el equipo da la talla; IA solo si el equipo creativo es bueno
     // (un estudio bien llevado no se juega la caja en efectos grandes hasta tener colchón)
     const holgura = NG.cajaLibre(0) > E.presupuestoTipico(anio) * 5;
     if (holgura && (b.fam === 'AA' || b.fam === 'IM') && dir && arte && (dir.hab + arte.hab) / 2 >= 64 && N.probabilidad(0.4) && X.efectos[3].desde <= anio) b.fx = 3;
-    if (anio >= IA.ideas.ANIO_IA && IA.ideas.equipoCreativo(b) >= 62 && N.probabilidad(0.3)) b.ia = N.entero(10, 40);
+    if (anio >= ART.ideas.ANIO_IA && ART.ideas.equipoCreativo(b) >= 62 && N.probabilidad(0.3)) b.ia = N.entero(10, 40);
     if (N.probabilidad(0.2)) b.cx = N.entero(1, 4);
     if (N.probabilidad(0.2)) b.rit = N.entero(1, 4);
     // Cómo se filma: el método y el terreno recomendados, a veces un estilo propio y, si hay, un set guardado
-    const R = IA.rodaje;
+    const R = ART.rodaje;
     b.met = R.metodoRecomendado(b, anio);
     b.ter = R.terrenoRecomendado(b);
     if ((b.fam === 'AA' || b.fam === 'IM') && b.presM >= 1.5 && anio >= 1915 && N.probabilidad(0.3)) b.pst = 'espectaculo';
@@ -363,18 +363,18 @@ IA.pruebas = (function () {
       if (o.bruto !== undefined && !isFinite(o.bruto)) errores.push('Bruto no finito en obra ' + o.id);
       if (o.et === 'cartelera' && !isFinite(o.u)) errores.push('Atractivo no finito en obra ' + o.id);
     });
-    if (!(IA.mundo.poblacionMundial(N.anio()) > 0)) errores.push('Población no positiva en ' + N.anio());
+    if (!(ART.mundo.poblacionMundial(N.anio()) > 0)) errores.push('Población no positiva en ' + N.anio());
     // Reglas de la fábrica de ideas en las obras del jugador
     O.activas().forEach(function (o) {
       if (o.est !== 0 || !o.cont) return;
-      if (IA.ideas.clasificar(o, o.anioPlan) !== o.clas) errores.push('La clasificación de «' + o.tit + '» no sale de su contenido');
+      if (ART.ideas.clasificar(o, o.anioPlan) !== o.clas) errores.push('La clasificación de «' + o.tit + '» no sale de su contenido');
       if (o.gen.indexOf('Erótico') >= 0 && ((o.pj || []).some(function (p) { return p.e < 18; }) || ['18', 'R', 'X'].indexOf(o.clas) < 0)) errores.push('Regla del Erótico rota en «' + o.tit + '»');
-      if (IA.ideas.hayMenores(o) && o.cont.amor > 1) errores.push('Contenido no permitido con menores en «' + o.tit + '»');
+      if (ART.ideas.hayMenores(o) && o.cont.amor > 1) errores.push('Contenido no permitido con menores en «' + o.tit + '»');
       // Decisiones que no se quedan colgadas y cuentas que cuadran
       if (o.dil && S.t - o.dil.t > 3) errores.push('Dilema sin resolver en «' + o.tit + '»');
       if (o.prueba && !o.prueba.ok && S.t - o.prueba.t > 4) errores.push('Prueba de público sin resolver en «' + o.tit + '»');
-      if (o.lp && !isFinite(IA.rodaje.linea(o).real)) errores.push('Costo real no finito en «' + o.tit + '»');
-      if (IA.ideas.hayNinos(o) && IA.taxonomia.ORDEN_CLAS.indexOf(o.clas) > 2) errores.push('Obra de más de PG-13 con niños en el elenco: «' + o.tit + '»');
+      if (o.lp && !isFinite(ART.rodaje.linea(o).real)) errores.push('Costo real no finito en «' + o.tit + '»');
+      if (ART.ideas.hayNinos(o) && ART.taxonomia.ORDEN_CLAS.indexOf(o.clas) > 2) errores.push('Obra de más de PG-13 con niños en el elenco: «' + o.tit + '»');
     });
     if (errores.length > 50) errores.length = 50;
   }
@@ -387,7 +387,7 @@ IA.pruebas = (function () {
     const reloj = typeof performance !== 'undefined' ? function () { return performance.now(); } : function () { return Date.now(); };
     registro = [];
     registroErrores = errores;
-    IA.juego.nuevaPartida({ semilla: op.semilla, anio: op.desde, nombre: 'Bot ' + op.estrategia, bot: true });
+    ART.juego.nuevaPartida({ semilla: op.semilla, anio: op.desde, nombre: 'Bot ' + op.estrategia, bot: true });
     const S = N.S;
     const semanas = (op.hasta - op.desde) * 52;
     let peorSemana = 0, totalMs = 0, anioMs = 0, peorAnio = 0, guardado150 = null;
@@ -396,7 +396,7 @@ IA.pruebas = (function () {
       const a = reloj();
       try {
         decidir(est);
-        IA.juego.avanzarSemana();
+        ART.juego.avanzarSemana();
       } catch (e) {
         errores.push('Excepción en ' + N.anio() + ' S' + N.semana() + ': ' + (e && e.message ? e.message : e));
         if (errores.length > 5) break;
@@ -448,7 +448,7 @@ IA.pruebas = (function () {
     }
     const crec30 = tasa(9, 39);
     const cuotas = hist.map(function (h) { return h.cuota; });
-    const premios = IA.premios.parteJugador();
+    const premios = ART.premios.parteJugador();
     const res = {
       estrategia: op.estrategia, desde: op.desde, hasta: op.hasta, semilla: op.semilla,
       obras: terminadas.length, obrasJugador: jug.length,
@@ -459,7 +459,7 @@ IA.pruebas = (function () {
       crecimiento30: crec30, crecimientoArranque: tasa(-1, 9), crecimientoTotal: tasa(9, hist.length - 1),
       crecimientoMediano: mediana(hist.slice(1).map(function (h, i) { return hist[i].caja2025 > 0 ? h.caja2025 / hist[i].caja2025 - 1 : 0; })),
       premiosJugador: premios.parte, premiosTotal: premios.total,
-      aniosAMajor: S.majorDesde ? S.majorDesde - Math.max(op.desde, IA.datos.CINE_DESDE) : null, // antes del cine no hay majors: se cuenta desde 1895
+      aniosAMajor: S.majorDesde ? S.majorDesde - Math.max(op.desde, ART.datos.CINE_DESDE) : null, // antes del cine no hay majors: se cuenta desde 1895
       cuotaMax: cuotas.length ? Math.max.apply(null, cuotas) : 0,
       cuotaMedia: cuotas.length ? cuotas.reduce(function (a, b) { return a + b; }, 0) / cuotas.length : 0,
       cajaFinal2025: hist.length ? hist[hist.length - 1].caja2025 : 0,
