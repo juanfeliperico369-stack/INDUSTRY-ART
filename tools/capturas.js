@@ -64,7 +64,7 @@ const PANTALLAS = [
 // Una partida con historia: el bot juega 12 años desde 1990
 async function partida(p) {
   await p.evaluate(() => {
-    ART.juego.nuevaPartida({ semilla: 'capturas', anio: 1990, nombre: 'Estudio Aurora Boreal', avatar: { nombre: 'Felipe', sexo: 'M', edad: 32 } });
+    ART.juego.nuevaPartida({ semilla: 'capturas', anio: 1990, nombre: 'Estudio Aurora Boreal', avatar: { nombre: 'OneZero', sexo: 'M', edad: 32 } });
     for (let i = 0; i < 52 * 12; i++) { ART.pruebas.decidir(ART.pruebas.ESTRATEGIAS.normal); ART.juego.avanzarSemana(); }
     const lista = ART.obras.delEstudio(0, ['lista'])[0];
     ART.ui.estado.np = false;

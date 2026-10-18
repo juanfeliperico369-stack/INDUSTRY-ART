@@ -13,9 +13,9 @@ Partes: 1. Reglas · 2. Registro de decisiones · 3. Técnica, matemática e int
 - No pulas: sin ajuste fino de balance, sin capturas, sin animaciones extra. Lo que no bloquea va a «Errores conocidos» de la bitácora; se corrige en la V24 a la V26.
 - Trabaja en archivos (src/ y tools/armar.py). No pegues código en el chat. Lee con búsquedas, no archivos enteros.
 - Pregunta solo si algo es imposible; si dudas, decide con esta Especificación y anótalo en la bitácora.
-- No cambies ninguna decisión del Registro sin preguntarle a Felipe; si algo no funciona en la práctica, propónlo en dos líneas en la bitácora y sigue.
+- No cambies ninguna decisión del Registro sin preguntarle a OneZero; si algo no funciona en la práctica, propónlo en dos líneas en la bitácora y sigue.
 - Entrega: INDUSTRY_ART_vXX.html, bitacora_vXX.md (40 líneas o menos, plantilla en la parte 6) y 5 líneas en el chat: qué hiciste, qué probar y qué quedó pendiente.
-- Felipe no programa: háblale en español simple y corto.
+- OneZero no programa: háblale en español simple y corto.
 
 ### Prueba de humo (cierre de cada versión de la Fase 1)
 
@@ -117,7 +117,7 @@ Estas 65 decisiones ya están tomadas; un chat de programación no las cambia si
 | Descripciones de 18, R y X | Conservan su palabra original y agregan “siempre sugerido” | V17 |
 | Certificaciones de música | Las reproducciones cuentan como en la vida real (desde 2016, 1.500 equivalen a un álbum) | V22 |
 | Empaquetado | Recomendado: en la nube con GitHub Actions; se confirma en la V27 | V27 |
-| Créditos y firma | Propuesta: “Ideado y creado por Felipe” con una línea para Claude en los créditos; en la tienda, tu nombre o tu marca de estudio; se confirma en la V27 | V27 |
+| Créditos y firma | Propuesta: “Ideado y creado por OneZero” con una línea para Claude en los créditos; en la tienda, tu nombre o tu marca de estudio; se confirma en la V27 | V27 |
 | Hoja de ruta | 12 versiones en 4 fases: construir todo (V16 a V23), prueba libre, pulir (V24 a V26) y publicar (V27) | V16 |
 | Método de construcción | Cada chat construye todas las funciones de su versión, conectadas y usables; el pulido, el balance y los errores que no bloquean van a la V24, la V25 y la V26 | V16 |
 | Especificación corta | Los chats leen la Especificación v2 (las reglas y su versión) en lugar del plan completo, y los datos solo cuando su versión los usa | V16 |
@@ -1290,7 +1290,7 @@ Cada sección dice qué construir, cuándo está lista, qué diseño seguir y qu
 
 ### Fase 2 · Prueba libre
 
-No es un chat de programación: Felipe juega con hasta 5 partidas y anota todo en una lista. Los arreglos pequeños se piden en chats cortos (V23b, V23c…) con el prompt de cambios del Kit: aplicar solo la lista, prueba de humo y 3 líneas de resumen.
+No es un chat de programación: OneZero juega con hasta 5 partidas y anota todo en una lista. Los arreglos pequeños se piden en chats cortos (V23b, V23c…) con el prompt de cambios del Kit: aplicar solo la lista, prueba de humo y 3 líneas de resumen.
 
 ### V24 · Balance
 
@@ -1387,7 +1387,7 @@ No agregues funciones nuevas en esta versión.
 
 No agregues funciones nuevas en esta versión.
 
-- Corrige por orden de gravedad todos los «Errores conocidos» de las bitácoras y la lista de Felipe.
+- Corrige por orden de gravedad todos los «Errores conocidos» de las bitácoras y la lista de OneZero.
 - Pruebas de reglas: clasificación, dominio público, regla del Erótico, inflación, población y fechas del calendario contra los Datos.
 - Traduce el diccionario completo al inglés, con selector de idioma; ningún texto queda fuera del diccionario.
 
@@ -1421,7 +1421,7 @@ No agregues funciones nuevas en esta versión.
 
 #### Créditos y firma
 
-- **En los créditos del juego:** “Ideado y creado por Felipe” y, debajo, una línea como “Programado junto a Claude, de Anthropic”. Si quieres el chiste, “con Claude, su amigo programador” también funciona ahí. La idea, el diseño y las decisiones son tuyas.
+- **En los créditos del juego:** “Ideado y creado por OneZero” y, debajo, una línea como “Programado junto a Claude, de Anthropic”. Si quieres el chiste, “con Claude, su amigo programador” también funciona ahí. La idea, el diseño y las decisiones son tuyas.
 - **En la tienda:** el nombre de desarrollador debe ser el tuyo o una marca de estudio que inventes, y la app se llama INDUSTRY ART. Mejor no poner “Claude” en el nombre del desarrollador ni de la app: es una marca de Anthropic y podría parecer un producto oficial, algo que Google Play revisa.
 
 **Funciones del Inventario (3)**

@@ -587,11 +587,23 @@ ART.taxonomia = (function () {
     'El Dorado': 'Exploradores buscan una ciudad de oro en las selvas de Sudamérica, guiados por la leyenda de un cacique cubierto de polvo dorado.|Un explorador:M:35:Explorador:p;La guía:F:25:Aliado:s;El cacique dorado:M:50:Gobernante:s;El capitán ambicioso:M:45:Villano:s',
     'El Hombre Caimán': 'Un pescador del río Magdalena, por espiar a las mujeres que se bañan, termina convertido en mitad hombre y mitad caimán.|Saúl Montenegro:M:35:Bufón:p;El amigo brujo:M:40:Mago:s;Una bañista:F:25:Testigo:s',
   };
+  // La historia de siempre de un material: la del canon, la que escribiste en el editor o tu retoque de una obra libre
+  const ARQ_PROPIOS = ['Héroe', 'Aliado', 'Mentor', 'Villano', 'Rival', 'Bufón', 'Sabio', 'Rebelde'];
+  function pjsPropios(l) {
+    return (l || []).map(function (p, i) {
+      const q = typeof p === 'string' ? { n: p, s: 'M' } : p;
+      return { n: q.n, s: q.s === 'F' ? 'F' : 'M', e: 20 + (ART.n.hash(q.n) % 36), a: ARQ_PROPIOS[i % ARQ_PROPIOS.length], i: i < 1 ? 'protagonista' : 'secundario' };
+    }).filter(function (p) { return p.n; });
+  }
   function canon(m) {
-    const x = m && CANON[m.tit];
-    if (!x) return null;
-    const p = x.split('|');
-    return { sin: p[0], pj: p[1].split(';').map(function (c) { const q = c.split(':'); return { n: q[0], s: q[1], e: +q[2], a: q[3], i: q[4] === 'p' ? 'protagonista' : 'secundario' }; }) };
+    if (!m) return null;
+    const x = CANON[m.tit];
+    let r = null;
+    if (x) { const p = x.split('|'); r = { sin: p[0], pj: p[1].split(';').map(function (c) { const q = c.split(':'); return { n: q[0], s: q[1], e: +q[2], a: q[3], i: q[4] === 'p' ? 'protagonista' : 'secundario' }; }) }; }
+    else if (m.grupo === 'editor' && (m.sin || (m.pjs || m.pers || []).length)) r = { sin: m.sin || '', pj: pjsPropios(m.pjs || m.pers) };
+    const S = ART.n && ART.n.S, o = S && S.edit && S.edit.pdo && S.edit.pdo[m.id];
+    if (o) r = { sin: o.sin || (r ? r.sin : ''), pj: o.pjs && o.pjs.length ? pjsPropios(o.pjs) : (r ? r.pj : []) };
+    return r && (r.sin || r.pj.length) ? r : null;
   }
   // Géneros de la obra original que no son del cine se traducen al género de cine más cercano
   const GENERO_CINE = {

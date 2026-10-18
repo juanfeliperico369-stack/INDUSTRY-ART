@@ -47,7 +47,9 @@ ART.creacion = (function () {
       const b = O.borrador(0, { gen: gen || [recomendarGenero()], escala: 2, completa: true });
       O.equipoRecomendado(b, 1);
       if (preparar) preparar(b);
+      const temMat = b.mat && b.tem && b.tem.length ? b.tem.slice() : null; // los temas del material mandan
       if (!(b.prob && b.prob.length)) I.recomendarHistoria(b, anio());
+      if (temMat) b.tem = temMat;
       I.generarPersonajes(b);
       O.recalcular(b);
       O.equipoNegociado(b, 1); // todo el elenco con nombre, contratado y negociado
@@ -146,7 +148,7 @@ ART.creacion = (function () {
   }
   // Los totales quedan fijos al final de la creación (no persiguen el desplazamiento)
   // La idea todavía en borrador también se puede descargar como documento
-  ac('crDocIdea', function () { if (cr.b) ART.documento.descargarYAvisar(cr.b); });
+  ac('crDocIdea', function () { if (cr.b) ART.documento.elegirFormato(cr.b); });
   function pie(b) { return '<div id="crPie" class="tarjeta totales" style="margin-top:12px;padding:8px 10px">' + piezaPie(b) + '</div>'; }
   function refrescarPie() {
     const p = document.getElementById('crPie');
@@ -196,7 +198,7 @@ ART.creacion = (function () {
         (margen > 4 ? '<button class="chip" data-a="crInforme" data-v="' + g.id + '">Informe de lectura · ' + dinero(I.costoInforme(g)) + '</button>' : '') +
         (g.reg ? '' : '<button class="chip" data-a="crRegatear" data-v="' + g.id + '">Regatear</button>') + '</div>') + '</div>';
   }
-  const GRUPOS_MAT = [['todos', 'Todas'], ['clasico', 'Clásicos'], ['tono', 'Subidas de tono'], ['tradicion', 'Tradiciones del mundo']];
+  const GRUPOS_MAT = [['todos', 'Todas'], ['clasico', 'Clásicos'], ['tono', 'Subidas de tono'], ['tradicion', 'Tradiciones del mundo'], ['editor', 'Tuyos y con licencia']];
   function mini(v) { return '<span class="mini"><i style="width:' + Math.round(N.limitar(v / 1.5, 0, 1) * 100) + '%"></i></span>'; }
   function listaMaterial() {
     const a = anio(), q = cr.qMat.toLowerCase();
@@ -214,12 +216,13 @@ ART.creacion = (function () {
         '<div class="chico" style="margin-top:4px">Fama ' + mini(m.fama * 1.5) + ' · ' + EDADES.map(function (e, i) { return e + ' ' + mini(at.edades[i]); }).join(' ') + ' · Hombres ' + mini(at.sexo[0]) + ' Mujeres ' + mini(at.sexo[1]) + '</div>' +
         (usos ? '<span class="mal chico">Adaptada ' + usos + ' ' + (usos > 1 ? 'veces' : 'vez') + ' en los últimos 15 años: el público está cansado.</span><br>' : '') +
         (m.grupo === 'tono' ? '<span class="nota info">Subida de tono: se adapta con guiños, la clasificación sube y nada es explícito.</span><br>' : '') +
-        '<button class="btn primario" data-a="crAdaptar" data-v="' + m.id + '">Adaptar</button></div>';
+        '<div class="fila"><button class="btn primario" data-a="crAdaptar" data-v="' + m.id + '">Adaptar</button><button class="btn" data-a="mtEditar" data-v="' + esc(m.id) + '">' + icono('pincel') + 'Editar</button></div></div>';
     }).join('');
   }
   function vistaMaterial() {
     let h = cabecera('Usar material', 'Obras de dominio público: quedan libres el 1 de enero del año 71 tras la muerte del autor; las antiguas y las tradiciones, siempre. Antes de liberarse, sus derechos se compran.');
     h += '<div class="chips">' + GRUPOS_MAT.map(function (g) { return chip(g[1], 'crMatGrupo', g[0], cr.grupoMat === g[0]); }).join('') + '</div>';
+    h += ART.materialUI.tarjetaPropios();
     h += '<input type="search" placeholder="Buscar por título, autor o género" value="' + esc(cr.qMat) + '" data-i="crMatBuscar" style="margin:8px 0">';
     return h + '<div id="crMatLista">' + listaMaterial() + '</div>';
   }
@@ -572,8 +575,13 @@ ART.creacion = (function () {
     else h += bloqueResumen(b);
     h += pie(b);
     h += '<div class="fila entre" style="margin-top:8px">' + (cr.paso > 0 ? '<button class="btn" data-a="crPaso" data-v="-1">' + t('atras') + '</button>' : '<button class="btn" data-a="crVolverCamino">' + t('atras') + '</button>') +
-      (cr.paso < PASOS.length - 1 ? '<button class="btn primario" data-a="crPaso" data-v="1">' + t('siguiente') + '</button>' : '<button class="btn primario" data-a="crIniciar">' + t('iniciar') + '</button>') + '</div>';
+      (cr.paso < PASOS.length - 1 ? '<button class="btn primario" data-a="crPaso" data-v="1">' + t('siguiente') + '</button>' : botonFinal()) + '</div>';
     return h;
+  }
+  // En el Taller creativo la idea no se produce: se guarda en la biblioteca y se descarga
+  function botonFinal() {
+    if (N.S && N.S.taller) return '<button class="btn" data-a="crDocIdea">' + icono('bajar') + 'Descargar</button><button class="btn primario" data-a="tlGuardar">' + icono('guardar') + 'Guardar en la biblioteca</button>';
+    return '<button class="btn primario" data-a="crIniciar">' + t('iniciar') + '</button>';
   }
   // ---------- Cómo y dónde se filma ----------
   const EDADES_N = ['niños', 'adolescentes', 'jóvenes', 'adultos', 'mayores'];
@@ -702,7 +710,7 @@ ART.creacion = (function () {
     h += '<h4>Financiación</h4><div class="chips">' + fins.map(function (x) { return chip(x.nombre, 'crFin', x.id, (b.fin2 || '') === x.id); }).join('') + '</div>';
     const fsel = ART.imperio.financiacionDe(b.fin2), ap = ART.imperio.aporteFin(fsel.id, tot);
     h += '<p class="nota info">' + esc(fsel.texto) + (ap ? ' Recibes ' + dinero(ap) + ' al empezar.' : '') + '</p>';
-    h += '<p class="nota info">Es orientativo: la competencia de esa semana, las críticas y el boca a boca deciden el estreno real.</p><div class="fila"><button class="btn" data-a="crDocIdea">Documento de la idea (.docx)</button></div></div>';
+    h += '<p class="nota info">Es orientativo: la competencia de esa semana, las críticas y el boca a boca deciden el estreno real.</p><div class="fila"><button class="btn" data-a="crDocIdea">' + icono('bajar') + 'Descargar la idea</button></div></div>';
     return h;
   }
   function kpiCr(n, v, c) { return '<div class="kpi"><span>' + esc(n) + '</span><b class="cifra ' + (c || '') + '">' + esc(v) + '</b></div>'; }
@@ -740,7 +748,7 @@ ART.creacion = (function () {
       h += '<div class="tarjeta seccion-cr" id="crs-' + s[0] + '"><button class="cab-seccion toque" data-a="crSeccion" data-v="' + s[0] + '" aria-expanded="' + abierta + '"><b><span class="cr-n">' + (i + 1) + '</span> ' + esc(s[1]) + '</b><span class="tenue chico">' + esc(abierta ? '' : resumenSeccion(b, s[0])) + '</span><span aria-hidden="true">' + (abierta ? '▲' : '▼') + '</span></button>' + (abierta ? '<div>' + s[2](b) + '</div>' : '') + '</div>';
     });
     h += pie(b);
-    h += '<div class="fila entre" style="margin-top:8px"><button class="btn" data-a="crVolverCamino">' + t('atras') + '</button><button class="btn primario" data-a="crIniciar">' + t('iniciar') + '</button></div>';
+    h += '<div class="fila entre" style="margin-top:8px"><button class="btn" data-a="crVolverCamino">' + t('atras') + '</button>' + botonFinal() + '</div>';
     return h;
   }
   function fichaCrear() {
@@ -760,7 +768,7 @@ ART.creacion = (function () {
   // =====================================================================
   ac('crearObra', function () {
     if (N.anio() < D.CINE_DESDE) { U.aviso('El cine nace en ' + D.CINE_DESDE + (N.anio() >= 1877 ? ': por ahora produce teatro, libros o música.' : ': por ahora produce teatro o libros.')); U.irA('obras', 'teatro'); return; }
-    if (O.enProduccion(0).length >= NG.capacidad(0)) { U.aviso('No tienes capacidad libre: construye un plató o espera.', 'mal'); return; }
+    if (!N.S.taller && O.enProduccion(0).length >= NG.capacidad(0)) { U.aviso('No tienes capacidad libre: construye un plató o espera.', 'mal'); return; }
     cr.b = null; cr.etapa = 'camino'; cr.paso = 0; cr.rol = null; cr.picker = null; cr.q = '';
     U.abrirFicha(fichaCrear(), 'crear');
   });
@@ -1233,7 +1241,8 @@ ART.creacion = (function () {
   function siguienteDecision() { const o = J.decisionesPendientes()[0]; if (o) setTimeout(function () { modalDecision(o); }, 50); }
 
   // Abre la creación con un borrador ya armado (continuaciones, series y adaptaciones)
-  function abrirCon(b) { cr.b = ajustar(b); cr.etapa = 'idea'; cr.paso = 3; cr.rol = null; cr.picker = null; U.abrirFicha(fichaCrear(), 'crear'); }
-  return { abrirCon: abrirCon, refrescar: refrescar, fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon, listaCandidatos: listaCandidatos,
+  function abrirCon(b, paso) { cr.b = ajustar(b); cr.etapa = 'idea'; cr.paso = paso === undefined ? 3 : paso; cr.rol = null; cr.picker = null; U.abrirFicha(fichaCrear(), 'crear'); }
+  function borrador() { return cr.b; }
+  return { abrirCon: abrirCon, borrador: borrador, prediccion: prediccion, razones: razones, refrescar: refrescar, fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon, listaCandidatos: listaCandidatos,
     bloqueProduccion: bloqueProduccion, abrirDecision: abrirDecision, siguienteDecision: siguienteDecision };
 })();

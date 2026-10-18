@@ -175,6 +175,7 @@ ART.ui = (function () {
   }
   function dibujarRetrato(cv) {
     if (cv.getAttribute('data-retrato') === 'nuevo') { if (estado.avatarNuevo) ART.arte.retratoEn(cv, estado.avatarNuevo, estado.avatarNuevo.anio); return; }
+    if (cv.getAttribute('data-retrato') === 'tnuevo') { if (estado.talentoNuevo) ART.arte.retratoEn(cv, estado.talentoNuevo, estado.talentoNuevo.anio); return; }
     const id = +cv.getAttribute('data-retrato');
     const tal = id === 999999 ? avatarComoTalento() : ART.talentos.porId(id);
     if (tal) ART.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
@@ -286,7 +287,8 @@ ART.ui = (function () {
     const clave = (N.S ? N.S.semilla : '') + '|' + tal.id;
     if (!cacheAspecto[clave]) cacheAspecto[clave] = ART.arte.aspectoNuevo(N.hash(clave), tal.reg || 'nam');
     const propio = (tal.id === 999999 || tal.jugador) && N.S && N.S.avatar && N.S.avatar.asp;
-    return { id: tal.id, nombre: tal.nom, sexo: tal.sx, edad: N.anio() - tal.nac, oficio: tal.of, aspecto: propio ? Object.assign({}, cacheAspecto[clave], N.S.avatar.asp) : cacheAspecto[clave] };
+    const asp = propio ? N.S.avatar.asp : tal.asp; // el avatar y los talentos creados por el jugador tienen su aspecto elegido
+    return { id: tal.id, nombre: tal.nom, sexo: tal.sx, edad: N.anio() - tal.nac, oficio: tal.of, aspecto: asp ? Object.assign({}, cacheAspecto[clave], asp) : cacheAspecto[clave] };
   }
   function avatarComoTalento() {
     const a = N.S.avatar;
@@ -302,6 +304,12 @@ ART.ui = (function () {
       document.getElementById('vista').scrollTop = 0;
       dibujar(document.getElementById('vista'));
       ART.pantallas.alMostrar('portada');
+      return;
+    }
+    if (N.S.taller && ART.taller) { // Taller creativo: su propia pantalla, sin barra ni menú
+      app.classList.add('sin-juego');
+      document.getElementById('vista').innerHTML = ART.taller.vista();
+      dibujar(document.getElementById('vista'));
       return;
     }
     app.classList.remove('sin-juego');
@@ -348,7 +356,7 @@ ART.ui = (function () {
   }
   // Refresco ligero tras avanzar: barra, vista (manteniendo el scroll) y ficha abierta
   function refrescar() {
-    if (!N.S) return render();
+    if (!N.S || N.S.taller) return render();
     renderBarra();
     // La lista de talentos (40 retratos) no se redibuja con cada semana: se actualiza al volver a entrar
     if (estado.seccion !== 'talento') renderVista(true);

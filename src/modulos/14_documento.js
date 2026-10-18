@@ -124,6 +124,22 @@ ART.documento = (function () {
     return { cuando: cuando, actos: actos, escaleta: escaleta, forma: forma, arco: arco };
   }
 
+  // ---------- Logline: la historia en una frase ----------
+  function logline(o) {
+    const P = personajesDe(o), pr = P.prot, g = function (x) { return generoTxt(pr.s, x); };
+    const nombre = pr.n || 'su protagonista', prob = g(X.fraseProblema((o.prob && o.prob[0]) || 'La búsqueda'));
+    const arco = o.arco ? X.arco(o.arco) : null;
+    return 'Cuando ' + nombre + ' ' + prob + ', ' + (P.malo ? 'tendrá que enfrentarse a ' + P.malo.n : 'tendrá que decidir hasta dónde llegar') + (arco ? ' y, al final, ' + g(arco.final).replace(/^y /, '') : '') + '.';
+  }
+  // ---------- ¿Le irá bien? La predicción del estreno para una idea que todavía no se estrena ----------
+  function prediccionDe(o) {
+    if (!N.S || !ART.creacion || !ART.creacion.prediccion || o.bruto || o.et === 'cartelera' || o.et === 'terminada' || !o.eq) return null;
+    try {
+      const p = ART.creacion.prediccion(o), tot = p.est.total;
+      return { lo: tot * p.lo, pr: tot * p.pr, hi: tot * p.hi, eq: tot * p.eq, prob: p.prob, costo: tot, calidad: p.est.calidad, razones: ART.creacion.razones(o, p) };
+    } catch (e) { return null; }
+  }
+
   // ---------- Datos técnicos ----------
   function nombreTalento(id) { const t = id !== undefined && id !== null ? ART.talentos.porId(id) : null; return t ? t.nom : ''; }
   function equipo(o) {
@@ -267,8 +283,16 @@ ART.documento = (function () {
     b += p(o.tit || 'Sin título', 'Title');
     b += p((o.gen || []).join(' · ') + (o.clas ? ' · ' + o.clas : '') + (est ? ' · ' + est.nombre : ''), 'Subtitle');
     if (o.sin) b += p(o.sin, 'Quote');
+    b += par(run('Logline: ', true) + run(logline(o)), null, true);
     b += p(tr('Documento de la idea generado por INDUSTRY ART el ') + new Date().toLocaleDateString('es') + (N.S ? ' (' + tr('año del juego') + ' ' + N.anio() + ')' : ''), 'Small', true);
     b += SALTO + p('La idea', 'Heading1') + tabla(filasIdea(o));
+    const pd = prediccionDe(o), din = function (x) { return ART.ui ? ART.ui.dinero(x) : '$' + Math.round(x); };
+    if (pd) {
+      b += p('¿Le irá bien?', 'Heading1') + tabla([['Costo total', din(pd.costo)], ['Si sale mal', din(pd.lo)], ['Lo más probable', din(pd.pr)], ['Si sale muy bien', din(pd.hi)],
+        ['Para no perder dinero', tr('hay que recaudar') + ' ' + din(pd.eq)], ['Probabilidad de recuperar lo invertido', Math.round(pd.prob * 100) + ' %'], ['Calidad esperada', pd.calidad + ' / 100']]);
+      pd.razones.forEach(function (x) { b += p((x[0] > 0 ? '▲ ' + tr('A favor') + ': ' : x[0] < 0 ? '▼ ' + tr('En contra') + ': ' : '• ') + x[1]); });
+      b += p('Es una estimación: la competencia, las críticas y el boca a boca deciden el estreno real.', 'Small');
+    }
     b += p('La trama', 'Heading1');
     tm.actos.forEach(function (a) { b += p(a.titulo, 'Heading2'); a.parrafos.forEach(function (x) { b += p(x); }); });
     if (curva) { imgs.push(curva); b += p('Curva del arco', 'Heading2') + imagen('rIdImg' + imgs.length, imgs.length, 5486400, 1920240); }
@@ -288,7 +312,7 @@ ART.documento = (function () {
     const tc = tecnicos(o);
     if (tc.length) b += p('Datos técnicos', 'Heading1') + tabla(tc);
     if (o.diario) { b += p('Notas del autor', 'Heading1'); String(o.diario).split(/\n+/).forEach(function (x) { b += p(x); }); }
-    b += p('Ideado y creado por OneZero · INDUSTRY ART ' + ART.VERSION, 'Small', true);
+    b += p('Ideado y creado por OneZero · Programado por Faro · INDUSTRY ART ' + ART.VERSION, 'Small', true);
     const ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"';
     const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + ns + '><w:body>' + b +
       '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>';
@@ -325,5 +349,84 @@ ART.documento = (function () {
     U.modal('<h2>' + esc(o.tit || '') + '</h2>' + (aviso ? '<p class="mal chico">' + esc(aviso) + '</p>' : '') + '<textarea id="docTextoIdea" rows="16" style="width:100%" readonly>' + esc(texto(o)) + '</textarea>' +
       '<div class="fila envolver"><button class="btn" data-a="docCopiar">Copiar el texto</button><button class="btn" data-a="docTxt" data-v="' + (o.id || '') + '">Guardar como texto (.txt)</button><button class="btn primario" data-a="cerrarModal">' + ART.t('aceptar') + '</button></div>');
   }
-  return { filasIdea: filasIdea, trama: trama, texto: texto, docx: docx, zip: zip, crc32: crc32, descargar: descargar, descargarYAvisar: descargarYAvisar, mostrarTexto: mostrarTexto };
+  // ---------- Página web (se abre en cualquier navegador y se imprime o guarda como PDF) ----------
+  function h(t) { return N.esc(tr(t)); }
+  function curvaSVG(tm) {
+    const f = tm.forma, W = 600, H = 200, m = 24, px = function (i) { return m + (W - 2 * m) * i / Math.max(1, f.length - 1); }, py = function (y) { return H - m - (H - 2 * m) * y; };
+    let d = '';
+    f.forEach(function (y, i) { if (!i) d += 'M' + px(i) + ' ' + py(y); else { const x0 = px(i - 1), y0 = py(f[i - 1]), x = px(i); d += ' C' + ((x0 + x) / 2) + ' ' + y0 + ' ' + ((x0 + x) / 2) + ' ' + py(y) + ' ' + x + ' ' + py(y); } });
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + h('Curva del arco') + '"><rect width="' + W + '" height="' + H + '" fill="#fff"/>' + [0, 1, 2, 3, 4].map(function (k) { const y = m + (H - 2 * m) * k / 4; return '<line x1="' + m + '" x2="' + (W - m) + '" y1="' + y + '" y2="' + y + '" stroke="#e3e6ee"/>'; }).join('') +
+      '<path d="' + d + '" fill="none" stroke="#1aa39a" stroke-width="4" stroke-linecap="round"/>' + f.map(function (y, i) { return '<circle cx="' + px(i) + '" cy="' + py(y) + '" r="6" fill="#c8941a"/>'; }).join('') + '</svg>';
+  }
+  function tablaHTML(filas) { return '<table>' + filas.map(function (x) { return '<tr><th>' + h(x[0]) + '</th><td>' + h(x[1]) + '</td></tr>'; }).join('') + '</table>'; }
+  function html(o) {
+    const tm = trama(o), est = N.S && N.S.estudios[o.est || 0], pos = imagenPoster(o), din = function (x) { return ART.ui ? ART.ui.dinero(x) : '$' + Math.round(x); };
+    let img = '';
+    if (pos) { let bin = ''; for (let i = 0; i < pos.datos.length; i++) bin += String.fromCharCode(pos.datos[i]); img = '<img class="poster" alt="" src="data:image/jpeg;base64,' + btoa(bin) + '">'; }
+    const css = 'body{font:17px/1.6 Georgia,"Times New Roman",serif;color:#1b2033;max-width:820px;margin:0 auto;padding:32px 22px;background:#fbfaf6}h1{font-size:2.6em;text-align:center;margin:.2em 0}h2{color:#1aa39a;border-bottom:2px solid #e8e2d0;padding-bottom:4px;margin-top:1.8em}h3{color:#b07d10}.sub{text-align:center;color:#5b6478;font-style:italic}.poster{display:block;margin:0 auto 16px;width:260px;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.25)}blockquote{margin:16px 0;padding:12px 18px;background:#fff;border-left:4px solid #c8941a;font-style:italic}table{width:100%;border-collapse:collapse;margin:10px 0;background:#fff}th,td{padding:7px 10px;border-bottom:1px solid #e3e6ee;text-align:left;vertical-align:top}th{width:32%;color:#3a4256}.bien{color:#13804a}.mal{color:#c2262e}.pie{text-align:center;color:#7a8296;font-size:.85em;margin-top:40px}svg{width:100%;height:auto}@media print{body{background:#fff}h2{break-after:avoid}}';
+    let b = img + '<h1>' + h(o.tit || 'Sin título') + '</h1><p class="sub">' + h((o.gen || []).join(' · ') + (o.clas ? ' · ' + o.clas : '') + (est ? ' · ' + est.nombre : '')) + '</p>';
+    if (o.sin) b += '<blockquote>' + h(o.sin) + '</blockquote>';
+    b += '<p><b>' + h('Logline') + ':</b> ' + h(logline(o)) + '</p><h2>' + h('La idea') + '</h2>' + tablaHTML(filasIdea(o));
+    const pd = prediccionDe(o);
+    if (pd) b += '<h2>' + h('¿Le irá bien?') + '</h2>' + tablaHTML([['Costo total', din(pd.costo)], ['Si sale mal', din(pd.lo)], ['Lo más probable', din(pd.pr)], ['Si sale muy bien', din(pd.hi)], ['Para no perder dinero', tr('hay que recaudar') + ' ' + din(pd.eq)], ['Probabilidad de recuperar lo invertido', Math.round(pd.prob * 100) + ' %']]) +
+      '<ul>' + pd.razones.map(function (x) { return '<li class="' + (x[0] > 0 ? 'bien' : x[0] < 0 ? 'mal' : '') + '">' + (x[0] > 0 ? '▲ ' : x[0] < 0 ? '▼ ' : '• ') + h(x[1]) + '</li>'; }).join('') + '</ul>';
+    b += '<h2>' + h('La trama') + '</h2>';
+    tm.actos.forEach(function (a) { b += '<h3>' + h(a.titulo) + '</h3>' + a.parrafos.map(function (x) { return '<p>' + h(x) + '</p>'; }).join(''); });
+    b += '<h3>' + h('Curva del arco') + '</h3>' + curvaSVG(tm) + '<h3>' + h('Escaleta') + '</h3><ol>' + tm.escaleta.map(function (x) { return '<li><b>' + h(x[0]) + ':</b> ' + h(x[1]) + '</li>'; }).join('') + '</ol>';
+    if (o.pj && o.pj.length) b += '<h2>' + h('Personajes') + '</h2>' + o.pj.map(function (x) { const ta = x.t !== null && x.t !== undefined ? nombreTalento(x.t) : ''; return '<p><b>' + N.esc(x.n) + '</b> · ' + h(x.a) + ' · ' + x.e + ' ' + h('años') + '<br><i>' + h(descriptor(x)) + (ta ? '. ' + tr('Lo interpreta') + ' ' + N.esc(ta) : '') + '</i></p>'; }).join('');
+    const eq = equipo(o), tc = tecnicos(o);
+    if (eq.length) b += '<h2>' + h('Equipo creativo') + '</h2>' + tablaHTML(eq);
+    if (tc.length) b += '<h2>' + h('Datos técnicos') + '</h2>' + tablaHTML(tc);
+    if (o.diario) b += '<h2>' + h('Notas del autor') + '</h2>' + String(o.diario).split(/\n+/).map(function (x) { return '<p>' + N.esc(x) + '</p>'; }).join('');
+    b += '<p class="pie">' + h(ART.publicacion ? ART.publicacion.creditos().join(' · ') : 'Ideado y creado por OneZero') + ' · INDUSTRY ART ' + ART.VERSION + '</p>';
+    return '<!DOCTYPE html><html lang="' + (ART.idioma && ART.idioma.actual() === 'en' ? 'en' : 'es') + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + h(o.tit || 'Idea') + '</title><style>' + css + '</style></head><body>' + b + '</body></html>';
+  }
+  // ---------- Markdown ----------
+  function markdown(o) {
+    const tm = trama(o), est = N.S && N.S.estudios[o.est || 0], fila = function (x) { return '| ' + tr(x[0]) + ' | ' + String(tr(x[1])).replace(/\|/g, '/') + ' |'; };
+    const l = ['# ' + tr(o.tit || 'Sin título'), '', '_' + tr((o.gen || []).join(' · ') + (est ? ' · ' + est.nombre : '')) + '_', ''];
+    if (o.sin) l.push('> ' + tr(o.sin), '');
+    l.push('**' + tr('Logline') + ':** ' + tr(logline(o)), '', '## ' + tr('La idea'), '', '| | |', '|---|---|');
+    filasIdea(o).forEach(function (x) { l.push(fila(x)); });
+    const pd = prediccionDe(o), din = function (x) { return ART.ui ? ART.ui.dinero(x) : '$' + Math.round(x); };
+    if (pd) { l.push('', '## ' + tr('¿Le irá bien?'), '', '| | |', '|---|---|', fila(['Si sale mal', din(pd.lo)]), fila(['Lo más probable', din(pd.pr)]), fila(['Si sale muy bien', din(pd.hi)]), fila(['Para no perder dinero', din(pd.eq)]), fila(['Probabilidad de recuperar lo invertido', Math.round(pd.prob * 100) + ' %']), ''); pd.razones.forEach(function (x) { l.push('- ' + (x[0] > 0 ? '▲ ' : x[0] < 0 ? '▼ ' : '') + tr(x[1])); }); }
+    l.push('', '## ' + tr('La trama'));
+    tm.actos.forEach(function (a) { l.push('', '### ' + tr(a.titulo), ''); a.parrafos.forEach(function (x) { l.push(tr(x), ''); }); });
+    l.push('### ' + tr('Escaleta'), '');
+    tm.escaleta.forEach(function (x, i) { l.push((i + 1) + '. **' + tr(x[0]) + ':** ' + tr(x[1])); });
+    if (o.pj && o.pj.length) { l.push('', '## ' + tr('Personajes'), ''); o.pj.forEach(function (p) { l.push('- **' + p.n + '**, ' + p.e + ' · ' + tr(p.a) + ' · ' + tr(descriptor(p))); }); }
+    const eq = equipo(o), tc = tecnicos(o);
+    if (eq.length) { l.push('', '## ' + tr('Equipo creativo'), '', '| | |', '|---|---|'); eq.forEach(function (x) { l.push(fila(x)); }); }
+    if (tc.length) { l.push('', '## ' + tr('Datos técnicos'), '', '| | |', '|---|---|'); tc.forEach(function (x) { l.push(fila(x)); }); }
+    l.push('', '---', '_INDUSTRY ART ' + ART.VERSION + '_');
+    return l.join('\n');
+  }
+  // ---------- Elegir el formato de la descarga ----------
+  const FORMATOS = {
+    docx: ['Word (.docx)', 'docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    html: ['Página web (.html) · se imprime o se guarda como PDF', 'html', 'text/html'],
+    md: ['Markdown (.md)', 'md', 'text/markdown'],
+    txt: ['Texto (.txt)', 'txt', 'text/plain'],
+  };
+  function datosEn(o, fmt) { return fmt === 'docx' ? docx(o) : fmt === 'html' ? html(o) : fmt === 'md' ? markdown(o) : texto(o); }
+  function descargarComo(o, fmt) {
+    const F = FORMATOS[fmt] || FORMATOS.docx, U = ART.ui;
+    return ART.publicacion.guardarArchivo('Idea - ' + (o.tit || 'sin título') + '.' + F[1], datosEn(o, fmt), F[2]).then(function (r) {
+      if (r.ok) U.aviso('Documento listo: ' + (r.ruta || r.nombre));
+      else if (!r.cancelado) mostrarTexto(o, 'No se pudo guardar el documento en este aparato. Aquí está la trama completa para copiarla:');
+      return r;
+    });
+  }
+  let pendiente = null;
+  function elegirFormato(o) {
+    const U = ART.ui, esc = N.esc;
+    pendiente = o;
+    U.modal('<div class="fila entre"><h2>' + esc('Descargar la idea') + '</h2><button class="ico" data-a="cerrarModal" aria-label="' + ART.t('cerrar') + '">' + U.icono('cerrar') + '</button></div>' +
+      '<p class="nota info">El documento trae la idea completa: logline, trama en tres actos, curva del arco, escaleta, personajes, equipo, datos técnicos' + (prediccionDe(o) ? ' y la predicción del estreno' : '') + '.</p><div class="col">' +
+      Object.keys(FORMATOS).map(function (k) { return '<button class="btn' + (k === 'docx' ? ' primario' : '') + '" data-a="docFormato" data-v="' + k + '">' + U.icono('bajar') + esc(FORMATOS[k][0]) + '</button>'; }).join('') +
+      '<button class="btn" data-a="docVerTexto">' + U.icono('libro') + 'Leer la trama aquí</button></div>');
+  }
+  // Los botones del modal los atiende la interfaz (ART.taller registra docFormato y docVerTexto)
+  function usarPendiente(fmt) { if (!pendiente) return; if (fmt) { ART.ui.cerrarModal(); descargarComo(pendiente, fmt); } else mostrarTexto(pendiente); }
+  return { filasIdea: filasIdea, trama: trama, texto: texto, docx: docx, html: html, markdown: markdown, logline: logline, zip: zip, crc32: crc32, descargar: descargar, descargarYAvisar: descargarYAvisar, descargarComo: descargarComo, elegirFormato: elegirFormato, usarPendiente: usarPendiente, mostrarTexto: mostrarTexto };
 })();

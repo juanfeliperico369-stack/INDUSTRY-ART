@@ -361,6 +361,9 @@ ART.ideas = (function () {
     b.mat = id;
     b.gen = gen.length ? gen : ['Drama'];
     b.tit = m.tit;
+    // Los temas que escribiste para el material (o tu retoque de una obra libre) pasan a la adaptación
+    const ret = N.S && N.S.edit && N.S.edit.pdo && N.S.edit.pdo[id], tems = (ret && ret.tem && ret.tem.length ? ret.tem : m.tem) || [];
+    if (tems.length) b.tem = tems.filter(function (x) { return X.famTema[x]; }).slice(0, LIMITES.tem);
     b.derechos = costoDerechos(m, anio);
     if (m.grupo === 'tono' && !b.suave) {
       b.cont = Object.assign({}, contenidoDe(b));
@@ -593,9 +596,9 @@ ART.ideas = (function () {
   function sinopsis(b) {
     // Una adaptación de una obra libre cuenta su historia de siempre
     const cm = b.mat ? X.canon(X.material(b.mat)) : null;
-    if (cm) {
+    if (cm && cm.sin) {
       const m = X.material(b.mat), pre = (b.pre || []).slice(0, 2);
-      return cm.sin + (pre.length ? ' Con ' + pre.map(function (x) { return '«' + x + '»'; }).join(' y ') + '.' : '') + ' Basada en «' + m.tit + '»' + (m.autor && m.grupo !== 'tradicion' ? ', de ' + m.autor : '') + (b.suave ? ', adaptada con guiños por la censura de la época' : '') + '.';
+      return cm.sin + (pre.length ? (pre.length > 1 ? ' Incluye los tópicos ' : ' Incluye el tópico ') + pre.map(function (x) { return '«' + x + '»'; }).join(' y ') + '.' : '') + ' Basada en «' + m.tit + '»' + (m.autor && m.grupo !== 'tradicion' ? ', de ' + m.autor : '') + (b.suave ? ', adaptada con guiños por la censura de la época' : '') + '.';
     }
     const pj = (b.pj || []).filter(function (p) { return p.i === 'protagonista'; })[0];
     const sx = pj ? pj.s : 'M';

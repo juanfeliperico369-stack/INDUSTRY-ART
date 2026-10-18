@@ -18,7 +18,7 @@ ART.textos = {
     toca_dinero: 'Toca la caja para verla en dólares de hoy',
     // Inicio
     nueva_partida: 'Nueva partida', continuar: 'Continuar', cargar: 'Cargar partida', importar: 'Importar archivo .iasave',
-    creditos: 'Ideado y creado por OneZero',
+    creditos: 'Ideado y creado por OneZero · Programado por Faro',
     // Nueva partida
     np_titulo: 'Funda tu estudio', np_nombre: 'Nombre del estudio', np_logo: 'Logo', np_logo_otro: 'Otro logo',
     np_anio: 'Año de inicio', np_pais: 'País de la sede', np_capital: 'Capital inicial (en dólares de hoy)',

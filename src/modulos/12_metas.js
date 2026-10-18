@@ -223,6 +223,7 @@ ART.metas = (function () {
   function agregarMaterial(m) {
     const S = N.S;
     if (!S.sandbox) return 'Activa el Editor Sandbox primero.';
+    if (m && (m.tem || m.sin || m.tipo || m.lic !== undefined)) return guardarMaterial({ tit: m.tit, autor: m.autor, anio: m.anio, tipo: m.tipo, gen: m.gen, tem: m.tem, pjs: m.pers || m.pjs, sin: m.sin, lic: m.lic, fama: m.fama });
     const tit = String(m.tit || '').trim().slice(0, 60);
     if (!tit) return 'Ponle un título.';
     S.edit = S.edit || {};
@@ -234,6 +235,65 @@ ART.metas = (function () {
     S.edit.matSig = (S.edit.matSig || 0) + 1;
     lista.push({ id: 'ed' + S.edit.matSig, tit: tit, autor: 'Material propio', anio: String(N.anio()), libre: 0, gen: gen.length ? gen : ['Drama'], fama: 0.5, grupo: 'editor',
       pers: (Array.isArray(m.pers) ? m.pers : []).filter(function (x) { return typeof x === 'string' && x.trim(); }).slice(0, 10).map(function (x) { return x.slice(0, 40); }) });
+    return '';
+  }
+  // ---------- Material propio o con licencia (desde Obras › Crear › Usar material) ----------
+  // Lo tuyo empieza poco conocido (fama hasta 40) y es gratis; una licencia de otra empresa se paga una vez, más cara
+  // cuanto más famosa. Con el Editor Sandbox no se paga. Guarda título, autor, año, tipo, géneros, temas, personajes y
+  // sinopsis. Las obras de dominio público no cambian, pero puedes retocar sus temas, personajes y sinopsis para tus
+  // adaptaciones (quedan en S.edit.pdo).
+  const TIPOS_MATERIAL = ['Novela', 'Cuento', 'Cómic', 'Manga', 'Obra de teatro', 'Película', 'Serie', 'Videojuego', 'Canción', 'Leyenda', 'Mitología', 'Poema', 'Personaje', 'Universo de personajes'];
+  function precioLicencia(fama) { return Math.round(ART.economia.presupuestoTipico(N.anio()) * 0.1 * Math.pow(0.5 + N.limitar(+fama || 0, 10, 100) / 60, 2)); }
+  // «Ana:F» o «Ana» por línea (o separados por comas): nombre y sexo de cada personaje
+  function leerPersonajes(txt) {
+    const l = Array.isArray(txt) ? txt : String(txt || '').split(/\n|,/);
+    return l.map(function (x) {
+      if (x && typeof x === 'object') return { n: String(x.n || '').trim().slice(0, 40), s: x.s === 'F' ? 'F' : 'M' };
+      const p = String(x).split(':');
+      return { n: p[0].trim().slice(0, 40), s: (p[1] || '').trim().toUpperCase() === 'F' ? 'F' : 'M' };
+    }).filter(function (p) { return p.n; }).slice(0, 12);
+  }
+  function guardarMaterial(d, id) {
+    const S = N.S, X = ART.taxonomia;
+    S.edit = S.edit || {};
+    const lista = S.edit.mat = S.edit.mat || [];
+    const tem = (d.tem || []).filter(function (x) { return X.famTema[x]; }).slice(0, 9);
+    const pjs = leerPersonajes(d.pjs), sin = String(d.sin || '').trim().slice(0, 400);
+    // Retoque de una obra de dominio público
+    if (id && X.dominio.some(function (x) { return x.id === id; })) {
+      S.edit.pdo = S.edit.pdo || {};
+      S.edit.pdo[id] = { tem: tem, pjs: pjs, sin: sin };
+      return '';
+    }
+    const tit = String(d.tit || '').trim().slice(0, 60);
+    if (!tit) return 'Ponle un título.';
+    const gen = (d.gen || []).filter(function (g) { return D.familiaDe[g]; }).slice(0, 3);
+    const datos = { tit: tit, autor: String(d.autor || '').trim().slice(0, 50) || (d.lic ? 'Otra empresa' : N.S.avatar ? N.S.avatar.nom : 'Material propio'), anio: String(Math.round(+d.anio || N.anio())),
+      gen: gen.length ? gen : ['Drama'], tipo: TIPOS_MATERIAL.indexOf(d.tipo) >= 0 ? d.tipo : 'Novela', tem: tem, pjs: pjs, sin: sin };
+    if (id) {
+      const m = lista.filter(function (x) { return x.id === id; })[0];
+      if (!m) return 'Ese material ya no existe.';
+      if (lista.some(function (x) { return x.id !== id && x.tit === tit; })) return 'Ya existe un material con ese título.';
+      Object.assign(m, datos);
+      return '';
+    }
+    if (lista.length >= 100) return 'Ya tienes 100 materiales propios.';
+    if (lista.some(function (x) { return x.tit === tit; })) return 'Ya existe un material con ese título.';
+    const fama = d.lic ? N.limitar(+d.fama || 50, 10, 100) : N.limitar(+d.fama || 30, 10, 40);
+    const pr = d.lic && !S.sandbox ? precioLicencia(fama) : 0;
+    if (pr && ART.negocio.cajaLibre(0) < pr) return 'Tu caja libre no alcanza para los derechos (' + ART.ui.dinero(pr) + ').';
+    if (pr) ART.negocio.pagar(0, 'derechos', pr);
+    S.edit.matSig = (S.edit.matSig || 0) + 1;
+    lista.push(Object.assign({ id: 'ed' + S.edit.matSig, libre: 0, fama: N.redondear(fama / 100, 2), grupo: 'editor', lic: d.lic ? 1 : 0, pr: pr }, datos));
+    N.emit('noticia', { tipo: 'estudio', texto: d.lic ? 'Compras la licencia de «' + tit + '» a ' + datos.autor + '.' : 'Registras tu material «' + tit + '».' });
+    return '';
+  }
+  function borrarMaterial(id) {
+    const S = N.S, lista = (S.edit && S.edit.mat) || [];
+    const i = lista.map(function (x) { return x.id; }).indexOf(id);
+    if (i < 0) return 'Ese material ya no existe.';
+    if (lista[i].lic) return 'Una licencia comprada no se borra.';
+    lista.splice(i, 1);
     return '';
   }
   function crearTalento(op) { if (!N.S.sandbox) return 'Activa el Editor Sandbox primero.'; const t = ART.talentos.crearPropio(op); t.sb = 1; return ''; }
@@ -265,7 +325,7 @@ ART.metas = (function () {
     if (p.precio) { S.edit = S.edit || {}; S.edit.precio = N.limitar(+p.precio || 1, 0.2, 5); }
     return '';
   }
-  return { MODOS: MODOS, HUMOR: HUMOR, RETOS: RETOS, LOGROS: LOGROS, PASOS: PASOS, estado: st, iniciar: iniciar, frecEventos: frecEventos, cumpleMeta: cumpleMeta, mensual: mensual,
+  return { TIPOS_MATERIAL: TIPOS_MATERIAL, precioLicencia: precioLicencia, guardarMaterial: guardarMaterial, borrarMaterial: borrarMaterial, leerPersonajes: leerPersonajes, MODOS: MODOS, HUMOR: HUMOR, RETOS: RETOS, LOGROS: LOGROS, PASOS: PASOS, estado: st, iniciar: iniciar, frecEventos: frecEventos, cumpleMeta: cumpleMeta, mensual: mensual,
     revisarLogros: revisarLogros, progresoReto: progresoReto, anual: anual, resumen: resumen, seccionesVisibles: seccionesVisibles, pasoTutorial: pasoTutorial, semana: semana,
     saltarTutorial: saltarTutorial, consejos: consejos, activarSandbox: activarSandbox, editar: editar, personaje: personaje, crearTalento: crearTalento,
     exportarPaquete: exportarPaquete, importarPaquete: importarPaquete, agregarMaterial: agregarMaterial };

@@ -95,7 +95,7 @@ ART.metasUI = (function () {
         return '<div class="tarjeta"><div class="fila" style="align-items:flex-start"><canvas class="retrato" data-retrato="' + t.id + '"></canvas><div class="col crece">' + campo('talento', t.id, 'nom', t.nom, 'Nombre') +
           '<span class="tenue chico">' + esc(ART.datos.oficio(t.of).nombre) + ' · ' + (N.anio() - t.nac) + ' años</span></div></div><div class="rejilla-ed">' +
           campo('talento', t.id, 'hab', t.hab, 'Habilidad (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'pot', t.pot, 'Potencial (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'fama', Math.round(t.fama * 100), 'Fama (%)', { num: 1, min: 0, max: 100, por: 100 }) + '</div></div>';
-      }).join('') + '<div class="tarjeta"><b>Crear talento</b><div class="rejilla-ed"><label class="campo" style="margin:0"><span>Nombre</span><input id="edTNom" maxlength="40"></label><label class="campo" style="margin:0"><span>Oficio</span><select id="edTOf">' + ART.datos.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label></div>' + btn('Crear', 'edCrearT', '', 'primario') + '</div>';
+      }).join('') + '<div class="tarjeta"><b>Crear talento</b><p class="nota info">Con el Editor activo tus talentos son gratis y su potencial llega hasta 99.</p>' + btn('Abrir el creador de talentos', 'crearTalentoForm', '', 'primario') + '</div>';
     } else if (st.ed === 'estudio') {
       lista = filtra(S.estudios.slice(), function (e) { return e.nombre; });
       h = lista.slice(0, n).map(function (e) {
@@ -117,7 +117,7 @@ ART.metasUI = (function () {
           (f.pers.length ? '<span class="tenue chico">Personajes y popularidad</span>' + f.pers.map(function (p) { return '<div class="rejilla-ed"><label class="campo" style="margin:0"><span>Personaje</span><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"></label><label class="campo" style="margin:0"><span>Popularidad (0–100)</span><input type="number" min="0" max="100" value="' + Math.round(p.pop) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop"></label></div>'; }).join('') : '') + '</div>';
       }).join('') + '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota info">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
         '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + ART.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
-        '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') +
+        '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') + btn('Editor completo de material', 'mtNuevo') +
         ((S.edit && S.edit.mat || []).length ? '<p class="chico">Tus materiales: ' + S.edit.mat.map(function (m) { return '«' + esc(m.tit) + '» (' + esc(m.gen.join(', ')) + ')'; }).join(' · ') + '</p>' : '') + '</div>';
     } else if (st.ed === 'precio') {
       const pr = (S.edit && S.edit.precio) || 1;
@@ -145,7 +145,6 @@ ART.metasUI = (function () {
   ac('edTipo', function (v) { st.ed = v; st.q = ''; st.n = 20; U.refrescar(); });
   ac('edCampo', function (v, el) { const p = el.getAttribute('data-v').split('|'), por = +el.getAttribute('data-por') || 1; const e = M.editar(p[0], p[1], p[2], por > 1 ? +v / por : v); U.aviso(e || 'Guardado', e ? 'mal' : ''); if (p[0] === 'precio') U.refrescar(); });
   ac('edPers', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.personaje(p[0], p[1], p[2] === 'n' ? v : '', p[2] === 'pop' ? v : undefined); U.aviso(e || 'Guardado', e ? 'mal' : ''); });
-  ac('edCrearT', function () { const e = M.crearTalento({ nom: document.getElementById('edTNom').value, of: document.getElementById('edTOf').value, edad: 30, pot: 70 }); U.aviso(e || 'Talento creado', e ? 'mal' : ''); U.refrescar(); });
   ac('edExportar', function () { document.getElementById('edPaquete').value = M.exportarPaquete(); });
   ac('edDescargar', function () { ART.publicacion.guardarArchivo('paquete_industry_art.json', M.exportarPaquete(), 'application/json').then(function (r) { if (!r.ok) U.aviso('No se pudo descargar: copia el texto.', 'mal'); }); });
   ac('edMaterial', function () {

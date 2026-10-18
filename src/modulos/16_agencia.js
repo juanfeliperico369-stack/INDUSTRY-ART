@@ -71,7 +71,7 @@ ART.agencia = (function () {
   // =====================================================================
   function talento() {
     const S = N.S, av = S.avatar;
-    let h = '<div class="titulo-sec"><h2>' + esc(t('sec_talento')) + '</h2><div class="fila"><button class="ayuda-i" data-a="ayuda" data-v="talento" aria-label="' + t('ayuda') + '">i</button></div></div>';
+    let h = '<div class="titulo-sec"><h2>' + esc(t('sec_talento')) + '</h2><div class="fila"><button class="btn primario" data-a="crearTalentoForm">' + icono('persona') + 'Crear talento</button><button class="ayuda-i" data-a="ayuda" data-v="talento" aria-label="' + t('ayuda') + '">i</button></div></div>';
     // Tu avatar y su academia
     const bonos = (av.esp || []).map(function (x) { return D.oficio(x).nombre + ' +' + (1 + ((av.ac && av.ac[x]) || 0)); }).concat(Object.keys(av.ac || {}).filter(function (x) { return (av.esp || []).indexOf(x) < 0; }).map(function (x) { return D.oficio(x).nombre + ' +' + av.ac[x]; }));
     h += '<div class="tarjeta"><div class="fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece"><span class="tenue chico">' + t('tu_avatar') + '</span><h3 style="margin:2px 0">' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(N.S.estudios[0].personalidad) + '</span>' +
@@ -160,6 +160,7 @@ ART.agencia = (function () {
       '<span class="tenue">' + e + ' años · ' + esc(D.pais(x.pais).nombre) + ' · ' + (x.sx === 'F' ? t('mujer') : t('hombre')) + (x.idi ? ' · habla ' + esc(x.idi.map(function (i) { return i.toLowerCase(); }).join(', ')) : '') + '</span>' +
       '<span class="oro">' + esc(per.txt) + ' · impulsa ' + per.valor + ' % la popularidad</span><span>' + etiquetas(x) + '</span></div></div>';
     h += '<p>' + esc(T.biografia(x)) + '</p>';
+    if (x.propio && !x.jugador && !x.mu || S.sandbox && !x.mu) h += '<div class="fila"><button class="btn" data-a="tnEditar" data-v="' + x.id + '">' + icono('pincel') + 'Editar talento</button></div>';
     const pot = T.potencialConocido(x) ? Math.round(x.pot) : '?';
     h += '<div class="kpis" style="margin:10px 0">' + kpi('Overall', T.overall(x)) + kpi(t('tal_habilidad'), Math.round(x.hab)) + kpi('Potencial', pot) + kpi(t('tal_fama'), Math.round(x.fama * 100)) + kpi('Poder de estrella', ex.poder) +
       kpi(t('tal_tarifa'), dinero(T.tarifaPara(x, 0))) + kpi('Energía', x.ret ? '—' : T.energia(x)) + kpi('Moral', x.ret ? '—' : T.moral(x)) + kpi('Proyectos activos', (x.act || 0) + ' de ' + T.MAX_PROYECTOS) +

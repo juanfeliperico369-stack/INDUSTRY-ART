@@ -271,11 +271,25 @@ ART.talentos = (function () {
     return Math.max(0, nivel(t).prestigio - Math.round((est ? est.fama : 0) * 100));
   }
   // Crear un talento propio: con nombre, oficio, sexo y edad; la habilidad sale de un potencial modesto
+  // Un talento creado por el jugador: nombre, oficio (y otro), país, potencial, rasgo, familia fuerte, aspecto y biografía.
+  // Fuera del Editor Sandbox el potencial llega hasta 80, así nadie crea una estrella hecha.
   function crearPropio(op) {
     const anio = N.anio();
     const edad = N.limitar(Math.round(op.edad || 25), 8, 80);
-    const t = crear(op.of || 'interprete', edad, anio, { reg: op.reg, sx: op.sx, pot: N.limitar(op.pot || 62, 30, 80), pasado: false });
+    const p = op.pais ? D.pais(op.pais) : null, reg = p ? p.region : op.reg;
+    const t = crear(op.of || 'interprete', edad, anio, { reg: reg, sx: op.sx, pot: N.limitar(op.pot || 62, 30, op.sinTope ? 99 : 80), pasado: false });
+    if (p) { t.pais = p.id; t.idi = null; completar(t, N.azar); }
     if (op.nom) t.nom = String(op.nom).slice(0, 40);
+    if (op.of2 && op.of2 !== t.of && D.oficio(op.of2)) { t.h2 = {}; t.h2[op.of2] = Math.round(N.limitar(t.hab - 12, 10, 95)); }
+    if (op.rasgo !== undefined) t.rasgo = D.rasgos[op.rasgo] ? op.rasgo : '';
+    const i = D.ORDEN_FAM.indexOf(op.fuerte);
+    if (i >= 0 && t.af) { t.af[i] = Math.max(t.af[i], 5); }
+    const j = D.ORDEN_FAM.indexOf(op.debil);
+    if (j >= 0 && j !== i && t.af) { t.af[j] = Math.min(t.af[j], -4); }
+    if (op.asp) t.asp = op.asp;
+    if (op.bio) t.bioP = String(op.bio).slice(0, 280);
+    // Un personaje histórico llega con el talento y la fama de su época dorada
+    if (op.hist) { t.hist = op.hist; t.hab = Math.round(N.limitar(op.hab || t.hab, 10, 99)); t.fama = N.redondear(N.limitar(op.fama || t.fama, 0, 1), 3); t.cp = null; completar(t, N.azar); }
     t.propio = 1;
     N.S.talentos.push(t);
     reindexar();
@@ -656,6 +670,7 @@ ART.talentos = (function () {
     if (t.vu) s += 'Volvió del retiro' + (t.vu > 1 ? ' ' + t.vu + ' veces' : '') + '. ';
     if (t.ret && !t.mu) s += 'Se retiró en ' + t.ret + '. ';
     if (t.mu) s += 'Falleció en ' + t.mu + '. ';
+    if (t.bioP) s += t.bioP + (/[.!?…]$/.test(t.bioP) ? '' : '.');
     return s.trim();
   }
 

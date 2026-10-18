@@ -139,7 +139,12 @@ ART.imperioUI = (function () {
     const pasado = function (x) { return x.y < hoy.y || (x.y === hoy.y && (x.m < hoy.m || (x.m === hoy.m && x.d <= hoy.d))); };
     const vis = st.hist === 'todo' ? l : l.filter(function (x) { return x.y >= a - 15 && x.y <= a + 25; });
     let h = '<p class="nota info">La historia real llega hasta 2026 (sin personas reales); después siguen las eras de ficción y, desde 2150, eventos que salen de tu partida.</p>' +
-      '<div class="fila">' + chip('Cerca de hoy', 'hsVer', 'cerca', st.hist === 'cerca') + chip('Toda la historia', 'hsVer', 'todo', st.hist === 'todo') + chip('Archivo de curiosidades', 'hsVer', 'curio', st.hist === 'curio') + '</div>';
+      '<div class="fila">' + chip('Cerca de hoy', 'hsVer', 'cerca', st.hist === 'cerca') + chip('Toda la historia', 'hsVer', 'todo', st.hist === 'todo') + chip('Archivo de curiosidades', 'hsVer', 'curio', st.hist === 'curio') + chip('Hitos del arte', 'hsVer', 'arte', st.hist === 'arte') + '</div>';
+    if (st.hist === 'arte') {
+      const HA = ART.hitosArte.hasta(a).slice().reverse(), TIPO = ART.idioma.actual() === 'en' ? { o: 'Work', c: 'Movement', m: 'Milestone' } : { o: 'Obra', c: 'Corriente', m: 'Momento' };
+      return h + '<p class="nota">Obras, corrientes y momentos reales del arte hasta ' + a + ' (' + HA.length + '). Las obras famosas se pueden cargar como material con licencia en Obras › Crear obra › Usar material.</p>' +
+        '<div class="col" data-fijo="' + (ART.idioma.actual() === 'en' ? '1' : '') + '">' + HA.map(function (x) { return '<div class="cal-ev"><b class="cifra">' + x[0] + '</b><div class="col crece"><span>' + esc(ART.hitosArte.texto(x)) + '</span><span class="tenue chico">' + (TIPO[x[1]] || '') + '</span></div></div>'; }).join('') + '</div>';
+    }
     if (st.hist === 'curio') {
       const cs = ART.curiosidades.todas(a);
       return h + '<p class="nota">' + cs.length + ' de ' + ART.curiosidades.total() + ' temas desbloqueados: aparecen cuando la partida llega a su año.</p>' + cs.map(fichaCuriosidad).join('');

@@ -5,7 +5,7 @@ Fecha: 11 de octubre de 2026. Fuentes: `INDUSTRY_ART_Plan_Maestro_v2.docx`, `IND
 
 ## 1. Qué cambia con la v2
 
-- **Hoja de ruta**: 12 versiones en 4 fases. Construir todo (V16 a V23), prueba libre de Felipe, pulir (V24 balance,
+- **Hoja de ruta**: 12 versiones en 4 fases. Construir todo (V16 a V23), prueba libre de OneZero, pulir (V24 balance,
   V25 interfaz y rendimiento, V26 errores e inglés) y publicar (V27).
 - **Modo rápido** en la fase de construcción: funciones completas y conectadas, sin pulir; sin balance fino, sin
   capturas ni bot largo (llegan en V24 y V25); prueba de humo al cierre (abre sin errores, partida nueva, bot de
@@ -64,7 +64,7 @@ y repartir lo que falta de la fase de construcción en el orden de la v2:
 | V24 | V21 de la v2: mundo vivo y negocio |
 | V25 | V22 de la v2: música, juegos, teatro y libros |
 | V26 | V23 de la v2: metas, modos y editor |
-| — | Prueba libre de Felipe |
+| — | Prueba libre de OneZero |
 | V27 a V30 | Balance, interfaz y rendimiento, errores e inglés, 1.0 |
 
 ## 5. Forma de trabajo desde ahora

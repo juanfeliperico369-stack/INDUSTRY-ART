@@ -175,7 +175,7 @@ ART.publicacion = (function () {
       }
     }
   }
-  const CREDITOS = ['Ideado y creado por OneZero'];
+  const CREDITOS = ['Ideado y creado por OneZero', 'Programado por Faro'];
   function creditos() { return CREDITOS.slice(); }
   return { config: config, enApp: enApp, plataforma: plataforma, nombrePlataforma: nombrePlataforma, alAbrir: alAbrir,
     privacidadDisponible: privacidadDisponible, abrirPrivacidad: abrirPrivacidad, creditos: creditos,

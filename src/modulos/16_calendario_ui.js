@@ -265,21 +265,8 @@ ART.calendarioUI = (function () {
   ac('abrirPausa', function () {
     U.modal('<div class="fila entre"><h2>Pausa</h2><button class="ico" data-a="cerrarModal" aria-label="' + t('cerrar') + '">' + U.icono('cerrar') + '</button></div><div class="col">' +
       '<button class="btn primario" data-a="cerrarModal">Seguir</button>' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button>' : '') +
-      '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' + (N.S ? '<button class="btn" data-a="crearTalentoForm">Crear talento (Editor)</button>' : '') +
+      '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' + (N.S ? '<button class="btn" data-a="crearTalentoForm">Crear talento</button>' : '') +
       '<button class="btn" data-a="ayuda" data-v="inicio_guia">Guía</button>' + (N.S ? '<button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') + '</div>');
   });
-  ac('crearTalentoForm', function () {
-    U.modal('<h2>Crear talento</h2><p class="nota info">Tu propio talento entra al mundo con una habilidad modesta que crece con el trabajo.</p>' +
-      '<label class="campo"><span>Nombre</span><input type="text" maxlength="40" id="ctNom" value=""></label>' +
-      '<label class="campo"><span>Oficio</span><select id="ctOf">' + D.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label>' +
-      '<div class="fila"><label class="campo crece"><span>Sexo</span><select id="ctSx"><option value="F">' + t('mujer') + '</option><option value="M">' + t('hombre') + '</option></select></label><label class="campo crece"><span>Edad</span><input type="number" min="8" max="80" value="25" id="ctEd"></label></div>' +
-      '<button class="btn primario bloque" data-a="crearTalentoSi">Crear</button><p></p><button class="btn bloque" data-a="cerrarModal">' + t('cerrar') + '</button>');
-  });
-  ac('crearTalentoSi', function () {
-    const g = function (id) { const el = document.getElementById(id); return el ? el.value : ''; };
-    const ta = ART.talentos.crearPropio({ nom: g('ctNom').trim() || undefined, of: g('ctOf'), sx: g('ctSx'), edad: +g('ctEd') || 25, reg: est0().reg });
-    U.cerrarModal(); U.aviso('Nace ' + ta.nom); U.acciones.verTalento(String(ta.id));
-  });
-
   return { calendario: calendario, tarjetasEstudio: tarjetasEstudio, mostrarPendientes: mostrarPendientes, negocioSede: negocioSede, adnMercado: adnMercado };
 })();
