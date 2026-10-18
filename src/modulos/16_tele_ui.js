@@ -27,7 +27,7 @@ ART.teleUI = (function () {
     h += '<h3>Tus franquicias</h3>' + (vivas.length ? '<div class="col">' + vivas.map(function (f) {
       const b = F.biografia(f);
       return '<div class="tarjeta" data-a="tvVerFr" data-v="' + f.id + '" style="cursor:pointer"><div class="fila entre"><b>' + esc(f.nom) + '</b><span class="etiqueta' + (b.nivel >= 3 ? ' oro' : '') + '">' + esc(b.nombreNivel) + '</span></div>' +
-        '<span class="chico">' + b.entradas + ' obras · calidad ' + b.calidad + ' · hype ' + (b.hype > 0 ? '+' : '') + b.hype + ' · fatiga ' + b.fat + ' %' + (f.xo.length ? ' · crossover' : '') + '</span></div>';
+        '<span class="chico">' + N.cuenta(b.entradas, 'obra', 'obras') + ' · calidad ' + b.calidad + ' · hype ' + (b.hype > 0 ? '+' : '') + b.hype + ' · fatiga ' + b.fat + ' %' + (f.xo.length ? ' · crossover' : '') + '</span></div>';
     }).join('') + '</div>' : '<p class="tenue">Aún no tienes franquicias vivas: continúa o registra una obra.</p>');
     h += '<h3>Obras que pueden ser franquicia</h3><div class="col">' + (sueltas.length ? sueltas.map(function (o) {
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(o.tit) + '</b><span class="tenue chico">' + (o.tv ? 'Serie' : 'Cine') + ' · público ' + o.pub + '</span></div><div class="fila">' + btn('Continuación', 'tvContinuar', o.id, 'primario') + btn('Registrar', 'tvRegistrar', o.id) + '</div></div>';

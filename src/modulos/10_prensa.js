@@ -76,7 +76,7 @@ ART.prensa = (function () {
     S.obras.forEach(function (o) {
       if (o.est === 0) { if (o.prog && o.et === 'lista') out.push({ tipo: 'propio', txt: 'Tu adelanto de «' + o.tit + '» da que hablar.' }); return; }
       if (o.prog && o.et === 'lista' && o.fe - S.t <= 8) out.push({ tipo: 'anuncio', txt: S.estudios[o.est].nombre + ' anuncia «' + o.tit + '» para ' + ART.cal.texto(ART.cal.viernesDeT(o.fe)) + '.' });
-      else if (o.et === 'rodaje' && N.hash('r' + o.id) % 5 === 0) out.push({ tipo: 'rumor', txt: (red ? 'Filtración: ' : 'Se rumorea que ') + S.estudios[o.est].nombre + ' rueda algo de ' + o.gen[0].toLowerCase() + '.' });
+      else if (o.et === 'rodaje' && N.hash('r' + o.id) % 5 === 0) out.push({ tipo: 'rumor', txt: (red ? 'Filtración: ' : 'Se rumorea que ') + S.estudios[o.est].nombre + ' rueda algo del género «' + o.gen[0] + '».' });
     });
     const t = D.familias.slice().sort(function (a, b) { return (S.mundo.tendencias[b.id] || 0) - (S.mundo.tendencias[a.id] || 0); })[0];
     out.push({ tipo: 'tendencia', txt: (red ? 'Tendencia: ' : 'En los cafés se habla de ') + t.nombre.toLowerCase() + '.' });

@@ -194,12 +194,12 @@ ART.distribucion = (function () {
     const dob = Object.keys(p.dob || {}).length;
     return '<p class="nota">Plan: ' + Object.keys(grupos).map(function (m) { return nombreModo(m).toLowerCase() + ' en ' + grupos[m].join(', '); }).join(' · ') +
       (dob ? ' · ' + dob + ' doblaje' + (dob > 1 ? 's' : '') : '') + ((p.promo || []).length ? ' · promociones: ' + p.promo.map(function (id) { return ES.promo(id).nombre.toLowerCase(); }).join(', ') : '') +
-      (p.anuncio ? ' · anunciada con ' + p.anuncio + ' semanas' : '') + '.</p>';
+      (p.anuncio ? ' · anunciada con ' + N.cuenta(p.anuncio, 'semana', 'semanas') + ' de antelación' : '') + '.</p>';
   }
   function bloqueVentanas(o) {
     const st = V.estadisticas(o);
     if (!st.length) {
-      if (o.et === 'cartelera' && o.fv > 0) return '<h3>Ventanas</h3><p class="nota">Al salir de los cines, el ' + Math.round(o.fv * 100) + ' % de lo que gana una obra de ' + o.anio + ' llega después por video, TV' + (o.anio >= 2007 ? ' y streaming' : '') + '.</p>';
+      if (o.et === 'cartelera' && o.fv > 0) return '<h3>Ventanas</h3><p class="nota">Al salir de los cines, el ' + Math.round(o.fv * 100) + ' % de lo que gana una obra de ' + o.anio + ' llega después por ' + (o.anio >= 2007 ? 'video, TV y streaming' : 'video y TV') + '.</p>';
       return '';
     }
     const txtEstado = { pendiente: 'abre', curso: 'en curso', terminada: 'terminada', boveda: 'en la bóveda' };

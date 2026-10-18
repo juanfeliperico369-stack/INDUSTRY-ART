@@ -36,18 +36,7 @@ ART.obras = (function () {
   function enCartelera() { return activas().filter(function (o) { return o.et === 'cartelera'; }); }
 
   // ---------- Títulos ----------
-  function tituloNuevo(gen) {
-    const fam = D.familiaDe[gen && gen[0]] || 'DR';
-    const t1 = N.elegir(D.titulo1), t2 = N.elegir(D.titulo2);
-    const r = N.azar();
-    if (r < 0.55) return t1 + ' ' + t2;
-    if (r < 0.75) return 'El ' + t1.toLowerCase() + ' ' + t2;
-    if (r < 0.9) {
-      const tema = N.elegir(D.temas);
-      return (fam === 'SM' ? 'Sombras de ' : fam === 'RD' ? 'Un amor y ' : fam === 'AA' ? 'Operación ' : '') + tema;
-    }
-    return t1;
-  }
+  function tituloNuevo(gen) { return ART.titulos.nuevo(gen); }
   // Clasificaciones disponibles en el año (antes de 1968 la censura no deja estrenar lo más fuerte)
   function clasificacionesDisponibles(anio, gen) {
     const erotico = gen && gen.indexOf('Erótico') >= 0;

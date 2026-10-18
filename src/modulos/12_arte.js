@@ -633,7 +633,8 @@ ART.arte = (function () {
 
   // Título en mayúsculas, hasta tres líneas, con la tipografía de la época.
   function tituloPoster(c, w, h, o, era, mo) {
-    const palabras = String(o.titulo || '').toUpperCase().split(' ');
+    const tit = ART.idioma && ART.idioma.actual() === 'en' ? ART.idioma.texto(String(o.titulo || '')) : String(o.titulo || '');
+    const palabras = tit.toUpperCase().split(' ');
     const max = era === 5 ? 13 : 11;
     const fs = Math.max(7, w * (era === 5 ? 0.1 : 0.13));
     const lineas = [];

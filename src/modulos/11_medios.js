@@ -356,8 +356,7 @@ ART.medios = (function () {
     s.lista = tuyos.concat(otros).sort(function (x, y) { return y.pts - x.pts; }).slice(0, 10).map(function (x) { x.prev = antes[x.k] || 0; return x; });
     s.lista.forEach(function (x, i) { if (x.tuyo && (!x.prev || x.prev > 10)) N.emit('noticia', { tipo: 'estudio', texto: '«' + x.nom + '» entra al puesto ' + (i + 1) + ' de la lista de éxitos.' }); });
   }
-  const PALABRAS_CANCION = ['Luna', 'Fuego', 'Noche', 'Corazón', 'Ciudad', 'Lluvia', 'Mar', 'Verano', 'Estrella', 'Camino', 'Sombra', 'Baile', 'Sueño', 'Eco', 'Neón', 'Cristal'];
-  function tituloCancion(n) { const a = PALABRAS_CANCION[n % 16], b = PALABRAS_CANCION[(n >> 4) % 16]; return n % 3 === 0 ? a : n % 3 === 1 ? a + ' de ' + b.toLowerCase() : 'Mi ' + a.toLowerCase(); }
+  function tituloCancion(n) { return ART.titulos.cancion(n); }
   function cobrar(p, m) {
     const cat = p.med;
     ART.negocio.cobrarEn(0, cat, m);
@@ -425,7 +424,7 @@ ART.medios = (function () {
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
     ART.negocio.pagar(0, 'talento', c);
     const t0 = T.porId(ids[0]);
-    st().bandas.push({ id: N.sigId(), nom: (nom || (tipo === 'solista' ? t0.nom : 'Los ' + N.elegir(D.titulo2))).slice(0, 40), tipo: tipo === 'solista' ? 'solista' : 'banda', m: ids, rel: 70, prac: 0, fans: Math.round(5000 + t0.fama * 2e5), t0: S.t, hasta: S.t + 52 * 5, sep: null });
+    st().bandas.push({ id: N.sigId(), nom: (nom || (tipo === 'solista' ? t0.nom : ART.titulos.banda())).slice(0, 40), tipo: tipo === 'solista' ? 'solista' : 'banda', m: ids, rel: 70, prac: 0, fans: Math.round(5000 + t0.fama * 2e5), t0: S.t, hasta: S.t + 52 * 5, sep: null });
     return '';
   }
   function practicar(id) {
@@ -463,7 +462,7 @@ ART.medios = (function () {
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
     ART.negocio.pagar(0, 'talento', c);
     b.sep = null; b.rel = 60; b.reu = 1; b.hasta = S.t + 52 * 3; b.fans = Math.round(b.fans * 1.3);
-    N.emit('noticia', { tipo: 'estudio', texto: '¡' + b.nom + ' vuelve a reunirse!', importante: true });
+    N.emit('noticia', { tipo: 'estudio', texto: '¡' + b.nom + (/^(Los|Las) /.test(b.nom) ? ' vuelven' : ' vuelve') + ' a reunirse!', importante: true });
     return '';
   }
   function mensualBandas() {
@@ -504,7 +503,7 @@ ART.medios = (function () {
     const c = costoMotor(fun);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
     ART.negocio.pagar(0, 'investigacion', c);
-    st().motores.push({ id: N.sigId(), nom: (nom || 'Motor ' + N.elegir(D.titulo1)).slice(0, 30), fun: fun, est: estrellasMotor(fun), anio: N.anio(), de: 0 });
+    st().motores.push({ id: N.sigId(), nom: (nom || 'Motor ' + ART.titulos.sustantivo()).slice(0, 30), fun: fun, est: estrellasMotor(fun), anio: N.anio(), de: 0 });
     return '';
   }
   function licenciarMotor(i) {

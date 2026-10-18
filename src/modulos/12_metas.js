@@ -105,7 +105,7 @@ ART.metas = (function () {
   }
   // ---------- Misiones por correo ----------
   const MISIONES = [
-    function () { const f = N.elegir(ART.datos.familias); return { tipo: 'familia', fam: f.id, txt: 'Un distribuidor busca una obra de ' + f.nombre.toLowerCase() + ': estrénala antes de la fecha.', sem: 52 }; },
+    function () { const f = N.elegir(ART.datos.familias); return { tipo: 'familia', fam: f.id, txt: 'Un distribuidor busca una obra de «' + f.nombre + '»: estrénala antes de la fecha.', sem: 52 }; },
     function () { return { tipo: 'fans', meta: Math.round((N.S.fans || 0) * 1.25 + 5000), txt: 'Tu agente de prensa apuesta a que llegas a más fans.', sem: 39 }; },
     function () { return { tipo: 'caja', meta: Math.round(N.S.estudios[0].caja + tip() * 2), txt: 'El banco quiere ver tu caja más gorda.', sem: 52 }; },
     function () { return { tipo: 'critica', meta: 75, txt: 'Una revista te reta: estrena algo con 75 o más de crítica.', sem: 60 }; },

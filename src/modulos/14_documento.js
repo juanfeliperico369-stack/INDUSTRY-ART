@@ -32,7 +32,7 @@ ART.documento = (function () {
     if (o.pre && o.pre.length) filas.push(['Premisas', o.pre.join(', ')]);
     if (o.epo) filas.push(['Época y lugar', X.epoca(o.epo).nombre + (o.lug ? ' · ' + lugarDe(o) : '')]);
     if (o.idio) filas.push(['Idioma', o.idio + (o.rod && D.pais(o.rod) ? ' · rodada en ' + D.pais(o.rod).nombre : '')]);
-    if (o.min) filas.push(['Forma', o.min + ' min · ' + X.complejidad[v(o, 'cx', 2)] + ' · ritmo ' + X.ritmo[v(o, 'rit', 2)].id.toLowerCase() + ' · efectos ' + X.efectos[v(o, 'fx', 2)].id.toLowerCase() + (o.fxr ? ' (' + o.fxr + ')' : '')]);
+    if (o.min) filas.push(['Forma', o.min + ' min · ' + X.complejidad[v(o, 'cx', 2)] + ' · ritmo ' + X.ritmo[v(o, 'rit', 2)].id.toLowerCase() + ' · efectos: ' + X.efectos[v(o, 'fx', 2)].id.toLowerCase() + (o.fxr ? ' (' + o.fxr + ')' : '')]);
     if (o.corr || o.estilo) filas.push(['Estilo', (o.corr || X.ESTANDAR) + ' · ' + (o.estilo || 'General') + ' · prioridad ' + X.prioridad(o.prio).nombre.toLowerCase()]);
     if (o.cont) filas.push(['Contenido', I().describirContenido(o)]);
     if (o.clas) filas.push(['Clasificación', o.clas]);

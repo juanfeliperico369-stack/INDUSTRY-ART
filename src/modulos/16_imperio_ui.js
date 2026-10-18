@@ -66,8 +66,8 @@ ART.imperioUI = (function () {
     h += '<h3>Coproducciones</h3><p class="nota info">Un rival pone el 40 % del costo y se lleva el 40 % de lo que gane.</p>' + (enDes.length ? '<div class="fila">' + sel('imCoObra', enDes.map(function (o) { return [o.id, o.tit]; }), '') + sel('imCoEst', rivs.map(function (e) { return [e.id, e.nombre]; }), '') + btn('Proponer', 'imCopro', '', 'primario') + '</div>' : '<p class="tenue chico">Necesitas una obra en desarrollo o preproducción.</p>');
     h += '<h3>Encargos</h3><p class="nota info">Pagas a un rival para que filme por ti (te quedas con el 75 %) o aceptas un encargo suyo (te pagan y se quedan con el 70 %).</p><div class="fila">' +
       sel('imEnEst', rivs.map(function (e) { return [e.id, e.nombre]; }), '') + sel('imEnGen', D.familias.map(function (f) { return [f.generos[0], f.generos[0]]; }), '') + btn('Encargar', 'imEncargar', '', 'primario') + '</div>' +
-      I.ofertasEncargo().map(function (x) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(S.estudios[x.est].nombre) + '</b><span class="tenue chico">Quiere una obra de ' + esc(x.gen.toLowerCase()) + ' · te paga ' + dinero(x.pago) + '</span></div>' + btn('Aceptar', 'imAceptarEnc', x.id) + '</div>'; }).join('') +
-      (S.encargoPend ? '<p class="bien chico">Encargo aceptado: tu próxima obra de ' + esc(S.encargoPend.gen.toLowerCase()) + ' lo cumple.</p>' : '');
+      I.ofertasEncargo().map(function (x) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(S.estudios[x.est].nombre) + '</b><span class="tenue chico">Quiere una obra del género «' + esc(x.gen) + '» · te paga ' + dinero(x.pago) + '</span></div>' + btn('Aceptar', 'imAceptarEnc', x.id) + '</div>'; }).join('') +
+      (S.encargoPend ? '<p class="bien chico">Encargo aceptado: tu próxima obra del género «' + esc(S.encargoPend.gen) + '» lo cumple.</p>' : '');
     h += '<h3>Financiar proyectos ajenos</h3><p class="nota info">Pones el 25 % del costo y recibes el 30 % de su parte de taquilla.</p>' + (I.proyectosAjenos().map(function (o) {
       return '<div class="cal-ev"><div class="col crece"><b>' + esc(o.tit) + '</b><span class="tenue chico">' + esc(S.estudios[o.est].nombre) + ' · pones ' + dinero(Math.round(O.costoTotal(o) * 0.25)) + '</span></div>' + btn('Financiar', 'imFinanciar', o.id) + '</div>';
     }).join('') || '<p class="tenue chico">Ningún proyecto busca dinero ahora.</p>');
@@ -80,7 +80,7 @@ ART.imperioUI = (function () {
       ART.historia.INVENTOS.filter(function (x) { const e = I.estadoInvento(x); return e !== 'mundo' || x.anio > a - 5; }).slice(0, 14).map(function (x) {
         const e = I.estadoInvento(x), nom = { tuyo: 'Tuyo', licencia: 'Licenciado', mundo: 'Ya llegó al mundo', rival: 'Lo tiene un rival', investigable: 'Investigable', futuro: 'Futuro' }[e];
         const accion = e === 'investigable' ? btn('Investigar · ' + dinero(I.costoInvento(x)) + ' · ' + I.semanasInvento(x) + ' sem', 'imInvestigar', x.id, 'primario', inv ? 'Ya investigas otra cosa' : '') : e === 'rival' ? btn('Licenciar · ' + dinero(I.costoLicenciaTec(x)), 'imLicTec', x.id) : '';
-        return '<div class="cal-ev"><b class="cifra">' + x.anio + '</b><div class="col crece"><span>' + esc(x.nombre) + '</span><span class="tenue chico">' + esc(nom) + ' · ' + esc(x.dep) + '</span></div>' + accion + '</div>';
+        return '<div class="cal-ev"><b class="cifra">' + x.anio + '</b><div class="col crece"><span>' + esc(x.nombre) + '</span><span class="tenue chico">' + esc(nom) + ' · ' + esc(ART.rodaje.nombreDep(x.dep)) + '</span></div>' + accion + '</div>';
       }).join('') + '</div>';
     return h;
   }

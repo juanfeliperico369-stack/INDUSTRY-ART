@@ -528,7 +528,7 @@ ART.pantallas = (function () {
       const fam = D.familia(o.fam || 'DR');
       const ns = ART.rodaje.notas(o);
       const gr = U.grafica('radar' + o.id, function (cv) { ART.arte.radar(cv, ns.map(function (n) { return n.v; }), ns.map(function (n) { return n.nombre; })); });
-      h += '<h3>Departamentos</h3><canvas class="lienzo" style="height:220px" data-grafica="' + gr + '"></canvas><p class="nota">Lo que más pesa en ' + esc(fam.nombre.toLowerCase()) + ': ' + ns.slice(0, 3).map(function (n) { return n.nombre.toLowerCase(); }).join(', ') + '.</p>';
+      h += '<h3>Departamentos</h3><canvas class="lienzo" style="height:220px" data-grafica="' + gr + '"></canvas><p class="nota">Lo que más pesa en ' + esc(fam.nombre.toLowerCase()) + ': ' + N.lista(ns.slice(0, 3).map(function (n) { return n.nombre.toLowerCase(); })) + '.</p>';
     }
     h += '<h3>' + t('paso_equipo') + '</h3>';
     if (o.cr && o.cr.ejecutiva) h += '<p class="tenue">Producción ejecutiva: ' + esc(o.cr.ejecutiva) + '</p>';

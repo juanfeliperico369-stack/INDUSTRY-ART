@@ -81,10 +81,14 @@ ART.guardado = (function () {
   MIGRACIONES[36] = function () { /* 2.1: el aspecto del avatar, los teatros propios y el talento del avatar se agregan solos cuando hacen falta */ };
   // 4.0: los hitos de la historia se cuentan otra vez (hay hitos nuevos entre los viejos)
   MIGRACIONES[38] = function (S) {
-    if (!S.hist) return;
     let v = 0;
+    if (!S.hist) S.hist = { gen: [], vistos: 0, ultAnio: 0 };
     ART.historia.HITOS.forEach(function (x, i) { const tx = (x[0] - S.y0) * 52 + ART.cal.semanaDeFecha(x[0], x[1] - 1, x[2]) - 1; if (tx < S.t) v = i + 1; });
     S.hist.vistos = v;
+    // Títulos sin concordancia de las versiones anteriores («El aurora prohibido» → «La aurora prohibida»)
+    S.obras.forEach(function (o) { o.tit = ART.titulos.reparar(o.tit); });
+    const viejas = /^Los (de |del |en |sin |final|eterno|perdido|secreto|imposible|salvaje|prohibido|dorado)/;
+    if (S.med && S.med.bandas) S.med.bandas.forEach(function (b) { if (viejas.test(b.nom)) b.nom = ART.titulos.banda(); });
   };
   MIGRACIONES[37] = function () { /* 3.0: el canal (24 horas, 8 franjas) y la plataforma se ponen al día solos al usarlos */ };
   MIGRACIONES[29] = function () { /* Errores e inglés, sin datos nuevos */ };

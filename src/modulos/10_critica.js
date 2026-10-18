@@ -128,11 +128,14 @@ ART.critica = (function () {
 
   // ---------- Cartas de fans ----------
   const CARTAS = [
-    function (o) { return '«Vi «' + o.tit + '» tres veces. ¿Cuándo llega la secuela?»'; },
-    function (o) { return '«El final de «' + o.tit + '» me dejó sin palabras. Gracias.»'; },
-    function (o) { return '«Mi abuela y yo vimos «' + o.tit + '» juntas. Hacía años que no reíamos así.»'; },
-    function (o) { return '«No entendí el final de «' + o.tit + '». ¿Me lo explican?»'; },
-    function (o) { return '«Quiero trabajar en su estudio algún día. «' + o.tit + '» me cambió la vida.»'; },
+    function (o) { return '«Vi “' + o.tit + '” tres veces. ¿Cuándo llega la secuela?»'; },
+    function (o) { return '«El final de “' + o.tit + '” me dejó sin palabras. Gracias.»'; },
+    function (o) { return '«Mi abuela y yo vimos “' + o.tit + '” juntas. Hacía años que no reíamos así.»'; },
+    function (o) { return '«No entendí el final de “' + o.tit + '”. ¿Me lo explican?»'; },
+    function (o) { return '«Quiero trabajar en su estudio algún día. “' + o.tit + '” me cambió la vida.»'; },
+    function (o) { return '«Mi hija se disfrazó de un personaje de “' + o.tit + '” para su cumpleaños.»'; },
+    function (o) { return '«Lloré con “' + o.tit + '” y no me da vergüenza decirlo.»'; },
+    function (o) { return '«Pido más obras como “' + o.tit + '”. El mundo las necesita.»'; },
   ];
   function cartaMensual() {
     const S = N.S;
@@ -156,7 +159,7 @@ ART.critica = (function () {
     const num = { n: (S.revista && S.revista.length ? S.revista[0].n : 0) + 1, t: S.t,
       boletin: top.map(function (o) { return { tit: o.tit, est: S.estudios[o.est].nombre, bruto: Math.round(o.bruto || 0), mio: o.est === 0 }; }),
       critica: crit.length ? { mejor: { tit: crit[0].tit, n: crit[0].crit }, peor: crit.length > 1 ? { tit: crit[crit.length - 1].tit, n: crit[crit.length - 1].crit } : null } : null,
-      editorial: 'El mercado de hoy se mueve por ' + motor.toLowerCase() + '. ' + tend[0].f.nombre + ' está en alza y ' + tend[tend.length - 1].f.nombre.toLowerCase() + ' pierde público.' +
+      editorial: 'El mercado de hoy se mueve por ' + motor.toLowerCase() + '. Sube «' + tend[0].f.nombre + '» y baja «' + tend[tend.length - 1].f.nombre + '».' +
         (S.estudios[0].fama > 0.4 ? ' ' + S.estudios[0].nombre + ' ya es un nombre que todos miran.' : '') };
     S.revista = S.revista || [];
     S.revista.unshift(num);

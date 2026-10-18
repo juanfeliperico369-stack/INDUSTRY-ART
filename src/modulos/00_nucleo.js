@@ -150,6 +150,10 @@ ART.n = (function () {
   }
   function copiar(obj) { return JSON.parse(JSON.stringify(obj)); }
   function redondear(v, dec) { const p = Math.pow(10, dec || 0); return Math.round(v * p) / p; }
+  // «1 obra», «3 obras»: el número con su palabra en singular o plural
+  function cuenta(n, uno, varios) { return n + ' ' + (Math.abs(+String(n).replace(',', '.')) === 1 ? uno : varios); }
+  // «a, b y c»
+  function lista(xs, y) { xs = xs.filter(function (x) { return x !== '' && x !== null && x !== undefined; }); return xs.length < 2 ? (xs[0] || '') : xs.slice(0, -1).join(', ') + ' ' + (y || 'y') + ' ' + xs[xs.length - 1]; }
 
   Object.assign(nucleo, {
     estadoNuevo: estadoNuevo, azar: azar, entero: entero, elegir: elegir, probabilidad: probabilidad,
@@ -157,7 +161,7 @@ ART.n = (function () {
     anio: anio, semana: semana, mes: mes, mesDeSemana: mesDeSemana, tDe: tDe,
     on: on, emit: emit,
     limitar: limitar, mezcla: mezcla, interp: interp, interpLog: interpLog, esc: esc, sigId: sigId,
-    suma: suma, copiar: copiar, redondear: redondear,
+    suma: suma, copiar: copiar, redondear: redondear, cuenta: cuenta, lista: lista,
   });
   return nucleo;
 })();

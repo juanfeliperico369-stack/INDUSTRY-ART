@@ -105,7 +105,7 @@ ART.ideas = (function () {
     const cont = contenidoDe(o);
     return X.contenido.map(function (c) {
       const n = c.niveles[cont[c.id] || 0];
-      return c.nombre.split(' ')[0].toLowerCase() + ' ' + n[0].toLowerCase() + (n[1] >= 5 ? ', siempre sugerido' : '');
+      return c.nombre.split(' ')[0].toLowerCase() + ': ' + (n[0] === 'Sin violencia' ? 'ninguna' : n[0].toLowerCase()) + (n[1] >= 5 ? ' (siempre sugerido)' : '');
     }).join(' · ');
   }
 
@@ -564,6 +564,24 @@ ART.ideas = (function () {
   // ---------- Sinopsis y frases (plantillas: género, tema, arco, personajes, época y lugar) ----------
   const PROPIOS = /^[A-ZÁÉÍÓÚ]{2}|^(Dios|IA)$/;
   function minus(t) { return X.famTema[t] === 'EH' || PROPIOS.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1); }
+  // Los temas de época llevan su artículo: «Medieval» se cuenta como «la Edad Media»
+  const TEMA_HISTORIA = {
+    'América': 'América', 'Antiguo Egipto': 'el antiguo Egipto', 'China imperial': 'la China imperial', Civilizaciones: 'las primeras civilizaciones',
+    Cruzadas: 'las Cruzadas', 'Culturas indígenas': 'las culturas indígenas', Descubrimientos: 'los grandes descubrimientos', 'Era digital': 'la era digital',
+    'Era victoriana': 'la era victoriana', Esparta: 'Esparta', 'Fiebre del oro': 'la fiebre del oro', Gladiadores: 'los gladiadores', 'Globalización': 'la globalización',
+    'Gran Depresión': 'la Gran Depresión', 'Grecia clásica': 'la Grecia clásica', 'Guerra de trincheras': 'la guerra de trincheras', 'Guerra Fría': 'la Guerra Fría',
+    'Guerras napoleónicas': 'las guerras napoleónicas', Holocausto: 'el Holocausto', 'Ilustración': 'la Ilustración', 'Imperio mongol': 'el Imperio mongol',
+    'Imperio romano': 'el Imperio romano', Imprenta: 'la imprenta', Incas: 'los incas', Independencia: 'la independencia', Independencias: 'las independencias',
+    'India antigua': 'la India antigua', 'Inquisición': 'la Inquisición', 'Islámico': 'el mundo islámico', 'Japón feudal': 'el Japón feudal', 'Las pirámides': 'las pirámides',
+    Mayas: 'los mayas', Medieval: 'la Edad Media', Mesopotamia: 'Mesopotamia', 'Muro de Berlín': 'el Muro de Berlín', Nazismo: 'el nazismo', 'Olímpicos': 'los Juegos Olímpicos',
+    Peloponeso: 'la guerra del Peloponeso', 'Peste negra': 'la peste negra', Piratas: 'los piratas', Precolombinas: 'las culturas precolombinas', Prehistoria: 'la prehistoria',
+    'Primera Guerra Mundial': 'la Primera Guerra Mundial', 'Reinado del Terror': 'el Reinado del Terror', Renacimiento: 'el Renacimiento', Resistencia: 'la Resistencia',
+    'Revolución francesa': 'la Revolución francesa', 'Revolución industrial': 'la Revolución industrial', 'Revolución rusa': 'la Revolución rusa',
+    'Revoluciones artísticas': 'las revoluciones artísticas', 'Revoluciones tecnológicas': 'las revoluciones tecnológicas', 'Ruta de la Seda': 'la Ruta de la Seda',
+    'Salvaje oeste': 'el Salvaje Oeste', 'Segunda Guerra Mundial': 'la Segunda Guerra Mundial', 'Siglo XIX': 'el siglo XIX', Templarios: 'los templarios',
+    Tenochtitlan: 'Tenochtitlan', Vikingos: 'los vikingos',
+  };
+  function temaHistorico(t) { return TEMA_HISTORIA[t] || t; }
   function lugarTexto(b) {
     if (!b.lug) return '';
     const p = D.pais(b.lug);
@@ -593,10 +611,12 @@ ART.ideas = (function () {
     const fin = arco ? (arco.final.indexOf('y ') === 0 ? ' ' : ', ') + genero(sx, arco.final) : '';
     let s = inicio + ', ' + (pj ? quien : quien.charAt(0).toLowerCase() + quien.slice(1)) + ' ' + accion + fin + '.';
     s = s.charAt(0).toUpperCase() + s.slice(1);
-    const temas = (b.tem || []).slice(0, 3).map(minus);
-    if (temas.length) s += ' Una historia de ' + (temas.length > 1 ? temas.slice(0, -1).join(', ') + ' y ' + temas[temas.length - 1] : temas[0]) + '.';
+    const tem = (b.tem || []).slice(0, 3);
+    const comunes = tem.filter(function (x) { return X.famTema[x] !== 'EH'; }).map(minus), historia = tem.filter(function (x) { return X.famTema[x] === 'EH'; }).map(temaHistorico);
+    if (comunes.length) s += ' Una historia de ' + N.lista(comunes) + '.';
+    if (historia.length) s += ' Trasfondo: ' + N.lista(historia) + '.';
     const pre = (b.pre || []).slice(0, 2);
-    if (pre.length) s += ' Con ' + (pre.length > 1 ? '«' + pre[0] + '» y «' + pre[1] + '»' : '«' + pre[0] + '»') + '.';
+    if (pre.length) s += pre.length > 1 ? ' Incluye los tópicos «' + pre[0] + '» y «' + pre[1] + '».' : ' Incluye el tópico «' + pre[0] + '».';
     if (b.mat) { const m = X.material(b.mat); if (m) s += ' Basada en «' + m.tit + '»' + (m.autor && m.grupo !== 'tradicion' ? ', de ' + m.autor : '') + (b.suave ? ', adaptada con guiños por la censura de la época' : '') + '.'; }
     return s;
   }

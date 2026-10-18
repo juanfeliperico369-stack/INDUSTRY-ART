@@ -176,7 +176,7 @@ ART.ventanas = (function () {
     CERTIFICACIONES.forEach(function (c) {
       if (antes < c.copias && ahora >= c.copias) {
         o.cert = c.id;
-        N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» es ' + c.nombre.toLowerCase() + ' en video: más de ' + (c.copias / 1000) + ' mil copias.', importante: c.id !== 'oro' });
+        N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» es ' + c.nombre.toLowerCase() + ' en video: más de ' + (c.copias >= 1e6 ? (c.copias === 1e6 ? 'un millón' : String(c.copias / 1e6).replace('.', ',') + ' millones') : (c.copias / 1000) + ' mil') + ' de copias.', importante: c.id !== 'oro' });
       }
     });
   }

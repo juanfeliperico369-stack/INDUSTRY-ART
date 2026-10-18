@@ -80,6 +80,10 @@ ART.idioma = (function () {
     preparar();
     let t = s.trim();
     if (mapa[t] !== undefined) return s.replace(t, mapa[t]);
+    const ti = ART.titulos.ingles(t); // un título inventado completo
+    if (ti) return s.replace(t, ti);
+    // Títulos entre comillas dentro de una frase
+    s = s.replace(/«([^«»]{2,70})»/g, function (m, x) { const e = ART.titulos.ingles(x); return e ? '«' + e + '»' : m; });
     const tm = t.charAt(0).toLowerCase() + t.slice(1); // frase que empieza con mayúscula solo por ir al principio
     if (tm !== t && mapa[tm] !== undefined) return s.replace(t, mapa[tm].charAt(0).toUpperCase() + mapa[tm].slice(1));
     // Frases con huecos: se reemplazan donde aparezcan (los huecos se traducen aparte)
@@ -124,7 +128,7 @@ ART.idioma = (function () {
     if (lienzo || typeof CanvasRenderingContext2D === 'undefined') return;
     lienzo = true;
     const f = CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string' && mapa) { const t = s.trim(); if (mapa[t] !== undefined) a[0] = s.replace(t, mapa[t]); } return f.apply(this, a); }; // en los lienzos, solo frases completas: un póster no queda a medio traducir
+    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string' && mapa) { const t = s.trim(); if (mapa[t] !== undefined) a[0] = s.replace(t, mapa[t]); else { const ti = ART.titulos.ingles(t) || ART.titulos.ingles(t.charAt(0) + t.slice(1).toLowerCase()); if (ti) a[0] = s.replace(t, t === t.toUpperCase() ? ti.toUpperCase() : ti); } } return f.apply(this, a); }; // en los lienzos, solo frases completas: un póster no queda a medio traducir
   }
   function poner(id) {
     actual = id === 'en' ? 'en' : 'es';

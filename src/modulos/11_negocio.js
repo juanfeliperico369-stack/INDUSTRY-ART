@@ -129,7 +129,7 @@ ART.negocio = (function () {
     pagar(0, 'construccion', costo);
     if (tipo === 'piso') est.pisos.push(id); else est.terrenos.push(id);
     est.valorObras = (est.valorObras || 0) + costo / E.presupuestoTipico(N.anio());
-    N.emit('noticia', { tipo: 'estudio', texto: 'Tu estudio estrena ' + info.nombre.toLowerCase() + '.' });
+    N.emit('noticia', { tipo: 'estudio', texto: 'Tu estudio inaugura: ' + info.nombre.toLowerCase() + '.' });
     return '';
   }
   // Gastos fijos del mes: personal por piso y mantenimiento (crecen con el tamaño)
