@@ -1,7 +1,7 @@
 /* ==== módulo: negocio ==== */
 // Finanzas mes a mes por categoría, gastos fijos que crecen con el tamaño, impuesto del 25 % sobre utilidades
-// (no sobre la caja, fallo 18 de la V15), antimonopolio sobre el 35 %, construcciones básicas del estudio,
-// cuota de mercado y quiebra (con sus tres salidas en IA.banco, V24).
+// (no sobre la caja), antimonopolio sobre el 35 %, construcciones básicas del estudio,
+// cuota de mercado y quiebra (con sus tres salidas en IA.banco).
 IA.negocio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, T = IA.talentos;
@@ -12,7 +12,7 @@ IA.negocio = (function () {
     reestrenos: 'Reestrenos', carrera: 'Tus encargos como talento', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
     personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio', musica: 'Música', juegos: 'Videojuegos', teatro: 'Teatro', libros: 'Libros',
   };
-  // V34: movimientos de capital. Entran y salen de la caja (flujo de caja), pero no son ingresos ni gastos del año:
+  // Movimientos de capital. Entran y salen de la caja (flujo de caja), pero no son ingresos ni gastos del año:
   // no cambian la utilidad ni el impuesto (antes el capital de los préstamos se descontaba como gasto).
   const CAPITAL = { prestamo: 1, amortizacion: 1, aportes: 1, recompra: 1, socio: 1, acciones: 1, aporteFilial: 1 };
   Object.assign(NOMBRES, { prestamo: 'Préstamos recibidos', amortizacion: 'Pago de capital de deudas', aportes: 'Aportes del socio',
@@ -73,10 +73,10 @@ IA.negocio = (function () {
       const p = infoTerreno(id);
       if (p.bono && (!p.familias || p.familias.indexOf(famId) >= 0)) Object.keys(p.bono).forEach(function (k) { b[k] = (b[k] || 0) + p.bono[k]; });
     });
-    IA.sede.bonos(b, obra); // personal de oficina (V21)
-    IA.carrera.bonos(b); // trasfondo y arquetipo de tu avatar (V21)
-    IA.imperio.bonoTec(b); // inventos propios o licenciados mientras son novedad (V24)
-    // V27: rendimientos decrecientes; apilar instalaciones y personal rinde cada vez menos (tope suave de +10)
+    IA.sede.bonos(b, obra); // personal de oficina
+    IA.carrera.bonos(b); // trasfondo y arquetipo de tu avatar
+    IA.imperio.bonoTec(b); // inventos propios o licenciados mientras son novedad
+    // Rendimientos decrecientes; apilar instalaciones y personal rinde cada vez menos (tope suave de +10)
     Object.keys(b).forEach(function (k) { if (k[0] !== '_' && b[k] > 0) b[k] = Math.round(10 * (1 - Math.exp(-b[k] / 10)) * 10) / 10; });
     return b;
   }
@@ -86,7 +86,7 @@ IA.negocio = (function () {
     N.S.estudios[0].pisos.forEach(function (id) { if (id === 'guion') r.guion = 1; if (id === 'edicion') r.edicion = 1; });
     return r;
   }
-  // Los rivales son estudios establecidos: ya tienen backlots y talleres que abaratan su producción (V19)
+  // Los rivales son estudios establecidos: ya tienen backlots y talleres que abaratan su producción
   const AJ = { ahorroRivales: 0.1 };
   function ahorro(estId) {
     if (estId !== 0) return AJ.ahorroRivales;
@@ -124,7 +124,7 @@ IA.negocio = (function () {
     const est = N.S.estudios[0];
     const info = tipo === 'piso' ? infoPiso(id) : infoTerreno(id);
     const costo = costoConstruccion(info);
-    const veto = IA.banco.opinar(costo, 'la construcción'); // el socio opina en lo grande (V24)
+    const veto = IA.banco.opinar(costo, 'la construcción'); // el socio opina en lo grande
     if (veto) return veto;
     pagar(0, 'construccion', costo);
     if (tipo === 'piso') est.pisos.push(id); else est.terrenos.push(id);
@@ -142,7 +142,7 @@ IA.negocio = (function () {
     est.pisos.forEach(function (id) { reduccion += -(infoPiso(id).fijo || 0); });
     const f = 1 - Math.min(0.3, reduccion);
     return {
-      personal: (tipico * (0.006 + 0.004 * partes) * f + IA.sede.gastoFijoMes()) * (1 - IA.carrera.descuentoFijo()), // sede y personal de oficina (V21)
+      personal: (tipico * (0.006 + 0.004 * partes) * f + IA.sede.gastoFijoMes()) * (1 - IA.carrera.descuentoFijo()), // sede y personal de oficina
       mantenimiento: tipico * 0.008 * (est.valorObras || 0) * f,
     };
   }
@@ -156,7 +156,7 @@ IA.negocio = (function () {
       pagar: pagar,
       cobrar: function (o, parte) {
         cobrarEn(o.est, 'taquilla', parte);
-        // Participaciones: los talentos con porcentaje cobran su parte de lo que recibe el estudio (V18)
+        // Participaciones: los talentos con porcentaje cobran su parte de lo que recibe el estudio
         if (o.pctT) {
           let pct = 0;
           Object.keys(o.pctT).forEach(function (id) { pct += o.pctT[id]; });
@@ -172,7 +172,7 @@ IA.negocio = (function () {
       famaTrasEstreno: function (o, mult) {
         const est = N.S.estudios[o.est];
         // La fama del estudio sube despacio con los éxitos y la buena crítica (cuesta más cuanto más alta)
-        const cambio = N.limitar(0.004 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 6000, -0.012, 0.01); // V27: más lento
+        const cambio = N.limitar(0.004 * Math.log(Math.max(0.2, mult)) + (o.crit - 65) / 6000, -0.012, 0.01); // Más lento
         est.fama = N.redondear(N.limitar(est.fama + (cambio > 0 ? cambio * (1 - est.fama) : cambio), 0.01, 1), 3);
       },
     };
@@ -251,7 +251,7 @@ IA.negocio = (function () {
     const puesto = ranking.map(function (r) { return r.id; }).indexOf(0) + 1;
     fila.puesto = puesto;
     const ultimos = S.fin.hist.slice(-3);
-    // V27: cuatro años seguidos entre los tres primeros con 4 % o más del mercado, prestigio de 70 y al menos 15 años de historia
+    // Cuatro años seguidos entre los tres primeros con 4 % o más del mercado, prestigio de 70 y al menos 15 años de historia
     const cinco = S.fin.hist.slice(-4);
     if (cinco.length === 4 && cinco.every(function (h) { return h.puesto <= 3 && h.cuota >= 0.04; }) && jug.fama >= 0.7 && S.fin.hist.length >= 16 && !S.majorDesde) {
       S.majorDesde = anioCerrado;

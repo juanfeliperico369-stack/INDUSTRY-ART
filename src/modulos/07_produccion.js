@@ -1,7 +1,7 @@
 /* ==== módulo: produccion ==== */
 // Etapas de la obra: desarrollo, preproducción, rodaje y posproducción, con su costo semana a semana.
 // El productor, el liderazgo y la excelencia del director y del diseñador (tu documento), la experiencia y los
-// rasgos del equipo controlan el sobrecosto. V19: cada semana puede pasar algo (incidentes) o surgir un dilema que
+// rasgos del equipo controlan el sobrecosto. Cada semana puede pasar algo (incidentes) o surgir un dilema que
 // decides tú; dos semanas antes de terminar se hace la prueba de público; la línea de producción compara el
 // presupuesto acordado con el costo real y el set nuevo se guarda para otras obras (todo en IA.rodaje).
 IA.produccion = (function () {
@@ -55,7 +55,7 @@ IA.produccion = (function () {
     for (let i = 0; i < lista.length; i++) {
       const o = lista[i];
       if (!SIGUIENTE[o.et]) continue;
-      if (IA.historia.pausa(o) || IA.historia.climaCierra(o)) continue; // huelgas y clima (V24)
+      if (IA.historia.pausa(o) || IA.historia.climaCierra(o)) continue; // huelgas y clima
       // Una decisión pendiente detiene la obra (sin gastar); sin respuesta, el equipo hace lo más prudente
       if (o.dil) {
         if (!R.vencido(o)) continue;
@@ -95,7 +95,7 @@ IA.produccion = (function () {
           o.notas = {};
           ns.forEach(function (n) { o.notas[n.dep] = n.v; });
         }
-        R.guardarSet(o); // también los rivales guardan sus sets (V20)
+        R.guardarSet(o); // también los rivales guardan sus sets
         o.tLista = N.S.t;
         T.liberar(O.idsEquipo(o));
         N.emit('obraLista', o);

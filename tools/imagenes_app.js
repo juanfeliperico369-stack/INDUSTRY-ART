@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Dibuja con el arte del propio juego el ícono de la app (todas las densidades), las pantallas de inicio,
  * el ícono de 512 px y la imagen destacada (1024×500) de Google Play, y 6 capturas 1080×1920 en español e inglés.
- * V31: ícono (1024, sin transparencia) y pantallas de inicio de iPhone, ícono de PC, 6 capturas 1320×2868 por idioma
+ * Ícono (1024, sin transparencia) y pantallas de inicio de iPhone, ícono de PC, 6 capturas 1320×2868 por idioma
  * para la App Store y 3 capturas 1920×1080 para PC.
  * Uso: node tools/imagenes_app.js   (necesita Playwright y app/www/index.html armado con tools/preparar_app.py) */
 const fs = require('fs'), path = require('path'), zlib = require('zlib');

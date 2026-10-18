@@ -1,5 +1,5 @@
 /* ==== módulo: carrera ==== */
-// V21 · Tu avatar: trasfondo, arquetipo de liderazgo y especialidades; modo carrera (empezar como talento, con
+// Tu avatar: trasfondo, arquetipo de liderazgo y especialidades; modo carrera (empezar como talento, con
 // encargos de los estudios); vida ligera con mini decisiones (cada opción arriesga algo); edad, salud, retiro,
 // muerte (normalmente entre los 85 y los 100) y heredero.
 IA.carrera = (function () {

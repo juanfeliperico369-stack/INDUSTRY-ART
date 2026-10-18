@@ -1,9 +1,9 @@
 /* ==== módulo: publicacion ==== */
-// V30 · La 1.0 en Google Play: un solo anuncio al abrir (solo dentro de la app, con AdMob por Capacitor),
+// La 1.0 en Google Play: un solo anuncio al abrir (solo dentro de la app, con AdMob por Capacitor),
 // versión gratuita o de pago según IA_CONFIG (lo pone tools/preparar_app.py al armar la app) y créditos.
-// V31 · iPhone y PC: la misma app en iOS (con el permiso de rastreo de Apple) y en Windows, macOS y Linux (Electron, sin anuncios).
+// IPhone y PC: la misma app en iOS (con el permiso de rastreo de Apple) y en Windows, macOS y Linux (Electron, sin anuncios).
 // Antes del anuncio se pide el consentimiento que exige Google en Europa (UMP); en Ajustes queda «Privacidad de los anuncios».
-// V32 · Compra única «Versión completa» (Google Play y App Store) que solo quita el anuncio; el juego es el mismo para todos.
+// Compra única «Versión completa» (Google Play y App Store) que solo quita el anuncio; el juego es el mismo para todos.
 // La compra se consulta a la tienda cada vez que se abre la app (un reembolso la quita); sin internet vale la última respuesta.
 // En el navegador y en PC no hay anuncios ni compras.
 IA.publicacion = (function () {
@@ -51,7 +51,7 @@ IA.publicacion = (function () {
     if (plataforma() !== 'ios') return Promise.resolve();
     return ad.trackingAuthorizationStatus().then(function (r) { return r.status === 'notDetermined' ? ad.requestTrackingAuthorization() : null; });
   }
-  // ---- Compra «Versión completa» (V32) ----
+  // ---- Compra «Versión completa» ----
   function tienda() { return enApp() && window.Capacitor.Plugins ? window.Capacitor.Plugins.NativePurchases || null : null; }
   function conTiempo(p, ms) { return Promise.race([p, new Promise(function (_, no) { setTimeout(function () { no(new Error('tiempo')); }, ms); })]); }
   // Vale solo la compra de este producto ya pagada (en Android, estado «1»; un pago pendiente todavía no cuenta)
@@ -109,7 +109,7 @@ IA.publicacion = (function () {
   }
   function privacidadDisponible() { return privacidad && !!plugin(); }
   function abrirPrivacidad() { const ad = plugin(); return ad ? ad.showPrivacyOptionsForm().catch(function () {}) : Promise.resolve(); }
-  // ---------- V34: guardar un archivo (partida, paquete o documento de la idea) ----------
+  // ---------- Guardar un archivo (partida, paquete o documento de la idea) ----------
   // En el navegador y en PC, una descarga normal. En la app (Android y iPhone) el visor web no descarga: el archivo se
   // escribe en la caché de la app (Filesystem) y se abre el menú Compartir para guardarlo en Archivos, Drive o el correo.
   function aBase64(bytes) {
@@ -142,7 +142,7 @@ IA.publicacion = (function () {
       return Promise.resolve({ ok: false, nombre: nombre, error: (e && e.message) || String(e) });
     }
   }
-  const CREDITOS = ['Ideado y creado por Felipe', 'Programado junto a Claude, de Anthropic'];
+  const CREDITOS = ['Ideado y creado por OneZero', 'Programado junto a Lumen'];
   function creditos() { return CREDITOS.slice(); }
   return { config: config, enApp: enApp, plataforma: plataforma, nombrePlataforma: nombrePlataforma, alAbrir: alAbrir,
     privacidadDisponible: privacidadDisponible, abrirPrivacidad: abrirPrivacidad, creditos: creditos,

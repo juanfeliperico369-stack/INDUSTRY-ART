@@ -1,5 +1,5 @@
 /* ==== módulo: premios ==== */
-// V22 · Premios y festivales. Premiaciones de cine en su semana del circuito anual (Quimera con categorías por
+// Premios y festivales. Premiaciones de cine en su semana del circuito anual (Quimera con categorías por
 // cargo, Independientes, Bastard, Pop y los Premios Nacionales de tu país): cada una mira las obras del año
 // anterior y tiene su jurado (talentos, crítica, academia o público). Festivales en sus fechas: 18 continentales
 // (tres por continente) y el Festival Mundial del Arte, con convocatoria, inscripción, selección oficial

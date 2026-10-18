@@ -1,5 +1,5 @@
 /* ==== módulo: metas_ui ==== */
-// V26 · Opciones de modo en la partida nueva (modo, reto, tutorial, personalizado y dificultades desbloqueables),
+// Opciones de modo en la partida nueva (modo, reto, tutorial, personalizado y dificultades desbloqueables),
 // tarjetas del Estudio (tutorial, consejos, década, misiones y reto), Mundo › Metas (logros, campaña, misiones,
 // reto y resumen), Mundo › Editor (Sandbox y paquetes), créditos finales y música de fondo opcional.
 IA.metasUI = (function () {
@@ -90,7 +90,7 @@ IA.metasUI = (function () {
     if (st.ed === 'estudio') h += '<div class="col">' + S.estudios.map(function (e) { return '<div class="fila">' + campo('estudio', e.id, 'nombre', e.nombre) + ' caja ' + campo('estudio', e.id, 'caja', Math.round(e.caja), 1) + ' calidad ' + campo('estudio', e.id, 'calidad', e.calidad || 0, 1) + '</div>'; }).join('') + '</div>';
     if (st.ed === 'obra') h += '<div class="col">' + S.obras.filter(function (o) { return o.pub !== undefined; }).slice(-25).reverse().map(function (o) { return '<div class="fila">' + campo('obra', o.id, 'tit', o.tit) + ' crít ' + campo('obra', o.id, 'crit', o.crit, 1) + ' púb ' + campo('obra', o.id, 'pub', o.pub, 1) + '</div>'; }).join('') + '</div>';
     if (st.ed === 'franquicia') h += '<div class="col">' + IA.franquicias.lista().slice(-20).map(function (f) { return '<div class="tarjeta"><div class="fila">' + campo('franquicia', f.id, 'nom', f.nom) + campo('franquicia', f.id, 'gen', f.gen) + '</div>' + f.pers.map(function (p) { return '<div class="fila"><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"> pop <input type="number" value="' + p.pop + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop" style="max-width:70px"></div>'; }).join('') + '</div>'; }).join('') + '</div>';
-    if (st.ed === 'franquicia') h += '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
+    if (st.ed === 'franquicia') h += '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota info">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
       '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + IA.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
       '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') +
       ((S.edit && S.edit.mat || []).length ? '<p class="chico">Tus materiales: ' + S.edit.mat.map(function (m) { return '«' + esc(m.tit) + '» (' + esc(m.gen.join(', ')) + ')'; }).join(' · ') + '</p>' : '') + '</div>';
@@ -98,7 +98,7 @@ IA.metasUI = (function () {
     return h + paquetesUI();
   }
   function paquetesUI() {
-    return '<h3>Paquetes</h3><p class="nota">Un paquete guarda tus talentos creados, los nombres de los estudios, las franquicias, tus materiales propios y los precios. Copia el texto para compartirlo o pega uno para importarlo: las franquicias llegan como material para adaptar.</p>' +
+    return '<h3>Paquetes</h3><p class="nota info">Un paquete guarda tus talentos creados, los nombres de los estudios, las franquicias, tus materiales propios y los precios. Copia el texto para compartirlo o pega uno para importarlo: las franquicias llegan como material para adaptar.</p>' +
       '<textarea id="edPaquete" rows="4" style="width:100%"></textarea><div class="fila">' + btn('Exportar', 'edExportar') + btn('Descargar archivo', 'edDescargar') + btn('Importar', 'edImportar', '', 'primario') + '</div>';
   }
   ac('edActivar', function () { M.activarSandbox(); U.refrescar(); });

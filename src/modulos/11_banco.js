@@ -1,5 +1,5 @@
 /* ==== módulo: banco ==== */
-// V24 · Banco por escalones de prestigio con puntaje de crédito; préstamos con cuota mensual; cuentas por pagar
+// Banco por escalones de prestigio con puntaje de crédito; préstamos con cuota mensual; cuentas por pagar
 // con pago automático (y atrasos que cuestan); deuda semilla según la región y la dificultad; socio que toma parte
 // del control y opina en lo grande; paciencia de la junta o del socio; quiebra con tres salidas (terminar, rescate
 // o socio); inversiones en compañías inventadas que suben y bajan; estado anual (balance) y cambio de marca.
@@ -46,7 +46,7 @@ IA.banco = (function () {
     const ta = motivo === 'rescate' ? tasa() + 0.06 : motivo === 'semilla' ? escalon().tasa : tasa();
     const d = { id: N.sigId(), banco: motivo === 'semilla' ? 'Deuda semilla' : motivo === 'rescate' ? 'Rescate bancario' : escalon().nombre, capital: monto, saldo: monto, tasa: ta, cuota: cuota(monto, ta, meses), meses: meses, t0: S.t };
     b.deudas.push(d);
-    if (motivo !== 'semilla') IA.negocio.cobrarEn(0, 'prestamo', monto); // el préstamo no es ingreso: es capital y no paga impuestos (V34)
+    if (motivo !== 'semilla') IA.negocio.cobrarEn(0, 'prestamo', monto); // el préstamo no es ingreso: es capital y no paga impuestos
     return '';
   }
   function prepagar(id, monto) {
@@ -68,7 +68,7 @@ IA.banco = (function () {
     const S = N.S, b = st(), est = S.estudios[0];
     cuentasDelMes().forEach(function (c) {
       if (est.caja >= c.monto || c.d && est.caja > -tip()) {
-        // V34: el interés es gasto (baja la utilidad); el capital que se devuelve no lo es
+        // El interés es gasto (baja la utilidad); el capital que se devuelve no lo es
         if (c.d) { const interes = Math.min(c.monto, Math.round(c.d.saldo * c.d.tasa / 12)); IA.negocio.pagar(0, 'deuda', interes); IA.negocio.pagar(0, 'amortizacion', c.monto - interes); c.d.saldo = Math.max(0, c.d.saldo - (c.monto - interes)); b.pagados++; }
         else { IA.negocio.pagar(0, 'personal', c.monto); }
       } else {
@@ -91,7 +91,7 @@ IA.banco = (function () {
     const S = N.S;
     if (S.socio) { S.socio.parte = N.redondear(Math.min(0.49, S.socio.parte + parte), 3); S.socio.aporte += aporte; }
     else S.socio = { nom: nom || N.elegir(SOCIOS), parte: N.redondear(Math.min(0.49, parte), 3), aporte: aporte, t0: S.t };
-    IA.negocio.cobrarEn(0, 'aportes', aporte); // capital: no es ingreso del año (V34)
+    IA.negocio.cobrarEn(0, 'aportes', aporte); // capital: no es ingreso del año
     st().junta = 50;
     N.emit('noticia', { tipo: 'negocio', texto: S.socio.nom + ' entra como socio con el ' + Math.round(S.socio.parte * 100) + ' % del estudio.', importante: true });
   }

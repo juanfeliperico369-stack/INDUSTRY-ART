@@ -1,5 +1,5 @@
 /* ==== módulo: estreno ==== */
-// V20 · Lanzamiento: el plan de estreno de cada obra. Fecha con cuenta regresiva (el anuncio arma expectativa),
+// Lanzamiento: el plan de estreno de cada obra. Fecha con cuenta regresiva (el anuncio arma expectativa),
 // estreno por región (amplio, limitado, escalonado o retener), doblaje por mercado con su costo, la mezcla de
 // canales de marketing (cada uno llega mejor a unas edades, con rendimientos decrecientes), las promociones
 // (alfombra roja, comida, juguetes, coleccionables, ediciones exclusivas), las cadenas de cines con contrato y

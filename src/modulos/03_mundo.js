@@ -1,6 +1,6 @@
 /* ==== módulo: mundo ==== */
 // Población real por región y edad, inflación (IPC), acceso y frecuencia del cine, precio de la entrada,
-// calendario con estaciones por hemisferio y tendencias de géneros. Nada de esto existía en la V15.
+// calendario con estaciones por hemisferio y tendencias de géneros.
 IA.mundo = (function () {
   'use strict';
   const N = IA.n, D = IA.datos;
@@ -122,7 +122,7 @@ IA.mundo = (function () {
   function accesoCine(region, anio) { return N.interp(ACCESO_CINE[region], anio); }
   function frecuenciaCine(region, anio) { return N.interp(FRECUENCIA_CINE[region], anio); }
   function precioEntrada2025(region, anio) { return N.interp(PRECIO_ENTRADA_2025, anio) * N.interp(PRECIO_REGION[region], anio); }
-  function precioEntrada(region, anio) { return aEpoca(precioEntrada2025(region, anio), anio) * (N.S && N.S.edit && N.S.edit.precio || 1); } // precio del Editor (V26)
+  function precioEntrada(region, anio) { return aEpoca(precioEntrada2025(region, anio), anio) * (N.S && N.S.edit && N.S.edit.precio || 1); } // precio del Editor
   // Público = Población × Acceso × Frecuencia (entradas posibles al año)
   function publicoCine(region, anio) { return poblacion(region, anio) * accesoCine(region, anio) * frecuenciaCine(region, anio); }
   // Ocio en casa: radio, TV, video, internet y streaming hacen más atractivo quedarse en casa
@@ -130,8 +130,8 @@ IA.mundo = (function () {
   function ocioEnCasa(anio) { return N.interp(OCIO_CASA, anio); }
 
   // ---------- Acceso a otros medios (radio, TV, internet, consolas) ----------
-  // Parte de la población con acceso en cada región. Aproximado; se verifica con fuentes en la V27. Lo usan
-  // la TV, la música y los videojuegos en sus versiones (V24, V30, V31); hoy se ve en Mundo → Población.
+  // Parte de la población con acceso en cada región. Aproximado y verificado con fuentes. Lo usan
+  // la TV, la música y los videojuegos en sus versiones; hoy se ve en Mundo → Población.
   const ACCESO_MEDIOS = {
     radio: {
       nam: [[1920, 0], [1930, 0.4], [1940, 0.8], [1950, 0.95], [2150, 0.97]], eur: [[1922, 0], [1935, 0.3], [1950, 0.7], [1970, 0.95], [2150, 0.97]],
@@ -185,7 +185,7 @@ IA.mundo = (function () {
     }
     return 1;
   }
-  // Festividades con fechas reales (V21): viven en IA.cal con su regla (fija, Pascua, luna nueva, calendario
+  // Festividades con fechas reales: viven en IA.cal con su regla (fija, Pascua, luna nueva, calendario
   // islámico). Aquí quedan los atajos que usan la economía y las pantallas.
   function festividades(sem, reg, anio) { return IA.cal.fiestasSemana(sem, reg, anio || N.anio()); }
   function bonoRegion(famId, reg, sem, anio) { return IA.cal.bonoFiesta(famId, reg, sem, anio || N.anio()); }
@@ -228,7 +228,7 @@ IA.mundo = (function () {
     });
   }
 
-  // ---------- Tendencias por región (V20): olas propias de cada región alrededor de la tendencia mundial ----------
+  // ---------- Tendencias por región: olas propias de cada región alrededor de la tendencia mundial ----------
   function ola(reg, fam, t) {
     const h = N.hash((N.S.semilla || '') + '|ola|' + reg + '|' + fam);
     const periodo = 6 + (h % 9); // de 6 a 14 años

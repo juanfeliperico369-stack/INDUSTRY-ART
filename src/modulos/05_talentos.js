@@ -1,5 +1,5 @@
 /* ==== módulo: talentos ==== */
-// Talentos 2.0 (V18): más de 1.000 personas inventadas con biografía, país, idiomas, edad y sexo; habilidad por
+// Talentos 2.0: más de 1.000 personas inventadas con biografía, país, idiomas, edad y sexo; habilidad por
 // oficio y oficios secundarios, desempeño por familia de géneros, capacidades (excelencia, creatividad,
 // inteligencia, liderazgo y paciencia), especialidad por medio, belleza, aprobación del público y papeles
 // recomendados, clasificaciones que aceptan, rasgo de personalidad, fama por región, energía (−20 por cargo,
@@ -63,7 +63,7 @@ IA.talentos = (function () {
     if (azar() < 0.18) { const otros = ['Español', 'Francés', 'Italiano', 'Alemán', 'Portugués', 'Mandarín', 'Japonés', 'Árabe']; const x = otros[Math.floor(azar() * otros.length)]; if (out.indexOf(x) < 0) out.push(x); }
     return out;
   }
-  // Completa los datos de la V18 de un talento. azar: función de 0 a 1 (el generador del mundo o un hash fijo)
+  // Completa los datos de un talento. azar: función de 0 a 1 (el generador del mundo o un hash fijo)
   function completar(t, azar) {
     const nz = function (m, d) { let s = 0; for (let i = 0; i < 4; i++) s += azar(); return m + (s - 2) * d * 1.7; };
     if (!t.af) t.af = EJES.map(function () { return Math.round(N.limitar(nz(0, 3), -8, 8)); });
@@ -173,7 +173,7 @@ IA.talentos = (function () {
   function tarifaPara(t, estId) {
     if (!t) return 0;
     if (exclusivoDe(t) === estId) return 0;
-    if (t.jugador && estId === 0) return 0; // tu avatar trabaja gratis en tu estudio (modo carrera, V21)
+    if (t.jugador && estId === 0) return 0; // tu avatar trabaja gratis en tu estudio (modo carrera)
     let f = tarifa(t);
     if (estId === 0 && t.beca && t.beca > N.S.t) f *= 0.9; // la beca da 5 años de lealtad
     if (estId === 0 && t.desc && !t.obras) f *= 0.7; // tu descubrimiento firma barato su primer contrato
@@ -251,7 +251,7 @@ IA.talentos = (function () {
     return N.limitar(h, 1, 100);
   }
 
-  // ---------- Niveles de talento (V21): Promesa, Veterano, Estrella consolidada y Leyenda viva ----------
+  // ---------- Niveles de talento: Promesa, Veterano, Estrella consolidada y Leyenda viva ----------
   // Los niveles altos piden un prestigio mínimo del estudio (0 a 100) y la ficha dice cuánto falta
   const NIVELES = [
     { id: 'promesa', nombre: 'Promesa', prestigio: 0 },
@@ -270,7 +270,7 @@ IA.talentos = (function () {
     const est = N.S.estudios[estId || 0];
     return Math.max(0, nivel(t).prestigio - Math.round((est ? est.fama : 0) * 100));
   }
-  // Crear un talento propio (V21): con nombre, oficio, sexo y edad; la habilidad sale de un potencial modesto
+  // Crear un talento propio: con nombre, oficio, sexo y edad; la habilidad sale de un potencial modesto
   function crearPropio(op) {
     const anio = N.anio();
     const edad = N.limitar(Math.round(op.edad || 25), 8, 80);

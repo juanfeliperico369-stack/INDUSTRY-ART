@@ -12,7 +12,7 @@ Agrega el inglés como segundo idioma (Agregar traducción › English (United S
 | Nombre de la app (≤30) | INDUSTRY ART |
 | Categoría | Juegos › Simulación |
 | Etiquetas | Simulación, Gestión, Un jugador, Sin conexión |
-| Nombre del desarrollador | Tu nombre o un nombre de estudio. **No uses «Claude».** |
+| Nombre del desarrollador | **OneZero** (o el nombre de tu estudio) |
 | Correo de contacto | El que quieras mostrar en público |
 | Política de privacidad | La pública que armes (ver `publicar_google_play.md`, paso 5) |
 | Clasificación esperada | 16+ (PEGI 16 / Teen–Mature según el cuestionario) |
@@ -44,7 +44,7 @@ INDUSTRY ART es un simulador de estudio de cine profundo, para jugar a tu ritmo 
 
 Todos los nombres de personas, estudios y obras del juego son inventados.
 
-Ideado y creado por Felipe. Programado junto a Claude, de Anthropic.
+Ideado y creado por OneZero. Programado junto a Lumen.
 
 ## English
 
@@ -71,7 +71,7 @@ INDUSTRY ART is a deep film studio simulator you play at your own pace, fully of
 
 All people, studios and works in the game are fictional.
 
-Conceived and created by Felipe. Programmed together with Claude, by Anthropic.
+Conceived and created by OneZero. Programmed together with Lumen.
 
 ## Imágenes (ya hechas, en `docs/tienda/`)
 

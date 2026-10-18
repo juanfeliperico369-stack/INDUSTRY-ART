@@ -1,5 +1,5 @@
 /* ==== módulo: documento ==== */
-// V34 · El documento de la idea: descarga en Word (.docx) la trama completa de una obra (planteamiento, nudo y
+// El documento de la idea: descarga en Word (.docx) la trama completa de una obra (planteamiento, nudo y
 // desenlace según su arco, escaleta, personajes, temas y premisas) y sus datos técnicos (equipo, presupuesto, rodaje,
 // contenido y resultados), con el póster, la curva del arco y las notas del autor. Así el juego también sirve para
 // desarrollar ideas. El .docx se arma a mano (XML de Office dentro de un ZIP sin comprimir): sin librerías ni internet.
@@ -288,7 +288,7 @@ IA.documento = (function () {
     const tc = tecnicos(o);
     if (tc.length) b += p('Datos técnicos', 'Heading1') + tabla(tc);
     if (o.diario) { b += p('Notas del autor', 'Heading1'); String(o.diario).split(/\n+/).forEach(function (x) { b += p(x); }); }
-    b += p('Ideado y creado por Felipe · Programado junto a Claude, de Anthropic · INDUSTRY ART ' + IA.VERSION, 'Small', true);
+    b += p('Ideado y creado por OneZero · Programado junto a Lumen · INDUSTRY ART ' + IA.VERSION, 'Small', true);
     const ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"';
     const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + ns + '><w:body>' + b +
       '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>';

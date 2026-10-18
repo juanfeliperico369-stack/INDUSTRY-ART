@@ -1,5 +1,5 @@
 /* ==== módulo: eventos ==== */
-// V24 · 80 eventos con decisiones (escándalos, quejas del elenco, propuestas de talentos y productores, fans que
+// 80 eventos con decisiones (escándalos, quejas del elenco, propuestas de talentos y productores, fans que
 // piden secuelas, huelgas, negocio, prensa, tecnología, momentos históricos y vida del estudio) y la bitácora del
 // estudio con cada mini decisión, al estilo de una vida que se escribe sola.
 IA.eventos = (function () {

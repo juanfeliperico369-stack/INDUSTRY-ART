@@ -1,5 +1,5 @@
 /* ==== módulo: medios_ui ==== */
-// V25 · Pantallas de música, videojuegos, teatro y libros: lista de proyectos con su portada dibujada, creación
+// Pantallas de música, videojuegos, teatro y libros: lista de proyectos con su portada dibujada, creación
 // (tipo, género, tamaño, equipo y opciones del medio), ficha con ventas por formato, certificaciones, jugadores,
 // ocupación o copias y sus acciones (gira, DLC, soporte, paquete, traducción, grabar), bandas y solistas,
 // plataformas con su cuota y kits, motores propios y licenciados, y los premios de cada medio.

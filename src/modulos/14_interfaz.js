@@ -23,8 +23,8 @@ IA.ui = (function () {
     r.setAttribute('data-texto', String(ajustes.texto));
     r.setAttribute('data-movimiento', ajustes.movimiento ? 'menos' : 'normal');
     r.setAttribute('data-orientacion', ajustes.orientacion);
-    r.setAttribute('data-dalton', ajustes.dalton ? 'si' : 'no'); // daltonismo (V28)
-    IA.idioma.poner(ajustes.idioma); // español o inglés (V29)
+    r.setAttribute('data-dalton', ajustes.dalton ? 'si' : 'no'); // daltonismo
+    IA.idioma.poner(ajustes.idioma); // español o inglés
     actualizarEpoca();
     if (IA.arte) { IA.arte.menosMovimiento = !!ajustes.movimiento; IA.arte.activarSonido(!!ajustes.sonido); }
     if (ajustes.orientacion !== 'auto' && window.screen && screen.orientation && screen.orientation.lock) {
@@ -64,7 +64,7 @@ IA.ui = (function () {
     return numero(v);
   }
   function pct(x, d) { return decimal(x * 100, d === undefined ? 1 : d) + ' %'; }
-  // Fechas reales (V21): la semana del juego empieza en su primer día; los estrenos de cine caen en su viernes
+  // Fechas reales: la semana del juego empieza en su primer día; los estrenos de cine caen en su viernes
   function fecha(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs), true) + ' · ' + t('semana') + ' ' + N.semana(tAbs); }
   function fechaCorta(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs)); }
   function fechaEstreno(tAbs) { return IA.cal.textoCorto(IA.cal.viernesDeT(tAbs)) + ' ' + N.anio(tAbs); }
@@ -145,7 +145,7 @@ IA.ui = (function () {
   function modalAbierto() { return document.getElementById('modal').classList.contains('on'); }
 
   // ---------- Lienzos: pósters, retratos, logos y gráficas se dibujan después de cada render ----------
-  // V33: los pósters y retratos se dibujan cuando están por verse (en un celular, un catálogo largo ya no se dibuja entero de golpe)
+  // Los pósters y retratos se dibujan cuando están por verse (en un celular, un catálogo largo ya no se dibuja entero de golpe)
   function dibujarPoster(cv) {
     const o = IA.obras.porId(+cv.getAttribute('data-poster'));
     if (o) IA.arte.posterEn(cv, IA.obras.paraPoster(o));
@@ -169,7 +169,7 @@ IA.ui = (function () {
     return vigia;
   }
   function vigilar(cv) { vigia.observe(cv); vigilados.add(cv); }
-  // V34: logo con imagen propia. Se guarda solo en este dispositivo (no viaja en la partida ni en el .iasave):
+  // Logo con imagen propia. Se guarda solo en este dispositivo (no viaja en la partida ni en el .iasave):
   // se reduce a 128 × 128 en un lienzo y se guarda como PNG; al leerlo solo se acepta una imagen en data:.
   let logoImg = null, logoClave = '';
   function claveLogo() { return N.S ? 'ia_logo_' + String(N.S.semilla).slice(0, 40) + '_' + String(N.S.creado || '').slice(0, 30) : ''; }
@@ -204,6 +204,7 @@ IA.ui = (function () {
   function quitarLogoPropio() { try { localStorage.removeItem(claveLogo()); } catch (e) { /* nada que quitar */ } logoClave = ''; logoImg = null; }
   function dibujar(raiz) {
     const r = raiz || document;
+    if (IA.puntos) IA.puntos.convertir(r);
     const v = vigiaPosters();
     // Los lienzos que ya salieron de la página (otra vista) se sueltan para no guardarlos en memoria
     if (v) vigilados.forEach(function (cv) { if (!cv.isConnected) { v.unobserve(cv); vigilados.delete(cv); } });
@@ -292,7 +293,7 @@ IA.ui = (function () {
   }
   function renderMenu() {
     const ic = { estudio: 'estudio', obras: 'obras', talento: 'talento', mundo: 'mundo', negocio: 'negocio' };
-    const vis = IA.metas && N.S ? IA.metas.seccionesVisibles() : null; // tutorial (V26)
+    const vis = IA.metas && N.S ? IA.metas.seccionesVisibles() : null; // tutorial
     document.getElementById('menu').innerHTML = SECCIONES.filter(function (s) { return !vis || vis.indexOf(s) >= 0; }).map(function (s) {
       return '<button class="nav' + (estado.seccion === s ? ' on' : '') + '" data-a="seccion" data-v="' + s + '"' + (estado.seccion === s ? ' aria-current="page"' : '') + '>' + icono(ic[s]) + '<span>' + t('sec_' + s) + '</span></button>';
     }).join('');
@@ -301,7 +302,7 @@ IA.ui = (function () {
     const v = document.getElementById('vista');
     const y = v.scrollTop;
     v.innerHTML = IA.pantallas[estado.seccion]();
-    // V28: la pestaña activa siempre a la vista (en el celular las pestañas se deslizan)
+    // La pestaña activa siempre a la vista (en el celular las pestañas se deslizan)
     const pa = v.querySelector('.pestanas .pestana.on'); if (pa && pa.scrollIntoView && pa.parentNode.scrollWidth > pa.parentNode.clientWidth) { const c = pa.parentNode; c.scrollLeft = pa.offsetLeft - c.offsetLeft - 16; }
     dibujar(v);
     IA.pantallas.alMostrar(estado.seccion);
@@ -344,7 +345,7 @@ IA.ui = (function () {
       const fn = acciones[el.getAttribute('data-c')];
       if (fn) { try { fn(el.type === 'checkbox' ? el.checked : el.value, el, ev); } catch (e) { console.error(e); aviso('Error: ' + e.message, 'mal'); } }
     });
-    // V34: tocar una gráfica muestra el valor más cercano (con el mouse, también al pasar por encima)
+    // Tocar una gráfica muestra el valor más cercano (con el mouse, también al pasar por encima)
     document.addEventListener('pointerdown', globoGrafica, true);
     document.addEventListener('pointermove', function (ev) { if (ev.pointerType === 'mouse') globoGrafica(ev); }, { passive: true });
     window.addEventListener('scroll', ocultarGlobo, { passive: true, capture: true });

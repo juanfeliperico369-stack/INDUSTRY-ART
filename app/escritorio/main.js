@@ -1,4 +1,4 @@
-// V31 · INDUSTRY ART para PC (Windows, macOS y Linux): una ventana con el mismo juego, sin anuncios y sin internet.
+// INDUSTRY ART para PC (Windows, macOS y Linux): una ventana con el mismo juego, sin anuncios y sin internet.
 // El HTML lo copia tools/preparar_app.py a www/index.html; las partidas quedan guardadas en la carpeta de datos de la app.
 const { app, BrowserWindow, Menu, shell } = require('electron');
 const path = require('path');

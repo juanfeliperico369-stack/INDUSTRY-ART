@@ -1,12 +1,12 @@
 /* ==== módulo: idioma ==== */
-// V29 · Inglés: el juego se escribe en español y, con el idioma en inglés, todo lo que aparece en pantalla pasa por el
+// Inglés: el juego se escribe en español y, con el idioma en inglés, todo lo que aparece en pantalla pasa por el
 // diccionario (IA.INGLES, armado desde todos los textos del juego): primero la frase completa y, si no, cada
 // fragmento conocido (las frases que el juego arma con datos). Un observador traduce lo nuevo en cuanto aparece.
 IA.idioma = (function () {
   'use strict';
   let actual = 'es', mapa = null, re = null, obs = null;
   const LETRA = 'A-Za-zÁÉÍÓÚÜÑáéíóúüñ';
-  // El diccionario viaja comprimido (gzip en Z85 desde la V34; antes en base64) para que el archivo no pase de 1,5 MB
+  // El diccionario viaja comprimido (gzip en Z85; lee también el base64 de antes) para que el archivo no pase de 1,5 MB
   const Z85 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!~*?&<>()[]{}@%$#';
   function deZ85(s, largo) {
     const val = {};
@@ -41,19 +41,23 @@ IA.idioma = (function () {
   const DIAC = { lun: 'Mon', mar: 'Tue', 'mié': 'Wed', jue: 'Thu', vie: 'Fri', 'sáb': 'Sat', dom: 'Sun' };
   const ADJ = { salvaje: 'Wild', secreto: 'Secret', imposible: 'Impossible', prohibido: 'Forbidden', dorado: 'Golden', eterno: 'Eternal', perdido: 'Lost' };
   const REGLAS = [
-    [/(?<![A-Za-zÁ-ú])(?!(?:el|la|los|las|de|del|y)\s)([A-Za-zÁÉÍÓÚáéíóúñ]+) (salvaje|secreto|imposible|prohibido|dorado|eterno|perdido)(?![A-Za-zÁ-ú])/g, function (m, n, a) { return ADJ[a] + ' ' + n; }],
+    // Títulos: «El faro salvaje» → «The Wild faro» (el diccionario traduce el resto). Solo con artículo o con mayúscula,
+    // para no tocar frases como «lo que parecía imposible»
+    [/(?<![A-Za-zÁ-ú])(?:(El|La|Los|Las|el|la|los|las) (?!(?:el|la|los|las|de|del|y)\s)([A-Za-zÁÉÍÓÚáéíóúñ]+)|([A-ZÁÉÍÓÚ][a-záéíóúñ]+)) (salvaje|secreto|imposible|prohibido|dorado|eterno|perdido)(?![A-Za-zÁ-ú])/g, function (m, art, n1, n2, a) { return (art ? (art[0] === 'E' || art[0] === 'L' ? 'The ' : 'the ') : '') + ADJ[a] + ' ' + (n1 || n2); }],
     [/(lunes|martes|miércoles|jueves|viernes|sábado|domingo) (\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (\d{3,4})/g, function (m, d, n, me, y) { return DIA[d] + ', ' + MES[me] + ' ' + n + ', ' + y; }],
     [/(\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)( de (\d{3,4}))?/g, function (m, n, me, x, y) { return MES[me] + ' ' + n + (y ? ', ' + y : ''); }],
     [/(?<![A-Za-zÁ-ú])(lun|mar|mié|jue|vie|sáb|dom) (\d{1,2}) (ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)(?![A-Za-zÁ-ú])/g, function (m, d, n, me) { return DIAC[d] + ' ' + MESC[me] + ' ' + n; }],
     [/(\d{1,2}) (ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)(?![A-Za-zÁ-ú])( (\d{3,4}))?/g, function (m, n, me, x, y) { return MESC[me] + ' ' + n + (y ? ', ' + y : ''); }],
   ];
-  const REGLAS_FIN = [[/(\d+) de (\d+)(?![\d])/g, '$1 of $2'], [/at age (\d+) years/g, 'at age $1'], [/(^|[«“"(\s])(El|La|Los|Las) (?=[a-záéíóúñ])/g, function (m, a) { return a + 'The '; }], [/«/g, '“'], [/»/g, '”'], [/ y (?=[a-záéíóúñA-Z])/g, ' and '], [/(\d) años(?![A-Za-zÁ-ú])/g, '$1 years']];
+  const REGLAS_FIN = [[/(\d+) de (\d+)(?![\d])/g, '$1 of $2'], [/at age (\d+) years/g, 'at age $1'], [/(^|[«“"(\s])(El|La|Los|Las) (?=[a-záéíóúñ])/g, function (m, a) { return a + 'The '; }], [/«/g, '“'], [/»/g, '”'], [/ y (?=[a-záéíóúñA-Z])/g, ' and '], [/(\d) años(?![A-Za-zÁ-ú])/g, '$1 years'], [/ (a|an) ([a-z]+(?: [a-z]+)?) de (\d{1,3}) years/g, ' $1 $2 aged $3']];
   let plantillas = [];
   function preparar() {
     if (re !== null || !mapa) return;
     // Variantes en minúscula (los géneros y los títulos aparecen así dentro de las frases)
     Object.keys(mapa).forEach(function (k) {
       if (/^[A-ZÁÉÍÓÚÑ]/.test(k) && k.length < 80) { const l = k.toLowerCase(); if (mapa[l] === undefined) mapa[l] = /^[A-Z]{2}/.test(mapa[k]) ? mapa[k] : mapa[k].charAt(0).toLowerCase() + mapa[k].slice(1); }
+      // y en mayúscula las frases de tres palabras o más (al empezar una línea de la escaleta, por ejemplo)
+      else if (/^[a-záéíóúñ]/.test(k) && k.length < 80 && k.split(' ').length >= 3) { const u = k.charAt(0).toUpperCase() + k.slice(1); if (mapa[u] === undefined) mapa[u] = mapa[k].charAt(0).toUpperCase() + mapa[k].slice(1); }
     });
     // Frases con huecos ({t}, {n}…): se vuelven patrones
     plantillas = Object.keys(mapa).filter(function (k) { return /\{[a-z$]+\}/.test(k) && /[a-z]{3}/i.test(k.replace(/\{[a-z$]+\}/g, '')); }).map(function (k) {
@@ -76,6 +80,8 @@ IA.idioma = (function () {
     preparar();
     let t = s.trim();
     if (mapa[t] !== undefined) return s.replace(t, mapa[t]);
+    const tm = t.charAt(0).toLowerCase() + t.slice(1); // frase que empieza con mayúscula solo por ir al principio
+    if (tm !== t && mapa[tm] !== undefined) return s.replace(t, mapa[tm].charAt(0).toUpperCase() + mapa[tm].slice(1));
     // Frases con huecos: se reemplazan donde aparezcan (los huecos se traducen aparte)
     plantillas.forEach(function (p) { s = s.replace(p.re, function () { const g = arguments; let out = p.en; p.nombres.forEach(function (n, j) { out = out.replace('{' + n + '}', g[j + 1]); }); return out; }); });
     REGLAS.forEach(function (x) { s = s.replace(x[0], x[1]); });
@@ -118,7 +124,7 @@ IA.idioma = (function () {
     if (lienzo || typeof CanvasRenderingContext2D === 'undefined') return;
     lienzo = true;
     const f = CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string' && mapa) { const t = s.trim(); if (mapa[t] !== undefined) a[0] = s.replace(t, mapa[t]); } return f.apply(this, a); }; // en los lienzos, solo frases completas (V30): un póster no queda a medio traducir
+    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string' && mapa) { const t = s.trim(); if (mapa[t] !== undefined) a[0] = s.replace(t, mapa[t]); } return f.apply(this, a); }; // en los lienzos, solo frases completas: un póster no queda a medio traducir
   }
   function poner(id) {
     actual = id === 'en' ? 'en' : 'es';

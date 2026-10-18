@@ -1,9 +1,9 @@
 {
   "name": "industry-art-pc",
   "productName": "INDUSTRY ART",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "INDUSTRY ART para PC (Windows, macOS y Linux)",
-  "author": "Felipe",
+  "author": "OneZero",
   "private": true,
   "main": "main.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "build": {
     "appId": "com.industryart.juego",
     "productName": "INDUSTRY ART",
-    "copyright": "Ideado y creado por Felipe",
+    "copyright": "Ideado y creado por OneZero",
     "publish": null,
     "files": ["main.js", "www/index.html", "build/icon.png"],
     "directories": { "output": "dist", "buildResources": "build" },

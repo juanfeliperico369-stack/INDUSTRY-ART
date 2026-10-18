@@ -1,9 +1,8 @@
 /* ==== módulo: pruebas ==== */
 // Bot de partidas: juega solo con tres estrategias (prudente, normal, agresiva), desde 1900 y desde 2000 hasta
 // 2150 con semillas fijas, y revisa las metas de balance, los errores, el tiempo por semana y el tamaño del
-// guardado. Desde la V17 crea sus obras con la fábrica de ideas (historia, personajes, material, guiones
-// comprados, efectos e IA) y hay pruebas de reglas (desde la V34 en tools/reglas.js, fuera del juego). Ninguna versión
-// se entrega si el bot falla.
+// guardado. Crea sus obras con la fábrica de ideas (historia, personajes, material, guiones comprados, efectos e IA);
+// las pruebas de reglas viven en tools/reglas.js, fuera del juego. Ninguna versión se entrega si el bot falla.
 IA.pruebas = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, T = IA.talentos, L = IA.lanzamiento, NG = IA.negocio, X = IA.taxonomia;
@@ -17,9 +16,9 @@ IA.pruebas = (function () {
   // Registro de cada obra al terminar (las métricas no dependen de lo que la compactación borra después)
   let registro = null;
   N.on('obraTerminada', function (o) {
-    if (!registro || o.tv) return; // las metas son de películas (V27): las series van aparte
+    if (!registro || o.tv) return; // las metas son de películas: las series van aparte
     const r = { est: o.est, mult: O.multiplicador(o), neto: O.neto(o), talento: O.costoTotal(o) > 0 ? (o.cf || 0) / O.costoTotal(o) : 0 };
-    // Cómo se hizo (V19), solo para las obras del jugador
+    // Cómo se hizo, solo para las obras del jugador
     if (o.est === 0) {
       const l = IA.rodaje.linea(o);
       r.met = o.met || 'mixto'; r.pst = o.pst || 'clasico'; r.set = o.setR ? 1 : 0; r.ext = o.ext ? Object.keys(o.ext).length : 0;
@@ -54,7 +53,7 @@ IA.pruebas = (function () {
     }
     return gen;
   }
-  // Prueba de público: con un puntaje flojo reedita o regraba; con uno bueno estrena (V19)
+  // Prueba de público: con un puntaje flojo reedita o regraba; con uno bueno estrena
   function pruebaBot(o) {
     const p = o.prueba.p, ops = IA.rodaje.opcionesPrueba(o);
     const ok = function (id) { const x = ops.filter(function (q) { return q.id === id; })[0]; return x && !x.no; };
@@ -69,12 +68,12 @@ IA.pruebas = (function () {
   function decidir(est) {
     const S = N.S, jug = S.estudios[0];
     const tipico = E.presupuestoTipico(N.anio());
-    // 0. Dilemas de rodaje y pruebas de público pendientes (V19)
+    // 0. Dilemas de rodaje y pruebas de público pendientes
     IA.juego.decisionesPendientes().forEach(function (o) {
       if (o.dil) IA.juego.decidirDilema(o.id, IA.rodaje.mejorOpcion(o));
       else if (o.prueba && !o.prueba.ok) IA.juego.decidirPrueba(o.id, pruebaBot(o));
     });
-    // 0b. Vida del avatar y heredero (V21); personal de oficina cuando sobra caja
+    // 0b. Vida del avatar y heredero; personal de oficina cuando sobra caja
     IA.carrera.autoDecidir();
     if ((S.candidatos || []).length) { IA.sede.aceptar(S.candidatos[0].id); S.candidatos = []; }
     if (N.semana() === 30 && NG.cajaLibre(0) > tipico * 8) {
@@ -86,29 +85,29 @@ IA.pruebas = (function () {
       if (o.prog) return;
       const nota = o.prueba ? o.prueba.p : o.pub;
       let nivM = S.t < 52 * 3 ? Math.min(est.marketing, 2) : est.marketing; // al principio, campañas medianas
-      // Con poca caja o una obra floja, campaña mediana: el dinero de las ventanas tarda en llegar (V20)
+      // Con poca caja o una obra floja, campaña mediana: el dinero de las ventanas tarda en llegar
       if (nota < 48 || NG.cajaLibre(0) < tipico * 2) nivM = Math.min(nivM, 2);
       while (nivM > 0 && NG.cajaLibre(0) < E.marketingTipico(N.anio()) * D.nivelesMarketing[nivM].mult * 1.2) nivM--;
       const t = L.mejorSemana(o, S.t + 1, S.t + 10);
-      // Una obra muy floja va directo a video o a streaming (V20): ahorra la campaña de cines
+      // Una obra muy floja va directo a video o a streaming: ahorra la campaña de cines
       const vias = IA.ventanas.viasDirectas(N.anio());
       const plan = nota < 42 && vias.length ? { via: vias[vias.length - 1].id } : null;
       while (nivM >= 0 && IA.juego.programarEstreno(o, t, nivM, plan)) nivM--;
     });
-    // Reestreno de un clásico de tu catálogo cuando sobra caja (V20)
+    // Reestreno de un clásico de tu catálogo cuando sobra caja
     if (N.semana() === 10 && NG.cajaLibre(0) > tipico * 6) {
       const cand = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && !IA.ventanas.puedeReestrenar(o); })
         .sort(function (a, b) { return IA.ventanas.valorReestreno(b, 1) - IA.ventanas.valorReestreno(a, 1); })[0];
       if (cand && IA.ventanas.valorReestreno(cand, 1) > IA.ventanas.costoReestreno(1) * 1.5) IA.ventanas.reestrenar(cand.id, 1);
     }
-    // Contrato con una cadena de cines de tu región cuando sobra caja (V20)
+    // Contrato con una cadena de cines de tu región cuando sobra caja
     if (N.semana() === 20 && NG.cajaLibre(0) > tipico * 8 && !(jug.cad && jug.cad[jug.reg])) {
       const c = IA.estreno.cadenas(jug.reg).filter(function (x) { return !IA.estreno.puedeFirmar(x.id, 2); }).sort(function (a, b) { return b.salas - a.salas; })[0];
       if (c) IA.estreno.firmar(c.id, 2);
     }
-    botTele(est, tipico); // series, canal, plataforma, franquicias y licencias (V23)
-    botImperio(est, tipico); // eventos, banco e imperio (V24)
-    botMedios(tipico); // música, videojuegos, teatro y libros (V25)
+    botTele(est, tipico); // series, canal, plataforma, franquicias y licencias
+    botImperio(est, tipico); // eventos, banco e imperio
+    botMedios(tipico); // música, videojuegos, teatro y libros
     // Con la caja en rojo no se arriesga más: espera a que entren los ingresos
     if (S.semanasEnRojo > 0) return;
     // 2. Construir cuando sobra caja
@@ -148,7 +147,7 @@ IA.pruebas = (function () {
       if (r.error) { if (registroErrores) registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error); break; }
     }
   }
-  // V25: un proyecto a la vez en cada medio, bandas, giras, kits, motores, DLC, traducciones y teatro grabado
+  // Un proyecto a la vez en cada medio, bandas, giras, kits, motores, DLC, traducciones y teatro grabado
   function botMedios(tipico) {
     const S = N.S, Md = IA.medios, anio = N.anio();
     if (N.semana() % 4 !== 3 || NG.cajaLibre(0) < tipico * 2) return;
@@ -182,13 +181,13 @@ IA.pruebas = (function () {
       if (med === 'musica') { const b = Md.bandas().filter(function (x) { return !x.sep; })[0]; if (b) op.banda = b.id; else op.tipo = 'jingle'; }
       if (med === 'libros') { const fr = IA.franquicias.lista().filter(function (x) { return x.est === 0; })[0]; if (fr && N.probabilidad(0.3)) op.fr = fr.id; }
       let b = Md.borrador(med, op);
-      // V34: si no alcanza, prueba una versión chica (sala chica, escala 0): antes de 1895 el teatro y los libros son todo
+      // Si no alcanza, prueba una versión chica (sala chica, escala 0): antes de 1895 el teatro y los libros son todo
       if (b.costo >= NG.cajaLibre(0) * 0.3 && med !== 'musica') { op.esc = 0; b = Md.borrador(med, op); if (med === 'teatro') { b.cfg.sala = 'chica'; Md.recalcular(b); } }
       if (med === 'juegos') { const m = Md.motores()[0]; if (m) { b.cfg.motor = m.id; Md.recalcular(b); } if (anio >= 2017 && N.probabilidad(0.2)) b.cfg.modelo = 'suscripcion'; else if (anio >= 2009 && N.probabilidad(0.25)) b.cfg.modelo = 'gratis'; }
       if (b.costo < NG.cajaLibre(0) * 0.3) Md.iniciar(b);
     });
   }
-  // V24: eventos, quiebra, banco, inversiones e imperio
+  // Eventos, quiebra, banco, inversiones e imperio
   function botImperio(est, tipico) {
     const S = N.S, B = IA.banco, I = IA.imperio, anio = N.anio();
     IA.eventos.autoDecidir();
@@ -216,7 +215,7 @@ IA.pruebas = (function () {
     ['tienda', 'museo', 'animacion', 'cafeteria', 'laboratorio'].forEach(function (id) { const inf = I.info(id); if (inf && !I.tiene(id) && libre > tipico * 10 && !NG.puedeConstruir('piso', id)) NG.construir('piso', id); });
     if (!I.tiene('parque') && libre > tipico * 20 && !NG.puedeConstruir('terreno', 'parque')) NG.construir('terreno', 'parque');
   }
-  // V23: lo que haría un jugador con la televisión, el streaming y sus franquicias
+  // Lo que haría un jugador con la televisión, el streaming y sus franquicias
   function botTele(est, tipico) {
     const S = N.S, anio = N.anio(), TV = IA.tv, ST = IA.streaming, F = IA.franquicias;
     (S.pilotos || []).filter(function (p) { return p.nota !== undefined; }).forEach(function (p) {
@@ -281,10 +280,10 @@ IA.pruebas = (function () {
     if (!b) return;
     if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6) return;
     const r = IA.juego.iniciarObra(b);
-    if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad/.test(r.error)) registroErrores.push('Bot V23 en ' + anio + ': ' + r.error);
+    if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad/.test(r.error)) registroErrores.push('Bot en ' + anio + ': ' + r.error);
   }
   function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x) c++; }); return c; }
-  // La idea del bot (V17): a veces adapta un material, a veces produce un guion comprado, y si no, una idea propia
+  // La idea del bot: a veces adapta un material, a veces produce un guion comprado, y si no, una idea propia
   function ideaDelBot(S, gen) {
     const anio = N.anio();
     const r = { campos: {} };
@@ -329,7 +328,7 @@ IA.pruebas = (function () {
     if (anio >= IA.ideas.ANIO_IA && IA.ideas.equipoCreativo(b) >= 62 && N.probabilidad(0.3)) b.ia = N.entero(10, 40);
     if (N.probabilidad(0.2)) b.cx = N.entero(1, 4);
     if (N.probabilidad(0.2)) b.rit = N.entero(1, 4);
-    // Cómo se filma (V19): el método y el terreno recomendados, a veces un estilo propio y, si hay, un set guardado
+    // Cómo se filma: el método y el terreno recomendados, a veces un estilo propio y, si hay, un set guardado
     const R = IA.rodaje;
     b.met = R.metodoRecomendado(b, anio);
     b.ter = R.terrenoRecomendado(b);
@@ -340,7 +339,7 @@ IA.pruebas = (function () {
     const sets = R.usaSet(b) ? R.setsQueSirven(b) : [];
     if (sets.length && sets[0].q >= 50) b.setR = sets[0].id;
     O.recalcular(b);
-    // Todo el elenco con nombre se contrata y se negocia (V18), ya con la clasificación final
+    // Todo el elenco con nombre se contrata y se negocia, ya con la clasificación final
     O.equipoNegociado(b, amb);
     O.recalcular(b);
     return b;
@@ -362,7 +361,7 @@ IA.pruebas = (function () {
       if (IA.ideas.clasificar(o, o.anioPlan) !== o.clas) errores.push('La clasificación de «' + o.tit + '» no sale de su contenido');
       if (o.gen.indexOf('Erótico') >= 0 && ((o.pj || []).some(function (p) { return p.e < 18; }) || ['18', 'R', 'X'].indexOf(o.clas) < 0)) errores.push('Regla del Erótico rota en «' + o.tit + '»');
       if (IA.ideas.hayMenores(o) && o.cont.amor > 1) errores.push('Contenido no permitido con menores en «' + o.tit + '»');
-      // V19: decisiones que no se quedan colgadas y cuentas que cuadran
+      // Decisiones que no se quedan colgadas y cuentas que cuadran
       if (o.dil && S.t - o.dil.t > 3) errores.push('Dilema sin resolver en «' + o.tit + '»');
       if (o.prueba && !o.prueba.ok && S.t - o.prueba.t > 4) errores.push('Prueba de público sin resolver en «' + o.tit + '»');
       if (o.lp && !isFinite(IA.rodaje.linea(o).real)) errores.push('Costo real no finito en «' + o.tit + '»');
@@ -488,7 +487,7 @@ IA.pruebas = (function () {
     };
   }
   // Qué usó el bot de la fábrica de ideas (para el informe)
-  // Qué usó el bot de la producción (V19)
+  // Qué usó el bot de la producción
   function resumenProduccion() {
     const mias = (registro || []).filter(function (r) { return r.est === 0 && r.met; });
     const contar = function (k) { return mias.reduce(function (a, r) { if (r[k]) a[r[k]] = (a[r[k]] || 0) + 1; return a; }, {}); };
@@ -499,7 +498,7 @@ IA.pruebas = (function () {
       dilemas: mias.reduce(function (a, r) { return a + (r.dil || 0); }, 0), sobrecosto: sob.length ? sob[Math.floor(sob.length / 2)] : 0,
     };
   }
-  // Lanzamiento (V20): estrenos directos, certificaciones, reestrenos y cuánto llega por las ventanas
+  // Lanzamiento: estrenos directos, certificaciones, reestrenos y cuánto llega por las ventanas
   function resumenLanzamiento(S) {
     const mias = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada'; });
     const c = function (f) { return mias.filter(f).length; };

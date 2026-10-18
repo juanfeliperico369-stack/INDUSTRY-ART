@@ -1,5 +1,5 @@
 /* ==== módulo: calendario_ui ==== */
-// V21 · Pantallas del calendario completo (vistas de mes, semana, año, día y agenda; filtros por tipo, región y
+// Pantallas del calendario completo (vistas de mes, semana, año, día y agenda; filtros por tipo, región y
 // «solo lo mío»; saltar a una fecha; avanzar hasta un día; recordatorios con nota) y de lo nuevo del estudio: sede
 // por niveles y personal de oficina (Negocio › Sede), tu avatar (vida ligera, encargos, retiro y heredero),
 // menú rápido de departamentos, fans, ADN del mercado y el menú de pausa.
@@ -118,7 +118,7 @@ IA.calendarioUI = (function () {
     else if (st.vista === 'anio') cuerpo = vistaAnio();
     else if (st.vista === 'dia') cuerpo = '<div class="tarjeta">' + vistaDia(st.y, st.m, st.d) + '</div>';
     else cuerpo = vistaAgenda();
-    return '<p class="nota">Calendario real de 1850 a 2150. El juego avanza por semanas y cada evento ocurre en la semana de su día. Tus cosas, en dorado.</p>' + cabecera() + cuerpo;
+    return '<p class="nota info">Calendario real de 1850 a 2150. El juego avanza por semanas y cada evento ocurre en la semana de su día. Tus cosas, en dorado.</p>' + cabecera() + cuerpo;
   }
   function refrescar() { U.refrescar(); }
   ac('abrirCalendario', function () { U.irA('mundo', 'calendario'); });
@@ -193,7 +193,7 @@ IA.calendarioUI = (function () {
     }
     const v = IA.carrera.vidaPendiente();
     if (v) {
-      U.modal('<h2>Tu vida</h2><p>' + esc(v.texto) + '</p><div class="col">' + v.ops.map(function (o, i) { return '<button class="btn" data-a="carVida" data-v="' + i + '">' + esc(o.t) + '</button>'; }).join('') + '</div><p class="nota">Cada opción arriesga algo.</p>');
+      U.modal('<h2>Tu vida</h2><p>' + esc(v.texto) + '</p><div class="col">' + v.ops.map(function (o, i) { return '<button class="btn" data-a="carVida" data-v="' + i + '">' + esc(o.t) + '</button>'; }).join('') + '</div><p class="nota info">Cada opción arriesga algo.</p>');
       return true;
     }
     const recs = C.recordatoriosDeSemana(S.t);
@@ -220,7 +220,7 @@ IA.calendarioUI = (function () {
     const sig = SD.NIVELES[sd.n];
     if (sig) { const e = SD.puedeMejorar(); h += '<p class="chico">Siguiente: <b>' + esc(sig.nombre) + '</b> (tope ' + sig.tope + '). ' + esc(sig.texto) + '</p><button class="btn' + (e ? '' : ' primario') + '" data-a="sedeMejorar"' + (e ? ' disabled title="' + esc(e) + '"' : '') + '>Mudarte · ' + dinero(SD.costoMejora()) + '</button>'; }
     h += '</div>';
-    h += '<h3>Personal de oficina</h3><p class="nota">Cada rol tiene un efecto que no se acumula (cuenta el mejor de cada rol). Quien trabaja en un departamento puede sumarse a una producción en marcha (+1 en esa obra).</p>';
+    h += '<h3>Personal de oficina</h3><p class="nota info">Cada rol tiene un efecto que no se acumula (cuenta el mejor de cada rol). Quien trabaja en un departamento puede sumarse a una producción en marcha (+1 en esa obra).</p>';
     const enMarcha = O.enProduccion(0);
     h += SD.personal().length ? SD.personal().map(function (p) {
       const r = SD.rol(p.rol), o = p.obra ? O.porId(p.obra) : null;
@@ -269,7 +269,7 @@ IA.calendarioUI = (function () {
       '<button class="btn" data-a="ayuda" data-v="inicio_guia">Guía</button>' + (N.S ? '<button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') + '</div>');
   });
   ac('crearTalentoForm', function () {
-    U.modal('<h2>Crear talento</h2><p class="nota">Tu propio talento entra al mundo con una habilidad modesta que crece con el trabajo.</p>' +
+    U.modal('<h2>Crear talento</h2><p class="nota info">Tu propio talento entra al mundo con una habilidad modesta que crece con el trabajo.</p>' +
       '<label class="campo"><span>Nombre</span><input type="text" maxlength="40" id="ctNom" value=""></label>' +
       '<label class="campo"><span>Oficio</span><select id="ctOf">' + D.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label>' +
       '<div class="fila"><label class="campo crece"><span>Sexo</span><select id="ctSx"><option value="F">' + t('mujer') + '</option><option value="M">' + t('hombre') + '</option></select></label><label class="campo crece"><span>Edad</span><input type="number" min="8" max="80" value="25" id="ctEd"></label></div>' +

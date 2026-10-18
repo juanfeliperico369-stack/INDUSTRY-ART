@@ -1,5 +1,5 @@
 /* ==== módulo: metas ==== */
-// V26 · Modos Campaña, Libre y Personalizado; dificultades Experto y Pesadilla (se desbloquean al ganar) con textos
+// Modos Campaña, Libre y Personalizado; dificultades Experto y Pesadilla (se desbloquean al ganar) con textos
 // con humor; campaña por décadas con legado; logros con nombres divertidos; misiones por correo con fecha límite;
 // retos de final de partida (ranking, legado, imperio y dinastía) con créditos y resumen de la carrera; tutorial que
 // desbloquea las secciones poco a poco; consejos del momento y Editor Sandbox con paquetes.
@@ -218,7 +218,7 @@ IA.metas = (function () {
     return '';
   }
   function personaje(frId, k, nom, pop) { const f = IA.franquicias.porId(+frId); if (!N.S.sandbox || !f) return 'No se puede.'; const p = f.pers.filter(function (x) { return x.k === +k; })[0]; if (!p) return 'No existe.'; if (nom) p.n = String(nom).slice(0, 40); if (pop !== undefined && pop !== '') p.pop = N.limitar(+pop || 0, 1, 99); return ''; }
-  // V34: franquicias u obras propias (reales o inventadas por el jugador) que se adaptan como material, igual que el
+  // Franquicias u obras propias (reales o inventadas por el jugador) que se adaptan como material, igual que el
   // dominio público; viven en la partida y en los paquetes, nunca en el juego base (Registro: «lo real solo lo agrega el jugador»)
   function agregarMaterial(m) {
     const S = N.S;
@@ -246,7 +246,7 @@ IA.metas = (function () {
   function importarPaquete(txt) {
     const S = N.S;
     let p;
-    // V34: un paquete puede venir de otra persona: tope de tamaño, limpieza de textos y claves, y datos validados
+    // Un paquete puede venir de otra persona: tope de tamaño, limpieza de textos y claves, y datos validados
     if (typeof txt !== 'string' || txt.length > 2e6) return 'El paquete es demasiado grande.';
     try { p = IA.guardado.limpiar(JSON.parse(txt)); } catch (e) { return 'El paquete no es válido.'; }
     if (!p || p.tipo !== 'paquete-industry-art') return 'No es un paquete de INDUSTRY ART.';

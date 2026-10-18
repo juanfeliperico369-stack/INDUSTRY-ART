@@ -1,5 +1,5 @@
 /* ==== módulo: sede ==== */
-// V21 · La sede por niveles (del cuarto alquilado al complejo), con tope de personal, gasto fijo y una
+// La sede por niveles (del cuarto alquilado al complejo), con tope de personal, gasto fijo y una
 // descripción con humor; el personal de oficina por rol (productor, guionista de planta, editor, mercadeo y
 // analista), cada uno con un efecto que no se acumula; el reclutamiento pagado (rápido o estándar) con su bandeja
 // de candidatos; la capacitación (intensiva más allá del nivel 50); el personal libre que se suma a una producción;

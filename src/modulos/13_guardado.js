@@ -2,7 +2,7 @@
 // Base de datos del navegador (IndexedDB) con el almacenamiento simple como respaldo; compresión nativa
 // (gzip) o un compresor propio (LZW) cuando no existe; 5 ranuras manuales y 3 autoguardados rotativos;
 // archivo .iasave para pasar la partida del celular al PC. Cada guardado lleva versión y suma de verificación,
-// y las migraciones van en orden (V16 → V17 → …). Nunca falla en silencio (fallo de la V15).
+// y las migraciones van en orden. Nunca falla en silencio.
 IA.guardado = (function () {
   'use strict';
   const N = IA.n;
@@ -77,9 +77,10 @@ IA.guardado = (function () {
   MIGRACIONES[32] = function () { /* 1.2 (compra «Versión completa»): sin datos nuevos; la compra vive en la tienda */ };
   MIGRACIONES[33] = function () { /* 1.3 (celulares lentos): sin datos nuevos */ };
   MIGRACIONES[34] = function () { /* 1.4: sin datos nuevos obligatorios (notas del autor, material propio y logo propio son opcionales) */ };
-  MIGRACIONES[29] = function () { /* V29: errores e inglés, sin datos nuevos */ };
-  MIGRACIONES[28] = function () { /* V28: interfaz y rendimiento, sin datos nuevos */ };
-  MIGRACIONES[27] = function () { /* V27: solo balance, sin datos nuevos */ };
+  MIGRACIONES[35] = function () { /* 2.0: sin datos nuevos (los puntos «i» no se guardan) */ };
+  MIGRACIONES[29] = function () { /* Errores e inglés, sin datos nuevos */ };
+  MIGRACIONES[28] = function () { /* Interfaz y rendimiento, sin datos nuevos */ };
+  MIGRACIONES[27] = function () { /* Solo balance, sin datos nuevos */ };
   MIGRACIONES[26] = function (S) { if (!S.metas) S.metas = { modo: 'libre', reto: null, logros: {}, misiones: [], legado: 0, decadas: [], tut: 0, fin: null, ret: 0 }; };
   MIGRACIONES[25] = function (S) { if (!S.med) S.med = { p: [], bandas: [], kits: {}, motores: [], motorLic: [], ofMot: [], premios: [], ing: {} }; };
   MIGRACIONES[24] = function (S) {
@@ -102,7 +103,7 @@ IA.guardado = (function () {
     return (h >>> 0).toString(16).padStart(8, '0');
   }
 
-  // ---------- V34: lo que llega de afuera (.iasave o paquete de otra persona) se limpia antes de usarlo ----------
+  // ---------- Lo que llega de afuera (.iasave o paquete de otra persona) se limpia antes de usarlo ----------
   // Topes de tamaño, claves trampa fuera (__proto__…) y, en todos los textos, los caracteres que podrían armar HTML
   // (< > " ' `) se cambian por otros que se ven igual. Así ningún campo, aunque la pantalla lo muestre tal cual, inyecta nada.
   const TOPE_ARCHIVO = 64 * 1024 * 1024, TOPE_TEXTO = 160 * 1024 * 1024, TOPE_NODOS = 8e6;
@@ -131,7 +132,7 @@ IA.guardado = (function () {
     const flujo = new Blob([texto]).stream().pipeThrough(new CompressionStream('gzip'));
     return new Uint8Array(await new Response(flujo).arrayBuffer());
   }
-  // V34: se descomprime por partes y se corta si pasa del tope (un archivo chico no puede inflarse hasta colgar la app)
+  // Se descomprime por partes y se corta si pasa del tope (un archivo chico no puede inflarse hasta colgar la app)
   async function gunzip(bytes) {
     const lector = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();
     const partes = [];
@@ -353,12 +354,12 @@ IA.guardado = (function () {
     let S = JSON.parse(texto);
     if (ajeno) {
       S = limpiar(S);
-      if (!S || !Array.isArray(S.estudios) || !S.estudios.length || !Array.isArray(S.obras) || !Array.isArray(S.talentos)) throw new Error('no es una partida de INDUSTRY ART V16 o posterior');
+      if (!S || !Array.isArray(S.estudios) || !S.estudios.length || !Array.isArray(S.obras) || !Array.isArray(S.talentos)) throw new Error('no es una partida de INDUSTRY ART');
     }
     return migrar(S);
   }
   function migrar(S) {
-    if (!S || S.juego !== 'INDUSTRY ART' || typeof S.v !== 'number') throw new Error('no es una partida de INDUSTRY ART V16 o posterior');
+    if (!S || S.juego !== 'INDUSTRY ART' || typeof S.v !== 'number') throw new Error('no es una partida de INDUSTRY ART');
     if (S.v > IA.VERSION_GUARDADO) throw new Error('la partida es de una versión más nueva (V' + S.v + ')');
     while (S.v < IA.VERSION_GUARDADO) {
       const m = MIGRACIONES[S.v + 1];
@@ -384,7 +385,7 @@ IA.guardado = (function () {
       const reg = await empaquetar(N.S);
       reg.ranura = ranura;
       await escribir(reg);
-      // Se relee lo escrito para confirmar que quedó bien (la V15 decía "guardado" aunque no cupiera)
+      // Se relee lo escrito para confirmar que quedó bien
       const leido = await leer(ranura);
       if (!leido || leido.suma !== reg.suma || leido.datos.length !== reg.datos.length) throw new Error('no se pudo confirmar el guardado');
       return { ok: true, bytes: reg.datos.length, comp: reg.comp };
@@ -427,7 +428,7 @@ IA.guardado = (function () {
       const texto = await exportarTexto();
       const est = N.S.estudios[0];
       const nombre = ('industryart_' + est.nombre + '_' + N.anio()).toLowerCase().replace(/[^a-z0-9_]+/g, '_') + '.iasave';
-      // V34: en la app de Android y iPhone se guarda con el menú Compartir (antes no bajaba nada)
+      // En la app de Android y iPhone se guarda con el menú Compartir (antes no bajaba nada)
       const r = await IA.publicacion.guardarArchivo(nombre, texto, 'application/json');
       if (!r.ok) throw new Error(r.error || 'no se pudo guardar el archivo');
       return { ok: true, nombre: nombre, bytes: texto.length };

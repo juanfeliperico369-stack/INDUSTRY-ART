@@ -1,6 +1,6 @@
 /* ==== módulo: lanzamiento ==== */
 // Fecha de estreno, marketing, la cartelera de cada semana y el cierre de cada obra con su informe.
-// V20: el plan de estreno (regiones, doblaje, canales, promociones) vive en IA.estreno; las ventanas, en IA.ventanas.
+// El plan de estreno (regiones, doblaje, canales, promociones) vive en IA.estreno; las ventanas, en IA.ventanas.
 IA.lanzamiento = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, T = IA.talentos, O = IA.obras;
@@ -46,7 +46,7 @@ IA.lanzamiento = (function () {
   function semana(ctx) {
     const lista = estrenosDeLaSemana(N.S.t);
     lista.forEach(function (o) {
-      // Estreno directo en video o en streaming: sin cines (V20)
+      // Estreno directo en video o en streaming: sin cines
       if (o.plan && o.plan.via && o.plan.via !== 'cines') {
         IA.ventanas.estrenarDirecto(o, o.plan.via);
         cerrar(o, ctx);
@@ -69,7 +69,7 @@ IA.lanzamiento = (function () {
     Object.keys(res.porEstudio).forEach(function (k) { m.anio.porEstudio[k] = (m.anio.porEstudio[k] || 0) + res.porEstudio[k]; });
     return res;
   }
-  // Cierre de una obra: queda su resumen y el informe "por qué funcionó o fracasó" (básico; completo en la V21)
+  // Cierre de una obra: queda su resumen y el informe "por qué funcionó o fracasó"
   function terminar(o, ctx) {
     o.et = 'terminada';
     O.tocar();
@@ -78,7 +78,7 @@ IA.lanzamiento = (function () {
     o.ent = Math.round(o.ent);
     if (o.part) o.part = Math.round(o.part);
     delete o.feR;
-    // Juguetes y coleccionables venden según la taquilla (V20)
+    // Juguetes y coleccionables venden según la taquilla
     const merch = o.plan && o.plan.promo ? o.plan.promo.reduce(function (s, id) { const x = IA.estreno.promo(id); return s + (x && x.merch ? x.merch : 0); }, 0) : 0;
     if (merch > 0 && o.bruto > 0) {
       const m = Math.round(o.bruto * merch * (['FJ', 'IM', 'AA'].indexOf(o.fam) >= 0 ? 1 : 0.4));

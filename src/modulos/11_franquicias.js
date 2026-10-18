@@ -1,5 +1,5 @@
 /* ==== módulo: franquicias ==== */
-// V23 · Toda obra nace como franquicia (de una sola obra, sin ocupar memoria) y se vuelve una franquicia «viva»
+// Toda obra nace como franquicia (de una sola obra, sin ocupar memoria) y se vuelve una franquicia «viva»
 // cuando se continúa, se registra, se licencia, se cruza o se vende. Siete caminos de continuación (y la nueva
 // temporada de una serie), personajes con ficha y popularidad, llamada al elenco original, licencias y derivados
 // canon o no canon, crossovers, canon con continuidades, compra y venta (también de obras sueltas), ofertas de
@@ -264,7 +264,7 @@ IA.franquicias = (function () {
       .map(function (o) { return { tipo: 'obra', o: o, nom: o.tit, est: o.est, precio: Math.round(valor(o) * 1.25) }; });
     return vivas.slice(0, 10).concat(sueltas);
   }
-  // Las de estudios quebrados se venden con descuento (V24)
+  // Las de estudios quebrados se venden con descuento
   function precioCompra(f) { return Math.round(valor(f) * (N.S.estudios[f.est] && N.S.estudios[f.est].quebrado ? 0.6 : 1.25)); }
   function comprar(tipo, id) {
     const S = N.S;

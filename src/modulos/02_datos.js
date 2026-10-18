@@ -1,6 +1,6 @@
 /* ==== módulo: datos ==== */
-// Listas y tablas del juego, separadas de la lógica para que el Editor (V34) y las traducciones las cambien
-// sin tocar el código. Rescatado de la V15: nombres por región (NMR), países (CY), rasgos (TRA),
+// Listas y tablas del juego, separadas de la lógica para que el Editor y las traducciones las cambien
+// sin tocar el código. Rescatado del juego original: nombres por región (NMR), países (CY), rasgos (TRA),
 // personalidades (TI), tonos (TO), prioridades (PR), clasificaciones (AG), rivales (RV), temas (DX.tm).
 IA.datos = (function () {
   'use strict';
@@ -53,7 +53,7 @@ IA.datos = (function () {
     { id: 'pg', nombre: 'Papúa Nueva Guinea', region: 'oce', idioma: 'Tok Pisin', costo: 0.35, peso: 0.04, lon: 145, lat: -6 },
   ];
 
-  // Siluetas simples de los continentes para el mapa (rescatadas de la V15: lon, lat)
+  // Siluetas simples de los continentes para el mapa (lon, lat)
   const continentes = [
     [[-168, 66], [-140, 70], [-95, 72], [-60, 60], [-52, 47], [-80, 25], [-97, 16], [-83, 8], [-105, 22], [-125, 38], [-135, 58]],
     [[-80, 10], [-60, 10], [-35, -6], [-40, -22], [-58, -38], [-68, -54], [-75, -45], [-72, -18], [-81, -5]],
@@ -63,7 +63,7 @@ IA.datos = (function () {
     [[113, -22], [130, -12], [153, -26], [147, -38], [115, -34]],
   ];
 
-  // ---------- Nombres por región (V15 NMR, más nombres de Rusia y Hong Kong) ----------
+  // ---------- Nombres por región ----------
   const nombres = {
     nam: {
       f: sp('Emily,Grace,Olivia,Madison,Hannah,Chloe,Valeria,Ximena,Camila,Abigail,Harper,Lily,Ruth,Evelyn,June,Dorothy'),
@@ -109,7 +109,7 @@ IA.datos = (function () {
     { id: 'edicion', nombre: 'Editor', dep: 'Edición', base: 0.006 },
     { id: 'arte', nombre: 'Diseñador de arte y tecnología', dep: 'Arte y diseño', base: 0.008 },
     { id: 'interprete', nombre: 'Intérprete', dep: 'Actuación', base: 0.022 },
-    // V19 · Cine a fondo: departamentos que antes cubría el diseñador de arte
+    // Cine a fondo: departamentos que antes cubría el diseñador de arte
     { id: 'vestuario', nombre: 'Diseñador de vestuario', dep: 'Vestuario y maquillaje', base: 0.005 },
     { id: 'efectos', nombre: 'Supervisor de efectos', dep: 'Efectos', base: 0.007 },
     { id: 'animacion', nombre: 'Animador', dep: 'Animación', base: 0.008 },
@@ -203,7 +203,7 @@ IA.datos = (function () {
   // Antes de 1968 la censura de la época (Código de Producción en Norteamérica) no deja estrenar lo más fuerte.
   const ANIO_CLASIFICACION_POR_EDADES = 1968;
 
-  // ---------- Tonos (V15 TO: efecto en crítica y público) ----------
+  // ---------- Tonos ----------
   const tonos = [
     { id: 'Surrealista', crit: 3, pub: -2 }, { id: 'Oscuro', crit: 3, pub: -2 }, { id: 'Caótico', crit: 0, pub: 0 },
     { id: 'Reflexivo', crit: 3, pub: -3 }, { id: 'Realista', crit: 1, pub: 0 }, { id: 'Poético', crit: 3, pub: -3 },
@@ -211,7 +211,7 @@ IA.datos = (function () {
     { id: 'Épico', crit: 1, pub: 3, costo: 1.15 },
   ];
 
-  // ---------- Rasgos de talento (V15 TRA: calidad, sobrecosto, tarifa) y personalidades (TI) ----------
+  // ---------- Rasgos de talento y personalidades (TI) ----------
   const rasgos = {
     Eficiente: [0, -0.05, 1], Perfeccionista: [2, 0.05, 1.1], Obsesivo: [1, 0.04, 1], Visionario: [3, 0.03, 1.15],
     Ambicioso: [1, 0, 1.1], Diva: [1, 0.04, 1.3], Comercial: [0, -0.02, 0.95], Amable: [0, -0.02, 0.95],
@@ -227,9 +227,9 @@ IA.datos = (function () {
     { id: 'Rockstar', valor: 90, rasgos: sp('Eficiente,Perfeccionista,Obsesivo,Visionario,Ambicioso,Diva') },
   ];
 
-  // ---------- Estudio: tipo, visión, público (V15 IT, VI, PU) ----------
+  // ---------- Estudio: tipo, visión, público ----------
   const tiposEstudio = sp('Corporación,Compañía,Productora,Estudio,Independiente,Colectivo');
-  // Visión de la industria y público objetivo (V15 VI y PU), ahora con un efecto pequeño y claro
+  // Visión de la industria y público objetivo, ahora con un efecto pequeño y claro
   const visiones = [
     { id: 'Boutique de Culto', efecto: '+2 a la crítica, −1 al público', crit: 2, pub: -1 },
     { id: 'Prestigio de Industria', efecto: '+1 a la crítica y más fama al empezar', crit: 1, fama: 0.04 },
@@ -244,7 +244,7 @@ IA.datos = (function () {
     { id: 'Adulto', efecto: '+1 a la crítica en drama, suspenso y romance', familias: ['DR', 'SM', 'RD'], crit: 1 },
     { id: 'Cultos', efecto: '+2 a la crítica en arte e imaginación', familias: ['AV', 'IM'], crit: 2 },
   ];
-  // Tipo de industria al empezar (V34): define con qué empieza el estudio. plato: arranca con el plató de rodaje;
+  // Tipo de industria al empezar: define con qué empieza el estudio. plato: arranca con el plató de rodaje;
   // meds: medios con +1 proyecto a la vez; rebaja: factor de costo en esos medios; canal: factor del costo del canal propio
   const industrias = [
     { id: 'Cine', desde: 1895, plato: 1, meds: [], efecto: 'Plató de rodaje incluido: +2 películas o series a la vez' },
@@ -258,7 +258,7 @@ IA.datos = (function () {
   const CINE_DESDE = 1895;
   function industria(id) { return industrias.filter(function (x) { return x.id === id; })[0] || industrias[0]; }
 
-  // ---------- Rivales (nombres de la V15) ----------
+  // ---------- Rivales ----------
   // tam: tamaño inicial relativo; calidad: tendencia de calidad; riesgo: cuánto se arriesgan con el presupuesto.
   const rivales = [
     { nombre: 'Aurora Films', pais: 'us', familia: 'DR', tam: 1.4, calidad: 4, riesgo: 0.4, logo: 3 },
@@ -271,7 +271,7 @@ IA.datos = (function () {
     { nombre: 'Ágora Colectivo', pais: 'ar', familia: 'RD', tam: 0.6, calidad: 1, riesgo: 0.4, logo: 79 },
   ];
 
-  // ---------- Títulos (V15 T1 y T2, ampliados) ----------
+  // ---------- Títulos ----------
   const titulo1 = sp('Noche,Eco,Frontera,Aurora,Sombra,Vértigo,Marea,Cenizas,Reflejo,Horizonte,Umbral,Cometa,Silencio,Laberinto,Faro,Destello,Tormenta,Jardín,Carnaval,Espejismo,Relámpago,Abismo,Brújula,Linterna,Hierro,Ceniza,Selva,Oasis,Péndulo,Rastro');
   const titulo2 = sp('de cristal,final,eterno,sin nombre,perdido,del norte,en llamas,de invierno,secreto,imposible,de medianoche,del sur,salvaje,prohibido,de plata,sin regreso,dorado,de papel,en la niebla,del fin del mundo');
   const temas = ['Actuación', 'Adolescencia', 'Adultez', 'Aislamiento', 'Alquimia', 'Ambición', 'América', 'Amistad', 'Amor', 'Anarquismo', 'Antiguo Egipto', 'Arte', 'Artes', 'Asesinos', 'Ateísmo', 'Bien y mal', 'Bombas nucleares', 'Búsqueda', 'Caballeros', 'Capitalismo', 'Carrera espacial', 'Caza', 'China imperial', 'Cibernética', 'Ciencia', 'Cine', 'Civilización y barbarie', 'Civilizaciones precolombinas', 'Clase social', 'Clonación', 'Codicia', 'Colonialismo', 'Cómics', 'Comunismo', 'Conciencia', 'Conocimiento', 'Corrupción', 'Cruzadas', 'Culpa', 'Culpabilidad', 'Culturas indígenas', 'Depresión', 'Descubrimientos', 'Deshumanización', 'Desigualdad', 'Destino', 'Dictadura', 'Dictaduras', 'Dinero', 'Dios', 'Dioses', 'Discriminación', 'Drogas', 'Dudas', 'Duelo', 'Elegancia', 'Elfos', 'Empatía', 'Enanos', 'Entrenamiento', 'Era digital', 'Era victoriana', 'Esclavitud', 'Espacio', 'Esparta', 'Esperanza', 'Evolución', 'Exclusión', 'Exilio', 'Existencia', 'Existencialismo', 'Éxito', 'Explotación', 'Fama', 'Familia', 'Fascismo', 'Fe', 'Fiebre del oro', 'Filosofía', 'Fracaso', 'Gánsteres', 'Genética', 'Gladiadores', 'Globalización', 'Gran Depresión', 'Grecia clásica', 'Guerra', 'Guerra de trincheras', 'Guerra Fría', 'Guerras napoleónicas', 'Hackers', 'Hechiceros', 'Hermanos', 'Héroes', 'Historietas', 'Holocausto', 'Honor', 'Humanidad', 'Humanidad y máquinas', 'Humildad', 'Humor', 'IA', 'Identidad', 'Ilustración', 'Imperialismo', 'Imperio mongol', 'Imperio romano', 'Imprenta', 'Incas', 'Independencias', 'India antigua', 'Infancia', 'Informática', 'Injusticia', 'Inmortalidad', 'Inquisición', 'Islámico', 'Japón feudal', 'Justicia', 'Las pirámides', 'Lealtad', 'Libertad', 'Literatura', 'Lo prohibido', 'Locura', 'Mafia', 'Magia', 'Magos', 'Mangas', 'Mayas', 'Medieval', 'Memoria', 'Mentiras', 'Mesopotamia', 'Miedo', 'Migración', 'Minería', 'Moda', 'Monarquías', 'Moralidad', 'Mortalidad', 'Muerte', 'Muro de Berlín', 'Música', 'Naturaleza', 'Nazismo', 'Negocios', 'Nihilismo', 'Obsesión', 'Ocultismo', 'Olímpicos', 'Orcos', 'Orden y caos', 'Paz', 'Peloponeso', 'Perdón', 'Peste negra', 'Piratas', 'Planetas', 'Pobreza', 'Poder', 'Política', 'Prehistoria', 'Primera Guerra Mundial', 'Progreso', 'Propaganda', 'Racismo', 'Radicalización', 'Realidad virtual', 'Rebelión', 'Redención', 'Reinado del Terror', 'Religión', 'Renacimiento', 'Resistencia', 'Revolución', 'Revolución francesa', 'Revolución industrial', 'Revolución rusa', 'Revoluciones artísticas', 'Revoluciones tecnológicas', 'Reyes', 'Riqueza', 'Rivalidad', 'Robos', 'Ruta de la Seda', 'Sacrificio', 'Salvaje oeste', 'Secretos', 'Segunda Guerra Mundial', 'Ser humano', 'Siglo XIX', 'Socialismo', 'Sociedad', 'Soledad', 'Sueños', 'Superhéroes', 'Supervivencia', 'Tecnología', 'Templarios', 'Tenochtitlan', 'Terrorismo', 'Tiempo', 'Traición', 'Trauma', 'Vejez', 'Venganza', 'Verdad', 'Videojuegos', 'Vigilancia', 'Vikingos', 'Villanos', 'Xenofobia'];
@@ -308,7 +308,7 @@ IA.datos = (function () {
     { id: 'epica', nombre: 'Épica', mult: 4, semanas: 1.3 },
   ];
 
-  // ---------- Construcciones del estudio (base de la V16; las 30 llegan en la V28) ----------
+  // ---------- Construcciones del estudio ----------
   // costo: en presupuestos típicos de la época. capacidad: proyectos a la vez. bono: departamento que mejora.
   const pisos = [
     { id: 'oficinas', nombre: 'Oficinas', desde: 1850, costo: 0.3, capacidad: 1, efecto: 'Base del estudio: 1 proyecto a la vez' },
@@ -325,9 +325,9 @@ IA.datos = (function () {
     { id: 'backlot', nombre: 'Backlot (calles y sets)', desde: 1910, costo: 1.4, capacidad: 2, ahorro: 0.08, efecto: '+2 proyectos a la vez y −8 % en producción' },
     { id: 'foso', nombre: 'Foso de agua', desde: 1920, costo: 0.5, bono: { arte: 3 }, familias: ['AA', 'IM'], efecto: '+3 en acción e imaginación' },
     { id: 'captura', nombre: 'Estudio de captura', desde: 1995, costo: 0.7, bono: { arte: 4 }, familias: ['IM', 'AA', 'FJ'], efecto: '+4 en imaginación, acción y familia' },
-    // V20: cines propios en la región de tu sede (hasta 3 cuentan)
+    // Cines propios en la región de tu sede (hasta 3 cuentan)
     { id: 'cine', nombre: 'Cadena de cines propia', desde: 1905, costo: 1.2, efecto: 'En tu región: tus obras en 12 % más salas, te quedas con 12 puntos más de cada entrada y cobras una parte de las entradas de las obras ajenas' },
-    // V19: tierras propias para rodar en locación (más barato, menos incidentes y una semana menos en ese terreno)
+    // Tierras propias para rodar en locación (más barato, menos incidentes y una semana menos en ese terreno)
     { id: 't_ciudad', nombre: 'Manzana de ciudad', terreno: 'ciudad', desde: 1910, costo: 0.55, efecto: 'Rodar en la ciudad: más barato, más seguro y una semana menos' },
     { id: 't_pradera', nombre: 'Pradera propia', terreno: 'pradera', desde: 1905, costo: 0.35, efecto: 'Rodar en la pradera: más barato, más seguro y una semana menos' },
     { id: 't_desierto', nombre: 'Rancho en el desierto', terreno: 'desierto', desde: 1910, costo: 0.45, efecto: 'Rodar en el desierto: más barato, más seguro y una semana menos' },
@@ -339,7 +339,7 @@ IA.datos = (function () {
   ];
   const MAX_PISOS = 10, MAX_TERRENOS = 10;
 
-  // ---------- Premios básicos de la V16 (la versión completa llega en la V22) ----------
+  // ---------- Premios básicos ----------
   const premios = {
     nombre: 'Premios Quimera', semana: 11,
     categorias: [
@@ -348,7 +348,7 @@ IA.datos = (function () {
       { id: 'guion', nombre: 'Mejor guion' },
       { id: 'actriz', nombre: 'Mejor actriz' },
       { id: 'actor', nombre: 'Mejor actor' },
-      // V22: más categorías por cargo (las 5 primeras son las principales para la meta de balance)
+      // Más categorías por cargo (las 5 primeras son las principales para la meta de balance)
       { id: 'animada', nombre: 'Mejor obra animada', desde: 1937 },
       { id: 'fotografia', nombre: 'Mejor fotografía', rol: 'fotografia' },
       { id: 'musica', nombre: 'Mejor música', rol: 'musica', desde: 1934 },
@@ -361,7 +361,7 @@ IA.datos = (function () {
   };
 
   // ---------- Cronología real 1850-2026 y eras de ficción hasta 2150 (pestaña Datos del mundo) ----------
-  // Sin personas reales ni marcas. Cada fecha se verifica con fuentes en la V27.
+  // Sin personas reales ni marcas. Fechas verificadas con fuentes.
   const cronologia = [
     [1850, 'Teatro, libros y folletines por entregas dominan el entretenimiento'],
     [1877, 'Se inventa el fonógrafo: aparece la música grabada en cilindros'],
@@ -411,7 +411,7 @@ IA.datos = (function () {
     [2125, 'Arte posthumano: talentos sintéticos con derechos y obras eternas'],
     [2150, 'Después de 2150: el mundo sigue con eventos generados por tu partida'],
   ];
-  // Tecnologías del cine que cambian la calidad esperada (el estudio las adopta solo en la V16)
+  // Tecnologías del cine que cambian la calidad esperada
   const tecnologias = [
     { anio: 1895, nombre: 'Cine mudo' }, { anio: 1927, nombre: 'Cine sonoro' }, { anio: 1935, nombre: 'Color' },
     { anio: 1953, nombre: 'Pantalla ancha' }, { anio: 1977, nombre: 'Efectos de nueva generación' },
@@ -419,7 +419,7 @@ IA.datos = (function () {
     { anio: 2040, nombre: 'Salas inmersivas' }, { anio: 2090, nombre: 'Cine sensorial' },
   ];
 
-  // ---------- Inicio (V21, Referencia R7): tarjetas de región, de era, sufijos de logo y ADN del mercado ----------
+  // ---------- Inicio (Referencia R7): tarjetas de región, de era, sufijos de logo y ADN del mercado ----------
   // capital: múltiplo del capital recomendado; prestigio: 0 a 100; competencia: 1 baja … 3 alta
   const regionesInicio = [
     { id: 'losangeles', nombre: 'Los Ángeles', pais: 'us', desde: 1910, mercado: 'El mercado más grande del mundo', competencia: 3, capital: 1, prestigio: 8, texto: 'Sol todo el año y las majors a la vuelta de la esquina.' },

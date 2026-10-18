@@ -10,7 +10,7 @@ Necesitas Java (keytool) solo para el paso 2. No hace falta Android Studio.
 
 1. **GitHub**: ya la tienes (`juanfeliperico369-stack`). La receta de Android corre sola cada vez que llega una versión nueva a la rama principal del repositorio (`claude/industry-art-v16-analysis-dbf0iv`) o a `main`, y también a mano (paso 4).
 2. **Google Play Console**: <https://play.google.com/console>. Pago único de 25 USD y verificación de identidad.
-   - Nombre del desarrollador: el tuyo o el de tu estudio. **No uses «Claude».**
+   - Nombre del desarrollador: **OneZero** (o el de tu estudio).
    - Las cuentas personales nuevas deben hacer una **prueba cerrada con 12 personas durante 14 días** antes de publicar (paso 6).
 3. **AdMob** (solo si la app es gratis con anuncio): <https://admob.google.com>. Crea la app «INDUSTRY ART» (Android) y un bloque de anuncio **intersticial**. Anota los dos identificadores:
    - de la app: `ca-app-pub-XXXXXXXX~YYYYYYYY`

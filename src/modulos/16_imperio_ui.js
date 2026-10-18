@@ -1,5 +1,5 @@
 /* ==== módulo: imperio_ui ==== */
-// V24 · Pantallas de Banco (crédito, préstamos, cuentas, socio y junta, inversiones, balance y cambio de marca),
+// Pantallas de Banco (crédito, préstamos, cuentas, socio y junta, inversiones, balance y cambio de marca),
 // Imperio (sedes, filiales y compra de estudios, coproducciones, encargos, financiar, distribución, negocios para
 // fans e investigación), Rivales (ranking ordenable con filtros, estrellas y taquillas) e Historia (hitos con su
 // día); la bitácora del estudio, los eventos con decisión y la quiebra con sus tres salidas.
@@ -21,7 +21,7 @@ IA.imperioUI = (function () {
   function banco() {
     const S = N.S, e = B.escalon(), p = B.puntaje(), b = B.estado();
     let h = '<div class="kpis">' + kpi('Puntaje de crédito', p, p >= 650 ? 'bien' : p < 450 ? 'mal' : '') + kpi('Tu banco', e.nombre) + kpi('Te presta hasta', dinero(B.limite())) + kpi('Tasa anual', Math.round(B.tasa() * 1000) / 10 + ' %') + kpi('Deuda', dinero(B.deuda()), B.deuda() ? 'mal' : '') + '</div>';
-    h += '<p class="nota">Con más prestigio subes de banco (' + B.ESCALONES.map(function (x) { return x.nombre + ' desde ' + Math.round(x.fama * 100); }).join(' · ') + '). Pagar a tiempo sube tu puntaje; los atrasos lo bajan.</p>';
+    h += '<p class="nota info">Con más prestigio subes de banco (' + B.ESCALONES.map(function (x) { return x.nombre + ' desde ' + Math.round(x.fama * 100); }).join(' · ') + '). Pagar a tiempo sube tu puntaje; los atrasos lo bajan.</p>';
     h += '<div class="tarjeta"><h3>Pedir un préstamo</h3><div class="fila"><label class="campo crece"><span>Monto</span><input id="bnMonto" type="number" value="' + Math.round(Math.min(B.limite(), IA.economia.presupuestoTipico(N.anio()))) + '"></label>' +
       '<label class="campo"><span>Plazo</span>' + sel('bnPlazo', [[12, '1 año'], [24, '2 años'], [36, '3 años'], [60, '5 años'], [120, '10 años']], 36) + '</label></div>' + btn('Pedir', 'bnPedir', '', 'primario bloque') + '</div>';
     h += '<h3>Cuentas por pagar este mes</h3>' + (B.cuentasDelMes().length ? B.cuentasDelMes().map(function (c) {
@@ -53,30 +53,30 @@ IA.imperioUI = (function () {
   // ---------- Negocio › Imperio ----------
   function imperio() {
     const S = N.S, a = N.anio(), rivs = IA.rivales.activos();
-    let h = '<h3>Sedes en otros países</h3><p class="nota">Rodar donde tienes sede cuesta 15 % menos y aparecen talentos locales.</p>' +
+    let h = '<h3>Sedes en otros países</h3><p class="nota info">Rodar donde tienes sede cuesta 15 % menos y aparecen talentos locales.</p>' +
       (I.sedes().length ? '<p>' + I.sedes().map(function (x) { const p = D.pais(x.pais); return esc(p.nombre) + ' ' + btn('Cerrar', 'imCerrarSede', x.pais); }).join(' · ') + '</p>' : '') +
       '<div class="fila">' + sel('imPais', D.paises.filter(function (p) { return p.id !== S.estudios[0].pais; }).map(function (p) { return [p.id, p.nombre + ' · ' + dinero(I.costoSede(p.id))]; }), '') + btn('Abrir sede', 'imSede', '', 'primario') + '</div>';
-    h += '<h3>Filiales y compra de estudios</h3><p class="nota">Una filial sigue filmando con su estilo, te cuesta cada mes y te da dividendos si gana. No puedes comprar si juntos superan el ' + Math.round(IA.economia.P.ANTIMONOPOLIO * 100) + ' % del mercado.</p><div class="col">' +
+    h += '<h3>Filiales y compra de estudios</h3><p class="nota info">Una filial sigue filmando con su estilo, te cuesta cada mes y te da dividendos si gana. No puedes comprar si juntos superan el ' + Math.round(IA.economia.P.ANTIMONOPOLIO * 100) + ' % del mercado.</p><div class="col">' +
       rivs.map(function (e) {
         if (e.filial) return '<div class="cal-ev"><div class="col crece"><b class="oro">' + esc(e.nombre) + '</b><span class="tenue chico">Filial · caja ' + dinero(e.caja) + ' · ' + dinero(I.costoFilial(e)) + '/mes</span></div>' + btn('Vender', 'imVenderFil', e.id) + '</div>';
         const err = I.puedeComprar(e.id);
         return '<div class="cal-ev"><div class="col crece"><b>' + esc(e.nombre) + '</b><span class="tenue chico">' + dinero(I.precioEstudio(e.id)) + '</span></div>' + btn('Comprar', 'imComprarEst', e.id, err ? '' : 'primario', err) + '</div>';
       }).join('') + '</div>';
     const enDes = O.enProduccion(0).filter(function (o) { return ['desarrollo', 'preproduccion'].indexOf(o.et) >= 0 && !o.copro; });
-    h += '<h3>Coproducciones</h3><p class="nota">Un rival pone el 40 % del costo y se lleva el 40 % de lo que gane.</p>' + (enDes.length ? '<div class="fila">' + sel('imCoObra', enDes.map(function (o) { return [o.id, o.tit]; }), '') + sel('imCoEst', rivs.map(function (e) { return [e.id, e.nombre]; }), '') + btn('Proponer', 'imCopro', '', 'primario') + '</div>' : '<p class="tenue chico">Necesitas una obra en desarrollo o preproducción.</p>');
-    h += '<h3>Encargos</h3><p class="nota">Pagas a un rival para que filme por ti (te quedas con el 75 %) o aceptas un encargo suyo (te pagan y se quedan con el 70 %).</p><div class="fila">' +
+    h += '<h3>Coproducciones</h3><p class="nota info">Un rival pone el 40 % del costo y se lleva el 40 % de lo que gane.</p>' + (enDes.length ? '<div class="fila">' + sel('imCoObra', enDes.map(function (o) { return [o.id, o.tit]; }), '') + sel('imCoEst', rivs.map(function (e) { return [e.id, e.nombre]; }), '') + btn('Proponer', 'imCopro', '', 'primario') + '</div>' : '<p class="tenue chico">Necesitas una obra en desarrollo o preproducción.</p>');
+    h += '<h3>Encargos</h3><p class="nota info">Pagas a un rival para que filme por ti (te quedas con el 75 %) o aceptas un encargo suyo (te pagan y se quedan con el 70 %).</p><div class="fila">' +
       sel('imEnEst', rivs.map(function (e) { return [e.id, e.nombre]; }), '') + sel('imEnGen', D.familias.map(function (f) { return [f.generos[0], f.generos[0]]; }), '') + btn('Encargar', 'imEncargar', '', 'primario') + '</div>' +
       I.ofertasEncargo().map(function (x) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(S.estudios[x.est].nombre) + '</b><span class="tenue chico">Quiere una obra de ' + esc(x.gen.toLowerCase()) + ' · te paga ' + dinero(x.pago) + '</span></div>' + btn('Aceptar', 'imAceptarEnc', x.id) + '</div>'; }).join('') +
       (S.encargoPend ? '<p class="bien chico">Encargo aceptado: tu próxima obra de ' + esc(S.encargoPend.gen.toLowerCase()) + ' lo cumple.</p>' : '');
-    h += '<h3>Financiar proyectos ajenos</h3><p class="nota">Pones el 25 % del costo y recibes el 30 % de su parte de taquilla.</p>' + (I.proyectosAjenos().map(function (o) {
+    h += '<h3>Financiar proyectos ajenos</h3><p class="nota info">Pones el 25 % del costo y recibes el 30 % de su parte de taquilla.</p>' + (I.proyectosAjenos().map(function (o) {
       return '<div class="cal-ev"><div class="col crece"><b>' + esc(o.tit) + '</b><span class="tenue chico">' + esc(S.estudios[o.est].nombre) + ' · pones ' + dinero(Math.round(O.costoTotal(o) * 0.25)) + '</span></div>' + btn('Financiar', 'imFinanciar', o.id) + '</div>';
     }).join('') || '<p class="tenue chico">Ningún proyecto busca dinero ahora.</p>');
-    h += '<h3>Distribución exclusiva</h3><p class="nota">Distribuyes las obras de un rival y te quedas con el 8 % de su taquilla.</p>' + I.distribuciones().filter(function (d) { return d.hasta > S.t; }).map(function (d) { return '<p class="chico">' + esc(S.estudios[d.est].nombre) + ' hasta ' + esc(U.fechaCorta(d.hasta)) + '</p>'; }).join('') +
+    h += '<h3>Distribución exclusiva</h3><p class="nota info">Distribuyes las obras de un rival y te quedas con el 8 % de su taquilla.</p>' + I.distribuciones().filter(function (d) { return d.hasta > S.t; }).map(function (d) { return '<p class="chico">' + esc(S.estudios[d.est].nombre) + ' hasta ' + esc(U.fechaCorta(d.hasta)) + '</p>'; }).join('') +
       '<div class="fila">' + sel('imDiEst', rivs.map(function (e) { return [e.id, e.nombre + ' · ' + dinero(I.costoDistribucion(e.id)) + '/año']; }), '') + btn('Firmar 2 años', 'imDistrib', '', 'primario') + '</div>';
-    h += '<h3>Negocios para fans</h3><p>' + ['tienda', 'museo', 'parque', 'arena'].map(function (id) { const x = I.info(id); return x ? (I.tiene(id) ? '✔ ' : '✖ ') + esc(x.nombre) : ''; }).join(' · ') + '</p><p class="nota">Se construyen en Negocio › Construcciones.</p>' +
+    h += '<h3>Negocios para fans</h3><p>' + ['tienda', 'museo', 'parque', 'arena'].map(function (id) { const x = I.info(id); return x ? (I.tiene(id) ? '✔ ' : '✖ ') + esc(x.nombre) : ''; }).join(' · ') + '</p><p class="nota info">Se construyen en Negocio › Construcciones.</p>' +
       (a >= 1950 ? '<div class="fila">' + sel('imEvObra', [['', 'Sin obra en especial']].concat(O.enProduccion(0).concat(O.delEstudio(0, ['lista'])).map(function (o) { return [o.id, o.tit]; })), '') + btn('Organizar convención · ' + dinero(I.costoEvento()), 'imEvento', '', 'primario') + '</div>' : '');
     const inv = I.investigando();
-    h += '<h3>Investigación</h3>' + (inv ? '<p class="bien">Investigas «' + esc(I.invento(inv.id).nombre) + '»: faltan ' + inv.sr + ' semanas.</p>' : '') + '<p class="nota">Un invento propio o licenciado da +1 a su departamento (hasta +3) mientras es novedad (hasta 5 años después de llegar al mundo).</p><div class="col">' +
+    h += '<h3>Investigación</h3>' + (inv ? '<p class="bien">Investigas «' + esc(I.invento(inv.id).nombre) + '»: faltan ' + inv.sr + ' semanas.</p>' : '') + '<p class="nota info">Un invento propio o licenciado da +1 a su departamento (hasta +3) mientras es novedad (hasta 5 años después de llegar al mundo).</p><div class="col">' +
       IA.historia.INVENTOS.filter(function (x) { const e = I.estadoInvento(x); return e !== 'mundo' || x.anio > a - 5; }).slice(0, 14).map(function (x) {
         const e = I.estadoInvento(x), nom = { tuyo: 'Tuyo', licencia: 'Licenciado', mundo: 'Ya llegó al mundo', rival: 'Lo tiene un rival', investigable: 'Investigable', futuro: 'Futuro' }[e];
         const accion = e === 'investigable' ? btn('Investigar · ' + dinero(I.costoInvento(x)) + ' · ' + I.semanasInvento(x) + ' sem', 'imInvestigar', x.id, 'primario', inv ? 'Ya investigas otra cosa' : '') : e === 'rival' ? btn('Licenciar · ' + dinero(I.costoLicenciaTec(x)), 'imLicTec', x.id) : '';
@@ -137,7 +137,7 @@ IA.imperioUI = (function () {
     const l = IA.historia.lineaDeTiempo();
     const pasado = function (x) { return x.y < hoy.y || (x.y === hoy.y && (x.m < hoy.m || (x.m === hoy.m && x.d <= hoy.d))); };
     const vis = st.hist === 'todo' ? l : l.filter(function (x) { return x.y >= a - 15 && x.y <= a + 25; });
-    let h = '<p class="nota">La historia real llega hasta 2026 (sin personas reales); después siguen las eras de ficción y, desde 2150, eventos que salen de tu partida.</p>' +
+    let h = '<p class="nota info">La historia real llega hasta 2026 (sin personas reales); después siguen las eras de ficción y, desde 2150, eventos que salen de tu partida.</p>' +
       '<div class="fila">' + chip('Cerca de hoy', 'hsVer', 'cerca', st.hist === 'cerca') + chip('Toda la historia', 'hsVer', 'todo', st.hist === 'todo') + '</div>';
     const act = IA.historia.activos();
     if (act.length) h += '<div class="tarjeta"><b>Ahora mismo:</b> ' + act.map(function (p) { return esc(p.txt || { guerra1: 'Primera Guerra Mundial', guerra2: 'Segunda Guerra Mundial', depresion: 'Gran Depresión', hays: 'Código de Producción (censura)', huelgaG: 'Huelga de guionistas', huelgaA: 'Huelga de actores' }[p.id] || p.tipo || p.id); }).join(' · ') + '</div>';

@@ -1,5 +1,5 @@
 /* ==== módulo: critica ==== */
-// V22 · Crítica, etiquetas y la vida pública del estudio. Críticos inventados con nombre, medio (según la época),
+// Crítica, etiquetas y la vida pública del estudio. Críticos inventados con nombre, medio (según la época),
 // gustos y frases que dicen qué funcionó o falló; reseñas de tus obras al estrenar (con la proyección para la
 // prensa); etiquetas de recepción (Hit, Pop, Fresco, Olvidado, Podrida) y de prestigio (Culto, Clásico,
 // Invaluable) que cambian con el tiempo; insignias (Hype, Oro, De autor, Blockbuster, Media, Independiente);
@@ -62,7 +62,7 @@ IA.critica = (function () {
       n = Math.round(N.limitar(n + N.normal(0, 5), 5, 100));
       const banda = n >= 72 ? 'alto' : n >= 50 ? 'medio' : 'bajo';
       let f = N.elegir(FRASES[banda]);
-      // V29: un remate al azar para que las reseñas no se repitan en partidas largas
+      // Un remate al azar para que las reseñas no se repitan en partidas largas
       if (N.probabilidad(0.6)) f += ' ' + N.elegir(REMATES[banda]);
       if (banda === 'alto' && mejor) f += ' Brilla ' + DEP_TEXTO[mejor] + '.';
       if (banda === 'bajo' && peor) f += ' Falla ' + DEP_TEXTO[peor] + '.';
@@ -116,7 +116,7 @@ IA.critica = (function () {
     if (O.costoTotal(o) < tipico * 0.5) r.push('Independiente');
     return r;
   }
-  // Las etiquetas pesan en reestrenos (y en las secuelas, V23): la recepción en los primeros 10 años, el prestigio después
+  // Las etiquetas pesan en reestrenos (y en las secuelas): la recepción en los primeros 10 años, el prestigio después
   function factorEtiquetas(o) {
     const edad = N.anio() - (o.anio || N.anio());
     const rc = recepcion(o), pr = prestigio(o);

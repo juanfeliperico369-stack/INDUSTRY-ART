@@ -418,7 +418,7 @@
  "error de la base de datos": "database error",
  "el guardado se canceló (¿sin espacio?)": "saving was canceled (out of space?)",
  "la suma de verificación no coincide": "the checksum doesn't match",
- "no es una partida de INDUSTRY ART V16 o posterior": "this isn't an INDUSTRY ART V16 or later game",
+ "no es una partida de INDUSTRY ART": "this isn't an INDUSTRY ART game",
  "la partida es de una versión más nueva (V": "the game is from a newer version (V",
  "no hay migración desde la V": "there is no migration from V",
  "no se pudo confirmar el guardado": "the save could not be confirmed",

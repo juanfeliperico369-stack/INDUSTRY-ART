@@ -20,7 +20,7 @@ IA.ideas = (function () {
   function v(o, k, porDefecto) { return o[k] === undefined || o[k] === null ? porDefecto : o[k]; }
   function contenidoDe(o) { return o.cont || X.contenidoFamilia[familia(o)]; }
   function nivelEfectos(o) { return N.limitar(v(o, 'fx', 2), 0, 4); }
-  // Completa un borrador del jugador con todos los campos de la V17 (las obras de los rivales usan los de siempre)
+  // Completa un borrador del jugador con todos los campos de la idea (las obras de los rivales usan los de siempre)
   function completar(b, anio) {
     const fam = familia(b);
     if (!b.med) b.med = 'cine';
@@ -40,7 +40,7 @@ IA.ideas = (function () {
     if (!b.cont) b.cont = Object.assign({}, X.contenidoFamilia[fam]);
     if (!b.min) b.min = duracionTipica(anio);
     if (b.cx === undefined) b.cx = 2;
-    // V19: cómo se filma (método, terreno y estilo de producción); se recomiendan según la idea
+    // Cómo se filma (método, terreno y estilo de producción); se recomiendan según la idea
     if (!b.pst) b.pst = 'clasico';
     if (!b.met) b.met = IA.rodaje.metodoRecomendado(b, anio);
     if (!b.ter) b.ter = IA.rodaje.terrenoRecomendado(b);
@@ -64,7 +64,7 @@ IA.ideas = (function () {
   function hayMenores(o) {
     return (o.pj || []).some(function (p) { return p.e < 18 && (p.i === 'protagonista' || p.i === 'secundario'); });
   }
-  // Niños en el elenco (menores de 16): los interpretan niños actores, que solo hacen obras hasta PG-13 (V18)
+  // Niños en el elenco (menores de 16): los interpretan niños actores, que solo hacen obras hasta PG-13
   function hayNinos(o) {
     return (o.pj || []).some(function (p) { return p.e < 16 && (p.i === 'protagonista' || p.i === 'secundario'); });
   }
@@ -207,18 +207,18 @@ IA.ideas = (function () {
     if (o.corr && o.corr !== X.ESTANDAR) f *= X.efectoCorriente(o.corr, anio, fam).costo;
     f *= X.estilo(o.estilo).costo || 1;
     if (o.tv) f *= IA.tv.factorCosto(o);
-    f *= IA.imperio.ahorroRodaje(o); // sede propia en el país del rodaje (V24) // episodios, sala de guionistas y tramas (V23)
+    f *= IA.imperio.ahorroRodaje(o); // sede propia en el país del rodaje // episodios, sala de guionistas y tramas
     f *= N.limitar(Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.55), 0.35, 2.2);
     if (o.rod) {
       const p = D.pais(o.rod), casa = N.S && N.S.estudios[o.est] ? D.pais(N.S.estudios[o.est].pais) : null;
       if (p && casa) f *= N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8);
     }
     if (o.ia) f *= 1 - 0.4 * o.ia / 100; // la IA abarata la producción
-    f *= IA.rodaje.factorCosto(o, anio); // método, terreno, estilo, sets, viaje, incentivos y estudios externos (V19)
+    f *= IA.rodaje.factorCosto(o, anio); // método, terreno, estilo, sets, viaje, incentivos y estudios externos
     // Extras y terceros (figurantes, dobles y personal de apoyo): un número, cada uno suma un poco al costo
     if (o.pj) {
       let extras = o.extras || 0;
-      o.pj.forEach(function (p) { if (p.i === 'extra') extras++; }); // obras de la V17
+      o.pj.forEach(function (p) { if (p.i === 'extra') extras++; }); // obras con extras como personajes
       f *= 1 + 0.003 * extras + 0.001 * (o.terceros || 0);
     }
     return f;
@@ -232,7 +232,7 @@ IA.ideas = (function () {
     const tc = X.tipoCine(o.tipo || 'real');
     const largo = Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.4);
     const fx = v(o, 'fx', 2);
-    const r = IA.rodaje.ajusteSemanas(o); // sets, viaje, estilo, método y terreno (V19)
+    const r = IA.rodaje.ajusteSemanas(o); // sets, viaje, estilo, método y terreno
     return {
       desarrollo: o.ideaIA ? -2 : 0,
       rodaje: tc.semanas * N.limitar(largo, 0.5, 1.6),
@@ -272,7 +272,7 @@ IA.ideas = (function () {
     return n ? parseInt(n[0], 10) : -1;
   }
   function materialesDisponibles(anio) {
-    const S = N.S; // V34: más el material propio del Editor
+    const S = N.S; // Más el material propio del Editor
     return X.dominio.filter(function (m) { return anioMaterial(m) <= anio; }).concat(S && S.edit && S.edit.mat || []);
   }
   // Atractivo de un material por edad [niños, adolescentes, jóvenes, adultos, mayores] y por sexo [hombres, mujeres]
@@ -300,7 +300,7 @@ IA.ideas = (function () {
     u.push(anio);
     if (u.length > 6) u.shift();
   }
-  // ---------- Premisas y tropos (V21) ----------
+  // ---------- Premisas y tropos ----------
   const TODAS_PREMISAS = [];
   X.familiasPremisa.forEach(function (f) { f.items.forEach(function (p) { TODAS_PREMISAS.push(p); }); });
   function famPremisa(p) { return X.familiasPremisa.filter(function (f) { return f.items.indexOf(p) >= 0; })[0]; }
@@ -335,7 +335,7 @@ IA.ideas = (function () {
     });
     return pub;
   }
-  // Enfoque del estudio (V21): 3 géneros y 3 temas con bono, más experiencia con cada obra del enfoque
+  // Enfoque del estudio: 3 géneros y 3 temas con bono, más experiencia con cada obra del enfoque
   function efectoEnfoque(o) {
     const est = N.S.estudios[o.est];
     const en = est && est.enf;
@@ -382,14 +382,14 @@ IA.ideas = (function () {
       const autor = N.elegir(autores);
       const idea = ideaAleatoria(anio, autor.hab);
       const calif = Math.round(N.limitar(N.normal(autor.hab, 10), 25, 98));
-      // V21: la calidad real queda oculta; la primera lectura es una estimación con margen (±12)
+      // La calidad real queda oculta; la primera lectura es una estimación con margen (±12)
       const lect = Math.round(N.limitar(calif + N.normal(0, 7), 20, 99));
       const pags = Math.round(N.limitar(N.normal(110, 15), 70, 160));
       S.guiones.push({ id: N.sigId(), idea: idea, autor: autor.id, nomAutor: autor.nom, calif: calif, lect: lect, margen: 12, pags: pags,
         precio: precioGuion(lect, anio), vence: S.t + 12 });
     }
   }
-  // Informe de lectura pagado (V21): revela la calidad con un margen pequeño (más preciso con un analista)
+  // Informe de lectura pagado: revela la calidad con un margen pequeño (más preciso con un analista)
   function costoInforme(g) { return Math.max(1, Math.round(g.precio * 0.08)); }
   function informeLectura(id, conAnalista) {
     const S = N.S, g = (S.guiones || []).filter(function (x) { return x.id === id; })[0];
@@ -402,7 +402,7 @@ IA.ideas = (function () {
     g.lect = Math.round(N.limitar(g.calif + N.normal(0, g.margen / 2), 20, 99));
     return '';
   }
-  // Regatear (V21): una vez por guion; puede bajar el precio, quedar igual o hacer que el vendedor se retire
+  // Regatear: una vez por guion; puede bajar el precio, quedar igual o hacer que el vendedor se retire
   function regatear(id, conAnalista) {
     const S = N.S, g = (S.guiones || []).filter(function (x) { return x.id === id; })[0];
     if (!g) return { error: 'Ese guion ya no está en venta.' };
@@ -609,7 +609,7 @@ IA.ideas = (function () {
     let s = 0;
     Object.keys(famObj.pesos).forEach(function (k) { r[k] = famObj.pesos[k] * (pr[k] || 1) * (tc[k] || 1); s += r[k]; });
     Object.keys(r).forEach(function (k) { r[k] /= s; });
-    return IA.rodaje.pesosDep(o, r); // vestuario, efectos y animación (V19)
+    return IA.rodaje.pesosDep(o, r); // vestuario, efectos y animación
   }
   function habilidad(id) { const t = id !== undefined && id !== null ? T().porId(id) : null; return t ? t.hab : 45; }
   function equipoCreativo(o) { return (habilidad(o.eq.guion) + habilidad(o.eq.direccion) + habilidad(o.eq.arte)) / 3; }
@@ -665,9 +665,9 @@ IA.ideas = (function () {
     if (fam === 'SM' && contenidoDe(o).terror >= 2) pub += 1;
     // Multitudes: muchos extras lucen en la acción y en las épocas pasadas
     if ((o.extras || 0) >= 12 && (fam === 'AA' || (o.epo && o.epo !== 'actualidad'))) pub += 1;
-    add(IA.rodaje.ajusteNotas(o, anio)); // estilo de producción, método, terreno y sets (V19)
-    pub += efectoPremisas(o, anio); // premisas y tropos (V21)
-    add(efectoEnfoque(o)); // enfoque del estudio (V21)
+    add(IA.rodaje.ajusteNotas(o, anio)); // estilo de producción, método, terreno y sets
+    pub += efectoPremisas(o, anio); // premisas y tropos
+    add(efectoEnfoque(o)); // enfoque del estudio
     return { crit: crit, pub: pub };
   }
   // Lo que se decide con azar al terminar: efectos aplaudidos o repudiados y el resultado de la IA
@@ -694,7 +694,7 @@ IA.ideas = (function () {
   function edadesExtra(o) {
     const tc = X.tipoCine(o.tipo || 'real').edades;
     const focos = (o.pubs || []).map(X.publico).filter(function (x) { return x && x.edades; });
-    const ep = IA.rodaje.edades(o); // estilo de producción: unos lo aman y otros lo rechazan (V19)
+    const ep = IA.rodaje.edades(o); // estilo de producción: unos lo aman y otros lo rechazan
     if (!tc && !focos.length && !ep) return null;
     const r = ep || [1, 1, 1, 1, 1];
     if (tc) tc.forEach(function (x, i) { r[i] *= x; });
@@ -716,7 +716,7 @@ IA.ideas = (function () {
   // Una historia conocida ya tiene público que la espera
   function bonoConocimiento(o) {
     const m = o.mat && X.material(o.mat);
-    return (m ? 0.08 * m.fama : 0) + (o.dcon || 0); // + convenciones y portadas (V22)
+    return (m ? 0.08 * m.fama : 0) + (o.dcon || 0); // + convenciones y portadas
   }
   // Estimación orientativa del retorno (multiplicador) antes de empezar
   function retornoEstimado(calidad) {

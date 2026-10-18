@@ -1,5 +1,5 @@
 /* ==== módulo: prensa ==== */
-// V22 · Convenciones (cultura pop desde 1970; antes, exposiciones universales) con salas por familia y tres
+// Convenciones (cultura pop desde 1970; antes, exposiciones universales) con salas por familia y tres
 // acciones por convención; rueda de prensa con promesas que castigan si la obra no cumple; ánimo de los fans;
 // paquetes de prensa (portada); radar de redes (desde 1995; antes, columnas de chismes); rivales que mueven fechas.
 IA.prensa = (function () {

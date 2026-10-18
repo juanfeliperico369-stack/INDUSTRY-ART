@@ -1,5 +1,5 @@
 /* ==== módulo: tele_ui ==== */
-// V23 · Pantallas de franquicias (lista, biografía y línea por fecha, personajes, continuidades, licencias,
+// Pantallas de franquicias (lista, biografía y línea por fecha, personajes, continuidades, licencias,
 // crossovers, mente maestra, registro, venta), Adquisición (derechos de rivales, libros y dominio público), botón
 // Continuación con los siete caminos y la llamada al elenco, nueva serie (formato, episodios, sala, tramas,
 // piloto y pitch), dónde se emite, renovar o cancelar; canal propio (parrilla, autocompletar, público por grupos,
@@ -22,7 +22,7 @@ IA.teleUI = (function () {
     const S = N.S;
     const vivas = F.lista().filter(function (f) { return f.est === 0; });
     const sueltas = S.obras.filter(function (o) { return o.est === 0 && !o.fr && o.pub !== undefined && F.dueno(o) === 0; }).sort(function (a, b) { return b.pub - a.pub; }).slice(0, 12);
-    let h = '<p class="nota">Toda obra nace como franquicia. Continúala, regístrala, licencia a sus personajes o únela con otra. La fatiga del público sube con cada entrega seguida.</p>';
+    let h = '<p class="nota info">Toda obra nace como franquicia. Continúala, regístrala, licencia a sus personajes o únela con otra. La fatiga del público sube con cada entrega seguida.</p>';
     h += (S.ofFr || []).map(function (x, i) { const f = F.porId(x.fr); return f ? '<div class="tarjeta"><b>' + esc(nomEst(x.est)) + '</b> quiere comprar «' + esc(f.nom) + '» por ' + dinero(x.precio) + '<div class="fila">' + btn('Vender', 'tvVenderOf', i, 'primario') + btn('Rechazar', 'tvRechazarOf', i) + '</div></div>' : ''; }).join('');
     h += '<h3>Tus franquicias</h3>' + (vivas.length ? '<div class="col">' + vivas.map(function (f) {
       const b = F.biografia(f);
@@ -55,7 +55,7 @@ IA.teleUI = (function () {
       if (pr.length && f.pers.length) h += '<div class="fila">' + sel('tvLicPers', f.pers.map(function (p) { return [p.k, p.n]; }), st.licP || f.pers[0].k) + sel('tvLicProd', pr.map(function (p) { return [p.id, p.nombre]; }), st.licProd || pr[0].id) +
         btn('Canon', 'tvLicenciar', f.id + '|1', 'primario') + btn('No canon (paga más, cansa)', 'tvLicenciar', f.id + '|0') + '</div>';
       const prods = N.S.talentos.filter(function (t) { return t.of === 'produccion' && !t.ret && !t.mu && t.hab >= 55; }).sort(function (x, y) { return y.hab - x.hab; }).slice(0, 15);
-      h += '<h3>Mente maestra</h3><p class="nota">Un productor que guía la franquicia: menos fatiga y algo más de entusiasmo.</p>' + sel('tvMente', [['', 'Nadie']].concat(prods.map(function (t) { return [t.id, t.nom + ' · ' + t.hab]; })), f.mente === null ? '' : f.mente, f.id);
+      h += '<h3>Mente maestra</h3><p class="nota info">Un productor que guía la franquicia: menos fatiga y algo más de entusiasmo.</p>' + sel('tvMente', [['', 'Nadie']].concat(prods.map(function (t) { return [t.id, t.nom + ' · ' + t.hab]; })), f.mente === null ? '' : f.mente, f.id);
       const otras = F.lista().filter(function (x) { return x.est === 0 && x !== f; });
       h += '<h3>Crossover</h3>' + (f.xo.length ? '<p>' + f.xo.map(function (x) { const g = F.porId(x); return g ? esc(g.nom) + ' ' + btn('Crear obra juntas', 'tvCruce', f.id + '|' + g.id, 'primario') + btn('Separar', 'tvSeparar', f.id + '|' + g.id) : ''; }).join('<br>') + '</p>' : '') +
         (otras.length ? '<div class="fila">' + sel('tvXo', otras.map(function (x) { return [x.id, x.nom]; }), st.xo || otras[0].id) + btn('Unir universos', 'tvUnir', f.id) + '</div>' : '<p class="tenue chico">Necesitas otra franquicia viva.</p>');
@@ -120,7 +120,7 @@ IA.teleUI = (function () {
   // ---------- Obras › Adquisición ----------
   function adquisicion() {
     const a = N.anio();
-    let h = '<p class="nota">Compra derechos de franquicias y obras de los rivales, de libros y del dominio público. Lo comprado se continúa como si fuera tuyo.</p><h3>Derechos de rivales</h3><div class="col">';
+    let h = '<p class="nota info">Compra derechos de franquicias y obras de los rivales, de libros y del dominio público. Lo comprado se continúa como si fuera tuyo.</p><h3>Derechos de rivales</h3><div class="col">';
     const v = F.enVenta();
     h += v.length ? v.map(function (x) {
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(x.nom) + '</b><span class="tenue chico">' + (x.tipo === 'franquicia' ? 'Franquicia' : 'Obra suelta') + ' · ' + esc(nomEst(x.est)) + '</span></div><div class="fila entre"><span class="cifra">' + dinero(x.precio) + '</span>' + btn('Comprar', 'tvComprar', x.tipo + '|' + (x.f ? x.f.id : x.o.id), 'primario') + '</div></div>';
@@ -202,7 +202,7 @@ IA.teleUI = (function () {
     h += '<h3>Serie</h3><p>' + esc(fm.nombre) + ' · ' + tv.eps + ' episodios de ' + (o.min || fm.min) + ' min · ' + (fm.vivo ? esc((TV.SUBVIVO.filter(function (x) { return x.id === tv.sub; })[0] || {}).nombre || '') : tv.modo === 'serial' ? 'serializada' : 'episódica') + ' · temporada ' + (tv.temp || 1) + ' · sala de ' + tv.sala + '</p>';
     if (tv.tr) h += '<p>' + tv.tr.map(function (x) { return esc(x.n) + ': <b class="cifra">' + x.v + '</b>'; }).join(' · ') + '</p>';
     if (o.est === 0 && o.et === 'lista') {
-      h += '<p class="nota">Elige dónde se emite.</p><div class="col">' + TV.opcionesEmision(o).filter(function (x) { return !o.pitch || x.id === o.pitch.c; }).map(function (x) {
+      h += '<p class="nota info">Elige dónde se emite.</p><div class="col">' + TV.opcionesEmision(o).filter(function (x) { return !o.pitch || x.id === o.pitch.c; }).map(function (x) {
         return x.id === 'stream' ? '<div class="fila">' + btn('Tu plataforma · semanal', 'tvEmitir', o.id + '|stream|0', 'primario') + btn('Tu plataforma · temporada completa', 'tvEmitir', o.id + '|stream|1') + '</div>' :
           btn(x.nombre + (x.pago ? ' · te pagan ' + dinero(x.pago) : ''), 'tvEmitir', o.id + '|' + x.id, 'primario');
       }).join('') + '</div>';
@@ -245,7 +245,7 @@ IA.teleUI = (function () {
     h += '</div><div class="fila">' + btn('Autocompletar vacías', 'tvAuto', '1', 'primario') + btn('Rehacer toda la parrilla', 'tvAuto', '0') + '</div>';
     h += '<h3>Patrocinadores</h3>' + (c.pat.length ? c.pat.map(function (p) { return '<p>' + esc(p.nom) + ' · ' + esc(TV.FRANJAS[p.f].nombre) + ' · meta ' + m(p.meta) + ' · ' + dinero(p.pago) + '/sem' + (p.mal ? ' · <span class="mal">' + p.mal + ' semanas bajo la meta</span>' : '') + '</p>'; }).join('') : '<p class="tenue chico">Sin patrocinadores.</p>') +
       c.ofPat.map(function (p) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(p.nom) + '</b><span class="tenue chico">' + esc(TV.FRANJAS[p.f].nombre) + ': pide ' + m(p.meta) + ' de audiencia · paga ' + dinero(p.pago) + '/sem por ' + p.sem + ' semanas</span></div>' + btn('Aceptar', 'tvPat', p.id, 'primario') + '</div>'; }).join('');
-    h += '<h3>Noticias exclusivas</h3><p class="nota">Suben la audiencia del noticiero y del canal unas semanas; después vencen.</p>' + c.notis.map(function (x) { return '<p class="bien chico">' + esc(x.txt) + ' · hasta ' + esc(U.fechaCorta(x.hasta)) + '</p>'; }).join('') +
+    h += '<h3>Noticias exclusivas</h3><p class="nota info">Suben la audiencia del noticiero y del canal unas semanas; después vencen.</p>' + c.notis.map(function (x) { return '<p class="bien chico">' + esc(x.txt) + ' · hasta ' + esc(U.fechaCorta(x.hasta)) + '</p>'; }).join('') +
       (c.ofNot.length ? c.ofNot.map(function (x) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(x.txt) + '</b><span class="tenue chico">+' + Math.round(x.bono * 100) + ' % por ' + x.sem + ' semanas</span></div>' + btn(dinero(x.costo), 'tvNoticia', x.id, 'primario') + '</div>'; }).join('') : '<p class="tenue chico">No hay exclusivas a la venta esta semana.</p>');
     return h;
   }
@@ -275,7 +275,7 @@ IA.teleUI = (function () {
     }).join('') + '</div>';
     const propias = S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada' && !s.cat.some(function (x) { return x.o === o.id; }); }).slice(-8);
     if (propias.length) h += '<div class="fila">' + sel('tvPropia', propias.map(function (o) { return [o.id, o.tit]; }), st.propia || propias[0].id) + btn('Agregar obra tuya', 'tvAgregar') + '</div>';
-    h += '<h3>Licencias disponibles</h3><p class="nota">Puedes ofrecer menos: aceptan, contraofertan o se retiran.</p><div class="col">' + (s.ofLic.length ? s.ofLic.map(function (x, i) {
+    h += '<h3>Licencias disponibles</h3><p class="nota info">Puedes ofrecer menos: aceptan, contraofertan o se retiran.</p><div class="col">' + (s.ofLic.length ? s.ofLic.map(function (x, i) {
       return '<div class="tarjeta"><b>' + esc(x.nom) + '</b> <span class="tenue chico">' + esc(nomEst(x.est)) + '</span><div class="fila">' + ST.MODOS.map(function (mo) { return btn(mo.nombre + ' · ' + dinero(x.p * mo.k), 'tvLic', i + '|' + mo.id); }).join('') + '</div>' +
         '<div class="fila"><input type="number" id="tvOferta' + i + '" placeholder="Tu oferta (temporal)">' + btn('Ofrecer', 'tvOfrecer', i) + '</div></div>';
     }).join('') : '<p class="tenue">Sin ofertas este mes.</p>') + '</div>';
@@ -283,7 +283,7 @@ IA.teleUI = (function () {
       const l = s.lineas.filter(function (x) { return x.id === p.id; })[0];
       return '<div class="cal-ev"><div class="col crece"><b>' + esc(p.nom) + '</b><span class="tenue chico">' + p.n + ' títulos al mes · ' + dinero(ST.cuotaLinea(p)) + '/mes' + (l ? ' · hasta ' + esc(U.fechaCorta(l.hasta)) : '') + '</span></div>' + (l ? '' : btn('Contratar un año', 'tvLinea', p.id)) + '</div>';
     }).join('') + '</div>';
-    h += '<h3>Mercado negro</h3><p class="nota">Tres títulos atractivos y baratos. Si llega la demanda: multa, menos prestigio y te los quitan.</p>' + btn('Comprar lote · ' + dinero(ST.costoNegro()), 'tvNegro', '', 'mal');
+    h += '<h3>Mercado negro</h3><p class="nota info">Tres títulos atractivos y baratos. Si llega la demanda: multa, menos prestigio y te los quitan.</p>' + btn('Comprar lote · ' + dinero(ST.costoNegro()), 'tvNegro', '', 'mal');
     return h;
   }
   ac('tvLanzar', function () { avisar(ST.lanzar(document.getElementById('tvNomStream').value), '¡Tu plataforma está en línea!'); U.refrescar(); });

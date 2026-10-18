@@ -1,5 +1,5 @@
 /* ==== módulo: prensa_ui ==== */
-// V22 · Pantallas de premios (vitrina, galas, archivo), festivales (crónica, rumores, inscripción, subasta),
+// Pantallas de premios (vitrina, galas, archivo), festivales (crónica, rumores, inscripción, subasta),
 // revista, radar de redes, filmografía, panel, cronología y biografía del estudio; en la ficha de la obra, la
 // crítica con sus etiquetas e insignias, campañas y festivales; convención en vivo, proyección para la prensa y
 // ceremonias con sobre.
@@ -15,7 +15,7 @@ IA.prensaUI = (function () {
   // ---------- Premios: vitrina, próximas galas y archivo ----------
   function premios() {
     const S = N.S, anio = N.anio();
-    let h = '<p class="nota">Cada premiación mira las obras del año anterior. Compiten las obras reales de todos los estudios.</p><h3>Vitrina</h3><div class="col">';
+    let h = '<p class="nota info">Cada premiación mira las obras del año anterior. Compiten las obras reales de todos los estudios.</p><h3>Vitrina</h3><div class="col">';
     PM.GALAS.forEach(function (g) {
       if (anio < g.desde) return;
       const tg = (anio - S.y0) * 52 + g.sem - 1, falta = tg >= S.t ? tg - S.t : tg + 52 - S.t;
@@ -46,7 +46,7 @@ IA.prensaUI = (function () {
   function festivales() {
     const S = N.S, anio = N.anio();
     const lista = PM.festivalesAnio(anio).filter(function (f) { return st.fFiltro === 'todos' || (st.fFiltro === 'mayor' ? f.prestigio === 3 : f.prestigio < 3); }).sort(function (a, b) { return a.sem - b.sem; });
-    let h = '<p class="nota">Inscribir una obra bloquea su estreno hasta que termine el festival. La selección oficial sale una semana antes; después hay subasta de derechos.</p><div class="chips">' +
+    let h = '<p class="nota info">Inscribir una obra bloquea su estreno hasta que termine el festival. La selección oficial sale una semana antes; después hay subasta de derechos.</p><div class="chips">' +
       chip('Todos', 'prFFiltro', 'todos', st.fFiltro === 'todos') + chip('Circuito mayor', 'prFFiltro', 'mayor', st.fFiltro === 'mayor') + chip('Independientes', 'prFFiltro', 'indep', st.fFiltro === 'indep') + '</div>';
     const inv = PM.invitaciones();
     if (inv.length) h += '<div class="tarjeta"><b>Invitaciones</b>' + inv.map(function (x) { return '<div class="chico">' + esc(x.f.nombre) + ' invita a «' + esc(x.o.tit) + '» · responde antes de ' + esc(U.fechaCorta(x.limite)) + '</div>'; }).join('') + '</div>';
@@ -109,7 +109,7 @@ IA.prensaUI = (function () {
     if (b) h += '<div class="tarjeta"><h3>Biografía pública</h3><p class="chico">Mejor obra: «' + esc(b.mejor.tit) + '» · más taquillera: «' + esc(b.taquillera.tit) + '» · más cara: «' + esc(b.cara.tit) + '»' +
       (b.clasico ? ' · mayor clásico: «' + esc(b.clasico.tit) + '»' : '') + ' · obras de culto: ' + b.culto + ' · especialidad: ' + esc(b.genero) + ' · perfil ' + esc(b.perfil) + ' · clase ' + esc(b.clase) + '</p>' +
       '<label class="campo"><span>Mascota del estudio</span><input type="text" maxlength="30" value="' + esc(b.mascota) + '" data-c="prMascota" placeholder="Por ejemplo: un búho con boina"></label></div>';
-    // V34: obras por medio (cine, TV y los otros cuatro medios)
+    // Obras por medio (cine, TV y los otros cuatro medios)
     const todas = S.obras.filter(function (o) { return o.est === 0; });
     const porMedio = [['Cine', todas.filter(function (o) { return !o.tv && (o.med || 'cine') === 'cine'; }).length], ['Televisión', todas.filter(function (o) { return o.tv || o.med === 'tv'; }).length]]
       .concat(['musica', 'juegos', 'teatro', 'libros'].map(function (m) { return [IA.medios.MED[m].nombre, IA.medios.proyectos(m).length]; }));
@@ -158,7 +158,7 @@ IA.prensaUI = (function () {
   ac('prConvencion', function () {
     const c = PR.convencionActual(), s = PR.estado();
     if (!c) return;
-    U.modal('<h2>' + esc(c.nombre) + '</h2><p class="nota">Tres acciones por convención. Solo obras en desarrollo, en cartelera o estrenadas hace menos de 12 meses. Cada sala es de una familia de géneros.</p><p>Acciones restantes: ' + (3 - s.usadas) + '</p>' + PR.elegibles().slice(0, 6).map(function (o) {
+    U.modal('<h2>' + esc(c.nombre) + '</h2><p class="nota info">Tres acciones por convención. Solo obras en desarrollo, en cartelera o estrenadas hace menos de 12 meses. Cada sala es de una familia de géneros.</p><p>Acciones restantes: ' + (3 - s.usadas) + '</p>' + PR.elegibles().slice(0, 6).map(function (o) {
       return '<div class="tarjeta"><b>' + esc(o.tit) + '</b> <span class="tenue chico">sala de ' + esc(D.familia(o.fam || 'DR').nombre.toLowerCase()) + ' · ánimo de los fans ' + PR.animo(o) + '</span><div class="chips">' +
         PR.ACCIONES.filter(function (a) { return a.id !== 'rueda'; }).map(function (a) { return chip(a.nombre, 'prAccion', o.id + ':' + a.id); }).join('') +
         PR.PROMESAS.map(function (p) { return chip('Rueda: ' + p.t, 'prAccion', o.id + ':rueda:' + p.id); }).join('') + '</div></div>';

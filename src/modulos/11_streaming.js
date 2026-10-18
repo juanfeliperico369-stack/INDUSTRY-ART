@@ -1,5 +1,5 @@
 /* ==== módulo: streaming ==== */
-// V23 · Plataforma propia (desde 2007) con tres planes (con anuncios, estándar y premium), suscriptores, costo de
+// Plataforma propia (desde 2007) con tres planes (con anuncios, estándar y premium), suscriptores, costo de
 // servidores e ingresos; catálogo propio, comprado y licenciado (exclusiva, global o temporal) con propuestas de ida
 // y vuelta y contratos que se extienden; capacidad de biblioteca con costo de almacenamiento y bóvedas; líneas de
 // suministro y mercado negro de contenido.

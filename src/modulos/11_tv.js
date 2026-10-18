@@ -1,5 +1,5 @@
 /* ==== módulo: tv ==== */
-// V23 · Televisión: formatos por época (temporada larga, telenovela, miniserie, temporada corta y programas en
+// Televisión: formatos por época (temporada larga, telenovela, miniserie, temporada corta y programas en
 // vivo), de 2 a 300 episodios y de 5 a 180 minutos; episódica o serializada; sala de guionistas; 2 o 3 tramas
 // con nota; piloto antes de pedir la temporada; presentar la idea (pitch); elegir dónde se emite (tu canal, la
 // cadena de un rival, tu plataforma o una ajena); audiencias por episodio; renovar o cancelar. Canal propio con
@@ -189,7 +189,7 @@ IA.tv = (function () {
       for (let i = 0; i < n; i++) {
         const q = calidadEp(o);
         let aud;
-        if (em.d === 'stream') { aud = (S.stream ? S.stream.subs : 0) / 1e6 * 0.25 * Math.pow(q / 60, 1.4); const h = S.stream && S.stream.hist[S.stream.hist.length - 1]; if (h) em.ing += Math.round(h.ing * 0.12 / Math.max(1, f.sem)); } // V29: parte de la plataforma que se le atribuye a la serie (solo estadística)
+        if (em.d === 'stream') { aud = (S.stream ? S.stream.subs : 0) / 1e6 * 0.25 * Math.pow(q / 60, 1.4); const h = S.stream && S.stream.hist[S.stream.hist.length - 1]; if (h) em.ing += Math.round(h.ing * 0.12 / Math.max(1, f.sem)); } // Parte de la plataforma que se le atribuye a la serie (solo estadística)
         else if (em.d === 'ajena') aud = hogares(a) * 0.05 * Math.pow(q / 60, 1.4);
         else if (em.d === 'cable') aud = hogares(a) * 0.06 * competencia(a) * Math.pow(q / 60, 1.6);
         else aud = 0; // en tu canal la audiencia la calcula la parrilla
@@ -223,7 +223,7 @@ IA.tv = (function () {
   }
   function cancelar(id) { const o = O.porId(+id); if (o && o.tv) o.tv.ren = 'cancelada'; }
   // ---------- Canal propio ----------
-  function costoCanal() { return Math.round(tip() * 4 * (D.industria(N.S.estudios[0].industria).canal || 1)); } // V34: industria Televisión, 40 % menos
+  function costoCanal() { return Math.round(tip() * 4 * (D.industria(N.S.estudios[0].industria).canal || 1)); } // Industria Televisión, 40 % menos
   function comprarCanal(nom, tema) {
     const s = N.S;
     if (s.canal) return 'Ya tienes canal.';

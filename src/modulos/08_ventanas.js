@@ -1,5 +1,5 @@
 /* ==== módulo: ventanas ==== */
-// V20 · Lanzamiento: la vida de una obra después de los cines. Las ventanas van en orden (cines, video
+// Lanzamiento: la vida de una obra después de los cines. Las ventanas van en orden (cines, video
 // doméstico, televisión y streaming) salvo que se elija estrenar directo en video o en streaming. Cada ventana
 // tiene sus estadísticas (copias, espectadores, vistas) y el video sus certificaciones de oro, platino y diamante
 // desde su año real. Lo que el estudio gana en total no cambia en promedio: desde que existe la TV, una parte de
@@ -86,7 +86,7 @@ IA.ventanas = (function () {
   const ADELANTO = 0.35;
   // Cobra lo de una ventana; los talentos con porcentaje también cobran su parte (como en la taquilla)
   function cobrar(o, cat, monto) {
-    IA.negocio.cobrarEn(o.est, cat, cat === 'video' || cat === 'streaming' ? monto * IA.historia.pirateria(N.anio()) : monto); // piratería por época (V24)
+    IA.negocio.cobrarEn(o.est, cat, cat === 'video' || cat === 'streaming' ? monto * IA.historia.pirateria(N.anio()) : monto); // piratería por época
     if (!o.pctT) return;
     let pct = 0;
     Object.keys(o.pctT).forEach(function (id) { pct += o.pctT[id]; });
@@ -213,7 +213,7 @@ IA.ventanas = (function () {
     const premios = 1 + 0.15 * (o.aw || []).length;
     const rem = o.rem ? 1.4 : 1;
     const bov = 1 + Math.min(1.5, (o.bovA || 0) * 0.12);
-    const veces = Math.pow(0.5, o.re || 0) * IA.critica.factorEtiquetas(o); // etiquetas (V22)
+    const veces = Math.pow(0.5, o.re || 0) * IA.critica.factorEtiquetas(o); // etiquetas
     return Math.round(orig * 0.05 * calidad * nostalgia * premios * rem * bov * veces * [0.6, 1, 1.4][nivel] * 0.6);
   }
   function costoReestreno(nivel) { return Math.round(E.marketingTipico(N.anio()) * [0.4, 0.8, 1.5][nivel]); }

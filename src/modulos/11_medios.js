@@ -1,5 +1,5 @@
 /* ==== módulo: medios ==== */
-// V25 · Música, videojuegos, teatro y libros con un motor común: proyectos con equipo (la habilidad de cada talento
+// Música, videojuegos, teatro y libros con un motor común: proyectos con equipo (la habilidad de cada talento
 // en ese medio), calidad, ventas semanales por formato, piratería, cuota del mercado y premios del medio (Vinilo,
 // Cartucho, Telón y Pluma). Música: álbumes, EP, sencillos, jingles y bandas sonoras; bandas o solistas con relación,
 // contrato, práctica, giras, separación y reunión; vinilo, casete, CD, descargas y streams; certificaciones.
@@ -10,7 +10,7 @@
 IA.medios = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, X = IA.taxonomia, T = IA.talentos;
-  // V34: piso de costos en dólares de 2025. Antes de 1912 el cine es chico y su presupuesto típico no sirve de vara para
+  // Piso de costos en dólares de 2025. Antes de 1912 el cine es chico y su presupuesto típico no sirve de vara para
   // los demás medios; el teatro cobra entradas a precio de su época, así que su costo nunca baja de una sala de hoy.
   const tip = function (a, med) { a = a || N.anio(); return Math.max(IA.economia.presupuestoTipico(a), IA.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
   function industria() { const e = N.S && N.S.estudios[0]; return D.industria(e && e.industria); }
@@ -62,7 +62,7 @@ IA.medios = (function () {
   const TAMANOS = [{ id: 'bolsillo', nombre: 'Bolsillo', k: 0.8 }, { id: 'estandar', nombre: 'Estándar', k: 1 }, { id: 'grande', nombre: 'Gran formato', k: 1.3 }];
   // La imprenta propia se construye como un piso más
   if (!D.pisos.some(function (x) { return x.id === 'imprenta'; })) D.pisos.push({ id: 'imprenta', nombre: 'Imprenta propia', desde: 1850, costo: 0.4, efecto: 'Tus libros cuestan 30 % menos de imprimir y caben más proyectos de libros' });
-  X.medios.forEach(function (m) { m.activo = true; if (m.id !== 'cine' && m.id !== 'tv') m.version = 'V25'; });
+  X.medios.forEach(function (m) { m.activo = true; });
 
   function st() { const S = N.S; if (!S.med) S.med = { p: [], bandas: [], kits: {}, motores: [], motorLic: [], ofMot: [], premios: [], ing: {} }; return S.med; }
   function disponible(med, anio) { return (anio || N.anio()) >= MED[med].desde; }
@@ -171,7 +171,7 @@ IA.medios = (function () {
   }
   // Lo que puede ganar en total (repartido semana a semana con su caída)
   function potencial(p) {
-    let f = 1.15 * Math.pow(p.pub / 60, 2.2) // V29: rendían de más * Math.exp(N.normal(0, 0.35));
+    let f = 1.15 * Math.pow(p.pub / 60, 2.2) // Rendían de más * Math.exp(N.normal(0, 0.35));
     const fam = famDe(p.med, p.gen); if (fam) f *= 1 + (N.S.mundo.tendencias[fam.eje] || 0) * 0.3;
     const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
     if (bd) { f *= 1 + Math.min(1, bd.fans / 2e6) * 0.5; if (bd.reu) { f *= 1.5; bd.reu = 0; } }
@@ -253,7 +253,7 @@ IA.medios = (function () {
         certificar(p);
       }
       if (p.et === 'lanzado' && p.pw > 60) { p.et = 'catalogo'; p.sop = 0; }
-      if (p.et === 'catalogo' && S.t - p.fe > 52 * 5 && p.hs.length) p.hs = []; // memoria (V29)
+      if (p.et === 'catalogo' && S.t - p.fe > 52 * 5 && p.hs.length) p.hs = []; // memoria
     });
     // Los proyectos viejos del catálogo se resumen (memoria)
     if (s.p.length > 120) s.p = s.p.filter(function (p) { return p.et !== 'catalogo' || S.t - p.fe < 52 * 30 || p.cert || p.prem; });
@@ -275,7 +275,7 @@ IA.medios = (function () {
     p.ocup = N.redondear(N.limitar(p.ocup + (p.pub - 60) / 600 + N.normal(0, 0.02), 0.05, 1), 3);
     const entradas = Math.round(s.asientos * p.cfg.funciones * p.ocup * (p.gira ? 0.8 : 1));
     const ing = Math.round(entradas * ep(p.gira ? 60 : 90, a));
-    // V34: cada función cuesta (elenco, sala, técnicos): unos 45 dólares de hoy por butaca, 35 en gira; sin esto una obra
+    // Cada función cuesta (elenco, sala, técnicos): unos 45 dólares de hoy por butaca, 35 en gira; sin esto una obra
     // chica rendía 20 a 50 veces lo invertido. Con la sala llena al 50 % se cubren los gastos.
     const gas = Math.round(p.costo * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 35 : 45, a));
     cobrar(p, ing); IA.negocio.pagar(0, 'produccion', gas); p.gas += gas;

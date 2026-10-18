@@ -1,5 +1,5 @@
 # Bitácora V17 · Fábrica de ideas
-Fecha: 5 de octubre de 2026 · Chat: V17 (Claude Code)
+Fecha: 5 de octubre de 2026
 
 Archivo del juego: `INDUSTRY_ART_v17.html` (597 KB, un solo archivo, funciona sin internet). La V16 queda en el repositorio para comparar, y sus partidas guardadas se abren en la V17.
 

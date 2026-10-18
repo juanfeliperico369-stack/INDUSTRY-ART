@@ -1,5 +1,5 @@
 /* ==== módulo: obras ==== */
-// La ficha de cada obra y su creación: el borrador con todos los campos de la fábrica de ideas (V17), el equipo,
+// La ficha de cada obra y su creación: el borrador con todos los campos de la fábrica de ideas, el equipo,
 // los costos y las semanas de cada etapa. Las reglas de la idea (clasificación, encaje, sinopsis) viven en IA.ideas.
 IA.obras = (function () {
   'use strict';
@@ -10,11 +10,11 @@ IA.obras = (function () {
     lista: 'Lista para estrenar', cartelera: 'En cartelera', emision: 'En emisión', terminada: 'Terminada',
   };
   const ROLES = ['guion', 'direccion', 'produccion', 'fotografia', 'musica', 'edicion', 'arte'];
-  // V19: vestuario, efectos y animación. Se contratan cuando la obra los necesita; efectos y animación también
+  // Vestuario, efectos y animación. Se contratan cuando la obra los necesita; efectos y animación también
   // pueden encargarse a un estudio externo (sin vestuario o efectos propios, el diseñador de arte se ocupa)
-  const ROLES_V19 = ['vestuario', 'efectos', 'animacion'];
-  const TODOS_ROLES = ROLES.concat(ROLES_V19);
-  function rolesDe(o) { return ROLES.concat(ROLES_V19.filter(function (r) { return IA.rodaje.necesita(o, r) && !IA.rodaje.esExterno(o, r); })); }
+  const ROLES_EXTRA = ['vestuario', 'efectos', 'animacion'];
+  const TODOS_ROLES = ROLES.concat(ROLES_EXTRA);
+  function rolesDe(o) { return ROLES.concat(ROLES_EXTRA.filter(function (r) { return IA.rodaje.necesita(o, r) && !IA.rodaje.esExterno(o, r); })); }
   let indice = null;
 
   // Las obras activas (no terminadas) se guardan aparte en memoria: así el juego no recorre miles de obras
@@ -57,7 +57,7 @@ IA.obras = (function () {
       return true;
     }).map(function (c) { return c.id; });
   }
-  // La recomendada sale del contenido típico de la familia (V17: la clasificación se calcula desde el contenido)
+  // La recomendada sale del contenido típico de la familia (la clasificación se calcula desde el contenido)
   function clasificacionRecomendada(gen, anio) {
     const fam = D.familiaDe[gen[0]] || 'DR';
     return IA.ideas.clasificar({ gen: gen, clasN: fam === 'AV' }, anio);
@@ -124,7 +124,7 @@ IA.obras = (function () {
   function esSecundario(o, id) { return !!(o.pj && o.pj.some(function (p) { return p.t === id && p.i === 'secundario'; })); }
   function costoTalento(o) {
     let s = 0;
-    // Tarifa para este estudio (exclusivos y becados) menos el descuento por porcentaje de taquilla (V18)
+    // Tarifa para este estudio (exclusivos y becados) menos el descuento por porcentaje de taquilla
     const t = function (id) { const x = T.porId(id); return x ? T.salarioCon(T.tarifaPara(x, o.est), o.pctT && o.pctT[id] || 0) : 0; };
     TODOS_ROLES.forEach(function (r) { if (o.eq[r] !== undefined && o.eq[r] !== null && !(r === 'guion' && o.guionPagado)) s += t(o.eq[r]); });
     (o.eq.int || []).forEach(function (id) { s += t(id) * (esSecundario(o, id) ? PARTE_SECUNDARIO : 1); });
@@ -141,9 +141,9 @@ IA.obras = (function () {
     const k = IA.taxonomia.ORDEN_CLAS.indexOf(o.clas);
     const op = { est: o.est, fam: o.fam || D.familiaDe[o.gen[0]], clas: k >= 0 ? k : 2 };
     const usados = [];
-    // Los roles de la V19 que ya no hacen falta (menos efectos, estudio externo) se sueltan
+    // Los roles opcionales que ya no hacen falta (menos efectos, estudio externo) se sueltan
     const roles = rolesDe(o);
-    ROLES_V19.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
+    ROLES_EXTRA.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
     roles.forEach(function (r) {
       if (o.eq[r] !== undefined && o.eq[r] !== null) { usados.push(o.eq[r]); return; }
       const of = D.oficio(r);
@@ -158,7 +158,7 @@ IA.obras = (function () {
     (o.eq.inv || []).concat(o.eq.cam || []).forEach(function (id) { usados.push(id); });
     const base = D.oficio('interprete').base * tipico * a;
     if (o.pj) {
-      // Cada protagonista y secundario tiene su intérprete contratado (V18): primero se reaprovechan los que ya
+      // Cada protagonista y secundario tiene su intérprete contratado: primero se reaprovechan los que ya
       // estaban, después se busca a quien encaje en sexo y edad
       const papeles = o.pj.filter(function (p) { return p.i === 'protagonista'; }).concat(o.pj.filter(function (p) { return p.i === 'secundario'; }));
       const enUso = {};
@@ -241,15 +241,15 @@ IA.obras = (function () {
     return quitados;
   }
   // Recomendado completo: arma el equipo y lo negocia hasta que todos firman (máximo 4 vueltas)
-  // Ajusta solo los roles de la V19 (vestuario, efectos y animación) sin tocar el resto del equipo
-  function ajustarRolesV19(o, ambicion) {
+  // Ajusta solo los roles opcionales (vestuario, efectos y animación) sin tocar el resto del equipo
+  function ajustarRolesExtra(o, ambicion) {
     const roles = rolesDe(o);
-    ROLES_V19.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
+    ROLES_EXTRA.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
     const tipico = E.presupuestoTipico(N.anio()), a = ambicion || 1;
     const k = IA.taxonomia.ORDEN_CLAS.indexOf(o.clas);
     const op = { est: o.est, fam: o.fam || D.familiaDe[o.gen[0]], clas: k >= 0 ? k : 2 };
     const usados = idsEquipo(o);
-    ROLES_V19.forEach(function (r) {
+    ROLES_EXTRA.forEach(function (r) {
       if (roles.indexOf(r) < 0 || (o.eq[r] !== undefined && o.eq[r] !== null)) return;
       const t = T.mejorDisponible(r, D.oficio(r).base * tipico * 2.2 * a, usados, null, 0, op) || T.mejorDisponible(r, Infinity, usados, null, 0, op);
       if (t) { o.eq[r] = t.id; usados.push(t.id); }
@@ -271,7 +271,7 @@ IA.obras = (function () {
   }
   function equipoCompleto(o) {
     if (!ROLES.every(function (r) { return o.eq[r] !== undefined && o.eq[r] !== null; }) || !o.eq.int || !o.eq.int.length) return false;
-    // Una obra animada necesita quien anime: un animador o un estudio externo (V19)
+    // Una obra animada necesita quien anime: un animador o un estudio externo
     if (IA.rodaje.necesita(o, 'animacion') && !(o.eq.animacion !== undefined && o.eq.animacion !== null) && !IA.rodaje.esExterno(o, 'animacion')) return false;
     // Con personajes, cada protagonista y secundario necesita intérprete
     return !o.pj || o.pj.every(function (p) { return (p.i !== 'protagonista' && p.i !== 'secundario') || (p.t !== null && p.t !== undefined); });
@@ -285,7 +285,7 @@ IA.obras = (function () {
     const anio = o.anioPlan || N.anio();
     const f = esc.semanas * N.interp(EPOCA_DURACION, anio);
     const a = IA.ideas.ajusteSemanas(o, anio); // animación, duración, efectos, IA e idea automática
-    const tv = IA.tv.factorSemanas(o); // series: más episodios, más rodaje (V23)
+    const tv = IA.tv.factorSemanas(o); // series: más episodios, más rodaje
     return {
       desarrollo: Math.max(1, Math.round(5 * f) - (r.guion || 0) + a.desarrollo),
       preproduccion: Math.max(1, Math.round(4 * f) + (a.preExtra || 0)),
@@ -324,9 +324,9 @@ IA.obras = (function () {
       o.frp = IA.ideas.frasePremio(o);
     }
     registrar(o);
-    if (o.fr) IA.franquicias.alCrear(o); // franquicias (V23)
-    if (o.tv) IA.tv.alCrear(o); // series vendidas con el pitch (V23)
-    IA.imperio.alCrear(o); // encargos recibidos (V24)
+    if (o.fr) IA.franquicias.alCrear(o); // franquicias
+    if (o.tv) IA.tv.alCrear(o); // series vendidas con el pitch
+    IA.imperio.alCrear(o); // encargos recibidos
     return o;
   }
   // Créditos con nombre (quedan aunque el talento se retire y se borre del mundo)
@@ -369,11 +369,11 @@ IA.obras = (function () {
       'met', 'ter', 'pst', 'rep', 'ext', 'setR', 'lp', 'dq', 'dcrit', 'dpub', 'ddes', 'notas', 'plan', 'campana', 'cmD', 'cmP'];
     S.obras.forEach(function (o) {
       if (o.et !== 'terminada') return;
-      // Series viejas (V23): de las audiencias por episodio queda el promedio
+      // Series viejas: de las audiencias por episodio queda el promedio
       if (o.tv && o.tv.em && o.tv.em.aud.length > 1 && t - (o.fe || 0) > 104) o.tv.em.aud = [N.redondear(o.tv.em.aud.reduce(function (x, y) { return x + y; }, 0) / o.tv.em.aud.length, 2)];
-      // Ventanas terminadas de los rivales (V20): solo queda lo cobrado
+      // Ventanas terminadas de los rivales: solo queda lo cobrado
       if (o.est !== 0 && o.vt && o.vt.fin && (o.vt.video || o.vt.tv || o.vt.streaming)) o.vt = { total: o.vt.total, cob: o.vt.cob, fin: 1 };
-      // Tus obras (V20): la mezcla de canales no se usa después del estreno y de las ventanas cerradas quedan sus cifras
+      // Tus obras: la mezcla de canales no se usa después del estreno y de las ventanas cerradas quedan sus cifras
       if (o.est === 0 && t - (o.fe || 0) > 52 * 2) {
         if (o.plan && o.plan.mix) delete o.plan.mix;
         if (o.plan && o.plan.reg && Object.keys(o.plan.reg).every(function (r) { return o.plan.reg[r] === 'amplio'; })) delete o.plan.reg;
@@ -418,13 +418,13 @@ IA.obras = (function () {
   }
 
   return {
-    ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, ROLES_V19: ROLES_V19, TODOS_ROLES: TODOS_ROLES, rolesDe: rolesDe, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
+    ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, ROLES_EXTRA: ROLES_EXTRA, TODOS_ROLES: TODOS_ROLES, rolesDe: rolesDe, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
     delEstudio: delEstudio, enProduccion: enProduccion, enCartelera: enCartelera, tituloNuevo: tituloNuevo,
     clasificacionesDisponibles: clasificacionesDisponibles, clasificacionRecomendada: clasificacionRecomendada,
     contratos: contratos, negociaciones: negociaciones, resolverNegociaciones: resolverNegociaciones, equipoNegociado: equipoNegociado,
     validarGeneros: validarGeneros, borrador: borrador, recalcular: recalcular, escalaCercana: escalaCercana, idsEquipo: idsEquipo, costoTalento: costoTalento,
     PARTE_SECUNDARIO: PARTE_SECUNDARIO, PARTE_INVITADO: PARTE_INVITADO, PARTE_CAMEO: PARTE_CAMEO,
-    equipoRecomendado: equipoRecomendado, equipoCompleto: equipoCompleto, ajustarRolesV19: ajustarRolesV19, duraciones: duraciones,
+    equipoRecomendado: equipoRecomendado, equipoCompleto: equipoCompleto, ajustarRolesExtra: ajustarRolesExtra, duraciones: duraciones,
     semanasTotales: semanasTotales, estimar: estimar, crear: crear, paraPoster: paraPoster,
     creditosDe: creditos, costoTotal: costoTotal, multiplicador: multiplicador, neto: neto, ingresosTotales: ingresosTotales, compactar: compactar, escalaTono: escalaTono,
   };

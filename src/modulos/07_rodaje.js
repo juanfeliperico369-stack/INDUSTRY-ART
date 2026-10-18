@@ -1,5 +1,5 @@
 /* ==== módulo: rodaje ==== */
-// V19 · Cine a fondo: cómo se hace cada película. Departamentos con nota de F a A+, reparto del presupuesto con
+// Cine a fondo: cómo se hace cada película. Departamentos con nota de F a A+, reparto del presupuesto con
 // un ideal por familia, estilos de producción que unos públicos aman y otros rechazan, locación real, set, CGI o
 // efectos prácticos, terrenos con ventajas, sets que se guardan y se reutilizan, costo local e incentivos de cada
 // país, estudios externos de efectos y animación, dilemas e incidentes de rodaje, prueba de público y la línea de
@@ -69,7 +69,7 @@ IA.rodaje = (function () {
     { id: 'mano', nombre: 'Cámara en mano', desde: 1959, costo: 0.92, crit: 1, pub: 0, ama: [1, 2], rechaza: [4], texto: 'Urgente y cercano: lo aman los jóvenes, no los mayores.' },
     { id: 'videoclip', nombre: 'Videoclip', desde: 1981, costo: 1, crit: -1, pub: 1, ama: [1, 2], rechaza: [3, 4], dep: { musica: 2, edicion: 2 }, texto: 'Montaje rápido y música al frente.' },
     { id: 'found', nombre: 'Metraje encontrado', desde: 1999, costo: 0.5, crit: -1, pub: 0, ama: [1, 2], rechaza: [3, 4], familias: ['SM'], texto: 'La mitad del costo; en suspenso y miedo, +2 al público.' },
-    // Los seis del Plan Maestro v2 (V21): edades 0 niños, 1 adolescentes, 2 jóvenes, 3 adultos, 4 mayores
+    // Los seis del Plan Maestro v2: edades 0 niños, 1 adolescentes, 2 jóvenes, 3 adultos, 4 mayores
     { id: 'estandar', nombre: 'Estándar', desde: 1895, costo: 1, crit: 0, pub: 0, ama: [], rechaza: [], texto: 'Para todo público, sin riesgos.' },
     { id: 'mas16', nombre: '+16', desde: 1968, costo: 1, crit: 0, pub: 1, ama: [1, 2], rechaza: [0], texto: 'Más filo para adolescentes y jóvenes; las familias con niños se alejan.' },
     { id: 'adultos', nombre: 'Adultos', desde: 1968, costo: 1, crit: 1, pub: 0, ama: [3, 4], rechaza: [0, 1], texto: 'Tono maduro: +1 a la crítica, lo aman adultos y mayores.' },
@@ -515,7 +515,7 @@ IA.rodaje = (function () {
     // Un dilema para el jugador (si hay uno que encaje) o un incidente para todos
     if (dil.length && N.probabilidad(0.6)) {
       const d = N.elegir(dil);
-      // Los rivales también tienen dilemas (V20): deciden al momento, casi siempre lo que más les conviene
+      // Los rivales también tienen dilemas: deciden al momento, casi siempre lo que más les conviene
       if (o.est !== 0) {
         o.dil = { id: d.id, t: N.S.t, n: {} };
         d.quien.forEach(function (k) { o.dil.n[k] = n[k].id; });

@@ -1,5 +1,5 @@
 /* ==== módulo: distribucion ==== */
-// V20 · Lanzamiento (pantallas): el plan de estreno de cada obra (vía, fecha con cuenta regresiva, regiones con
+// Lanzamiento (pantallas): el plan de estreno de cada obra (vía, fecha con cuenta regresiva, regiones con
 // su modo y su doblaje, campaña con la mezcla de canales, promociones, expectativa frente a calidad), las ventanas
 // y el dinero en cadena en la ficha de la obra, las acciones del catálogo (reestrenar, remasterizar, bóveda),
 // las cadenas de cines y tus cines en Negocio, y el calendario de 12 meses y las tendencias por región en Mundo.
@@ -46,17 +46,17 @@ IA.distribucion = (function () {
     pg.plan = p;
     const c = ES.costos(o, p, pg.nivM, anio);
     let h = '<h2>Plan de lanzamiento</h2><div class="fila"><canvas class="poster" data-poster="' + o.id + '"></canvas><div class="col"><b>' + esc(o.tit) + '</b><span class="tenue">' + esc(o.gen.join(' · ')) + ' · ' + esc(o.clas) + '</span>' +
-      '<span class="nota">Elige cómo, cuándo y dónde se estrena. La campaña y lo demás se pagan al confirmar.</span></div></div>';
+      '<span class="nota info">Elige cómo, cuándo y dónde se estrena. La campaña y lo demás se pagan al confirmar.</span></div></div>';
 
     // 1. Vía de estreno
     const vias = V.viasDirectas(anio);
     h += '<h3>Vía de estreno</h3><div class="chips">' + chip('Cines', 'plVia', 'cines', p.via === 'cines') +
       chip('Directo a video' + (anio < 1980 ? ' · 1980' : ''), 'plVia', 'video', p.via === 'video', !vias.some(function (v) { return v.id === 'video'; })) +
       chip('Directo a streaming' + (anio < 2010 ? ' · 2010' : ''), 'plVia', 'streaming', p.via === 'streaming', !vias.some(function (v) { return v.id === 'streaming'; })) + '</div>';
-    if (p.via !== 'cines') h += '<p class="nota">Sin cines: no hay taquilla ni premios de taquilla, la campaña cuesta un 30 % y el dinero llega por ' + (p.via === 'video' ? 'la venta de video' : 'el streaming') + ' (y después por las demás ventanas). Conviene para obras flojas.</p>';
+    if (p.via !== 'cines') h += '<p class="nota info">Sin cines: no hay taquilla ni premios de taquilla, la campaña cuesta un 30 % y el dinero llega por ' + (p.via === 'video' ? 'la venta de video' : 'el streaming') + ' (y después por las demás ventanas). Conviene para obras flojas.</p>';
 
     // 2. Fecha con cuenta regresiva
-    h += '<h3>Fecha de estreno</h3><p class="nota">Anunciar con tiempo arma expectativa: cada semana de cuenta regresiva (hasta 8) suma gente que se entera. Las festividades de ' + esc(D.region(est.reg).nombre) + ' pesan el doble en el pronóstico.</p><div class="col">';
+    h += '<h3>Fecha de estreno</h3><p class="nota info">Anunciar con tiempo arma expectativa: cada semana de cuenta regresiva (hasta 8) suma gente que se entera. Las festividades de ' + esc(D.region(est.reg).nombre) + ' pesan el doble en el pronóstico.</p><div class="col">';
     for (let k = 1; k <= 12; k++) {
       const tt = S.t + k, sem = N.semana(tt);
       const temp = E.pronosticoSemana(sem, o.fam, est.reg);
@@ -70,7 +70,7 @@ IA.distribucion = (function () {
     if (p.via === 'cines') {
       // 3. Regiones: modo y doblaje
       const pr = ES.pesoRegiones(anio);
-      h += '<h3>Estreno por región</h3><p class="nota">Amplio: todas las salas. Limitado: 40 % de las salas y de la campaña; si gusta mucho (70+), crece cada semana. Escalonado: llega 4 semanas después. Retener (0): no se estrena ahí y queda para las ventanas.</p>';
+      h += '<h3>Estreno por región</h3><p class="nota info">Amplio: todas las salas. Limitado: 40 % de las salas y de la campaña; si gusta mucho (70+), crece cada semana. Escalonado: llega 4 semanas después. Retener (0): no se estrena ahí y queda para las ventanas.</p>';
       h += D.regiones.map(function (r) {
         const dob = ES.necesitaDoblaje(o, r.id, anio);
         return '<div class="tarjeta"><div class="fila entre"><b class="' + (r.id === est.reg ? 'oro' : '') + '">' + esc(r.nombre) + (r.id === est.reg ? ' (sede)' : '') + '</b><span class="chico tenue">' + (pr[r.id] < 0.01 ? 'menos del 1 %' : U.pct(pr[r.id], 0)) + ' del público</span></div>' +
@@ -79,7 +79,7 @@ IA.distribucion = (function () {
           (dob ? '<label class="interruptor" style="margin:0;border:0"><span>Doblaje · ' + dinero(ES.costoDoblaje(anio)) + '</span><input type="checkbox" data-c="plDob" data-k="' + r.id + '"' + (p.dob[r.id] ? ' checked' : '') + (p.reg[r.id] === 'retener' ? ' disabled' : '') + '></label>' : '<span class="tenue chico">' + (anio < ES.ANIO_SONORO ? 'Cine mudo: sin doblaje' : 'Habla su idioma') + '</span>') + '</div></div>';
       }).join('');
       h += '<div class="chips">' + chip('Copiar el modo de la sede a todas', 'plCopiar', 'sede') + chip('Doblar en todas', 'plDobTodas', '1') + chip('Sin doblajes', 'plDobTodas', '0') + '</div>';
-      h += '<p class="nota">Sin doblaje, en una región de otro idioma la obra rinde un 10 % menos.</p>';
+      h += '<p class="nota info">Sin doblaje, en una región de otro idioma la obra rinde un 10 % menos.</p>';
     }
 
     // 4. Campaña: nivel y mezcla de canales
@@ -93,7 +93,7 @@ IA.distribucion = (function () {
       const cs = E.canalesDe(anio);
       const ev = ES.evaluarMix(o, p.mix, anio);
       const f = ES.factorCampana(prueba);
-      h += '<h4 style="margin:10px 0 4px">Mezcla de canales de ' + anio + '</h4><p class="nota">Cada canal llega mejor a unas edades. Poner todo en uno rinde menos (rendimientos decrecientes).</p>';
+      h += '<h4 style="margin:10px 0 4px">Mezcla de canales de ' + anio + '</h4><p class="nota info">Cada canal llega mejor a unas edades. Poner todo en uno rinde menos (rendimientos decrecientes).</p>';
       cs.forEach(function (ch) {
         const v = Math.round((p.mix && p.mix[ch.id] !== undefined ? p.mix[ch.id] : ch.peso) * 100);
         h += '<label class="campo rango"><span>' + esc(ch.nombre) + ': <b id="rv-mix-' + ch.id + '">' + v + '</b> <span class="tenue">· ' + edadesFuertes(ch.edades) + '</span></span>' +
@@ -124,7 +124,7 @@ IA.distribucion = (function () {
     h += '<h3>Expectativa frente a calidad</h3><div class="kpis">' + kpi('Gente que se enterará', '~' + Math.round(con * 100) + ' %') + kpi('Expectativa', '~' + expect) +
       kpi('Calidad (prueba de público)', calidad !== null ? String(calidad) : 'sin prueba') + '</div>';
     if (calidad !== null) h += '<p class="nota">' + (expect - calidad >= 6 ? 'Promete más de lo que es: abrirá fuerte y caerá rápido cuando corra la voz.' : calidad - expect >= 6 ? 'Es mejor de lo que promete: el boca a boca la hará crecer.' : 'Promesa y calidad van parejas.') + '</p>';
-    else h += '<p class="nota">Sin prueba de público no sabes cuánto gustará. Si la expectativa supera la calidad, cae rápido; si la calidad supera la expectativa, crece.</p>';
+    else h += '<p class="nota info">Sin prueba de público no sabes cuánto gustará. Si la expectativa supera la calidad, cae rápido; si la calidad supera la expectativa, crece.</p>';
 
     // 7. Total
     h += '<h3>Total</h3><div class="kpis">' + kpi('Campaña', dinero(c.campana)) + (c.doblaje ? kpi('Doblajes', dinero(c.doblaje)) : '') + (c.promos ? kpi('Promociones', dinero(c.promos)) : '') + kpi('Total', dinero(c.total), c.total > est.caja ? 'mal' : '') + kpi('Caja', dinero(est.caja)) + '</div>';
@@ -207,7 +207,7 @@ IA.distribucion = (function () {
     h += st.map(function (w) {
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(w.nombre) + '</b><span class="chico ' + (w.estado === 'curso' ? 'bien' : 'tenue') + '">' + esc(txtEstado[w.estado]) + (w.estado === 'pendiente' ? ' ' + esc(U.fechaCorta(w.t0)) : '') + '</span></div>' +
         barra(w.cobrado, w.total) + '<span class="chico">Cobrado ' + dinero(w.cobrado, o.anio) + ' de ' + dinero(w.total, o.anio) + ' · ' + U.grande(w.n) + ' ' + w.unidad + '</span></div>';
-    }).join('') + '<p class="nota">Las ventanas abren en orden: cines, video, TV y streaming. Al firmar, cada comprador adelanta el 35 %.</p>';
+    }).join('') + '<p class="nota info">Las ventanas abren en orden: cines, video, TV y streaming. Al firmar, cada comprador adelanta el 35 %.</p>';
     return h;
   }
   function bloqueDinero(o) {
@@ -234,7 +234,7 @@ IA.distribucion = (function () {
     let h = '<h3>Tu catálogo</h3>';
     const err = V.puedeReestrenar(o);
     if (!err) {
-      h += '<p class="nota">Reestreno en cines (6 semanas). Vale más con nostalgia, premios, remasterización y años en la bóveda; cada reestreno vale la mitad que el anterior.</p><div class="col">' + [0, 1, 2].map(function (n) {
+      h += '<p class="nota info">Reestreno en cines (6 semanas). Vale más con nostalgia, premios, remasterización y años en la bóveda; cada reestreno vale la mitad que el anterior.</p><div class="col">' + [0, 1, 2].map(function (n) {
         const costo = V.costoReestreno(n), val = V.valorReestreno(o, n);
         return '<button class="tarjeta toque fila entre" style="width:100%;margin:0" data-a="catReestreno" data-v="' + o.id + ':' + n + '"><span><b>' + ['Reestreno modesto', 'Reestreno', 'Gran reestreno'][n] + '</b><br><span class="chico">campaña ' + dinero(costo) + '</span></span><span class="chico ' + (val > costo ? 'bien' : 'mal') + '">dejaría ~' + dinero(val) + '</span></button>';
       }).join('') + '</div>';
@@ -261,7 +261,7 @@ IA.distribucion = (function () {
   function negocioDistribucion() {
     const est = est0(), anio = N.anio();
     const n = ES.cinesPropios();
-    let h = '<p class="nota">Con una cadena de cines bajo contrato tus obras llegan a más salas, te dejan una parte mayor de la taquilla y se quedan unas semanas mínimas en cartelera. Pagas una cuota cada mes.</p>';
+    let h = '<p class="nota info">Con una cadena de cines bajo contrato tus obras llegan a más salas, te dejan una parte mayor de la taquilla y se quedan unas semanas mínimas en cartelera. Pagas una cuota cada mes.</p>';
     h += '<div class="kpis">' + kpi('Tus cines', n + ' de 3') + kpi('Contratos activos', Object.keys(est.cad || {}).length) + kpi('Fama del estudio', Math.round(est.fama * 100)) + '</div>';
     h += '<p class="nota">' + (n ? 'Tus ' + n + ' cine' + (n > 1 ? 's' : '') + ' en ' + esc(D.region(est.reg).nombre) + ': +' + (12 * n) + ' % de salas y +' + (12 * n) + ' puntos de la parte del estudio para tus obras allí, y cobran algo de las obras ajenas.' : 'Construye una «Cadena de cines propia» en Negocio › Estudio › Terrenos (hasta 3 cuentan).') + '</p>';
     D.regiones.slice().sort(function (a, b) { return (b.id === est.reg) - (a.id === est.reg); }).forEach(function (r) {
@@ -319,7 +319,7 @@ IA.distribucion = (function () {
   function tendenciasRegion() {
     const est = est0();
     const reg = regTend || est.reg;
-    let h = '<h3>Por región</h3><p class="nota">Cada región tiene sus propias olas: lo que sube en Asia puede bajar en Europa.</p><div class="chips">' + D.regiones.map(function (r) { return chip(r.nombre, 'tendReg', r.id, r.id === reg); }).join('') + '</div>';
+    let h = '<h3>Por región</h3><p class="nota info">Cada región tiene sus propias olas: lo que sube en Asia puede bajar en Europa.</p><div class="chips">' + D.regiones.map(function (r) { return chip(r.nombre, 'tendReg', r.id, r.id === reg); }).join('') + '</div>';
     h += '<div class="desliza"><table class="tabla"><tr><th>Familia</th><th class="n">' + esc(D.region(reg).nombre) + '</th><th>Rumbo</th></tr>' + D.familias.map(function (f) {
       const v = M.tendenciaRegion(reg, f.id);
       return '<tr><td>' + esc(f.nombre) + '</td><td class="n ' + (v > 0.15 ? 'bien' : v < -0.15 ? 'mal' : '') + '">' + (v >= 0 ? '+' : '') + U.decimal(v, 2) + '</td><td class="chico">' + (v > 0.15 ? 'en alza' : v < -0.15 ? 'en baja' : 'estable') + '</td></tr>';

@@ -1,5 +1,5 @@
 /* ==== módulo: calendario ==== */
-// V21 · Calendario completo: los días reales de 1850 a 2150 con su día de la semana. La simulación sigue por
+// Calendario completo: los días reales de 1850 a 2150 con su día de la semana. La simulación sigue por
 // semanas: la semana k del año son los días 7(k-1)+1 a 7k desde el 1 de enero (la 52 llega hasta el 31 de
 // diciembre) y cada evento se procesa en la semana que contiene su día. Nada se fecha al azar: festividades con su
 // regla real (fijas, Pascua gregoriana, Acción de Gracias, luna nueva para el Año Nuevo chino y Diwali, calendario

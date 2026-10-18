@@ -1,5 +1,5 @@
-// Pruebas de reglas de la V17 a la V34 (clasificación, dominio público, Erótico, inflación, población, economía…).
-// Desde la V34 viven fuera del juego, porque al jugador no le sirven y pesaban 30 KB: las cargan tools/bot.js y las
+// Pruebas de reglas (clasificación, dominio público, Erótico, inflación, población, economía…).
+// Viven fuera del juego porque al jugador no le sirven y pesaban 30 KB: las cargan tools/bot.js y las
 // pruebas en el navegador (después de abrir el juego) o en Node. Agregan IA.pruebas.reglas().
 (function () {
   'use strict';
@@ -241,7 +241,7 @@
       const vivas = F.lista();
       prueba('Toda franquicia viva tiene al menos una obra y un canon', vivas.every(function (f) { return f.o.length >= 1 && f.cont.length >= 1; }), vivas.length);
       prueba('El efecto de la franquicia en el deseo está acotado', N.S.obras.every(function (o) { const v = F.bonoDeseo(o); return v >= -15 && v <= 18; }));
-      // V34: dinero y matemática
+      // Dinero y matemática
       const NGc = IA.negocio, uh = N.S.fin.hist[N.S.fin.hist.length - 1];
       prueba('El impuesto es el 25 % de la utilidad operativa del año', !uh || Math.abs(Math.max(0, uh.util) * E.P.IMPUESTO - uh.imp) <= 2, uh ? uh.anio + ': ' + uh.util + ' → ' + uh.imp : '');
       prueba('Préstamos, socio y acciones son capital: mueven la caja pero no la utilidad', NGc.esCapital('prestamo') && NGc.esCapital('amortizacion') && NGc.esCapital('socio') && !NGc.esCapital('taquilla') &&
@@ -249,7 +249,7 @@
       prueba('La caja y las cifras del estudio no tienen NaN ni infinitos', N.S.estudios.every(function (e) { return isFinite(e.caja) && isFinite(e.ingAnio) && isFinite(e.gasAnio); }));
       prueba('Ida y vuelta entre dinero de la época y dólares de hoy', [1850, 1900, 1950, 2000, 2025, 2080].every(function (a) { return Math.abs(M.aHoy(M.aEpoca(1000, a), a) - 1000) < 0.01; }));
     }
-    // V34: inicio desde 1850 y tipo de industria (en una partida aparte; al final se vuelve a la de antes)
+    // Inicio desde 1850 y tipo de industria (en una partida aparte; al final se vuelve a la de antes)
     {
       const antes = N.S, Md = IA.medios;
       prueba('Cada industria existe desde su año y tiene efecto', D.industrias.every(function (x) { return x.desde >= 1850 && x.efecto && x.meds; }) && D.industria('Teatro').desde === 1850 && D.industria('Videojuegos').desde === 1972);

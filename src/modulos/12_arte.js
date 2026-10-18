@@ -12,7 +12,7 @@ IA.arte = (function () {
      Utilidades
      ========================================================= */
 
-  // Hash de texto (el de la V15): entero de 32 bits sin signo.
+  // Hash de texto: entero de 32 bits sin signo.
   function hash(texto) {
     const s = String(texto);
     let h = 7;
@@ -20,7 +20,7 @@ IA.arte = (function () {
     return h;
   }
 
-  // Generador con semilla (mulberry32, el "mb" de la V15). Devuelve () => [0, 1).
+  // Generador con semilla (mulberry32). Devuelve () => [0, 1).
   function azar(semilla) {
     let a = semilla | 0;
     return function () {
@@ -56,7 +56,7 @@ IA.arte = (function () {
   }
 
   // Ajusta un <canvas> a su tamaño CSS × devicePixelRatio y lo deja listo en px CSS.
-  // V33: como mucho ×2 (en pantallas de ×3 se ve igual y cuesta la mitad de memoria y de batería)
+  // Como mucho ×2 (en pantallas de ×3 se ve igual y cuesta la mitad de memoria y de batería)
   function prepararLienzo(canvas, wDef, hDef) {
     if (!canvas || !canvas.getContext) return null;
     const d = Math.min(2, window.devicePixelRatio || 1);
@@ -120,7 +120,7 @@ IA.arte = (function () {
     c.closePath();
   }
 
-  // Colores del tema (variables CSS) con los de la V15 como respaldo.
+  // Colores del tema (variables CSS) con colores fijos de respaldo.
   const TEMA_BASE = {
     fondo: '#0b1020', panel: '#151c33', panel2: '#1e2744', texto: '#e9edf8', tenue: '#8e9ab8',
     acento: '#35d0ba', rosa: '#ff4f81', dorado: '#ffc857', bien: '#35d0ba', mal: '#ff4f81',
@@ -137,7 +137,7 @@ IA.arte = (function () {
   }
 
   /* =========================================================
-     Logo del estudio (igual que la V15)
+     Logo del estudio
      ========================================================= */
 
   const FUENTES = [
@@ -197,7 +197,7 @@ IA.arte = (function () {
   const colorLogo = (L) => colorFrente(L ? L.c : 6);
 
   /* =========================================================
-     Pósters (V15: seis estilos de época y once motivos de género)
+     Pósters (seis estilos de época y once motivos de género)
      ========================================================= */
 
   const ACENTO_MOTIVO = ['#c0392b', '#22d3ee', '#a78bfa', '#ff6fa8', '#f59e0b', '#94a3b8',
@@ -761,7 +761,7 @@ IA.arte = (function () {
   }
 
   /* =========================================================
-     Retratos (base de la V15 + edades, ropa de época y oficio)
+     Retratos (edades, ropa de época y oficio)
      ========================================================= */
 
   const PIELES = ['#f6d7c3', '#efc3a4', '#e3b08b', '#cf9466', '#b07548', '#8d5a36', '#6e4227', '#4e2d1a'];
@@ -770,7 +770,7 @@ IA.arte = (function () {
   const REGIONES = { nam: 0, lat: 1, eur: 2, afr: 3, asi: 4, oce: 5 };
   const RANGO_PIEL = [[0, 7], [1, 6], [0, 4], [4, 7], [0, 5], [0, 7]];
   const PELO_REGION = [[0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2], [0, 1, 2], [0, 1, 2, 3, 4, 5, 6]];
-  // Mismo orden que los roles de la V15 (el fondo del retrato usa índice × 45 de tono).
+  // Orden fijo de los roles (el fondo del retrato usa índice × 45 de tono).
   const OFICIOS = ['guion', 'direccion', 'produccion', 'arte', 'fotografia', 'musica', 'edicion', 'interprete'];
 
   // Rasgos fijos de un talento (datos planos, se guardan con la partida).
@@ -948,7 +948,7 @@ IA.arte = (function () {
     const nino = edad < 13, joven = !nino && edad < 18, adulto = edad >= 18, mayor = edad >= 60;
     anio = anio || 2000;
     const era = epocaRetrato(anio);
-    // Los oficios de la V19 se visten como sus parientes (vestuario y animación con el arte, efectos con la edición)
+    // Vestuario, efectos y animación se visten como sus parientes (vestuario y animación con el arte, efectos con la edición)
     const oficio = OFICIOS.indexOf(t.oficio) >= 0 ? t.oficio : ({ vestuario: 'arte', animacion: 'arte', efectos: 'edicion' })[t.oficio] || 'interprete';
     const piel = PIELES[a.piel] || PIELES[2];
     const pelo = colorPelo(a, edad);
@@ -2038,7 +2038,7 @@ IA.arte = (function () {
       c.fillRect(x, s - alto * 0.3, w, alto * 0.3);
       c.fillStyle = '#2f7fb5';
       c.fillRect(x + 3, s - alto * 0.27, w - 6, alto * 0.22);
-    } else if (L.tipo && L.tipo.indexOf('t_') === 0) { // tierras propias para rodar (V19): un paisaje chico
+    } else if (L.tipo && L.tipo.indexOf('t_') === 0) { // tierras propias para rodar: un paisaje chico
       const ter = L.tipo.slice(2);
       const cielo = { artico: '#cfe3f2', desierto: '#f2d9a4', tropico: '#9fd6c9', mar: '#9cc8ea' }[ter] || '#a9cde8';
       const suelo = { artico: '#f4f8fb', desierto: '#e0b56a', tropico: '#3f9a52', mar: '#2f7fb5', pradera: '#7fb24f', bosque: '#3d7a3c', montana: '#7b7f86', ciudad: '#666a73' }[ter] || '#6a8a4a';
@@ -2394,7 +2394,7 @@ IA.arte = (function () {
     ctx.restore();
   }
 
-  // V34: qué hay en un punto del dibujo del estudio (tocar un piso abre su departamento; un terreno, su ficha)
+  // Qué hay en un punto del dibujo del estudio (tocar un piso abre su departamento; un terreno, su ficha)
   function estudioEn(w, h, datos, x, y) {
     const pisos = ((datos && datos.pisos) || []).filter(Boolean), terrenos = ((datos && datos.terrenos) || []).filter(Boolean);
     const g = geometria(w, h, pisos.length, terrenos);
@@ -2658,7 +2658,7 @@ IA.arte = (function () {
      Gráficas
      ========================================================= */
 
-  // ---------- Gráficas (V34: rejilla con escala, valores al tocar, paleta para daltonismo, anillo y pirámide) ----------
+  // ---------- Gráficas (rejilla con escala, valores al tocar, paleta para daltonismo, anillo y pirámide) ----------
   // Cada gráfica deja en el lienzo sus puntos (_pts: x, y y texto en px CSS); la interfaz muestra el valor al tocar.
   function paletaSeries(T) {
     let dalton = false;
@@ -2864,7 +2864,7 @@ IA.arte = (function () {
   }
 
   /* =========================================================
-     Sonido (pitidos de WebAudio como la V15)
+     Sonido (pitidos de WebAudio)
      ========================================================= */
 
   let audio = null;
@@ -2912,7 +2912,7 @@ IA.arte = (function () {
   }
 
   /* =========================================================
-     Mapa del mundo (V15 wmap): continentes y puntos por país
+     Mapa del mundo: continentes y puntos por país
      puntos: [{ lon, lat, r (0..1), color, etiqueta }]
      ========================================================= */
   function mapa(canvas, continentes, puntos) {

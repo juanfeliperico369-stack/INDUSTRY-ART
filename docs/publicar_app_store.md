@@ -6,7 +6,7 @@ Ojo con los minutos: en un repositorio privado cada minuto de Mac gasta 10 de lo
 
 ## 1. Cuentas
 
-1. **Apple Developer Program**: <https://developer.apple.com/programs/>. Cuesta 99 USD al año. Necesitas un Apple ID con verificación en dos pasos. Como persona, el vendedor que se ve en la tienda es tu nombre legal. Para mostrar un nombre de estudio hace falta inscribirse como empresa, con número D-U-N-S. **No uses «Claude».**
+1. **Apple Developer Program**: <https://developer.apple.com/programs/>. Cuesta 99 USD al año. Necesitas un Apple ID con verificación en dos pasos. Como persona, el vendedor que se ve en la tienda es tu nombre legal. Para mostrar un nombre de estudio hace falta inscribirse como empresa, con número D-U-N-S (por ejemplo, **OneZero**).
 2. **AdMob** (solo si la app es gratis): en la misma cuenta de AdMob de Android, agrega la app «INDUSTRY ART» para **iOS** y un bloque **intersticial**. Anota sus dos identificadores. En Privacidad y mensajes crea también el mensaje **IDFA** (explica el permiso de rastreo antes de que Apple lo pida).
 
 ## 2. Certificado de distribución (sin Mac)

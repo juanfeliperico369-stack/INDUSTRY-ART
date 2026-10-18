@@ -1,5 +1,5 @@
 /* ==== módulo: imperio ==== */
-// V24 · Las construcciones que faltaban (33 en total, las futuras visibles con su pista), sedes en otros países
+// Las construcciones que faltaban (33 en total, las futuras visibles con su pista), sedes en otros países
 // con costos y talentos locales, comprar estudios (con límite antimonopolio) que quedan como filiales con costo
 // mensual y voluntad propia, coproducciones, encargos de ida y vuelta, financiar proyectos ajenos, contratos
 // exclusivos de distribución, tienda, museo, parque y convenciones propias, e investigación de los inventos.
@@ -7,7 +7,7 @@ IA.imperio = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, O = IA.obras;
   const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
-  // Construcciones nuevas (se suman a las de la V16 a la V20)
+  // Construcciones nuevas (se suman a las básicas)
   [
     { id: 'animacion', nombre: 'Departamento de animación', desde: 1915, costo: 0.5, bono: { animacion: 4 }, efecto: '+4 a la animación de tus obras' },
     { id: 'cafeteria', nombre: 'Cafetería y comedor', desde: 1920, costo: 0.2, moral: 2, efecto: 'El equipo come bien: +2 de moral al empezar cada obra' },

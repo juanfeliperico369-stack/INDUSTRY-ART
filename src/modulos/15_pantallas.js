@@ -38,7 +38,7 @@ IA.pantallas = (function () {
       '<button class="btn" data-a="abrirGuardado">' + t('cargar') + '</button>' +
       '<label class="btn">' + t('importar') + '<input type="file" accept=".iasave,application/json" data-c="importarArchivo" class="oculto"></label>' +
       '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' +
-      '<p class="nota">' + t('creditos') + '</p><p class="nota">' + t('v15_aparte') + '</p></div>';
+      '<p class="tenue chico">' + t('creditos') + '</p></div>';
   }
   const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'Felipe', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
     tipo: 'Estudio', industria: 'Cine', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
@@ -59,7 +59,7 @@ IA.pantallas = (function () {
     const nTipicas = cap / tipico2025;
     const L = U.estado.logoNuevo;
     const num = function (k) { return deslizadorLogo(k, L[k], 'npLogo'); };
-    // V21 (Referencia R7): inicio al azar, tarjetas de región y de era, enfoque, trasfondo, arquetipo y modo carrera
+    // Inicio al azar, tarjetas de región y de era, enfoque, trasfondo, arquetipo y modo carrera
     const regs = D.regionesInicio.filter(function (r) { return r.desde <= np.anio; });
     if (!regs.some(function (r) { return r.id === np.region; })) np.region = 'independiente';
     const era = D.erasInicio.filter(function (e) { return np.anio >= e.desde && np.anio <= e.hasta; })[0];
@@ -75,7 +75,7 @@ IA.pantallas = (function () {
           '<br><span class="chico">' + esc(r.mercado) + ' · competencia ' + ['', 'baja', 'media', 'alta'][r.competencia] + ' · capital ×' + U.decimal(r.capital, 2) + ' · prestigio ' + r.prestigio + '</span><br><span class="nota">' + esc(r.texto) + '</span></button>';
       }).join('') + '</div>' +
       (era ? '<div class="tarjeta"><b>Era: ' + esc(era.nombre) + '</b><ul style="margin:6px 0 0 18px;padding:0">' + era.reglas.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>' : '') +
-      '<h3>Enfoque del estudio</h3><p class="nota">3 géneros y 3 temas: tus obras con ellos ganan público y crítica, y cada 5 obras del enfoque suman experiencia.</p><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+      '<h3>Enfoque del estudio</h3><p class="nota info">3 géneros y 3 temas: tus obras con ellos ganan público y crítica, y cada 5 obras del enfoque suman experiencia.</p><div class="fila envolver">' + [0, 1, 2].map(function (i) {
         return '<label class="campo crece"><span>Género ' + (i + 1) + '</span><select data-c="npEnf" data-k="g' + i + '">' + ops(generos.map(function (g) { return [g, g]; }), np.enfG[i]) + '</select></label>';
       }).join('') + '</div><div class="fila envolver">' + [0, 1, 2].map(function (i) {
         return '<label class="campo crece"><span>Tema ' + (i + 1) + '</span><select data-c="npEnf" data-k="t' + i + '">' + ops([['', '—']].concat(temas.map(function (x) { return [x, x]; })), np.enfT[i]) + '</select></label>';
@@ -91,7 +91,7 @@ IA.pantallas = (function () {
       '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
       '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Sufijo del logo</span><select data-c="np" data-k="sufijo">' + ops([['', 'Sin sufijo']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
       '<label class="campo"><span>' + t('np_anio') + '</span><select data-c="npAnio">' + ops(anios.map(function (a) { return [a, a + ' · ' + M.tecnologia(a).nombre]; }), np.anio) + '</select>' +
-      '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota">' + t('np_anio_ayuda') + '</span></label>' +
+      '<input type="number" min="' + J.ANIO_MIN + '" max="' + J.ANIO_MAX + '" value="' + np.anio + '" data-c="npAnio" aria-label="Otro año" style="margin-top:6px"><span class="nota info">' + t('np_anio_ayuda') + '</span></label>' +
       '<label class="campo"><span>Tipo de industria</span><select data-c="npInd">' + ops(D.industrias.filter(function (x) { return x.desde <= np.anio; }).map(function (x) { return [x.id, x.id]; }), indNp().id) + '</select><span class="nota">' + esc(indNp().efecto) + '</span></label>' +
       '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
       '<label class="campo"><span>Visión de la industria</span><select data-c="np" data-k="vision">' + ops(D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.vision) + '</select></label>' +
@@ -107,10 +107,10 @@ IA.pantallas = (function () {
       '<label class="campo crece"><span>' + t('np_edad') + '</span><input type="number" min="16" max="80" value="' + np.avEdad + '" data-i="np" data-k="avEdad"></label></div>' +
       '<button class="btn" data-a="npDadoAvatar">' + icono('dado') + ' Otro nombre para tu avatar</button>' + avatar2 +
       '<label class="campo"><span>' + t('np_personalidad') + '</span><select data-c="np" data-k="personalidad">' + ops(D.personalidades.map(function (p) { return [p.id, p.id]; }), np.personalidad) + '</select></label>' +
-      '<span class="nota">Tus tres especialidades (+1 en esos departamentos de tus obras):</span><div class="fila envolver">' + [0, 1, 2].map(function (i) {
+      '<span class="nota info">Tus tres especialidades (+1 en esos departamentos de tus obras):</span><div class="fila envolver">' + [0, 1, 2].map(function (i) {
         return '<label class="campo crece"><span>Especialidad ' + (i + 1) + '</span><select data-c="npEsp" data-k="' + i + '">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.esp[i]) + '</select></label>';
       }).join('') + '</div>' +
-      '<label class="campo"><span>' + t('np_semilla') + '</span><input type="text" maxlength="24" value="' + esc(np.semilla) + '" data-i="np" data-k="semilla" placeholder="' + t('dado') + '"><span class="nota">' + t('np_semilla_ayuda') + '</span></label>' +
+      '<label class="campo"><span>' + t('np_semilla') + '</span><input type="text" maxlength="24" value="' + esc(np.semilla) + '" data-i="np" data-k="semilla" placeholder="' + t('dado') + '"><span class="nota info">' + t('np_semilla_ayuda') + '</span></label>' +
       '<button class="btn primario bloque" data-a="empezar">' + t('np_empezar') + '</button><p></p><button class="btn bloque" data-a="volverPortada">' + t('volver') + '</button></div>';
   }
   ac('nuevaPartida', function () { U.estado.np = true; cacheT = -1; document.getElementById('vista').innerHTML = nuevaPartida(); U.dibujar(document.getElementById('vista')); alMostrar('nueva'); });
@@ -122,11 +122,11 @@ IA.pantallas = (function () {
     U.acciones.nuevaPartida();
   });
   ac('np', function (v, el) { np[el.getAttribute('data-k')] = v; });
-  // V34: tipo de industria; si el año elegido es anterior a ese medio, se usa el que corresponde a la época
+  // Tipo de industria; si el año elegido es anterior a ese medio, se usa el que corresponde a la época
   function indNp() { const x = D.industria(np.industria); return x.desde <= np.anio && x.id === np.industria ? x : D.industria(np.anio >= D.CINE_DESDE ? 'Cine' : 'Teatro'); }
   ac('npInd', function (v) { np.industria = v; const y = document.getElementById('vista').scrollTop; U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; });
   ac('npNombre', function (v) { np.nombre = v; cacheT = -1; });
-  // Deslizadores de identidad (V15, a pedido): 20 estilos de logo, 20 colores de logo, de fondo y de letras, 20 tipografías
+  // Deslizadores de identidad (a pedido): 20 estilos de logo, 20 colores de logo, de fondo y de letras, 20 tipografías
   const NOMBRES_LOGO = { s: 'Tipo de logo', c: 'Color del logo', b: 'Color de fondo', t: 'Color de letras', f: 'Tipo de letra' };
   function textoLogo(k, v) { return k === 'f' ? NOMBRES_FUENTE[v] : String(+v + 1) + ' de 20'; }
   function deslizadorLogo(k, v, accion) {
@@ -216,11 +216,11 @@ IA.pantallas = (function () {
     O.delEstudio(0, ['lista']).filter(function (o) { return !o.prog; }).forEach(function (o) {
       out.push({ txt: t('tarea_lista', { t: o.tit }), btn: t('programar'), a: 'programar', v: o.id, imp: 1 });
     });
-    // Dilemas de rodaje y pruebas de público que esperan tu decisión (V19)
+    // Dilemas de rodaje y pruebas de público que esperan tu decisión
     J.decisionesPendientes().forEach(function (o) {
       out.push({ txt: '«' + o.tit + '»: ' + (o.dil ? 'un dilema en ' + O.NOMBRE_ETAPA[o.et].toLowerCase() : 'resultado de la prueba de público (' + o.prueba.p + ' de 100)'), btn: 'Decidir', a: 'verDecision', v: o.id, imp: 1 });
     });
-    // V21: vida del avatar, heredero, candidatos y encargos
+    // Vida del avatar, heredero, candidatos y encargos
     if (S.herederos || IA.carrera.vidaPendiente()) out.push({ txt: S.herederos ? 'Elige a tu heredero' : 'Una decisión de tu vida te espera', btn: 'Decidir', a: 'verPendientes', imp: 1 });
     if ((S.candidatos || []).length) out.push({ txt: S.candidatos.length + ' candidatos esperan en la bandeja', btn: 'Ver', a: 'irSede' });
     if ((S.ofertas || []).some(function (o) { return o.vence > S.t; })) out.push({ txt: 'Tienes ofertas de encargo como talento', imp: 1 });
@@ -314,7 +314,7 @@ IA.pantallas = (function () {
       rodajes: prods.filter(function (o) { return o.et === 'rodaje' || o.et === 'preproduccion'; }).map(function (o) { return { titulo: o.tit, progreso: PR.progreso(o) }; }),
     };
   }
-  // Animación del edificio, solo si se ve. V33 (celulares): 20 cuadros por segundo a ×1,5 como mucho; el ciclo se apaga
+  // Animación del edificio, solo si se ve. En celulares: 20 cuadros por segundo a ×1,5 como mucho; el ciclo se apaga
   // cuando el lienzo no está en pantalla, y con «Menos animación» solo se redibuja cuando cambia algo.
   let anim = null, ultimoCuadro = 0, cacheDatos = null, cacheT = -1, firmaQuieta = '';
   let ultimoToque = Date.now();
@@ -340,7 +340,7 @@ IA.pantallas = (function () {
     if (!cacheDatos || cacheT !== tt) { cacheDatos = datosEstudio(); cacheT = tt; }
     IA.arte.estudio(c, w, h, ts, cacheDatos);
   }
-  // V34: tocar un piso del edificio abre su departamento; un terreno, su ficha
+  // Tocar un piso del edificio abre su departamento; un terreno, su ficha
   ac('tocarEstudio', function (v, el, ev) {
     if (!ev || !cacheDatos) return;
     const r = el.getBoundingClientRect(), q = IA.arte.estudioEn(el.clientWidth, el.clientHeight, cacheDatos, ev.clientX - r.left, ev.clientY - r.top);
@@ -402,7 +402,7 @@ IA.pantallas = (function () {
       h += '</div>' + (s === 'panel' ? IA.prensaUI.panel() : IA.prensaUI.filmografia()) + '<div>';
     } else {
       const cat = N.S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada'; }).sort(function (a, b) { return b.fe - a.fe; });
-      const tope = U.estado.catalogoVer || 30; // V33: de 30 en 30 (un catálogo de cientos de obras pesaba en el celular)
+      const tope = U.estado.catalogoVer || 30; // De 30 en 30 (un catálogo de cientos de obras pesaba en el celular)
       h += cat.length ? '<div class="rejilla">' + cat.slice(0, tope).map(function (o) {
         const m = O.multiplicador(o);
         return '<button class="tarjeta toque" style="text-align:left;display:block" data-a="verObra" data-v="' + o.id + '"><canvas class="poster" style="width:100%;height:auto;aspect-ratio:2/3" data-poster="' + o.id + '"></canvas><b>' + esc(o.tit) + '</b><br><span class="tenue chico">' + o.anio + '</span> <span class="etiqueta ' + (m >= 2.5 ? 'bien' : m < 1.4 ? 'mal' : '') + '">' + mult(o) + '</span>' + ((o.aw || []).length ? ' <span class="etiqueta oro">' + o.aw.length + ' premio' + (o.aw.length > 1 ? 's' : '') + '</span>' : '') +
@@ -438,13 +438,13 @@ IA.pantallas = (function () {
       h += '<h3>' + t('bruto') + ' por semana</h3><canvas class="lienzo" data-grafica="' + id2 + '"></canvas>';
     }
     if (o.inf) h += '<h3>' + t('informe') + '</h3><ul>' + o.inf.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
-    // Lanzamiento (V20): dinero en cadena, ventanas y acciones del catálogo
+    // Lanzamiento: dinero en cadena, ventanas y acciones del catálogo
     if (vis) h += IA.distribucion.bloqueDinero(o) + IA.distribucion.bloqueVentanas(o) + IA.distribucion.bloqueCatalogo(o);
     if (vis || o.est === 0) h += IA.prensaUI.bloqueObra(o);
-    h += IA.teleUI.bloqueObra(o); // franquicia y serie (V23)
+    h += IA.teleUI.bloqueObra(o); // franquicia y serie
     if (o.est === 0 || estrenada) h += IA.creacion.bloqueIdea(o);
-    // V34: herramienta de ideas: notas del autor y el documento completo de la idea (trama y datos técnicos) en Word
-    if (o.est === 0 && (o.pj || o.sin || o.gen)) h += '<div class="tarjeta"><h3>Desarrolla tu idea</h3><p class="nota">Descarga la trama completa (planteamiento, nudo, desenlace y escaleta), los personajes y los datos técnicos en un documento de Word. Tus notas van al final.</p>' +
+    // Herramienta de ideas: notas del autor y el documento completo de la idea (trama y datos técnicos) en Word
+    if (o.est === 0 && (o.pj || o.sin || o.gen)) h += '<div class="tarjeta"><h3>Desarrolla tu idea</h3><p class="nota info">Descarga la trama completa (planteamiento, nudo, desenlace y escaleta), los personajes y los datos técnicos en un documento de Word. Tus notas van al final.</p>' +
       '<label class="campo"><span>Notas del autor</span><textarea rows="4" maxlength="4000" data-i="obraDiario" data-v="' + o.id + '" placeholder="Escenas, diálogos, ideas sueltas…">' + esc(o.diario || '') + '</textarea></label>' +
       '<div class="fila"><button class="btn primario" data-a="docIdea" data-v="' + o.id + '">Descargar documento (.docx)</button><button class="btn" data-a="docTexto" data-v="' + o.id + '">Ver la trama</button></div></div>';
     if (o.est === 0) h += IA.creacion.bloqueProduccion(o);
@@ -452,7 +452,7 @@ IA.pantallas = (function () {
       h += '<div class="kpis">' + kpi(t('costo_talento'), dinero(o.cf)) + kpi(t('costo_produccion'), dinero(o.pp * (o.sobre || 1))) + kpi('Gastado en producción', dinero(o.gp || 0)) + '</div>';
     }
     if (o.eq && o.gen) {
-      // Departamentos (V19): la nota de cada uno, en una telaraña; lo que más pesa va primero
+      // Departamentos: la nota de cada uno, en una telaraña; lo que más pesa va primero
       const fam = D.familia(o.fam || 'DR');
       const ns = IA.rodaje.notas(o);
       const gr = U.grafica('radar' + o.id, function (cv) { IA.arte.radar(cv, ns.map(function (n) { return n.v; }), ns.map(function (n) { return n.nombre; })); });
@@ -486,12 +486,12 @@ IA.pantallas = (function () {
     const o = O.porId(+v);
     if (o) U.modal('<h2>' + esc(o.tit) + '</h2><textarea rows="18" style="width:100%" readonly>' + esc(IA.documento.texto(o)) + '</textarea><button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
   });
-  ac('catalogoMas', function () { U.estado.catalogoVer = (U.estado.catalogoVer || 30) + 30; U.refrescar(); }); // V33
+  ac('catalogoMas', function () { U.estado.catalogoVer = (U.estado.catalogoVer || 30) + 30; U.refrescar(); });
 
-  // ---------- Programar estreno: el plan de lanzamiento vive en IA.distribucion (V20) ----------
+  // ---------- Programar estreno: el plan de lanzamiento vive en IA.distribucion ----------
 
   // =====================================================================
-  // TALENTO (la sección y la ficha viven en IA.agencia desde la V18)
+  // TALENTO (la sección y la ficha viven en IA.agencia)
   // =====================================================================
   function talento() { return IA.agencia.talento(); }
   function fichaTalento(id) { return IA.agencia.fichaTalento(id); }
@@ -507,7 +507,7 @@ IA.pantallas = (function () {
   function mCartelera() {
     const S = N.S, sem = S.mercado.semana;
     const cart = O.enCartelera().slice().sort(function (a, b) { return (b.hs[b.hs.length - 1] || 0) - (a.hs[a.hs.length - 1] || 0); });
-    let h = '<p class="nota">Cartelera de la semana pasada en todo el mundo. Compiten tus obras, las de los rivales y las de otras productoras.</p>';
+    let h = '<p class="nota info">Cartelera de la semana pasada en todo el mundo. Compiten tus obras, las de los rivales y las de otras productoras.</p>';
     if (sem) h += '<div class="kpis">' + kpi('Taquilla mundial', dinero(sem.bruto)) + kpi(t('otras_productoras'), dinero(sem.otras)) + kpi('Tu parte', U.pct(sem.bruto ? (sem.porEstudio[0] || 0) / sem.bruto : 0)) + kpi('En cartelera', cart.length) + '</div>';
     h += '<div class="desliza"><table class="tabla"><tr><th>#</th><th>Obra</th><th class="n">Semana</th><th class="n">Total</th><th class="n">Sem.</th></tr>' + cart.slice(0, 15).map(function (o, i) {
       return '<tr' + (o.est === 0 ? ' class="oro"' : '') + ' data-a="verObra" data-v="' + o.id + '" style="cursor:pointer"><td>' + (i + 1) + '</td><td><b>' + esc(o.tit) + '</b><br><span class="tenue chico">' + esc(nombreEstudio(o.est)) + ' · ' + esc(o.gen[0]) + '</span></td><td class="n">' + dinero(o.hs[o.hs.length - 1] || 0) + '</td><td class="n">' + dinero(o.bruto) + '</td><td class="n">' + o.sc + '</td></tr>';
@@ -524,7 +524,7 @@ IA.pantallas = (function () {
   }
   function mTendencias() {
     const S = N.S;
-    return '<h3>En el mundo</h3><p class="nota">Las familias de géneros suben y bajan en olas; si todos estrenan lo mismo, el público se cansa.</p>' + D.familias.map(function (f) {
+    return '<h3>En el mundo</h3><p class="nota info">Las familias de géneros suben y bajan en olas; si todos estrenan lo mismo, el público se cansa.</p>' + D.familias.map(function (f) {
       const v = S.mundo.tendencias[f.id] || 0;
       const w = Math.round(Math.abs(v) * 50);
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(f.nombre) + '</b><span class="' + (v > 0.2 ? 'bien' : v < -0.2 ? 'mal' : 'tenue') + '">' + (v > 0.2 ? 'en alza' : v < -0.2 ? 'en baja' : 'estable') + ' (' + (v >= 0 ? '+' : '') + U.decimal(v, 2) + ')</span></div>' +
@@ -549,11 +549,11 @@ IA.pantallas = (function () {
         return { lon: f.p.lon, lat: f.p.lat, r: f.pub / max, color: propia ? css.getPropertyValue('--dorado').trim() : s ? css.getPropertyValue('--rosa').trim() : css.getPropertyValue('--acento').trim(), destacado: !!s, etiqueta: propia ? f.p.nombre : '' };
       }));
     });
-    let h = '<p class="nota">El tamaño de cada círculo es su público de cine en ' + anio + '. <span class="oro">Dorado</span>: tu sede · <span class="rosa">Rosa</span>: sedes rivales. Tus sedes en otros países se abren en Negocio › Imperio y tus cines propios en Negocio › Estudio › Terrenos.</p>' +
+    let h = '<p class="nota info">El tamaño de cada círculo es su público de cine en ' + anio + '. <span class="oro">Dorado</span>: tu sede · <span class="rosa">Rosa</span>: sedes rivales. Tus sedes en otros países se abren en Negocio › Imperio y tus cines propios en Negocio › Estudio › Terrenos.</p>' +
       '<canvas class="lienzo" style="height:auto;aspect-ratio:2/1" data-grafica="' + g + '"></canvas>';
     h += '<div class="desliza"><table class="tabla"><tr><th>País</th><th class="n">Población</th><th class="n">Entradas/año</th><th class="n">Costo de rodaje</th><th>Sede de</th></tr>' + filas.sort(function (a, b) { return b.pub - a.pub; }).map(function (f) {
       return '<tr><td>' + esc(f.p.nombre) + '<br><span class="tenue chico">' + esc(f.p.idioma) + '</span></td><td class="n">' + U.grande(f.pob) + '</td><td class="n">' + U.grande(f.pub) + '</td><td class="n">×' + U.decimal(f.p.costo, 2) + '</td><td>' + esc((sedes[f.p.id] || []).map(function (e) { return e.nombre; }).join(', ')) + '</td></tr>';
-    }).join('') + '</table></div><p class="nota">Población y entradas por país son aproximadas: salen de su región y de su peso en ella.</p>';
+    }).join('') + '</table></div><p class="nota info">Población y entradas por país son aproximadas: salen de su región y de su peso en ella.</p>';
     return h;
   }
   function mPoblacion() {
@@ -562,7 +562,7 @@ IA.pantallas = (function () {
       kpi('Mercado del cine al año', dinero(M.aEpoca(da.mercado2025, anio))) + kpi('Inflación del año', U.pct(M.inflacionAnual(anio))) + '</div>';
     h += '<h3>Acceso por medio</h3><div class="desliza"><table class="tabla"><tr><th>Región</th><th class="n">Cine</th><th class="n">Radio</th><th class="n">TV</th><th class="n">Internet</th><th class="n">Consolas</th></tr>' + D.regiones.map(function (r) {
       return '<tr><td>' + esc(r.nombre) + '</td>' + ['cine', 'radio', 'tv', 'internet', 'consolas'].map(function (m) { return '<td class="n">' + U.pct(M.accesoMedio(m, r.id, anio), 0) + '</td>'; }).join('') + '</tr>';
-    }).join('') + '</table></div><p class="nota">Radio, TV, internet y consolas compiten con el cine por el tiempo libre, y cada uno es también un mercado propio (TV, streaming, música y videojuegos).</p>';
+    }).join('') + '</table></div><p class="nota info">Radio, TV, internet y consolas compiten con el cine por el tiempo libre, y cada uno es también un mercado propio (TV, streaming, música y videojuegos).</p>';
     h += '<p class="nota">$1 de ' + anio + ' equivale a ' + U.dinero(M.aHoy(1, anio) * 1, 2025).replace('$', '$') + ' de hoy (IPC de EE. UU.). Público = Población × Acceso × Frecuencia.</p>';
     h += '<div class="desliza"><table class="tabla"><tr><th>Región</th><th class="n">Población</th><th class="n">Acceso al cine</th><th class="n">Entradas/año</th><th class="n">Precio</th></tr>' + D.regiones.map(function (r) {
       return '<tr><td>' + esc(r.nombre) + '</td><td class="n">' + U.grande(M.poblacion(r.id, anio)) + '</td><td class="n">' + U.pct(M.accesoCine(r.id, anio), 0) + '</td><td class="n">' + U.grande(da.regiones[r.id].publico) + '</td><td class="n">' + dinero(da.regiones[r.id].precio) + '</td></tr>';
@@ -572,11 +572,11 @@ IA.pantallas = (function () {
       for (let y = 1850; y <= 2150; y += 10) { anios.push(String(y)); vals.push(M.poblacionMundial(y) / 1e6); }
       IA.arte.linea(cv, [{ nombre: 'Millones de personas', color: getComputedStyle(document.documentElement).getPropertyValue('--acento').trim(), valores: vals }], anios, { formato: function (v) { return U.grande(v * 1e6); } });
     });
-    h += '<h3>Población mundial 1850–2150</h3><canvas class="lienzo" data-grafica="' + g1 + '"></canvas><p class="nota">Real hasta 2024, proyección media de la ONU hasta 2100 y ficción del juego hasta 2150 (escenario ' + esc(N.S.escenario) + ').</p>';
+    h += '<h3>Población mundial 1850–2150</h3><canvas class="lienzo" data-grafica="' + g1 + '"></canvas><p class="nota info">Real hasta 2024, proyección media de la ONU hasta 2100 y ficción del juego hasta 2150 (escenario ' + esc(N.S.escenario) + ').</p>';
     const reg = N.S.estudios[0].reg;
     const g2 = U.grafica('piramide', function (cv) {
       const ed = M.edades(reg, anio);
-      IA.arte.piramide(cv, ed.map(function (x) { return Math.round(x * 1000) / 10; }), M.GRUPOS, { formato: function (v) { return U.decimal(v, 1) + ' %'; } }); // V34: pirámide de verdad
+      IA.arte.piramide(cv, ed.map(function (x) { return Math.round(x * 1000) / 10; }), M.GRUPOS, { formato: function (v) { return U.decimal(v, 1) + ' %'; } }); // Pirámide de verdad
     });
     h += '<h3>Pirámide de edades en ' + esc(D.region(reg).nombre) + '</h3><canvas class="lienzo" style="height:220px" data-grafica="' + g2 + '"></canvas>';
     return h;
@@ -590,7 +590,7 @@ IA.pantallas = (function () {
     return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['banco', 'Banco'], ['imperio', 'Imperio'], ['mercado', t('neg_mercado')]], s) +
       ({ finanzas: nFinanzas, estudio: nEstudio, sede: IA.calendarioUI.negocioSede, distribucion: IA.distribucion.negocioDistribucion, canal: IA.teleUI.canal, streaming: IA.teleUI.streaming, banco: IA.imperioUI.banco, imperio: IA.imperioUI.imperio, mercado: nMercado }[s] || nFinanzas)();
   }
-  // V34: primero lo operativo y la utilidad; debajo, el capital (préstamos, socio, acciones), que mueve la caja pero no paga impuestos
+  // Primero lo operativo y la utilidad; debajo, el capital (préstamos, socio, acciones), que mueve la caja pero no paga impuestos
   function tablaLibro(libro) {
     const filas = [], cap = [];
     const fila = function (k, v, ing) { return '<tr><td>' + esc(NG.NOMBRES[k] || k) + '</td><td class="n ' + (ing ? 'bien' : 'mal') + '">' + (ing ? '' : '−') + dinero(v) + '</td></tr>'; };
@@ -604,10 +604,10 @@ IA.pantallas = (function () {
   function nFinanzas() {
     const S = N.S, est = est0(), g = NG.gastosFijosMes(0);
     let h = '<div class="kpis">' + kpi(t('caja'), dinero(est.caja), est.caja < 0 ? 'mal' : '') + kpi(t('comprometido'), dinero(NG.comprometido(0))) + kpi(t('caja_libre'), dinero(NG.cajaLibre(0))) + kpi(t('gasto_fijo'), dinero(g.personal + g.mantenimiento)) + kpi('Impuesto estimado del año', dinero(NG.impuestoEstimado(0))) + '</div>';
-    h += '<div class="dos" style="margin-top:10px"><div class="tarjeta"><h3>Año ' + N.anio() + ' hasta hoy</h3>' + tablaLibro(S.fin.anio) + '<p class="nota">El impuesto del 25 % se paga al cerrar el año, solo sobre las utilidades.</p></div>';
+    h += '<div class="dos" style="margin-top:10px"><div class="tarjeta"><h3>Año ' + N.anio() + ' hasta hoy</h3>' + tablaLibro(S.fin.anio) + '<p class="nota info">El impuesto del 25 % se paga al cerrar el año, solo sobre las utilidades.</p></div>';
     const ult = S.fin.meses[S.fin.meses.length - 1];
     h += '<div class="tarjeta"><h3>Mes en curso</h3>' + tablaLibro(S.fin.mes) + (ult ? '<p class="nota">Mes anterior: ingresos ' + dinero(ult.ing) + ', gastos ' + dinero(ult.gas) + '.</p>' : '') + '</div></div>';
-    // V34: flujo de caja mes a mes (lo operativo; el capital va aparte en la tabla)
+    // Flujo de caja mes a mes (lo operativo; el capital va aparte en la tabla)
     if (S.fin.meses.length > 1) {
       const ms = S.fin.meses.slice(-24);
       const gf = U.grafica('flujo', function (cv) {
@@ -615,7 +615,7 @@ IA.pantallas = (function () {
         IA.arte.barras(cv, netos, ms.map(function (x) { return (x.mes + 1) + '/' + String(x.anio).slice(2); }), { formato: function (v) { return dinero(v); },
           colores: netos.map(function (v) { return v >= 0 ? css.getPropertyValue('--bien').trim() : css.getPropertyValue('--mal').trim(); }) });
       });
-      h += '<h3>Flujo de caja mes a mes</h3><canvas class="lienzo" style="height:180px" data-grafica="' + gf + '"></canvas><p class="nota">Ingresos menos gastos de cada mes. Toca una barra para ver su valor.</p>';
+      h += '<h3>Flujo de caja mes a mes</h3><canvas class="lienzo" style="height:180px" data-grafica="' + gf + '"></canvas><p class="nota info">Ingresos menos gastos de cada mes. Toca una barra para ver su valor.</p>';
     }
     if (S.fin.hist.length) {
       const hist = S.fin.hist.slice(-40);
@@ -626,7 +626,7 @@ IA.pantallas = (function () {
           hist.map(function (x) { return String(x.anio); }), { formato: function (v) { return U.dinero(v, 2025); } });
       });
       h += '<h3>Historial (en dólares de hoy)</h3><canvas class="lienzo" style="height:200px" data-grafica="' + g1 + '"></canvas>';
-      h += '<div class="desliza"><table class="tabla"><tr><th>Año</th><th class="n">' + t('ingresos') + '</th><th class="n">' + t('gastos') + '</th><th class="n">' + t('utilidad') + '</th><th class="n">' + t('impuestos') + '</th><th class="n">' + t('caja') + '</th><th class="n">Cuota</th></tr>' +
+      h += '<div class="desliza"><table class="tabla densa"><tr><th>Año</th><th class="n">' + t('ingresos') + '</th><th class="n">' + t('gastos') + '</th><th class="n">' + t('utilidad') + '</th><th class="n">' + t('impuestos') + '</th><th class="n">' + t('caja') + '</th><th class="n">Cuota</th></tr>' +
         S.fin.hist.slice(-15).reverse().map(function (x) {
           return '<tr><td>' + x.anio + '</td><td class="n">' + dinero(x.ing, x.anio) + '</td><td class="n">' + dinero(x.gas, x.anio) + '</td><td class="n ' + (x.util >= 0 ? 'bien' : 'mal') + '">' + dinero(x.util, x.anio) + '</td><td class="n">' + dinero(x.imp, x.anio) + '</td><td class="n">' + dinero(x.caja, x.anio) + '</td><td class="n">' + U.pct(x.cuota) + '</td></tr>';
         }).join('') + '</table></div>';
@@ -635,7 +635,7 @@ IA.pantallas = (function () {
   }
   function nEstudio() {
     const est = est0(), anio = N.anio();
-    let h = '<p class="nota">Tu edificio crece piso a piso y los terrenos se llenan de sets. Cada construcción cuesta más que la anterior y sube los gastos fijos. Las futuras se ven con candado y su pista. Hay 33 construcciones.</p>';
+    let h = '<p class="nota info">Tu edificio crece piso a piso y los terrenos se llenan de sets. Cada construcción cuesta más que la anterior y sube los gastos fijos. Las futuras se ven con candado y su pista. Hay 33 construcciones.</p>';
     h += '<div class="kpis">' + kpi(t('est_capacidad'), NG.capacidad(0)) + kpi('Pisos', est.pisos.length + ' / ' + D.MAX_PISOS) + kpi('Terrenos', est.terrenos.length + ' / ' + D.MAX_TERRENOS) + kpi(t('caja_libre'), dinero(NG.cajaLibre(0))) + '</div>';
     const fila = function (info, tipo) {
       const err = NG.puedeConstruir(tipo, info.id);
@@ -645,7 +645,7 @@ IA.pantallas = (function () {
     };
     h += '<h3>Pisos del edificio</h3>' + D.pisos.filter(function (p) { return p.id !== 'oficinas'; }).map(function (p) { return fila(p, 'piso'); }).join('');
     h += '<h3>Terrenos</h3>' + D.terrenos.map(function (p) { return fila(p, 'terreno'); }).join('');
-    // Almacén de sets (V19): los sets de tus obras quedan guardados para reusarlos
+    // Almacén de sets: los sets de tus obras quedan guardados para reusarlos
     const sets = est.sets || [];
     h += '<h3>Almacén de sets (' + sets.length + ' de ' + IA.rodaje.capacidadSets(0) + ')</h3>' + (sets.length ? sets.map(function (x) {
       return '<div class="tarjeta fila entre"><div class="col crece"><b>' + esc(x.nombre) + '</b><span class="chico">De «' + esc(x.obra) + '» (' + x.anio + ') · calidad ' + x.q + ' · ' + x.usos + ' uso' + (x.usos === 1 ? '' : 's') + '</span></div><button class="btn" data-a="desarmarSet" data-v="' + x.id + '">Desarmar</button></div>';
@@ -656,7 +656,7 @@ IA.pantallas = (function () {
       ['s', 'c', 'b', 't', 'f'].map(function (k) { return deslizadorLogo(k, est.logo[k] || 0, 'estLogo'); }).join('') +
       '<div class="fila"><label class="btn">' + (U.logoPropio() ? 'Cambiar la imagen del logo' : 'Usar una imagen propia') + '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-c="estLogoImg" class="oculto"></label>' +
       (U.logoPropio() ? '<button class="btn" data-a="estLogoQuitar">Volver al logo dibujado</button>' : '') + '</div>' +
-      '<p class="nota">La imagen propia se guarda solo en este dispositivo: no viaja en la partida, en el archivo .iasave ni en los pósters.</p>' +
+      '<p class="nota info">La imagen propia se guarda solo en este dispositivo: no viaja en la partida, en el archivo .iasave ni en los pósters.</p>' +
       '<label class="campo"><span>Público objetivo</span>' + opsSel('publico', D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.publico) + '</label>' +
       '<label class="campo"><span>Visión de la industria</span>' + opsSel('vision', D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.vision) + '</label>' +
       '<label class="campo"><span>Tipo de estudio</span>' + opsSel('tipo', D.tiposEstudio.map(function (x) { return [x, x]; }), est.tipo) + '</label>' +
@@ -700,7 +700,7 @@ IA.pantallas = (function () {
       '<li>Antimonopolio: con 35 % o más del mercado se abre una investigación con multa.' + (S.investigaciones ? ' Has tenido ' + S.investigaciones + '.' : '') + '</li></ul></div>';
     const da = E.datosAnio(anio);
     h += '<div class="tarjeta"><h3>Economía de ' + anio + '</h3><div class="kpis">' + kpi('Película típica', dinero(da.tipico)) + kpi('Producción típica', dinero(E.produccionTipica(anio, 'DR'))) +
-      kpi('Marketing típico', dinero(E.marketingTipico(anio))) + kpi('Películas del año en el mundo', U.numero(da.peliculas)) + '</div><p class="nota">Una major es uno de los 3 estudios más taquilleros del mundo, con 6 % o más del mercado, tres años seguidos.' + (S.majorDesde ? ' Lo lograste en ' + S.majorDesde + '.' : '') + '</p></div>';
+      kpi('Marketing típico', dinero(E.marketingTipico(anio))) + kpi('Películas del año en el mundo', U.numero(da.peliculas)) + '</div><p class="nota info">Una major es uno de los 3 estudios más taquilleros del mundo, con 6 % o más del mercado, tres años seguidos.' + (S.majorDesde ? ' Lo lograste en ' + S.majorDesde + '.' : '') + '</p></div>';
     return h;
   }
 
@@ -723,13 +723,13 @@ IA.pantallas = (function () {
       compraCompleta() +
       '<p class="nota">' + t('juego') + ' ' + IA.VERSION + ' · ' + IA.publicacion.nombrePlataforma() + ' · ' + t('creditos') + '</p>';
   }
-  // V32: compra única «Versión completa» (solo quita el anuncio); en la web y en PC no aparece
+  // Compra única «Versión completa» (solo quita el anuncio); en la web y en PC no aparece
   function compraCompleta() {
     const P = IA.publicacion;
     if (!P.compraDisponible()) return '';
     if (P.tieneCompleta()) return '<p class="oro">Versión completa · ¡gracias por apoyar el juego!</p>';
     const pr = P.precioGuardado();
-    return '<div class="tarjeta"><h3>Versión completa</h3><p class="nota">Una sola compra quita el anuncio al abrir. El juego es el mismo para todos.</p>' +
+    return '<div class="tarjeta"><h3>Versión completa</h3><p class="nota info">Una sola compra quita el anuncio al abrir. El juego es el mismo para todos.</p>' +
       '<div class="col"><button class="btn primario" data-a="comprarCompleta">Quitar el anuncio' + (pr ? ' · ' + esc(pr) : '') + '</button>' +
       '<button class="btn" data-a="restaurarCompras">Restaurar compras</button></div></div>';
   }
@@ -753,12 +753,12 @@ IA.pantallas = (function () {
       reabrirAjustes();
     });
   });
-  ac('privacidadAnuncios', function () { IA.publicacion.abrirPrivacidad(); }); // V31: consentimiento de Google
+  ac('privacidadAnuncios', function () { IA.publicacion.abrirPrivacidad(); }); // Consentimiento de Google
   ac('ajuste', function (v, el) {
     const k = el.getAttribute('data-k');
     const val = el.type === 'checkbox' ? !!v : (k === 'texto' ? +v : v);
     U.ajuste(k, val);
-    if (k === 'musica') IA.metasUI.musica(val); // música de fondo (V26)
+    if (k === 'musica') IA.metasUI.musica(val); // música de fondo
     if (N.S) U.refrescar();
   });
   ac('salir', function () {
@@ -777,7 +777,7 @@ IA.pantallas = (function () {
     }).join('');
     h += '<div class="col">' + (N.S ? '<button class="btn" data-a="exportar">' + t('gua_exportar') + '</button>' : '') +
       '<label class="btn">' + t('gua_importar') + '<input type="file" accept=".iasave,application/json" data-c="importarArchivo" class="oculto"></label></div>' +
-      '<p class="nota">Las partidas viven en este navegador. Para pasarlas del celular al PC, o para guardar copias seguras, usa el archivo .iasave.</p>';
+      '<p class="nota info">Las partidas viven en este navegador. Para pasarlas del celular al PC, o para guardar copias seguras, usa el archivo .iasave.</p>';
     return h;
   }
   ac('abrirGuardado', function () { IA.guardado.listar().then(function (l) { U.modal(guardado(l)); }); });
@@ -858,7 +858,7 @@ IA.pantallas = (function () {
     for (let i = 0; i < N.S.noticias.length && N.S.noticias[i] !== notiAntes; i++) nuevas.push(N.S.noticias[i]);
     return { r: r, nuevas: nuevas };
   }
-  // V33: el autoguardado espera a que el teléfono esté libre (la semana se ve primero) y nunca se encima con otro
+  // El autoguardado espera a que el teléfono esté libre (la semana se ve primero) y nunca se encima con otro
   let guardando = false;
   function cuandoLibre(fn) { if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: 3000 }); else setTimeout(fn, 60); }
   function autoguardarSiToca(anioAntes, mesAntes) {
@@ -881,10 +881,10 @@ IA.pantallas = (function () {
     res.nuevas.filter(function (n) { return n.imp; }).slice(0, 2).forEach(function (n) { U.aviso(n.texto.split('{$}').join(n.monto !== undefined ? dinero(n.monto, N.anio(n.t)) : '')); });
     if (N.S.quiebra) { detenerAuto(); modalQuiebra(); IA.arte.sonido('fracaso'); return; }
     if (r && r.motivo === 'premios' && N.S.premios.length) mostrarPremios();
-    else if (J.decisionesPendientes().length) IA.creacion.siguienteDecision(); // dilemas y pruebas de público (V19)
-    else if (N.S.proyeccion && IA.prensaUI.proyeccion()) { /* reseñas (V22) */ }
-    else if (IA.imperioUI.mostrarEvento()) { /* evento con decisión (V24) */ }
-    else if (IA.calendarioUI.mostrarPendientes()) { /* vida, heredero o recordatorio (V21) */ }
+    else if (J.decisionesPendientes().length) IA.creacion.siguienteDecision(); // dilemas y pruebas de público
+    else if (N.S.proyeccion && IA.prensaUI.proyeccion()) { /* reseñas */ }
+    else if (IA.imperioUI.mostrarEvento()) { /* evento con decisión */ }
+    else if (IA.calendarioUI.mostrarPendientes()) { /* vida, heredero o recordatorio */ }
     else if (mostrarResumen && r && r.semanas > 1) {
       U.modal('<h2>' + t('resumen_titulo', { n: r.semanas }) + '</h2><div class="kpis">' + kpi(t('ingresos'), dinero(r.ingresos), 'bien') + kpi(t('gastos'), dinero(r.gastos), 'mal') + kpi('Cambio de caja', dinero(r.caja), r.caja >= 0 ? 'bien' : 'mal') + kpi(t('caja'), dinero(est0().caja)) + '</div>' +
         (res.nuevas.length ? '<h3>' + t('mun_periodico') + '</h3>' + res.nuevas.slice(0, 8).map(function (n) { return '<p style="margin:4px 0">' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>'; }).join('') : '') +
@@ -897,7 +897,7 @@ IA.pantallas = (function () {
     return IA.prensaUI.ceremonia(res);
   }
   function modalQuiebra() {
-    return IA.imperioUI.quiebra(); // tres salidas (V24)
+    return IA.imperioUI.quiebra(); // tres salidas
   }
   ac('avanzar', function () {
     if (U.estado.auto) { detenerAuto(); U.renderBarra(); return; }
@@ -952,7 +952,7 @@ IA.pantallas = (function () {
   ac('ritmo', function (v) { U.ajuste('ritmo', v); quitarMenuRitmo(); detenerAuto(); U.renderBarra(); });
   let semanasElegidas = 8;
   ac('semanasRango', function (v) { semanasElegidas = N.limitar(Math.round(+v), 1, 52); const l = document.getElementById('rv-semanas'); if (l) l.textContent = semanasElegidas + (semanasElegidas === 1 ? ' semana' : ' semanas'); });
-  // Avanzar hasta un día elegido en el calendario (V21); se detiene antes si llega algo que decidir
+  // Avanzar hasta un día elegido en el calendario; se detiene antes si llega algo que decidir
   function avanzarHasta(tt) {
     detenerAuto();
     if (N.S && N.S.quiebra) { modalQuiebra(); return; }

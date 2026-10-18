@@ -10,14 +10,14 @@ IA.taxonomia = (function () {
   const alfa = function (a) { return a.slice().sort(function (x, y) { return x.localeCompare(y, 'es'); }); };
 
   // ---------- Medios y tipos de obra ----------
-  // En la V17 se produce cine; los demás medios ya tienen su taxonomía completa y llegan con su economía.
+  // Cada medio con su taxonomía completa; su economía vive en la producción de cine, IA.tv e IA.medios.
   const medios = [
-    { id: 'cine', nombre: 'Cine', desde: 1895, version: 'V16', activo: true },
-    { id: 'tv', nombre: 'Televisión', desde: 1936, version: 'V24' },
-    { id: 'musica', nombre: 'Música', desde: 1877, version: 'V30' },
-    { id: 'juegos', nombre: 'Videojuegos', desde: 1972, version: 'V31' },
-    { id: 'teatro', nombre: 'Teatro', desde: 1850, version: 'V32' },
-    { id: 'libros', nombre: 'Libros', desde: 1850, version: 'V32' },
+    { id: 'cine', nombre: 'Cine', desde: 1895, activo: true },
+    { id: 'tv', nombre: 'Televisión', desde: 1936 },
+    { id: 'musica', nombre: 'Música', desde: 1877 },
+    { id: 'juegos', nombre: 'Videojuegos', desde: 1972 },
+    { id: 'teatro', nombre: 'Teatro', desde: 1850 },
+    { id: 'libros', nombre: 'Libros', desde: 1850 },
   ];
   const tiposPorMedio = {
     tv: sp('Animación,Concurso,Documental,Programa de noticias,Serie,Show,Telenovela'),
@@ -255,7 +255,7 @@ IA.taxonomia = (function () {
     return { crit: Math.round(3 * novedad) + afin + (c.crit || 0), pub: (c.pub || 0) + (novedad > 0.5 ? 1 : 0), costo: c.costo || 1, novedad: novedad };
   }
 
-  // ---------- Tono (V15 TO, con los 13 de tu documento), estilo artístico y prioridad ----------
+  // ---------- Tono, estilo artístico y prioridad ----------
   // Los tonos están en IA.datos.tonos; aquí se agregan los que faltaban.
   [{ id: 'Deprimente', crit: 2, pub: -3 }, { id: 'Melancólico', crit: 2, pub: -1 }, { id: 'Luminoso', crit: 0, pub: 2 }].forEach(function (x) {
     if (!D.tonos.some(function (y) { return y.id === x.id; })) D.tonos.push(x);
@@ -270,7 +270,7 @@ IA.taxonomia = (function () {
     { id: 'Minimalismo', crit: 1, pub: -1, desde: 1960, costo: 0.92, afines: ['AV', 'DR'] }, { id: 'Digital', crit: 0, pub: 1, desde: 1995, afines: ['IM', 'AA'] },
     { id: 'Híbrido', crit: 1, pub: 0, desde: 1990 },
   ];
-  // Prioridad: reparte el peso entre departamentos (V15 PR)
+  // Prioridad: reparte el peso entre departamentos
   const prioridades = [
     { id: 'Híbrido', nombre: 'Híbrido / normal', pesos: {}, efecto: 'Equilibrio entre todo' },
     { id: 'Historia', nombre: 'Historia', pesos: { guion: 1.35, interprete: 1.2 }, efecto: 'Pesan más el guion y la actuación' },
@@ -417,7 +417,7 @@ IA.taxonomia = (function () {
     { id: 'protagonista', nombre: 'Protagonista', max: 10 }, { id: 'secundario', nombre: 'Secundario', max: 15 },
     { id: 'extra', nombre: 'Extra', max: 20, contado: true }, { id: 'invitado', nombre: 'Invitado especial', max: 5 }, { id: 'cameo', nombre: 'Cameo', max: 5 },
   ];
-  // Desde la V18 los extras y los terceros (figurantes, dobles y personal de apoyo) son un número, no personajes
+  // Los extras y los terceros (figurantes, dobles y personal de apoyo) son un número, no personajes
   const MAX_EXTRAS = 20, MAX_TERCEROS = 100;
   // Arquetipos (Jung, Campbell y Vogler) con su palabra para la sinopsis según el sexo [él, ella]
   const arquetipos = [
@@ -510,7 +510,7 @@ IA.taxonomia = (function () {
     lista.forEach(function (g) { const c = GENERO_CINE[g] || g; if (D.familiaDe[c] && out.indexOf(c) < 0) out.push(c); });
     return out.slice(0, 3);
   }
-  const REGLA_DOMINIO = 70; // vida del autor + 70 años (ajustable en el Editor de la V33)
+  const REGLA_DOMINIO = 70; // vida del autor + 70 años (ajustable en el Editor)
 
   // ---------- Índices y búsquedas ----------
   function indice(familias, campo) {
@@ -565,7 +565,7 @@ IA.taxonomia = (function () {
     material: function (id) {
       const d = dominio.filter(function (x) { return x.id === id; })[0];
       if (d) return d;
-      const S = IA.n && IA.n.S; // V34: material propio del Editor (vive en la partida)
+      const S = IA.n && IA.n.S; // Material propio del Editor (vive en la partida)
       return (S && S.edit && S.edit.mat || []).filter(function (x) { return x.id === id; })[0] || null;
     },
     estilo: function (id) { return estilos.filter(function (x) { return x.id === id; })[0] || estilos[0]; },

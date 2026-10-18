@@ -1,5 +1,5 @@
 /* ==== módulo: historia ==== */
-// V24 · Historia viva: cada hito real (1850–2026) en su día exacto, sin personas ni marcas; guerras y crisis que
+// Historia viva: cada hito real (1850–2026) en su día exacto, sin personas ni marcas; guerras y crisis que
 // mueven el mercado por región; Código de Producción (censura de 1934 a 1968); fallo antimonopolio de 1948;
 // piratería por época; huelgas que detienen guiones y rodajes; las eras de ficción (2026–2150) y, después,
 // eventos generados con lo que pasó en tu partida. También los 50 inventos del cine y los del futuro.
@@ -36,7 +36,7 @@ IA.historia = (function () {
     [2100, 1, 1, 'Era orbital: rodajes en órbita y pequeños públicos en colonias'], [2125, 1, 1, 'Arte posthumano: talentos sintéticos con derechos y obras eternas'],
     [2150, 1, 1, 'Después de 2150: el mundo sigue con eventos generados por tu partida'],
   ];
-  // V34: más historia real (sin personas ni marcas) e hitos de obras reconocidas. Solo se nombran obras de dominio
+  // Más historia real (sin personas ni marcas) e hitos de obras reconocidas. Solo se nombran obras de dominio
   // público (Registro: «reales solo los eventos, las tecnologías y las obras de dominio público»); las más recientes se
   // describen sin su título. El 6.º dato empuja la tendencia de una familia de géneros (los éxitos crean olas).
   HITOS.push.apply(HITOS, [
@@ -148,7 +148,7 @@ IA.historia = (function () {
     { id: 'hays', ini: [1934, 7, 1], fin: [1968, 11, 1], censura: 1 },
     { id: 'huelgaG', ini: [2023, 5, 2], fin: [2023, 11, 9], pausa: 'desarrollo' },
     { id: 'huelgaA', ini: [2023, 7, 14], fin: [2023, 11, 9], pausa: 'rodaje' },
-    // V34: más crisis reales que mueven el mercado
+    // Más crisis reales que mueven el mercado
     { id: 'guerraCivil', ini: [1861, 4, 12], fin: [1865, 4, 9], reg: ['nam'], f: 0.8 },
     { id: 'panico1873', ini: [1873, 5, 9], fin: [1879, 3, 1], f: 0.92 },
     { id: 'panico1893', ini: [1893, 5, 5], fin: [1897, 6, 1], f: 0.93 },
@@ -175,8 +175,8 @@ IA.historia = (function () {
     [2040, 'Salas de realidad mixta', 'fotografia'], [2048, 'Hologramas en escena', 'efectos'], [2060, 'Sets climáticos virtuales', 'arte'], [2075, 'Guion asistido por emociones', 'guion'],
     [2088, 'Interfaz neuronal de rodaje', 'direccion'], [2105, 'Cámaras orbitales', 'fotografia'], [2130, 'Talentos sintéticos con derechos', 'interprete'], [2145, 'Montaje por pensamiento', 'edicion'],
   ].map(function (x, i) { return { id: 'inv' + i, anio: x[0], nombre: x[1], dep: x[2] }; });
-  function tDe(y, m, d) { return IA.cal.tDeFecha(y, m - 1, d); } // los hitos usan meses 1–12; el calendario, 0–11 (V29)
-  // V34: la partida recuerda hasta qué semana procesó los hitos (tv), no su posición en la lista: así se pueden agregar
+  function tDe(y, m, d) { return IA.cal.tDeFecha(y, m - 1, d); } // los hitos usan meses 1–12; el calendario, 0–11
+  // La partida recuerda hasta qué semana procesó los hitos (tv), no su posición en la lista: así se pueden agregar
   // hitos en cualquier fecha sin repetir avisos en partidas viejas (al cargarlas, todo lo anterior cuenta como visto)
   function st() {
     const S = N.S;
@@ -254,7 +254,7 @@ IA.historia = (function () {
       if (tx < S.t - 1) return; // lo de antes del inicio no se anuncia
       N.emit('noticia', { tipo: 'historia', texto: IA.cal.texto({ y: x[0], m: x[1] - 1, d: x[2] }) + ': ' + x[3] + '.', importante: true });
       if (x[4]) N.emit('hito', x[4]);
-      // Un éxito reconocido crea una ola en su familia de géneros (V34)
+      // Un éxito reconocido crea una ola en su familia de géneros
       if (x[5] && S.mundo && S.mundo.tendencias) { const f = x[5].fam; S.mundo.tendencias[f] = N.redondear(N.limitar((S.mundo.tendencias[f] || 0) + x[5].v, -1, 1), 3); }
     });
     h.tv = S.t;

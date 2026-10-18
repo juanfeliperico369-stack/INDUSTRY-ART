@@ -1,7 +1,7 @@
 /* ==== módulo: rivales ==== */
 // Estudios rivales simples que hacen obras de verdad: contratan talentos del mismo mundo, eligen fechas mirando
 // la temporada y la competencia, estrenan en la misma cartelera y ganan o pierden dinero como tú.
-// V24: identidad y estrategia, robo de fechas, quiebras de verdad, fusiones, estudios emergentes y estrellas.
+// Identidad y estrategia, robo de fechas, quiebras de verdad, fusiones, estudios emergentes y estrellas.
 IA.rivales = (function () {
   'use strict';
   const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, P = IA.produccion, L = IA.lanzamiento;
@@ -98,7 +98,7 @@ IA.rivales = (function () {
     const tono = prestigio ? N.elegir(['Reflexivo', 'Realista', 'Poético', 'Oscuro', 'Épico']) : N.elegir(D.tonos).id;
     const anio = N.anio();
     const op = { gen: gen, escala: escala, tono: tono };
-    // A veces adaptan una obra libre de derechos (V17) y, desde 2022, algunos usan IA para abaratar
+    // A veces adaptan una obra libre de derechos y, desde 2022, algunos usan IA para abaratar
     if (!prestigio && N.probabilidad(0.07)) {
       const libres = IA.ideas.materialesDisponibles(anio).filter(function (m) { return IA.ideas.esLibre(m, anio); });
       if (libres.length) {
@@ -114,15 +114,15 @@ IA.rivales = (function () {
     op.tem = [buenOjo ? IA.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
     op.prob = [buenOjo ? IA.ideas.problemaRecomendado(famIdea) : IA.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
     op.arco = buenOjo ? IA.ideas.arcoRecomendado(famIdea) : N.elegir(IA.taxonomia.arcos).id;
-    const sec = IA.franquicias.secuelaRival(est); // a veces continúan su éxito (V23)
+    const sec = IA.franquicias.secuelaRival(est); // a veces continúan su éxito
     if (sec) { op.gen = sec.gen.slice(); delete op.mat; }
     let b = O.borrador(est.id, op);
-    // Con poca caja hacen una obra más chica en vez de quedarse sin filmar (V18)
+    // Con poca caja hacen una obra más chica en vez de quedarse sin filmar
     while (b.pp * 1.4 > est.caja && op.escala > AJ.minEscala) { op.escala--; b = O.borrador(est.id, op); }
     if (sec) IA.franquicias.prepararRival(b, sec);
     const pobre = b.pp * 2 > est.caja;
     b.prest = prestigio ? 1 : 0;
-    // Cómo filman (V20): el método y el terreno recomendados y, si tienen uno que sirva, un set guardado
+    // Cómo filman: el método y el terreno recomendados y, si tienen uno que sirva, un set guardado
     const R = IA.rodaje;
     b.met = R.metodoRecomendado(b, anio); b.ter = R.terrenoRecomendado(b); b.pst = 'clasico';
     const sets = R.usaSet(b) ? R.setsQueSirven(b) : [];
@@ -144,7 +144,7 @@ IA.rivales = (function () {
   // Cada mes: decide qué producir
   function mensual(ctx) {
     const S = N.S;
-    if (N.anio() < D.CINE_DESDE) return; // V34: antes de 1895 no hay películas
+    if (N.anio() < D.CINE_DESDE) return; // Antes de 1895 no hay películas
     for (let i = 1; i < S.estudios.length; i++) {
       const est = S.estudios[i];
       if (est.quebrado) continue;
@@ -165,11 +165,11 @@ IA.rivales = (function () {
       t = tuya.fe;
       N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' te roba la fecha: estrena «' + o.tit + '» la misma semana que «' + tuya.tit + '».', importante: true });
     }
-    // La campaña sigue a lo que prometen las primeras funciones de prueba: a una obra floja le gastan menos (V18)
+    // La campaña sigue a lo que prometen las primeras funciones de prueba: a una obra floja le gastan menos
     const nivM = N.limitar(Math.round(N.normal(2 + (o.esc - 2) * 0.4 + ((o.pub || 60) - 65) / 15, 0.45)), 1, 3);
     L.programar(o, t, nivM, ctx);
   }
-  // Cada año: crecen si ganan, se achican si pierden; si quedan en rojo reciben un rescate (las quiebras, en la V26)
+  // Cada año: crecen si ganan, se achican si pierden; si quedan en rojo reciben un rescate
   function anual() {
     const S = N.S, anio = N.anio();
     const tipico = E.presupuestoTipico(anio);
@@ -181,7 +181,7 @@ IA.rivales = (function () {
       est.resc = (est.resc || []).filter(function (a) { return a > anio - 10; });
       if (est.caja < 0 && est.resc.length >= 3 && anio - (est.desde || S.y0) >= 15 && !est.filial) { quebrar(est); continue; }
       // Rescate si de verdad quedó en rojo (no por tener la caja invertida en producciones) o si ya no le alcanza
-      // ni para la obra más chica y no tiene nada en marcha (V18: así ningún rival queda congelado para siempre)
+      // ni para la obra más chica y no tiene nada en marcha (así ningún rival queda congelado para siempre)
       const varado = est.caja < tipico * 0.25 && !O.enProduccion(est.id).length;
       if (est.caja < 0 || varado) {
         est.tam = N.redondear(Math.max(base * 0.4, est.tam * 0.85), 3);
