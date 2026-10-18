@@ -122,7 +122,8 @@ IA.eventos = (function () {
     if (S.evento) { if (S.t - S.evento.t0 >= 6) decidir(S.evento.ops.length - 1, true); return; }
     if (S.evProx === undefined) S.evProx = S.t + N.entero(3, 8);
     if (S.t < S.evProx) return;
-    S.evProx = S.t + N.entero(4, 9);
+    const fr = IA.metas.frecEventos();
+    S.evProx = S.t + (fr > 0 ? Math.round(N.entero(4, 9) / fr) : 99999);
     const a = N.anio(), ult = S.evUlt || (S.evUlt = {});
     const cand = EV.filter(function (e) { return a >= e[2] && a <= e[3] && !(ult[e[0]] > S.t - 104); });
     for (let k = 0; k < 6 && cand.length; k++) {

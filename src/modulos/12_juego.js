@@ -14,6 +14,8 @@ IA.juego = (function () {
     { id: 'facil', nombre: 'Fácil', rivales: -4 },
     { id: 'normal', nombre: 'Normal', rivales: 0 },
     { id: 'dificil', nombre: 'Difícil', rivales: 4 },
+    { id: 'experto', nombre: 'Experto', rivales: 7, bloqueo: 'Gana una partida en Difícil' },
+    { id: 'pesadilla', nombre: 'Pesadilla', rivales: 11, bloqueo: 'Gana una partida en Experto' },
   ];
   let conectado = false;
 
@@ -78,6 +80,7 @@ IA.juego = (function () {
     S.recordatorios = [];
     IA.carrera.iniciar(op);
     IA.historia.inicio(); // hitos ya pasados (V24)
+    IA.metas.iniciar(op); // modo, reto y tutorial (V26)
     IA.banco.semilla(pais.region, S.dificultad); // deuda semilla (V24)
     O.reindexar();
     noticia({ tipo: 'estudio', texto: 'Nace ' + S.estudios[0].nombre + ' en ' + pais.nombre + '. ' + M.era(anio) + '.', importante: true });
@@ -343,6 +346,7 @@ IA.juego = (function () {
     IA.tv.semana(); IA.streaming.semana(); IA.franquicias.semana(); // series, canal, plataforma y licencias (V23)
     IA.historia.semana(); IA.eventos.semana(); IA.banco.semana(); IA.imperio.semana(); // historia, eventos, banco e imperio (V24)
     IA.medios.semana(); // música, videojuegos, teatro y libros (V25)
+    IA.metas.semana(); // tutorial (V26)
     const ceremonia = PM.semana();
     academia();
     S.t++;
@@ -364,6 +368,7 @@ IA.juego = (function () {
       IA.franquicias.mensual(); IA.tv.mensual(); // ofertas por tus franquicias y patrocinadores (V23)
       IA.banco.mensual(); IA.imperio.mensual(); // cuotas, junta, sedes, filiales y encargos (V24)
       IA.medios.mensual(); // bandas (V25)
+      IA.metas.mensual(); // misiones y logros (V26)
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;
@@ -377,6 +382,7 @@ IA.juego = (function () {
       IA.franquicias.anual();
       IA.banco.anual(S.estudios[0].util); IA.imperio.anual(); // dividendos, inventos y filiales (V24)
       IA.medios.anual(); // premios Vinilo, Cartucho, Telón y Pluma; motores (V25)
+      IA.metas.anual(); // campaña por décadas y retos (V26)
       O.compactar();
       if (S.fin.hist.length) N.emit('finAnio', S.fin.hist[S.fin.hist.length - 1]);
     }

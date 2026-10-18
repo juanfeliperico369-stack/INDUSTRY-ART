@@ -9,7 +9,7 @@ IA.ui = (function () {
   const SECCIONES = ['estudio', 'obras', 'talento', 'mundo', 'negocio'];
 
   // ---------- Ajustes del jugador (fuera de la partida) ----------
-  const AJUSTES_BASE = { tema: 'oscuro', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana' };
+  const AJUSTES_BASE = { tema: 'oscuro', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana', musica: false };
   let ajustes = Object.assign({}, AJUSTES_BASE);
   function cargarAjustes() {
     try { const a = JSON.parse(localStorage.getItem(CLAVE_AJUSTES) || '{}'); ajustes = Object.assign({}, AJUSTES_BASE, a); } catch (e) { ajustes = Object.assign({}, AJUSTES_BASE); }
@@ -220,7 +220,8 @@ IA.ui = (function () {
   }
   function renderMenu() {
     const ic = { estudio: 'estudio', obras: 'obras', talento: 'talento', mundo: 'mundo', negocio: 'negocio' };
-    document.getElementById('menu').innerHTML = SECCIONES.map(function (s) {
+    const vis = IA.metas && N.S ? IA.metas.seccionesVisibles() : null; // tutorial (V26)
+    document.getElementById('menu').innerHTML = SECCIONES.filter(function (s) { return !vis || vis.indexOf(s) >= 0; }).map(function (s) {
       return '<button class="nav' + (estado.seccion === s ? ' on' : '') + '" data-a="seccion" data-v="' + s + '"' + (estado.seccion === s ? ' aria-current="page"' : '') + '>' + icono(ic[s]) + '<span>' + t('sec_' + s) + '</span></button>';
     }).join('');
   }

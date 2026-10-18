@@ -99,7 +99,7 @@ IA.pantallas = (function () {
       (np.region === 'independiente' ? '<label class="campo"><span>' + t('np_pais') + '</span><select data-c="np" data-k="pais">' + ops(paises, np.pais) + '</select></label>' : '') +
       '<label class="campo"><span>' + t('np_capital') + '</span><select data-c="npCapital">' + ops(capOps, cap) + '</select><span class="nota">' +
       t('np_capital_ayuda', { epoca: esc(U.dinero(M.aEpoca(cap, np.anio)).replace(/^\$/, '$')), anio: np.anio, n: U.decimal(nTipicas, nTipicas < 10 ? 1 : 0) }) + '</span></label>' +
-      '<label class="campo"><span>' + t('np_dificultad') + '</span><select data-c="np" data-k="dificultad">' + ops(J.DIFICULTADES.map(function (d) { return [d.id, d.nombre]; }), np.dificultad) + '</select></label>' +
+      IA.metasUI.opcionesNueva(np) + '<label class="campo"><span>' + t('np_dificultad') + '</span><select data-c="np" data-k="dificultad">' + ops(IA.metasUI.dificultades().map(function (d) { return [d.id, d.nombre]; }), np.dificultad) + '</select></label>' +
       '<label class="campo"><span>' + t('np_escenario') + '</span><select data-c="np" data-k="escenario">' + ops([['medio', t('escenario_medio')], ['alto', t('escenario_alto')], ['bajo', t('escenario_bajo')]], np.escenario) + '</select></label>' +
       '<h3>' + t('np_avatar') + '</h3>' +
       '<label class="campo"><span>' + t('np_tu_nombre') + '</span><input type="text" maxlength="30" value="' + esc(np.avNombre) + '" data-i="np" data-k="avNombre"></label>' +
@@ -152,6 +152,9 @@ IA.pantallas = (function () {
   function redibujarNP() { const y = document.getElementById('vista').scrollTop; U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; }
   ac('npRegion', function (v) { np.region = v; np.capital = 0; const r = D.regionesInicio.filter(function (x) { return x.id === v; })[0]; if (r && r.pais) np.pais = r.pais; redibujarNP(); });
   ac('npModo', function (v) { np.modo = v; redibujarNP(); });
+  ac('mtNp', function (v, el) { np[el.getAttribute('data-k')] = v; redibujarNP(); });
+  ac('mtNpB', function (v, el) { np[el.getAttribute('data-k')] = !!v; });
+  ac('mtPerso', function (v, el) { np.perso[el.getAttribute('data-k')] = +v; redibujarNP(); });
   ac('npEnf', function (v, el) { const k = el.getAttribute('data-k'); (k[0] === 'g' ? np.enfG : np.enfT)[+k[1]] = v; });
   // Dado de nombres (sin azar de la partida: es solo para elegir)
   let dadoN = 1;
@@ -191,6 +194,7 @@ IA.pantallas = (function () {
       escenario: np.escenario, personalidad: np.personalidad, creado: new Date().toISOString(),
       tipo: np.tipo, vision: np.vision, publico: np.publico,
       avatar: { nombre: (np.avNombre || '').trim() || 'Felipe', sexo: np.avSexo, edad: edad, especialidades: np.esp },
+      modoJuego: np.modoJuego, reto: np.reto === undefined ? undefined : np.reto || null, tutorial: !!np.tutorial, perso: np.perso,
       region: np.region, sufijo: np.sufijo, trasfondo: np.tf, arquetipo: np.arq, modo: np.modo, oficio: np.oficio,
       enfoque: { gen: np.enfG.filter(function (x, i, a) { return x && a.indexOf(x) === i; }), tem: np.enfT.filter(function (x, i, a) { return x && a.indexOf(x) === i; }) },
     });
@@ -265,7 +269,7 @@ IA.pantallas = (function () {
       kpi('Típico de la época', dinero(E.presupuestoTipico(N.anio()))) +
       kpi('Entrada de cine', dinero(M.precioEntrada('nam', N.anio()))) +
       '</div></div>' +
-      IA.prensaUI.banner() + IA.imperioUI.bitacora() + IA.calendarioUI.tarjetasEstudio() +
+      IA.metasUI.tarjetas() + IA.prensaUI.banner() + IA.imperioUI.bitacora() + IA.calendarioUI.tarjetasEstudio() +
       '<div class="tarjeta"><h3>' + t('mun_periodico') + '</h3>' + S.noticias.slice(0, 5).map(function (n) {
         return '<p style="margin:6px 0"><span class="tenue chico">' + esc(U.fechaCorta(n.t)) + '</span><br>' + (n.imp ? '<b>' : '') + textoNoticia(n) + (n.imp ? '</b>' : '') + '</p>';
       }).join('') + '</div></div></div>';
@@ -459,8 +463,8 @@ IA.pantallas = (function () {
   // =====================================================================
   function mundo() {
     const s = sub('mundo', 'cartelera');
-    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['festivales', 'Festivales'], ['revista', 'Revista'], ['redes', 'Redes'], ['rivales', t('mun_rivales')], ['historia', 'Historia'], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa'], ['taxonomia', 'Taxonomía']], s);
-    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: IA.prensaUI.premios, festivales: IA.prensaUI.festivales, revista: IA.prensaUI.revista, redes: IA.prensaUI.redes, rivales: IA.imperioUI.rivales, historia: IA.imperioUI.historia, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa, taxonomia: IA.creacion.taxonomia }[s] || mCartelera)();
+    let h = titulo(t('sec_mundo'), 'mundo') + pestanas('mundo', [['cartelera', t('mun_cartelera')], ['calendario', t('mun_calendario')], ['premios', t('mun_premios')], ['festivales', 'Festivales'], ['revista', 'Revista'], ['redes', 'Redes'], ['rivales', t('mun_rivales')], ['historia', 'Historia'], ['metas', 'Metas'], ['editor', 'Editor'], ['periodico', t('mun_periodico')], ['tendencias', t('mun_tendencias')], ['poblacion', t('mun_poblacion')], ['mapa', 'Mapa'], ['taxonomia', 'Taxonomía']], s);
+    return h + ({ cartelera: mCartelera, calendario: mCalendario, premios: IA.prensaUI.premios, festivales: IA.prensaUI.festivales, revista: IA.prensaUI.revista, redes: IA.prensaUI.redes, rivales: IA.imperioUI.rivales, historia: IA.imperioUI.historia, metas: IA.metasUI.metas, editor: IA.metasUI.editor, periodico: mPeriodico, tendencias: mTendencias, poblacion: mPoblacion, mapa: mMapa, taxonomia: IA.creacion.taxonomia }[s] || mCartelera)();
   }
   function mCartelera() {
     const S = N.S, sem = S.mercado.semana;
@@ -671,7 +675,7 @@ IA.pantallas = (function () {
       '<label class="campo"><span>' + t('aj_texto') + '</span>' + sel('texto', [[1, 'Pequeño'], [2, 'Normal'], [3, 'Grande'], [4, 'Muy grande']]) + '</label>' +
       '<label class="campo"><span>' + t('aj_orientacion') + '</span>' + sel('orientacion', [['auto', t('ori_auto')], ['vertical', t('ori_vertical')], ['horizontal', t('ori_horizontal')]]) + '</label>' +
       '<label class="campo"><span>' + t('gua_autoguardado') + '</span>' + sel('autoguardado', [['mes', t('auto_mes')], ['anio', t('auto_anio')], ['no', t('auto_no')]]) + '</label>' +
-      sw('sonido', t('aj_sonido')) + sw('movimiento', t('aj_movimiento')) + sw('vibracion', t('aj_vibracion')) + sw('dineroHoy', t('dinero_hoy')) +
+      sw('sonido', t('aj_sonido')) + sw('movimiento', t('aj_movimiento')) + sw('vibracion', t('aj_vibracion')) + sw('dineroHoy', t('dinero_hoy')) + sw('musica', 'Música de fondo') +
       '<p></p><div class="col">' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button><button class="btn" data-a="laboratorio">' + t('aj_laboratorio') + '</button><button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') + '</div>' +
       '<p class="nota">' + t('juego') + ' ' + IA.VERSION + ' · ' + t('creditos') + '</p>';
   }
@@ -680,6 +684,7 @@ IA.pantallas = (function () {
     const k = el.getAttribute('data-k');
     const val = el.type === 'checkbox' ? !!v : (k === 'texto' ? +v : v);
     U.ajuste(k, val);
+    if (k === 'musica') IA.metasUI.musica(val); // música de fondo (V26)
     if (N.S) U.refrescar();
   });
   ac('salir', function () {

@@ -122,7 +122,7 @@ IA.mundo = (function () {
   function accesoCine(region, anio) { return N.interp(ACCESO_CINE[region], anio); }
   function frecuenciaCine(region, anio) { return N.interp(FRECUENCIA_CINE[region], anio); }
   function precioEntrada2025(region, anio) { return N.interp(PRECIO_ENTRADA_2025, anio) * N.interp(PRECIO_REGION[region], anio); }
-  function precioEntrada(region, anio) { return aEpoca(precioEntrada2025(region, anio), anio); }
+  function precioEntrada(region, anio) { return aEpoca(precioEntrada2025(region, anio), anio) * (N.S && N.S.edit && N.S.edit.precio || 1); } // precio del Editor (V26)
   // Público = Población × Acceso × Frecuencia (entradas posibles al año)
   function publicoCine(region, anio) { return poblacion(region, anio) * accesoCine(region, anio) * frecuenciaCine(region, anio); }
   // Ocio en casa: radio, TV, video, internet y streaming hacen más atractivo quedarse en casa

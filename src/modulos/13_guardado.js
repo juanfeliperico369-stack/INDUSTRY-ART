@@ -72,6 +72,7 @@ IA.guardado = (function () {
 
   // V21 → V22: premios, festivales, crítica y prensa (todo empieza vacío)
   MIGRACIONES[22] = function (S) { ['galas', 'palmares', 'revista', 'cartas', 'hitos'].forEach(function (k) { if (!S[k]) S[k] = []; }); if (!S.fest) S.fest = {}; };
+  MIGRACIONES[26] = function (S) { if (!S.metas) S.metas = { modo: 'libre', reto: null, logros: {}, misiones: [], legado: 0, decadas: [], tut: 0, fin: null, ret: 0 }; };
   MIGRACIONES[25] = function (S) { if (!S.med) S.med = { p: [], bandas: [], kits: {}, motores: [], motorLic: [], ofMot: [], premios: [], ing: {} }; };
   MIGRACIONES[24] = function (S) {
     const ESTR = { DR: 'autor', AV: 'autor', AA: 'taquillero', SM: 'imitador', HM: 'economico', IM: 'franquicias', FJ: 'familiar', RD: 'economico' };

@@ -195,7 +195,7 @@ IA.banco = (function () {
   }
   // ---------- Deuda semilla y cambio de marca ----------
   function semilla(region, dificultad) {
-    const f = { facil: 0, normal: 0.6, dificil: 1.6, extremo: 2.5 }[dificultad] === undefined ? 0.6 : { facil: 0, normal: 0.6, dificil: 1.6, extremo: 2.5 }[dificultad];
+    const f = { facil: 0, normal: 0.6, dificil: 1.6, experto: 2.5, pesadilla: 4 }[dificultad] === undefined ? 0.6 : { facil: 0, normal: 0.6, dificil: 1.6, experto: 2.5, pesadilla: 4 }[dificultad];
     const r = ['nam', 'eur', 'oce'].indexOf(region) >= 0 ? 1.2 : 0.8;
     const m = Math.round(tip() * f * r);
     if (m > 0) pedir(m, 48, 'semilla');

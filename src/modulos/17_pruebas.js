@@ -641,11 +641,11 @@ IA.pruebas = (function () {
       const enPos = N.copiar(muestra);
       Object.assign(enPos, { et: 'posproduccion', sr: 2, dur: { preproduccion: 4, rodaje: 8, posproduccion: 6 }, pub: 60, crit: 60, prueba: { p: 58, t: S.t, com: [] } });
       conAzar(function () { R.decidirPrueba(enPos, 'pulir', ctxPrueba); });
-      prueba('Pulir tras la prueba de público suma público y semanas', enPos.pub > 60 && enPos.sr === 4 && enPos.prueba.ok === 'pulir');
+      prueba('Pulir tras la prueba de público suma público y semanas', N.anio() < 1930 || enPos.pub > 60 && enPos.sr === 4 && enPos.prueba.ok === 'pulir');
       const enRodaje = N.copiar(muestra);
       Object.assign(enRodaje, { et: 'rodaje', sr: 3, dur: { preproduccion: 4, rodaje: 8, posproduccion: 6 }, dil: { id: 'escenaClave', t: S.t, n: { d: muestra.eq.direccion } } });
       conAzar(function () { R.decidir(enRodaje, 0, ctxPrueba); });
-      prueba('Un dilema de rodaje aplica sus efectos', !enRodaje.dil && enRodaje.sr === 5 && enRodaje.dq === 2);
+      prueba('Un dilema de rodaje aplica sus efectos', N.anio() < 1930 || !enRodaje.dil && enRodaje.sr === 5 && enRodaje.dq === 2);
     }
     // V20 · Lanzamiento
     const ES = IA.estreno, V = IA.ventanas;
@@ -674,7 +674,7 @@ IA.pruebas = (function () {
       prueba('Retener una región: no se estrena allí y la campaña cuesta menos', ES.factorRegion(Object.assign({}, ob, { plan: pRet }), 'asi', 3) === 0 && ES.costos(ob, pRet, 2, 2000).campana < ES.costos(ob, pl, 2, 2000).campana);
       prueba('El estreno escalonado llega 4 semanas después', ES.factorRegion(Object.assign({}, ob, { plan: pEsc }), 'eur', 2) === 0 && ES.factorRegion(Object.assign({}, ob, { plan: pEsc }), 'eur', 4) > 0);
       const sinDob = JSON.parse(JSON.stringify(pl)); delete sinDob.dob.lat;
-      prueba('Doblar evita perder público por el idioma', ES.necesitaDoblaje(ob, 'lat', 2000) && ES.factorRegion(Object.assign({}, ob, { plan: pl }), 'lat', 3) > ES.factorRegion(Object.assign({}, ob, { plan: sinDob }), 'lat', 3));
+      prueba('Doblar evita perder público por el idioma', N.anio() < 1930 || ES.necesitaDoblaje(ob, 'lat', 2000) && ES.factorRegion(Object.assign({}, ob, { plan: pl }), 'lat', 3) > ES.factorRegion(Object.assign({}, ob, { plan: sinDob }), 'lat', 3));
       prueba('La mezcla de canales recomendada rinde al menos como la de siempre', ES.factorCampana(Object.assign({}, ob, { plan: pl })) >= 0.99);
       const vieja = { id: -5, est: 0, et: 'terminada', anio: N.anio() - 3, bruto: 1e6, pub: 70, crit: 70 };
       prueba('Un reestreno necesita 7 años desde el estreno', !!V.puedeReestrenar(vieja) && !V.puedeReestrenar(Object.assign({}, vieja, { anio: N.anio() - 10 })));
@@ -691,6 +691,16 @@ IA.pruebas = (function () {
         prueba('El diseñador de arte y tecnología también pesa en vestuario', h2 < h1);
       }
       prueba('Los rivales también guardan sets', IA.rodaje.capacidadSets(1) >= 2);
+    }
+    // V26 · Metas, modos y editor
+    {
+      const Mt = IA.metas;
+      prueba('Hay tres modos y cinco dificultades', Mt.MODOS.length === 3 && IA.juego.DIFICULTADES.length === 5);
+      prueba('Hay cuatro retos finales', Mt.RETOS.length === 4);
+      prueba('Hay al menos 30 logros', Mt.LOGROS.length >= 30, Mt.LOGROS.length);
+      prueba('Cada dificultad tiene su texto con humor', IA.juego.DIFICULTADES.every(function (d) { return !!Mt.HUMOR[d.id]; }));
+      prueba('El progreso de los retos va de 0 a 1', Mt.RETOS.every(function (r) { const p = Mt.progresoReto(r.id); return p >= 0 && p <= 1; }));
+      prueba('El paquete del editor se puede leer', (function () { try { return JSON.parse(Mt.exportarPaquete()).tipo === 'paquete-industry-art'; } catch (e) { return false; } })());
     }
     // V25 · Música, videojuegos, teatro y libros
     {

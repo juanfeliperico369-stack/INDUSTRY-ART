@@ -13042,6 +13042,249 @@ IA.juego = (function () {
   };
 })();
 
+/* ==== módulo: metas ==== */
+// V26 · Modos Campaña, Libre y Personalizado; dificultades Experto y Pesadilla (se desbloquean al ganar) con textos
+// con humor; campaña por décadas con legado; logros con nombres divertidos; misiones por correo con fecha límite;
+// retos de final de partida (ranking, legado, imperio y dinastía) con créditos y resumen de la carrera; tutorial que
+// desbloquea las secciones poco a poco; consejos del momento y Editor Sandbox con paquetes.
+IA.metas = (function () {
+  'use strict';
+  const N = IA.n, O = IA.obras;
+  const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
+  const MODOS = [
+    { id: 'campana', nombre: 'Campaña', texto: 'Metas por década, legado y un reto final.' },
+    { id: 'libre', nombre: 'Libre', texto: 'Sin metas obligatorias: juega a tu ritmo.' },
+    { id: 'personalizado', nombre: 'Personalizado', texto: 'Tú eliges el dinero, la fuerza de los rivales y cuántos eventos hay.' },
+  ];
+  const HUMOR = {
+    facil: 'Los bancos te sonríen y los críticos duermen la siesta.', normal: 'Hollywood tal como es: injusto pero predecible.',
+    dificil: 'Los rivales madrugan y los bancos leen la letra chica.', experto: 'Cada estreno es un duelo al amanecer.',
+    pesadilla: 'Tus estrellas se odian, tu banco te odia y tu madre prefiere al estudio de enfrente.',
+  };
+  const RETOS = [
+    { id: 'ranking', nombre: 'Ranking', texto: 'Sé el estudio número 1 en cuota tres años seguidos.' },
+    { id: 'legado', nombre: 'Legado', texto: 'Junta 150 puntos de legado en la campaña.' },
+    { id: 'imperio', nombre: 'Imperio', texto: 'Llega a un patrimonio de 300 presupuestos típicos con dos filiales.' },
+    { id: 'dinastia', nombre: 'Dinastía', texto: 'Que tu estudio llegue a la tercera generación de tu familia.' },
+  ];
+  // Logros: [id, nombre divertido, descripción, condición]
+  const LOGROS = [
+    ['primera', 'Luz, cámara… ¿acción?', 'Estrena tu primera obra.', function (S) { return mias(S).length >= 1; }],
+    ['diez', 'Fábrica de sueños (versión beta)', 'Estrena 10 obras.', function (S) { return mias(S).length >= 10; }],
+    ['cien', 'Ya no recuerdo todos los títulos', 'Estrena 100 obras.', function (S) { return mias(S).length >= 100; }],
+    ['taquillazo', 'Las palomitas se acabaron', 'Una obra que gane 5 veces lo que costó.', function (S) { return mias(S).some(function (o) { return O.multiplicador(o) >= 5; }); }],
+    ['bomba', 'Fracaso con estilo', 'Una obra que recupere menos de la cuarta parte.', function (S) { return mias(S).some(function (o) { return o.et === 'terminada' && O.multiplicador(o) < 0.25; }); }],
+    ['critica90', 'Los críticos lloraron (de alegría)', 'Una obra con 90 o más de crítica.', function (S) { return mias(S).some(function (o) { return o.crit >= 90; }); }],
+    ['quimera', 'Tengo que agradecer a mi mamá', 'Gana un Premio Quimera.', function (S) { return (S.premios || []).some(function (r) { return r.categorias.some(function (c) { return c.ganador.est === 0; }); }); }],
+    ['bastardo', 'Lo peor de lo peor (y orgulloso)', 'Gana un Premio Bastardo.', function (S) { return mias(S).some(function (o) { return (o.galas || []).some(function (g) { return g.g === 'bastard'; }); }); }],
+    ['secuela', 'Nunca segundas partes…', 'Estrena una secuela.', function (S) { return mias(S).some(function (o) { return o.cam === 'secuela'; }); }],
+    ['franq5', 'Universo cinematográfico en expansión', 'Una franquicia con 5 obras.', function (S) { return IA.franquicias.lista().some(function (f) { return f.est === 0 && f.o.length >= 5; }); }],
+    ['serie', 'La caja tonta me quiere', 'Emite tu primera serie.', function (S) { return S.obras.some(function (o) { return o.est === 0 && o.tv && o.tv.em; }); }],
+    ['canal', 'Dueño del control remoto', 'Abre tu canal de TV.', function (S) { return !!S.canal; }],
+    ['stream', 'Netflix y relájate… espera', 'Lanza tu plataforma.', function (S) { return !!S.stream; }],
+    ['millon', 'Un millón de amigos', 'Llega a un millón de fans.', function (S) { return (S.fans || 0) >= 1e6; }],
+    ['major', 'Ahora soy de los grandes', 'Conviértete en una major.', function (S) { return !!S.majorDesde; }],
+    ['quiebra', 'Lo que no te mata te endeuda', 'Sal de una quiebra.', function (S) { return (S.quiebras || 0) >= 1; }],
+    ['socio', 'Compartir es vivir', 'Ten un socio.', function (S) { return !!S.socio; }],
+    ['filial', 'Coleccionista de estudios', 'Compra un estudio rival.', function (S) { return S.estudios.some(function (e) { return e.filial; }); }],
+    ['sede', 'Pasaporte lleno de sellos', 'Abre una sede en otro país.', function (S) { return !!(S.imp && S.imp.sedes.length); }],
+    ['invento', 'Eureka en la sala de máquinas', 'Inventa algo antes que el mundo.', function (S) { return !!(S.imp && Object.keys(S.imp.tec).some(function (k) { return S.imp.tec[k].de === 0; })); }],
+    ['disco', 'Disco de oro (y no es de chocolate)', 'Un disco de oro.', function (S) { return IA.medios.proyectos('musica').some(function (p) { return p.cert; }); }],
+    ['banda', 'Diferencias creativas', 'Una banda tuya se separa.', function (S) { return IA.medios.bandas().some(function (b) { return b.sep; }); }],
+    ['juego', 'Presiona Start', 'Lanza tu primer videojuego.', function (S) { return IA.medios.proyectos('juegos').some(function (p) { return p.pub !== undefined; }); }],
+    ['teatro', 'Que se rompa una pierna', 'Estrena una obra de teatro.', function (S) { return IA.medios.proyectos('teatro').some(function (p) { return p.pub !== undefined; }); }],
+    ['libro', 'Huele a papel nuevo', 'Publica un libro.', function (S) { return IA.medios.proyectos('libros').some(function (p) { return p.pub !== undefined; }); }],
+    ['seis', 'Todos los medios, todas las cosas', 'Ten algo en los seis medios.', function (S) { return mias(S).some(function (o) { return !o.tv; }) && S.obras.some(function (o) { return o.est === 0 && o.tv; }) && ['musica', 'juegos', 'teatro', 'libros'].every(function (m) { return IA.medios.proyectos(m).length; }); }],
+    ['escandalo', 'Ninguna publicidad es mala', 'Sobrevive a 10 eventos.', function (S) { return (S.bitacora || []).length >= 10; }],
+    ['heredero', 'De tal palo, tal estudio', 'Pasa el estudio a tu heredero.', function (S) { return (S.avatar && S.avatar.gen || 1) >= 2; }],
+    ['siglo', 'Cien años de cine (y contando)', 'Juega cien años.', function (S) { return S.t >= 5200; }],
+    ['deuda0', 'Libre como un pájaro (sin deudas)', 'Paga toda tu deuda después de tener una.', function (S) { return S.banco && S.banco.pagados > 0 && !IA.banco.deuda(); }],
+  ];
+  function mias(S) { return S.obras.filter(function (o) { return o.est === 0 && o.pub !== undefined && o.et !== 'lista'; }); }
+  function st() { const S = N.S; if (!S.metas) S.metas = { modo: 'libre', reto: null, logros: {}, misiones: [], legado: 0, decadas: [], tut: 0, fin: null, ret: 0 }; return S.metas; }
+  // Al empezar: modo, reto, tutorial y ajustes del modo personalizado
+  function iniciar(op) {
+    const S = N.S, m = st();
+    m.modo = op.modoJuego || 'libre'; m.reto = op.reto || (m.modo === 'campana' ? 'legado' : null); m.tut = op.tutorial ? 1 : 0;
+    if (m.modo === 'personalizado' && op.perso) {
+      const p = op.perso;
+      m.perso = { dinero: N.limitar(+p.dinero || 1, 0.25, 5), rivales: N.limitar(+p.rivales || 0, -6, 9), eventos: N.limitar(+p.eventos || 1, 0, 3) };
+      S.estudios[0].caja = Math.round(S.estudios[0].caja * m.perso.dinero);
+      for (let i = 1; i < S.estudios.length; i++) S.estudios[i].calidad += m.perso.rivales;
+    }
+    if (m.modo === 'campana') nuevaDecada();
+  }
+  function frecEventos() { const m = st(); return m.perso ? m.perso.eventos : 1; }
+  // ---------- Campaña por décadas ----------
+  function nuevaDecada() {
+    const S = N.S, m = st(), d = Math.floor(N.anio() / 10) * 10, a = N.anio();
+    const n0 = mias(S).length;
+    const metas = [
+      { id: 'estrenos', txt: 'Estrena 8 obras esta década', meta: n0 + 8, pts: 5 },
+      { id: 'premio', txt: 'Gana al menos un premio', meta: 1, pts: 8 },
+      { id: 'fama', txt: 'Llega a 50 de prestigio', meta: 0.5, pts: 5 },
+      { id: 'fans', txt: 'Duplica tus fans', meta: Math.max(20000, (S.fans || 0) * 2), pts: 5 },
+    ];
+    if (a >= 1950) metas.push({ id: 'serie', txt: 'Emite una serie', meta: 1, pts: 4 });
+    if (a >= 1980) metas.push({ id: 'medio', txt: 'Lanza algo en música, juegos, teatro o libros', meta: 1, pts: 4 });
+    m.dec = { d: d, metas: metas, p0: (S.galas || []).length, t0: S.t };
+  }
+  function cumpleMeta(x) {
+    const S = N.S, m = st();
+    if (x.id === 'estrenos') return mias(S).length >= x.meta;
+    if (x.id === 'premio') return (S.galas || []).slice(m.dec.p0).some(function (r) { return r.categorias.some(function (c) { return c.ganador.est === 0; }); }) || IA.medios.premios().some(function (r) { return r.anio >= m.dec.d - 1 && r.cats.some(function (c) { return c.est === 0; }); });
+    if (x.id === 'fama') return S.estudios[0].fama >= x.meta;
+    if (x.id === 'fans') return (S.fans || 0) >= x.meta;
+    if (x.id === 'serie') return S.obras.some(function (o) { return o.est === 0 && o.tv && o.tv.em && o.tv.em.t0 >= m.dec.t0; });
+    if (x.id === 'medio') return IA.medios.proyectos().some(function (p) { return p.t0 >= m.dec.t0; });
+    return false;
+  }
+  function cerrarDecada() {
+    const m = st();
+    if (!m.dec) return;
+    const ok = m.dec.metas.filter(cumpleMeta), pts = ok.reduce(function (s, x) { return s + x.pts; }, 0);
+    m.legado += pts; m.decadas.push({ d: m.dec.d, ok: ok.length, de: m.dec.metas.length, pts: pts });
+    N.emit('noticia', { tipo: 'estudio', texto: 'Cierra la década de ' + m.dec.d + ': cumpliste ' + ok.length + ' de ' + m.dec.metas.length + ' metas (+' + pts + ' de legado).', importante: true });
+    nuevaDecada();
+  }
+  // ---------- Misiones por correo ----------
+  const MISIONES = [
+    function () { const f = N.elegir(IA.datos.familias); return { tipo: 'familia', fam: f.id, txt: 'Un distribuidor busca una obra de ' + f.nombre.toLowerCase() + ': estrénala antes de la fecha.', sem: 52 }; },
+    function () { return { tipo: 'fans', meta: Math.round((N.S.fans || 0) * 1.25 + 5000), txt: 'Tu agente de prensa apuesta a que llegas a más fans.', sem: 39 }; },
+    function () { return { tipo: 'caja', meta: Math.round(N.S.estudios[0].caja + tip() * 2), txt: 'El banco quiere ver tu caja más gorda.', sem: 52 }; },
+    function () { return { tipo: 'critica', meta: 75, txt: 'Una revista te reta: estrena algo con 75 o más de crítica.', sem: 60 }; },
+    function () { return N.anio() >= 1950 ? { tipo: 'serie', txt: 'Una cadena quiere ver tu primera serie (o la próxima).', sem: 78 } : null; },
+    function () { return { tipo: 'medio', txt: 'Un amigo del gremio te pide lanzar un disco, un juego, una obra o un libro.', sem: 52 }; },
+  ];
+  function mensual() {
+    const S = N.S, m = st();
+    if (S.sandbox) return;
+    // Misiones: una nueva cada tanto (hasta 3 abiertas)
+    m.misiones.forEach(function (x) { if (!x.ok && !x.fallo && revisarMision(x)) { x.ok = 1; IA.negocio.cobrarEn(0, 'eventos', x.premio); m.legado += 1; N.emit('noticia', { tipo: 'estudio', texto: 'Misión cumplida: «' + x.txt + '» (+' + Math.round(x.premio) + ').', importante: true }); } else if (!x.ok && S.t > x.hasta) x.fallo = 1; });
+    m.misiones = m.misiones.filter(function (x) { return S.t - x.hasta < 26; });
+    if (m.misiones.filter(function (x) { return !x.ok && !x.fallo; }).length < 3 && N.probabilidad(0.12)) {
+      const x = N.elegir(MISIONES)();
+      if (x) { x.id = N.sigId(); x.t0 = S.t; x.hasta = S.t + x.sem; x.premio = Math.round(tip() * 0.3); m.misiones.push(x); N.emit('noticia', { tipo: 'estudio', texto: 'Correo nuevo: ' + x.txt }); }
+    }
+    revisarLogros();
+  }
+  function revisarMision(x) {
+    const S = N.S;
+    if (x.tipo === 'familia') return S.obras.some(function (o) { return o.est === 0 && o.fam === x.fam && o.fe >= x.t0 && o.pub !== undefined; });
+    if (x.tipo === 'fans') return (S.fans || 0) >= x.meta;
+    if (x.tipo === 'caja') return S.estudios[0].caja >= x.meta;
+    if (x.tipo === 'critica') return S.obras.some(function (o) { return o.est === 0 && o.fe >= x.t0 && o.crit >= x.meta; });
+    if (x.tipo === 'serie') return S.obras.some(function (o) { return o.est === 0 && o.tv && o.tv.em && o.tv.em.t0 >= x.t0; });
+    if (x.tipo === 'medio') return IA.medios.proyectos().some(function (p) { return p.t0 >= x.t0 && p.pub !== undefined; });
+    return false;
+  }
+  function revisarLogros() {
+    const S = N.S, m = st();
+    if (S.sandbox) return;
+    LOGROS.forEach(function (l) { if (!m.logros[l[0]] && l[3](S)) { m.logros[l[0]] = S.t; N.emit('noticia', { tipo: 'estudio', texto: 'Logro: «' + l[1] + '».', importante: true }); } });
+  }
+  // ---------- Retos de final de partida ----------
+  function progresoReto(id) {
+    const S = N.S, m = st(), b = IA.banco.balance();
+    if (id === 'ranking') return Math.min(1, (m.ret || 0) / 3);
+    if (id === 'legado') return Math.min(1, m.legado / 150);
+    if (id === 'imperio') return Math.min(1, b.patrimonio / (tip() * 300)) * (IA.imperio.filiales().length >= 2 ? 1 : 0.9);
+    if (id === 'dinastia') return Math.min(1, ((S.avatar && S.avatar.gen) || 1) / 3);
+    return 0;
+  }
+  function anual() {
+    const S = N.S, m = st();
+    const h = S.fin.hist[S.fin.hist.length - 1];
+    m.ret = h && h.puesto === 1 ? (m.ret || 0) + 1 : 0;
+    if (m.modo === 'campana' && N.anio() % 10 === 0) cerrarDecada();
+    if (m.reto && !m.fin && !S.sandbox && progresoReto(m.reto) >= 1) {
+      m.fin = { t: S.t, reto: m.reto };
+      N.emit('noticia', { tipo: 'estudio', texto: '¡Cumpliste el reto «' + RETOS.filter(function (r) { return r.id === m.reto; })[0].nombre + '»! Ganaste la partida.', importante: true });
+      N.emit('victoria', m.fin);
+    }
+  }
+  // Créditos finales y resumen de la carrera
+  function resumen() {
+    const S = N.S, m = st(), ms = mias(S);
+    const mejor = ms.slice().sort(function (a, b) { return O.multiplicador(b) - O.multiplicador(a); })[0], critica = ms.slice().sort(function (a, b) { return (b.crit || 0) - (a.crit || 0); })[0];
+    return { estudio: S.estudios[0].nombre, avatar: S.avatar ? S.avatar.nom : '', desde: S.y0, hasta: N.anio(), obras: ms.length, mejor: mejor ? mejor.tit : '', critica: critica ? critica.tit : '',
+      premios: (S.galas || []).reduce(function (s, r) { return s + r.categorias.filter(function (c) { return c.ganador.est === 0; }).length; }, 0), legado: m.legado, logros: Object.keys(m.logros).length, patrimonio: IA.banco.balance().patrimonio,
+      fans: S.fans || 0, reto: m.reto, modo: m.modo, dificultad: S.dificultad };
+  }
+  // ---------- Tutorial ----------
+  const PASOS = [
+    { sec: ['estudio', 'obras'], txt: 'Bienvenida: este es tu estudio. Ve a Obras y crea tu primera obra.' },
+    { sec: ['estudio', 'obras', 'talento'], txt: 'Tu obra está en marcha. Ahora puedes buscar talentos en Talento.' },
+    { sec: ['estudio', 'obras', 'talento', 'mundo'], txt: 'Cuando quede lista, prográmala y mira la cartelera en Mundo.' },
+    { sec: ['estudio', 'obras', 'talento', 'mundo', 'negocio'], txt: 'Ya estrenaste: en Negocio están tus cuentas, construcciones y el banco. ¡Tutorial completo!' },
+  ];
+  function seccionesVisibles() { const m = N.S ? st() : null; if (!m || !m.tut) return null; return PASOS[Math.min(m.tut, PASOS.length) - 1].sec; }
+  function pasoTutorial() { const m = st(); return m.tut ? PASOS[Math.min(m.tut, PASOS.length) - 1] : null; }
+  function semana() {
+    const S = N.S, m = st();
+    if (m.tut && m.tut < 4) {
+      const n = m.tut === 1 ? S.obras.some(function (o) { return o.est === 0; }) : m.tut === 2 ? S.obras.some(function (o) { return o.est === 0 && ['lista', 'cartelera', 'terminada'].indexOf(o.et) >= 0; }) : S.obras.some(function (o) { return o.est === 0 && o.pub !== undefined && o.et !== 'lista'; });
+      if (n) { m.tut++; N.emit('noticia', { tipo: 'estudio', texto: 'Tutorial: ' + PASOS[m.tut - 1].txt, importante: true }); if (m.tut >= 4) m.tut = 0; }
+    }
+  }
+  function saltarTutorial() { st().tut = 0; }
+  // ---------- Consejos del momento ----------
+  function consejos() {
+    const S = N.S, out = [], est = S.estudios[0], NG = IA.negocio;
+    if (est.caja < 0) out.push('Tu caja está en rojo: pide un préstamo en Negocio › Banco o espera los ingresos de las ventanas.');
+    if (O.enProduccion(0).length < NG.capacidad(0) && NG.cajaLibre(0) > tip()) out.push('Tienes platós libres y caja: empieza otra obra.');
+    if (O.delEstudio(0, ['lista']).some(function (o) { return !o.prog; })) out.push('Hay obras listas sin fecha de estreno.');
+    const fams = IA.datos.familias.slice().sort(function (a, b) { return (S.mundo.tendencias[b.id] || 0) - (S.mundo.tendencias[a.id] || 0); });
+    if ((S.mundo.tendencias[fams[0].id] || 0) > 0.4) out.push('El público pide ' + fams[0].nombre.toLowerCase() + ': es buen momento para ese género.');
+    if (IA.banco.junta() < 30) out.push('La paciencia de la junta está baja: evita gastos grandes un tiempo.');
+    if (NG.cajaLibre(0) > tip() * 20) out.push('Te sobra dinero: mira Negocio › Imperio (filiales, sedes, investigación) o los medios nuevos en Obras.');
+    if (S.evento) out.push('Hay una decisión esperándote.');
+    st().misiones.filter(function (x) { return !x.ok && !x.fallo && x.hasta - S.t < 8; }).forEach(function (x) { out.push('Vence pronto la misión: ' + x.txt); });
+    return out.slice(0, 3);
+  }
+  // ---------- Editor Sandbox y paquetes ----------
+  function activarSandbox() { N.S.sandbox = 1; }
+  function editar(tipo, id, campo, valor) {
+    const S = N.S;
+    if (!S.sandbox) return 'Activa el Editor Sandbox primero (desactiva logros y retos).';
+    let x = null;
+    if (tipo === 'talento') x = IA.talentos.porId(+id);
+    else if (tipo === 'estudio') x = S.estudios[+id];
+    else if (tipo === 'obra') x = O.porId(+id);
+    else if (tipo === 'franquicia') x = IA.franquicias.porId(+id);
+    else if (tipo === 'precio') { S.edit = S.edit || {}; S.edit.precio = N.limitar(+valor || 1, 0.2, 5); return ''; }
+    if (!x) return 'No existe.';
+    const num = ['hab', 'pot', 'fama', 'caja', 'tam', 'calidad', 'pub', 'crit'];
+    const permitidos = { talento: ['nom', 'hab', 'pot', 'fama'], estudio: ['nombre', 'caja', 'tam', 'calidad', 'fama'], obra: ['tit', 'pub', 'crit'], franquicia: ['nom', 'gen'] }[tipo];
+    if (permitidos.indexOf(campo) < 0) return 'Ese campo no se edita.';
+    if (num.indexOf(campo) >= 0) { let v = +valor; if (!isFinite(v)) return 'Número inválido.'; if (campo === 'fama') v = N.limitar(v, 0, 1); else if (campo !== 'caja') v = N.limitar(v, campo === 'tam' ? 0.1 : 1, campo === 'tam' ? 5 : 99); x[campo] = v; }
+    else x[campo] = String(valor).slice(0, 40);
+    return '';
+  }
+  function personaje(frId, k, nom, pop) { const f = IA.franquicias.porId(+frId); if (!N.S.sandbox || !f) return 'No se puede.'; const p = f.pers.filter(function (x) { return x.k === +k; })[0]; if (!p) return 'No existe.'; if (nom) p.n = String(nom).slice(0, 40); if (pop !== undefined && pop !== '') p.pop = N.limitar(+pop || 0, 1, 99); return ''; }
+  function crearTalento(op) { if (!N.S.sandbox) return 'Activa el Editor Sandbox primero.'; const t = IA.talentos.crearPropio(op); t.sb = 1; return ''; }
+  function exportarPaquete() {
+    const S = N.S;
+    return JSON.stringify({ tipo: 'paquete-industry-art', v: 1, talentos: S.talentos.filter(function (t) { return t.sb || t.propio; }).map(function (t) { return { nom: t.nom, of: t.of, sx: t.sx, edad: N.anio() - t.nac, pot: t.pot, hab: t.hab }; }),
+      estudios: S.estudios.map(function (e) { return { id: e.id, nombre: e.nombre }; }), franquicias: IA.franquicias.lista().map(function (f) { return { nom: f.nom, gen: f.gen, pers: f.pers.map(function (p) { return p.n; }) }; }), precio: S.edit ? S.edit.precio : 1 });
+  }
+  function importarPaquete(txt) {
+    const S = N.S;
+    let p;
+    try { p = JSON.parse(txt); } catch (e) { return 'El paquete no es válido.'; }
+    if (!p || p.tipo !== 'paquete-industry-art') return 'No es un paquete de INDUSTRY ART.';
+    activarSandbox();
+    (p.talentos || []).slice(0, 200).forEach(function (t) { const n = IA.talentos.crearPropio({ of: t.of, sx: t.sx, edad: t.edad, pot: t.pot, nom: t.nom }); n.sb = 1; if (t.hab) n.hab = N.limitar(+t.hab, 1, 99); });
+    (p.estudios || []).forEach(function (e) { if (S.estudios[e.id] && e.nombre) S.estudios[e.id].nombre = String(e.nombre).slice(0, 40); });
+    if (p.precio) { S.edit = S.edit || {}; S.edit.precio = N.limitar(+p.precio, 0.2, 5); }
+    return '';
+  }
+  return { MODOS: MODOS, HUMOR: HUMOR, RETOS: RETOS, LOGROS: LOGROS, PASOS: PASOS, estado: st, iniciar: iniciar, frecEventos: frecEventos, cumpleMeta: cumpleMeta, mensual: mensual,
+    revisarLogros: revisarLogros, progresoReto: progresoReto, anual: anual, resumen: resumen, seccionesVisibles: seccionesVisibles, pasoTutorial: pasoTutorial, semana: semana,
+    saltarTutorial: saltarTutorial, consejos: consejos, activarSandbox: activarSandbox, editar: editar, personaje: personaje, crearTalento: crearTalento,
+    exportarPaquete: exportarPaquete, importarPaquete: importarPaquete };
+})();
+
 /* ==== módulo: guardado ==== */
 // Base de datos del navegador (IndexedDB) con el almacenamiento simple como respaldo; compresión nativa
 // (gzip) o un compresor propio (LZW) cuando no existe; 5 ranuras manuales y 3 autoguardados rotativos;
@@ -17129,6 +17372,134 @@ IA.mediosUI = (function () {
   ac('mdGiraT', function (v) { avisar(Md.gira(v, 4), 'La obra sale de gira'); refrescarProyecto(v); });
   ac('mdGrabar', function (v) { const p = v.split('|'); avisar(Md.grabar(+p[0], p[1]), 'Obra grabada'); refrescarProyecto(p[0]); });
   return { medio: medio, fichaProyecto: fichaProyecto, dibujar: dibujar };
+})();
+
+/* ==== módulo: metas_ui ==== */
+// V26 · Opciones de modo en la partida nueva (modo, reto, tutorial, personalizado y dificultades desbloqueables),
+// tarjetas del Estudio (tutorial, consejos, década, misiones y reto), Mundo › Metas (logros, campaña, misiones,
+// reto y resumen), Mundo › Editor (Sandbox y paquetes), créditos finales y música de fondo opcional.
+IA.metasUI = (function () {
+  'use strict';
+  const N = IA.n, U = IA.ui, M = IA.metas, esc = N.esc;
+  const dinero = U.dinero, ac = U.accion;
+  const st = { ed: 'talento' };
+  function btn(txt, a, v, cl, dis) { return '<button class="btn ' + (cl || '') + '" data-a="' + a + '" data-v="' + esc(v === undefined ? '' : v) + '"' + (dis ? ' disabled title="' + esc(dis) + '"' : '') + '>' + esc(txt) + '</button>'; }
+  function barra(v) { return '<div class="barra-p"><i style="width:' + Math.round(N.limitar(v, 0, 1) * 100) + '%"></i></div>'; }
+  // ---------- Desbloqueos (se guardan en este navegador) ----------
+  function desbloqueos() { try { return JSON.parse(localStorage.getItem('ia_desbloqueos') || '{}'); } catch (e) { return {}; } }
+  function desbloquear(id) { try { const d = desbloqueos(); d[id] = 1; localStorage.setItem('ia_desbloqueos', JSON.stringify(d)); } catch (e) { /* sin almacenamiento */ } }
+  function dificultadDisponible(d) { const u = desbloqueos(); return !d.bloqueo || u[d.id]; }
+  // ---------- Partida nueva ----------
+  function opcionesNueva(np) {
+    const ops = function (l, v) { return l.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === v ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join(''); };
+    np.modoJuego = np.modoJuego || 'libre';
+    let h = '<h3>Modo de juego</h3><label class="campo"><span>Modo</span><select data-c="mtNp" data-k="modoJuego">' + ops(M.MODOS.map(function (m) { return [m.id, m.nombre + ' · ' + m.texto]; }), np.modoJuego) + '</select></label>' +
+      '<label class="campo"><span>Reto final</span><select data-c="mtNp" data-k="reto">' + ops([['', 'Sin reto']].concat(M.RETOS.map(function (r) { return [r.id, r.nombre + ' · ' + r.texto]; })), np.reto || (np.modoJuego === 'campana' ? 'legado' : '')) + '</select></label>' +
+      '<label class="interruptor"><span>Tutorial (las secciones se abren de a poco)</span><input type="checkbox" data-c="mtNpB" data-k="tutorial"' + (np.tutorial ? ' checked' : '') + '></label>';
+    if (np.modoJuego === 'personalizado') {
+      const p = np.perso = np.perso || { dinero: 1, rivales: 0, eventos: 1 };
+      h += '<div class="tarjeta"><label class="campo"><span>Dinero inicial ×' + p.dinero + '</span><input type="range" min="0.25" max="5" step="0.25" value="' + p.dinero + '" data-c="mtPerso" data-k="dinero"></label>' +
+        '<label class="campo"><span>Fuerza de los rivales ' + (p.rivales > 0 ? '+' : '') + p.rivales + '</span><input type="range" min="-6" max="9" step="1" value="' + p.rivales + '" data-c="mtPerso" data-k="rivales"></label>' +
+        '<label class="campo"><span>Eventos ×' + p.eventos + '</span><input type="range" min="0" max="3" step="0.5" value="' + p.eventos + '" data-c="mtPerso" data-k="eventos"></label></div>';
+    }
+    const d = IA.juego.DIFICULTADES.filter(function (x) { return x.id === np.dificultad; })[0];
+    h += '<p class="nota">' + esc(M.HUMOR[np.dificultad] || '') + '</p>' + IA.juego.DIFICULTADES.filter(function (x) { return !dificultadDisponible(x); }).map(function (x) { return '<p class="tenue chico">🔒 ' + esc(x.nombre) + ': ' + esc(x.bloqueo) + '.</p>'; }).join('');
+    return d ? h : h;
+  }
+  function dificultades() { return IA.juego.DIFICULTADES.filter(dificultadDisponible); }
+  // ---------- Tarjetas del Estudio ----------
+  function tarjetas() {
+    if (!N.S) return '';
+    const S = N.S, m = M.estado(), p = M.pasoTutorial();
+    let h = '';
+    if (p) h += '<div class="tarjeta oro"><b>Tutorial</b><p>' + esc(p.txt) + '</p>' + btn('Saltar el tutorial', 'mtSaltar') + '</div>';
+    const c = M.consejos();
+    if (c.length) h += '<div class="tarjeta"><b>Consejos del momento</b>' + c.map(function (x) { return '<p class="chico">💡 ' + esc(x) + '</p>'; }).join('') + '</div>';
+    const abiertas = m.misiones.filter(function (x) { return !x.ok && !x.fallo; });
+    if (m.dec || abiertas.length || m.reto) {
+      h += '<div class="tarjeta"><b>Metas</b>';
+      if (m.dec) h += '<p class="chico">Década de ' + m.dec.d + ': ' + m.dec.metas.filter(M.cumpleMeta).length + ' de ' + m.dec.metas.length + ' metas · legado ' + m.legado + '</p>';
+      if (m.reto) { const r = M.RETOS.filter(function (x) { return x.id === m.reto; })[0]; h += '<p class="chico">Reto «' + esc(r.nombre) + '»: ' + Math.round(M.progresoReto(m.reto) * 100) + ' %</p>' + barra(M.progresoReto(m.reto)); }
+      h += abiertas.map(function (x) { return '<p class="chico">✉ ' + esc(x.txt) + ' <span class="tenue">(hasta ' + esc(U.fechaCorta(x.hasta)) + ')</span></p>'; }).join('') + btn('Ver metas y logros', 'mtIrMetas') + '</div>';
+    }
+    return h;
+  }
+  ac('mtSaltar', function () { M.saltarTutorial(); U.render(); });
+  ac('mtIrMetas', function () { U.irA('mundo', 'metas'); });
+  // ---------- Mundo › Metas ----------
+  function metas() {
+    const S = N.S, m = M.estado(), mo = M.MODOS.filter(function (x) { return x.id === m.modo; })[0];
+    let h = '<p class="nota">Modo ' + esc(mo.nombre) + ' · dificultad ' + esc(S.dificultad) + (S.sandbox ? ' · Editor Sandbox activo: los logros y los retos están apagados.' : '') + '</p>';
+    if (m.reto) { const r = M.RETOS.filter(function (x) { return x.id === m.reto; })[0]; h += '<div class="tarjeta"><b>Reto final: ' + esc(r.nombre) + '</b><p class="chico">' + esc(r.texto) + '</p>' + barra(M.progresoReto(m.reto)) + (m.fin ? '<p class="oro">¡Cumplido!</p>' + btn('Ver los créditos', 'mtCreditos') : '') + '</div>'; }
+    if (m.dec) h += '<h3>Campaña · década de ' + m.dec.d + ' (legado ' + m.legado + ')</h3>' + m.dec.metas.map(function (x) { return '<p>' + (M.cumpleMeta(x) ? '✔' : '○') + ' ' + esc(x.txt) + ' <span class="tenue chico">+' + x.pts + '</span></p>'; }).join('') +
+      (m.decadas.length ? '<p class="tenue chico">' + m.decadas.map(function (d) { return d.d + ': ' + d.ok + '/' + d.de; }).join(' · ') + '</p>' : '');
+    h += '<h3>Misiones</h3>' + (m.misiones.length ? m.misiones.slice().reverse().map(function (x) { return '<p class="chico">' + (x.ok ? '✔' : x.fallo ? '✖' : '✉') + ' ' + esc(x.txt) + ' <span class="tenue">· premio ' + dinero(x.premio) + ' · hasta ' + esc(U.fechaCorta(x.hasta)) + '</span></p>'; }).join('') : '<p class="tenue">Llegan por correo de vez en cuando.</p>');
+    const n = Object.keys(m.logros).length;
+    h += '<h3>Logros (' + n + ' de ' + M.LOGROS.length + ')</h3><div class="col">' + M.LOGROS.map(function (l) { const ok = m.logros[l[0]] !== undefined; return '<div class="cal-ev' + (ok ? '' : ' tenue') + '"><b>' + (ok ? '🏆' : '🔒') + '</b><div class="col crece"><span>' + esc(l[1]) + '</span><span class="tenue chico">' + esc(l[2]) + (ok ? ' · ' + esc(U.fechaCorta(m.logros[l[0]])) : '') + '</span></div></div>'; }).join('') + '</div>';
+    h += btn('Resumen de la carrera', 'mtCreditos', '', 'bloque');
+    return h;
+  }
+  function creditos() {
+    const r = M.resumen();
+    U.modal('<h2>' + esc(r.estudio) + '</h2><p class="tenue">' + r.desde + ' – ' + r.hasta + ' · dirigido por ' + esc(r.avatar) + '</p><div class="col">' +
+      [['Obras estrenadas', r.obras], ['Mejor negocio', r.mejor ? '«' + r.mejor + '»' : '—'], ['Favorita de la crítica', r.critica ? '«' + r.critica + '»' : '—'], ['Premios en galas', r.premios], ['Legado', r.legado], ['Logros', r.logros + ' de ' + M.LOGROS.length], ['Patrimonio', dinero(r.patrimonio)], ['Fans', U.grande(r.fans)], ['Modo y dificultad', r.modo + ' · ' + r.dificultad]]
+        .map(function (x) { return '<div class="fila entre"><span>' + esc(x[0]) + '</span><b>' + esc(String(x[1])) + '</b></div>'; }).join('') + '</div><p class="nota" style="text-align:center">Gracias por jugar INDUSTRY ART.</p>' +
+      btn('Seguir jugando', 'cerrarModal', '', 'primario bloque'));
+  }
+  ac('mtCreditos', creditos);
+  // Al ganar: créditos y desbloqueo de la dificultad siguiente
+  N.on('victoria', function () {
+    const d = N.S.dificultad;
+    if (d === 'dificil') desbloquear('experto');
+    if (d === 'experto') desbloquear('pesadilla');
+    setTimeout(creditos, 0);
+  });
+  // ---------- Mundo › Editor ----------
+  function editor() {
+    const S = N.S;
+    if (!S.sandbox) return '<div class="tarjeta"><b>Editor Sandbox</b><p>Cambia franquicias, obras, personajes, precios, talentos y estudios, e importa o exporta paquetes. Al activarlo se apagan los logros y los retos de esta partida.</p>' + btn('Activar el Editor', 'edActivar', '', 'primario') + '</div>' + paquetesUI();
+    const tipos = [['talento', 'Talentos'], ['estudio', 'Estudios'], ['obra', 'Obras'], ['franquicia', 'Franquicias'], ['precio', 'Precios']];
+    let h = '<div class="fila">' + tipos.map(function (x) { return '<button class="chip' + (st.ed === x[0] ? ' on' : '') + '" data-a="edTipo" data-v="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
+    const campo = function (tipo, id, k, v, num) { return '<input ' + (num ? 'type="number" step="any" ' : '') + 'value="' + esc(v) + '" data-c="edCampo" data-v="' + tipo + '|' + id + '|' + k + '" style="max-width:110px">'; };
+    if (st.ed === 'talento') h += '<div class="col">' + S.talentos.filter(function (t) { return !t.mu && !t.ret; }).sort(function (a, b) { return b.fama - a.fama; }).slice(0, 25).map(function (t) { return '<div class="fila">' + campo('talento', t.id, 'nom', t.nom) + '<span class="tenue chico">' + esc(t.of) + '</span> hab ' + campo('talento', t.id, 'hab', t.hab, 1) + ' fama ' + campo('talento', t.id, 'fama', t.fama, 1) + '</div>'; }).join('') + '</div>' +
+      '<div class="tarjeta"><b>Crear talento</b><label class="campo"><span>Nombre</span><input id="edTNom" maxlength="40"></label><label class="campo"><span>Oficio</span><select id="edTOf">' + IA.datos.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label>' + btn('Crear', 'edCrearT', '', 'primario') + '</div>';
+    if (st.ed === 'estudio') h += '<div class="col">' + S.estudios.map(function (e) { return '<div class="fila">' + campo('estudio', e.id, 'nombre', e.nombre) + ' caja ' + campo('estudio', e.id, 'caja', Math.round(e.caja), 1) + ' calidad ' + campo('estudio', e.id, 'calidad', e.calidad || 0, 1) + '</div>'; }).join('') + '</div>';
+    if (st.ed === 'obra') h += '<div class="col">' + S.obras.filter(function (o) { return o.pub !== undefined; }).slice(-25).reverse().map(function (o) { return '<div class="fila">' + campo('obra', o.id, 'tit', o.tit) + ' crít ' + campo('obra', o.id, 'crit', o.crit, 1) + ' púb ' + campo('obra', o.id, 'pub', o.pub, 1) + '</div>'; }).join('') + '</div>';
+    if (st.ed === 'franquicia') h += '<div class="col">' + IA.franquicias.lista().slice(-20).map(function (f) { return '<div class="tarjeta"><div class="fila">' + campo('franquicia', f.id, 'nom', f.nom) + campo('franquicia', f.id, 'gen', f.gen) + '</div>' + f.pers.map(function (p) { return '<div class="fila"><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"> pop <input type="number" value="' + p.pop + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop" style="max-width:70px"></div>'; }).join('') + '</div>'; }).join('') + '</div>';
+    if (st.ed === 'precio') h += '<label class="campo"><span>Precio de la entrada ×' + ((S.edit && S.edit.precio) || 1) + '</span><input type="range" min="0.2" max="5" step="0.1" value="' + ((S.edit && S.edit.precio) || 1) + '" data-c="edCampo" data-v="precio|0|x"></label>';
+    return h + paquetesUI();
+  }
+  function paquetesUI() {
+    return '<h3>Paquetes</h3><p class="nota">Un paquete guarda tus talentos creados, los nombres de los estudios, las franquicias y los precios. Copia el texto para compartirlo o pega uno para importarlo.</p>' +
+      '<textarea id="edPaquete" rows="4" style="width:100%"></textarea><div class="fila">' + btn('Exportar', 'edExportar') + btn('Descargar archivo', 'edDescargar') + btn('Importar', 'edImportar', '', 'primario') + '</div>';
+  }
+  ac('edActivar', function () { M.activarSandbox(); U.refrescar(); });
+  ac('edTipo', function (v) { st.ed = v; U.refrescar(); });
+  ac('edCampo', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.editar(p[0], p[1], p[2], v); U.aviso(e || 'Guardado', e ? 'mal' : ''); if (p[0] === 'precio') U.refrescar(); });
+  ac('edPers', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.personaje(p[0], p[1], p[2] === 'n' ? v : '', p[2] === 'pop' ? v : undefined); U.aviso(e || 'Guardado', e ? 'mal' : ''); });
+  ac('edCrearT', function () { const e = M.crearTalento({ nom: document.getElementById('edTNom').value, of: document.getElementById('edTOf').value, edad: 30, pot: 70 }); U.aviso(e || 'Talento creado', e ? 'mal' : ''); U.refrescar(); });
+  ac('edExportar', function () { document.getElementById('edPaquete').value = M.exportarPaquete(); });
+  ac('edDescargar', function () { try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([M.exportarPaquete()], { type: 'application/json' })); a.download = 'paquete_industry_art.json'; a.click(); } catch (e) { U.aviso('No se pudo descargar: copia el texto.', 'mal'); } });
+  ac('edImportar', function () { const e = M.importarPaquete(document.getElementById('edPaquete').value); U.aviso(e || 'Paquete importado', e ? 'mal' : ''); if (!e) U.refrescar(); });
+  // ---------- Música de fondo (opcional, sintetizada) ----------
+  let audio = null;
+  function musica(on) {
+    try {
+      if (!on) { if (audio) { audio.ctx.close(); audio = null; } return; }
+      if (audio) return;
+      const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
+      const ctx = new Ctx(), gan = ctx.createGain(); gan.gain.value = 0.035; gan.connect(ctx.destination);
+      const acordes = [[220, 277, 330], [196, 247, 294], [175, 220, 262], [196, 247, 294]];
+      let i = 0;
+      const tocar = function () {
+        if (!audio) return;
+        acordes[i % 4].forEach(function (f) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(1, ctx.currentTime + 1); g.gain.linearRampToValueAtTime(0, ctx.currentTime + 3.8); o.connect(g); g.connect(gan); o.start(); o.stop(ctx.currentTime + 4); });
+        i++; audio.tm = setTimeout(tocar, 4000);
+      };
+      audio = { ctx: ctx }; tocar();
+    } catch (e) { audio = null; }
+  }
+  return { opcionesNueva: opcionesNueva, dificultades: dificultades, tarjetas: tarjetas, metas: metas, editor: editor, creditos: creditos, musica: musica, desbloquear: desbloquear };
 })();
 
 /* ==== módulo: prensa_ui ==== */
