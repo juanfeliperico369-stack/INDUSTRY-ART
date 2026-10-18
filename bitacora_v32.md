@@ -11,7 +11,7 @@ Fecha: 18 de octubre de 2026 · decisiones tuyas de esta versión · sin cambios
 - Textos nuevos traducidos al inglés (12 frases).
 
 ## Decisiones nuevas (¿cambia el Registro? sí, las tomaste tú)
-- Monetización: gratis con un anuncio al abrir, más una compra única que solo quita el anuncio. Nada del juego queda bloqueado.
+- Monetización: gratis con un anuncio al abrir, más una sola compra de 3 USD («Versión completa») que quita el anuncio para siempre. No hay más compras y nada del juego queda bloqueado.
 - El editor queda gratis e incluido para todos.
 
 ## Guardado

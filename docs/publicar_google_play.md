@@ -83,7 +83,7 @@ Tarda unos 6 minutos. Al final, en la misma página, descarga **industry-art-aab
 2. **Monetizar › Productos › Productos integrados en la aplicación** › Crear producto:
    - ID del producto: **`version_completa`** (tiene que ser exacto, porque el juego lo busca con ese nombre).
    - Nombre: «Versión completa». Descripción: «Quita el anuncio al abrir. El juego es el mismo para todos.»
-   - Precio: el que quieras (sugerencia: 2,99 USD). Google lo convierte a cada país, y el juego muestra el precio que manda la tienda.
+   - Precio: el que quieras (**3 USD**, decisión de la V32). Google lo convierte a cada país, y el juego muestra el precio que manda la tienda.
    - Actívalo.
 3. **Probar sin pagar**: Configuración › **Pruebas de licencias** › agrega tu Gmail y los de tus probadores. Con esas cuentas, la compra sale como «prueba» y no cobra.
 

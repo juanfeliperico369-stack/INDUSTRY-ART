@@ -67,7 +67,7 @@ En App Store Connect › TestFlight agrega tu correo como probador interno, inst
 - **Categoría**: Juegos › Simulación. **Precio**: gratis.
 - **Compra «Versión completa»** (solo quita el anuncio):
   1. App Store Connect › **Negocios** › firma el **Acuerdo de apps de pago** y llena los datos bancarios y de impuestos. Sin esto Apple no deja vender.
-  2. En tu app › **Compras dentro de la app** › **+** › tipo **No consumible**. ID del producto: **`version_completa`** (exacto). Nombre de referencia: «Versión completa». Elige el precio (sugerencia: 2,99 USD) y escribe el nombre y la descripción en español e inglés.
+  2. En tu app › **Compras dentro de la app** › **+** › tipo **No consumible**. ID del producto: **`version_completa`** (exacto). Nombre de referencia: «Versión completa». Elige el precio (**3 USD**, decisión de la V32) y escribe el nombre y la descripción en español e inglés.
   3. Sube una captura de Ajustes con el botón «Quitar el anuncio» para la revisión, y en la versión que envíes marca la compra para revisarla junto con la app.
   4. En TestFlight, las compras son de prueba y no cobran.
 - **Privacidad de la app** (versión gratis), según la guía de Google para AdMob: *Ubicación aproximada*, *Identificadores › ID del dispositivo*, *Datos de uso › Interacción con el producto y Datos de publicidad*, *Diagnóstico*. Todos con el uso «Publicidad de terceros», no vinculados a tu identidad. El ID del dispositivo sí se usa para **rastreo**. En la versión de pago: «No se recopilan datos».

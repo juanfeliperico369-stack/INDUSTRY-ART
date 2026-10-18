@@ -16,7 +16,7 @@ Agrega el inglés como segundo idioma (Agregar traducción › English (United S
 | Correo de contacto | El que quieras mostrar en público |
 | Política de privacidad | La pública que armes (ver `publicar_google_play.md`, paso 5) |
 | Clasificación esperada | 16+ (PEGI 16 / Teen–Mature según el cuestionario) |
-| Precio | Gratis, con un anuncio al abrir y la compra única «Versión completa» que solo lo quita (decisión de la V32) |
+| Precio | Gratis, con un anuncio al abrir y la compra única «Versión completa» de 3 USD que quita el anuncio (decisión de la V32) |
 | Avisos de la ficha | Contiene anuncios · Ofrece compras en la aplicación |
 
 ## Español
