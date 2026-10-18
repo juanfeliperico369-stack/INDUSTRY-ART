@@ -126,7 +126,7 @@ ART.banco = (function () {
     if (S.socio && util > 0) { const d = Math.round(util * 0.75 * S.socio.parte); ART.negocio.pagar(0, 'socio', d); }
     // Antes del cine las compañías de teatro, las imprentas y las casas de música repartían casi toda la ganancia: la
     // familia retira un tercio de la del año (así un estudio de 1700 no llega al cine con una fortuna imposible)
-    if (N.anio() < ART.datos.CINE_DESDE && util > 0) ART.negocio.pagar(0, 'familia', Math.round(util / 3));
+    if (N.anio() - 1 < ART.datos.CINE_DESDE && util > 0) ART.negocio.pagar(0, 'familia', Math.round(Math.min(util / 3, Math.max(0, ART.negocio.cajaLibre(0))))); // se cierra el año anterior
     // Dividendos de las inversiones (2 % del valor)
     Object.keys(st().acc).forEach(function (id) { const v = valorAccion(id); if (v > 0) ART.negocio.cobrarEn(0, 'inversiones', Math.round(v * 0.02)); });
   }

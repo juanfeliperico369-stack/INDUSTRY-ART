@@ -320,13 +320,16 @@ ART.hitosArte = (function () {
   function enIngles() { return ART.idioma && ART.idioma.actual() === 'en'; }
   function texto(h) { return enIngles() && h[4] ? h[4] : h[3]; }
   function hasta(anio) { return HITOS.filter(function (h) { return h[0] <= anio; }); }
+  // Títulos en inglés que no salen de la primera cita del texto en inglés
+  const TIT_EN = { 'Novena Sinfonía': 'Ninth Symphony', 'Quinta Sinfonía': 'Fifth Symphony', 'Tintín': 'Tintin', 'Batman': 'Batman', 'Mujer Maravilla': 'Wonder Woman',
+    'Liga de la Justicia': 'Justice League', 'El cascanueces (ballet)': 'The Nutcracker (ballet)' };
   // Una obra famosa lista para el editor de material
   function obra(i) {
     const h = HITOS[i];
     if (!h || h[1] !== 'o') return null;
     const t = (h[3].match(/«([^»]+)»/) || [])[1] || '', p = PERSONAS[h[5]], o = h[6];
-    const en = h[4] ? (h[4].match(/[«“]([^»”]+)[»”]/) || [])[1] : '';
-    return { tit: o ? o[0] : t, titEN: en || '', autor: p ? p[0] : '', anio: h[0], tipo: o ? o[1] : TIPOS[h[2]] || 'Novela', gen: (o ? o[2] : GENEROS_TIPO[h[2]] || ['Drama']).slice(), sin: h[3], sinEN: h[4] || '' };
+    const tit = o ? o[0] : t, en = TIT_EN[tit] || (h[4] ? (h[4].match(/[«“]([^»”]+)[»”]/) || [])[1] : '');
+    return { tit: tit, titEN: en || '', autor: p ? p[0] : '', anio: h[0], tipo: o ? o[1] : TIPOS[h[2]] || 'Novela', gen: (o ? o[2] : GENEROS_TIPO[h[2]] || ['Drama']).slice(), sin: h[3], sinEN: h[4] || '' };
   }
   function obrasHasta(anio) { const out = []; HITOS.forEach(function (h, i) { if (h[1] === 'o' && h[0] <= anio && obra(i).tit) out.push({ i: i, h: h, o: obra(i) }); }); return out.reverse(); }
   // Personas reales que viven ese año y tienen de 6 a 95 años; «ya» si su gran momento ya pasó

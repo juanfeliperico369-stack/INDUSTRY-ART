@@ -1,7 +1,10 @@
 {
-  "modo": "gratis",
-  "anuncioAlAbrir": true,
-  "compra": "version_completa",
+  "edicion": "anuncios",
+  "anuncios": {
+    "alAbrir": true,
+    "cadaMinutos": 20
+  },
+  "compra": "",
   "admob": {
     "prueba": true,
     "android": {

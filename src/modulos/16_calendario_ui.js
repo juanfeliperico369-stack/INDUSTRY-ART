@@ -263,6 +263,7 @@ ART.calendarioUI = (function () {
   // MENÚ DE PAUSA
   // =====================================================================
   ac('abrirPausa', function () {
+    ART.publicacion.anuncioEnPausa(); // edición con anuncios: si ya toca, sale uno al pausar
     U.modal('<div class="fila entre"><h2>Pausa</h2><button class="ico" data-a="cerrarModal" aria-label="' + t('cerrar') + '">' + U.icono('cerrar') + '</button></div><div class="col">' +
       '<button class="btn primario" data-a="cerrarModal">Seguir</button>' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button>' : '') +
       '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' + (N.S ? '<button class="btn" data-a="crearTalentoForm">Crear talento</button>' : '') +

@@ -39,7 +39,7 @@ ART.talentoNuevo = (function () {
     if (!f.editar) {
       const L = ART.hitosArte.personasEn(N.anio());
       if (L.length) h += campo('¿Es tu talento un personaje de hito histórico?', '<select data-c="tnHist"><option value="">— no —</option>' + L.map(function (x) {
-        const ya = T.porId && N.S.talentos.some(function (y) { return y.hist === x.k && !y.mu; });
+        const ya = T.porId && N.S.talentos.some(function (y) { return (y.histP || y.hist) === x.k && !y.mu; });
         return '<option value="' + esc(x.k) + '"' + (f.hist === x.k ? ' selected' : '') + (ya ? ' disabled' : '') + '>' + esc(x.p[0]) + ' · ' + esc(D.oficio(x.p[1]).nombre.toLowerCase()) + ' · ' + (N.anio() - x.p[4]) + ' años' + (ya ? ' (ya está en tu partida)' : x.ya ? '' : ' · su gran momento llega en ' + x.h[0]) + '</option>';
       }).join('') + '</select>') + (f.hist ? '<p class="nota info">' + esc(ART.hitosArte.texto(f.histH)) + '</p>' : '');
     }

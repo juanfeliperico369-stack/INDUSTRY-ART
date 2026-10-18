@@ -6715,8 +6715,6 @@
  "Debuta {t}, hijo de {o}.": "{t}, son of {o}, makes their debut.",
  "Debuta {t}, hija de {o}.": "{t}, daughter of {o}, makes their debut.",
  "La prensa elige a {t} ({o}) como la revelación del año.": "The press names {t} ({o}) the breakout of the year.",
- "Se cumplen cien años del nacimiento de {t}.": "It's been one hundred years since {t} was born.",
- "Se cumplen cien años del nacimiento de {t}, leyenda del oficio de {o}.": "It's been one hundred years since {t} was born, a legend of {o}.",
  "Hija de {t}: el oficio le viene de familia.": "Daughter of {t}: the craft runs in the family.",
  "Hijo de {t}: el oficio le viene de familia.": "Son of {t}: the craft runs in the family.",
  "Uno de sus hijos siguió sus pasos.": "One of their children followed in their footsteps.",
@@ -6739,5 +6737,14 @@
  "{n} guiones en venta · {m} tuyos sin producir. Ya están escritos, con su calificación y su precio.": "{n} scripts for sale · {m} of yours not yet produced. They're already written, with their rating and price.",
  "Fondos de cine": "Film funds",
  "El fondo de cine de {p} aporta {$} a «{o}».": "The {p} film fund contributes {$} to “{o}”.",
- "Fondo de cine para independientes: recibes {$} al empezar": "Film fund for independents: you get {$} when you start"
+ "Fondo de cine para independientes: recibes {$} al empezar": "Film fund for independents: you get {$} when you start",
+ "Edición completa · sin anuncios": "Complete edition · no ads",
+ "Edición con anuncios": "Edition with ads",
+ "Quitar los anuncios": "Remove the ads",
+ "Una sola compra quita los anuncios. El juego es el mismo para todos: las dos ediciones traen todo desbloqueado.": "A single purchase removes the ads. The game is the same for everyone: both editions come with everything unlocked.",
+ "¡Listo! Ya no verás anuncios. Gracias por apoyar el juego.": "Done! You won't see ads anymore. Thanks for supporting the game.",
+ "El pago está pendiente: cuando se confirme, los anuncios desaparecen.": "The payment is pending: once it is confirmed, the ads go away.",
+ "Se cumplen cien años del nacimiento de {t}, legendaria {o}.": "It's been one hundred years since the birth of {t}, a legendary {o}.",
+ "Se cumplen cien años del nacimiento de {t}, legendario {o}.": "It's been one hundred years since the birth of {t}, a legendary {o}.",
+ "Se cumplen cien años del nacimiento de {t}.": "It's been one hundred years since the birth of {t}."
 }

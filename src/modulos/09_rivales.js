@@ -50,7 +50,7 @@ ART.rivales = (function () {
     const S = N.S, anio = N.anio(), T = ART.talentos;
     const c = S.talentos.filter(function (t) {
       const e = anio - t.nac;
-      return !t.ret && !t.mu && !t.funda && ['direccion', 'produccion', 'interprete', 'guion', 'animacion'].indexOf(t.of) >= 0 && t.fama >= 0.4 && e >= 32 && e <= 66 && T.exclusivoDe(t) === null && !T.ocupado(t);
+      return !t.jugador && !t.propio && !t.ret && !t.mu && !t.funda && ['direccion', 'produccion', 'interprete', 'guion', 'animacion'].indexOf(t.of) >= 0 && t.fama >= 0.4 && e >= 32 && e <= 66 && T.exclusivoDe(t) === null && !T.ocupado(t);
     }).sort(function (a, b) { return b.fama - a.fama; });
     return c.length ? c[N.entero(0, Math.min(5, c.length - 1))] : null;
   }

@@ -27,9 +27,9 @@ Ideado y creado por OneZero · programado por Faro.
 
 | Partida | Resultado |
 |---|---|
-| 1700 → 1900 | RESULTADO_1700 |
-| 1900 → 2100 | RESULTADO_1900 |
-| 2100 → 2300 | RESULTADO_2100 |
+| 1700 → 1900 | Sin errores · llega al cine con 4.000 M$ de hoy (antes 7.900) · obras que pierden 37 % · crecimiento real 5 % al año · todavía no es major en 1900 · guarda 288 KB comprimido |
+| 1900 → 2100 | Sin errores · major a los 15 años · obras que pierden 41 % · crecimiento 12 % al año · 28 % de los premios principales · cuota máxima 15 % · 5.769 obras, guarda 2,4 MB comprimido |
+| 2100 → 2300 | Sin errores (antes quebraba en 2117) · major a los 15 años · obras que pierden 35 % · crecimiento 13 % al año · cuota máxima 14 % · 6.874 obras, guarda 2,8 MB comprimido |
 
 Prueba de humo (crear partida, avanzar, recorrer secciones), taller, editor de material y creador de talentos:
 sin errores en la página.

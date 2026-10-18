@@ -1,16 +1,17 @@
 /* ==== módulo: publicacion ==== */
-// La 1.0 en Google Play: un solo anuncio al abrir (solo dentro de la app, con AdMob por Capacitor),
-// versión gratuita o de pago según ART_CONFIG (lo pone tools/preparar_app.py al armar la app) y créditos.
-// IPhone y PC: la misma app en iOS (con el permiso de rastreo de Apple) y en Windows, macOS y Linux (Electron, sin anuncios).
+// Dos ediciones con todo el juego desbloqueado (ART_CONFIG.edicion, lo pone tools/preparar_app.py al armar cada paquete):
+// - «completa»: sin anuncios (la de pago en las tiendas; también la web, la de PC, Steam y Epic Games).
+// - «anuncios»: gratis, con un anuncio al abrir y, como mucho, uno más cada cierto tiempo en una pausa natural (al cerrar
+//   un año o al abrir la pausa), nunca en medio de una decisión. Solo dentro de la app (AdMob por Capacitor).
 // Antes del anuncio se pide el consentimiento que exige Google en Europa (UMP); en Ajustes queda «Privacidad de los anuncios».
-// Compra única «Versión completa» (Google Play y App Store) que solo quita el anuncio; el juego es el mismo para todos.
-// La compra se consulta a la tienda cada vez que se abre la app (un reembolso la quita); sin internet vale la última respuesta.
-// En el navegador y en PC no hay anuncios ni compras.
+// La edición con anuncios puede ofrecer, si config.compra tiene un producto, una compra única que quita los anuncios;
+// se consulta a la tienda cada vez que se abre la app (un reembolso la quita). Las configuraciones viejas (modo
+// «gratis» o «pago») siguen valiendo: gratis es la edición con anuncios y pago, la completa.
 ART.publicacion = (function () {
   'use strict';
   // Identificadores de prueba de Google (no pagan); los reales llegan por app/config.json
   const BASE = {
-    modo: 'gratis', anuncioAlAbrir: true, compra: 'version_completa',
+    anuncios: { alAbrir: true, cadaMinutos: 20 }, compra: '',
     admob: {
       prueba: true,
       android: { app: 'ca-app-pub-3940256099942544~3347511713', intersticial: 'ca-app-pub-3940256099942544/1033173712' },
@@ -18,6 +19,7 @@ ART.publicacion = (function () {
     }
   };
   const NOMBRES = { android: 'Android', ios: 'iPhone', pc: 'PC', web: 'Web' };
+  const TIENDAS = { steam: 'Steam', epic: 'Epic Games', mac: 'Mac', windows: 'Windows', linux: 'Linux' };
   let privacidad = false; // el usuario puede cambiar su consentimiento (lo dice Google al pedirlo)
   const CLAVE_COMPRA = 'industryart_completa';
   let completa = leerCompra(), precioTexto = '';
@@ -34,7 +36,18 @@ ART.publicacion = (function () {
     if (typeof window !== 'undefined' && (window.ART_ESCRITORIO || /Electron\//.test(navigator.userAgent || ''))) return 'pc';
     return 'web';
   }
-  function nombrePlataforma() { return NOMBRES[plataforma()]; }
+  function nombrePlataforma() { const ti = config().tienda; return (ti && TIENDAS[ti]) || NOMBRES[plataforma()]; }
+  // La edición: la que diga la configuración; sin configuración, la app de las tiendas es la gratuita y el resto, la completa
+  function edicion() {
+    const c = (typeof window !== 'undefined' && (window.ART_CONFIG || window.IA_CONFIG)) || {};
+    if (c.edicion === 'completa' || c.edicion === 'anuncios') return c.edicion;
+    if (c.modo === 'pago') return 'completa';
+    if (c.modo === 'gratis') return 'anuncios';
+    return enApp() ? 'anuncios' : 'completa';
+  }
+  function nombreEdicion() { return edicion() === 'completa' ? 'Edición completa · sin anuncios' : 'Edición con anuncios'; }
+  function conAnuncios() { return edicion() === 'anuncios' && !completa; }
+  function reglaAnuncios() { const c = config(), a = c.anuncios || {}; return { alAbrir: c.anuncioAlAbrir === false ? false : a.alAbrir !== false, cadaMinutos: +a.cadaMinutos || 0 }; }
   function plugin() { return enApp() && window.Capacitor.Plugins ? window.Capacitor.Plugins.AdMob || null : null; }
   // Consentimiento de Google (UMP): solo se muestra donde la ley lo pide; si no se puede pedir anuncios, no hay anuncio
   function consentir(ad) {
@@ -59,13 +72,13 @@ ART.publicacion = (function () {
   // Pregunta a Google Play o a la App Store qué compró esta cuenta; si la tienda no responde, queda lo último que se supo
   function revisarCompra() {
     const st = tienda();
-    if (!st || config().modo === 'pago') return Promise.resolve(completa);
+    if (!st || !compraDisponible()) return Promise.resolve(completa);
     return conTiempo(st.getPurchases({ productType: 'inapp', onlyCurrentEntitlements: true }), 4000)
       .then(function (r) { anotarCompra((r.purchases || []).some(valida)); return completa; })
       .catch(function () { return completa; });
   }
-  function compraDisponible() { return !!tienda() && config().modo !== 'pago'; }
-  function tieneCompleta() { return config().modo === 'pago' || completa; }
+  function compraDisponible() { return !!tienda() && edicion() === 'anuncios' && !!config().compra; }
+  function tieneCompleta() { return edicion() === 'completa' || completa; }
   function precio() {
     const st = tienda();
     if (!st) return Promise.resolve('');
@@ -89,24 +102,33 @@ ART.publicacion = (function () {
     if (!st) return Promise.resolve(false);
     return st.restorePurchases().catch(function () {}).then(revisarCompra);
   }
-  // Un solo anuncio al abrir (versión gratuita); si algo falla, el juego sigue sin esperar
+  // Un anuncio al abrir (edición con anuncios); si algo falla, el juego sigue sin esperar
   function alAbrir() {
-    return revisarCompra().then(anuncio);
+    return revisarCompra().then(function () { return reglaAnuncios().alAbrir ? anuncio() : false; });
+  }
+  let admobListo = null, ultimo = Date.now(), mostrando = false; // el primer anuncio en pausa llega después de un rato de juego
+  // Se inicia AdMob y se pide el consentimiento una sola vez por sesión
+  function preparar(ad, c) {
+    if (!admobListo) admobListo = ad.initialize({ initializeForTesting: !!c.admob.prueba }).then(function () { return consentir(ad); }).then(function (puede) { return puede ? rastreo(ad).then(function () { return true; }) : false; });
+    return admobListo;
   }
   function anuncio() {
     const c = config(), ad = plugin(), ids = c.admob[plataforma()];
-    if (!ad || !ids || c.modo === 'pago' || !c.anuncioAlAbrir || completa) return Promise.resolve(false);
-    return ad.initialize({ initializeForTesting: !!c.admob.prueba })
-      .then(function () { return consentir(ad); })
+    if (!ad || !ids || !conAnuncios() || mostrando) return Promise.resolve(false);
+    mostrando = true;
+    return preparar(ad, c)
       .then(function (puede) {
         if (!puede) return false;
-        return rastreo(ad)
-          .then(function () { return ad.prepareInterstitial({ adId: ids.intersticial, isTesting: !!c.admob.prueba }); })
+        return ad.prepareInterstitial({ adId: ids.intersticial, isTesting: !!c.admob.prueba })
           .then(function () { return ad.showInterstitial(); })
-          .then(function () { return true; });
+          .then(function () { ultimo = Date.now(); return true; });
       })
-      .catch(function () { return false; });
+      .catch(function () { admobListo = null; return false; })
+      .then(function (r) { mostrando = false; return r; });
   }
+  // En una pausa natural (cierre del año, menú de pausa): otro anuncio solo si pasó el tiempo de la regla
+  function anuncioPendiente() { const m = reglaAnuncios().cadaMinutos; return !!m && conAnuncios() && !!plugin() && !mostrando && Date.now() - ultimo >= m * 60000; }
+  function anuncioEnPausa() { return anuncioPendiente() ? anuncio() : Promise.resolve(false); }
   function privacidadDisponible() { return privacidad && !!plugin(); }
   function abrirPrivacidad() { const ad = plugin(); return ad ? ad.showPrivacyOptionsForm().catch(function () {}) : Promise.resolve(); }
   // ---------- Guardar un archivo (partida, paquete o documento de la idea) ----------
@@ -177,7 +199,8 @@ ART.publicacion = (function () {
   }
   const CREDITOS = ['Ideado y creado por OneZero', 'Programado por Faro'];
   function creditos() { return CREDITOS.slice(); }
-  return { config: config, enApp: enApp, plataforma: plataforma, nombrePlataforma: nombrePlataforma, alAbrir: alAbrir,
+  return { config: config, enApp: enApp, plataforma: plataforma, nombrePlataforma: nombrePlataforma, alAbrir: alAbrir, anuncioEnPausa: anuncioEnPausa, anuncioPendiente: anuncioPendiente,
+    edicion: edicion, nombreEdicion: nombreEdicion, conAnuncios: conAnuncios,
     privacidadDisponible: privacidadDisponible, abrirPrivacidad: abrirPrivacidad, creditos: creditos,
     revisarCompra: revisarCompra, compraDisponible: compraDisponible, tieneCompleta: tieneCompleta, precio: precio, precioGuardado: precioGuardado,
     comprar: comprar, restaurar: restaurar, guardarArchivo: guardarArchivo };

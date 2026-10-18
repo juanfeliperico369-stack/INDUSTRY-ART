@@ -204,7 +204,7 @@ ART.agencia = (function () {
       return '<button class="tarjeta toque fila entre" style="width:100%" data-a="verTalento" data-v="' + q.o.id + '"><span>' + esc(q.o.nom) + ' <span class="tenue chico">' + esc(oficioNombre(q.o)) + '</span></span><span class="' + (q.v > 0 ? 'bien' : 'mal') + '">' + esc(tipo) + ' (' + signo(q.v) + ')</span></button>';
     }).join('') + '<p class="nota info">La química del equipo clave (dirección, guion y protagonistas) suma o resta hasta 4 puntos de calidad.</p>' : '<p class="tenue">Las amistades, rivalidades y parejas nacen trabajando juntos.</p>');
     // Historial y premios
-    const obras = S.obras.filter(function (o) { return (o.eq && O.idsEquipo(o).indexOf(id) >= 0) || (x.hist && x.hist.indexOf(o.id) >= 0); }).slice(-15).reverse();
+    const obras = S.obras.filter(function (o) { return (o.eq && O.idsEquipo(o).indexOf(id) >= 0) || (Array.isArray(x.hist) && x.hist.indexOf(o.id) >= 0); }).slice(-15).reverse();
     h += '<h3>' + t('tal_obras') + '</h3>' + (obras.length ? obras.map(function (o) {
       const m = O.multiplicador(o);
       return '<button class="tarjeta toque fila entre" style="width:100%" data-a="verObra" data-v="' + o.id + '"><span>«' + esc(o.tit) + '» <span class="tenue chico">' + esc(S.estudios[o.est].nombre) + ' · ' + (o.anio || O.NOMBRE_ETAPA[o.et]) + '</span></span>' + (o.et === 'terminada' ? '<span class="etiqueta ' + (m >= 2.5 ? 'bien' : m < 1.4 ? 'mal' : '') + '">×' + U.decimal(m, 2) + '</span>' : '') + '</button>';

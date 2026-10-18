@@ -6,7 +6,7 @@
     ART.ui.cargarAjustes();
     ART.ui.enlazar();
     ART.ui.render();
-    ART.publicacion.alAbrir(); // un solo anuncio al abrir, solo en la app gratuita de Android
+    ART.publicacion.alAbrir(); // un anuncio al abrir, solo en la app de la edición con anuncios
     // Guardado automático al ocultar la app (sin avisos de "cambios sin guardar")
     document.addEventListener('visibilitychange', function () {
       if (document.hidden && ART.pantallas.detenerAuto) { ART.pantallas.detenerAuto(); if (ART.n.S) ART.ui.renderBarra(); }

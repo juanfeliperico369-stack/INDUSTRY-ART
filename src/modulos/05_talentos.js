@@ -289,7 +289,7 @@ ART.talentos = (function () {
     if (op.asp) t.asp = op.asp;
     if (op.bio) t.bioP = String(op.bio).slice(0, 280);
     // Un personaje histórico llega con el talento y la fama de su época dorada
-    if (op.hist) { t.hist = op.hist; t.hab = Math.round(N.limitar(op.hab || t.hab, 10, 99)); t.fama = N.redondear(N.limitar(op.fama || t.fama, 0, 1), 3); t.cp = null; completar(t, N.azar); }
+    if (op.hist) { t.histP = op.hist; t.hab = Math.round(N.limitar(op.hab || t.hab, 10, 99)); t.fama = N.redondear(N.limitar(op.fama || t.fama, 0, 1), 3); t.cp = null; completar(t, N.azar); }
     t.propio = 1;
     N.S.talentos.push(t);
     reindexar();
@@ -441,7 +441,7 @@ ART.talentos = (function () {
       const t = porId(id);
       if (!t) return;
       t.tq = Math.round((t.tq || 0) + bruto2025);
-      if (obra.est === 0) { t.hist = (t.hist || []).concat([obra.id]).slice(-15); }
+      if (obra.est === 0) { t.hist = (Array.isArray(t.hist) ? t.hist : []).concat([obra.id]).slice(-15); }
     });
     // Trabajar juntos crea amistades o rivalidades (los éxitos unen; los fracasos y los egos separan)
     const clave = ids.map(porId).filter(Boolean).slice(0, 4);
@@ -574,7 +574,7 @@ ART.talentos = (function () {
     return out;
   }
   // El potencial solo se conoce de verdad si lo descubriste o si trabajó contigo
-  function potencialConocido(t) { return !!(t.desc || t.beca || (t.hist && t.hist.length)); }
+  function potencialConocido(t) { return !!(t.desc || t.beca || (Array.isArray(t.hist) && t.hist.length)); }
 
   // ---------- Una vez al año: edades, crecimiento, retiro, regresos, muertes y nuevas generaciones ----------
   function anual() {
@@ -643,7 +643,7 @@ ART.talentos = (function () {
     let nom = h.nom.split(' ')[0];
     for (let i = 0; i < 6 && nom === pila; i++) nom = nombreNuevo(p.reg, h.sx).split(' ')[0]; // nunca el mismo nombre que su madre o su padre
     if (ap && nom !== pila) h.nom = nom + ' ' + ap;
-    h.pais = p.pais; h.nomPadre = p.nom; h.fama = N.redondear(Math.max(h.fama, p.fama * 0.25), 3);
+    h.pais = p.pais; delete h.idi; completar(h, N.azar); h.nomPadre = p.nom; h.fama = N.redondear(Math.max(h.fama, p.fama * 0.25), 3);
     p.hijos = (p.hijos || 0) + 1;
     if (p.fama > 0.6) N.emit('noticia', { tipo: 'talento', texto: 'Debuta ' + h.nom + ', ' + (h.sx === 'F' ? 'hija' : 'hijo') + ' de ' + p.nom + '.' });
     return h;
@@ -660,7 +660,7 @@ ART.talentos = (function () {
   function centenarios(anio) {
     const H = ART.hitosArte, S = N.S;
     if (H && H.PERSONAS && anio > S.y0) Object.keys(H.PERSONAS).forEach(function (k) { const p = H.PERSONAS[k]; if (p[4] + 100 === anio && p[5] && p[5] < anio) N.emit('noticia', { tipo: 'historia', texto: 'Se cumplen cien años del nacimiento de ' + p[0] + '.' }); });
-    S.talentos.forEach(function (t) { if (t.premios > 0 && t.mu && t.nac + 100 === anio) N.emit('noticia', { tipo: 'historia', texto: 'Se cumplen cien años del nacimiento de ' + t.nom + ', leyenda del oficio de ' + D.oficio(t.of).nombre.toLowerCase() + '.', importante: true }); });
+    S.talentos.forEach(function (t) { if (t.premios > 0 && t.mu && t.nac + 100 === anio) N.emit('noticia', { tipo: 'historia', texto: 'Se cumplen cien años del nacimiento de ' + t.nom + ', ' + (t.sx === 'F' ? 'legendaria ' : 'legendario ') + nombreOficio(t).toLowerCase() + '.', importante: true }); });
   }
   // Los rivales firman exclusivos con algunas estrellas libres
   function exclusivosRivales() {

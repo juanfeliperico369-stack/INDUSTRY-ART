@@ -69,7 +69,7 @@
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>Solo para que el anuncio al abrir el juego sea más útil para ti. Only used to make the ad shown when the game opens more relevant to you.</string>
+	<string>Solo para que los anuncios del juego sean más útiles para ti. Only used to make the ads in the game more relevant to you.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

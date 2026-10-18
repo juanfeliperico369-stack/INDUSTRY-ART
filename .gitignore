@@ -14,3 +14,8 @@ app/android/.gradle/
 app/escritorio/node_modules/
 app/escritorio/www/
 app/escritorio/dist/
+
+# Paquetes que arma tools/preparar_app.py y las recetas (no van al repositorio)
+dist/
+app/android/app/src/completa/assets/public/index.html
+app/android/app/src/anuncios/assets/public/index.html
