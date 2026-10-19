@@ -210,6 +210,27 @@ ART.eventos = (function () {
     ['w_espacio', '', 2060, 9999, 'Una agencia espacial ofrece rodar escenas en órbita.', [['Aceptar la aventura', { caja: -0.03, fama: 0.02, fans: 0.04 }], ['Seguir en tierra', {}]]],
     ['w_holograma', '', 2048, 9999, 'Piden que una estrella ya retirada vuelva como holograma.', [['Hacerlo con permiso de la familia', { caja: 0.02, fama: -0.004 }], ['No', { fama: 0.004 }]]],
     ['w_clima', '', 2040, 9999, 'Las olas de calor obligan a rodar de noche.', [['Turnos nocturnos', { caja: -0.01, moral: -1 }], ['Sets virtuales', { caja: -0.02 }]]],
+    // Tu vida fuera del set (de la Final)
+    ['av_clases', '', 1900, 9999, 'Te invitan a dar clases en una escuela de cine.', [['Aceptar', { fama: 0.006, moral: -1 }], ['No tengo tiempo', {}]]],
+    ['av_entrevista', '', 1930, 9999, 'Un programa quiere entrevistarte.', [['Ir', { fans: 0.03 }], ['Mejor no', {}]]],
+    ['av_descanso', '', 0, 9999, 'Llevas meses sin descansar.', [['Tomar vacaciones', { moral: 3 }], ['Seguir (un error en público te cuesta prestigio)', { fama: -0.004 }]]],
+    ['av_amigo', '', 0, 9999, 'Un viejo amigo te pide dinero para terminar su obra.', [['Ayudarle', { caja: -0.01, fama: 0.004 }], ['Decir que no', {}]]],
+    ['av_memorias', '', 0, 9999, 'Una editorial te propone escribir tus memorias.', [['Escribirlas (cobras un adelanto)', { caja: 0.01, moral: -1 }], ['Todavía no', {}]]],
+    ['av_jurado', '', 1900, 9999, 'Un festival te pide ser jurado.', [['Aceptar', { fama: 0.006 }], ['Rechazar', {}]]],
+    ['av_beca', '', 0, 9999, 'Una escuela quiere crear una beca con tu nombre.', [['Financiarla', { caja: -0.005, fama: 0.008 }], ['Agradecer y nada más', {}]]],
+    ['av_cameo', 'rival', 0, 9999, 'Te ofrecen un cameo en una obra de un rival.', [['Aceptar', { fans: 0.02, fama: 0.003 }], ['Rechazar', {}]]],
+    ['av_portada', '', 1900, 9999, 'Una revista te ofrece su portada.', [['Aceptar', { fans: 0.02 }], ['Rechazar', {}]]],
+    ['av_casa', '', 0, 9999, 'Ves una casa frente al mar.', [['Comprarla', { caja: -0.02, moral: 3 }], ['Seguir donde vives', {}]]],
+    ['av_perro', '', 0, 9999, 'Un perro callejero te sigue hasta el estudio.', [['Adoptarlo', { moral: 2 }], ['Llevarlo a un refugio', {}]]],
+    ['av_rival', 'rival', 0, 9999, 'Un viejo rival te invita a cenar.', [['Ir', { fama: 0.003 }], ['Inventar una excusa', {}]]],
+    ['av_discurso', '', 0, 9999, 'Te piden un discurso en una gala.', [['Darlo', { fama: 0.004 }], ['Mandar a alguien de tu oficina', {}]]],
+    ['av_biografia', '', 0, 9999, 'Un periodista quiere escribir tu biografía.', [['Colaborar', { fans: 0.03 }], ['Negarte', {}]]],
+    ['av_concursos', '', 1950, 9999, 'Te invitan a un programa de concursos.', [['Ir (más fans, menos prestigio)', { fans: 0.03, fama: -0.002 }], ['No', {}]]],
+    ['av_familia', 'obra', 0, 9999, 'Tu familia te pide más tiempo.', [['Tomar un mes libre (tus rodajes se atrasan una semana)', { sem: 1, moral: 3 }], ['Seguir trabajando', { moral: -1 }]]],
+    ['av_fan', '', 0, 9999, 'Un fan te reconoce en la calle.', [['Tomarte una foto', { fans: 0.005 }], ['Seguir de largo', {}]]],
+    ['av_talentos', '', 1950, 9999, 'Te ofrecen ser jurado en un concurso de talentos.', [['Aceptar', { fans: 0.02, fama: 0.002 }], ['Rechazar', {}]]],
+    ['av_idioma', '', 0, 9999, 'Tienes la oportunidad de aprender otro idioma.', [['Estudiar', { fama: 0.002 }], ['Ahora no', {}]]],
+    ['av_infancia', '', 0, 9999, 'Un amigo de la infancia te pide trabajo.', [['Contratarlo en la oficina', { moral: 1 }], ['Recomendarlo a otro estudio', {}]]],
   ];
   function evento(id) { return EV.filter(function (e) { return e[0] === id; })[0]; }
   // Sujetos posibles para un requisito

@@ -490,6 +490,7 @@ ART.medios = (function () {
     const c = costoGira(b, g);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
     ART.negocio.pagar(0, 'produccion', c);
+    b.giras = (b.giras || 0) + 1;
     const ult = st().p.filter(function (p) { return p.cfg.banda === b.id && p.pub !== undefined; }).pop();
     const q = ult ? ult.pub : 50;
     const total = Math.round(c * g.f / (g.f > 1 ? 2.2 : 1) * Math.pow(q / 60, 1.5) * (0.6 + Math.min(2, b.fans / 1e6)) * (b.reu ? 1.5 : 1));

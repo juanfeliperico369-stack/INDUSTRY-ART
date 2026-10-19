@@ -12,12 +12,18 @@ ART.carrera = (function () {
     { id: 'autodidacta', nombre: 'Autodidacta', texto: 'Aprendiste solo, escribiendo de noche: +1 al guion.', bono: { guion: 1 } },
     { id: 'contador', nombre: 'Contador', texto: 'Cada peso cuenta: −5 % en los gastos fijos.', fijo: 0.05 },
     { id: 'vendedor', nombre: 'Vendedor ambulante', texto: 'Sabes vender lo que sea: las campañas rinden un 5 % más.', mkt: 0.05 },
+    { id: 'critico', nombre: 'Crítico de cine', texto: 'Sabes lo que buscan los críticos: +1 al guion y a la dirección.', bono: { guion: 1, direccion: 1 } },
+    { id: 'tecnico', nombre: 'Técnico de efectos', texto: 'Vienes del taller: +1 al arte y la tecnología de tus obras.', bono: { arte: 1 } },
+    { id: 'musico', nombre: 'Músico callejero', texto: 'Tocaste en la calle: +1 a la música de tus obras.', bono: { musica: 1 } },
   ];
   const ARQUETIPOS = [
     { id: 'visionario', nombre: 'Visionario', texto: 'Apuestas por ideas nuevas: +1 a la crítica.', crit: 1 },
     { id: 'carismatico', nombre: 'Carismático', texto: 'Todos quieren trabajar contigo: el equipo llega con más moral.', moral: 8 },
     { id: 'metodico', nombre: 'Metódico', texto: 'Planillas para todo: un 3 % menos de costo de producción.', ahorro: 0.03 },
     { id: 'audaz', nombre: 'Audaz', texto: 'Te la juegas: +1 al público, pero los dilemas pesan más.', pub: 1 },
+    { id: 'gestor', nombre: 'Gestor', texto: 'Todo bajo control: un 3 % menos de sobrecosto.', ahorro: 0.03 },
+    { id: 'showman', nombre: 'Showman', texto: 'Tus estrenos son un espectáculo: +1 al público.', pub: 1 },
+    { id: 'artesano', nombre: 'Artesano', texto: 'Cuidas cada detalle: +1 a la crítica.', crit: 1 },
   ];
   function trasfondo() { const a = N.S.avatar; return TRASFONDOS.filter(function (x) { return x.id === (a && a.tf); })[0] || null; }
   function arquetipo() { const a = N.S.avatar; return ARQUETIPOS.filter(function (x) { return x.id === (a && a.arq); })[0] || null; }

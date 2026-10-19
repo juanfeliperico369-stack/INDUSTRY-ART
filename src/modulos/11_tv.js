@@ -15,6 +15,9 @@ ART.tv = (function () {
     { id: 'telenovela', nombre: 'Telenovela diaria', desde: 1951, eps: [100, 300], def: 150, min: 45, rmin: [30, 60], k: 0.2, sem: 5 },
     { id: 'miniserie', nombre: 'Miniserie', desde: 1960, eps: [2, 10], def: 6, min: 60, rmin: [45, 120], k: 1.3, sem: 1 },
     { id: 'corta', nombre: 'Temporada corta', desde: 2007, eps: [6, 13], def: 8, min: 50, rmin: [30, 70], k: 1.45, sem: 1 },
+    // De la Final
+    { id: 'especial', nombre: 'Especial o telefilme', desde: 1946, eps: [2, 4], def: 2, min: 90, rmin: [60, 180], k: 1.6, sem: 1 },
+    { id: 'web', nombre: 'Serie web y cortos', desde: 2005, eps: [5, 60], def: 12, min: 10, rmin: [5, 15], k: 0.25, sem: 1 },
     { id: 'vivo', nombre: 'Programa en vivo', desde: 1940, eps: [13, 300], def: 40, min: 60, rmin: [5, 180], k: 0.12, sem: 1, vivo: 1 },
   ];
   const SUBVIVO = [{ id: 'noticiero', nombre: 'Noticiero', desde: 1940 }, { id: 'variedades', nombre: 'Variedades', desde: 1948 }, { id: 'concurso', nombre: 'Concurso', desde: 1950 }, { id: 'reality', nombre: 'Reality', desde: 1992 }];

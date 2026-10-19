@@ -1,4 +1,4 @@
-# Bitácora · INDUSTRY ART Definitiva (4.0, guardado 39)
+# Bitácora · INDUSTRY ART Definitiva (4.0, guardado 39) · con toda la Final
 
 Base: la Definitiva 3.0 (guardado 37), con lo que faltaba de la Final y de la V36. No se quitó nada: todo se complementó.
 Ideado y creado por OneZero · programado por Faro.
@@ -66,6 +66,24 @@ Ideado y creado por OneZero · programado por Faro.
 - **Arquetipos** con su forma femenina (Heroína, Villana, Maga…) y el arquetipo Normal.
 - La pestaña Taxonomía muestra además las premisas, los estilos, las modas y el explorador.
 
+## Todo lo de la Final
+
+Se comparó cada lista de datos de la Final con esta versión y se pasó lo que faltaba, sin quitar nada:
+
+- **Material**: 236 obras de dominio público (antes 82), cada una con tipo, temas, problemáticas, personajes y sinopsis.
+- **Tecnología**: 129 inventos (48 más: imprenta de vapor, linotipia, gramófono, TV a color…), con su explicación.
+- **Historia**: 341 hechos (62 más: leyes, guerras, crisis y la llegada de cada medio).
+- **Mundo**: 35 estudios emergentes más (con su especialidad y su lema), 12 críticos con su medio, 12 compañías en la bolsa.
+- **Rodaje**: incidentes y dilemas nuevos (una marca que paga por salir en pantalla, actores que no se soportan, un hueco
+  en el tercer acto, fotos filtradas, un efecto que se ve barato…).
+- **Tu avatar**: 20 eventos de su vida (dar clases, una portada, el perro que te sigue, la casa frente al mar…), los
+  trasfondos Crítico de cine, Técnico de efectos y Músico callejero, y los estilos Gestor, Showman y Artesano.
+- **Logros**: 25 más (de «Luz, cámara… ¿y el guion?» a «Inmortal»).
+- **TV**: formatos Especial o telefilme y Serie web y cortos. **Talentos**: un rasgo que se recuerda (voz grave, pecas…).
+- **Archivo**: los récords de cada época (lo más visto, vendido o duradero).
+- **Música**: cuatro piezas que se encadenan (Amanecer, la de siempre; Marquesina, la de la Final; Estreno y Gran gala).
+- La clasificación por edades sigue siendo la de esta versión.
+
 ## Equipo
 
 - Ya no hay Diseñador de vestuario ni Supervisor de efectos: de eso se encarga el Diseñador de arte y tecnología, con su
@@ -78,6 +96,11 @@ Dos ediciones con todo desbloqueado: **completa** (de pago, sin anuncios) y **co
 como mucho, otro cada 20 minutos en una pausa). Android con dos sabores (`.aab` para Google Play y `.apk` para
 probar), iPhone por edición, PC (Windows, macOS y Linux), página instalable, Steam y Epic Games. Detalle en
 `docs/ediciones_y_tiendas.md`.
+
+## Prueba rápida (bot, 600 años seguidos, de 1700 a 2300)
+
+Sin errores; guardar y cargar funcionan. Todas las pestañas de las cinco secciones revisadas en 1750, 2000 y 2250 sin
+errores en la página.
 
 ## Pruebas (bot, estrategia normal, 200 años cada una, con la taxonomía completa y el equipo nuevo)
 

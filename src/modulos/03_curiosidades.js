@@ -1,6 +1,6 @@
 /* ==== módulo: curiosidades ==== */
 // Archivo de curiosidades: cada tema trae lo que todos saben y lo que pocos saben, en español y en inglés.
-// Un tema aparece cuando la partida llega a su año (el archivo solo conoce el pasado). Sin personas vivas ni marcas.
+// Un tema aparece cuando la partida llega a su año (el archivo solo conoce el pasado). Sin personas vivas ni marcas, salvo en los récords de cada época.
 ART.curiosidades = (function () {
   'use strict';
   const N = ART.n;
@@ -88,6 +88,19 @@ ART.curiosidades = (function () {
       'Augmented reality', 'Video games are played in front of a screen.', 'In 2016 an augmented reality game got millions of people walking their cities to catch creatures.'],
     [2020, 'Conciertos en un videojuego', 'Los conciertos se ven en estadios.', 'En 2020 millones de personas vieron un concierto dentro de un videojuego, con el cantante convertido en un gigante digital.',
       'Concerts inside a game', 'Concerts happen in stadiums.', 'In 2020 millions watched a concert inside a video game, with the singer turned into a digital giant.'],
+    // Récords de la Final (lo más visto, vendido o duradero de cada época)
+    [1940, 'Récord de su tiempo', 'Película más vista de su tiempo: «Lo que el viento se llevó» (1939).', 'Lo fue hasta 1997.', 'Record of its time', 'Most-watched film of its time: «Gone with the Wind» (1939).', 'It held that place until 1997.'],
+    [1958, 'Récord de su tiempo', 'La obra de teatro que más tiempo lleva en cartel: «La ratonera» de Agatha Christie (desde 1952).', 'Sigue sin ser superado.', 'Record of its time', 'The longest-running play: Agatha Christie\'s «The Mousetrap» (since 1952).', 'It has not been beaten.'],
+    [1984, 'Récord de su tiempo', 'Álbum más vendido de la historia: «Thriller» de Michael Jackson (1982), con decenas de millones de copias.', 'Sigue sin ser superado.', 'Record of its time', 'Best-selling album in history: Michael Jackson\'s «Thriller» (1982), with tens of millions of copies.', 'It has not been beaten.'],
+    [1998, 'Récord de su tiempo', 'Película más taquillera: «Titanic» de James Cameron (1997).', 'Lo fue hasta 2009.', 'Record of its time', 'Highest-grossing film: James Cameron\'s «Titanic» (1997).', 'It held that place until 2009.'],
+    [2010, 'Récord de su tiempo', 'Película más taquillera: «Avatar» de James Cameron (2009).', 'Lo fue hasta 2018.', 'Record of its time', 'Highest-grossing film: James Cameron\'s «Avatar» (2009).', 'It held that place until 2018.'],
+    [2006, 'Récord de su tiempo', 'El musical que más tiempo lleva en Broadway: «El fantasma de la ópera».', 'Lo fue hasta 2023.', 'Record of its time', 'The longest-running Broadway musical: «The Phantom of the Opera».', 'It held that place until 2023.'],
+    [2008, 'Récord de su tiempo', 'Saga de libros más vendida: Harry Potter, de J. K. Rowling.', 'Sigue sin ser superado.', 'Record of its time', 'Best-selling book series: Harry Potter, by J. K. Rowling.', 'It has not been beaten.'],
+    [2019, 'Récord de su tiempo', 'Videojuego más vendido de la historia: «Minecraft».', 'Sigue sin ser superado.', 'Record of its time', 'Best-selling video game in history: «Minecraft».', 'It has not been beaten.'],
+    [1700, 'Récord de su tiempo', 'El libro más vendido de la historia: la Biblia, con miles de millones de copias.', 'Sigue sin ser superado.', 'Record of its time', 'The best-selling book in history: the Bible, with billions of copies.', 'It has not been beaten.'],
+    [1980, 'Récord de su tiempo', 'La canción con más versiones grabadas: «Yesterday» de los Beatles (1965).', 'Sigue sin ser superado.', 'Record of its time', 'The song with the most recorded versions: The Beatles\' «Yesterday» (1965).', 'It has not been beaten.'],
+    [2019, 'Récord de su tiempo', 'Película más taquillera: «Avengers: Endgame» (2019).', 'Lo fue hasta 2020.', 'Record of its time', 'Highest-grossing film: «Avengers: Endgame» (2019).', 'It held that place until 2020.'],
+    [2021, 'Récord de su tiempo', 'Película más taquillera: «Avatar» de James Cameron, tras su reestreno.', 'Sigue sin ser superado.', 'Record of its time', 'Highest-grossing film: James Cameron\'s «Avatar», after its re-release.', 'It has not been beaten.'],
   ];
   function disponibles(anio) { return LISTA.filter(function (x) { return x[0] <= anio; }); }
   function enIngles() { return ART.idioma && ART.idioma.actual() === 'en'; }

@@ -24,6 +24,9 @@ internet. Las partidas de todas las versiones anteriores (desde la V16) se abren
   (Material, Guiones, Taxonomía) y Negocio › Inventos; 32 tipografías para el letrero; 141 datos históricos en las «i».
 - **Dos ediciones** con todo desbloqueado: completa (de pago, sin anuncios) y con anuncios (gratis). Ver
   [docs/ediciones_y_tiendas.md](docs/ediciones_y_tiendas.md): Android, iPhone, Windows, macOS, Linux, web, Steam y Epic Games.
+- **Todo lo de la Final**: 236 obras de dominio público con sinopsis y personajes, 129 inventos, 341 hechos históricos,
+  estudios emergentes, críticos, compañías, incidentes y dilemas, eventos de tu avatar, 25 logros más y música de fondo
+  con cuatro piezas que se encadenan.
 - **Taxonomía completa de la Final**: 385 subgéneros, 364 temas y tópicos (también los literarios), modas de cada
   subgénero por año, explorador por 16 etiquetas, estilos de producción de cada medio y arquetipos en femenino.
 - **Crear obra como en la Final**: el medio se elige en el mismo creador, y hay modo rápido de 5 o de 12 decisiones y

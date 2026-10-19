@@ -23,6 +23,19 @@ ART.critica = (function () {
     { id: 'c10', nombre: 'Joaquín Prado', ama: ['HM', 'FJ'], odia: ['AV'], valora: 'risa', desde: 2015, hasta: 2120 },
     { id: 'c11', nombre: 'Kaia Moreau', ama: ['AV', 'IM'], odia: ['HM'], valora: 'autor', desde: 2040, hasta: 2150 },
     { id: 'c12', nombre: 'Lev Andrade', ama: ['AA', 'SM'], odia: ['DR'], valora: 'espectaculo', desde: 2060, hasta: 2150 },
+    // De la Final, cada uno con su medio
+    { id: 'cf1', nombre: 'Dolores Arango', medio: 'La Gaceta del Espectáculo', ama: ['DR'], odia: [], valora: 'autor', desde: 1730, hasta: 1805 },
+    { id: 'cf2', nombre: 'Teodoro Valls', medio: 'Pantalla Crítica', ama: ['AV', 'DR'], odia: [], valora: 'autor', desde: 1775, hasta: 1850 },
+    { id: 'cf3', nombre: 'Marisa Okonkwo', medio: 'El Faro Cultural', ama: ['AV'], odia: [], valora: 'autor', desde: 1820, hasta: 1895 },
+    { id: 'cf4', nombre: 'Bruno Halvorsen', medio: 'Revista Butaca', ama: ['AA', 'HM'], odia: [], valora: 'espectaculo', desde: 1865, hasta: 1940 },
+    { id: 'cf5', nombre: 'Lin Mei-Ling', medio: 'Ojo de Plata', ama: ['IM'], odia: [], valora: 'espectaculo', desde: 1910, hasta: 1985 },
+    { id: 'cf6', nombre: 'Ramiro Etxeberria', medio: 'Diario Telón', ama: ['HM'], odia: [], valora: 'risa', desde: 1955, hasta: 2030 },
+    { id: 'cf7', nombre: 'Ingrid Sørli', medio: 'Cinemanía Norte', ama: ['SM'], odia: [], valora: 'espectaculo', desde: 2000, hasta: 2075 },
+    { id: 'cf8', nombre: 'Kwame Asante', medio: 'La Voz de la Sala', ama: ['AA'], odia: [], valora: 'espectaculo', desde: 2045, hasta: 2120 },
+    { id: 'cf9', nombre: 'Paloma Ríos', medio: 'Fotograma Libre', ama: ['RD'], odia: [], valora: 'risa', desde: 2090, hasta: 2165 },
+    { id: 'cf10', nombre: 'Hiroshi Tanabe', medio: 'Señal y Ruido', ama: ['IM', 'AA'], odia: [], valora: 'espectaculo', desde: 2135, hasta: 2210 },
+    { id: 'cf11', nombre: 'Valentina Duarte', medio: 'Crítica Abierta', ama: ['FJ'], odia: [], valora: 'risa', desde: 2180, hasta: 2255 },
+    { id: 'cf12', nombre: 'Augusto Ferreyra', medio: 'El Archivo', ama: ['AV', 'DR'], odia: [], valora: 'autor', desde: 2225, hasta: 2300 },
   ];
   function medio(c, anio) {
     const base = N.hash(c.id) % 3;

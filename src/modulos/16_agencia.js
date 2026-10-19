@@ -178,6 +178,8 @@ ART.agencia = (function () {
   // =====================================================================
   // FICHA DEL TALENTO
   // =====================================================================
+  // Un rasgo que se recuerda de cada talento (de la Final)
+  const RASGOS_FISICOS = ['rostro expresivo', 'voz grave', 'sonrisa amplia', 'mirada intensa', 'pecas', 'cicatriz pequeña', 'lunar', 'tatuajes', 'voz dulce', 'porte elegante'];
   function fichaTalento(id) {
     const x = T.porId(id);
     if (!x) return '<p class="tenue">Este talento ya no está en el mundo.</p>';
@@ -186,7 +188,7 @@ ART.agencia = (function () {
     const exc = T.exclusivoDe(x);
     let h = '<div class="fila" style="align-items:flex-start"><canvas class="retrato grande" data-retrato="' + x.id + '"></canvas><div class="col crece"><h2 style="margin:0">' + esc(x.nom) + '</h2>' +
       '<span>' + esc(oficioNombre(x)) + (x.h2 ? ' · también ' + esc(Object.keys(x.h2).map(function (k) { return T.nombreOficio(x, k).toLowerCase() + ' (' + Math.round(x.h2[k]) + ')'; }).join(', ')) : '') + '</span>' +
-      '<span class="tenue">' + e + ' años · ' + esc(D.pais(x.pais).nombre) + ' · ' + (x.sx === 'F' ? t('mujer') : t('hombre')) + (x.idi ? ' · habla ' + esc(x.idi.map(function (i) { return i.toLowerCase(); }).join(', ')) : '') + '</span>' +
+      '<span class="tenue">' + e + ' años · ' + esc(D.pais(x.pais).nombre) + ' · ' + (x.sx === 'F' ? t('mujer') : t('hombre')) + ' · ' + esc(RASGOS_FISICOS[N.hash('f' + x.id) % RASGOS_FISICOS.length]) + (x.idi ? ' · habla ' + esc(x.idi.map(function (i) { return i.toLowerCase(); }).join(', ')) : '') + '</span>' +
       '<span class="oro">' + esc(per.txt) + ' · impulsa ' + per.valor + ' % la popularidad</span><span>' + etiquetas(x) + '</span></div></div>';
     h += '<p>' + esc(T.biografia(x)) + '</p>';
     if (x.propio && !x.jugador && !x.mu || S.sandbox && !x.mu) h += '<div class="fila"><button class="btn" data-a="tnEditar" data-v="' + x.id + '">' + icono('pincel') + 'Editar talento</button></div>';

@@ -163,6 +163,22 @@ ART.rodaje = (function () {
     { id: 'improvisa', etapa: 'rodaje', quien: ['a'], txt: '{a} improvisa una escena que no está en el guion.', ops: [
       { t: 'Dejarla en la película', azar: 0.55, bien: { q: 2 }, mal: { q: -1 } },
       { t: 'Filmar lo escrito', def: 1 }] },
+    // De la Final
+    { id: 'efectoBarato', etapa: 'posproduccion', quien: [], txt: 'Un efecto clave se ve barato.', ops: [
+      { t: 'Rehacerlo', costo: 0.05, q: 1 },
+      { t: 'Dejarlo así', q: -1, def: 1 }] },
+    { id: 'marca', etapa: 'rodaje', quien: [], txt: 'Una marca quiere aparecer en pantalla y paga por ello.', ops: [
+      { t: 'Aceptar (paga el 3 % del rodaje; la crítica lo nota)', costo: -0.03, q: -1 },
+      { t: 'Rechazar', def: 1 }] },
+    { id: 'rivalidad', etapa: 'rodaje', quien: ['a', 'b'], cond: function (o, n) { return n.a && n.b; }, txt: '{a} y {b} no se soportan.', ops: [
+      { t: 'Separar sus escenas', costo: 0.02, def: 1 },
+      { t: 'Que lo resuelvan solos', azar: 0.5, bien: { q: 2, txt: 'La tensión dio una gran escena.' }, mal: { q: -1, sem: 1, txt: 'La pelea retrasó el rodaje.' } }] },
+    { id: 'tercerActo', etapa: 'preproduccion', quien: [], txt: 'El guion tiene un hueco en el tercer acto.', ops: [
+      { t: 'Contratar un guionista de apoyo', costo: 0.02, q: 1 },
+      { t: 'Seguir así', q: -1, def: 1 }] },
+    { id: 'fotos', etapa: 'rodaje', quien: [], txt: 'Se filtran fotos del rodaje.', ops: [
+      { t: 'Aprovecharlas en redes', q: 0, def: 1 },
+      { t: 'Pedir que las borren', costo: 0.01 }] },
   ];
   const INCIDENTES = [
     { id: 'lluvia', txt: 'La lluvia arruina varios días de rodaje: una semana más.', sem: 1, costo: 0.005, cond: function (o) { return o.met !== 'set' && o.met !== 'cgi'; } },
@@ -172,6 +188,11 @@ ART.rodaje = (function () {
     { id: 'huelga', txt: 'Huelga del equipo técnico: dos semanas perdidas.', sem: 2, costo: 0.01, cond: function () { return N.anio() >= 1933; } },
     { id: 'racha', txt: 'Todo sale mejor de lo pensado: terminan una semana antes.', sem: -1 },
     { id: 'magia', txt: 'El elenco tiene una química especial: las escenas brillan.', q: 1 },
+    // De la Final
+    { id: 'toma', txt: 'Una toma improvisada sale genial.', q: 1 },
+    { id: 'redes', txt: 'Un extra se vuelve famoso en redes y crece la expectativa.', q: 1, cond: function () { return N.anio() >= 2006; } },
+    { id: 'luz', txt: 'Un corte de luz en el set obliga a repetir el día.', costo: 0.01 },
+    { id: 'lluviaLeve', txt: 'Lluvia inesperada: hay que alquilar carpas.', costo: 0.02, cond: function (o) { return o.met !== 'set' && o.met !== 'cgi'; } },
   ];
   const OPCIONES_PRUEBA = [
     { id: 'estrenar', t: 'Estrenar así', texto: 'Sin cambios.' },
@@ -474,7 +495,9 @@ ART.rodaje = (function () {
   function aplicar(o, ef, ctx, n, txt) {
     const T = ART.talentos;
     let costo = 0;
-    if (ef.costo) {
+    // Costo negativo: entra dinero (una marca que paga por aparecer en pantalla)
+    if (ef.costo < 0) ART.negocio.cobrarEn(o.est, 'merchandising', Math.round(o.pp * -ef.costo));
+    if (ef.costo > 0) {
       costo = Math.max(0, Math.round(o.pp * ef.costo));
       if (costo > 0) ctx.pagar(o.est, 'produccion', costo);
       o.lp = o.lp || {};

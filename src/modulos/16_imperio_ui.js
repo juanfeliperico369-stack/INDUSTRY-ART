@@ -197,7 +197,7 @@ ART.imperioUI = (function () {
   function filaInvento(x) {
     const inv = I.investigando(), e = I.estadoInvento(x), nom = { tuyo: 'Tuyo', licencia: 'Licenciado', mundo: 'Ya llegó al mundo', rival: 'Lo tiene un rival', investigable: 'Investigable', futuro: 'Futuro' }[e];
     const accion = e === 'investigable' ? btn('Investigar · ' + dinero(I.costoInvento(x)) + ' · ' + I.semanasInvento(x) + ' sem', 'imInvestigar', x.id, 'primario', inv ? 'Ya investigas otra cosa' : '') : e === 'rival' ? btn('Licenciar · ' + dinero(I.costoLicenciaTec(x)), 'imLicTec', x.id) : '';
-    return '<div class="cal-ev"><b class="cifra">' + x.anio + '</b><div class="col crece"><span>' + esc(x.nombre) + (x.anio > 2026 ? ' <span class="etiqueta">ficción</span>' : '') + '</span><span class="tenue chico">' + esc(nom) + ' · ' + esc(ART.rodaje.nombreDep(x.dep)) + '</span></div>' + accion + '</div>';
+    return '<div class="cal-ev"><b class="cifra">' + x.anio + '</b><div class="col crece"><span>' + esc(x.nombre) + (x.anio > 2026 ? ' <span class="etiqueta">ficción</span>' : '') + '</span><span class="tenue chico">' + esc(nom) + ' · ' + esc(ART.rodaje.nombreDep(x.dep)) + (x.texto ? ' · ' + esc(x.texto) : '') + '</span></div>' + accion + '</div>';
   }
   // Negocio › Inventos: toda la tecnología del arte, de 1895 a 2300
   function inventos() {
