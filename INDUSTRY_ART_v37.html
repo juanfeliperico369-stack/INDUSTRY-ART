@@ -702,7 +702,15 @@ ART.n = (function () {
         }
         return h >>> 0;
     }
-    function ruido(texto) { return hash(texto) / 4294967296; }
+    function ruido(texto) {
+        let h = hash(texto);
+        h ^= h >>> 16;
+        h = Math.imul(h, 0x85ebca6b);
+        h ^= h >>> 13;
+        h = Math.imul(h, 0xc2b2ae35);
+        h ^= h >>> 16;
+        return (h >>> 0) / 4294967296;
+    }
     const DIAS_MES = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     function anio(t) { const S = nucleo.S; return S.y0 + Math.floor((t === undefined ? S.t : t) / 52); }
     function semana(t) { const S = nucleo.S; return ((t === undefined ? S.t : t) % 52) + 1; }
@@ -1156,7 +1164,7 @@ ART.datos = (function () {
         { id: 'backlot', nombre: 'Backlot (calles y sets)', desde: 1910, costo: 1.4, capacidad: 2, ahorro: 0.08, efecto: '+2 proyectos a la vez y −8 % en producción' },
         { id: 'foso', nombre: 'Foso de agua', desde: 1920, costo: 0.5, bono: { arte: 3 }, familias: ['AA', 'IM'], efecto: '+3 en acción e imaginación' },
         { id: 'captura', nombre: 'Estudio de captura', desde: 1995, costo: 0.7, bono: { arte: 4 }, familias: ['IM', 'AA', 'FJ'], efecto: '+4 en imaginación, acción y familia' },
-        { id: 'cine', nombre: 'Cadena de cines propia', desde: 1905, costo: 1.2, efecto: 'En tu región: tus obras en 12 % más salas, te quedas con 12 puntos más de cada entrada y cobras una parte de las entradas de las obras ajenas' },
+        { id: 'cine', nombre: 'Cadena de cines propia', desde: 1905, costo: 3, efecto: 'En tu región: tus obras en 6 % más salas, te quedas con 4 puntos más de cada entrada y cobras una parte de las entradas de las obras ajenas' },
         { id: 't_ciudad', nombre: 'Manzana de ciudad', terreno: 'ciudad', desde: 1910, costo: 0.55, efecto: 'Rodar en la ciudad: más barato, más seguro y una semana menos' },
         { id: 't_pradera', nombre: 'Pradera propia', terreno: 'pradera', desde: 1905, costo: 0.35, efecto: 'Rodar en la pradera: más barato, más seguro y una semana menos' },
         { id: 't_desierto', nombre: 'Rancho en el desierto', terreno: 'desierto', desde: 1910, costo: 0.45, efecto: 'Rodar en el desierto: más barato, más seguro y una semana menos' },
@@ -4539,14 +4547,16 @@ ART.mundo = (function () {
     }
     const IPC = [[1850, 25], [1855, 28], [1860, 27], [1863, 37], [1864, 47], [1865, 46], [1870, 38], [1875, 33], [1880, 29], [1885, 27], [1890, 27], [1895, 25], [1900, 25], [1905, 27], [1910, 28], [1913, 29.7], [1915, 30.4], [1917, 38.4], [1918, 45.1], [1919, 51.8], [1920, 60], [1921, 53.6], [1922, 50.2], [1925, 52.5], [1929, 51.3], [1930, 50], [1931, 45.6], [1932, 40.9], [1933, 38.8], [1935, 41.1], [1940, 42], [1942, 48.8], [1945, 53.9], [1946, 58.5], [1947, 66.9], [1948, 72.1], [1950, 72.3], [1951, 77.8], [1955, 80.2], [1960, 88.7], [1965, 94.5], [1967, 100], [1970, 116.3], [1973, 133.1], [1974, 147.7], [1975, 161.2], [1977, 181.5], [1979, 217.4], [1980, 246.8], [1981, 272.4], [1982, 289.1], [1985, 322.2], [1990, 391.4], [1995, 456.5], [2000, 515.8], [2005, 585], [2008, 644.9], [2009, 642.7], [2010, 653.2], [2015, 709.9], [2019, 765.6], [2020, 775.1], [2021, 811.5], [2022, 876.4], [2023, 912.5], [2024, 939.4], [2025, 967.5]];
     const IPC_2025 = 967.5;
+    const INFLACION_META = [[2026, 0.024], [2050, 0.02], [2100, 0.012], [2200, 0.005], [2300, 0.004]];
     const cacheIpc = { semilla: null, valores: {} };
     function inflacionFutura(anio) {
         const semilla = (N.S && N.S.semilla) || 'base';
         const r = N.ruido(semilla + '|inf|' + anio);
-        let tasa = 0.025 + (r - 0.5) * 0.016;
+        const meta = N.interp(INFLACION_META, anio);
+        let tasa = meta + (r - 0.5) * meta * 0.6;
         const crisis = N.ruido(semilla + '|crisis|' + Math.floor(anio / 2));
         if (crisis < 0.07)
-            tasa += 0.035;
+            tasa += 0.01 + meta;
         return tasa;
     }
     function ipc(anio) {
@@ -4738,9 +4748,9 @@ ART.economia = (function () {
     'use strict';
     const N = ART.n, D = ART.datos, M = ART.mundo;
     const P = {
-        AQ: 0.05,
+        AQ: 0.025,
         DELTA: 0.30,
-        BETA: 0.008,
+        BETA: 0.004,
         ESTRELLAS: 0.55,
         LOCAL: 0.25,
         TENDENCIA: 0.3,
@@ -4749,9 +4759,11 @@ ART.economia = (function () {
         U_TIPICA: -0.15,
         CORTE: 0.025,
         MAX_SEMANAS: 30,
-        ANIMO: 0.28,
+        ANIMO: 0.5,
         IMPUESTO: 0.25,
         ANTIMONOPOLIO: 0.35,
+        IMPUESTO_ANIO: [[1700, 0.05], [1908, 0.05], [1909, 0.06], [1917, 0.08], [1918, 0.14], [1922, 0.15], [1932, 0.16], [1936, 0.18], [1940, 0.27], [1942, 0.42], [1946, 0.40], [1950, 0.45], [1952, 0.52], [1964, 0.52], [1965, 0.50], [1979, 0.49], [1987, 0.43], [1988, 0.38], [1993, 0.39], [2017, 0.39], [2018, 0.26], [2025, 0.26], [2300, 0.26]],
+        BAJA_TIPICO: 0.95,
     };
     function parteEstudio(semanaEnCartelera) {
         if (semanaEnCartelera <= 2)
@@ -4763,7 +4775,8 @@ ART.economia = (function () {
         return 0.4;
     }
     const PROPENSION = [0.9, 1.3, 1.4, 0.8, 0.45];
-    const PELICULAS_ANIO = [[1895, 200], [1900, 450], [1910, 900], [1920, 650], [1930, 480], [1940, 450], [1950, 400], [1960, 300], [1970, 250], [1980, 250], [1990, 280], [2000, 320], [2010, 350], [2020, 300], [2025, 320], [2050, 350], [2150, 350]];
+    const PELICULAS_ANIO = [[1895, 200], [1900, 450], [1910, 900], [1915, 1800], [1920, 2800], [1930, 1800], [1940, 1550], [1950, 2000], [1960, 1150], [1970, 1300], [1975, 1150], [1980, 500], [1985, 380], [1990, 280], [2000, 320], [2010, 350], [2020, 300], [2025, 320], [2050, 350], [2150, 350]];
+    const PELICULAS_REF = [[1895, 200], [1900, 450], [1910, 900], [1920, 650], [1930, 480], [1940, 450], [1950, 400], [1960, 300], [1970, 250], [1980, 250], [1990, 280], [2000, 320], [2010, 350], [2020, 300], [2025, 320], [2050, 350], [2150, 350]];
     const cache = { semilla: null, escenario: null, anio: {} };
     function datosAnio(anio) {
         const S = N.S;
@@ -4789,12 +4802,17 @@ ART.economia = (function () {
             d.entradas += pub;
         });
         d.peliculas = N.interp(PELICULAS_ANIO, anio);
-        d.tipico2025 = Math.max(2000, d.mercado2025 * P.PARTICIPACION / d.peliculas / P.MULT_TIPICO);
-        d.tipico = M.aEpoca(d.tipico2025, anio);
+        d.peliculasRef = N.interp(PELICULAS_REF, anio);
+        d.tipicoMercado2025 = Math.max(2000, d.mercado2025 * P.PARTICIPACION / d.peliculas / P.MULT_TIPICO);
+        d.tipico2025 = d.tipicoMercado2025;
         cache.anio[anio] = d;
+        if (anio > 1895 && anio === Math.floor(anio))
+            d.tipico2025 = Math.max(d.tipicoMercado2025, datosAnio(anio - 1).tipico2025 * P.BAJA_TIPICO);
+        d.tipico = M.aEpoca(d.tipico2025, anio);
         return d;
     }
     function presupuestoTipico(anio) { return datosAnio(anio).tipico; }
+    function impuesto(anio) { return N.interp(P.IMPUESTO_ANIO, anio); }
     function tipicoSuavizado(anio) {
         let s = 0;
         for (let k = 0; k < 6; k++)
@@ -4812,7 +4830,7 @@ ART.economia = (function () {
         const excepcional = Math.max(0, (t.hab - 65) / 35);
         const ocupado = 1 + 0.12 * (t.act || 0);
         const animo = t.mo !== undefined && t.mo < 35 ? 0.92 : 1;
-        return (1 + 1.6 * t.fama * t.fama + 3 * excepcional * excepcional) * (r ? r[2] : 1) * ocupado * animo;
+        return (1 + 0.6 * t.fama * t.fama + 1.2 * excepcional * excepcional) * (r ? r[2] : 1) * ocupado * animo;
     }
     function tarifa(t, anio) {
         const of = D.oficio(t.of);
@@ -4934,6 +4952,8 @@ ART.economia = (function () {
             f += ART.talentos.famaRegion(t, reg) * 0.1; });
         return Math.min(1.2, f);
     }
+    function escalarCrit(x) { return 63 + (x - 70) * 1.25; }
+    function escalarPub(x) { return x + (x - 70) * 0.15; }
     function calificar(obra, talentos, bonos) {
         const fam = D.familia(familiaPrincipal(obra));
         const to = D.tonos.filter(function (x) { return x.id === obra.tono; })[0] || { crit: 0, pub: 0 };
@@ -4956,6 +4976,9 @@ ART.economia = (function () {
         const esc = obra.pp / produccionTipica(obra.anioPlan || N.anio(), fam.id);
         if ((fam.id === 'AA' || fam.id === 'IM') && esc >= 1.8)
             pub += esc >= 3.5 ? 3 : 2;
+        const ejec = N.normal(0, 6);
+        crit = escalarCrit(crit) + ejec + N.normal(0, 4);
+        pub = escalarPub(pub) + ejec * 0.7 + N.normal(0, 5);
         if (bonos) {
             crit += bonos._crit || 0;
             pub += bonos._pub || 0;
@@ -5007,7 +5030,7 @@ ART.economia = (function () {
         obra.fv = N.redondear(ART.ventanas.parteVentanas(anio), 3);
         obra.exp = N.redondear(obra.con * obra.des / 100, 3);
         obra.animo = N.redondear(N.normal(0, P.ANIMO), 3);
-        obra.u = N.redondear(P.AQ * (obra.des - 60) + Math.log(obra.con) + P.ESTRELLAS * fe + obra.animo, 4);
+        obra.u = N.redondear(P.AQ * (obra.des - 57) + Math.log(obra.con) + P.ESTRELLAS * fe + obra.animo, 4);
         obra.feR = {};
         D.regiones.forEach(function (r) { obra.feR[r.id] = N.redondear(famaEstrellasRegion(obra, ctx.talento, r.id) - fe, 3); });
         obra.sc = 0;
@@ -5062,7 +5085,7 @@ ART.economia = (function () {
                 const o = obras[i];
                 o._g = (o._g || 0) + g;
                 o._e = (o._e || 0) + ent;
-                o._p = (o._p || 0) + g * Math.min(0.95, parteEstudio(o.sc + 1) + ART.estreno.parteExtra(o, r.id));
+                o._p = (o._p || 0) + g * Math.min(0.85, parteEstudio(o.sc + 1) + ART.estreno.parteExtra(o, r.id));
             }
             const gOtras = mercado * pesoOtras / suma * dr.precio;
             res.brutoOtras += gOtras;
@@ -5085,7 +5108,7 @@ ART.economia = (function () {
             res.entradas += e;
             res.porEstudio[o.est] = (res.porEstudio[o.est] || 0) + g;
             ctx.cobrar(o, parte, g);
-            o.u = N.redondear(o.u - o.delta + P.BETA * (o.pub - o.des), 4);
+            o.u = N.redondear(o.u - o.delta + P.BETA * (o.pub - o.des + 3), 4);
             const minimo = ART.estreno.semanasMinimas(o);
             if (o.sc >= P.MAX_SEMANAS || (o.sc >= Math.max(2, minimo) && g < o.max * P.CORTE) || (o.sc >= Math.max(1, minimo) && g < 1 && !esperaRegion(o)))
                 ctx.terminar(o);
@@ -5105,10 +5128,10 @@ ART.economia = (function () {
         return N.limitar((t / w) * M.bonoGenero(famId, semanaX), 0.8, 1.4);
     }
     return {
-        P: P, PROPENSION: PROPENSION, datosAnio: datosAnio, presupuestoTipico: presupuestoTipico, tipicoSuavizado: tipicoSuavizado,
+        P: P, PROPENSION: PROPENSION, impuesto: impuesto, datosAnio: datosAnio, presupuestoTipico: presupuestoTipico, tipicoSuavizado: tipicoSuavizado,
         presupuestoTipico2025: presupuestoTipico2025, produccionTipica: produccionTipica, marketingTipico: marketingTipico,
         parteEstudio: parteEstudio, tarifa: tarifa, demanda: demandaTalento, familiaPrincipal: familiaPrincipal, familiasDe: familiasDe,
-        encajeObra: encajeObra, calidadBase: calidadBase, calificar: calificar, famaEstrellas: famaEstrellas, habilidadDep: habilidadDep,
+        encajeObra: encajeObra, calidadBase: calidadBase, escalarCrit: escalarCrit, escalarPub: escalarPub, calificar: calificar, famaEstrellas: famaEstrellas, habilidadDep: habilidadDep,
         canalesDe: canalesDe, conocimiento: conocimiento, deseo: deseo, accesoClasificacion: accesoClasificacion,
         iniciarCartelera: iniciarCartelera, semanaCartelera: semanaCartelera, pronosticoSemana: pronosticoSemana, alcanceMedio: alcanceMedio,
     };
@@ -6901,8 +6924,8 @@ ART.ideas = (function () {
     function paqueteMusica(id) { return PAQUETES_MUSICA.filter(function (x) { return x.id === (id || ''); })[0] || PAQUETES_MUSICA[0]; }
     function retornoEstimado(calidad) {
         const base = E().P.MULT_TIPICO;
-        const m = base * Math.exp((calidad - 62) * 0.035);
-        return [N.redondear(m * 0.55, 1), N.redondear(m * 1.5, 1)];
+        const m = base * Math.exp((calidad - 62) * 0.02);
+        return [N.redondear(m * 0.5, 1), N.redondear(m * 2, 1)];
     }
     function informe(o) {
         const r = [];
@@ -7242,7 +7265,7 @@ ART.obras = (function () {
             return false;
         return !o.pj || o.pj.every(function (p) { return (p.i !== 'protagonista' && p.i !== 'secundario') || (p.t !== null && p.t !== undefined); });
     }
-    const EPOCA_DURACION = [[1895, 0.4], [1910, 0.55], [1925, 1]];
+    const EPOCA_DURACION = [[1895, 0.4], [1910, 0.55], [1925, 0.7], [1950, 0.8], [1970, 1]];
     function duraciones(o, rapidez) {
         const esc = D.escalas[o.esc];
         const r = rapidez || {};
@@ -7267,7 +7290,7 @@ ART.obras = (function () {
         const cm = E.marketingTipico(N.anio()) * D.nivelesMarketing[o.nivM === undefined ? 2 : o.nivM].mult;
         const pp = Math.round(o.pp * (1 - ART.negocio.ahorro(o.est)));
         const der = o.derechos || 0;
-        const calidad = Math.round(N.limitar(q, 1, 99));
+        const calidad = Math.round(N.limitar(E.escalarCrit(q), 1, 99));
         return { calidad: calidad, talento: ct, produccion: pp, marketing: cm, derechos: der, total: ct + pp + cm + der, retorno: ART.ideas.retornoEstimado(calidad) };
     }
     function crear(b) {
@@ -8498,7 +8521,7 @@ ART.estreno = (function () {
         const est = N.S.estudios[o.est];
         cadenasDe(est, reg).forEach(function (c) { f *= 1 + 0.3 * c.salas; });
         if (o.est === 0 && reg === est.reg)
-            f *= 1 + 0.12 * cinesPropios();
+            f *= 1 + 0.06 * cinesPropios();
         return f;
     }
     function parteExtra(o, reg) {
@@ -8506,7 +8529,7 @@ ART.estreno = (function () {
         let x = 0;
         cadenasDe(est, reg).forEach(function (c) { x += c.parte; });
         if (o.est === 0 && reg === est.reg)
-            x += 0.12 * cinesPropios();
+            x += 0.04 * cinesPropios();
         return x;
     }
     function semanasMinimas(o) {
@@ -8552,7 +8575,7 @@ ART.estreno = (function () {
             r.push(c); });
         return r;
     }
-    function precioCadena(c) { return Math.round(E.presupuestoTipico(N.anio()) * (c.salas * 10 + c.fama * 6 + c.cuota * 8)); }
+    function precioCadena(c) { const d = E.datosAnio(N.anio()).regiones[c.reg]; const taq = d ? d.publico * d.precio : 0; return Math.round(taq * c.salas * 0.08 * 7 + E.presupuestoTipico(N.anio()) * c.fama * 6); }
     function esPropia(id) { const est = N.S.estudios[0]; return !!(est.cadP && est.cadP.indexOf(id) >= 0); }
     function puedeComprar(id) {
         const c = cadena(id), est = N.S.estudios[0];
@@ -8562,6 +8585,8 @@ ART.estreno = (function () {
             return c.nombre + ' abre en ' + c.desde + '.';
         if (esPropia(id))
             return 'Ya es tuya.';
+        if (est.fama < c.fama)
+            return c.nombre + ' solo se vende a estudios más famosos (fama ' + Math.round(c.fama * 100) + ').';
         if (ART.negocio.cajaLibre(0) < precioCadena(c))
             return 'Tu caja libre no alcanza (' + ART.ui.dinero(precioCadena(c)) + ').';
         return '';
@@ -8592,7 +8617,7 @@ ART.estreno = (function () {
         const S = N.S, da = E.datosAnio(N.anio());
         const tot = Object.keys(da.regiones).reduce(function (s2, k) { return s2 + da.regiones[k].publico * da.regiones[k].precio; }, 0);
         const reg = da.regiones[c.reg] ? da.regiones[c.reg].publico * da.regiones[c.reg].precio : 0;
-        return (S.mercado && S.mercado.semana ? S.mercado.semana.bruto || 0 : 0) * (tot > 0 ? reg / tot : 0) * c.salas * 0.18 * 4.33;
+        return (S.mercado && S.mercado.semana ? S.mercado.semana.bruto || 0 : 0) * (tot > 0 ? reg / tot : 0) * c.salas * 0.08 * 4.33;
     }
     function firmar(id, anios) {
         const err = puedeFirmar(id, anios);
@@ -8637,7 +8662,7 @@ ART.estreno = (function () {
         if (n && S.mercado.semana) {
             const da = E.datosAnio(N.anio()), tot = Object.keys(da.regiones).reduce(function (s, k) { return s + da.regiones[k].publico * da.regiones[k].precio; }, 0);
             const casa = da.regiones[est.reg] ? da.regiones[est.reg].publico * da.regiones[est.reg].precio : 0;
-            const g = (S.mercado.semana.bruto || 0) * (tot > 0 ? casa / tot : 0) * 0.012 * n * 4.33;
+            const g = (S.mercado.semana.bruto || 0) * (tot > 0 ? casa / tot : 0) * 0.004 * n * 4.33;
             if (g > 0)
                 ART.negocio.cobrarEn(0, 'exhibicion', g);
         }
@@ -8752,7 +8777,8 @@ ART.lanzamiento = (function () {
     function informe(o, mult) {
         const r = [];
         const tipico = E.presupuestoTipico(o.anio);
-        r.push(mult >= 2.5 ? 'Éxito: recuperó ' + N.redondear(mult, 1) + ' veces su costo.' : mult >= 1.4 ? 'Resultado correcto para su costo.' : 'Fracaso: no recuperó lo invertido.');
+        const roi = O.costoTotal(o) > 0 ? O.neto(o) / O.costoTotal(o) : 0;
+        r.push(roi >= 0.5 ? 'Éxito: taquilla de ' + N.redondear(mult, 1) + ' veces su costo y ' + Math.round(roi * 100) + ' % de ganancia.' : roi >= 0 ? 'Resultado correcto: recuperó lo invertido (' + Math.round(roi * 100) + ' % de ganancia).' : 'Fracaso: no recuperó lo invertido (' + Math.round(roi * 100) + ' %).');
         if (o.pub - o.des >= 6)
             r.push('El boca a boca la sostuvo: el público la disfrutó más de lo prometido.');
         else if (o.des - o.pub >= 6)
@@ -8857,7 +8883,7 @@ ART.ventanas = (function () {
                 p *= 1.15;
             const cal = calendario(v.id, anio), pr = propia(o, v.id);
             const espera = o.dir === v.id ? 0 : Math.round(cal.espera * ri.espera);
-            o.vt[v.id] = { t0: N.S.t + espera, dura: cal.dura, total: pr ? 0 : Math.round(total * p * ri.k), pag: 0, n: 0, propia: pr ? 1 : 0 };
+            o.vt[v.id] = { t0: N.S.t + espera, dura: cal.dura, total: pr ? 0 : Math.round(total * p * ri.k * (v.id === 'tv' ? 1 : ART.historia.pirateria(anio))), pag: 0, n: 0, propia: pr ? 1 : 0 };
         });
         o.vt.total = VENTANAS.reduce(function (s, v) { return s + (o.vt[v.id] ? o.vt[v.id].total : 0); }, 0);
         VENTANAS.forEach(function (v) {
@@ -8874,7 +8900,7 @@ ART.ventanas = (function () {
     }
     const ADELANTO = 0.35;
     function cobrar(o, cat, monto) {
-        ART.negocio.cobrarEn(o.est, cat, cat === 'video' || cat === 'streaming' ? monto * ART.historia.pirateria(N.anio()) : monto);
+        ART.negocio.cobrarEn(o.est, cat, monto);
         if (!o.pctT)
             return;
         let pct = 0;
@@ -9084,7 +9110,7 @@ ART.ventanas = (function () {
         const f = formatoNuevo(o);
         ART.negocio.pagar(0, 'produccion', costoRemaster());
         o.rem = N.anio();
-        const total = valorReestreno(o, 1) * 0.6;
+        const total = valorReestreno(o, 1) * 0.6 * ART.historia.pirateria(N.anio());
         o.vt = o.vt || { total: 0, cob: 0 };
         o.vt.fin = 0;
         const antes = o.vt.video || {};
@@ -9264,7 +9290,7 @@ ART.rivales = (function () {
     }
     function objetivo(est) {
         const da = E.datosAnio(N.anio());
-        return Math.max(1, Math.round(est.tam * 3.2 * Math.sqrt(da.peliculas / 320)));
+        return Math.max(1, Math.round(est.tam * 3.2 * Math.sqrt(da.peliculasRef / 320)));
     }
     function elegirGeneros(est) {
         const S = N.S;
@@ -13221,10 +13247,10 @@ ART.negocio = (function () {
         reestrenos: 'Reestrenos', carrera: 'Tus encargos como talento', exhibicion: 'Tus cines (obras ajenas)', distribucion: 'Contratos con cadenas de cines', talento: 'Contratos de talento', exclusivos: 'Contratos exclusivos', academia: 'Academia y becas', derechos: 'Derechos y guiones', produccion: 'Producción', marketing: 'Marketing',
         personal: 'Personal', mantenimiento: 'Mantenimiento', construccion: 'Construcciones', impuestos: 'Impuestos', multas: 'Multas', licencias: 'Licencias, derivados y franquicias', emision: 'Canal y plataforma (operación)', inversiones: 'Inversiones', filiales: 'Filiales', coproduccion: 'Coproducciones y financiación', encargos: 'Encargos', fans: 'Tienda, museo, parque y convenciones', investigacion: 'Investigación y patentes', eventos: 'Eventos', deuda: 'Pagos de deuda', socio: 'Dividendos del socio', casino: 'Casino y apuestas', fondos: 'Fondos de cine', familia: 'Retiros de la familia', musica: 'Música', juegos: 'Videojuegos', teatro: 'Teatro', libros: 'Libros',
     };
-    const CAPITAL = { prestamo: 1, amortizacion: 1, aportes: 1, recompra: 1, socio: 1, acciones: 1, aporteFilial: 1, familia: 1, casino: 1, ventaActivos: 1, compraNegocios: 1 };
+    const CAPITAL = { dividendos: 1, prestamo: 1, amortizacion: 1, aportes: 1, recompra: 1, socio: 1, acciones: 1, aporteFilial: 1, familia: 1, casino: 1, ventaActivos: 1, compraNegocios: 1 };
     Object.assign(NOMBRES, { alquilerTeatros: 'Alquiler de tus teatros', ventaTeatros: 'Venta de teatros', prestamo: 'Préstamos recibidos', amortizacion: 'Pago de capital de deudas', aportes: 'Aportes del socio',
         recompra: 'Recompra de la parte del socio', acciones: 'Compra y venta de acciones (capital)', aporteFilial: 'Aportes a filiales', deuda: 'Intereses de deudas',
-        ventaActivos: 'Venta de canal, plataforma y negocios', compraNegocios: 'Compra y ampliación de negocios', negocios: 'Negocios propios', parques: 'Parques temáticos' });
+        ventaActivos: 'Venta de canal, plataforma y negocios', dividendos: 'Dividendos a los accionistas', compraNegocios: 'Compra y ampliación de negocios', negocios: 'Negocios propios', parques: 'Parques temáticos' });
     function esCapital(cat) { return !!CAPITAL[cat]; }
     function libroVacio() { return { ing: {}, gas: {} }; }
     function cobrarEn(est, cat, monto) { mover(est, cat, Math.abs(monto)); }
@@ -13374,7 +13400,7 @@ ART.negocio = (function () {
         est.pisos.forEach(function (id) { reduccion += -(infoPiso(id).fijo || 0); });
         const f = 1 - Math.min(0.3, reduccion);
         return {
-            personal: (tipico * (0.006 + 0.004 * partes) * f + ART.sede.gastoFijoMes()) * (1 - ART.carrera.descuentoFijo()),
+            personal: (tipico * (0.006 + 0.004 * partes + 0.006 * Math.max(0, capacidad(0) - 3)) * f + ART.sede.gastoFijoMes()) * (1 - ART.carrera.descuentoFijo()),
             mantenimiento: tipico * 0.008 * (est.valorObras || 0) * f,
         };
     }
@@ -13405,7 +13431,7 @@ ART.negocio = (function () {
             bonos: bonos,
             famaTrasEstreno: function (o, mult) {
                 const est = N.S.estudios[o.est];
-                const cambio = N.limitar(0.004 * Math.log(Math.max(0.2, mult)) + (o.crit - 60) / 6000, -0.012, 0.01);
+                const cambio = N.limitar(0.003 * Math.log(Math.max(0.2, mult)) + (o.crit - 62) / 5000, -0.012, 0.006);
                 est.fama = N.redondear(N.limitar(est.fama + (cambio > 0 ? cambio * (1 - est.fama) : cambio), 0.01, 1), 3);
             },
         };
@@ -13451,10 +13477,18 @@ ART.negocio = (function () {
             const util = est.ingAnio - est.gasAnio;
             est.util = util;
             if (util > 0)
-                pagar(i, 'impuestos', util * E.P.IMPUESTO);
+                pagar(i, 'impuestos', util * E.impuesto(anioCerrado));
         }
         const jug = S.estudios[0];
-        const cuota = m.anio.total > 0 ? (m.anio.porEstudio[0] || 0) / m.anio.total : 0;
+        if (jug.util > 0 && jug.caja > 12 * tipicoCerrado)
+            pagar(0, 'dividendos', Math.round(Math.min((jug.caja - 12 * tipicoCerrado) * 0.35, jug.util * 0.9)));
+        for (let i = 1; i < S.estudios.length; i++) {
+            const e = S.estudios[i];
+            if (!e.quebrado && e.util > 0 && e.caja > 12 * tipicoCerrado)
+                pagar(i, 'dividendos', Math.round(Math.min((e.caja - 12 * tipicoCerrado) * 0.35, e.util * 0.9)));
+        }
+        const totRef = totalReferencia(m.anio, anioCerrado);
+        const cuota = totRef > 0 ? (m.anio.porEstudio[0] || 0) / totRef : 0;
         let multa = 0;
         if (cuota >= E.P.ANTIMONOPOLIO) {
             multa = Math.round((S.fin.anio.ing.taquilla || 0) * 0.1);
@@ -13495,7 +13529,7 @@ ART.negocio = (function () {
             e.ingAnio = 0;
             e.gasAnio = 0;
             if (e.fama > 0.06)
-                e.fama = N.redondear(N.limitar(0.06 + (e.fama - 0.06) * 0.95, 0.01, 1), 3);
+                e.fama = N.redondear(N.limitar(0.06 + (e.fama - 0.06) * 0.94, 0.01, 1), 3);
         }
         S.fin.anio = libroVacio();
         m.anio = { total: 0, otras: 0, porEstudio: {} };
@@ -13507,15 +13541,20 @@ ART.negocio = (function () {
     }
     function impuestoEstimado(estId) {
         const est = N.S.estudios[estId];
-        return Math.max(0, est.ingAnio - est.gasAnio) * E.P.IMPUESTO;
+        return Math.max(0, est.ingAnio - est.gasAnio) * E.impuesto(N.anio());
     }
     function cajaLibre(estId) {
         const g = gastosFijosMes(estId);
         return N.S.estudios[estId].caja - comprometido(estId) - impuestoEstimado(estId) - 3 * (g.personal + g.mantenimiento);
     }
+    function totalReferencia(a, anio) {
+        const da = E.datosAnio(anio), e = Math.max(0, N.S.mercado.estrenos52 || 0);
+        const k = Math.max(0.3 * da.peliculasRef, da.peliculasRef - e) / Math.max(0.3 * da.peliculas, da.peliculas - e);
+        return a.total - a.otras * (1 - Math.min(1, k));
+    }
     function cuotaAnioActual(estId) {
-        const m = N.S.mercado;
-        return m.anio.total > 0 ? (m.anio.porEstudio[estId] || 0) / m.anio.total : 0;
+        const m = N.S.mercado, tot = totalReferencia(m.anio, N.anio());
+        return tot > 0 ? (m.anio.porEstudio[estId] || 0) / tot : 0;
     }
     return {
         AJ: AJ, INGRESOS: INGRESOS, GASTOS: GASTOS, NOMBRES: NOMBRES, libroVacio: libroVacio, mover: mover, pagar: pagar,

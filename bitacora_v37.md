@@ -68,3 +68,26 @@ El juego cubre seis siglos (1700–2300). La historia real llega a 2026; desde a
 
 ## Verificación
 `node --check` y partidas automáticas en Chromium de 1960 a 2030, de 2026 a 2100, de 2150 a 2230 y de 2250 a 2300, recorriendo calendario, premios, historia, estadísticas, población, catálogo y creación de obras: sin errores.
+
+# Sesión 4 de 6 · Economía, lógica y realismo
+
+## Antes y después (bot «normal», partida desde 1900)
+| | Antes | Ahora |
+|---|---|---|
+| Caja del jugador en 2020 / 2050 | 41.085 M / sin techo (54.000 M en 2030) | 2.496 M / 8.036 M |
+| Rival más grande en 2020 | decenas de millones | 6.638 M (compite con el jugador) |
+| Obras que pierden dinero | casi ninguna | 20–49 % según la época |
+| Mediana de bruto/costo | ~2,7 con ganancias enormes | ~1,7–2,5 |
+| Crítica media y dispersión | 72–75, plana | 64–68, desviación 10–12 |
+| Partida desde 2150 hasta 2300 | 77 billones | 139.000 M (unas 57 veces el presupuesto típico, igual que en el presente) |
+
+## Cambios
+- **Presupuesto típico** que no se desploma con caídas temporales del mercado (no más saltos 45 M → 20 M → 86 M) y producción mundial real por época (presupuestos históricos: ~1 M en 1950, ~10 M en 1980, ~45-65 M en 2010-2020).
+- **Inflación futura** que se modera a largo plazo (2,4 % hoy → 0,4 % en 2300) y ruido aleatorio sin correlación entre años (antes unas semillas daban crisis inflacionarias de hasta 29 %).
+- **Impuesto a la utilidad histórico** (5 % antes de 1909, 52 % en los años 50, 26 % hoy) en vez de 25 % fijo de 1700 a 2300.
+- **Gastos fijos** según la capacidad instalada, **duración de producción** por época y **tarifas de estrellas** sin contar dos veces fama y habilidad.
+- **Dividendos**: cuando la caja ociosa supera 12 presupuestos típicos, la junta reparte una parte de la utilidad; vale para el jugador y para los rivales.
+- **Taquilla** menos generosa con las obras medianas, **piratería** descontada igual en lo previsto y en lo cobrado, informe de resultados por ganancia real, retorno estimado coherente.
+- **Cines**: cadenas con precio según lo que rinden (unos 7 años de ingreso), ventajas moderadas y fama mínima para comprarlas; cines propios menos desbalanceados.
+- **Crítica con dispersión real**: la ejecución de cada rodaje varía; la estimación en pantalla usa la misma escala.
+- **Fama** que depende de la calidad y del resultado de cada estreno (antes subía con el volumen) y se desgasta un poco más cada año.
