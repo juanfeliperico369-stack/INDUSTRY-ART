@@ -11,9 +11,9 @@ name: App de iPhone
 on:
   workflow_dispatch:
     inputs:
-      modo:
-        description: 'gratis (un anuncio al abrir) o pago (sin anuncios)'
-        default: 'gratis'
+      edicion:
+        description: 'anuncios (gratis, com.industryart.juego) o completa (de pago, sin anuncios, com.industryart.juego.completa)'
+        default: 'anuncios'
 jobs:
   ios:
     runs-on: macos-26
@@ -24,16 +24,19 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - run: xcodebuild -version
-      - name: Configuración de la app (modo y AdMob)
+      - name: Configuración de la app (edición y AdMob)
         env:
-          MODO: ${{ github.event.inputs.modo || 'gratis' }}
+          EDICION: ${{ github.event.inputs.edicion || 'anuncios' }}
           ADMOB_APP_ID: ${{ secrets.ADMOB_IOS_APP_ID }}
           ADMOB_INTERSTITIAL_ID: ${{ secrets.ADMOB_IOS_INTERSTITIAL_ID }}
         run: |
           python3 - <<'PY'
           import json, os
           c = json.load(open('app/config.json'))
-          c['modo'] = os.environ.get('MODO') or 'gratis'
+          c['edicion'] = os.environ.get('EDICION') or 'anuncios'
+          if c['edicion'] == 'completa':
+              p = 'app/ios/App/App.xcodeproj/project.pbxproj'
+              open(p, 'w').write(open(p).read().replace('PRODUCT_BUNDLE_IDENTIFIER = com.industryart.juego;', 'PRODUCT_BUNDLE_IDENTIFIER = com.industryart.juego.completa;'))
           if os.environ.get('ADMOB_APP_ID') and os.environ.get('ADMOB_INTERSTITIAL_ID'):
               c['admob']['ios'] = {'app': os.environ['ADMOB_APP_ID'], 'intersticial': os.environ['ADMOB_INTERSTITIAL_ID']}
               c['admob']['prueba'] = False
@@ -124,7 +127,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: steps.firma.outputs.si == '1'
         with:
-          name: industry-art-ipa
+          name: industry-art-ipa-${{ github.event.inputs.edicion || 'anuncios' }}
           path: ${{ runner.temp }}/ipa/*.ipa
       - name: Borrar el llavero
         if: always() && steps.firma.outputs.si == '1'

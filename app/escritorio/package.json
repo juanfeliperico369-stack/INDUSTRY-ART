@@ -1,8 +1,8 @@
 {
   "name": "industry-art-pc",
   "productName": "INDUSTRY ART",
-  "version": "2.1.0",
-  "description": "INDUSTRY ART para PC (Windows, macOS y Linux)",
+  "version": "4.0.0",
+  "description": "INDUSTRY ART para PC (Windows, macOS y Linux): edición completa, sin anuncios",
   "author": "OneZero",
   "private": true,
   "main": "main.js",
@@ -19,12 +19,55 @@
     "productName": "INDUSTRY ART",
     "copyright": "Ideado y creado por OneZero",
     "publish": null,
-    "files": ["main.js", "www/index.html", "build/icon.png"],
-    "directories": { "output": "dist", "buildResources": "build" },
-    "win": { "target": ["nsis", "portable"] },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "artifactName": "INDUSTRY-ART-${version}-Windows-instalador.${ext}" },
-    "portable": { "artifactName": "INDUSTRY-ART-${version}-Windows-portable.${ext}" },
-    "mac": { "target": [{ "target": "dmg", "arch": ["universal"] }], "category": "public.app-category.simulation-games", "artifactName": "INDUSTRY-ART-${version}-macOS.${ext}" },
-    "linux": { "target": ["AppImage"], "category": "Game", "artifactName": "INDUSTRY-ART-${version}-Linux.${ext}" }
+    "files": [
+      "main.js",
+      "www/index.html",
+      "build/icon.png"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable",
+        "zip"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "INDUSTRY-ART-${version}-Windows-instalador.${ext}"
+    },
+    "portable": {
+      "artifactName": "INDUSTRY-ART-${version}-Windows-portable.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.simulation-games",
+      "artifactName": "INDUSTRY-ART-${version}-macOS.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ],
+      "category": "Game",
+      "artifactName": "INDUSTRY-ART-${version}-Linux.${ext}"
+    }
   }
 }

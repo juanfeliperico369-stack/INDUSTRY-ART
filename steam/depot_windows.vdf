@@ -1,0 +1,12 @@
+// Depot de windows: todo lo que electron-builder dejó en app/escritorio/dist/win-unpacked, copiado a dist/steam/windows
+"DepotBuild"
+{
+	"DepotID" "1000001"
+	"ContentRoot" "../dist/steam/windows/"
+	"FileMapping"
+	{
+		"LocalPath" "*"
+		"DepotPath" "."
+		"Recursive" "1"
+	}
+}

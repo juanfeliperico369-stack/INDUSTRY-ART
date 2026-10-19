@@ -23,6 +23,24 @@ Ideado y creado por OneZero · programado por Faro.
   con datos históricos nuevos.
 - **Limpieza**: espacio de nombres `ART`, sin rastros de herramientas en el código ni en las notas; créditos de OneZero.
 
+## Lo que faltaba de la Final
+
+- **Tipo de obra**: en el modo rápido de Crear obra no se podía elegir (solo estaba en el detallado); ahora es lo
+  primero del paso 1.
+- **Pantallas**: Talento con Catálogo, Oficina, Academia y Tu avatar; Estudio con Inicio, Metas y Editor; Obras con
+  Material, Guiones y Taxonomía; Negocio › Inventos con toda la tecnología de 1895 a 2290.
+- **Futuro hasta 2300**: 29 tecnologías de ficción, 18 infraestructuras (de la sala de ensayos de 1700 a la Nave
+  estudio de 2222 y el plató lunar de 2250), 12 crisis y auges, 21 hitos y 11 estudios emergentes.
+- **Tipografías**: 32 para el letrero (las 20 de la Final y 12 más, entre ellas la de títulos del juego).
+- **Datos históricos**: 141 en las «i» (50 nuevos, revisados uno por uno).
+
+## Ediciones y paquetes
+
+Dos ediciones con todo desbloqueado: **completa** (de pago, sin anuncios) y **con anuncios** (gratis: uno al abrir y,
+como mucho, otro cada 20 minutos en una pausa). Android con dos sabores (`.aab` para Google Play y `.apk` para
+probar), iPhone por edición, PC (Windows, macOS y Linux), página instalable, Steam y Epic Games. Detalle en
+`docs/ediciones_y_tiendas.md`.
+
 ## Pruebas (bot, estrategia normal, 200 años cada una)
 
 | Partida | Resultado |

@@ -18,6 +18,12 @@ internet. Las partidas de todas las versiones anteriores (desde la V16) se abren
 - **Editores**: material propio, con licencia u obras famosas de los hitos del arte; talentos nuevos o personajes
   históricos; edición de lo creado.
 - **Archivo de curiosidades**: lo que todos saben y lo que pocos saben de cada arte.
+- **Futuro hasta 2300**: 81 inventos (29 nuevos de ficción, de las series interactivas al Archivo de la Humanidad), infraestructuras
+  como el plató orbital, la base en Marte o la Nave estudio, crisis, hitos y estudios del futuro.
+- **Pantallas de la Final**: Talento (Catálogo, Oficina, Academia, Tu avatar), Estudio (Inicio, Metas, Editor), Obras
+  (Material, Guiones, Taxonomía) y Negocio › Inventos; 32 tipografías para el letrero; 141 datos históricos en las «i».
+- **Dos ediciones** con todo desbloqueado: completa (de pago, sin anuncios) y con anuncios (gratis). Ver
+  [docs/ediciones_y_tiendas.md](docs/ediciones_y_tiendas.md): Android, iPhone, Windows, macOS, Linux, web, Steam y Epic Games.
 - Interfaz de videojuego con colores por sección y por época, español e inglés completos.
 
 ## Qué hay en este repositorio
@@ -27,6 +33,8 @@ internet. Las partidas de todas las versiones anteriores (desde la V16) se abren
 | `INDUSTRY_ART_Definitiva.html` | El juego, versión 4.0 (armado desde `src/`) |
 | `INDUSTRY_ART_v16.html` a `INDUSTRY_ART_v36.html` | Las versiones anteriores, para comparar |
 | `bitacora_Definitiva.md` | La bitácora corta de la Definitiva (las de la V16 a la V36 también están) |
+| `docs/ediciones_y_tiendas.md` | Las dos ediciones y cómo se arma y se publica cada paquete |
+| `steam/`, `epic/` | Archivos de subida a Steam (SteamPipe) y a la Epic Games Store (BuildPatchTool) |
 | `app/` | Las apps: Android e iPhone (Capacitor: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
 | `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone, la app de PC y la versión web |
 | `docs/publicar_google_play.md`, `docs/publicar_app_store.md`, `docs/publicar_pc.md` | Guías para publicar en cada tienda |

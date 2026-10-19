@@ -1,4 +1,6 @@
-# Arma el .aab firmado de INDUSTRY ART para Google Play cada vez que subes una versión nueva del juego.
+# Arma INDUSTRY ART para Google Play en sus dos ediciones (las dos con todo desbloqueado): «completa» (de pago, sin
+# anuncios, com.industryart.juego.completa) y «anuncios» (gratis, com.industryart.juego). Sale un .aab firmado por
+# edición para subir a Google Play y un .apk de cada una para instalar y probar.
 # Secretos que tú pones en GitHub (Settings › Secrets and variables › Actions):
 #   KEYSTORE_BASE64  la llave de firma (.jks) en base64      KEYSTORE_PASSWORD  su contraseña
 #   KEY_ALIAS        el alias de la llave                    KEY_PASSWORD       la contraseña de la llave
@@ -9,10 +11,6 @@ on:
     branches: [main, claude/industry-art-v16-analysis-dbf0iv]
     paths: ['INDUSTRY_ART_Definitiva.html', 'INDUSTRY_ART_v*.html', 'app/config.json', 'app/package.json', 'app/android/**', 'tools/preparar_app.py', '.github/workflows/android.yml']
   workflow_dispatch:
-    inputs:
-      modo:
-        description: 'gratis (un anuncio al abrir) o pago (sin anuncios)'
-        default: 'gratis'
 jobs:
   aab:
     runs-on: ubuntu-latest
@@ -24,16 +22,14 @@ jobs:
         with: { distribution: 'temurin', java-version: '21' }
       - uses: android-actions/setup-android@v3
         with: { packages: 'platform-tools platforms;android-36 build-tools;36.0.0' }
-      - name: Configuración de la app (modo y AdMob)
+      - name: Configuración de AdMob
         env:
-          MODO: ${{ github.event.inputs.modo || 'gratis' }}
           ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
           ADMOB_INTERSTITIAL_ID: ${{ secrets.ADMOB_INTERSTITIAL_ID }}
         run: |
           python3 - <<'PY'
           import json, os
           c = json.load(open('app/config.json'))
-          c['modo'] = os.environ.get('MODO') or 'gratis'
           if os.environ.get('ADMOB_APP_ID') and os.environ.get('ADMOB_INTERSTITIAL_ID'):
               c['admob']['android'] = {'app': os.environ['ADMOB_APP_ID'], 'intersticial': os.environ['ADMOB_INTERSTITIAL_ID']}
               c['admob']['prueba'] = False
@@ -50,7 +46,7 @@ jobs:
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/industry-art.jks"
           else echo "::warning::Falta el secreto KEYSTORE_BASE64: el .aab sale sin firmar y Google Play no lo acepta."; fi
-      - name: Armar el .aab firmado
+      - name: Armar los .aab firmados y los .apk
         working-directory: app/android
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/industry-art.jks
@@ -60,8 +56,10 @@ jobs:
           VERSION_CODE: ${{ github.run_number }}
         run: |
           [ -s "$KEYSTORE_FILE" ] || unset KEYSTORE_FILE
-          ./gradlew --no-daemon bundleRelease
+          ./gradlew --no-daemon bundleCompletaRelease bundleAnunciosRelease assembleCompletaRelease assembleAnunciosRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: industry-art-aab
-          path: app/android/app/build/outputs/bundle/release/app-release.aab
+          name: industry-art-android
+          path: |
+            app/android/app/build/outputs/bundle/*Release/*.aab
+            app/android/app/build/outputs/apk/*/release/*.apk
