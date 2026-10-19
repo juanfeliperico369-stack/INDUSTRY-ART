@@ -10,7 +10,8 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP = os.path.join(RAIZ, 'app')
 htmls = sorted(glob.glob(os.path.join(RAIZ, 'INDUSTRY_ART_v*.html')), key=lambda p: int(re.search(r'_v(\d+)', p).group(1)))
 cfg = json.load(open(os.path.join(APP, 'config.json'), encoding='utf-8'))
-base = open(htmls[-1], encoding='utf-8').read()
+DEFINITIVA = os.path.join(RAIZ, 'INDUSTRY_ART_Definitiva.html')
+base = open(DEFINITIVA if os.path.exists(DEFINITIVA) else htmls[-1], encoding='utf-8').read()
 
 def escribir(ruta, extra):
     c = dict(cfg, **extra)
@@ -44,4 +45,4 @@ if os.path.exists(plist):
     with open(plist, 'wb') as f:
         plistlib.dump(p, f, sort_keys=False)
 
-print('Listo:', os.path.basename(htmls[-1]), '-> app/www y app/escritorio/www - modo', cfg['modo'])  # solo ASCII: la consola de Windows no imprime flechas
+print('Listo:', os.path.basename(DEFINITIVA if os.path.exists(DEFINITIVA) else htmls[-1]), '-> app/www y app/escritorio/www - modo', cfg['modo'])  # solo ASCII: la consola de Windows no imprime flechas
