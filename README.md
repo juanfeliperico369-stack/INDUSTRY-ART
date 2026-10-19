@@ -61,7 +61,7 @@ internet. Las partidas de todas las versiones anteriores (desde la V16) se abren
 ## Para programar
 
 ```bash
-python3 tools/armar.py                       # src/ -> INDUSTRY_ART_Definitiva.html
+python3 tools/armar.py                       # src/ -> INDUSTRY_ART_Definitiva.html (compacto; --completo para desarmar)
 python3 tools/ingles.py                      # diccionario inglés -> src/modulos/01_ingles.js (antes de armar)
 node tools/bot.js --hasta 2150               # bot: 3 estrategias × 1700, 1900 y 2000 + pruebas de reglas
 node tools/capturas.js                       # capturas en 390×844, 844×390 y 1366×768 -> pruebas/capturas/

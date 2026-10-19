@@ -4,6 +4,7 @@
 Uso:
     python3 tools/armar.py                 # crea INDUSTRY_ART_Definitiva.html en la raíz
     python3 tools/armar.py --salida otro.html
+    python3 tools/armar.py --completo      # guarda la sangría y los comentarios para que desarmar.py los devuelva
 
 Qué hace:
 1. Lee src/plantilla.html.
@@ -78,9 +79,12 @@ def modulos(guardados=None):
 SANGRIA = re.compile(r"^((?:  )+)", re.M)
 
 
-def compactar(texto):
+def compactar(texto, completo=True):
     if "\t" in texto:
         sys.exit("Las fuentes no deben tener tabuladores (la sangría compacta los usa)")
+    if not completo:
+        # El archivo que se entrega va sin sangría ni líneas vacías: pesa menos y abre en cualquier visor
+        return "\n".join(l.lstrip(" ") for l in texto.split("\n") if l.strip())
     return SANGRIA.sub(lambda m: "\t" * (len(m.group(1)) // 2), texto)
 
 
@@ -95,14 +99,16 @@ def fuente():
     )
 
 
-def armar(salida):
+def armar(salida, completo=False):
     plantilla = leer(os.path.join(SRC, "plantilla.html"))
     estilos = fuente() + leer(os.path.join(SRC, "estilos.css"))
     guardados = {}
     codigo = modulos(guardados)
     if "/*@ESTILOS@*/" not in plantilla or "/*@MODULOS@*/" not in plantilla:
         sys.exit("La plantilla debe tener /*@ESTILOS@*/ y /*@MODULOS@*/")
-    html = plantilla.replace("/*@ESTILOS@*/", compactar(estilos)).replace("/*@MODULOS@*/", compactar(codigo)) + empacar(guardados)
+    html = plantilla.replace("/*@ESTILOS@*/", compactar(estilos, completo)).replace("/*@MODULOS@*/", compactar(codigo, completo))
+    if completo:
+        html += empacar(guardados)
     with open(salida, "w", encoding="utf-8", newline="\n") as f:
         f.write(html)
     kb = os.path.getsize(salida) / 1024
@@ -112,4 +118,6 @@ def armar(salida):
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--salida", default=os.path.join(RAIZ, SALIDA))
-    armar(p.parse_args().salida)
+    p.add_argument("--completo", action="store_true", help="con sangría y comentarios (para desarmar.py)")
+    a = p.parse_args()
+    armar(a.salida, a.completo)
