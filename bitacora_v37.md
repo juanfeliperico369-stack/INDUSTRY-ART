@@ -26,3 +26,21 @@ Base: «INDUSTRY ART Definitiva». No se quitó ninguna función. `INDUSTRY_ART_
 
 ## Verificación
 `node --check` del script y una partida del bot de 1960 a 2030 en Chromium, recorriendo cada pantalla nueva: sin errores.
+
+# Sesión 2 de 6 · Premios, búsqueda y estadísticas
+
+## Premios según el documento
+- **Premio de la Academia** (solo películas): las 12 categorías en el orden del documento: productor, fotografía, editor, compositor, diseñador de arte y tecnología, escritor, director, actor y actriz de reparto, actriz, actor y película (más obra animada). Separa protagonistas de reparto según el papel de cada intérprete.
+- **Emmy Shows Awards** (semana 40, solo series y programas): nueva gala con sus 12 categorías, entre ellas «Mejor director invitado» y «Mejor programa».
+- **Independent Award**: categorías completas y solo para obras de bajo presupuesto. **Bastard Awards**: solo obras con crítica por debajo de 50, con peor escritor, director, actriz, actor y película.
+- **Fase de nominados**: una semana antes de cada gala salen los 5 nominados por categoría (noticia y «Premios en vivo»); la semana de la gala se anuncian los ganadores con esos mismos nominados.
+- **Music Awards, Tony, Pulitzer / Editorial Book Award y The Game Award**: se entregan en su semana del calendario (6, 24, 14 y 52), con las categorías del documento por talento (escritor, diseñador, compositor, director, intérpretes, productor…), 5 nominados y 1 ganador. Los premios suben la fama del talento ganador.
+- **Festivales por región** con los premios y jurados del documento, agrupados en sus Awards: Olímpicos (Palma de Oro, León de Oro, Oso de Oro), The Western Hollywood (Golden Block, Crystal Block, Ariel de Oro), América (Estrella de Mar, Mujer Dorada, Kikito de Oro), Eden Fespaco (Monolito Estrella, Estrella de Mar de Oro, Semental de Yennenga), Everest Bollywood (Tokyo Grand Prix, Cáliz de Oro, Copa Caballo de Oro) y Sydney (Sydney Film Prize, The Sign Maori, Volcán de Guinea).
+- **Mundo › Premios** tiene tres pestañas: **Premios en vivo** (nominados o ganadores de la semana y cuánto falta para la próxima gala), **Historial de premios** (una barra por premiación: los 13 Awards del documento más Tony, Pulitzer, el Festival Mundial y los nacionales, año por año, con nominados y ganador) y **Vitrina y campañas**.
+
+## Estudio
+- **Estadísticas**: nombre, visión, industria y público objetivo; lanzamientos, ganancias totales y caja; premios ganados y nominaciones por premiación; proyecto de mayor y menor ingreso, más caro y más barato, mejor y peor valorado; cuántos hicieron ×2, ×3, ×4 y ×5; Indie, Mediano y Blockbuster; y proyectos por medio.
+- **Buscar personas y obras**: por personas (nombre, overall y costo mínimos y máximos, género, talento, activos o retirados, orden por nombre, overall, popularidad, costo o éxitos, de mejor a peor o al revés) y por proyecto (nombre, género o subgénero, tema, arco, argumento, review, taquilla, costo total y años de lanzamiento, con orden). Cada resultado abre su ficha.
+
+## Verificación
+`node --check` y una partida automática de 1960 a 2030 en Chromium, recorriendo las pantallas nuevas y las de la sesión 1: sin errores.

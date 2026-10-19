@@ -1178,18 +1178,19 @@ ART.datos = (function () {
     const premios = {
         nombre: 'Premio de la Academia', semana: 11,
         categorias: [
-            { id: 'pelicula', nombre: 'Mejor película' },
-            { id: 'direccion', nombre: 'Mejor dirección' },
-            { id: 'guion', nombre: 'Mejor guion' },
+            { id: 'productor', nombre: 'Mejor productor', rol: 'produccion' },
+            { id: 'fotografia', nombre: 'Mejor fotografía', rol: 'fotografia' },
+            { id: 'edicion', nombre: 'Mejor editor', rol: 'edicion', desde: 1934 },
+            { id: 'musica', nombre: 'Mejor compositor', rol: 'musica', desde: 1934 },
+            { id: 'arte', nombre: 'Mejor diseñador de arte y tecnología', rol: 'arte' },
+            { id: 'guion', nombre: 'Mejor escritor' },
+            { id: 'direccion', nombre: 'Mejor director' },
+            { id: 'actorRep', nombre: 'Mejor actor de reparto', desde: 1936 },
+            { id: 'actrizRep', nombre: 'Mejor actriz de reparto', desde: 1936 },
             { id: 'actriz', nombre: 'Mejor actriz' },
             { id: 'actor', nombre: 'Mejor actor' },
             { id: 'animada', nombre: 'Mejor obra animada', desde: 1937 },
-            { id: 'fotografia', nombre: 'Mejor fotografía', rol: 'fotografia' },
-            { id: 'musica', nombre: 'Mejor música', rol: 'musica', desde: 1934 },
-            { id: 'edicion', nombre: 'Mejor edición', rol: 'edicion', desde: 1934 },
-            { id: 'arte', nombre: 'Mejor diseño de arte', rol: 'arte' },
-            { id: 'vestuario', nombre: 'Mejor vestuario', rol: 'vestuario', desde: 1948 },
-            { id: 'efectos', nombre: 'Mejores efectos', rol: 'efectos', desde: 1939 },
+            { id: 'pelicula', nombre: 'Mejor película' },
         ],
         principales: ['pelicula', 'direccion', 'guion', 'actriz', 'actor'],
     };
@@ -9385,9 +9386,14 @@ ART.premios = (function () {
     const N = ART.n, D = ART.datos, T = ART.talentos;
     const tip = function () { return ART.economia.presupuestoTipico(N.anio()); };
     const GALAS = [
-        { id: 'quimera', nombre: 'Premio de la Academia', sem: 11, desde: 1929, jurado: 'academia', cats: null },
-        { id: 'indep', nombre: 'Independent Award', sem: 2, desde: 1985, jurado: 'critica', cats: [['pelicula', 'Mejor película independiente'], ['direccion', 'Mejor dirección independiente'], ['guion', 'Mejor guion independiente']], filtro: 'indie' },
-        { id: 'bastard', nombre: 'Bastard Awards', sem: 4, desde: 1980, jurado: 'peor', cats: [['pelicula', 'Peor película'], ['direccion', 'Peor dirección'], ['actuacion', 'Peor actuación']] },
+        { id: 'quimera', nombre: 'Premio de la Academia', sem: 11, desde: 1929, jurado: 'academia', cats: null, filtro: 'cine' },
+        { id: 'senal', nombre: 'Emmy Shows Awards', sem: 40, desde: 1949, jurado: 'academia', filtro: 'tv', cats: [['productor', 'Mejor productor'], ['fotografia', 'Mejor fotografía'], ['edicion', 'Mejor editor'],
+                ['musica', 'Mejor compositor'], ['arte', 'Mejor diseñador de arte y tecnología'], ['guion', 'Mejor escritor'], ['direccion', 'Mejor director invitado'], ['actorRep', 'Mejor actor de reparto'],
+                ['actrizRep', 'Mejor actriz de reparto'], ['actriz', 'Mejor actriz'], ['actor', 'Mejor actor'], ['pelicula', 'Mejor programa']] },
+        { id: 'indep', nombre: 'Independent Award', sem: 2, desde: 1985, jurado: 'critica', filtro: 'indie', cats: [['productor', 'Mejor productor'], ['fotografia', 'Mejor fotografía'], ['edicion', 'Mejor editor'],
+                ['musica', 'Mejor compositor'], ['arte', 'Mejor diseñador de arte y tecnología'], ['guion', 'Mejor escritor'], ['direccion', 'Mejor director'], ['actorRep', 'Mejor actor de reparto'],
+                ['actrizRep', 'Mejor actriz de reparto'], ['actriz', 'Mejor actriz'], ['actor', 'Mejor actor'], ['pelicula', 'Mejor película independiente']] },
+        { id: 'bastard', nombre: 'Bastard Awards', sem: 4, desde: 1980, jurado: 'peor', filtro: 'malas', cats: [['guion', 'Peor escritor'], ['direccion', 'Peor director'], ['actriz', 'Peor actriz'], ['actor', 'Peor actor'], ['pelicula', 'Peor película']] },
         { id: 'nacional', nombre: 'Premios Nacionales', sem: 15, desde: 1950, jurado: 'talentos', cats: [['pelicula', 'Mejor película nacional'], ['direccion', 'Mejor dirección nacional']], filtro: 'pais' },
         { id: 'pop', nombre: 'Pop Awards', sem: 38, desde: 1975, jurado: 'publico', cats: [['pelicula', 'Película más popular'], ['actriz', 'Actriz favorita'], ['actor', 'Actor favorito']] },
     ];
@@ -9439,72 +9445,106 @@ ART.premios = (function () {
             return g.cats.map(function (c) { return { id: c[0], nombre: c[1] }; });
         return D.premios.categorias.filter(function (c) { return !c.desde || anio >= c.desde; });
     }
-    function celebrar(g) {
-        const S = N.S, anio = N.anio() - 1;
+    function esLider(o, k) {
+        const id = o.eq.int[k];
+        const pj = (o.pj || []).filter(function (p) { return p.t === id; })[0];
+        return pj ? pj.i === 'protagonista' : k < 2;
+    }
+    function listaDe(g, anio) {
+        const S = N.S;
         let lista = candidatas(anio);
+        if (g.filtro === 'tv')
+            lista = lista.filter(function (o) { return !!o.tv; });
+        else
+            lista = lista.filter(function (o) { return !o.tv; });
         if (g.filtro === 'indie')
             lista = lista.filter(function (o) { return ART.obras.costoTotal(o) < ART.economia.presupuestoTipico(anio) * 0.8; });
+        if (g.filtro === 'malas')
+            lista = lista.filter(function (o) { return o.crit < 50; });
         if (g.filtro === 'pais') {
             const reg = S.estudios[0].reg;
             lista = lista.filter(function (o) { return S.estudios[o.est].reg === reg; });
         }
+        return lista;
+    }
+    const ELENCO = { actriz: ['F', 1], actor: ['M', 1], actrizRep: ['F', 0], actorRep: ['M', 0] };
+    function elegir(g) {
+        const anio = N.anio() - 1, lista = listaDe(g, anio);
         if (lista.length < 3)
             return null;
         const gusto = N.elegir(D.ORDEN_FAM);
         const res = { gala: g.id, nombre: nombreGala(g), anio: anio, categorias: [], gusto: gusto };
         categoriasDe(g, anio).forEach(function (c) {
             let pool;
-            if (c.id === 'actriz' || c.id === 'actor' || c.id === 'actuacion') {
+            const el = ELENCO[c.id];
+            if (el || c.id === 'actuacion') {
                 pool = [];
                 lista.forEach(function (o) {
                     const sxs = (o.cr && o.cr.sx) || [];
-                    for (let k = 0; k < sxs.length; k++)
-                        if (c.id === 'actuacion' || sxs[k] === (c.id === 'actriz' ? 'F' : 'M')) {
-                            const id = o.eq.int[k];
-                            pool.push({ o: o, k: k, nombre: o.cr.reparto[k], s: puntaje(g, 'interp', o, gusto) * 0.5 + hab(id) * (g.jurado === 'peor' ? -0.5 : 0.5) + (g.jurado === 'peor' ? 50 : 0) });
-                            break;
-                        }
+                    let mejor = null;
+                    for (let k = 0; k < sxs.length; k++) {
+                        if (el && (sxs[k] !== el[0] || (esLider(o, k) ? 1 : 0) !== el[1]))
+                            continue;
+                        const id = o.eq.int[k];
+                        const sc = puntaje(g, 'interp', o, gusto) * 0.5 + hab(id) * (g.jurado === 'peor' ? -0.5 : 0.5) + (g.jurado === 'peor' ? 50 : 0) - (el && !el[1] ? 2 : 0);
+                        if (!mejor || sc > mejor.s)
+                            mejor = { o: o, k: k, nombre: o.cr.reparto[k], s: sc };
+                    }
+                    if (mejor)
+                        pool.push(mejor);
                 });
             }
-            else if (c.id === 'animada') {
+            else if (c.id === 'animada')
                 pool = lista.filter(function (o) { return o.tipo === 'animacion' || o.tipo === 'hibrido'; }).map(function (o) { return { o: o, s: puntaje(g, 'pelicula', o, gusto) }; });
-            }
             else
                 pool = lista.map(function (o) { return { o: o, s: puntaje(g, c.id, o, gusto) }; });
             pool.sort(function (a, b) { return b.s - a.s; });
             const nominados = pool.slice(0, 5);
             if (nominados.length < 2)
                 return;
-            const ga = nominados[0];
-            const quien = ga.nombre || (c.id === 'direccion' ? ga.o.cr.direccion : c.id === 'guion' ? ga.o.cr.guion : '');
-            let idT = null;
-            if (c.id === 'direccion')
-                idT = ga.o.eq.direccion;
-            else if (c.id === 'guion')
-                idT = ga.o.eq.guion;
-            else if (ga.k !== undefined)
-                idT = ga.o.eq.int[ga.k];
-            else {
+            const rolC = function (n) {
+                if (n.k !== undefined)
+                    return n.o.eq.int[n.k];
+                if (c.id === 'direccion')
+                    return n.o.eq.direccion;
+                if (c.id === 'guion')
+                    return n.o.eq.guion;
                 const cc = D.premios.categorias.filter(function (x) { return x.id === c.id; })[0];
-                if (cc && cc.rol)
-                    idT = rolPremio(ga.o, cc.rol);
-            }
-            const est = S.estudios[ga.o.est];
-            const t = idT !== null && idT !== undefined ? T.porId(idT) : null;
-            if (g.id === 'quimera') {
-                ga.o.aw = ga.o.aw || [];
-                ga.o.aw.push(c.id);
-                nominados.forEach(function (n) { n.o.nom = (n.o.nom || 0) + 1; });
-                est.fama = N.redondear(N.limitar(est.fama + (c.id === 'pelicula' ? 0.05 : D.premios.principales.indexOf(c.id) >= 0 ? 0.02 : 0.008) * (1 - est.fama), 0, 1), 3);
+                return cc && cc.rol ? rolPremio(n.o, cc.rol) : null;
+            };
+            const nomT = function (n) { const id = rolC(n), t = id !== null && id !== undefined ? T.porId(id) : null; return n.nombre || (t ? t.nom : ''); };
+            const ga = nominados[0], idT = rolC(ga);
+            res.categorias.push({ id: c.id, nombre: c.nombre, ganador: { obra: ga.o.id, titulo: ga.o.tit, est: ga.o.est, quien: nomT(ga), tid: idT === undefined ? null : idT },
+                nominados: nominados.map(function (n) { return { obra: n.o.id, titulo: n.o.tit, est: n.o.est, quien: nomT(n) }; }) });
+        });
+        return res.categorias.length ? res : null;
+    }
+    function aplicar(res) {
+        if (!res)
+            return null;
+        const S = N.S, g = gala(res.gala), O = ART.obras;
+        res.categorias.forEach(function (c) {
+            const o = O.porId(c.ganador.obra);
+            if (!o)
+                return;
+            const est = S.estudios[o.est], t = c.ganador.tid !== null && c.ganador.tid !== undefined ? T.porId(c.ganador.tid) : null;
+            if (g.id === 'quimera' || g.id === 'senal') {
+                if (g.id === 'quimera') {
+                    o.aw = o.aw || [];
+                    o.aw.push(c.id);
+                }
+                c.nominados.forEach(function (n) { const x = O.porId(n.obra); if (x)
+                    x.nom = (x.nom || 0) + 1; });
+                est.fama = N.redondear(N.limitar(est.fama + (c.id === 'pelicula' ? 0.05 : D.premios.principales.indexOf(c.id) >= 0 ? 0.02 : 0.008) * (g.id === 'senal' ? 0.6 : 1) * (1 - est.fama), 0, 1), 3);
                 if (t) {
-                    t.fama = N.redondear(N.limitar(t.fama + 0.12, 0, 1), 3);
+                    t.fama = N.redondear(N.limitar(t.fama + (g.id === 'senal' ? 0.07 : 0.12), 0, 1), 3);
                     t.premios++;
                 }
             }
             else if (g.id === 'bastard') {
                 est.fama = N.redondear(N.limitar(est.fama - 0.01, 0.01, 1), 3);
                 if (N.probabilidad(0.25))
-                    ga.o.culto = 1;
+                    o.culto = 1;
             }
             else {
                 est.fama = N.redondear(N.limitar(est.fama + 0.01 * (1 - est.fama), 0, 1), 3);
@@ -9512,14 +9552,10 @@ ART.premios = (function () {
                     t.fama = N.redondear(N.limitar(t.fama + 0.03, 0, 1), 3);
             }
             if (g.id !== 'quimera') {
-                ga.o.galas = ga.o.galas || [];
-                ga.o.galas.push({ g: g.id, c: c.id });
+                o.galas = o.galas || [];
+                o.galas.push({ g: g.id, c: c.id });
             }
-            res.categorias.push({ id: c.id, nombre: c.nombre, ganador: { obra: ga.o.id, titulo: ga.o.tit, est: ga.o.est, quien: quien, tid: idT },
-                nominados: nominados.map(function (n) { return { obra: n.o.id, titulo: n.o.tit, est: n.o.est, quien: n.nombre || '' }; }) });
         });
-        if (!res.categorias.length)
-            return null;
         if (g.id === 'quimera') {
             S.premios.push(res);
             if (S.premios.length > 400)
@@ -9532,6 +9568,20 @@ ART.premios = (function () {
         N.emit('premios', res);
         return res;
     }
+    function celebrar(g) { return aplicar(elegir(g)); }
+    function nominar(g) {
+        const S = N.S, res = elegir(g);
+        S.nomin = S.nomin || {};
+        if (!res) {
+            delete S.nomin[g.id];
+            return null;
+        }
+        S.nomin[g.id] = res;
+        const mias = res.categorias.reduce(function (a, c) { return a + c.nominados.filter(function (n) { return n.est === 0; }).length; }, 0);
+        N.emit('noticia', { tipo: 'premios', texto: res.nombre + ': salen los nominados' + (mias ? ' y tienes ' + mias + ' nominación' + (mias > 1 ? 'es' : '') : '') + '. Ganadores la próxima semana.', importante: mias > 0 });
+        return res;
+    }
+    function nominados(id) { const x = N.S.nomin && N.S.nomin[id]; return x && x.anio === N.anio() - 1 ? x : null; }
     function ceremonia() { return celebrar(GALAS[0]); }
     function costoCampania() { return Math.round(tip() * 0.04); }
     function campania(obraId, galaId) {
@@ -9551,26 +9601,28 @@ ART.premios = (function () {
         return '';
     }
     const FESTIVALES = {
-        riviera: { premio: 'Palma de Oro', prestigio: 3, conv: 'cerrada', gen: ['DR', 'AV'], jurado: 'critica', costo: 0.01 },
-        laguna: { premio: 'León de Oro', prestigio: 3, conv: 'cerrada', gen: ['DR', 'AV'], jurado: 'academia', costo: 0.01 },
-        spree: { premio: 'Oso de Oro', prestigio: 3, conv: 'abierta', gen: ['DR', 'SM'], jurado: 'critica', costo: 0.008 },
-        lagos: { premio: 'Premio del Público', prestigio: 2, conv: 'abierta', gen: ['DR', 'HM'], jurado: 'publico', costo: 0.006 },
-        montana: { premio: 'Gran Premio del Jurado', prestigio: 2, conv: 'abierta', gen: ['AV', 'DR'], jurado: 'critica', costo: 0.004 },
-        altiplano: { premio: 'Premio Mezcal', prestigio: 1, conv: 'abierta', gen: ['SM', 'IM'], jurado: 'publico', costo: 0.003 },
-        atlantico: { premio: 'Astor de Oro', prestigio: 2, conv: 'abierta', gen: ['DR', 'RD'], jurado: 'academia', costo: 0.004 },
-        caribe: { premio: 'India Catalina de Oro', prestigio: 1, conv: 'abierta', gen: ['RD', 'HM'], jurado: 'publico', costo: 0.003 },
-        sierra: { premio: 'Premio Pudú', prestigio: 1, conv: 'abierta', gen: ['DR', 'AV'], jurado: 'talentos', costo: 0.003 },
-        atlas: { premio: 'Estrella de Oro', prestigio: 1, conv: 'abierta', gen: ['DR', 'FJ'], jurado: 'talentos', costo: 0.002 },
-        desierto: { premio: 'Pirámide de Oro', prestigio: 2, conv: 'abierta', gen: ['DR', 'AV'], jurado: 'critica', costo: 0.003 },
-        delta: { premio: 'Semental de Oro de Yennenga', prestigio: 2, conv: 'abierta', gen: ['DR', 'HM'], jurado: 'academia', costo: 0.003 },
-        solnaciente: { premio: 'Gran Premio de Tokio', prestigio: 2, conv: 'abierta', gen: ['IM', 'AA'], jurado: 'academia', costo: 0.005 },
-        yangtse: { premio: 'Copa de Oro', prestigio: 2, conv: 'abierta', gen: ['DR', 'AA'], jurado: 'talentos', costo: 0.004 },
-        puerto: { premio: 'Premio New Currents', prestigio: 1, conv: 'abierta', gen: ['SM', 'AV'], jurado: 'critica', costo: 0.003 },
-        bahia: { premio: 'Premio Sydney', prestigio: 1, conv: 'abierta', gen: ['DR', 'FJ'], jurado: 'publico', costo: 0.003 },
-        nube: { premio: 'Premio del Público', prestigio: 1, conv: 'abierta', gen: ['IM', 'FJ'], jurado: 'talentos', costo: 0.002 },
-        volcan: { premio: 'Premio Bright Horizons', prestigio: 1, conv: 'abierta', gen: ['SM', 'AA'], jurado: 'critica', costo: 0.002 },
-        mundial: { premio: 'Gran Premio Mundial del Arte', prestigio: 3, conv: 'cerrada', gen: ['DR', 'IM', 'AV'], jurado: 'academia', costo: 0.012 },
+        riviera: { premio: 'Palma de Oro', prestigio: 3, conv: 'cerrada', gen: ['DR', 'AV'], jurado: 'talentos', costo: 0.01, grupo: 'eur' },
+        laguna: { premio: 'León de Oro', prestigio: 3, conv: 'cerrada', gen: ['DR', 'AV'], jurado: 'critica', costo: 0.01, grupo: 'eur' },
+        spree: { premio: 'Oso de Oro', prestigio: 3, conv: 'abierta', gen: ['DR', 'SM'], jurado: 'academia', costo: 0.008, grupo: 'eur' },
+        lagos: { premio: 'Golden Block', prestigio: 2, conv: 'abierta', gen: ['DR', 'HM'], jurado: 'publico', costo: 0.006, grupo: 'nam' },
+        montana: { premio: 'Crystal Block', prestigio: 2, conv: 'abierta', gen: ['AV', 'DR'], jurado: 'critica', costo: 0.004, grupo: 'nam' },
+        altiplano: { premio: 'Ariel de Oro', prestigio: 2, conv: 'abierta', gen: ['SM', 'IM'], jurado: 'academia', costo: 0.003, grupo: 'nam' },
+        atlantico: { premio: 'Estrella de Mar', prestigio: 2, conv: 'abierta', gen: ['DR', 'RD'], jurado: 'talentos', costo: 0.004, grupo: 'lat' },
+        caribe: { premio: 'Mujer Dorada', prestigio: 1, conv: 'abierta', gen: ['RD', 'HM'], jurado: 'academia', costo: 0.003, grupo: 'lat' },
+        sierra: { premio: 'Kikito de Oro', prestigio: 1, conv: 'abierta', gen: ['DR', 'AV'], jurado: 'publico', costo: 0.003, grupo: 'lat' },
+        atlas: { premio: 'Monolito Estrella', prestigio: 1, conv: 'abierta', gen: ['DR', 'FJ'], jurado: 'talentos', costo: 0.002, grupo: 'afr' },
+        desierto: { premio: 'Estrella de Mar de Oro', prestigio: 2, conv: 'abierta', gen: ['DR', 'AV'], jurado: 'academia', costo: 0.003, grupo: 'afr' },
+        delta: { premio: 'Semental de Yennenga', prestigio: 2, conv: 'abierta', gen: ['DR', 'HM'], jurado: 'publico', costo: 0.003, grupo: 'afr' },
+        solnaciente: { premio: 'Tokyo Grand Prix', prestigio: 2, conv: 'abierta', gen: ['IM', 'AA'], jurado: 'critica', costo: 0.005, grupo: 'asi' },
+        yangtse: { premio: 'Cáliz de Oro', prestigio: 2, conv: 'abierta', gen: ['DR', 'AA'], jurado: 'academia', costo: 0.004, grupo: 'asi' },
+        puerto: { premio: 'Copa Caballo de Oro', prestigio: 1, conv: 'abierta', gen: ['SM', 'AV'], jurado: 'publico', costo: 0.003, grupo: 'asi' },
+        bahia: { premio: 'Sydney Film Prize', prestigio: 1, conv: 'abierta', gen: ['DR', 'FJ'], jurado: 'critica', costo: 0.003, grupo: 'oce' },
+        nube: { premio: 'The Sign Maori', prestigio: 1, conv: 'abierta', gen: ['IM', 'FJ'], jurado: 'publico', costo: 0.002, grupo: 'oce' },
+        volcan: { premio: 'Volcán de Guinea', prestigio: 1, conv: 'abierta', gen: ['SM', 'AA'], jurado: 'academia', costo: 0.002, grupo: 'oce' },
+        mundial: { premio: 'Gran Premio Mundial del Arte', prestigio: 3, conv: 'cerrada', gen: ['DR', 'IM', 'AV'], jurado: 'academia', costo: 0.012, grupo: 'mundial' },
     };
+    const GRUPOS_FEST = [['eur', 'Festival Olímpicos Awards'], ['nam', 'Festival The Western Hollywood Awards'], ['lat', 'Festival América Awards'], ['afr', 'Festival Eden Fespaco Awards'],
+        ['asi', 'Festival Everest Bollywood Awards'], ['oce', 'Festival Sydney Awards'], ['mundial', 'Festival Mundial del Arte']];
     const PREMIOS_FEST = [['mayor', null], ['direccion', 'Mejor dirección'], ['interp', 'Mejor interpretación']];
     function festivalesAnio(anio) {
         return ART.cal.circuitoAnio(anio).filter(function (x) { return x.tipo === 'festival' && FESTIVALES[x.id]; }).map(function (x) {
@@ -9755,11 +9807,19 @@ ART.premios = (function () {
     function semana() {
         const S = N.S, sem = N.semana();
         let res = null;
-        GALAS.forEach(function (g) { if (g.sem === sem && N.anio() >= g.desde) {
-            const r = celebrar(g);
-            if (g.id === 'quimera')
-                res = r;
-        } });
+        GALAS.forEach(function (g) {
+            if (N.anio() < g.desde)
+                return;
+            if (g.sem - 1 === sem)
+                nominar(g);
+            if (g.sem === sem) {
+                const pre = nominados(g.id), r = pre ? aplicar(pre) : celebrar(g);
+                if (N.S.nomin)
+                    delete N.S.nomin[g.id];
+                if (g.id === 'quimera')
+                    res = r;
+            }
+        });
         festivalesAnio(N.anio()).forEach(function (f) {
             const tf = tFest(f), e = estado(f.id);
             if (S.t === tf - 1 && e.fase === 'convocatoria')
@@ -9786,7 +9846,8 @@ ART.premios = (function () {
         const g = gala(x.g);
         if (g) {
             const c = categoriasDe(g, 2100).filter(function (y) { return y.id === x.c; })[0];
-            return nombreGala(g) + ': ' + (c ? c.nombre : x.c);
+            const viejas = { vestuario: 'Mejor vestuario', efectos: 'Mejores efectos', actuacion: 'Actuación' };
+            return nombreGala(g) + ': ' + (c ? c.nombre : viejas[x.c] || x.c);
         }
         const f = FESTIVALES[x.g];
         if (f) {
@@ -9799,7 +9860,7 @@ ART.premios = (function () {
         GALAS: GALAS, FESTIVALES: FESTIVALES, gala: gala, nombreGala: nombreGala, categoriasDe: categoriasDe, celebrar: celebrar, ceremonia: ceremonia,
         costoCampania: costoCampania, campania: campania, festivalesAnio: festivalesAnio, festival: festival, tFest: tFest, rumor: rumor, estado: estado,
         costoInscripcion: costoInscripcion, puedePostular: puedePostular, postular: postular, invitaciones: invitaciones, pujar: pujar,
-        semana: semana, parteJugador: parteJugador, nombrePremio: nombrePremio,
+        semana: semana, parteJugador: parteJugador, nombrePremio: nombrePremio, nominados: nominados, GRUPOS_FEST: GRUPOS_FEST,
     };
 })();
 ART.prensa = (function () {
@@ -12635,6 +12696,14 @@ ART.medios = (function () {
         }
         return '';
     }
+    const CATS_MEDIO = {
+        musica: [['guion', 'Mejor escritor'], ['arte', 'Mejor diseñador de arte y tecnología'], ['musica', 'Mejor compositor/ingeniero de música'], ['interprete', 'Mejor intérprete'], ['mejor', 'Mejor álbum']],
+        teatro: [['musica', 'Mejor compositor/ingeniero musical'], ['arte', 'Mejor diseñador de arte y tecnología'], ['guion', 'Mejor escritor'], ['direccion', 'Mejor director'],
+            ['actorRep', 'Mejor actor de reparto'], ['actrizRep', 'Mejor actriz de reparto'], ['actriz', 'Mejor actriz'], ['actor', 'Mejor actor'], ['mejor', 'Mejor obra de teatro']],
+        juegos: [['musica', 'Mejor compositor'], ['arte', 'Mejor diseñador de arte y tecnología'], ['guion', 'Mejor escritor'], ['produccion', 'Mejor productor'], ['interprete', 'Mejor interpretación'], ['mejor', 'Mejor videojuego']],
+        libros: [['guion', 'Mejor escritor'], ['arte', 'Mejor diseñador'], ['critica', 'Mejor editorial'], ['mejor', 'Mejor libro'], ['obra', 'Mejor obra']],
+    };
+    const SEM_PREMIO = { musica: 6, libros: 14, teatro: 24, juegos: 52 };
     function premiar(med, anio) {
         const S = N.S, m = MED[med];
         if (anio < m.premioDesde)
@@ -12643,21 +12712,62 @@ ART.medios = (function () {
         const rivs = ART.rivales.activos();
         const nom = function () { return { tit: ART.obras.tituloNuevo(['Drama']), est: rivs.length ? N.elegir(rivs).id : -1, crit: Math.round(N.normal(76, 8)), pub: Math.round(N.normal(76, 8)) }; };
         const cand = mios.map(function (p) { return { tit: p.tit, est: 0, crit: p.crit, pub: p.pub, p: p }; }).concat([nom(), nom(), nom(), nom(), nom(), nom()]);
-        const cats = [['mejor', 'Mejor ' + (med === 'musica' ? 'álbum' : med === 'juegos' ? 'juego' : med === 'teatro' ? 'obra' : 'libro') + ' del año', function (x) { return x.crit + x.pub; }], ['critica', 'Premio de la crítica', function (x) { return x.crit; }], ['publico', 'Favorito del público', function (x) { return x.pub; }]];
-        const r = { med: med, nombre: m.premio, anio: anio, cats: cats.map(function (c) { const g = cand.slice().sort(function (a, b) { return c[2](b) - c[2](a); })[0]; if (g.p) {
-                g.p.prem = (g.p.prem || 0) + 1;
-                S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + 0.003 * (1 - S.estudios[0].fama)), 3);
-            } return { nombre: c[1], tit: g.tit, est: g.est }; }) };
+        const ajenos = {};
+        const persona = function (x, of, sx, lider) {
+            if (x.p) {
+                const ts = (x.p.eq || []).map(T.porId).filter(function (t) { return t && (t.of === of || (t.h2 && t.h2[of])) && (!sx || t.sx === sx); });
+                const t = lider === false ? ts[1] || ts[0] : ts[0];
+                return t ? { n: t.nom, h: T.habilidadEn ? T.habilidadEn(t, null, of) : t.hab, id: t.id } : null;
+            }
+            const k = x.tit + '|' + of + '|' + (sx || '') + '|' + lider;
+            if (!ajenos[k]) {
+                const l = S.talentos.filter(function (t) { return t.of === of && !t.mu && (!sx || t.sx === sx) && T.exclusivoDe(t) !== 0; });
+                const t = l.length ? l[N.hash(k) % l.length] : null;
+                ajenos[k] = t ? { n: t.nom, h: t.hab, id: t.id } : { n: '', h: 60 };
+            }
+            return ajenos[k];
+        };
+        const r = { med: med, nombre: m.premio, anio: anio, cats: [] };
+        (CATS_MEDIO[med] || []).forEach(function (c) {
+            const id = c[0], el = { actriz: ['F', true], actor: ['M', true], actrizRep: ['F', false], actorRep: ['M', false] }[id];
+            const of = el ? 'interprete' : id;
+            const pool = cand.map(function (x) {
+                if (id === 'mejor' || id === 'obra')
+                    return { x: x, s: x.crit + x.pub + (id === 'obra' ? x.crit * 0.5 : 0) + N.normal(0, 4) };
+                if (id === 'critica')
+                    return { x: x, s: x.crit * 2 + N.normal(0, 4) };
+                const q = persona(x, of, el && el[0], el && el[1]);
+                return q ? { x: x, q: q, s: x.crit * 0.6 + q.h * 0.4 + N.normal(0, 4) } : null;
+            }).filter(Boolean).sort(function (a, b) { return b.s - a.s; }).slice(0, 5);
+            if (pool.length < 2)
+                return;
+            const g = pool[0];
+            if (g.x.p) {
+                g.x.p.prem = (g.x.p.prem || 0) + 1;
+                S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + (id === 'mejor' || id === 'obra' ? 0.004 : 0.002) * (1 - S.estudios[0].fama)), 3);
+                const t = g.q && g.q.id !== undefined ? T.porId(g.q.id) : null;
+                if (t) {
+                    t.fama = N.redondear(Math.min(1, t.fama + 0.04), 3);
+                    t.premios = (t.premios || 0) + 1;
+                }
+            }
+            r.cats.push({ id: id, nombre: c[1], tit: g.x.tit, est: g.x.est, quien: g.q ? g.q.n : '', nominados: pool.map(function (n) { return { tit: n.x.tit, est: n.x.est, quien: n.q ? n.q.n : '' }; }) });
+        });
+        if (!r.cats.length)
+            return;
         st().premios.push(r);
         if (st().premios.length > 200)
             st().premios.shift();
         const tuyos = r.cats.filter(function (c) { return c.est === 0; }).length;
-        if (tuyos)
-            N.emit('noticia', { tipo: 'premios', texto: m.premio + ' ' + (anio + 1) + ': ganas ' + tuyos + ' de 3.', importante: true });
+        N.emit('noticia', { tipo: 'premios', texto: m.premio + ' ' + (med === 'juegos' ? anio : anio + 1) + (tuyos ? ': ganas ' + tuyos + ' de ' + r.cats.length + '.' : ': gana «' + r.cats[r.cats.length - 1].tit + '».'), importante: tuyos > 0 });
+    }
+    function premiosSemana() {
+        const sem = N.semana(), a = N.anio();
+        Object.keys(SEM_PREMIO).forEach(function (med) { if (SEM_PREMIO[med] === sem && MED[med])
+            premiar(med, med === 'juegos' ? a : a - 1); });
     }
     function anual() {
         const S = N.S, a = N.anio(), s = st();
-        Object.keys(MED).forEach(function (med) { premiar(med, a - 1); });
         s.motores.forEach(function (m) { if (N.probabilidad(0.15 * m.est) && a - m.anio < 12) {
             const pago = Math.round(tip() * 0.03 * m.est);
             ART.negocio.cobrarEn(0, 'juegos', pago);
@@ -12673,7 +12783,7 @@ ART.medios = (function () {
             });
         s.ing = {};
     }
-    function semanaTodo() { semana(); semanaGiras(); semanaTeatros(); }
+    function semanaTodo() { semana(); semanaGiras(); semanaTeatros(); premiosSemana(); }
     const TEATROS = [
         { id: 'chica', nombre: 'Sala de barrio', asientos: 200, precio: 1.5e6 },
         { id: 'mediana', nombre: 'Teatro de la ciudad', asientos: 800, precio: 6e6 },
@@ -22570,7 +22680,9 @@ ART.pantallas = (function () {
     }
     function estudio() {
         const s = sub('estudio', 'inicio');
-        const tabs = pestanas('estudio', [['inicio', 'Inicio'], ['metas', 'Metas'], ['editor', 'Editor']], s);
+        const tabs = pestanas('estudio', [['inicio', 'Inicio'], ['estadisticas', 'Estadísticas'], ['buscar', 'Buscar personas y obras'], ['metas', 'Metas'], ['editor', 'Editor']], s);
+        if (s === 'estadisticas' || s === 'buscar')
+            return titulo(est0().nombre, 'estudio') + tabs + (s === 'buscar' ? ART.buscarUI.buscar() : ART.buscarUI.estadisticas());
         if (s === 'metas' || s === 'editor')
             return titulo(est0().nombre, 'estudio') + tabs + (s === 'metas' ? ART.metasUI.metas() : ART.metasUI.editor());
         return estudioInicio(tabs);
@@ -27193,7 +27305,7 @@ ART.mediosUI = (function () {
             return '<div class="tarjeta fila" data-a="mdVer" data-v="' + p.id + '" style="cursor:pointer">' + caja(p) + '<div class="col crece"><b>' + esc(p.tit) + (p.cert ? ' <span class="etiqueta oro">' + esc(Md.CERT.filter(function (c) { return c.id === p.cert; })[0].nombre) + '</span>' : '') + (p.prem ? ' <span class="etiqueta oro">★' + p.prem + '</span>' : '') + '</b><span class="tenue chico">' + esc(tipoNom(p)) + ' · ' + esc(p.gen) + '</span><span class="chico">' + esc(est) + ' · ingresos ' + dinero(p.ing) + '</span></div></div>';
         }).join('') : '<p class="tenue">Aún no tienes proyectos.</p>') + '</div>';
         const pr = Md.premios(med).slice(-6).reverse();
-        h += '<h3>' + esc(m.premio) + '</h3>' + (a < m.premioDesde ? '<p class="tenue chico">Empiezan en ' + m.premioDesde + '.</p>' : pr.length ? pr.map(function (r) { return '<p class="chico"><b>' + (r.anio + 1) + '</b> · ' + r.cats.map(function (c) { return esc(c.nombre) + ': <span class="' + (c.est === 0 ? 'oro' : '') + '">«' + esc(c.tit) + '»</span>'; }).join(' · ') + '</p>'; }).join('') : '<p class="tenue chico">Todavía no hay ceremonias.</p>');
+        h += '<h3>' + esc(m.premio) + '</h3>' + (a < m.premioDesde ? '<p class="tenue chico">Empiezan en ' + m.premioDesde + '.</p>' : pr.length ? pr.map(function (r) { return '<p class="chico"><b>' + (r.med === 'juegos' ? r.anio : r.anio + 1) + '</b> · ' + r.cats.map(function (c) { return esc(c.nombre) + ': <span class="' + (c.est === 0 ? 'oro' : '') + '">«' + esc(c.tit) + '»</span>'; }).join(' · ') + '</p>'; }).join('') : '<p class="tenue chico">Todavía no hay ceremonias.</p>');
         dibujar();
         return h;
     }
@@ -28197,9 +28309,66 @@ ART.prensaUI = (function () {
     function chip(txt, a, v, on) { return '<button class="chip' + (on ? ' on' : '') + '" data-a="' + a + '" data-v="' + esc(v) + '">' + esc(txt) + '</button>'; }
     function nomEst(i) { return i >= 0 && N.S.estudios[i] ? N.S.estudios[i].nombre : 'Otras productoras'; }
     const st = { fFiltro: 'todos', filQ: '', filOrden: 'fecha' };
+    const AWARDS = [['g:indep', 'Independent Award'], ['g:bastard', 'Bastard Awards'], ['m:musica', 'Music Awards'], ['g:quimera', 'Premio de la Academia'], ['f:eur', 'Festival Olímpicos Awards'],
+        ['f:nam', 'Festival The Western Hollywood Awards'], ['f:lat', 'Festival América Awards'], ['f:afr', 'Festival Eden Fespaco Awards'], ['f:asi', 'Festival Everest Bollywood Awards'],
+        ['f:oce', 'Festival Sydney Awards'], ['g:pop', 'Pop Awards'], ['g:senal', 'Emmy Shows Awards'], ['m:juegos', 'The Game Award'], ['m:teatro', 'Premios Tony internacional de Broadway'],
+        ['m:libros', 'Premios Pulitzer / Editorial Book Award'], ['f:mundial', 'Festival Mundial del Arte'], ['g:nacional', 'Premios nacionales']];
+    function lineaNom(n, gana) { return '<div class="chico' + (n.est === 0 ? ' oro' : '') + '">' + (gana ? '★ ' : '· ') + (n.quien ? esc(n.quien) + ' — ' : '') + '«' + esc(n.titulo || n.tit) + '»' + (gana ? ' · ganador' : ' · nominado') + ' · ' + esc(nomEst(n.est)) + '</div>'; }
+    function bloqueCat(c) {
+        const gan = c.ganador || { titulo: c.tit, est: c.est, quien: c.quien };
+        const noms = (c.nominados || []).filter(function (n) { return (n.titulo || n.tit) !== (gan.titulo || gan.tit) || (n.quien || '') !== (gan.quien || ''); });
+        return '<div style="margin:6px 0"><b class="chico">' + esc(c.nombre) + '</b>' + lineaNom(gan, true) + noms.slice(0, 4).map(function (n) { return lineaNom(n, false); }).join('') + '</div>';
+    }
+    function historial() {
+        const S = N.S;
+        return '<h3>Historial de premios</h3><p class="nota">Cada barra es una premiación: año por año, sus categorías con 5 nominados y 1 ganador. Lo tuyo, en dorado.</p>' + AWARDS.map(function (a) {
+            const k = a[0].slice(2), tipo = a[0][0];
+            let filas = [];
+            if (tipo === 'g')
+                filas = (S.galas || []).filter(function (r) { return r.gala === k; }).map(function (r) { return { anio: r.anio + 1, html: r.categorias.map(bloqueCat).join(''), mio: r.categorias.filter(function (c) { return c.ganador.est === 0; }).length }; });
+            else if (tipo === 'm')
+                filas = ART.medios.premios(k).map(function (r) { return { anio: k === 'juegos' ? r.anio : r.anio + 1, html: r.cats.map(bloqueCat).join(''), mio: r.cats.filter(function (c) { return c.est === 0; }).length }; });
+            else
+                filas = (S.palmares || []).filter(function (p) { return (PM.FESTIVALES[p.f] || {}).grupo === k; }).map(function (p) {
+                    return { anio: p.anio, html: '<b class="chico">' + esc(p.nombre) + '</b>' + Object.keys(p.gan).map(function (c) { const g = p.gan[c]; return '<div class="chico' + (g.est === 0 ? ' oro' : '') + '">★ ' + esc(g.nombre) + ': «' + esc(g.tit) + '» · ' + esc(nomEst(g.est)) + '</div>'; }).join(''),
+                        mio: Object.keys(p.gan).filter(function (c) { return p.gan[c].est === 0; }).length };
+                });
+            filas = filas.slice(-30).reverse();
+            const mios = filas.reduce(function (s2, f) { return s2 + f.mio; }, 0);
+            return '<details class="tarjeta"><summary><b>' + esc(a[1]) + '</b> <span class="tenue chico">' + filas.length + ' ediciones' + (mios ? ' · <span class="oro">' + mios + ' tuyos</span>' : '') + '</span></summary>' +
+                (filas.length ? filas.map(function (f) { return '<div style="border-top:1px solid var(--borde,#334);margin-top:6px;padding-top:4px"><b>' + f.anio + '</b>' + f.html + '</div>'; }).join('') : '<p class="tenue chico">Sin ediciones todavía.</p>') + '</details>';
+        }).join('');
+    }
+    function enVivo() {
+        const S = N.S, anio = N.anio(), sem = N.semana();
+        let h = '';
+        PM.GALAS.forEach(function (g) {
+            const nm = PM.nominados(g.id);
+            if (nm)
+                h += '<div class="tarjeta" style="border-color:var(--dorado)"><b>En vivo · ' + esc(nm.nombre) + ': nominados</b><p class="chico tenue">Los ganadores se anuncian la próxima semana.</p>' +
+                    nm.categorias.map(function (c) { return '<div style="margin:6px 0"><b class="chico">' + esc(c.nombre) + '</b>' + c.nominados.map(function (n) { return lineaNom(n, false); }).join('') + '</div>'; }).join('') + '</div>';
+            else if (g.sem === sem && anio >= g.desde) {
+                const r = (S.galas || []).filter(function (x) { return x.gala === g.id && x.anio === anio - 1; })[0];
+                if (r)
+                    h += '<div class="tarjeta" style="border-color:var(--dorado)"><b>En vivo · ' + esc(r.nombre) + ': ganadores</b>' + r.categorias.map(bloqueCat).join('') + '</div>';
+            }
+        });
+        const prox = PM.GALAS.filter(function (g) { return anio >= g.desde; }).map(function (g) { const d = (g.sem - 1 - sem + 52) % 52; return { g: g, d: d }; }).sort(function (a, b) { return a.d - b.d; })[0];
+        return (h || '<p class="nota">Ninguna premiación en vivo esta semana.' + (prox ? ' Próximos nominados: ' + esc(PM.nombreGala(prox.g)) + ' en ' + prox.d + ' semana' + (prox.d === 1 ? '' : 's') + '.' : '') + '</p>');
+    }
+    ac('prSubPremios', function (v) { st.pSub = v; U.refrescar(); });
     function premios() {
+        const sub = st.pSub || 'vivo';
+        const tabs = '<div class="chips">' + chip('Premios en vivo', 'prSubPremios', 'vivo', sub === 'vivo') + chip('Historial de premios', 'prSubPremios', 'historial', sub === 'historial') + chip('Vitrina y campañas', 'prSubPremios', 'vitrina', sub === 'vitrina') + '</div>';
+        if (sub === 'vivo')
+            return tabs + '<h3>Premios en vivo</h3>' + enVivo();
+        if (sub === 'historial')
+            return tabs + historial();
+        return tabs + vitrina();
+    }
+    function vitrina() {
         const S = N.S, anio = N.anio();
-        let h = '<p class="nota info">Cada premiación mira las obras del año anterior. Compiten las obras reales de todos los estudios.</p><h3>Vitrina</h3><div class="col">';
+        let h = '<p class="nota info">Cada premiación mira las obras del año anterior. Compiten las obras reales de todos los estudios. Una semana antes salen los nominados.</p><h3>Vitrina</h3><div class="col">';
         PM.GALAS.forEach(function (g) {
             if (anio < g.desde)
                 return;
@@ -29623,6 +29792,133 @@ ART.teleUI = (function () {
     ac('tvNegro', function () { avisar(ST.comprarNegro(), 'Lote pirata en tu catálogo'); U.refrescar(); });
     return { franquicias: franquicias, fichaFranquicia: fichaFranquicia, adquisicion: adquisicion, nuevaSerie: nuevaSerie, bannerCrear: bannerCrear, pilotos: pilotos,
         bloqueObra: bloqueObra, canal: canal, streaming: streaming };
+})();
+ART.buscarUI = (function () {
+    'use strict';
+    const N = ART.n, D = ART.datos, O = ART.obras, T = ART.talentos, U = ART.ui, esc = N.esc, ac = U.accion;
+    const dinero = U.dinero;
+    const st = { modo: 'personas', q: '', hMin: '', hMax: '', cMin: '', cMax: '', sx: '', of: '', vivo: 'activos', orden: 'overall', dir: 'desc', gen: '', tem: '', arco: '', prob: '', rMin: '', tMin: '', aMin: '', aMax: '', n: 40 };
+    function chip(txt, a, v, on) { return '<button class="chip' + (on ? ' on' : '') + '" data-a="' + a + '" data-v="' + esc(v) + '" aria-pressed="' + !!on + '">' + esc(txt) + '</button>'; }
+    function num(k, ph) { return '<label class="campo" style="margin:0"><span>' + ph + '</span><input type="number" data-c="bsCampo" data-k="' + k + '" value="' + esc(st[k]) + '"></label>'; }
+    function sel(k, nombre, ops) { return '<label class="campo" style="margin:0"><span>' + nombre + '</span><select data-c="bsCampo" data-k="' + k + '">' + ops.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(st[k]) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
+    const n0 = function (v) { return v === '' || isNaN(+v) ? null : +v; };
+    const M = 1e6;
+    function personas() {
+        const q = st.q.toLowerCase(), hMin = n0(st.hMin), hMax = n0(st.hMax), cMin = n0(st.cMin), cMax = n0(st.cMax);
+        let l = N.S.talentos.filter(function (t) {
+            if (st.vivo === 'activos' && (t.mu || t.ret))
+                return false;
+            if (st.vivo === 'retirados' && !(t.mu || t.ret))
+                return false;
+            if (q && t.nom.toLowerCase().indexOf(q) < 0)
+                return false;
+            if (st.sx && t.sx !== st.sx)
+                return false;
+            if (st.of && t.of !== st.of && !(t.h2 && t.h2[st.of]))
+                return false;
+            const ov = T.overall(t), c = T.tarifaPara(t, 0) / M;
+            return (hMin === null || ov >= hMin) && (hMax === null || ov <= hMax) && (cMin === null || c >= cMin) && (cMax === null || c <= cMax);
+        });
+        const clave = { nombre: function (t) { return t.nom; }, overall: function (t) { return T.overall(t); }, fama: function (t) { return t.fama; }, costo: function (t) { return T.tarifaPara(t, 0); }, entradas: function (t) { return t.exitos || 0; } }[st.orden] || function (t) { return T.overall(t); };
+        l.sort(function (a, b) { const x = clave(a), y = clave(b); const c = typeof x === 'string' ? x.localeCompare(y, 'es') : x - y; return st.dir === 'asc' ? c : -c; });
+        return { total: l.length, html: l.slice(0, st.n).map(function (t) {
+                return '<button class="tarjeta toque fila" style="width:100%;text-align:left" data-a="verTalento" data-v="' + t.id + '"><canvas class="retrato" data-retrato="' + t.id + '"></canvas><div class="col crece"><b>' + esc(t.nom) + (t.mu ? ' †' : t.ret ? ' (retirado)' : '') + '</b><span class="tenue chico">' +
+                    esc(D.oficio(t.of).nombre + ' · ' + (t.sx === 'F' ? 'mujer' : 'hombre') + ' · ' + (N.anio() - t.nac) + ' años · ' + ((D.pais(t.pais) || {}).nombre || '')) + '</span><span class="chico">Overall ' + T.overall(t) + ' · fama ' + Math.round(t.fama * 100) + ' · éxitos ' + (t.exitos || 0) + '</span></div><b class="cifra">' + dinero(T.tarifaPara(t, 0)) + '</b></button>';
+            }).join('') };
+    }
+    function proyectos() {
+        const q = st.q.toLowerCase(), rMin = n0(st.rMin), tMin = n0(st.tMin), cMax = n0(st.cMax), aMin = n0(st.aMin), aMax = n0(st.aMax);
+        let l = N.S.obras.filter(function (o) {
+            if (!(o.et === 'terminada' || o.et === 'cartelera'))
+                return false;
+            if (q && (o.tit || '').toLowerCase().indexOf(q) < 0)
+                return false;
+            if (st.gen && (o.gen || []).indexOf(st.gen) < 0 && (o.sub || []).indexOf(st.gen) < 0)
+                return false;
+            if (st.tem && (o.tem || []).indexOf(st.tem) < 0)
+                return false;
+            if (st.arco && o.arco !== st.arco)
+                return false;
+            if (st.prob && (o.prob || []).indexOf(st.prob) < 0)
+                return false;
+            return (rMin === null || (o.crit || 0) >= rMin) && (tMin === null || (o.bruto || 0) / M >= tMin) && (cMax === null || O.costoTotal(o) / M <= cMax) && (aMin === null || o.anio >= aMin) && (aMax === null || o.anio <= aMax);
+        });
+        const clave = { nombre: function (o) { return o.tit; }, review: function (o) { return o.crit || 0; }, costo: function (o) { return O.costoTotal(o); }, taquilla: function (o) { return o.bruto || 0; }, fecha: function (o) { return o.fe || 0; }, overall: function (o) { return (o.crit || 0) + (o.pub || 0); } }[st.orden] || function (o) { return (o.crit || 0) + (o.pub || 0); };
+        l.sort(function (a, b) { const x = clave(a), y = clave(b); const c = typeof x === 'string' ? x.localeCompare(y, 'es') : x - y; return st.dir === 'asc' ? c : -c; });
+        const est = function (i) { return N.S.estudios[i] ? N.S.estudios[i].nombre : 'Otras productoras'; };
+        return { total: l.length, html: l.slice(0, st.n).map(function (o) {
+                return '<button class="tarjeta toque" style="width:100%;text-align:left;display:block" data-a="verObra" data-v="' + o.id + '"><div class="fila entre"><b class="' + (o.est === 0 ? 'oro' : '') + '">' + esc(o.tit) + '</b><span class="chico">' + o.anio + (o.tv ? ' · serie' : '') + '</span></div><span class="tenue chico">' +
+                    esc((o.gen || []).join(' · ') + ' · ' + est(o.est)) + '</span><br><span class="chico">Crítica ' + (o.crit || 0) + ' · público ' + (o.pub || 0) + ' · costo ' + dinero(O.costoTotal(o)) + ' · taquilla ' + dinero(o.bruto || 0) + ' · ×' + U.decimal(O.multiplicador(o), 1) + '</span></button>';
+            }).join('') };
+    }
+    function buscar() {
+        const X = ART.taxonomia;
+        let h = '<div class="chips">' + chip('Filtro por personas', 'bsModo', 'personas', st.modo === 'personas') + chip('Filtro por proyecto', 'bsModo', 'proyectos', st.modo === 'proyectos') + '</div>';
+        h += '<input type="search" placeholder="Buscar por nombre" data-c="bsCampo" data-k="q" value="' + esc(st.q) + '" style="margin:6px 0">';
+        const dir = sel('dir', 'Mostrar', [['desc', 'De mejor a peor'], ['asc', 'De peor a mejor']]);
+        if (st.modo === 'personas') {
+            h += '<div class="rejilla-ed">' + num('hMin', 'Overall mínimo') + num('hMax', 'Overall máximo') + num('cMin', 'Costo mínimo (millones)') + num('cMax', 'Costo máximo (millones)') +
+                sel('sx', 'Género', [['', 'Todos'], ['F', 'Femenino'], ['M', 'Masculino']]) + sel('of', 'Talento', [['', 'Todos']].concat(D.oficios.map(function (o) { return [o.id, o.nombre]; }))) +
+                sel('vivo', 'Estado', [['activos', 'Activos'], ['retirados', 'Retirados'], ['todos', 'Todos']]) + sel('orden', 'Ordenar por', [['overall', 'Overall'], ['nombre', 'Nombre'], ['fama', 'Popularidad'], ['costo', 'Costo'], ['entradas', 'Máximas entradas']]) + dir + '</div>';
+        }
+        else {
+            const gens = D.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+            const temas = X.familiasTema.reduce(function (a, f) { return a.concat(f.items); }, []).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+            const probs = X.familiasProblema.reduce(function (a, f) { return a.concat(Object.keys(f.items)); }, []).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+            h += '<div class="rejilla-ed">' + sel('gen', 'Género o subgénero', [['', 'Todos']].concat(gens.map(function (g) { return [g, g]; }))) + sel('tem', 'Tema, subtema o tópico', [['', 'Todos']].concat(temas.map(function (g) { return [g, g]; }))) +
+                sel('arco', 'Arco', [['', 'Todos']].concat(X.arcos.map(function (a) { return [a.id, a.nombre || a.id]; }))) + sel('prob', 'Argumento', [['', 'Todos']].concat(probs.map(function (g) { return [g, g]; }))) +
+                num('rMin', 'Review mínima') + num('tMin', 'Taquilla mínima (millones)') + num('cMax', 'Costo total máximo (millones)') + num('aMin', 'Lanzada desde (año)') + num('aMax', 'Lanzada hasta (año)') +
+                sel('orden', 'Ordenar por', [['overall', 'Valoración'], ['nombre', 'Nombre'], ['review', 'Review'], ['costo', 'Costo total'], ['taquilla', 'Taquilla'], ['fecha', 'Fecha de lanzamiento']]) + dir + '</div>';
+        }
+        const r = st.modo === 'personas' ? personas() : proyectos();
+        h += '<p class="chico tenue">' + r.total + ' resultados' + (r.total > st.n ? ' · se muestran ' + st.n : '') + '</p><div class="col">' + (r.html || '<p class="tenue">Nada coincide.</p>') + '</div>';
+        if (r.total > st.n)
+            h += '<button class="btn bloque" data-a="bsMas">Ver 40 más</button>';
+        return h;
+    }
+    function rango(o) { const c = O.costoTotal(o), tp = ART.economia.presupuestoTipico(o.anio || N.anio()); return c < tp * 0.5 ? 'Indie' : c < tp * 1.5 ? 'Mediano' : 'Blockbuster'; }
+    function estadisticas() {
+        const S = N.S, est = S.estudios[0], mias = S.obras.filter(function (o) { return o.est === 0 && (o.et === 'terminada' || o.et === 'cartelera'); });
+        const kpi = function (n, v) { return '<div class="kpi"><span>' + esc(n) + '</span><b class="cifra">' + esc(v) + '</b></div>'; };
+        const mx = function (f, menor) { return mias.slice().sort(function (a, b) { return menor ? f(a) - f(b) : f(b) - f(a); })[0]; };
+        const fila = function (n, o, v) { return '<div class="fila entre chico" style="padding:4px 0;border-bottom:1px solid var(--borde)"><span>' + esc(n) + '</span><span>' + (o ? '<button class="btn" data-a="verObra" data-v="' + o.id + '">«' + esc(o.tit) + '» · ' + esc(v(o)) + '</button>' : '—') + '</span></div>'; };
+        let h = '<div class="tarjeta"><h3>' + esc(est.nombre) + '</h3><p class="chico">Visión: ' + esc(est.vision || '—') + ' · industria: ' + esc(est.industria || '—') + ' · público objetivo: ' + esc(est.publico || '—') + '</p></div>';
+        const ganancias = mias.reduce(function (s2, o) { return s2 + O.neto(o); }, 0);
+        h += '<div class="kpis">' + kpi('Lanzamientos', mias.length) + kpi('Ganancias totales', dinero(ganancias)) + kpi('Dinero disponible', dinero(est.caja)) + kpi('Fama', Math.round(est.fama * 100)) + '</div>';
+        const premios = {};
+        (S.galas || []).forEach(function (r) { r.categorias.forEach(function (c) {
+            const p = premios[r.nombre] = premios[r.nombre] || [0, 0];
+            if (c.ganador.est === 0)
+                p[0]++;
+            p[1] += c.nominados.filter(function (n) { return n.est === 0; }).length;
+        }); });
+        ['musica', 'teatro', 'juegos', 'libros'].forEach(function (m) { ART.medios.premios(m).forEach(function (r) { (r.cats || []).forEach(function (c) {
+            const p = premios[r.nombre] = premios[r.nombre] || [0, 0];
+            if (c.est === 0)
+                p[0]++;
+            p[1] += (c.nominados || []).filter(function (n) { return n.est === 0; }).length;
+        }); }); });
+        (S.palmares || []).forEach(function (p) { Object.keys(p.gan).forEach(function (k) { if (p.gan[k].est === 0) {
+            const x = premios[p.nombre] = premios[p.nombre] || [0, 0];
+            x[0]++;
+        } }); });
+        h += '<div class="tarjeta"><h3>Premios y nominaciones</h3>' + (Object.keys(premios).length ? Object.keys(premios).sort().map(function (k) { return '<div class="fila entre chico"><span>' + esc(k) + '</span><span><b class="oro">' + premios[k][0] + '</b> ganados · ' + premios[k][1] + ' nominaciones</span></div>'; }).join('') : '<p class="tenue chico">Aún sin premios.</p>') + '</div>';
+        h += '<div class="tarjeta"><h3>Récords</h3>' + fila('Mayor ingreso', mx(function (o) { return O.ingresosTotales(o); }), function (o) { return dinero(O.ingresosTotales(o)); }) +
+            fila('Menor ingreso', mx(function (o) { return O.ingresosTotales(o); }, true), function (o) { return dinero(O.ingresosTotales(o)); }) +
+            fila('Más caro', mx(function (o) { return O.costoTotal(o); }), function (o) { return dinero(O.costoTotal(o)); }) + fila('Más barato', mx(function (o) { return O.costoTotal(o); }, true), function (o) { return dinero(O.costoTotal(o)); }) +
+            fila('Mejor valorado', mx(function (o) { return o.crit || 0; }), function (o) { return 'crítica ' + o.crit; }) + fila('Peor valorado', mx(function (o) { return o.crit || 0; }, true), function (o) { return 'crítica ' + o.crit; }) + '</div>';
+        const mult = [2, 3, 4, 5].map(function (k) { return 'x' + k + (k === 5 ? ' o más' : '') + ': ' + mias.filter(function (o) { const m = O.multiplicador(o); return k === 5 ? m >= 5 : m >= k && m < k + 1; }).length; });
+        const rangos = { Indie: 0, Mediano: 0, Blockbuster: 0 };
+        mias.forEach(function (o) { rangos[rango(o)]++; });
+        const Md = ART.medios;
+        h += '<div class="tarjeta"><h3>Proyectos</h3><p class="chico">Multiplicador (veces que recuperó su costo) · ' + mult.join(' · ') + '</p><p class="chico">' + Object.keys(rangos).map(function (k) { return k + ': ' + rangos[k]; }).join(' · ') + '</p>' +
+            '<p class="chico">Películas: ' + mias.filter(function (o) { return !o.tv; }).length + ' · series y telenovelas: ' + mias.filter(function (o) { return !!o.tv; }).length + ' · videojuegos: ' + Md.proyectos('juegos').length + ' · editorial: ' + Md.proyectos('libros').length + ' · música: ' + Md.proyectos('musica').length + ' · teatro: ' + Md.proyectos('teatro').length + '</p></div>';
+        return h;
+    }
+    ac('bsModo', function (v) { st.modo = v; st.orden = v === 'personas' ? 'overall' : 'overall'; st.n = 40; U.refrescar(); });
+    ac('bsCampo', function (v, el) { st[el.getAttribute('data-k')] = String(v === undefined ? '' : v).slice(0, 60); st.n = 40; U.refrescar(); });
+    ac('bsMas', function () { st.n += 40; U.refrescar(); });
+    return { buscar: buscar, estadisticas: estadisticas };
 })();
 ART.pruebas = (function () {
     'use strict';
