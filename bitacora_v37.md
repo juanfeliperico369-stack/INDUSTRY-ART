@@ -44,3 +44,27 @@ Base: «INDUSTRY ART Definitiva». No se quitó ninguna función. `INDUSTRY_ART_
 
 ## Verificación
 `node --check` y una partida automática de 1960 a 2030 en Chromium, recorriendo las pantallas nuevas y las de la sesión 1: sin errores.
+
+# Sesión 3 de 6 · Ficción hasta 2300
+
+El juego cubre seis siglos (1700–2300). La historia real llega a 2026; desde ahí todo es ficción coherente con las eras que ya existían (IA, inmersión, clima y megaciudades, interfaces neuronales, era orbital, colonias, siglo interplanetario y Archivo de la humanidad).
+
+## Historia del arte inventada (2027–2300)
+- **56 obras de ficción** con fecha, autor, géneros, sinopsis, personajes y fama: «Eco de cristal», «La casa de los relojes», «Ciudad Raíz», «Lo que siente la piel», «Gravedad cero», «Yo también firmo», «Polvo rojo», «Arena y cielo», «Cuerpos de luz», «Tres soles», «Luz de vela», «Seiscientos años»… Aparecen en Mundo › Historia › Hitos del arte cuando la partida llega a su año y **se pueden licenciar y adaptar** como material.
+- **39 artistas inventados** (directores, escritores, músicos, diseñadores e intérpretes, humanos y sintéticos como Nova-7 y Lyra) que se pueden crear como talentos históricos cuando están en edad de trabajar.
+- **14 corrientes** (autoría declarada, ecorrealismo, sensorialismo, arte posthumano, onirismo, western marciano, analogismo…) y **17 momentos** del arte.
+
+## Historia del mundo inventada
+- **96 sucesos nuevos** de 2028 a 2297 (ya son 142 después de 2026), muchos con efecto en las modas de los géneros.
+- **9 periodos nuevos** que afectan el mercado: huelga de animadores, apagón europeo, puertos inundados, boom del cine africano, clasificación sensorial con cortes, huelga de actores humanos, Olimpiadas lunares, fiebre marciana y tormenta solar. Todos los periodos tienen ya su nombre en «Ahora mismo».
+- Cronología, tecnologías y motor del mercado llegan a 2300; la era «Futuro» se divide en seis eras con sus reglas para empezar partida.
+
+## Lo jugable del futuro
+- **Se puede empezar en 2125, 2150, 2175, 2200, 2225 y 2250** (antes, hasta 2100). El calendario va de 1700 a 2300 y la población, con sus escenarios, hasta 2300.
+- **Tipos de película nuevos**: cine sensorial (2090), rodaje orbital (2100), sueño compartido (2183), holograma sólido (2198) y realidad total (2240).
+- **Plataformas de juego** que ya no terminan en 2150: lentes con pantalla, holomesa, cápsula de sueño compartido, red interplanetaria y realidad total; y dimensiones de juego holográfica y realidad total.
+- Formato de video **Holocápsula** (2120); **8 críticos nuevos** hasta 2300; estilos neuroestético, holográfico y analógico; épocas «Siglo XXI», «Siglo XXII» y «Siglo XXIII» para obras de época; subgéneros marciano, orbital, posthumano y sueño compartido con sus modas; corrientes futuras para cine, televisión, teatro, música, videojuegos y libros.
+- Arreglo: un videojuego cuya dimensión necesita una plataforma (neuronal, holográfica, realidad total) ya la suma sola al crearse.
+
+## Verificación
+`node --check` y partidas automáticas en Chromium de 1960 a 2030, de 2026 a 2100, de 2150 a 2230 y de 2250 a 2300, recorriendo calendario, premios, historia, estadísticas, población, catálogo y creación de obras: sin errores.
