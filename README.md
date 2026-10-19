@@ -5,13 +5,14 @@ programado junto a Lumen. El plan completo está en `docs/` (Plan Maestro en Wor
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v36.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Abre **`INDUSTRY_ART_v37.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
 Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34 y la V35 se abren en la V36 (se migran solas).
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
+| `INDUSTRY_ART_v37.html` | El juego, V37 (base «Definitiva», archivo único; ver `bitacora_v37.md`) |
 | `INDUSTRY_ART_v36.html` | El juego, versión 2.1 (V36, armado desde `src/`) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
 | `bitacora_v36.md` | La bitácora corta de la V36 · 2.1, inicio por pasos, tu avatar en tus obras y clásicos con sus personajes (las de la V21 a la V35 también están) |
