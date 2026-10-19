@@ -1,0 +1,12 @@
+// Depot de mac: todo lo que electron-builder dejó en app/escritorio/dist/mac-universal, copiado a dist/steam/mac
+"DepotBuild"
+{
+	"DepotID" "1000002"
+	"ContentRoot" "../dist/steam/mac/"
+	"FileMapping"
+	{
+		"LocalPath" "*"
+		"DepotPath" "."
+		"Recursive" "1"
+	}
+}

@@ -4,9 +4,9 @@
 // efectos prácticos, terrenos con ventajas, sets que se guardan y se reutilizan, costo local e incentivos de cada
 // país, estudios externos de efectos y animación, dilemas e incidentes de rodaje, prueba de público y la línea de
 // producción (presupuesto acordado frente a costo real). Todo es dato plano en la obra: se guarda y migra fácil.
-IA.rodaje = (function () {
+ART.rodaje = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, X = IA.taxonomia;
+  const N = ART.n, D = ART.datos, X = ART.taxonomia;
 
   // =====================================================================
   // DATOS
@@ -69,7 +69,7 @@ IA.rodaje = (function () {
     { id: 'mano', nombre: 'Cámara en mano', desde: 1959, costo: 0.92, crit: 1, pub: 0, ama: [1, 2], rechaza: [4], texto: 'Urgente y cercano: lo aman los jóvenes, no los mayores.' },
     { id: 'videoclip', nombre: 'Videoclip', desde: 1981, costo: 1, crit: -1, pub: 1, ama: [1, 2], rechaza: [3, 4], dep: { musica: 2, edicion: 2 }, texto: 'Montaje rápido y música al frente.' },
     { id: 'found', nombre: 'Metraje encontrado', desde: 1999, costo: 0.5, crit: -1, pub: 0, ama: [1, 2], rechaza: [3, 4], familias: ['SM'], texto: 'La mitad del costo; en suspenso y miedo, +2 al público.' },
-    // Los seis del Plan Maestro v2: edades 0 niños, 1 adolescentes, 2 jóvenes, 3 adultos, 4 mayores
+    // Grupos de edad: 0 niños, 1 adolescentes, 2 jóvenes, 3 adultos, 4 mayores
     { id: 'estandar', nombre: 'Estándar', desde: 1895, costo: 1, crit: 0, pub: 0, ama: [], rechaza: [], texto: 'Para todo público, sin riesgos.' },
     { id: 'mas16', nombre: '+16', desde: 1968, costo: 1, crit: 0, pub: 1, ama: [1, 2], rechaza: [0], texto: 'Más filo para adolescentes y jóvenes; las familias con niños se alejan.' },
     { id: 'adultos', nombre: 'Adultos', desde: 1968, costo: 1, crit: 1, pub: 0, ama: [3, 4], rechaza: [0, 1], texto: 'Tono maduro: +1 a la crítica, lo aman adultos y mayores.' },
@@ -77,6 +77,10 @@ IA.rodaje = (function () {
     { id: 'caricatura', nombre: 'Caricatura', desde: 1910, costo: 0.95, crit: -1, pub: 1, ama: [0, 1], rechaza: [3, 4], dep: { animacion: 1 }, texto: 'Exagerado y colorido: lo aman niños y adolescentes.' },
     { id: 'anime', nombre: 'Anime', desde: 1960, costo: 0.9, crit: 1, pub: 1, ama: [1, 2], rechaza: [4], dep: { animacion: 2 }, texto: 'Estética japonesa: adolescentes y jóvenes en todo el mundo.' },
     { id: 'virtual', nombre: 'Producción virtual', desde: 2019, costo: 1.05, crit: 0, pub: 1, ama: [1, 2], rechaza: [], dep: { arte: 2, efectos: 2 }, texto: 'Escenarios en pantallas gigantes: una semana menos de posproducción.' },
+    // De la Final: tres maneras de filmar con su época
+    { id: 'expresionista', nombre: 'Expresionista', desde: 1919, costo: 1.02, crit: 2, pub: -1, ama: [3], rechaza: [0], familias: ['SM', 'AV'], dep: { arte: 2, fotografia: 1 }, texto: 'Luces y sombras torcidas: el miedo se ve en los decorados; +2 a la crítica.' },
+    { id: 'neorrealista', nombre: 'Neorrealista', desde: 1945, costo: 0.7, crit: 2, pub: -1, ama: [3, 4], rechaza: [1], familias: ['DR'], dep: { arte: -2 }, texto: 'Calles reales y actores sin fama: la vida tal cual; 30 % más barato y +2 a la crítica.' },
+    { id: 'stopmotion', nombre: 'Stop motion', desde: 1900, costo: 1.1, crit: 1, pub: 0, ama: [0, 1], rechaza: [], familias: ['FJ', 'IM'], dep: { arte: 2, animacion: 2 }, texto: 'Figuras movidas cuadro a cuadro: lento, artesanal y encantador.' },
   ];
   // Estudios externos de efectos y animación (cobran una parte del presupuesto de producción)
   const EXTERNOS = {
@@ -146,7 +150,7 @@ IA.rodaje = (function () {
     { id: 'locacionUnica', etapa: 'preproduccion', quien: [], txt: 'Aparece una locación espectacular para la escena final.', ops: [
       { t: 'Pagarla', costo: 0.03, crit: 1, pub: 1 },
       { t: 'Seguir con el plan', def: 1 }] },
-    { id: 'efectosAtrasados', etapa: 'posproduccion', quien: [], cond: function (o) { return IA.ideas.nivelEfectos(o) >= 2; }, txt: 'El equipo de efectos va atrasado.', ops: [
+    { id: 'efectosAtrasados', etapa: 'posproduccion', quien: [], cond: function (o) { return ART.ideas.nivelEfectos(o) >= 2; }, txt: 'El equipo de efectos va atrasado.', ops: [
       { t: 'Contratar ayuda externa', costo: 0.04 },
       { t: 'Recortar efectos', pub: -1, crit: -1, def: 1 },
       { t: 'Esperar dos semanas', sem: 2, costo: 0.01, q: 1 }] },
@@ -159,6 +163,22 @@ IA.rodaje = (function () {
     { id: 'improvisa', etapa: 'rodaje', quien: ['a'], txt: '{a} improvisa una escena que no está en el guion.', ops: [
       { t: 'Dejarla en la película', azar: 0.55, bien: { q: 2 }, mal: { q: -1 } },
       { t: 'Filmar lo escrito', def: 1 }] },
+    // De la Final
+    { id: 'efectoBarato', etapa: 'posproduccion', quien: [], txt: 'Un efecto clave se ve barato.', ops: [
+      { t: 'Rehacerlo', costo: 0.05, q: 1 },
+      { t: 'Dejarlo así', q: -1, def: 1 }] },
+    { id: 'marca', etapa: 'rodaje', quien: [], txt: 'Una marca quiere aparecer en pantalla y paga por ello.', ops: [
+      { t: 'Aceptar (paga el 3 % del rodaje; la crítica lo nota)', costo: -0.03, q: -1 },
+      { t: 'Rechazar', def: 1 }] },
+    { id: 'rivalidad', etapa: 'rodaje', quien: ['a', 'b'], cond: function (o, n) { return n.a && n.b; }, txt: '{a} y {b} no se soportan.', ops: [
+      { t: 'Separar sus escenas', costo: 0.02, def: 1 },
+      { t: 'Que lo resuelvan solos', azar: 0.5, bien: { q: 2, txt: 'La tensión dio una gran escena.' }, mal: { q: -1, sem: 1, txt: 'La pelea retrasó el rodaje.' } }] },
+    { id: 'tercerActo', etapa: 'preproduccion', quien: [], txt: 'El guion tiene un hueco en el tercer acto.', ops: [
+      { t: 'Contratar un guionista de apoyo', costo: 0.02, q: 1 },
+      { t: 'Seguir así', q: -1, def: 1 }] },
+    { id: 'fotos', etapa: 'rodaje', quien: [], txt: 'Se filtran fotos del rodaje.', ops: [
+      { t: 'Aprovecharlas en redes', q: 0, def: 1 },
+      { t: 'Pedir que las borren', costo: 0.01 }] },
   ];
   const INCIDENTES = [
     { id: 'lluvia', txt: 'La lluvia arruina varios días de rodaje: una semana más.', sem: 1, costo: 0.005, cond: function (o) { return o.met !== 'set' && o.met !== 'cgi'; } },
@@ -168,6 +188,11 @@ IA.rodaje = (function () {
     { id: 'huelga', txt: 'Huelga del equipo técnico: dos semanas perdidas.', sem: 2, costo: 0.01, cond: function () { return N.anio() >= 1933; } },
     { id: 'racha', txt: 'Todo sale mejor de lo pensado: terminan una semana antes.', sem: -1 },
     { id: 'magia', txt: 'El elenco tiene una química especial: las escenas brillan.', q: 1 },
+    // De la Final
+    { id: 'toma', txt: 'Una toma improvisada sale genial.', q: 1 },
+    { id: 'redes', txt: 'Un extra se vuelve famoso en redes y crece la expectativa.', q: 1, cond: function () { return N.anio() >= 2006; } },
+    { id: 'luz', txt: 'Un corte de luz en el set obliga a repetir el día.', costo: 0.01 },
+    { id: 'lluviaLeve', txt: 'Lluvia inesperada: hay que alquilar carpas.', costo: 0.02, cond: function (o) { return o.met !== 'set' && o.met !== 'cgi'; } },
   ];
   const OPCIONES_PRUEBA = [
     { id: 'estrenar', t: 'Estrenar así', texto: 'Sin cambios.' },
@@ -191,11 +216,11 @@ IA.rodaje = (function () {
   function animada(o) { return o.tipo === 'animacion' || o.tipo === 'hibrido'; }
 
   // ---------- Roles nuevos: quién los necesita ----------
-  // Vestuario siempre ayuda; efectos cuando hay efectos de verdad; animación en las obras animadas (sin
-  // supervisor de efectos o diseñador de vestuario, el diseñador de arte se ocupa y rinde un poco menos)
+  // Vestuario siempre ayuda; efectos cuando hay efectos de verdad (entonces se pueden encargar a un estudio
+  // externo); animación en las obras animadas. Del vestuario y los efectos se encarga el diseñador de arte.
   function necesita(o, r) {
     if (r === 'vestuario') return o.tipo !== 'animacion' && o.tipo !== 'documental';
-    if (r === 'efectos') return IA.ideas.nivelEfectos(o) >= 3 || o.met === 'cgi' || o.met === 'practicos' || o.pst === 'espectaculo' || o.pst === 'virtual';
+    if (r === 'efectos') return ART.ideas.nivelEfectos(o) >= 3 || o.met === 'cgi' || o.met === 'practicos' || o.pst === 'espectaculo' || o.pst === 'virtual';
     if (r === 'animacion') return animada(o);
     return true;
   }
@@ -219,7 +244,7 @@ IA.rodaje = (function () {
       p.vestuario = quitar('arte', wv / 2) + quitar('interprete', wv / 2);
     }
     // Efectos: una parte del arte, según cuántos efectos lleve y cómo se filme
-    let pe = PARTE_EFECTOS[N.limitar(IA.ideas.nivelEfectos(o), 0, 4)] * (o.met === 'cgi' || o.met === 'practicos' ? 1.3 : 1);
+    let pe = PARTE_EFECTOS[N.limitar(ART.ideas.nivelEfectos(o), 0, 4)] * (o.met === 'cgi' || o.met === 'practicos' ? 1.3 : 1);
     p.efectos = quitar('arte', (p.arte || 0) * Math.min(0.7, pe));
     // Animación: reemplaza parte de la actuación y la imagen
     if (o.tipo === 'animacion') p.animacion = quitar('interprete', (p.interprete || 0) * 0.55) + quitar('fotografia', (p.fotografia || 0) * 0.6) + quitar('arte', (p.arte || 0) * 0.3);
@@ -232,8 +257,7 @@ IA.rodaje = (function () {
   // Habilidad del departamento cuando no hay talento propio: estudio externo o el diseñador de arte
   function habilidadSinTalento(o, dep, habArte) {
     if (esExterno(o, dep)) return nivelExterno(o, dep);
-    if (dep === 'vestuario') return habArte * 0.85;
-    if (dep === 'efectos') return habArte * 0.8;
+    if (dep === 'vestuario' || dep === 'efectos') return habArte;
     if (dep === 'animacion') return 25;
     return 35;
   }
@@ -246,7 +270,7 @@ IA.rodaje = (function () {
     const base = IDEAL[fam(o)] || IDEAL.DR;
     const r = {};
     depsDe(o).forEach(function (k) { r[k] = base[k] || 0; });
-    const fx = IA.ideas.nivelEfectos(o);
+    const fx = ART.ideas.nivelEfectos(o);
     r.efectos *= [0.2, 0.5, 1, 1.7, 2.4][N.limitar(fx, 0, 4)];
     if (o.epo && o.epo !== 'actualidad') { r.vestuario *= 1.6; r.arte *= 1.25; }
     if (o.tipo === 'animacion') { r.animacion = 0.45; r.fotografia *= 0.4; r.vestuario *= 0.3; r.produccion *= 0.5; }
@@ -290,7 +314,7 @@ IA.rodaje = (function () {
     const es = estilo(o.pst);
     if (es.dep && es.dep[dep]) b += es.dep[dep];
     if (dep === 'direccion' && es.min) {
-      const d = IA.talentos.porId(o.eq && o.eq.direccion);
+      const d = ART.talentos.porId(o.eq && o.eq.direccion);
       if (!d || d.hab < es.min) b -= 4;
     }
     if (dep === 'efectos' && o.met === 'cgi' && (o.anioPlan || anio()) < 1993) b -= 3;
@@ -362,7 +386,7 @@ IA.rodaje = (function () {
     if (o.met === 'locacion' && (f === 'DR' || f === 'AV' || o.nat === 'r')) crit += 1;
     if (o.met === 'practicos' && a >= 2000) crit += 1;
     if (o.met === 'cgi' && a < 1993) pub -= 2;
-    if (o.met === 'cgi' && a >= 2015 && IA.ideas.nivelEfectos(o) >= 3) crit -= 1;
+    if (o.met === 'cgi' && a >= 2015 && ART.ideas.nivelEfectos(o) >= 3) crit -= 1;
     if (usaLocacion(o) && o.ter && terreno(o.ter).generos.some(function (g) { return o.gen.indexOf(g) >= 0; })) pub += 1;
     const s = setDe(o);
     if (s && s.usos >= 3) pub -= 1; // el público ya reconoce el set
@@ -380,10 +404,10 @@ IA.rodaje = (function () {
   // ---------- Notas de los departamentos ----------
   function notas(o, bonos) {
     const famObj = D.familia(fam(o));
-    const p = IA.ideas.pesos(o, famObj);
-    const b = bonos || (IA.negocio ? IA.negocio.bonos(o.est || 0, fam(o)) : {});
+    const p = ART.ideas.pesos(o, famObj);
+    const b = bonos || (ART.negocio ? ART.negocio.bonos(o.est || 0, fam(o)) : {});
     return Object.keys(p).filter(function (k) { return p[k] >= 0.01; }).sort(function (x, y) { return p[y] - p[x]; }).map(function (k) {
-      const v = Math.round(IA.economia.habilidadDep(o, k, IA.talentos.porId, b));
+      const v = Math.round(ART.economia.habilidadDep(o, k, ART.talentos.porId, b));
       return { dep: k, nombre: nombreDep(k), peso: p[k], v: v, letra: letra(v) };
     });
   }
@@ -398,12 +422,14 @@ IA.rodaje = (function () {
 
   // ---------- Recomendaciones ----------
   function metodoRecomendado(o, a) {
-    const f = fam(o), fx = IA.ideas.nivelEfectos(o);
-    if (o.tipo === 'animacion') return 'set';
-    if ((f === 'AA' || f === 'IM') && fx >= 3) return a >= 1995 ? 'cgi' : 'practicos';
-    if (f === 'DR' || f === 'AV' || f === 'RD' || o.nat === 'r') return 'locacion';
-    if (f === 'SM' || f === 'HM' || f === 'FJ') return 'set';
-    return 'mixto';
+    const f = fam(o), fx = ART.ideas.nivelEfectos(o), anio = a || N.anio();
+    let m = 'mixto';
+    if (o.tipo === 'animacion') m = 'set';
+    else if ((f === 'AA' || f === 'IM') && fx >= 3) m = anio >= 1995 ? 'cgi' : 'practicos';
+    else if (f === 'DR' || f === 'AV' || f === 'RD' || o.nat === 'r') m = 'locacion';
+    else if (f === 'SM' || f === 'HM' || f === 'FJ') m = 'set';
+    const x = METODOS.filter(function (y) { return y.id === m; })[0];
+    return x && x.desde > anio ? 'mixto' : m; // antes de 1900 no hay sets ni efectos prácticos
   }
   function terrenoRecomendado(o) {
     const t = TERRENOS.filter(function (x) { return x.generos.some(function (g) { return o.gen.indexOf(g) >= 0; }); })[0];
@@ -447,16 +473,16 @@ IA.rodaje = (function () {
   // =====================================================================
   // Personas que pueden aparecer en un dilema
   function personas(o) {
-    const T = IA.talentos;
+    const T = ART.talentos;
     return { a: T.porId(o.eq.int && o.eq.int[0]), b: T.porId(o.eq.int && o.eq.int[1]), d: T.porId(o.eq.direccion), p: T.porId(o.eq.produccion), g: T.porId(o.eq.guion) };
   }
   function riesgo(o) {
     let r = metodo(o.met).riesgo;
     if (usaLocacion(o) && o.ter) r *= o.met === 'locacion' ? terreno(o.ter).riesgo : 1 + (terreno(o.ter).riesgo - 1) / 2;
     if (terrenoPropio(o)) r *= 0.7;
-    const p = IA.talentos.porId(o.eq.produccion);
+    const p = ART.talentos.porId(o.eq.produccion);
     if (p) r *= N.limitar(1 - (p.hab - 50) / 200, 0.7, 1.25);
-    IA.obras.idsEquipo(o).forEach(function (id) { const t = IA.talentos.porId(id); if (t && (t.rasgo === 'Diva' || t.rasgo === 'Temperamental')) r *= 1.12; });
+    ART.obras.idsEquipo(o).forEach(function (id) { const t = ART.talentos.porId(id); if (t && (t.rasgo === 'Diva' || t.rasgo === 'Temperamental')) r *= 1.12; });
     return r;
   }
   function registrar(o, txt, costo, sem) {
@@ -467,9 +493,11 @@ IA.rodaje = (function () {
   }
   // Aplica los efectos de un incidente o de una opción
   function aplicar(o, ef, ctx, n, txt) {
-    const T = IA.talentos;
+    const T = ART.talentos;
     let costo = 0;
-    if (ef.costo) {
+    // Costo negativo: entra dinero (una marca que paga por aparecer en pantalla)
+    if (ef.costo < 0) ART.negocio.cobrarEn(o.est, 'merchandising', Math.round(o.pp * -ef.costo));
+    if (ef.costo > 0) {
       costo = Math.max(0, Math.round(o.pp * ef.costo));
       if (costo > 0) ctx.pagar(o.est, 'produccion', costo);
       o.lp = o.lp || {};
@@ -538,7 +566,7 @@ IA.rodaje = (function () {
     if (!o.dil) return null;
     const d = porId(DILEMAS, o.dil.id);
     if (!d) return null;
-    const T = IA.talentos, n = {};
+    const T = ART.talentos, n = {};
     Object.keys(o.dil.n || {}).forEach(function (k) { n[k] = T.porId(o.dil.n[k]); });
     return { d: d, n: n, txt: texto(d.txt, n), ops: d.ops.map(function (op, i) { return { i: i, t: texto(op.t, n), op: op }; }) };
   }
@@ -586,7 +614,7 @@ IA.rodaje = (function () {
     if (o.est === 0) N.emit('noticia', { tipo: 'estudio', texto: 'Prueba de público de «' + o.tit + '»: ' + o.prueba.p + ' de 100. ' + o.prueba.com.join(' '), importante: true });
   }
   function opcionesPrueba(o) {
-    const T = IA.talentos;
+    const T = ART.talentos;
     return OPCIONES_PRUEBA.map(function (op) {
       let no = '';
       if (op.id === 'regrabar') {
@@ -601,7 +629,7 @@ IA.rodaje = (function () {
     if (!o.prueba || o.prueba.ok) return 'No hay prueba pendiente.';
     const op = opcionesPrueba(o).filter(function (x) { return x.id === id; })[0] || OPCIONES_PRUEBA[0];
     if (op.no) return op.no;
-    const T = IA.talentos, nota = function (dep) { const n = notas(o).filter(function (x) { return x.dep === dep; })[0]; return n ? n.v : 50; };
+    const T = ART.talentos, nota = function (dep) { const n = notas(o).filter(function (x) { return x.dep === dep; })[0]; return n ? n.v : 50; };
     const ef = { costo: op.costo, sem: op.sem };
     let dp = 0, dc = 0;
     if (op.id === 'pulir') { dp = 1 + (nota('edicion') >= 70 ? 1 : 0); dc = 1; }

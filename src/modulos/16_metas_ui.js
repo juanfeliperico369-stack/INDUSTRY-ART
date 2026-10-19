@@ -2,9 +2,9 @@
 // Opciones de modo en la partida nueva (modo, reto, tutorial, personalizado y dificultades desbloqueables),
 // tarjetas del Estudio (tutorial, consejos, década, misiones y reto), Mundo › Metas (logros, campaña, misiones,
 // reto y resumen), Mundo › Editor (Sandbox y paquetes), créditos finales y música de fondo opcional.
-IA.metasUI = (function () {
+ART.metasUI = (function () {
   'use strict';
-  const N = IA.n, U = IA.ui, M = IA.metas, esc = N.esc;
+  const N = ART.n, U = ART.ui, M = ART.metas, esc = N.esc;
   const dinero = U.dinero, ac = U.accion;
   const st = { ed: 'talento' };
   function btn(txt, a, v, cl, dis) { return '<button class="btn ' + (cl || '') + '" data-a="' + a + '" data-v="' + esc(v === undefined ? '' : v) + '"' + (dis ? ' disabled title="' + esc(dis) + '"' : '') + '>' + esc(txt) + '</button>'; }
@@ -26,11 +26,11 @@ IA.metasUI = (function () {
         '<label class="campo"><span>Fuerza de los rivales ' + (p.rivales > 0 ? '+' : '') + p.rivales + '</span><input type="range" min="-6" max="9" step="1" value="' + p.rivales + '" data-c="mtPerso" data-k="rivales"></label>' +
         '<label class="campo"><span>Eventos ×' + p.eventos + '</span><input type="range" min="0" max="3" step="0.5" value="' + p.eventos + '" data-c="mtPerso" data-k="eventos"></label></div>';
     }
-    const d = IA.juego.DIFICULTADES.filter(function (x) { return x.id === np.dificultad; })[0];
-    h += '<p class="nota">' + esc(M.HUMOR[np.dificultad] || '') + '</p>' + IA.juego.DIFICULTADES.filter(function (x) { return !dificultadDisponible(x); }).map(function (x) { return '<p class="tenue chico">🔒 ' + esc(x.nombre) + ': ' + esc(x.bloqueo) + '.</p>'; }).join('');
+    const d = ART.juego.DIFICULTADES.filter(function (x) { return x.id === np.dificultad; })[0];
+    h += '<p class="nota">' + esc(M.HUMOR[np.dificultad] || '') + '</p>' + ART.juego.DIFICULTADES.filter(function (x) { return !dificultadDisponible(x); }).map(function (x) { return '<p class="tenue chico">🔒 ' + esc(x.nombre) + ': ' + esc(x.bloqueo) + '.</p>'; }).join('');
     return d ? h : h;
   }
-  function dificultades() { return IA.juego.DIFICULTADES.filter(dificultadDisponible); }
+  function dificultades() { return ART.juego.DIFICULTADES.filter(dificultadDisponible); }
   // ---------- Tarjetas del Estudio ----------
   function tarjetas() {
     if (!N.S) return '';
@@ -93,9 +93,9 @@ IA.metasUI = (function () {
       lista = filtra(S.talentos.filter(function (t) { return !t.mu && !t.ret; }).sort(function (a, b) { return b.fama - a.fama; }), function (t) { return t.nom; });
       h = lista.slice(0, n).map(function (t) {
         return '<div class="tarjeta"><div class="fila" style="align-items:flex-start"><canvas class="retrato" data-retrato="' + t.id + '"></canvas><div class="col crece">' + campo('talento', t.id, 'nom', t.nom, 'Nombre') +
-          '<span class="tenue chico">' + esc(IA.datos.oficio(t.of).nombre) + ' · ' + (N.anio() - t.nac) + ' años</span></div></div><div class="rejilla-ed">' +
+          '<span class="tenue chico">' + esc(ART.datos.oficio(t.of).nombre) + ' · ' + (N.anio() - t.nac) + ' años</span></div></div><div class="rejilla-ed">' +
           campo('talento', t.id, 'hab', t.hab, 'Habilidad (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'pot', t.pot, 'Potencial (1–100)', { num: 1, min: 1, max: 100 }) + campo('talento', t.id, 'fama', Math.round(t.fama * 100), 'Fama (%)', { num: 1, min: 0, max: 100, por: 100 }) + '</div></div>';
-      }).join('') + '<div class="tarjeta"><b>Crear talento</b><div class="rejilla-ed"><label class="campo" style="margin:0"><span>Nombre</span><input id="edTNom" maxlength="40"></label><label class="campo" style="margin:0"><span>Oficio</span><select id="edTOf">' + IA.datos.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label></div>' + btn('Crear', 'edCrearT', '', 'primario') + '</div>';
+      }).join('') + '<div class="tarjeta"><b>Crear talento</b><p class="nota info">Con el Editor activo tus talentos son gratis y su potencial llega hasta 99.</p>' + btn('Abrir el creador de talentos', 'crearTalentoForm', '', 'primario') + '</div>';
     } else if (st.ed === 'estudio') {
       lista = filtra(S.estudios.slice(), function (e) { return e.nombre; });
       h = lista.slice(0, n).map(function (e) {
@@ -111,13 +111,13 @@ IA.metasUI = (function () {
           campo('obra', o.id, 'crit', o.crit, 'Crítica (1–100)', { num: 1, min: 1, max: 100 }) + campo('obra', o.id, 'pub', o.pub, 'Público (1–100)', { num: 1, min: 1, max: 100 }) + '</div></div>';
       }).join('');
     } else if (st.ed === 'franquicia') {
-      lista = filtra(IA.franquicias.lista().slice().reverse(), function (f) { return f.nom; });
+      lista = filtra(ART.franquicias.lista().slice().reverse(), function (f) { return f.nom; });
       h = lista.slice(0, n).map(function (f) {
         return '<div class="tarjeta"><div class="rejilla-ed">' + campo('franquicia', f.id, 'nom', f.nom, 'Nombre') + campo('franquicia', f.id, 'gen', f.gen, 'Género') + '</div>' +
           (f.pers.length ? '<span class="tenue chico">Personajes y popularidad</span>' + f.pers.map(function (p) { return '<div class="rejilla-ed"><label class="campo" style="margin:0"><span>Personaje</span><input value="' + esc(p.n) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|n"></label><label class="campo" style="margin:0"><span>Popularidad (0–100)</span><input type="number" min="0" max="100" value="' + Math.round(p.pop) + '" data-c="edPers" data-v="' + f.id + '|' + p.k + '|pop"></label></div>'; }).join('') : '') + '</div>';
       }).join('') + '<div class="tarjeta"><b>Agregar una franquicia u obra propia</b><p class="nota info">Queda como material para adaptar en Obras › Crear › Usar material, igual que el dominio público. Lo real que agregues vive solo en tu partida y en tus paquetes.</p>' +
-        '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + IA.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
-        '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') +
+        '<label class="campo"><span>Título</span><input id="edMTit" maxlength="60"></label><label class="campo"><span>Género principal</span><select id="edMGen">' + ART.datos.familias.reduce(function (a, f) { return a.concat(f.generos); }, []).sort().map(function (g) { return '<option>' + esc(g) + '</option>'; }).join('') + '</select></label>' +
+        '<label class="campo"><span>Personajes (separados por coma, opcional)</span><input id="edMPers" maxlength="300"></label>' + btn('Agregar material', 'edMaterial', '', 'primario') + btn('Editor completo de material', 'mtNuevo') +
         ((S.edit && S.edit.mat || []).length ? '<p class="chico">Tus materiales: ' + S.edit.mat.map(function (m) { return '«' + esc(m.tit) + '» (' + esc(m.gen.join(', ')) + ')'; }).join(' · ') + '</p>' : '') + '</div>';
     } else if (st.ed === 'precio') {
       const pr = (S.edit && S.edit.precio) || 1;
@@ -128,7 +128,7 @@ IA.metasUI = (function () {
   function editor() {
     const S = N.S;
     if (!S.sandbox) return '<div class="tarjeta"><b>Editor Sandbox</b><p>Cambia franquicias, obras, personajes, precios, talentos y estudios, e importa o exporta paquetes. Al activarlo se apagan los logros y los retos de esta partida.</p>' + btn('Activar el Editor', 'edActivar', '', 'primario') + '</div>' + paquetesUI();
-    const cuenta = { talento: S.talentos.filter(function (t) { return !t.mu && !t.ret; }).length, estudio: S.estudios.length, obra: S.obras.filter(function (o) { return o.pub !== undefined; }).length, franquicia: IA.franquicias.lista().length };
+    const cuenta = { talento: S.talentos.filter(function (t) { return !t.mu && !t.ret; }).length, estudio: S.estudios.length, obra: S.obras.filter(function (o) { return o.pub !== undefined; }).length, franquicia: ART.franquicias.lista().length };
     const tipos = [['talento', 'Talentos'], ['estudio', 'Estudios'], ['obra', 'Obras'], ['franquicia', 'Franquicias'], ['precio', 'Precios']];
     let h = '<div class="tarjeta"><b>Editor Sandbox activo</b><span class="tenue chico"> · los logros y los retos de esta partida están apagados. Cada cambio se guarda al salir del campo.</span></div>';
     h += '<div class="chips">' + tipos.map(function (x) { return '<button class="chip' + (st.ed === x[0] ? ' on' : '') + '" data-a="edTipo" data-v="' + x[0] + '">' + x[1] + (cuenta[x[0]] !== undefined ? ' · ' + cuenta[x[0]] : '') + '</button>'; }).join('') + '</div>';
@@ -145,31 +145,103 @@ IA.metasUI = (function () {
   ac('edTipo', function (v) { st.ed = v; st.q = ''; st.n = 20; U.refrescar(); });
   ac('edCampo', function (v, el) { const p = el.getAttribute('data-v').split('|'), por = +el.getAttribute('data-por') || 1; const e = M.editar(p[0], p[1], p[2], por > 1 ? +v / por : v); U.aviso(e || 'Guardado', e ? 'mal' : ''); if (p[0] === 'precio') U.refrescar(); });
   ac('edPers', function (v, el) { const p = el.getAttribute('data-v').split('|'); const e = M.personaje(p[0], p[1], p[2] === 'n' ? v : '', p[2] === 'pop' ? v : undefined); U.aviso(e || 'Guardado', e ? 'mal' : ''); });
-  ac('edCrearT', function () { const e = M.crearTalento({ nom: document.getElementById('edTNom').value, of: document.getElementById('edTOf').value, edad: 30, pot: 70 }); U.aviso(e || 'Talento creado', e ? 'mal' : ''); U.refrescar(); });
   ac('edExportar', function () { document.getElementById('edPaquete').value = M.exportarPaquete(); });
-  ac('edDescargar', function () { IA.publicacion.guardarArchivo('paquete_industry_art.json', M.exportarPaquete(), 'application/json').then(function (r) { if (!r.ok) U.aviso('No se pudo descargar: copia el texto.', 'mal'); }); });
+  ac('edDescargar', function () { ART.publicacion.guardarArchivo('paquete_industry_art.json', M.exportarPaquete(), 'application/json').then(function (r) { if (!r.ok) U.aviso('No se pudo descargar: copia el texto.', 'mal'); }); });
   ac('edMaterial', function () {
     const e = M.agregarMaterial({ tit: document.getElementById('edMTit').value, gen: [document.getElementById('edMGen').value], pers: document.getElementById('edMPers').value.split(',') });
     U.aviso(e || 'Material agregado', e ? 'mal' : ''); if (!e) U.refrescar();
   });;
   ac('edImportar', function () { const e = M.importarPaquete(document.getElementById('edPaquete').value); U.aviso(e || 'Paquete importado', e ? 'mal' : ''); if (!e) U.refrescar(); });
-  // ---------- Música de fondo (opcional, sintetizada) ----------
+  // ---------- Música de fondo (opcional, sintetizada): una lista de piezas que se encadenan ----------
+  // «Amanecer» es la de siempre; al terminar cada pieza entra la siguiente. Las notas se programan con el reloj del
+  // audio (adelanto de medio segundo), así el tempo no depende de los temporizadores del navegador.
+  const nota = function (f, s) { return 440 * Math.pow(2, (f - 69 + (s || 0)) / 12); }; // número MIDI → hercios
+  const PIEZAS = [
+    // 1 · Amanecer: los cuatro acordes suaves de siempre (La menor, Sol, Fa, Sol), uno cada 4 segundos
+    { nombre: 'Amanecer', paso: 4, pasos: 16, tocar: function (A, t, i) {
+      [[220, 277, 330], [196, 247, 294], [175, 220, 262], [196, 247, 294]][i % 4].forEach(function (f) { A.tono(f, t, 4, 1, 'sine', 1, 3.8); });
+    } },
+    // 2 · Marquesina: la de la Final (La mayor, Fa sostenido menor, Re, Mi) con arpegio
+    { nombre: 'Marquesina', paso: 0.68, pasos: 96, tocar: function (A, t, i) {
+      const ch = [[0, 4, 7], [9, 0, 4], [5, 9, 0], [7, 11, 2]][(i >> 2) % 4], f = function (x) { return 220 * Math.pow(2, x / 12); };
+      if (i % 4 === 0) { ch.forEach(function (x) { A.tono(f(x), t, 2.6, 0.25, 'sine'); }); A.tono(f(ch[0]) / 2, t, 2.6, 0.3, 'triangle'); }
+      A.tono(f(ch[i % 3]) * 2, t, 0.5, 0.18, 'triangle');
+    } },
+    // 3 · Estreno: más movida (Si menor, Sol, Re, La), bajo a corcheas, arpegio y una melodía que vuelve
+    { nombre: 'Estreno', paso: 0.27, pasos: 256, tocar: function (A, t, i) {
+      const raiz = [47, 43, 50, 45][(i >> 4) % 4], acorde = [[0, 3, 7], [0, 4, 7], [0, 4, 7], [0, 4, 7]][(i >> 4) % 4];
+      if (i % 2 === 0) A.tono(nota(raiz, -12), t, 0.24, 0.32, 'triangle');
+      if (i % 16 === 0) acorde.forEach(function (x) { A.tono(nota(raiz + 12 + x), t, 4.2, 0.12, 'sine', 0.3, 3.6); });
+      A.tono(nota(raiz + 24 + acorde[i % 3] + (i % 8 >= 6 ? 12 : 0)), t, 0.18, 0.07, 'square');
+      const mel = [74, 0, 73, 71, 69, 0, 71, 0, 73, 74, 0, 76, 74, 0, 0, 0];
+      if ((i >> 6) % 2 === 1 && mel[i % 16]) A.tono(nota(mel[i % 16]), t, 0.5, 0.16, 'triangle');
+      if (i % 4 === 2) A.ruido(t, 0.05, 0.05); // platillo cerrado
+      if (i % 8 === 4) A.ruido(t, 0.12, 0.08); // caja
+    } },
+    // 4 · Gran gala: un vals (Fa, Re menor, Si bemol, Do) con melodía de cuerdas
+    { nombre: 'Gran gala', paso: 0.36, pasos: 192, tocar: function (A, t, i) {
+      const c = (i / 3 | 0) % 8, raiz = [41, 38, 46, 48, 41, 38, 46, 48][c], tri = [[0, 4, 7], [0, 3, 7], [0, 4, 7], [0, 4, 7]][c % 4];
+      if (i % 3 === 0) A.tono(nota(raiz, -12), t, 0.9, 0.3, 'triangle');
+      else tri.forEach(function (x) { A.tono(nota(raiz + 12 + x), t, 0.3, 0.07, 'sine'); });
+      const mel = [77, 0, 0, 76, 74, 72, 74, 0, 0, 77, 0, 81, 82, 0, 81, 79, 0, 77, 76, 0, 74, 72, 0, 0];
+      if (i >= 48 && mel[i % 24]) A.tono(nota(mel[i % 24]), t, 1, 0.14, 'triangle', 0.05);
+    } },
+  ];
   let audio = null;
   function musica(on) {
     try {
-      if (!on) { if (audio) { audio.ctx.close(); audio = null; } return; }
-      if (audio) return;
+      if (!on) { if (audio) { clearTimeout(audio.tm); audio.ctx.close(); audio = null; } return; }
+      if (audio) { if (audio.ctx.state === 'suspended' && audio.ctx.resume) audio.ctx.resume(); return; }
       const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
       const ctx = new Ctx(), gan = ctx.createGain(); gan.gain.value = 0.035; gan.connect(ctx.destination);
-      const acordes = [[220, 277, 330], [196, 247, 294], [175, 220, 262], [196, 247, 294]];
-      let i = 0;
-      const tocar = function () {
-        if (!audio) return;
-        acordes[i % 4].forEach(function (f) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(1, ctx.currentTime + 1); g.gain.linearRampToValueAtTime(0, ctx.currentTime + 3.8); o.connect(g); g.connect(gan); o.start(); o.stop(ctx.currentTime + 4); });
-        i++; audio.tm = setTimeout(tocar, 4000);
+      // Instrumentos: un tono con su envolvente y un golpe de ruido para la percusión
+      const A = {
+        tono: function (f, t, dur, vol, tipo, ataque, fin) {
+          const o = ctx.createOscillator(), g = ctx.createGain(); o.type = tipo; o.frequency.value = f;
+          const at = ataque || 0.02;
+          g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + at);
+          g.gain.linearRampToValueAtTime(0.0001, t + (fin || dur)); o.connect(g); g.connect(A.salida);
+          o.start(t); o.stop(t + dur + 0.05);
+        },
+        ruido: function (t, dur, vol) {
+          const n = Math.floor(ctx.sampleRate * dur), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+          let r = 12345; // ruido con su propio generador: la simulación no toca Math.random
+          for (let k = 0; k < n; k++) { r = (r * 1103515245 + 12345) & 0x7fffffff; d[k] = (r / 0x3fffffff - 1) * (1 - k / n); }
+          const s = ctx.createBufferSource(), g = ctx.createGain(); s.buffer = b; g.gain.value = vol; s.connect(g); g.connect(A.salida); s.start(t);
+        },
+        salida: null,
       };
-      audio = { ctx: ctx }; tocar();
+      audio = { ctx: ctx, pieza: 0, paso: 0, t: ctx.currentTime + 0.1 };
+      const empezarPieza = function () {
+        // Cada pieza suena por su propio canal: al terminar se apaga en dos segundos mientras entra la siguiente
+        const g = ctx.createGain(); g.gain.value = 1; g.connect(gan); A.salida = g; audio.canal = g; audio.paso = 0;
+      };
+      empezarPieza();
+      const programar = function () {
+        if (!audio) return;
+        if (!document.hidden) {
+          while (audio.t < ctx.currentTime + 0.5) {
+            const p = PIEZAS[audio.pieza % PIEZAS.length];
+            p.tocar(A, audio.t, audio.paso);
+            audio.t += p.paso; audio.paso++;
+            if (audio.paso >= p.pasos) {
+              const viejo = audio.canal, fin = audio.t + Math.min(4, p.paso * 2);
+              viejo.gain.setValueAtTime(1, audio.t); viejo.gain.linearRampToValueAtTime(0.0001, fin);
+              setTimeout(function () { try { viejo.disconnect(); } catch (e) { /* ya desconectado */ } }, (fin - ctx.currentTime + 1) * 1000);
+              audio.pieza++; audio.t += 0.4; empezarPieza();
+            }
+          }
+        } else audio.t = Math.max(audio.t, ctx.currentTime + 0.1);
+        audio.tm = setTimeout(programar, 200);
+      };
+      programar();
     } catch (e) { audio = null; }
   }
-  return { opcionesNueva: opcionesNueva, dificultades: dificultades, tarjetas: tarjetas, metas: metas, editor: editor, creditos: creditos, musica: musica, desbloquear: desbloquear };
+  function piezaActual() { return audio ? PIEZAS[audio.pieza % PIEZAS.length].nombre : ''; }
+  // Si la música quedó encendida en los ajustes, suena desde el primer toque (el navegador pide un gesto para el audio)
+  document.addEventListener('click', function primerToque() {
+    try { if (ART.ui && ART.ui.ajuste && ART.ui.ajuste('musica')) musica(true); } catch (e) { /* sin música */ }
+    document.removeEventListener('click', primerToque, true);
+  }, true);
+  return { opcionesNueva: opcionesNueva, dificultades: dificultades, tarjetas: tarjetas, metas: metas, editor: editor, creditos: creditos, musica: musica, piezaActual: piezaActual, PIEZAS: PIEZAS, desbloquear: desbloquear };
 })();

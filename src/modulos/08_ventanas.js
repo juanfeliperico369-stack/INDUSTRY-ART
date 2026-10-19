@@ -5,9 +5,9 @@
 // desde su año real. Lo que el estudio gana en total no cambia en promedio: desde que existe la TV, una parte de
 // lo que antes salía de la taquilla llega después por las ventanas (así la economía calibrada se mantiene).
 // Además: reestrenos, remasterizaciones y la bóveda.
-IA.ventanas = (function () {
+ART.ventanas = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo;
+  const N = ART.n, D = ART.datos, E = ART.economia, M = ART.mundo;
 
   const VENTANAS = [
     { id: 'video', nombre: 'Video doméstico', desde: 1977 },
@@ -86,15 +86,15 @@ IA.ventanas = (function () {
   const ADELANTO = 0.35;
   // Cobra lo de una ventana; los talentos con porcentaje también cobran su parte (como en la taquilla)
   function cobrar(o, cat, monto) {
-    IA.negocio.cobrarEn(o.est, cat, cat === 'video' || cat === 'streaming' ? monto * IA.historia.pirateria(N.anio()) : monto); // piratería por época
+    ART.negocio.cobrarEn(o.est, cat, cat === 'video' || cat === 'streaming' ? monto * ART.historia.pirateria(N.anio()) : monto); // piratería por época
     if (!o.pctT) return;
     let pct = 0;
     Object.keys(o.pctT).forEach(function (id) { pct += o.pctT[id]; });
     const p = monto * pct / 100;
     if (p <= 0) return;
-    IA.negocio.pagar(o.est, 'talento', p);
+    ART.negocio.pagar(o.est, 'talento', p);
     o.part = (o.part || 0) + p;
-    Object.keys(o.pctT).forEach(function (id) { IA.talentos.pagarA(+id, monto * o.pctT[id] / 100); });
+    Object.keys(o.pctT).forEach(function (id) { ART.talentos.pagarA(+id, monto * o.pctT[id] / 100); });
   }
   // Al terminar en cines: la parte que se recortó de la taquilla vuelve por las ventanas, según cómo rinda la obra
   function alTerminar(o) {
@@ -118,7 +118,8 @@ IA.ventanas = (function () {
     o.et = 'terminada';
     o.anio = N.anio();
     o.sc = 0; o.bruto = 0; o.parte = 0; o.ent = 0; o.hs = [];
-    const total = estimarParteCines(o) * (via === 'streaming' ? 0.5 : 0.45) * rendimiento(o);
+    let total = estimarParteCines(o) * (via === 'streaming' ? 0.5 : 0.45) * rendimiento(o);
+    if (via === 'streaming' && o.est === 0 && N.S.stream) { total *= 0.6; ART.streaming.agregar(o.id, 'propio', { orig: 1 }); } // estreno original en tu plataforma: menos ventas a terceros, más suscriptores
     programar(o, total, N.anio());
     // Va todo a la ventana elegida primero (y lo demás después)
     N.emit('noticia', { tipo: o.est === 0 ? 'estudio' : 'rival', texto: '«' + o.tit + '» se estrena directo en ' + (via === 'video' ? 'video' : 'streaming') + '.' });
@@ -162,10 +163,10 @@ IA.ventanas = (function () {
     // Reestrenos en marcha
     (S.reestrenos || []).forEach(function (r) {
       if (r.n >= r.dura) return;
-      const o = IA.obras.porId(r.id);
+      const o = ART.obras.porId(r.id);
       const monto = r.total / r.dura;
       r.n++;
-      IA.negocio.cobrarEn(0, 'reestrenos', monto);
+      ART.negocio.cobrarEn(0, 'reestrenos', monto);
       if (o) o.reB = Math.round((o.reB || 0) + monto);
     });
     if (S.reestrenos) S.reestrenos = S.reestrenos.filter(function (r) { return r.n < r.dura; });
@@ -175,7 +176,7 @@ IA.ventanas = (function () {
     CERTIFICACIONES.forEach(function (c) {
       if (antes < c.copias && ahora >= c.copias) {
         o.cert = c.id;
-        N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» es ' + c.nombre.toLowerCase() + ' en video: más de ' + (c.copias / 1000) + ' mil copias.', importante: c.id !== 'oro' });
+        N.emit('noticia', { tipo: 'estudio', texto: '«' + o.tit + '» es ' + c.nombre.toLowerCase() + ' en video: más de ' + (c.copias >= 1e6 ? (c.copias === 1e6 ? 'un millón' : String(c.copias / 1e6).replace('.', ',') + ' millones') : (c.copias / 1000) + ' mil') + ' de copias.', importante: c.id !== 'oro' });
       }
     });
   }
@@ -213,17 +214,17 @@ IA.ventanas = (function () {
     const premios = 1 + 0.15 * (o.aw || []).length;
     const rem = o.rem ? 1.4 : 1;
     const bov = 1 + Math.min(1.5, (o.bovA || 0) * 0.12);
-    const veces = Math.pow(0.5, o.re || 0) * IA.critica.factorEtiquetas(o); // etiquetas
+    const veces = Math.pow(0.5, o.re || 0) * ART.critica.factorEtiquetas(o); // etiquetas
     return Math.round(orig * 0.05 * calidad * nostalgia * premios * rem * bov * veces * [0.6, 1, 1.4][nivel] * 0.6);
   }
   function costoReestreno(nivel) { return Math.round(E.marketingTipico(N.anio()) * [0.4, 0.8, 1.5][nivel]); }
   function reestrenar(id, nivel) {
-    const o = IA.obras.porId(id);
+    const o = ART.obras.porId(id);
     const err = puedeReestrenar(o);
     if (err) return err;
     const costo = costoReestreno(nivel);
     if (N.S.estudios[0].caja < costo) return 'No alcanza la caja para la campaña del reestreno.';
-    IA.negocio.pagar(0, 'marketing', costo);
+    ART.negocio.pagar(0, 'marketing', costo);
     N.S.reestrenos = N.S.reestrenos || [];
     N.S.reestrenos.push({ id: o.id, n: 0, dura: 6, total: valorReestreno(o, nivel) });
     o.re = (o.re || 0) + 1; o.reA = N.anio(); o.bovA = 0;
@@ -244,11 +245,11 @@ IA.ventanas = (function () {
     return '';
   }
   function remasterizar(id) {
-    const o = IA.obras.porId(id);
+    const o = ART.obras.porId(id);
     const err = puedeRemasterizar(o);
     if (err) return err;
     const f = formatoNuevo(o);
-    IA.negocio.pagar(0, 'produccion', costoRemaster());
+    ART.negocio.pagar(0, 'produccion', costoRemaster());
     o.rem = N.anio();
     // Una edición nueva en video: vende según su fama y calidad (en la bóveda vale más)
     const total = valorReestreno(o, 1) * 0.6;
@@ -263,7 +264,7 @@ IA.ventanas = (function () {
   }
   // La bóveda: mientras está guardada no se vende ni se emite, y cada año guardada vale más al salir
   function alternarBoveda(id) {
-    const o = IA.obras.porId(id);
+    const o = ART.obras.porId(id);
     if (!o || o.est !== 0 || o.et !== 'terminada') return 'Solo tus obras ya estrenadas.';
     if (o.bov) { delete o.bov; return ''; }
     o.bov = N.S.t;

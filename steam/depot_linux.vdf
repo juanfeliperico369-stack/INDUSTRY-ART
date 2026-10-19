@@ -1,0 +1,12 @@
+// Depot de linux: todo lo que electron-builder dejó en app/escritorio/dist/linux-unpacked, copiado a dist/steam/linux
+"DepotBuild"
+{
+	"DepotID" "1000003"
+	"ContentRoot" "../dist/steam/linux/"
+	"FileMapping"
+	{
+		"LocalPath" "*"
+		"DepotPath" "."
+		"Recursive" "1"
+	}
+}

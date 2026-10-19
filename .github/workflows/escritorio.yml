@@ -11,6 +11,9 @@ on:
       sistemas:
         description: 'todos, windows, mac o linux'
         default: 'todos'
+      tienda:
+        description: 'directo (instaladores), microsoft (paquete .appx para Microsoft Store, solo Windows), steam o epic (carpetas para steamcmd o BuildPatchTool)'
+        default: 'directo'
 jobs:
   pc:
     strategy:
@@ -40,7 +43,7 @@ jobs:
         with: { python-version: '3.12' }
       - name: Preparar el juego
         if: steps.toca.outputs.si == '1'
-        run: python tools/preparar_app.py
+        run: python tools/preparar_app.py --tienda ${{ github.event.inputs.tienda || 'directo' }}
       - name: Armar la app
         if: steps.toca.outputs.si == '1'
         working-directory: app/escritorio
@@ -58,13 +61,21 @@ jobs:
             # Sin certificado de Apple: firma «ad hoc» para que el .dmg abra en Mac con chip Apple
             [ "${{ matrix.nombre }}" = "mac" ] && EXTRA="-c.mac.identity=- -c.mac.hardenedRuntime=false"
           fi
-          npx electron-builder ${{ matrix.args }} --publish never $EXTRA
+          T="${{ github.event.inputs.tienda || 'directo' }}"
+          if [ "$T" = "microsoft" ]; then [ "${{ matrix.nombre }}" = "windows" ] && npx electron-builder --win appx --publish never || echo 'Microsoft Store: solo Windows'
+          elif [ "$T" = "directo" ]; then npx electron-builder ${{ matrix.args }} --publish never $EXTRA
+          else npx electron-builder ${{ matrix.args }} --dir --publish never $EXTRA; fi
       - uses: actions/upload-artifact@v4
         if: steps.toca.outputs.si == '1'
         with:
-          name: industry-art-pc-${{ matrix.nombre }}
+          name: industry-art-pc-${{ matrix.nombre }}-${{ github.event.inputs.tienda || 'directo' }}
           path: |
             app/escritorio/dist/*.exe
             app/escritorio/dist/*.dmg
             app/escritorio/dist/*.AppImage
-          if-no-files-found: error
+            app/escritorio/dist/*.deb
+            app/escritorio/dist/*.zip
+            app/escritorio/dist/*.appx
+            app/escritorio/dist/*-unpacked/
+            app/escritorio/dist/mac*/
+          if-no-files-found: warn

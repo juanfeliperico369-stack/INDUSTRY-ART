@@ -2,12 +2,12 @@
 // Estudios rivales simples que hacen obras de verdad: contratan talentos del mismo mundo, eligen fechas mirando
 // la temporada y la competencia, estrenan en la misma cartelera y ganan o pierden dinero como tú.
 // Identidad y estrategia, robo de fechas, quiebras de verdad, fusiones, estudios emergentes y estrellas.
-IA.rivales = (function () {
+ART.rivales = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, P = IA.produccion, L = IA.lanzamiento;
+  const N = ART.n, D = ART.datos, E = ART.economia, O = ART.obras, P = ART.produccion, L = ART.lanzamiento;
 
   function logoDe(n) {
-    if (IA.arte && IA.arte.logoAleatorio) return IA.arte.logoAleatorio(n);
+    if (ART.arte && ART.arte.logoAleatorio) return ART.arte.logoAleatorio(n);
     return { s: n % 25, c: (n * 7) % 20, b: (n * 3) % 20, t: (n * 11) % 20, f: n % 20 };
   }
   const ESTRATEGIAS = {
@@ -33,8 +33,93 @@ IA.rivales = (function () {
     { anio: 2031, nombre: 'Sintética', pais: 'us', familia: 'IM', tam: 0.8, calidad: 1, riesgo: 0.9, texto: 'Todo hecho con IA' },
     { anio: 2058, nombre: 'Megaciudad Films', pais: 'ng', familia: 'DR', tam: 0.8, calidad: 2, riesgo: 0.5, texto: 'Historias de las nuevas megaciudades' },
     { anio: 2104, nombre: 'Órbita Baja', pais: 'us', familia: 'IM', tam: 0.7, calidad: 2, riesgo: 0.8, texto: 'Cine filmado en órbita' },
+    { anio: 2036, nombre: 'Inmersa', pais: 'kr', familia: 'IM', tam: 0.7, calidad: 0, riesgo: 0.6, texto: 'Experiencias inmersivas' },
+    { anio: 2072, nombre: 'Holograma Norte', pais: 'ca', familia: 'FJ', tam: 0.6, calidad: 2, riesgo: 0.6, texto: 'Teatro holográfico' },
+    { anio: 2090, nombre: 'Pulso Neural', pais: 'jp', familia: 'IM', tam: 0.6, calidad: 2, riesgo: 0.6, texto: 'Obras que se sienten' },
+    { anio: 2130, nombre: 'Colectivo Sintético', pais: 'us', familia: 'DR', tam: 0.7, calidad: 3, riesgo: 0.6, texto: 'Talentos sintéticos' },
+    { anio: 2155, nombre: 'Colonia Creativa Selene', pais: 'us', familia: 'IM', tam: 0.6, calidad: 2, riesgo: 0.6, texto: 'Obras hechas en la Luna' },
+    { anio: 2172, nombre: 'Hélice Sintética', pais: 'cn', familia: 'SM', tam: 0.7, calidad: 1, riesgo: 0.6, texto: 'Mundos persistentes y música generada' },
+    { anio: 2198, nombre: 'Coro de Titán', pais: 'it', familia: 'DR', tam: 0.5, calidad: 3, riesgo: 0.6, texto: 'Teatro y ópera de hologramas' },
+    { anio: 2224, nombre: 'Archivo Vivo', pais: 'fr', familia: 'AA', tam: 0.6, calidad: 1, riesgo: 0.6, texto: 'Remakes del catálogo de la humanidad' },
+    { anio: 2247, nombre: 'Fábrica de Sueños Ganímedes', pais: 'us', familia: 'AA', tam: 0.8, calidad: 1, riesgo: 0.6, texto: 'Superproducciones para sueños compartidos' },
+    { anio: 2269, nombre: 'Colectivo Raíz', pais: 'mx', familia: 'DR', tam: 0.5, calidad: 3, riesgo: 0.6, texto: 'Obras hechas a mano y en vivo' },
+    { anio: 2286, nombre: 'Biblioteca Infinita', pais: 'in', familia: 'RD', tam: 0.5, calidad: 2, riesgo: 0.6, texto: 'Libros de memoria implantada' },
+    // De la Final
+    { anio: 1909, nombre: 'Estudios Horizonte', pais: 'us', familia: 'AA', tam: 0.7, calidad: 1, riesgo: 0.5, texto: 'Westerns y aventuras', lema: 'Más allá del horizonte siempre hay otra toma.' },
+    { anio: 1923, nombre: 'Viñeta Animada', pais: 'us', familia: 'FJ', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Dibujantes de historietas que pasan a la animación', lema: 'Cada cuadro, hecho a mano.' },
+    { anio: 1931, nombre: 'Radio Fénix', pais: 'us', familia: 'HM', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Radio, discos y teatro', lema: 'Si suena, lo vendemos.' },
+    { anio: 1948, nombre: 'Canal Prisma', pais: 'us', familia: 'FJ', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Telenovelas', lema: 'Una historia cada noche.' },
+    { anio: 1957, nombre: 'Disco Cóndor', pais: 'us', familia: 'HM', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Música popular', lema: 'La canción que tararea el barrio.' },
+    { anio: 1966, nombre: 'Nueva Ola Films', pais: 'us', familia: 'DR', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Cine de autor', lema: 'Rodamos en la calle.' },
+    { anio: 1973, nombre: 'Píxel Arcade', pais: 'us', familia: 'IM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Videojuegos de arcade', lema: 'Una moneda, una aventura.' },
+    { anio: 1980, nombre: 'Cometa Cable', pais: 'us', familia: 'SM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Series de cable', lema: 'Sin pausa comercial.' },
+    { anio: 1990, nombre: 'Tinta y Píxel', pais: 'us', familia: 'IM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Dibujantes de historietas que pasan a la animación 3D', lema: 'Del papel a las tres dimensiones.' },
+    { anio: 1994, nombre: 'Nebulosa Interactiva', pais: 'us', familia: 'IM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Videojuegos en 3D', lema: 'Mundos para explorar.' },
+    { anio: 1999, nombre: 'Masala Talkies', pais: 'us', familia: 'HM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Musicales de Bombay', lema: 'Tres horas, diez canciones, un final feliz.' },
+    { anio: 2005, nombre: 'Faro Stream', pais: 'us', familia: 'SM', tam: 0.7, calidad: 1, riesgo: 0.5, texto: 'Series para streaming', lema: 'Todo el catálogo, todo el tiempo.' },
+    { anio: 2009, nombre: 'Albatros Móvil', pais: 'us', familia: 'HM', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Juegos para el teléfono', lema: 'Una partida en cada bolsillo.' },
+    { anio: 2014, nombre: 'Cardumen Media', pais: 'us', familia: 'AA', tam: 0.7, calidad: 1, riesgo: 0.5, texto: 'Dramas y pop de Asia', lema: 'La ola no se detiene.' },
+    { anio: 2018, nombre: 'Brillo de Lagos', pais: 'us', familia: 'HM', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Cine rápido de Lagos', lema: 'Hoy se rueda, mañana se estrena.' },
+    { anio: 2024, nombre: 'Sinapsis Studios', pais: 'us', familia: 'IM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Obras hechas con IA', lema: 'La máquina imagina, nosotros elegimos.' },
+    { anio: 2106, nombre: 'Órbita Baja Producciones', pais: 'us', familia: 'AA', tam: 0.8, calidad: 1, riesgo: 0.5, texto: 'Rodajes en órbita', lema: 'El cielo ya no es el límite.' },
+    { anio: 1936, nombre: 'Acero y Celuloide', pais: 'us', familia: 'AA', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Cine de acción y guerra', lema: 'Cada toma, una explosión.' },
+    { anio: 1952, nombre: 'Gran Carpa Teatral', pais: 'us', familia: 'FJ', tam: 0.4, calidad: 1, riesgo: 0.5, texto: 'Teatro musical', lema: 'La función debe continuar.' },
+    { anio: 1962, nombre: 'Ediciones Mirador', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.5, texto: 'Novelas y ensayos', lema: 'Leer es mirar lejos.' },
+    { anio: 1969, nombre: 'Surco Records', pais: 'us', familia: 'IM', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Rock y canción de autor', lema: 'El disco que cambia tu vida.' },
+    { anio: 1977, nombre: 'Vértigo Pictures', pais: 'us', familia: 'SM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Terror y ciencia ficción', lema: 'El miedo vende entradas.' },
+    { anio: 1986, nombre: 'Cartucho Dorado', pais: 'us', familia: 'FJ', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Juegos de plataformas', lema: 'Salta, corre, gana.' },
+    { anio: 1997, nombre: 'Andes Audiovisual', pais: 'us', familia: 'HM', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Telenovelas y cine de la región andina', lema: 'Historias de montaña y mar.' },
+    { anio: 2003, nombre: 'Turbo Digital', pais: 'us', familia: 'AA', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Juegos de carreras y autos', lema: 'Acelera hasta el final.' },
+    { anio: 2011, nombre: 'Bosque Negro Media', pais: 'us', familia: 'DR', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Series de suspenso europeo', lema: 'El frío también cuenta historias.' },
+    { anio: 2016, nombre: 'Cripta Producciones', pais: 'us', familia: 'IM', tam: 0.5, calidad: 1, riesgo: 0.5, texto: 'Fantasía oscura: vampiros y brujas', lema: 'La noche es nuestra.' },
+    { anio: 2021, nombre: 'Vía Láctea Studios', pais: 'us', familia: 'IM', tam: 0.6, calidad: 1, riesgo: 0.5, texto: 'Mundos virtuales y animación', lema: 'Más allá de la pantalla.' },
+    { anio: 1895, nombre: 'Compañía Aurora', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.4, texto: 'Teatro, libros y música' },
+    { anio: 1905, nombre: 'Teatro Nova', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.4, texto: 'Teatro, libros y música' },
+    { anio: 1915, nombre: 'Casa Kappa', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.4, texto: 'Teatro, libros y música' },
+    { anio: 1920, nombre: 'Imprenta Lumen', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.4, texto: 'Teatro, libros y música' },
+    { anio: 1950, nombre: 'Compañía del Tigre', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.4, texto: 'Teatro, libros y música' },
+    { anio: 1972, nombre: 'Taller Órbita', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.4, texto: 'Teatro, libros y música' },
+    { anio: 1912, nombre: 'Teatro Amanecer', pais: 'us', familia: 'DR', tam: 0.4, calidad: 1, riesgo: 0.4, texto: 'Teatro, libros y música' },
   ];
-  const SILABAS = ['Al', 'Bru', 'Ce', 'Do', 'Ka', 'Li', 'Mo', 'Ner', 'Or', 'Pa', 'Ri', 'Sa', 'Te', 'Vi', 'Zu'];
+  // ---------- Estudios que nacen solos ----------
+  // El mundo quiere más estudios a medida que crece el mercado. La mitad los funda una estrella o un director famoso
+  // con su apellido en la puerta (y se lleva su talento en exclusiva); el resto nace con un nombre de su región.
+  const META = [[1895, 7], [1920, 9], [1950, 11], [1980, 12], [2010, 14], [2100, 15], [2300, 17]];
+  const CON_APELLIDO = { lat: ['Producciones {a}', 'Estudios {a}', 'Cine {a}'], nam: ['{a} Pictures', '{a} Brothers', '{a} Films'], oce: ['{a} Pictures', '{a} Films'],
+    eur: ['Films {a}', '{a} Film', 'Studio {a}'], asi: ['{a} Pictures', '{a} Studios', '{a} Entertainment'], afr: ['{a} Films', '{a} Studios'] };
+  const RAICES = { lat: ['Cóndor', 'Alba', 'Faro', 'Volcán', 'Ceiba', 'Quetzal', 'Mar del Sur', 'Colibrí', 'Cielo Abierto', 'Andes'],
+    nam: ['Silver Lake', 'Red Oak', 'Blue Harbor', 'Northstar', 'Lighthouse', 'Ironwood', 'Summit', 'Prairie', 'Golden Hour', 'Bright Lane'],
+    oce: ['Southern Cross', 'Coral', 'Outback', 'Kiwi Hill'], eur: ['Aurora', 'Lumen', 'Atlas', 'Minerva', 'Orfeo', 'Borealis', 'Helios', 'Arlequín', 'Linterna', 'Vesta'],
+    asi: ['Loto', 'Jade', 'Sakura', 'Monzón', 'Tigre Blanco', 'Himalaya', 'Bambú', 'Dragón de Papel', 'Mekong', 'Perla'], afr: ['Baobab', 'Sahel', 'Kilimanjaro', 'Nilo', 'Sabana', 'Ébano', 'Atlas Sur'] };
+  const SUFIJOS = { lat: ['Films', 'Producciones', 'Cine', 'Estudios'], nam: ['Pictures', 'Studios', 'Films', 'Entertainment'], oce: ['Pictures', 'Films'], eur: ['Film', 'Films', 'Cinéma', 'Studio'], asi: ['Pictures', 'Studios', 'Films', 'Entertainment'], afr: ['Films', 'Studios', 'Pictures'] };
+  function apellido(nom) { const p = String(nom).split(' '); return p.length > 1 ? p.slice(1).join(' ') : p[0]; }
+  function fundador() {
+    const S = N.S, anio = N.anio(), T = ART.talentos;
+    const c = S.talentos.filter(function (t) {
+      const e = anio - t.nac;
+      return !t.jugador && !t.propio && !t.ret && !t.mu && !t.funda && ['direccion', 'produccion', 'interprete', 'guion', 'animacion'].indexOf(t.of) >= 0 && t.fama >= 0.4 && e >= 32 && e <= 66 && T.exclusivoDe(t) === null && !T.ocupado(t);
+    }).sort(function (a, b) { return b.fama - a.fama; });
+    return c.length ? c[N.entero(0, Math.min(5, c.length - 1))] : null;
+  }
+  function nacerEstudio() {
+    const S = N.S, t = N.probabilidad(0.5) ? fundador() : null;
+    let r;
+    if (t) {
+      const af = t.af && t.af.length ? t.af : [0], i = af.indexOf(Math.max.apply(null, af));
+      const pais = D.pais(t.pais) || D.pais('us');
+      r = { nombre: N.elegir(CON_APELLIDO[pais.region] || CON_APELLIDO.nam).replace('{a}', apellido(t.nom)), pais: pais.id, familia: D.ORDEN_FAM[Math.max(0, i)], tam: N.redondear(0.45 + t.fama * 0.4, 2),
+        calidad: Math.round(N.limitar((t.hab - 60) / 8, -1, 4)), riesgo: N.redondear(0.45 + N.azar() * 0.35, 2), texto: 'Fundado por ' + t.nom };
+    } else {
+      const pais = D.paises[N.ponderado(D.paises.map(function (p) { return p.peso; }))], reg = RAICES[pais.region] ? pais.region : 'nam';
+      r = { nombre: N.elegir(RAICES[reg]) + ' ' + N.elegir(SUFIJOS[reg]), pais: pais.id, familia: N.elegir(D.ORDEN_FAM), tam: N.redondear(0.5 + N.azar() * 0.3, 2), calidad: N.entero(-1, 3),
+        riesgo: N.redondear(0.4 + N.azar() * 0.4, 2), texto: 'Un estudio joven de ' + pais.nombre };
+    }
+    if (S.estudios.some(function (e) { return e.nombre === r.nombre; })) return null;
+    const est = agregarEstudio(r, false);
+    if (t) { t.funda = est.id; ART.talentos.firmarExclusivo(t, est.id, 6); }
+    N.emit('noticia', { tipo: 'rival', texto: t ? t.nom + ' funda su propio estudio: ' + r.nombre + '.' : 'Nace un estudio nuevo: ' + r.nombre + ' (' + r.texto.charAt(0).toLowerCase() + r.texto.slice(1) + ').', importante: !!t });
+    return est;
+  }
   function agregarEstudio(r, nota) {
     const S = N.S, tipico = E.presupuestoTipico(N.anio()), pais = D.pais(r.pais) || D.pais('us');
     const id = S.estudios.length;
@@ -100,30 +185,30 @@ IA.rivales = (function () {
     const op = { gen: gen, escala: escala, tono: tono };
     // A veces adaptan una obra libre de derechos y, desde 2022, algunos usan IA para abaratar
     if (!prestigio && N.probabilidad(0.07)) {
-      const libres = IA.ideas.materialesDisponibles(anio).filter(function (m) { return IA.ideas.esLibre(m, anio); });
+      const libres = ART.ideas.materialesDisponibles(anio).filter(function (m) { return ART.ideas.esLibre(m, anio); });
       if (libres.length) {
-        const m = IA.ideas.usarMaterial({ est: est.id }, N.elegir(libres).id, anio);
+        const m = ART.ideas.usarMaterial({ est: est.id }, N.elegir(libres).id, anio);
         op.gen = m.gen; op.mat = m.mat; op.tit = m.tit; op.epo = m.epo;
         if (m.cont) op.cont = m.cont;
       }
     }
-    if (anio >= IA.ideas.ANIO_IA && N.probabilidad(0.3)) op.ia = N.entero(10, 60);
+    if (anio >= ART.ideas.ANIO_IA && N.probabilidad(0.3)) op.ia = N.entero(10, 60);
     // La historia: los estudios con buen ojo (y los proyectos de prestigio) eligen lo que encaja con su género
     const famIdea = D.familiaDe[op.gen[0]] || 'DR';
     const buenOjo = N.probabilidad(N.limitar(0.45 + est.calidad / 20 + (prestigio ? 0.3 : 0), 0.2, 0.92));
-    op.tem = [buenOjo ? IA.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
-    op.prob = [buenOjo ? IA.ideas.problemaRecomendado(famIdea) : IA.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
-    op.arco = buenOjo ? IA.ideas.arcoRecomendado(famIdea) : N.elegir(IA.taxonomia.arcos).id;
-    const sec = IA.franquicias.secuelaRival(est); // a veces continúan su éxito
+    op.tem = [buenOjo ? ART.ideas.temaRecomendado(famIdea) : N.elegir(D.temas)];
+    op.prob = [buenOjo ? ART.ideas.problemaRecomendado(famIdea) : ART.ideas.problemaRecomendado(N.elegir(D.ORDEN_FAM))];
+    op.arco = buenOjo ? ART.ideas.arcoRecomendado(famIdea) : N.elegir(ART.taxonomia.arcos).id;
+    const sec = ART.franquicias.secuelaRival(est); // a veces continúan su éxito
     if (sec) { op.gen = sec.gen.slice(); delete op.mat; }
     let b = O.borrador(est.id, op);
     // Con poca caja hacen una obra más chica en vez de quedarse sin filmar
     while (b.pp * 1.4 > est.caja && op.escala > AJ.minEscala) { op.escala--; b = O.borrador(est.id, op); }
-    if (sec) IA.franquicias.prepararRival(b, sec);
+    if (sec) ART.franquicias.prepararRival(b, sec);
     const pobre = b.pp * 2 > est.caja;
     b.prest = prestigio ? 1 : 0;
     // Cómo filman: el método y el terreno recomendados y, si tienen uno que sirva, un set guardado
-    const R = IA.rodaje;
+    const R = ART.rodaje;
     b.met = R.metodoRecomendado(b, anio); b.ter = R.terrenoRecomendado(b); b.pst = 'clasico';
     const sets = R.usaSet(b) ? R.setsQueSirven(b) : [];
     if (sets.length && sets[0].q >= 50) b.setR = sets[0].id;
@@ -134,10 +219,10 @@ IA.rivales = (function () {
     const costo = O.costoTalento(b) + b.pp;
     if (est.caja < costo * 0.9) return null;
     const o = P.iniciar(b, ctx);
-    IA.ideas.registrarPremisas(o, anio);
+    ART.ideas.registrarPremisas(o, anio);
     if (o.mat) {
-      IA.ideas.registrarUso(o.mat, anio);
-      N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' adapta «' + IA.taxonomia.material(o.mat).tit + '».' });
+      ART.ideas.registrarUso(o.mat, anio);
+      N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' adapta «' + ART.taxonomia.material(o.mat).tit + '».' });
     }
     return o;
   }
@@ -195,24 +280,22 @@ IA.rivales = (function () {
         est.tam = N.redondear(Math.max(base * 0.5, est.tam * 0.96), 3);
       }
       est.tam = N.redondear(est.tam + (base - est.tam) * 0.05, 3);
-      if (est.filial && est.caja < 0) { const c = -est.caja + Math.round(tipico * 0.5); IA.negocio.pagar(0, 'filiales', c); est.caja += c; }
+      if (est.filial && est.caja < 0) { const c = -est.caja + Math.round(tipico * 0.5); ART.negocio.pagar(0, 'filiales', c); est.caja += c; }
     }
     fusiones();
     EMERGENTES.forEach(function (x) { if (x.anio === anio && !S.estudios.some(function (e) { return e.nombre === x.nombre; })) agregarEstudio(x, true); });
-    // Después de 2150, o cuando el mundo se queda con pocos estudios, nacen estudios generados
-    if ((anio > 2150 && N.probabilidad(0.08)) || activos().length < 6) {
-      const nom = N.elegir(SILABAS) + N.elegir(SILABAS).toLowerCase() + ' ' + N.elegir(IA.datos.sufijosLogo);
-      agregarEstudio({ nombre: nom, pais: N.elegir(D.paises).id, familia: N.elegir(D.ORDEN_FAM), tam: 0.6, calidad: N.entero(-1, 3), riesgo: 0.6, texto: 'Un estudio joven' }, true);
-    }
+    // Nacen estudios cuando faltan para el tamaño del mercado (y a veces, aunque no falten); nunca quedan menos de seis
+    const n = activos().length;
+    if (n < 6 || (anio >= D.CINE_DESDE && N.probabilidad(n < Math.round(N.interp(META, anio)) ? 0.25 : 0.03))) nacerEstudio();
   }
   function quebrar(est) {
     const S = N.S;
     est.quebrado = N.anio();
-    O.activas().forEach(function (o) { if (o.est === est.id && ['desarrollo', 'preproduccion'].indexOf(o.et) >= 0) { o.et = 'terminada'; o.cancelada = 1; o.pub = o.pub || 0; IA.talentos.liberar(O.idsEquipo(o)); } });
+    O.activas().forEach(function (o) { if (o.est === est.id && ['desarrollo', 'preproduccion'].indexOf(o.et) >= 0) { o.et = 'terminada'; o.cancelada = 1; o.pub = o.pub || 0; ART.talentos.liberar(O.idsEquipo(o)); } });
     // Sus franquicias quedan a la venta; otro rival se queda con la mejor
-    const fr = IA.franquicias.lista().filter(function (f) { return f.est === est.id; });
+    const fr = ART.franquicias.lista().filter(function (f) { return f.est === est.id; });
     const comprador = activos().sort(function (a, b) { return b.caja - a.caja; })[0];
-    if (fr.length && comprador) { const f = fr.sort(function (a, b) { return IA.franquicias.valor(b) - IA.franquicias.valor(a); })[0]; f.est = comprador.id; }
+    if (fr.length && comprador) { const f = fr.sort(function (a, b) { return ART.franquicias.valor(b) - ART.franquicias.valor(a); })[0]; f.est = comprador.id; }
     N.emit('noticia', { tipo: 'rival', texto: est.nombre + ' quiebra y cierra sus puertas' + (fr.length ? '; sus franquicias salen a la venta' : '') + '.', importante: true });
   }
   // Dos estudios chicos y en apuros se fusionan
@@ -223,12 +306,12 @@ IA.rivales = (function () {
     const a = chicos[1], b = chicos[0];
     a.caja += b.caja; a.tam = N.redondear(a.tam + b.tam * 0.6, 3); a.base = N.redondear((a.base || a.tam) + (b.base || b.tam) * 0.5, 3);
     b.quebrado = N.anio(); b.fusion = a.id;
-    IA.franquicias.lista().forEach(function (f) { if (f.est === b.id) f.est = a.id; });
+    ART.franquicias.lista().forEach(function (f) { if (f.est === b.id) f.est = a.id; });
     N.emit('noticia', { tipo: 'rival', texto: a.nombre + ' y ' + b.nombre + ' se fusionan.', importante: true });
   }
   // Estrellas de 1 a 5 por cuota, prestigio y calidad
   function estrellas(e) {
-    const c = IA.negocio.cuotaAnioActual(e.id);
+    const c = ART.negocio.cuotaAnioActual(e.id);
     const p = c * 40 + e.fama * 2 + (e.calidad || 0) * 0.15 + (e.id === 0 ? 0 : 0);
     return e.quebrado ? 0 : N.limitar(Math.round(1 + p * 1.2), 1, 5);
   }

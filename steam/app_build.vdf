@@ -1,0 +1,17 @@
+// Subida a Steam con SteamPipe. Cambia 1000000 por el AppID de INDUSTRY ART y los DepotID por los de tu app
+// (Steamworks › tu app › SteamPipe › Depots). Las carpetas las arma la receta «App de PC» con tienda = steam
+// (o en cada sistema: python3 tools/preparar_app.py --tienda steam y npx electron-builder --dir).
+"AppBuild"
+{
+	"AppID" "1000000"
+	"Desc" "INDUSTRY ART 4.0 - edicion completa"
+	"ContentRoot" "../dist/steam/"
+	"BuildOutput" "../dist/steam-registro/"
+	"SetLive" ""
+	"Depots"
+	{
+		"1000001" "depot_windows.vdf"
+		"1000002" "depot_mac.vdf"
+		"1000003" "depot_linux.vdf"
+	}
+}

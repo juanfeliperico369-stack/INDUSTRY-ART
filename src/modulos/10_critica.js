@@ -5,9 +5,9 @@
 // Invaluable) que cambian con el tiempo; insignias (Hype, Oro, De autor, Blockbuster, Media, Independiente);
 // cartas de fans; la revista de la industria (Boletín, Rincón de la crítica y Editorial); la cronología del
 // estudio y su biografía pública.
-IA.critica = (function () {
+ART.critica = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, O = IA.obras, E = IA.economia;
+  const N = ART.n, D = ART.datos, O = ART.obras, E = ART.economia;
 
   // gustos: familias que ama (+6) y que no soporta (−6); valora: autor (crítica alta y público bajo), espectaculo, risa
   const CRITICOS = [
@@ -23,6 +23,19 @@ IA.critica = (function () {
     { id: 'c10', nombre: 'Joaquín Prado', ama: ['HM', 'FJ'], odia: ['AV'], valora: 'risa', desde: 2015, hasta: 2120 },
     { id: 'c11', nombre: 'Kaia Moreau', ama: ['AV', 'IM'], odia: ['HM'], valora: 'autor', desde: 2040, hasta: 2150 },
     { id: 'c12', nombre: 'Lev Andrade', ama: ['AA', 'SM'], odia: ['DR'], valora: 'espectaculo', desde: 2060, hasta: 2150 },
+    // De la Final, cada uno con su medio
+    { id: 'cf1', nombre: 'Dolores Arango', medio: 'La Gaceta del Espectáculo', ama: ['DR'], odia: [], valora: 'autor', desde: 1730, hasta: 1805 },
+    { id: 'cf2', nombre: 'Teodoro Valls', medio: 'Pantalla Crítica', ama: ['AV', 'DR'], odia: [], valora: 'autor', desde: 1775, hasta: 1850 },
+    { id: 'cf3', nombre: 'Marisa Okonkwo', medio: 'El Faro Cultural', ama: ['AV'], odia: [], valora: 'autor', desde: 1820, hasta: 1895 },
+    { id: 'cf4', nombre: 'Bruno Halvorsen', medio: 'Revista Butaca', ama: ['AA', 'HM'], odia: [], valora: 'espectaculo', desde: 1865, hasta: 1940 },
+    { id: 'cf5', nombre: 'Lin Mei-Ling', medio: 'Ojo de Plata', ama: ['IM'], odia: [], valora: 'espectaculo', desde: 1910, hasta: 1985 },
+    { id: 'cf6', nombre: 'Ramiro Etxeberria', medio: 'Diario Telón', ama: ['HM'], odia: [], valora: 'risa', desde: 1955, hasta: 2030 },
+    { id: 'cf7', nombre: 'Ingrid Sørli', medio: 'Cinemanía Norte', ama: ['SM'], odia: [], valora: 'espectaculo', desde: 2000, hasta: 2075 },
+    { id: 'cf8', nombre: 'Kwame Asante', medio: 'La Voz de la Sala', ama: ['AA'], odia: [], valora: 'espectaculo', desde: 2045, hasta: 2120 },
+    { id: 'cf9', nombre: 'Paloma Ríos', medio: 'Fotograma Libre', ama: ['RD'], odia: [], valora: 'risa', desde: 2090, hasta: 2165 },
+    { id: 'cf10', nombre: 'Hiroshi Tanabe', medio: 'Señal y Ruido', ama: ['IM', 'AA'], odia: [], valora: 'espectaculo', desde: 2135, hasta: 2210 },
+    { id: 'cf11', nombre: 'Valentina Duarte', medio: 'Crítica Abierta', ama: ['FJ'], odia: [], valora: 'risa', desde: 2180, hasta: 2255 },
+    { id: 'cf12', nombre: 'Augusto Ferreyra', medio: 'El Archivo', ama: ['AV', 'DR'], odia: [], valora: 'autor', desde: 2225, hasta: 2300 },
   ];
   function medio(c, anio) {
     const base = N.hash(c.id) % 3;
@@ -128,11 +141,14 @@ IA.critica = (function () {
 
   // ---------- Cartas de fans ----------
   const CARTAS = [
-    function (o) { return '«Vi «' + o.tit + '» tres veces. ¿Cuándo llega la secuela?»'; },
-    function (o) { return '«El final de «' + o.tit + '» me dejó sin palabras. Gracias.»'; },
-    function (o) { return '«Mi abuela y yo vimos «' + o.tit + '» juntas. Hacía años que no reíamos así.»'; },
-    function (o) { return '«No entendí el final de «' + o.tit + '». ¿Me lo explican?»'; },
-    function (o) { return '«Quiero trabajar en su estudio algún día. «' + o.tit + '» me cambió la vida.»'; },
+    function (o) { return '«Vi “' + o.tit + '” tres veces. ¿Cuándo llega la secuela?»'; },
+    function (o) { return '«El final de “' + o.tit + '” me dejó sin palabras. Gracias.»'; },
+    function (o) { return '«Mi abuela y yo vimos “' + o.tit + '” juntas. Hacía años que no reíamos así.»'; },
+    function (o) { return '«No entendí el final de “' + o.tit + '”. ¿Me lo explican?»'; },
+    function (o) { return '«Quiero trabajar en su estudio algún día. “' + o.tit + '” me cambió la vida.»'; },
+    function (o) { return '«Mi hija se disfrazó de un personaje de “' + o.tit + '” para su cumpleaños.»'; },
+    function (o) { return '«Lloré con “' + o.tit + '” y no me da vergüenza decirlo.»'; },
+    function (o) { return '«Pido más obras como “' + o.tit + '”. El mundo las necesita.»'; },
   ];
   function cartaMensual() {
     const S = N.S;
@@ -156,7 +172,7 @@ IA.critica = (function () {
     const num = { n: (S.revista && S.revista.length ? S.revista[0].n : 0) + 1, t: S.t,
       boletin: top.map(function (o) { return { tit: o.tit, est: S.estudios[o.est].nombre, bruto: Math.round(o.bruto || 0), mio: o.est === 0 }; }),
       critica: crit.length ? { mejor: { tit: crit[0].tit, n: crit[0].crit }, peor: crit.length > 1 ? { tit: crit[crit.length - 1].tit, n: crit[crit.length - 1].crit } : null } : null,
-      editorial: 'El mercado de hoy se mueve por ' + motor.toLowerCase() + '. ' + tend[0].f.nombre + ' está en alza y ' + tend[tend.length - 1].f.nombre.toLowerCase() + ' pierde público.' +
+      editorial: 'El mercado de hoy se mueve por ' + motor.toLowerCase() + '. Sube «' + tend[0].f.nombre + '» y baja «' + tend[tend.length - 1].f.nombre + '».' +
         (S.estudios[0].fama > 0.4 ? ' ' + S.estudios[0].nombre + ' ya es un nombre que todos miran.' : '') };
     S.revista = S.revista || [];
     S.revista.unshift(num);
@@ -185,7 +201,7 @@ IA.critica = (function () {
     const max = function (f) { return mias.reduce(function (a, o) { return !a || f(o) > f(a) ? o : a; }, null); };
     const fams = {}; mias.forEach(function (o) { fams[o.fam] = (fams[o.fam] || 0) + 1; });
     const famTop = Object.keys(fams).sort(function (a, b) { return fams[b] - fams[a]; })[0];
-    const clas = mias.map(function (o) { return IA.taxonomia.ORDEN_CLAS.indexOf(o.clas); });
+    const clas = mias.map(function (o) { return ART.taxonomia.ORDEN_CLAS.indexOf(o.clas); });
     const prom = clas.reduce(function (a, x) { return a + Math.max(0, x); }, 0) / clas.length;
     return {
       mejor: max(function (o) { return o.crit; }), taquillera: max(function (o) { return o.bruto || 0; }), cara: max(function (o) { return O.costoTotal(o); }),

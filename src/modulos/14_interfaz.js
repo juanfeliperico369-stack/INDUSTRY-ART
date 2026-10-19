@@ -2,17 +2,18 @@
 // Marco de la interfaz: cinco secciones (Estudio, Obras, Talento, Mundo, Negocio) y la barra superior; fichas
 // deslizables en celular y panel lateral en PC y horizontal; avisos; íconos propios en lugar de emojis; temas y
 // accesibilidad. Nada depende de pasar el mouse: todo se abre tocando.
-IA.ui = (function () {
+ART.ui = (function () {
   'use strict';
-  const N = IA.n, t = IA.t;
+  const N = ART.n, t = ART.t;
   const CLAVE_AJUSTES = 'industryart.v16.ajustes';
   const SECCIONES = ['estudio', 'obras', 'talento', 'mundo', 'negocio'];
 
   // ---------- Ajustes del jugador (fuera de la partida) ----------
-  const AJUSTES_BASE = { tema: 'oscuro', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana', musica: false, dalton: false, idioma: 'es' };
+  const AJUSTES_BASE = { tema: 'epoca', texto: 2, movimiento: false, sonido: true, vibracion: false, autoguardado: 'mes', orientacion: 'auto', dineroHoy: false, ritmo: 'semana', musica: false, dalton: false, idioma: 'es' };
   let ajustes = Object.assign({}, AJUSTES_BASE);
   function cargarAjustes() {
     try { const a = JSON.parse(localStorage.getItem(CLAVE_AJUSTES) || '{}'); ajustes = Object.assign({}, AJUSTES_BASE, a); } catch (e) { ajustes = Object.assign({}, AJUSTES_BASE); }
+    if (!ajustes.v3) { if (ajustes.tema === 'oscuro') ajustes.tema = 'epoca'; ajustes.v3 = 1; guardarAjustes(); } // la 3.0 estrena la estética por época
     aplicarAjustes();
   }
   function guardarAjustes() { try { localStorage.setItem(CLAVE_AJUSTES, JSON.stringify(ajustes)); } catch (e) { /* sin almacenamiento: los ajustes duran la sesión */ } }
@@ -24,19 +25,22 @@ IA.ui = (function () {
     r.setAttribute('data-movimiento', ajustes.movimiento ? 'menos' : 'normal');
     r.setAttribute('data-orientacion', ajustes.orientacion);
     r.setAttribute('data-dalton', ajustes.dalton ? 'si' : 'no'); // daltonismo
-    IA.idioma.poner(ajustes.idioma); // español o inglés
+    ART.idioma.poner(ajustes.idioma); // español o inglés
     actualizarEpoca();
-    if (IA.arte) { IA.arte.menosMovimiento = !!ajustes.movimiento; IA.arte.activarSonido(!!ajustes.sonido); }
+    if (ART.arte) { ART.arte.menosMovimiento = !!ajustes.movimiento; ART.arte.activarSonido(!!ajustes.sonido); }
     if (ajustes.orientacion !== 'auto' && window.screen && screen.orientation && screen.orientation.lock) {
       screen.orientation.lock(ajustes.orientacion === 'vertical' ? 'portrait' : 'landscape').catch(function () { /* solo en pantalla completa o en la app */ });
     }
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', getComputedStyle(r).getPropertyValue('--panel').trim() || '#0b1020');
   }
-  // El tema Época cambia con el año: sepia hasta 1949, neón hasta 1999, vidrio después
-  function actualizarEpoca() {
-    const anio = N.S ? N.anio() : 1930;
-    document.documentElement.setAttribute('data-epoca', anio < 1950 ? 'sepia' : anio < 2000 ? 'neon' : 'vidrio');
+  // Nueve estéticas, del papel de imprenta al holograma: cambian solas con el año de la partida
+  const EPOCAS = [[1895, 'imprenta', 'Imprenta y teatro'], [1927, 'mudo', 'Cine mudo'], [1948, 'oro', 'Época de oro'], [1967, 'tele', 'Televisión'], [1980, 'nuevo', 'Nuevo cine'],
+    [2000, 'video', 'Video y neón'], [2020, 'digital', 'Era digital'], [2050, 'stream', 'Streaming'], [99999, 'futuro', 'Futuro']];
+  function epoca(anio) { for (let i = 0; i < EPOCAS.length; i++) if (anio < EPOCAS[i][0]) return { id: EPOCAS[i][1], nombre: EPOCAS[i][2] }; return { id: 'futuro', nombre: 'Futuro' }; }
+  function actualizarEpoca(anioNP) {
+    const anio = N.S ? N.anio() : anioNP || estado.anioNP || 1930, e = epoca(anio).id, r = document.documentElement;
+    if (r.getAttribute('data-epoca') !== e) r.setAttribute('data-epoca', e);
   }
 
   // ---------- Formatos ----------
@@ -44,7 +48,7 @@ IA.ui = (function () {
   // Notación anglosajona: K, M, B (Billion = mil millones) y T
   function dinero(v, anio) {
     if (v === undefined || v === null || !isFinite(v)) return '—';
-    if (ajustes.dineroHoy && N.S) v = IA.mundo.aHoy(v, anio === undefined ? N.anio() : anio);
+    if (ajustes.dineroHoy && N.S) v = ART.mundo.aHoy(v, anio === undefined ? N.anio() : anio);
     const s = v < 0 ? '−$' : '$';
     const a = Math.abs(v);
     const corto = function (x, suf) { return s + decimal(x, x < 10 ? 2 : x < 100 ? 1 : 0) + ' ' + suf; };
@@ -65,9 +69,9 @@ IA.ui = (function () {
   }
   function pct(x, d) { return decimal(x * 100, d === undefined ? 1 : d) + ' %'; }
   // Fechas reales: la semana del juego empieza en su primer día; los estrenos de cine caen en su viernes
-  function fecha(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs), true) + ' · ' + t('semana') + ' ' + N.semana(tAbs); }
-  function fechaCorta(tAbs) { return IA.cal.texto(IA.cal.inicioDeT(tAbs)); }
-  function fechaEstreno(tAbs) { return IA.cal.textoCorto(IA.cal.viernesDeT(tAbs)) + ' ' + N.anio(tAbs); }
+  function fecha(tAbs) { return ART.cal.texto(ART.cal.inicioDeT(tAbs), true) + ' · ' + t('semana') + ' ' + N.semana(tAbs); }
+  function fechaCorta(tAbs) { return ART.cal.texto(ART.cal.inicioDeT(tAbs)); }
+  function fechaEstreno(tAbs) { return ART.cal.textoCorto(ART.cal.viernesDeT(tAbs)) + ' ' + N.anio(tAbs); }
   const esc = N.esc;
 
   // ---------- Íconos propios (SVG) ----------
@@ -88,6 +92,19 @@ IA.ui = (function () {
     estrella: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
     abajo: '<path d="M6 9l6 6 6-6"/>',
     varita: '<path d="M4 20L16 8M14 4v3M18 8h3M17 4l2-2M11 6l-1-1M18 11l1 1"/>',
+    calendario: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    corazon: '<path d="M12 20s-7-4.4-9-8.6C1.6 8.2 3.6 5 6.8 5c2 0 3.5 1.2 4.2 2.6C11.7 6.2 13.2 5 15.2 5c3.2 0 5.2 3.2 3.8 6.4C19 15.6 12 20 12 20z"/>',
+    moneda: '<circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.6-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.9-2.8 2.1 0 2.9 5.8 1.4 5.8 4.3 0 1.2-1.3 2.1-3 2.1-1.3 0-2.4-.6-3-1.5M12 6v1.8M12 16.2V18"/>',
+    trofeo: '<path d="M8 4h8v4a4 4 0 0 1-8 0V4z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 12v4M8 20h8M9.5 16h5"/>',
+    rapido: '<path d="M4 6l8 6-8 6zM12 6l8 6-8 6z" fill="currentColor"/>',
+    subir: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+    bajar: '<path d="M12 4v12M7 11l5 5 5-5M4 20h16"/>',
+    bombilla: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/>',
+    flecha: '<path d="M9 6l6 6-6 6"/>',
+    libro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
+    carpeta: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>',
+    persona: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 4.5-6.5 8-6.5s6.5 2 8 6.5"/><path d="M19 3v5M16.5 5.5h5"/>',
+    pincel: '<path d="M14 4l6 6-8.5 8.5a3 3 0 0 1-4.2 0l-1.8-1.8a3 3 0 0 1 0-4.2L14 4z"/><path d="M5.5 16.5L3 21l4.5-2.5"/>',
   };
   function icono(nombre, titulo) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="' + (titulo ? 'false' : 'true') + '"' + (titulo ? ' role="img" aria-label="' + esc(titulo) + '"' : '') + '>' + (P[nombre] || '') + '</svg>';
@@ -147,14 +164,21 @@ IA.ui = (function () {
   // ---------- Lienzos: pósters, retratos, logos y gráficas se dibujan después de cada render ----------
   // Los pósters y retratos se dibujan cuando están por verse (en un celular, un catálogo largo ya no se dibuja entero de golpe)
   function dibujarPoster(cv) {
-    const o = IA.obras.porId(+cv.getAttribute('data-poster'));
-    if (o) IA.arte.posterEn(cv, IA.obras.paraPoster(o));
+    const v = cv.getAttribute('data-poster');
+    if (v === 'x') { // títulos sin obra (suministros, paquetes, piratas): cartel con los datos del lienzo
+      const tit = cv.getAttribute('data-tit') || '';
+      ART.arte.posterEn(cv, { id: N.hash(tit), titulo: tit, generos: [cv.getAttribute('data-gen') || 'Drama'], temas: [], anio: +cv.getAttribute('data-anio') || N.anio(), etapa: 'terminada', crit: null, pub: null, clas: cv.getAttribute('data-clas') || 'PG', premiosGanados: 0, creditos: {}, estudio: { nombre: cv.getAttribute('data-est') || '', logo: null } });
+      return;
+    }
+    const o = ART.obras.porId(+v);
+    if (o) ART.arte.posterEn(cv, ART.obras.paraPoster(o));
   }
   function dibujarRetrato(cv) {
-    if (cv.getAttribute('data-retrato') === 'nuevo') { if (estado.avatarNuevo) IA.arte.retratoEn(cv, estado.avatarNuevo, estado.avatarNuevo.anio); return; }
+    if (cv.getAttribute('data-retrato') === 'nuevo') { if (estado.avatarNuevo) ART.arte.retratoEn(cv, estado.avatarNuevo, estado.avatarNuevo.anio); return; }
+    if (cv.getAttribute('data-retrato') === 'tnuevo') { if (estado.talentoNuevo) ART.arte.retratoEn(cv, estado.talentoNuevo, estado.talentoNuevo.anio); return; }
     const id = +cv.getAttribute('data-retrato');
-    const tal = id === 999999 ? avatarComoTalento() : IA.talentos.porId(id);
-    if (tal) IA.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
+    const tal = id === 999999 ? avatarComoTalento() : ART.talentos.porId(id);
+    if (tal) ART.arte.retratoEn(cv, tal.aspecto ? tal : comoRetrato(tal), N.anio());
   }
   let vigia = null;
   const vigilados = new Set();
@@ -203,9 +227,11 @@ IA.ui = (function () {
     });
   }
   function quitarLogoPropio() { try { localStorage.removeItem(claveLogo()); } catch (e) { /* nada que quitar */ } logoClave = ''; logoImg = null; }
+  const SUB_IND = { Cine: 'Estudio de cine', 'Televisión': 'Cine y televisión', 'Música': 'Discográfica', Videojuegos: 'Estudio de videojuegos', Teatro: 'Compañía de teatro', Editorial: 'Casa editorial', Mixto: 'Grupo de medios' };
+  function subIndustria(id) { return SUB_IND[id] || id; }
   function dibujar(raiz) {
     const r = raiz || document;
-    if (IA.puntos) IA.puntos.convertir(r);
+    if (ART.puntos) ART.puntos.convertir(r);
     const v = vigiaPosters();
     // Los lienzos que ya salieron de la página (otra vista) se sueltan para no guardarlos en memoria
     if (v) vigilados.forEach(function (cv) { if (!cv.isConnected) { v.unobserve(cv); vigilados.delete(cv); } });
@@ -221,7 +247,7 @@ IA.ui = (function () {
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
       if (img && est && est.id === 0) { const q = Math.min(w, h) * 0.46; c.save(); c.beginPath(); c.arc(w / 2, h / 2, q, 0, Math.PI * 2); c.clip(); c.drawImage(img, w / 2 - q, h / 2 - q, q * 2, q * 2); c.restore(); }
-      else IA.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.36, L);
+      else ART.arte.logo(c, w / 2, h / 2, Math.min(w, h) * 0.36, L);
     });
     // Vista previa del letrero (logo, fondo, color de letras y tipo de letra)
     r.querySelectorAll('canvas[data-letrero]').forEach(function (cv) {
@@ -230,7 +256,8 @@ IA.ui = (function () {
       cv.width = w * d; cv.height = h * d;
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
-      IA.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'));
+      const ind = est ? est.industria : cv.getAttribute('data-ind'), suf = est ? est.suf : cv.getAttribute('data-suf');
+      ART.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'), null, suf || (ind ? subIndustria(ind) : ''));
     });
     r.querySelectorAll('canvas[data-grafica]').forEach(function (cv) {
       const g = graficas[cv.getAttribute('data-grafica')];
@@ -258,9 +285,10 @@ IA.ui = (function () {
   const cacheAspecto = {};
   function comoRetrato(tal) {
     const clave = (N.S ? N.S.semilla : '') + '|' + tal.id;
-    if (!cacheAspecto[clave]) cacheAspecto[clave] = IA.arte.aspectoNuevo(N.hash(clave), tal.reg || 'nam');
+    if (!cacheAspecto[clave]) cacheAspecto[clave] = ART.arte.aspectoNuevo(N.hash(clave), tal.reg || 'nam');
     const propio = (tal.id === 999999 || tal.jugador) && N.S && N.S.avatar && N.S.avatar.asp;
-    return { id: tal.id, nombre: tal.nom, sexo: tal.sx, edad: N.anio() - tal.nac, oficio: tal.of, aspecto: propio ? Object.assign({}, cacheAspecto[clave], N.S.avatar.asp) : cacheAspecto[clave] };
+    const asp = propio ? N.S.avatar.asp : tal.asp; // el avatar y los talentos creados por el jugador tienen su aspecto elegido
+    return { id: tal.id, nombre: tal.nom, sexo: tal.sx, edad: N.anio() - tal.nac, oficio: tal.of, aspecto: asp ? Object.assign({}, cacheAspecto[clave], asp) : cacheAspecto[clave] };
   }
   function avatarComoTalento() {
     const a = N.S.avatar;
@@ -272,10 +300,16 @@ IA.ui = (function () {
     const app = document.getElementById('app');
     if (!N.S) {
       app.classList.add('sin-juego');
-      document.getElementById('vista').innerHTML = estado.np ? IA.pantallas.nuevaPartida() : IA.pantallas.portada();
+      document.getElementById('vista').innerHTML = estado.np ? ART.pantallas.nuevaPartida() : ART.pantallas.portada();
       document.getElementById('vista').scrollTop = 0;
       dibujar(document.getElementById('vista'));
-      IA.pantallas.alMostrar('portada');
+      ART.pantallas.alMostrar('portada');
+      return;
+    }
+    if (N.S.taller && ART.taller) { // Taller creativo: su propia pantalla, sin barra ni menú
+      app.classList.add('sin-juego');
+      document.getElementById('vista').innerHTML = ART.taller.vista();
+      dibujar(document.getElementById('vista'));
       return;
     }
     app.classList.remove('sin-juego');
@@ -286,17 +320,18 @@ IA.ui = (function () {
     renderVista();
   }
   function renderBarra() {
+    actualizarEpoca();
     const S = N.S, est = S.estudios[0];
     const rojo = est.caja < 0 ? ' rojo' : '';
     const auto = !!estado.auto;
     const etiquetaRitmo = { semana: t('ritmo_semana'), mes: t('ritmo_mes'), evento: t('ritmo_evento'), auto: t('ritmo_auto') }[ajustes.ritmo];
     document.getElementById('barra').innerHTML =
-      '<div class="marca"><canvas data-logo="0" width="34" height="34"></canvas><b style="font:' + esc(IA.arte.fuenteLetra((est.logo || {}).f, 16)) + '">' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
-      '<button class="fecha" data-a="abrirCalendario" aria-label="Abrir el calendario"><b>' + esc(IA.cal.texto(IA.cal.hoy())) + '</b><span class="tenue">' + t('semana') + ' ' + N.semana() + '</span></button>' +
-      '<button class="fans" data-a="verFans" aria-label="Fans"><b class="cifra">' + grande(S.fans || 0) + '</b><span>fans</span></button>' +
-      '<button class="dinero' + rojo + '" data-a="alternarDinero" aria-label="' + t('toca_dinero') + '"><b class="cifra">' + dinero(est.caja) + '</b><span>' + (ajustes.dineroHoy ? t('hoy') : t('epoca')) + '</span></button>' +
+      '<div class="marca"><canvas data-logo="0" width="36" height="36"></canvas><b style="font:' + esc(ART.arte.fuenteLetra((est.logo || {}).f, 16)) + '">' + esc(est.nombre) + (est.suf ? ' <span class="tenue">' + esc(est.suf) + '</span>' : '') + '</b></div>' +
+      '<button class="indicador fecha" data-a="abrirCalendario" aria-label="Abrir el calendario">' + icono('calendario') + '<span class="col"><b>' + esc(ART.cal.texto(ART.cal.hoy())) + '</b><span>' + t('semana') + ' ' + N.semana() + '</span></span></button>' +
+      '<button class="indicador fans" data-a="verFans" aria-label="Fans">' + icono('corazon') + '<span class="col"><b class="cifra">' + grande(S.fans || 0) + '</b><span>fans</span></span></button>' +
+      '<button class="indicador dinero' + rojo + '" data-a="alternarDinero" aria-label="' + t('toca_dinero') + '">' + icono('moneda') + '<span class="col"><b class="cifra">' + dinero(est.caja) + '</b><span>' + (ajustes.dineroHoy ? t('hoy') : t('epoca')) + '</span></span></button>' +
       '<span class="espacio"></span>' +
-      '<button class="avanzar' + (auto ? ' auto' : '') + '" data-a="avanzar" aria-label="' + (auto ? t('pausa') : t('avanzar') + ': ' + esc(etiquetaRitmo)) + '">' + icono(auto ? 'pausa' : 'avanzar') + '<span>' + (auto ? t('pausa') : esc(etiquetaRitmo)) + '</span></button>' +
+      '<button class="avanzar' + (auto ? ' auto' : '') + '" data-a="avanzar" aria-label="' + (auto ? t('pausa') : t('avanzar') + ': ' + esc(etiquetaRitmo)) + '">' + icono(auto ? 'pausa' : ajustes.ritmo === 'semana' ? 'avanzar' : 'rapido') + '<span>' + (auto ? t('pausa') : esc(etiquetaRitmo)) + '</span></button>' +
       '<button class="ico" data-a="menuRitmo" aria-label="' + t('ritmo') + '">' + icono('abajo') + '</button>' +
       '<button class="ico opcional" data-a="abrirGuardado" aria-label="' + t('guardar') + '">' + icono('guardar') + '</button>' +
       '<button class="ico" data-a="abrirPausa" aria-label="Pausa y ajustes">' + icono('ajustes') + '</button>';
@@ -304,7 +339,7 @@ IA.ui = (function () {
   }
   function renderMenu() {
     const ic = { estudio: 'estudio', obras: 'obras', talento: 'talento', mundo: 'mundo', negocio: 'negocio' };
-    const vis = IA.metas && N.S ? IA.metas.seccionesVisibles() : null; // tutorial
+    const vis = ART.metas && N.S ? ART.metas.seccionesVisibles() : null; // tutorial
     document.getElementById('menu').innerHTML = SECCIONES.filter(function (s) { return !vis || vis.indexOf(s) >= 0; }).map(function (s) {
       return '<button class="nav' + (estado.seccion === s ? ' on' : '') + '" data-a="seccion" data-v="' + s + '"' + (estado.seccion === s ? ' aria-current="page"' : '') + '>' + icono(ic[s]) + '<span>' + t('sec_' + s) + '</span></button>';
     }).join('');
@@ -312,28 +347,33 @@ IA.ui = (function () {
   function renderVista(mantenerScroll) {
     const v = document.getElementById('vista');
     const y = v.scrollTop;
-    v.innerHTML = IA.pantallas[estado.seccion]();
+    v.innerHTML = ART.pantallas[estado.seccion]();
     // La pestaña activa siempre a la vista (en el celular las pestañas se deslizan)
     const pa = v.querySelector('.pestanas .pestana.on'); if (pa && pa.scrollIntoView && pa.parentNode.scrollWidth > pa.parentNode.clientWidth) { const c = pa.parentNode; c.scrollLeft = pa.offsetLeft - c.offsetLeft - 16; }
     dibujar(v);
-    IA.pantallas.alMostrar(estado.seccion);
+    ART.pantallas.alMostrar(estado.seccion);
     v.scrollTop = mantenerScroll ? y : 0;
   }
   // Refresco ligero tras avanzar: barra, vista (manteniendo el scroll) y ficha abierta
   function refrescar() {
-    if (!N.S) return render();
+    if (!N.S || N.S.taller) return render();
     renderBarra();
     // La lista de talentos (40 retratos) no se redibuja con cada semana: se actualiza al volver a entrar
     if (estado.seccion !== 'talento') renderVista(true);
-    if (fichaAbierta() && estado.fichaActual && IA.pantallas.refrescarFicha) IA.pantallas.refrescarFicha(estado.fichaActual);
+    if (fichaAbierta() && estado.fichaActual && ART.pantallas.refrescarFicha) ART.pantallas.refrescarFicha(estado.fichaActual);
   }
   function irA(seccion, sub) {
+    const cambio = estado.seccion !== seccion;
     estado.seccion = seccion;
     if (sub) estado.sub[seccion] = sub;
     cerrarFicha();
+    document.getElementById('app').setAttribute('data-seccion', seccion);
     renderMenu();
     renderVista();
-    document.getElementById('vista').scrollTop = 0;
+    const v = document.getElementById('vista');
+    v.scrollTop = 0;
+    // Al cambiar de sección, la vista entra con un leve deslizamiento (no al refrescar cada semana)
+    if (cambio && !ajustes.movimiento) { v.classList.remove('entra'); void v.offsetWidth; v.classList.add('entra'); clearTimeout(irA.t); irA.t = setTimeout(function () { v.classList.remove('entra'); }, 400); }
   }
 
   // ---------- Eventos: un solo oyente para todos los botones ----------
@@ -347,7 +387,7 @@ IA.ui = (function () {
       const fn = acciones[el.getAttribute('data-a')];
       if (!fn) return;
       ev.preventDefault();
-      if (IA.arte && el.tagName === 'BUTTON') IA.arte.sonido('clic');
+      if (ART.arte && el.tagName === 'BUTTON') ART.arte.sonido('clic');
       try { fn(el.getAttribute('data-v'), el, ev); } catch (e) { console.error(e); aviso('Error: ' + e.message, 'mal'); }
     });
     document.addEventListener('change', function (ev) {
@@ -390,7 +430,7 @@ IA.ui = (function () {
   accion('alternarDinero', function () { ajuste('dineroHoy', !ajustes.dineroHoy); refrescar(); });
 
   return {
-    SECCIONES: SECCIONES, estado: estado, ajuste: ajuste, ajustes: function () { return ajustes; }, cargarAjustes: cargarAjustes,
+    SECCIONES: SECCIONES, estado: estado, epoca: epoca, actualizarEpoca: actualizarEpoca, ajuste: ajuste, ajustes: function () { return ajustes; }, cargarAjustes: cargarAjustes,
     aplicarAjustes: aplicarAjustes, dinero: dinero, numero: numero, grande: grande, pct: pct, fecha: fecha, fechaCorta: fechaCorta, fechaEstreno: fechaEstreno,
     decimal: decimal, icono: icono, aviso: aviso, abrirFicha: abrirFicha, refrescarFicha: refrescarFicha, cerrarFicha: cerrarFicha,
     fichaAbierta: fichaAbierta, modal: modal, cerrarModal: cerrarModal, modalAbierto: modalAbierto, dibujar: dibujar, logoPropio: logoPropio, ponerLogoPropio: ponerLogoPropio, quitarLogoPropio: quitarLogoPropio,

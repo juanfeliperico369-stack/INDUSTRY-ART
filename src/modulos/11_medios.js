@@ -7,35 +7,37 @@
 // antipiratería, ediciones, DLC, gratis con compras o suscripción, soporte, arcade y móviles. Teatro: temporadas en
 // sala con funciones y ocupación, giras y obra grabada. Libros: tapas, tamaños, audiolibro, libro digital,
 // traducciones, imprenta propia y cómics o mangas de tus franquicias. Cada proyecto tiene su portada.
-IA.medios = (function () {
+ART.medios = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, X = IA.taxonomia, T = IA.talentos;
+  const N = ART.n, D = ART.datos, X = ART.taxonomia, T = ART.talentos;
   // Piso de costos en dólares de 2025. Antes de 1912 el cine es chico y su presupuesto típico no sirve de vara para
   // los demás medios; el teatro cobra entradas a precio de su época, así que su costo nunca baja de una sala de hoy.
-  const tip = function (a, med) { a = a || N.anio(); return Math.max(IA.economia.presupuestoTipico(a), IA.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
+  const ESCALA_MUSICA = 0.22;
+  const tip = function (a, med) { a = a || N.anio(); return Math.max(ART.economia.presupuestoTipico(a), ART.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
   function industria() { const e = N.S && N.S.estudios[0]; return D.industria(e && e.industria); }
   function especial(med) { return industria().meds.indexOf(med) >= 0; }
-  const ep = function (v, a) { return IA.mundo.aEpoca(v, a || N.anio()); };
+  const ep = function (v, a) { return ART.mundo.aEpoca(v, a || N.anio()); };
   // ---------- Datos de cada medio ----------
   const MED = {
-    musica: { nombre: 'Música', desde: 1877, of: ['interprete', 'musica', 'produccion'], decae: 0.9, base: 0.05, eqk: 0.15, premio: 'Premios Vinilo', premioDesde: 1959, cap: 'sonido',
-      tipos: [{ id: 'sencillo', nombre: 'Sencillo', desde: 1890, k: 0.2, sem: 3 }, { id: 'ep', nombre: 'EP', desde: 1952, k: 0.4, sem: 5 }, { id: 'album', nombre: 'Álbum de estudio', desde: 1900, k: 1, sem: 10 },
+    musica: { nombre: 'Música', desde: 1700, of: ['interprete', 'musica', 'produccion'], decae: 0.9, base: 0.05, eqk: 0.15, premio: 'Premios Vinilo', premioDesde: 1959, cap: 'sonido',
+      tipos: [{ id: 'partitura', nombre: 'Partitura impresa', desde: 1700, hasta: 1930, k: 0.15, sem: 4 }, { id: 'sencillo', nombre: 'Sencillo', desde: 1890, k: 0.2, sem: 3 }, { id: 'ep', nombre: 'EP', desde: 1952, k: 0.4, sem: 5 }, { id: 'album', nombre: 'Álbum de estudio', desde: 1900, k: 1, sem: 10 },
         { id: 'doble', nombre: 'Álbum doble', desde: 1960, k: 1.7, sem: 16 }, { id: 'digital', nombre: 'Álbum digital', desde: 2003, k: 0.6, sem: 8 },
         { id: 'jingle', nombre: 'Jingle', desde: 1926, k: 0.08, sem: 2, encargo: 1 }, { id: 'banda', nombre: 'Banda sonora', desde: 1927, k: 0.6, sem: 8, peli: 1 }] },
     juegos: { nombre: 'Videojuegos', desde: 1972, of: ['direccion', 'guion', 'arte', 'efectos', 'musica'], decae: 0.88, base: 0.15, eqk: 0.5, premio: 'Premios Cartucho', premioDesde: 1982, cap: 'graficos' },
-    teatro: { nombre: 'Teatro', desde: 1850, of: ['direccion', 'interprete', 'guion', 'vestuario'], decae: 1, base: 0.01, eqk: 0.04, premio: 'Premios Telón', premioDesde: 1947, cap: 'escuela' },
-    libros: { nombre: 'Libros', desde: 1850, of: ['guion', 'arte'], decae: 0.93, base: 0.02, eqk: 0.1, premio: 'Premios Pluma', premioDesde: 1917, cap: 'imprenta' },
+    teatro: { nombre: 'Teatro', desde: 1700, of: ['direccion', 'interprete', 'guion', 'vestuario'], decae: 1, base: 0.01, eqk: 0.04, premio: 'Premios Telón', premioDesde: 1947, cap: 'escuela' },
+    libros: { nombre: 'Libros', desde: 1700, of: ['guion', 'arte'], decae: 0.93, base: 0.02, eqk: 0.1, premio: 'Premios Pluma', premioDesde: 1917, cap: 'imprenta' },
   };
   // Mercado mundial de cada medio, en miles de millones de dólares de 2025 (para la cuota)
   const MERCADO = {
-    musica: [[1877, 0.01], [1900, 0.4], [1929, 3], [1933, 1], [1950, 5], [1978, 30], [1999, 42], [2014, 15], [2025, 30], [2150, 45]],
+    musica: [[1700, 0.04], [1800, 0.08], [1877, 0.1], [1900, 0.4], [1929, 3], [1933, 1], [1950, 5], [1978, 30], [1999, 42], [2014, 15], [2025, 30], [2150, 45]],
     juegos: [[1972, 0.05], [1982, 8], [1985, 2], [1995, 25], [2008, 60], [2025, 180], [2150, 400]],
-    teatro: [[1850, 2], [1920, 6], [1950, 6], [2000, 12], [2020, 4], [2025, 20], [2150, 30]],
-    libros: [[1850, 8], [1920, 25], [1960, 50], [2007, 110], [2025, 120], [2150, 140]],
+    teatro: [[1700, 0.6], [1800, 1.2], [1850, 2], [1920, 6], [1950, 6], [2000, 12], [2020, 4], [2025, 20], [2150, 30]],
+    libros: [[1700, 1.5], [1800, 4], [1850, 8], [1920, 25], [1960, 50], [2007, 110], [2025, 120], [2150, 140]],
   };
   // Música: formatos por época (peso relativo) y precio por unidad en dólares de 2025
   const FMT_MUSICA = [
-    { id: 'cilindro', nombre: 'Cilindro', p: 20, w: [[1877, 1], [1905, 1], [1915, 0]] },
+    { id: 'partitura', nombre: 'Partituras', p: 8, w: [[1700, 1], [1877, 1], [1900, 0.3], [1930, 0.05], [1950, 0]] },
+    { id: 'cilindro', nombre: 'Cilindro', p: 20, w: [[1876, 0], [1877, 1], [1905, 1], [1915, 0]] },
     { id: 'pizarra', nombre: 'Disco de pizarra', p: 15, w: [[1895, 0], [1905, 1], [1948, 1], [1958, 0]] },
     { id: 'vinilo', nombre: 'Vinilo', p: 25, w: [[1947, 0], [1950, 1], [1975, 1], [1988, 0.15], [2006, 0.02], [2020, 0.1], [2150, 0.06]] },
     { id: 'casete', nombre: 'Casete', p: 15, w: [[1962, 0], [1968, 0.2], [1985, 0.8], [1995, 0.3], [2005, 0]] },
@@ -60,6 +62,76 @@ IA.medios = (function () {
   const SALAS = [{ id: 'chica', nombre: 'Sala chica', asientos: 200, k: 0.35 }, { id: 'mediana', nombre: 'Sala mediana', asientos: 800, k: 1 }, { id: 'grande', nombre: 'Gran teatro', asientos: 2000, k: 2.3 }];
   const TAPAS = [{ id: 'blanda', nombre: 'Tapa blanda', p: 12, k: 1 }, { id: 'dura', nombre: 'Tapa dura', p: 25, k: 1.6 }, { id: 'lujo', nombre: 'Edición de lujo', p: 45, k: 2.5 }];
   const TAMANOS = [{ id: 'bolsillo', nombre: 'Bolsillo', k: 0.8 }, { id: 'estandar', nombre: 'Estándar', k: 1 }, { id: 'grande', nombre: 'Gran formato', k: 1.3 }];
+  // Videojuegos: tipo de imagen (k = costo, sem = semanas) y cuánto lo pide el público en cada época
+  const DIMENSIONES = [
+    { id: 'texto', nombre: 'Por texto', desde: 1976, k: 0.45, sem: 0.7, gusto: [[1976, 1.3], [1985, 1], [1995, 0.45], [2010, 0.35], [2150, 0.3]], texto: 'Aventuras escritas y rol de texto: baratas y profundas; de nicho desde los noventa.' },
+    { id: '2d', nombre: '2D', desde: 1972, k: 1, sem: 1, gusto: [[1972, 1.2], [1990, 1.15], [2000, 0.75], [2012, 0.9], [2150, 0.7]], texto: 'Sprites, plataformas y pixel art: el clásico de siempre; vuelve con los indies.' },
+    { id: 'iso', nombre: 'Isométrico (2,5D)', desde: 1982, k: 1.25, sem: 1.1, gusto: [[1982, 0.9], [1995, 1.1], [2005, 0.8], [2150, 0.7]], texto: 'Perspectiva en diagonal: ideal para estrategia y rol.' },
+    { id: '3d', nombre: '3D', desde: 1992, k: 1.8, sem: 1.35, gusto: [[1992, 0.9], [1996, 1.2], [2005, 1.35], [2150, 1.2]], texto: 'Mundos en tres dimensiones: caros y espectaculares; los primeros años se ven toscos.' },
+    { id: 'rv', nombre: 'Realidad virtual', desde: 2016, k: 2.2, sem: 1.5, gusto: [[2016, 0.35], [2030, 0.6], [2045, 0.95], [2080, 1.1], [2150, 0.9]], texto: 'Necesita un visor: público pequeño que crece; inmersión total.', plat: 'visor' },
+    { id: 'neuro', nombre: 'Inmersión neuronal', desde: 2085, k: 3, sem: 1.7, gusto: [[2085, 0.6], [2100, 1.2], [2150, 1.6]], texto: 'Se siente con todo el cuerpo: el futuro del juego.', plat: 'neuro' },
+  ];
+  // Estilos de producción de cada medio: k multiplica el costo; los géneros afines suman público
+  const ESTILOS_MED = [
+    { id: 'estandar', nombre: 'Estándar', desde: 0, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 1, crit: 0, pub: 0, texto: 'Lo de siempre: sin riesgos ni sorpresas.' },
+    { id: 'mas16', nombre: '+16', desde: 0, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 1, crit: 0, pub: 0, gen: 'Acción,Terror,Thriller,Crimen,Shooter,Trap,Rap', texto: 'Más fuerte de lo habitual: atrae a los jóvenes y aleja a las familias.' },
+    { id: 'adultos', nombre: 'Adultos', desde: 0, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 1, crit: 1, pub: 0, gen: 'Drama,Romance,Crimen,Noir,Novela negra', texto: 'Temas y miradas para gente grande, sin concesiones.' },
+    { id: 'glamour', nombre: 'Glamour', desde: 0, meds: ['teatro', 'musica'], k: 1.12, crit: -1, pub: 1, gen: 'Romance,Musical,Comedia,Drama,Pop,Disco,Balada', texto: 'Vestuario, estrellas y brillo: el público viene a mirar.' },
+    { id: 'caricatura', nombre: 'Caricatura', desde: 0, meds: ['juegos', 'teatro', 'libros'], k: 0.95, crit: -1, pub: 1, gen: 'Comedia,Familiar,Aventura,Infantil,Plataformas,Party', texto: 'Todo exagerado, rápido y gracioso.' },
+    { id: 'anime', nombre: 'Anime', desde: 1958, meds: ['juegos', 'libros'], k: 0.9, crit: 1, pub: 1, gen: 'Acción,Fantasía,Ciencia ficción,Aventura,Romance,RPG,Manga,Shōnen,Shōjo', texto: 'Ojos grandes, acción y emociones intensas.' },
+    { id: 'espectaculo', nombre: 'Gran espectáculo', desde: 0, meds: ['juegos', 'teatro'], k: 1.15, crit: -1, pub: 2, gen: 'Épico,Acción,Aventura,Fantasía,Musical,Ciencia ficción,Bélico,Ópera', texto: 'Multitudes, efectos y decorados enormes: llena salas, pero cuesta.' },
+    { id: 'contemplativo', nombre: 'Contemplativo', desde: 1950, meds: ['juegos', 'libros'], k: 0.95, crit: 3, pub: -3, gen: 'Drama,Romance,Ciencia ficción,Poesía,Literaria', texto: 'Ritmo lento y silencio: el tiempo también cuenta.' },
+    { id: 'independiente', nombre: 'Independiente de bajo costo', desde: 1950, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 0.75, crit: 1, pub: -1, gen: 'Drama,Comedia,Terror,Romance,Indie', texto: 'Pocos recursos y mucha libertad: el riesgo lo pones tú.' },
+    { id: 'videoclip', nombre: 'Videoclip', desde: 1981, meds: ['musica'], k: 1.1, crit: -1, pub: 1, gen: 'Pop,Hip hop,Electrónica,K-Pop,Dance,Rock', texto: 'Montaje rápido, música y colores fuertes.' },
+    { id: 'found', nombre: 'Metraje encontrado', desde: 1980, meds: ['juegos'], k: 0.6, crit: -1, pub: 0, gen: 'Terror,Horror,Misterio,Supervivencia', texto: 'Grabaciones «reales» halladas: barato y aterrador.' },
+    { id: 'plano', nombre: 'Plano secuencia', desde: 1948, meds: ['juegos'], k: 1.05, crit: 2, pub: 0, gen: 'Acción,Shooter,Sigilo,Horror', texto: 'Sin cortes: difícil de hacer, inolvidable si sale bien.' },
+    { id: 'stopmotion', nombre: 'Stop motion', desde: 1900, meds: ['juegos'], k: 1.1, crit: 1, pub: 0, gen: 'Aventura,Puzzle,Plataformas,Horror', texto: 'Figuras movidas cuadro a cuadro: lento, artesanal y encantador.' },
+    { id: 'expresionista', nombre: 'Expresionista', desde: 1919, meds: ['teatro', 'libros'], k: 1, crit: 2, pub: -1, gen: 'Terror,Drama,Psicológico,Gótico,Experimental', texto: 'Luces y sombras torcidas: el miedo se ve en los decorados.' },
+    { id: 'commedia', nombre: 'Commedia dell\'arte', desde: 0, meds: ['teatro'], k: 0.85, crit: 1, pub: 1, gen: 'Comedia,Farsa,Improvisación,Tragicomedia', texto: 'Máscaras, improvisación y personajes de siempre.' },
+    { id: 'guinol', nombre: 'Gran guiñol', desde: 1897, meds: ['teatro'], k: 0.9, crit: -1, pub: 1, gen: 'Terror,Misterio,Melodrama', texto: 'Teatro de sustos y sangre de mentira.' },
+    { id: 'sinfonico', nombre: 'Sinfónico', desde: 1700, meds: ['musica', 'teatro'], k: 1.4, crit: 2, pub: 0, gen: 'Clásica,Banda sonora,Ópera,Musical,Metal', texto: 'Orquesta completa: grandeza y emoción.' },
+    { id: 'acustico', nombre: 'Acústico', desde: 0, meds: ['musica'], k: 0.8, crit: 1, pub: 0, gen: 'Folk,Clásica,Indie,Jazz,Bolero,Balada,Country,Flamenco', texto: 'Pocos instrumentos y la voz al frente.' },
+    { id: 'lofi', nombre: 'Lo-fi casero', desde: 1990, meds: ['musica'], k: 0.5, crit: 0, pub: -1, gen: 'Indie,Hip hop,Electrónica,Pop,Lo-fi', texto: 'Grabado en casa, con encanto imperfecto.' },
+    { id: 'folletin', nombre: 'Folletín por entregas', desde: 1836, meds: ['libros'], k: 0.9, crit: -1, pub: 1, gen: 'Romance,Drama,Aventura,Misterio,Serializada,Novela', texto: 'Capítulos que terminan en suspenso: el lector vuelve cada semana.' },
+    { id: 'pulp', nombre: 'Pulp', desde: 1896, meds: ['libros'], k: 0.7, crit: -2, pub: 1, gen: 'Aventura,Ciencia ficción,Misterio,Terror,Crimen,Pulp', texto: 'Papel barato y emoción sin pausa.' },
+    { id: 'pixel', nombre: 'Pixel art', desde: 1971, meds: ['juegos'], k: 0.8, crit: 1, pub: 0, gen: 'Plataformas,Aventura,RPG,Acción,Puzzle,Arcade,Metroidvania,Roguelike', texto: 'Gráficos de cuadritos con aire de clásico.' },
+    { id: 'realista', nombre: 'Superproducción realista', desde: 2000, meds: ['juegos'], k: 1.5, crit: 0, pub: 2, gen: 'Acción,Aventura,Mundo abierto,Shooter,Carreras,Deportes', texto: 'Gráficos de cine y mundos enormes: el juego más caro del año.' },
+  ];
+  function estilosMedio(med, a) { a = a || N.anio(); return ESTILOS_MED.filter(function (e) { return e.meds.indexOf(med) >= 0 && e.desde <= a; }); }
+  function estiloMedio(id) { return de(ESTILOS_MED, id, 'estandar'); }
+  // Si el género del proyecto es afín al estilo (comparación por palabras: «Indie» sirve para «Indie / Alternativa»)
+  function estiloAfin(es, gen) {
+    if (!es.gen || !gen) return false;
+    const g = String(gen).toLowerCase();
+    return es.gen.split(',').some(function (x) { return g.indexOf(x.toLowerCase()) >= 0; });
+  }
+  const MODOS_J = [{ id: 'solo', nombre: 'Un jugador', desde: 1972, k: 1, f: 1, d: 0 }, { id: 'local', nombre: 'Multijugador local', desde: 1975, k: 1.08, f: 1.06, d: 0.005 },
+    { id: 'online', nombre: 'En línea', desde: 1995, k: 1.2, f: 1.12, d: 0.02 }, { id: 'masivo', nombre: 'Masivo en línea', desde: 1997, k: 1.6, f: 1.2, d: 0.04, servidores: 1 }];
+  // Música: grabación, video, promoción y plataformas de cada época (nombres inventados)
+  const ESTUDIOS_GRAB = [{ id: 'casera', nombre: 'Grabación casera', k: 0.6, q: -4 }, { id: 'pro', nombre: 'Estudio profesional', k: 1, q: 0 }, { id: 'lujo', nombre: 'Estudio de lujo', k: 1.6, q: 4 }];
+  const PROMOS_M = [{ id: 'ninguna', nombre: 'Sin promoción', k: 0, f: 1, desde: 1877 }, { id: 'radio', nombre: 'Radio y prensa', k: 0.15, f: 1.12, desde: 1922 }, { id: 'gira', nombre: 'Gira de presentación', k: 0.3, f: 1.22, desde: 1900 }, { id: 'redes', nombre: 'Redes y listas de reproducción', k: 0.2, f: 1.2, desde: 2008 }];
+  const PLAT_MUSICA = [
+    { id: 'fisico', nombre: 'Tiendas de discos', desde: 1877, u: 'copias', w: [[1877, 1], [1980, 0.8], [2000, 0.75], [2010, 0.3], [2020, 0.08], [2150, 0.05]] },
+    { id: 'radio', nombre: 'Radio Ondas', desde: 1922, u: 'emisiones', pago: 40, w: [[1921, 0], [1935, 0.25], [1980, 0.18], [2010, 0.1], [2150, 0.05]] },
+    { id: 'tv', nombre: 'Canal TeleClip', desde: 1981, u: 'emisiones', pago: 300, w: [[1980, 0], [1986, 0.1], [2000, 0.08], [2012, 0.03], [2150, 0.01]], video: 1 },
+    { id: 'descarga', nombre: 'Tienda Pulsar', desde: 2001, u: 'descargas', pago: 1, w: [[2000, 0], [2006, 0.2], [2012, 0.25], [2020, 0.03], [2030, 0]] },
+    { id: 'audio', nombre: 'Sonora', desde: 2008, u: 'reproducciones', pago: 0.004, w: [[2007, 0], [2013, 0.15], [2020, 0.62], [2150, 0.66]] },
+    { id: 'video', nombre: 'ClipNet', desde: 2005, u: 'vistas', pago: 0.003, w: [[2004, 0], [2010, 0.07], [2020, 0.12], [2150, 0.12]], video: 1 },
+  ];
+  // Libros y teatro: extensión, primera tirada, gira de firmas y precio de la entrada
+  const EXTENSIONES = [{ id: 'corta', nombre: 'Novela corta (120 páginas)', k: 0.7, sem: 0.7, f: 0.9 }, { id: 'novela', nombre: 'Novela (320 páginas)', k: 1, sem: 1, f: 1 }, { id: 'saga', nombre: 'Saga larga (640 páginas)', k: 1.6, sem: 1.5, f: 1.12 }];
+  const TIRADAS = [{ id: 'corta', nombre: 'Corta (3.000)', k: 0.85, f: 0.85 }, { id: 'normal', nombre: 'Normal (15.000)', k: 1, f: 1 }, { id: 'grande', nombre: 'Grande (60.000)', k: 1.3, f: 1.15, riesgo: 1 }];
+  const PRECIOS_T = [{ id: 'popular', nombre: 'Entrada popular', p: 60, ocup: 0.08 }, { id: 'normal', nombre: 'Entrada normal', p: 90, ocup: 0 }, { id: 'premium', nombre: 'Entrada premium', p: 140, ocup: -0.08 }];
+  function de(lista, id, def) { return lista.filter(function (x) { return x.id === id; })[0] || lista.filter(function (x) { return x.id === def; })[0] || lista[0]; }
+  function dimensionesDe(a) { return DIMENSIONES.filter(function (x) { return x.desde <= (a || N.anio()); }); }
+  function gustoDim(id, a) { return N.interp(de(DIMENSIONES, id, '2d').gusto, a || N.anio()); }
+  function dimRecomendada(a) { let m = DIMENSIONES[1], v = -1; dimensionesDe(a).forEach(function (x) { const g = gustoDim(x.id, a) / Math.pow(x.k, 0.35); if (g > v) { v = g; m = x; } }); return m.id; }
+  function partesMusica(a, p) {
+    const c = (p && p.cfg) || {};
+    const ws = PLAT_MUSICA.map(function (x) { let w = x.desde <= a ? Math.max(0, N.interp(x.w, a)) : 0; if (x.video && c.video) w *= 2.2; if (x.id === 'audio' && c.exclusiva) w *= 1.25; else if (c.exclusiva && x.id !== 'audio') w *= 0.85; return w; });
+    const s = ws.reduce(function (x, y) { return x + y; }, 0) || 1;
+    return PLAT_MUSICA.map(function (x, i) { return { id: x.id, nombre: x.nombre, u: x.u, pago: x.pago, parte: ws[i] / s }; }).filter(function (x) { return x.parte > 0.002; });
+  }
   // La imprenta propia se construye como un piso más
   if (!D.pisos.some(function (x) { return x.id === 'imprenta'; })) D.pisos.push({ id: 'imprenta', nombre: 'Imprenta propia', desde: 1850, costo: 0.4, efecto: 'Tus libros cuestan 30 % menos de imprimir y caben más proyectos de libros' });
   X.medios.forEach(function (m) { m.activo = true; });
@@ -68,7 +140,7 @@ IA.medios = (function () {
   function disponible(med, anio) { return (anio || N.anio()) >= MED[med].desde; }
   function tipos(med, anio) {
     const a = anio || N.anio();
-    if (med === 'musica') return MED.musica.tipos.filter(function (x) { return x.desde <= a; });
+    if (med === 'musica') return MED.musica.tipos.filter(function (x) { return x.desde <= a && (!x.hasta || x.hasta >= a); });
     const l = X.tiposPorMedio[med] || [];
     return l.filter(function (x) { return !(med === 'libros' && x === 'Manga' && a < 1950) && !(med === 'juegos' && ['Mundo abierto', 'Sandbox'].indexOf(x) >= 0 && a < 1995); }).map(function (x) { return { id: x, nombre: x, k: 1, sem: 0 }; });
   }
@@ -76,7 +148,7 @@ IA.medios = (function () {
   function famDe(med, gen) { return familias(med).filter(function (f) { return f.generos.indexOf(gen) >= 0; })[0] || familias(med)[0]; }
   function porId(id) { return st().p.filter(function (p) { return p.id === +id; })[0] || null; }
   function proyectos(med) { return st().p.filter(function (p) { return !med || p.med === med; }); }
-  function capacidad(med) { return 2 + (IA.imperio.tiene(MED[med].cap) ? 1 : 0) + (especial(med) ? 1 : 0); }
+  function capacidad(med) { return 2 + (ART.imperio.tiene(MED[med].cap) ? 1 : 0) + (especial(med) ? 1 : 0); }
   function enMarcha(med) { return proyectos(med).filter(function (p) { return p.et === 'produccion' || p.et === 'ensayo'; }).length; }
   function habMedio(t, med) { return T.perfilExtra(t).medios[med] || t.hab; }
   // Equipo recomendado: lo mejor disponible en ese medio dentro del presupuesto
@@ -97,30 +169,40 @@ IA.medios = (function () {
   function borrador(med, op) {
     const a = N.anio(), o = op || {};
     const tp = tipos(med)[0], fam = familias(med)[0];
-    const b = { med: med, tipo: o.tipo || (med === 'musica' ? 'album' : tp.id), gen: o.gen || (fam ? fam.generos[0] : 'General'), esc: o.esc === undefined ? 1 : o.esc, tit: o.tit || IA.obras.tituloNuevo(['Drama']), cfg: {} };
-    if (med === 'musica') b.cfg = { banda: o.banda || null, peli: o.peli || null };
-    if (med === 'juegos') b.cfg = { plats: platsRecomendadas(a), motor: null, idiomas: a >= 1990 ? 3 : 1, anti: 0, modelo: 'completo', edicion: 0 };
-    if (med === 'teatro') b.cfg = { sala: 'mediana', funciones: 7, semanas: 12, ensayo: 6 };
-    if (med === 'libros') b.cfg = { tapa: 'blanda', tam: 'estandar', audio: 0, ebook: a >= 2007 ? 1 : 0, trad: 1, fr: o.fr || null };
+    const b = { med: med, tipo: o.tipo || (med === 'musica' ? (a >= 1900 ? 'album' : tp.id) : tp.id), gen: o.gen || (fam ? fam.generos[0] : 'General'), esc: o.esc === undefined ? 1 : o.esc, tit: o.tit || ART.obras.tituloNuevo(['Drama']), cfg: {} };
+    if (med === 'musica') b.cfg = { banda: o.banda || null, peli: o.peli || null, estudio: 'pro', video: a >= 1983 ? 1 : 0, promo: a >= 1922 ? 'radio' : 'ninguna', exclusiva: 0 };
+    if (med === 'juegos') b.cfg = { plats: platsRecomendadas(a), motor: null, idiomas: a >= 1990 ? 3 : 1, anti: 0, modelo: 'completo', edicion: 0, dim: dimRecomendada(a), modo: 'solo' };
+    if (med === 'teatro') b.cfg = { sala: 'mediana', funciones: 7, semanas: 12, ensayo: 6, precio: 'normal' };
+    if (med === 'libros') b.cfg = { tapa: 'blanda', tam: 'estandar', audio: 0, ebook: a >= 2007 ? 1 : 0, trad: 1, fr: o.fr || null, ext: 'novela', tirada: 'normal', firmas: 0 };
     b.eq = equipoRecomendado(med, b.esc);
     return recalcular(b);
   }
   function recalcular(b) {
-    const a = N.anio(), m = MED[b.med], t = tip(a, b.med) * (especial(b.med) ? industria().rebaja || 1 : 1);
+    // La música trabaja a otra escala que el cine: un álbum de estudio cuesta cerca de una vigésima parte de una película típica
+    const a = N.anio(), m = MED[b.med], t = tip(a, b.med) * (especial(b.med) ? industria().rebaja || 1 : 1) * (b.med === 'musica' ? ESCALA_MUSICA : 1);
     let k = (m.base + (b.med === 'teatro' ? 0.005 : 0.06) * b.esc) * (b.esc === 2 && b.med !== 'juegos' ? 1.6 : 1), sem = 8;
-    if (b.med === 'musica') { const tp = MED.musica.tipos.filter(function (x) { return x.id === b.tipo; })[0] || MED.musica.tipos[2]; k *= tp.k; sem = tp.sem; }
+    if (b.med === 'musica') {
+      const tp = MED.musica.tipos.filter(function (x) { return x.id === b.tipo; })[0] || MED.musica.tipos[2]; k *= tp.k; sem = tp.sem;
+      const eg = de(ESTUDIOS_GRAB, b.cfg.estudio, 'pro'), pr = de(PROMOS_M, b.cfg.promo, 'ninguna');
+      k *= eg.k * (1 + pr.k + (b.cfg.video && a >= 1981 ? 0.25 : 0));
+    }
     if (b.med === 'juegos') {
       const e = ESCALAS_J[N.limitar(b.esc, 0, 2)];
       k = 0.03 * e.k * N.interp([[1972, 0.15], [1985, 0.4], [2000, 1], [2025, 1.6]], a); sem = e.sem;
       const mo = motor(b.cfg.motor); if (mo) { k *= 0.9; sem = Math.round(sem * 0.85); }
       k *= 1 + b.cfg.plats.filter(function (p) { return !st().kits[p]; }).length * 0.05 + (b.cfg.idiomas - 1) * 0.02 + (b.cfg.edicion ? 0.03 : 0);
+      const di = de(DIMENSIONES, b.cfg.dim, '2d'), mo2 = de(MODOS_J, b.cfg.modo, 'solo');
+      k *= di.k * mo2.k; sem = Math.round(sem * di.sem * (mo2.id === 'masivo' ? 1.2 : 1));
     }
-    if (b.med === 'teatro') { const s = sala(b.cfg.sala); k *= s.k; sem = b.cfg.ensayo; }
+    if (b.med === 'teatro') { const s = sala(b.cfg.sala); k *= s.k * (b.cfg.precio === 'premium' ? 1.1 : 1); sem = b.cfg.ensayo; }
     if (b.med === 'libros') {
       const tp = TAPAS.filter(function (x) { return x.id === b.cfg.tapa; })[0], tm = TAMANOS.filter(function (x) { return x.id === b.cfg.tam; })[0];
-      k *= tp.k * tm.k * (IA.imperio.tiene('imprenta') ? 0.7 : 1) * (1 + (b.cfg.trad - 1) * 0.08) * (b.cfg.audio ? 1.15 : 1);
+      k *= tp.k * tm.k * (ART.imperio.tiene('imprenta') ? 0.7 : 1) * (1 + (b.cfg.trad - 1) * 0.08) * (b.cfg.audio ? 1.15 : 1);
       sem = ['Novela', 'Novela gráfica', 'Manga'].indexOf(b.tipo) >= 0 ? 20 : 12;
+      const ex = de(EXTENSIONES, b.cfg.ext, 'novela'), ti = de(TIRADAS, b.cfg.tirada, 'normal');
+      k *= ex.k * ti.k * (b.cfg.firmas ? 1.1 : 1); sem = Math.round(sem * ex.sem);
     }
+    k *= estiloMedio(b.cfg.pst).k;
     b.pp = Math.round(t * k);
     b.costo = Math.round(b.pp + costoEquipo(b.eq, b.med));
     b.sem = Math.max(2, Math.round(sem * (1 + b.esc * 0.15)));
@@ -133,11 +215,12 @@ IA.medios = (function () {
     if (enMarcha(b.med) >= capacidad(b.med)) return 'Ya tienes ' + capacidad(b.med) + ' proyectos de ' + MED[b.med].nombre.toLowerCase() + ' en marcha.';
     if (!b.eq.length) return 'Falta el equipo.';
     if (b.eq.some(function (id) { const t = T.porId(id); return !t || !T.disponible(t, 0); })) return 'Alguien del equipo ya no está disponible.';
-    if (b.med === 'musica' && ['jingle', 'banda'].indexOf(b.tipo) < 0 && !b.cfg.banda) return 'Elige una banda o solista con contrato.';
+    if (b.med === 'musica' && ['jingle', 'banda', 'partitura'].indexOf(b.tipo) < 0 && !b.cfg.banda) return 'Elige una banda o solista con contrato.';
     if (b.med === 'musica' && b.cfg.banda) { const bd = banda(b.cfg.banda); if (!bd || bd.sep) return 'Esa banda está separada.'; }
     if (b.med === 'musica' && b.tipo === 'banda' && !b.cfg.peli) return 'Una banda sonora necesita una película tuya.';
     if (b.med === 'juegos' && (!b.cfg.plats.length || b.cfg.plats.length > 4)) return 'Elige de una a cuatro plataformas.';
     if (b.med === 'juegos' && b.cfg.plats.some(function (p) { const x = plat(p); return !x || x.desde > a || x.hasta < a; })) return 'Esa plataforma no está a la venta.';
+    if (b.med === 'juegos') { const di = de(DIMENSIONES, b.cfg.dim, '2d'), mo2 = de(MODOS_J, b.cfg.modo, 'solo'); if (di.desde > a) return di.nombre + ' llega en ' + di.desde + '.'; if (mo2.desde > a) return mo2.nombre + ' llega en ' + mo2.desde + '.'; if (di.plat && b.cfg.plats.indexOf(di.plat) < 0) return di.nombre + ' necesita la plataforma «' + plat(di.plat).nombre + '».'; }
     if (S.estudios[0].caja < b.costo) return 'No alcanza la caja.';
     return '';
   }
@@ -146,10 +229,10 @@ IA.medios = (function () {
     if (e) return { error: e };
     const S = N.S, p = N.copiar(b);
     p.id = N.sigId(); p.est = 0; p.t0 = S.t; p.sr = p.sem; p.et = p.med === 'teatro' ? 'ensayo' : 'produccion'; p.ing = 0; p.gas = p.costo; p.vend = {}; p.hs = []; p.port = N.hash('p' + p.id + p.tit) % 100000;
-    IA.negocio.pagar(0, 'produccion', p.costo);
+    ART.negocio.pagar(0, 'produccion', p.costo);
     T.ocupar(p.eq, S.t + p.sem);
     // Jingle: es un encargo, te pagan al empezar
-    if (p.tipo === 'jingle') { const pago = Math.round(p.costo * 1.6); IA.negocio.cobrarEn(0, 'musica', pago); p.ing += pago; }
+    if (p.tipo === 'jingle') { const pago = Math.round(p.costo * 1.6); ART.negocio.cobrarEn(0, 'musica', pago); p.ing += pago; }
     st().p.push(p);
     N.emit('noticia', { tipo: 'estudio', texto: 'Empieza ' + (p.med === 'teatro' ? 'el ensayo de' : 'la producción de') + ' «' + p.tit + '» (' + MED[p.med].nombre.toLowerCase() + ').' });
     return { proyecto: p };
@@ -158,29 +241,39 @@ IA.medios = (function () {
   function calificar(p) {
     const ts = p.eq.map(T.porId).filter(Boolean);
     let q = ts.length ? ts.reduce(function (s, t, i) { return s + habMedio(t, p.med) * (i === 0 ? 1.5 : 1); }, 0) / (ts.length + 0.5) : 40;
-    q += p.esc * 3;
+    q += p.esc * 3 + (p.dq || 0); // dq: decisiones de los eventos
     const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
     if (bd) q += bd.prac / 6 + (bd.rel - 50) / 25;
     const mo = motor(p.cfg.motor); if (mo) q += mo.est * 1.5;
     if (p.med === 'teatro') q += (p.cfg.ensayo - 6) * 0.8;
+    if (p.med === 'musica') q += de(ESTUDIOS_GRAB, p.cfg.estudio, 'pro').q;
+    if (p.med === 'juegos') { const di = de(DIMENSIONES, p.cfg.dim, '2d'), an = N.anio() - di.desde; if (di.id === '3d' && an < 6) q -= 3; if ((di.id === 'rv' || di.id === 'neuro') && an < 10) q += 2; }
+    if (p.med === 'libros' && p.cfg.ext === 'saga') q += 1;
     const fam = famDe(p.med, p.gen), tend = fam ? N.S.mundo.tendencias[fam.eje] || 0 : 0;
     q = N.limitar(q + N.normal(0, 6), 5, 98);
     p.q = Math.round(q);
     p.crit = Math.round(N.limitar(q + N.normal(0, 6) + (fam && fam.inclina === 'crit' ? 3 : 0), 1, 99));
     p.pub = Math.round(N.limitar(q + tend * 10 + N.normal(0, 6) + (fam && fam.inclina === 'pub' ? 3 : 0) - (p.cfg.anti === 2 ? 2 : 0) - (p.cfg.modelo === 'gratis' ? 1 : 0), 1, 99));
+    // Estilo de producción y modas del género (las de la taxonomía)
+    const es = estiloMedio(p.cfg.pst), moda = X.modaSub([p.gen], N.anio());
+    p.crit = Math.round(N.limitar(p.crit + es.crit * 2 + moda.crit * 2, 1, 99));
+    p.pub = Math.round(N.limitar(p.pub + es.pub * 2 + (estiloAfin(es, p.gen) ? 3 : 0) + moda.pub * 3, 1, 99));
   }
   // Lo que puede ganar en total (repartido semana a semana con su caída)
   function potencial(p) {
-    let f = 1.15 * Math.pow(p.pub / 60, 2.2) // Rendían de más * Math.exp(N.normal(0, 0.35));
+    // En la música el éxito se concentra más: pocos discos se llevan casi todo
+    let f = 1.15 * Math.pow(p.pub / 60, p.med === 'musica' ? 3 : 2.2);
     const fam = famDe(p.med, p.gen); if (fam) f *= 1 + (N.S.mundo.tendencias[fam.eje] || 0) * 0.3;
     const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
     if (bd) { f *= 1 + Math.min(1, bd.fans / 2e6) * 0.5; if (bd.reu) { f *= 1.5; bd.reu = 0; } }
     if (p.med === 'juegos') {
       const sh = p.cfg.plats.reduce(function (s, id) { return s + cuota(id) * (st().kits[id] ? 1 : 0.6); }, 0);
       f *= (0.3 + 1.4 * Math.min(1, sh)) * (1 + (p.cfg.idiomas - 1) * 0.12) * (p.cfg.edicion ? 1.08 : 1) * (p.cfg.modelo === 'gratis' ? 1.15 : p.cfg.modelo === 'suscripcion' ? 0.9 : 1);
+      f *= gustoDim(p.cfg.dim || '2d', N.anio()) * de(MODOS_J, p.cfg.modo, 'solo').f;
     }
-    if (p.med === 'libros') { f *= (1 + (p.cfg.trad - 1) * 0.12) * (p.cfg.ebook ? 1.1 : 1) * (p.cfg.audio ? 1.12 : 1); if (p.cfg.fr) { const fr = IA.franquicias.porId(p.cfg.fr); if (fr) f *= 1 + fr.pers.reduce(function (s, x) { return Math.max(s, x.pop); }, 0) / 100; } }
-    if (p.med === 'musica' && p.tipo === 'banda' && p.cfg.peli) { const o = IA.obras.porId(p.cfg.peli); if (o && o.bruto) f *= 1 + Math.min(1.5, o.bruto / tip() * 0.2); }
+    if (p.med === 'libros') { f *= de(EXTENSIONES, p.cfg.ext, 'novela').f * (p.cfg.tirada === 'grande' ? (p.pub >= 65 ? 1.15 : 0.9) : de(TIRADAS, p.cfg.tirada, 'normal').f) * (p.cfg.firmas ? 1.08 : 1); f *= (1 + (p.cfg.trad - 1) * 0.12) * (p.cfg.ebook ? 1.1 : 1) * (p.cfg.audio ? 1.12 : 1); if (p.cfg.fr) { const fr = ART.franquicias.porId(p.cfg.fr); if (fr) f *= 1 + fr.pers.reduce(function (s, x) { return Math.max(s, x.pop); }, 0) / 100; } }
+    if (p.med === 'musica') f *= de(PROMOS_M, p.cfg.promo, 'ninguna').f * (p.cfg.video && N.anio() >= 1981 ? 1.12 : 1);
+    if (p.med === 'musica' && p.tipo === 'banda' && p.cfg.peli) { const o = ART.obras.porId(p.cfg.peli); if (o && o.bruto) f *= 1 + Math.min(1.5, o.bruto / tip() * 0.2); }
     return Math.round(p.costo * f);
   }
   function lanzar(p) {
@@ -190,7 +283,8 @@ IA.medios = (function () {
     p.fe = S.t; p.anio = N.anio(); p.pw = 0;
     if (p.med === 'teatro') { p.et = 'temporada'; p.semT = 0; p.ocup = N.redondear(N.limitar(Math.pow(p.pub / 70, 1.5) * 0.8, 0.15, 1), 3); p.malas = 0; }
     else { p.et = 'lanzado'; p.R = p.tipo === 'jingle' ? 0 : potencial(p); }
-    if (p.cfg.fr && p.med === 'libros') { const fr = IA.franquicias.porId(p.cfg.fr); if (fr) fr.pers.forEach(function (x) { x.pop = Math.min(99, x.pop + 2); }); }
+    if (p.med === 'musica' && p.cfg.exclusiva && N.anio() >= 2012 && p.R) { const ad = Math.round(p.R * 0.15); ART.negocio.cobrarEn(0, 'musica', ad); p.ing += ad; p.R = Math.round(p.R * 0.92); N.emit('noticia', { tipo: 'estudio', texto: 'Sonora paga ' + ART.ui.dinero(ad) + ' por la exclusiva de «' + p.tit + '».' }); }
+    if (p.cfg.fr && p.med === 'libros') { const fr = ART.franquicias.porId(p.cfg.fr); if (fr) fr.pers.forEach(function (x) { x.pop = Math.min(99, x.pop + 2); }); }
     N.emit('noticia', { tipo: 'estudio', texto: '«' + p.tit + '» sale a la venta: crítica ' + p.crit + ', público ' + p.pub + '.', importante: true });
   }
   // ---------- Ventas por formato ----------
@@ -199,10 +293,9 @@ IA.medios = (function () {
     return FMT_MUSICA.map(function (f, i) { return { id: f.id, nombre: f.nombre, parte: ws[i] / s, p: f.p }; }).filter(function (f) { return f.parte > 0.001; });
   }
   function registrarVentas(p, monto) {
-    const a = N.anio(), v = p.vend, pir = IA.historia.pirateria(a);
+    const a = N.anio(), v = p.vend, pir = ART.historia.pirateria(a);
     if (p.med === 'musica') {
       formatosMusica(a).forEach(function (f) { const digital = f.id === 'descarga' || f.id === 'stream'; v[f.id] = (v[f.id] || 0) + Math.round(monto * f.parte * (digital ? pir : 1) / ep(f.p, a)); });
-      if (p.tipo === 'banda' || p.cfg.banda) v.vistas = (v.vistas || 0) + (a >= 2005 ? Math.round(monto * 0.05 / ep(0.002, a)) : 0);
     } else if (p.med === 'juegos') {
       const dig = N.interp([[2003, 0], [2010, 0.3], [2020, 0.75], [2150, 0.95]], a);
       const precio = ep(p.cfg.modelo === 'gratis' ? 8 : 55, a);
@@ -238,17 +331,19 @@ IA.medios = (function () {
       if (p.et === 'temporada') return semanaTeatro(p);
       if (p.et !== 'lanzado' && p.et !== 'catalogo') return;
       p.pw++;
-      let d = MED[p.med].decae + (p.sop ? 0.03 : 0) + (p.cfg.modelo === 'suscripcion' ? 0.06 : 0);
+      let d = MED[p.med].decae + (p.sop ? 0.03 : 0) + (p.cfg.modelo === 'suscripcion' ? 0.06 : 0) + (p.med === 'juegos' ? de(MODOS_J, p.cfg.modo, 'solo').d : 0);
       d = Math.min(0.985, d);
       let m = p.et === 'catalogo' ? p.R * 0.0004 : p.R * (1 - d) * Math.pow(d, p.pw - 1);
       // Una plataforma que muere se lleva las ventas
       if (p.med === 'juegos') m *= N.limitar(p.cfg.plats.reduce(function (x, id) { return x + (plat(id).hasta >= a ? 1 : 0); }, 0) / p.cfg.plats.length, 0, 1);
-      if (p.med === 'musica' || p.med === 'juegos') m *= p.cfg.anti === 1 ? (1 + IA.historia.pirateria(a)) / 2 + 0.05 : p.cfg.anti === 2 ? 1 : IA.historia.pirateria(a) * 0.5 + 0.5;
-      if (p.sop) { IA.negocio.pagar(0, 'produccion', Math.round(p.costo * 0.004)); p.gas += Math.round(p.costo * 0.004); }
+      if (p.med === 'musica' || p.med === 'juegos') m *= p.cfg.anti === 1 ? (1 + ART.historia.pirateria(a)) / 2 + 0.05 : p.cfg.anti === 2 ? 1 : ART.historia.pirateria(a) * 0.5 + 0.5;
+      if (p.sop) { ART.negocio.pagar(0, 'produccion', Math.round(p.costo * 0.004)); p.gas += Math.round(p.costo * 0.004); }
       m = Math.round(m);
       if (m > 0) {
         cobrar(p, m);
         registrarVentas(p, m);
+        if (p.med === 'musica') repartirPlataformas(p, m);
+        if (p.med === 'juegos' && p.cfg.modo === 'masivo') { const sv = Math.round(m * 0.08); ART.negocio.pagar(0, 'emision', sv); p.gas += sv; }
         p.hs.push(m); if (p.hs.length > 30) p.hs.shift();
         certificar(p);
       }
@@ -257,28 +352,77 @@ IA.medios = (function () {
     });
     // Los proyectos viejos del catálogo se resumen (memoria)
     if (s.p.length > 120) s.p = s.p.filter(function (p) { return p.et !== 'catalogo' || S.t - p.fe < 52 * 30 || p.cert || p.prem; });
+    semanaLista();
   }
+  // Música en cada plataforma: copias, emisiones de radio y TV, descargas, reproducciones y vistas
+  function repartirPlataformas(p, m) {
+    const a = N.anio(), pl = p.pl = p.pl || {}, sem = {};
+    partesMusica(a, p).forEach(function (x) {
+      const ing = m * x.parte;
+      let u;
+      if (x.id === 'fisico') { const f = formatosMusica(a).filter(function (y) { return y.id !== 'descarga' && y.id !== 'stream'; }); const precio = f.length ? f.reduce(function (s2, y) { return s2 + y.p * y.parte; }, 0) / f.reduce(function (s2, y) { return s2 + y.parte; }, 0) : 15; u = ing / ep(precio, a); }
+      else u = ing / ep(x.pago, a);
+      const r = pl[x.id] = pl[x.id] || { u: 0, ing: 0 };
+      r.u = Math.round(r.u + u); r.ing = Math.round(r.ing + ing); sem[x.id] = Math.round(u);
+    });
+    p.plSem = sem;
+    // Las cifras de la ficha salen de las mismas plataformas: reproducciones de Sonora y vistas de ClipNet
+    if (pl.audio) p.vend.stream = pl.audio.u;
+    if (pl.video) p.vend.vistas = pl.video.u;
+    const S = N.S;
+    if (S.canal && p.pw <= 26 && p.pub >= 55) { const n = S.canal.par.reduce(function (s2, d) { return s2 + d.filter(function (x) { return x && x.g === 'musical'; }).length; }, 0); if (n) { const r = pl.canal = pl.canal || { u: 0, ing: 0 }; r.u += n; sem.canal = n; } }
+  }
+  function bonoTV() { return st().p.filter(function (p) { return p.med === 'musica' && p.et === 'lanzado' && p.pw <= 26 && (p.pub || 0) >= 60; }).length; }
+  function concierto(id) {
+    const S = N.S, p = porId(id);
+    if (!p || p.med !== 'musica' || p.pub === undefined) return 'Ese disco no está a la venta.';
+    if (!S.stream) return 'Necesitas tu plataforma de streaming.';
+    if (p.conc) return 'Ya tiene su concierto en tu plataforma.';
+    const c = Math.round(p.costo * 0.1);
+    if (S.estudios[0].caja < c) return 'No alcanza la caja.';
+    const e = ART.streaming.agregar(null, 'propio', { nom: 'Concierto: ' + p.tit, gen: 'Musical', q: Math.round(p.pub), ed: 0, orig: 1 });
+    if (e) return e;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c; p.conc = 1;
+    if (p.et === 'lanzado') p.R = Math.round(p.R * 1.08);
+    return '';
+  }
+  // Lista de éxitos semanal: tus discos a la venta frente a artistas inventados
+  const SILABAS = ['Lu', 'Ma', 'Ro', 'Sa', 'Vi', 'Ka', 'Ne', 'To', 'Ri', 'Da', 'Mi', 'Zo', 'Le', 'Pa', 'Ju', 'Ce'];
+  function artista(n) { const a = SILABAS[n % 16] + SILABAS[(n >> 4) % 16].toLowerCase() + (n % 3 ? '' : 'n'), b = SILABAS[(n >> 8) % 16] + SILABAS[(n >> 12) % 16].toLowerCase() + 'z'; return n % 4 === 0 ? 'Los ' + a + 's' : a + ' ' + b; }
+  function semanaLista() {
+    const S = N.S, s = st(), a = N.anio();
+    if (a < 1935) return;
+    const antes = {};
+    (s.lista || []).forEach(function (x, i) { antes[x.k] = i + 1; });
+    const tuyos = s.p.filter(function (p) { return p.med === 'musica' && p.et === 'lanzado' && p.hs.length; }).map(function (p) { return { k: 'p' + p.id, nom: p.tit, art: (banda(p.cfg.banda) || { nom: S.estudios[0].nombre }).nom, pts: p.hs[p.hs.length - 1] / Math.max(1, tip(a, 'musica')) * 200, tuyo: 1 }; });
+    const ciclo = Math.floor(S.t / 6), otros = [];
+    for (let i = 0; i < 14; i++) { const n = N.hash('lista' + (ciclo - (i % 4)) + '|' + i) % 65536; otros.push({ k: 'r' + n, nom: tituloCancion(n), art: artista(n), pts: 1.6 * Math.pow(0.86, i) * (0.9 + (n % 20) / 100) }); }
+    s.lista = tuyos.concat(otros).sort(function (x, y) { return y.pts - x.pts; }).slice(0, 10).map(function (x) { x.prev = antes[x.k] || 0; return x; });
+    s.lista.forEach(function (x, i) { if (x.tuyo && (!x.prev || x.prev > 10)) N.emit('noticia', { tipo: 'estudio', texto: '«' + x.nom + '» entra al puesto ' + (i + 1) + ' de la lista de éxitos.' }); });
+  }
+  function tituloCancion(n) { return ART.titulos.cancion(n); }
   function cobrar(p, m) {
     const cat = p.med;
-    IA.negocio.cobrarEn(0, cat, m);
+    ART.negocio.cobrarEn(0, cat, m);
     p.ing += m;
     st().ing[cat] = (st().ing[cat] || 0) + m;
     // Regalías de la banda (15 %) y de los autores (10 %)
     const reg = p.cfg.banda ? 0.15 : 0.1;
     const ids = p.cfg.banda ? (banda(p.cfg.banda) || { m: [] }).m : p.eq.slice(0, 1);
-    if (ids.length) { const r = Math.round(m * reg); IA.negocio.pagar(0, 'talento', r); ids.forEach(function (id) { T.pagarA(id, r / ids.length); }); p.gas += r; }
+    if (ids.length) { const r = Math.round(m * reg); ART.negocio.pagar(0, 'talento', r); ids.forEach(function (id) { T.pagarA(id, r / ids.length); }); p.gas += r; }
   }
   // ---------- Teatro ----------
   function semanaTeatro(p) {
     const s = sala(p.cfg.sala), a = N.anio();
     p.semT++;
     p.ocup = N.redondear(N.limitar(p.ocup + (p.pub - 60) / 600 + N.normal(0, 0.02), 0.05, 1), 3);
-    const entradas = Math.round(s.asientos * p.cfg.funciones * p.ocup * (p.gira ? 0.8 : 1));
-    const ing = Math.round(entradas * ep(p.gira ? 60 : 90, a));
+    const pt = de(PRECIOS_T, p.cfg.precio, 'normal');
+    const entradas = Math.round(s.asientos * p.cfg.funciones * N.limitar(p.ocup + pt.ocup, 0.03, 1) * (p.gira ? 0.8 : 1));
+    const ing = Math.round(entradas * ep(p.gira ? pt.p * 0.67 : pt.p, a));
     // Cada función cuesta (elenco, sala, técnicos): unos 45 dólares de hoy por butaca, 35 en gira; sin esto una obra
     // chica rendía 20 a 50 veces lo invertido. Con la sala llena al 50 % se cubren los gastos.
     const gas = Math.round(p.costo * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 35 : 45, a) * (enTeatroPropio(p) ? 0.6 : 1));
-    cobrar(p, ing); IA.negocio.pagar(0, 'produccion', gas); p.gas += gas;
+    cobrar(p, ing); ART.negocio.pagar(0, 'produccion', gas); p.gas += gas;
     p.vend.entradas = (p.vend.entradas || 0) + entradas;
     p.vend.funciones = (p.vend.funciones || 0) + p.cfg.funciones;
     p.hs.push(ing); if (p.hs.length > 30) p.hs.shift();
@@ -297,15 +441,15 @@ IA.medios = (function () {
     if (!p || p.med !== 'teatro' || p.et !== 'catalogo') return 'La obra debe haber terminado su temporada.';
     const c = Math.round(p.costo * 0.25);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c); p.gas += c;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c;
     p.gira = N.limitar(+ciudades || 4, 2, 12); p.et = 'temporada'; p.semT = 0; p.malas = 0; p.ocup = N.limitar(p.ocup + 0.1, 0.2, 1);
     return '';
   }
   function grabar(id, destino) {
     const p = porId(id), S = N.S;
     if (!p || p.med !== 'teatro' || p.grab) return 'No se puede grabar.';
-    if (destino === 'stream') { if (!S.stream) return 'No tienes plataforma.'; const e = IA.streaming.agregar(null, 'propio', { nom: p.tit + ' (teatro grabado)', q: p.pub, ed: 0 }); if (e) return e; }
-    else { if (N.anio() < 1950) return 'La televisión todavía no compra obras de teatro.'; const pago = Math.round(p.costo * 0.3); IA.negocio.cobrarEn(0, 'teatro', pago); p.ing += pago; }
+    if (destino === 'stream') { if (!S.stream) return 'No tienes plataforma.'; const e = ART.streaming.agregar(null, 'propio', { nom: p.tit + ' (teatro grabado)', q: p.pub, ed: 0 }); if (e) return e; }
+    else { if (N.anio() < 1950) return 'La televisión todavía no compra obras de teatro.'; const pago = Math.round(p.costo * 0.3); ART.negocio.cobrarEn(0, 'teatro', pago); p.ing += pago; }
     p.grab = destino;
     return '';
   }
@@ -322,9 +466,9 @@ IA.medios = (function () {
     if (ids.some(function (id) { return st().bandas.some(function (b) { return !b.sep && b.m.indexOf(id) >= 0; }); })) return 'Alguien ya está en otra banda tuya.';
     const c = costoContrato(ids);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'talento', c);
+    ART.negocio.pagar(0, 'talento', c);
     const t0 = T.porId(ids[0]);
-    st().bandas.push({ id: N.sigId(), nom: (nom || (tipo === 'solista' ? t0.nom : 'Los ' + N.elegir(D.titulo2))).slice(0, 40), tipo: tipo === 'solista' ? 'solista' : 'banda', m: ids, rel: 70, prac: 0, fans: Math.round(5000 + t0.fama * 2e5), t0: S.t, hasta: S.t + 52 * 5, sep: null });
+    st().bandas.push({ id: N.sigId(), nom: (nom || (tipo === 'solista' ? t0.nom : ART.titulos.banda())).slice(0, 40), tipo: tipo === 'solista' ? 'solista' : 'banda', m: ids, rel: 70, prac: 0, fans: Math.round(5000 + t0.fama * 2e5), t0: S.t, hasta: S.t + 52 * 5, sep: null });
     return '';
   }
   function practicar(id) {
@@ -333,7 +477,7 @@ IA.medios = (function () {
     if (b.pr > S.t) return 'Ya practicaron este mes.';
     const c = Math.round(tip() * 0.003);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c);
+    ART.negocio.pagar(0, 'produccion', c);
     b.prac = Math.min(30, b.prac + 5); b.rel = Math.min(100, b.rel + 2); b.pr = S.t + 4;
     return '';
   }
@@ -345,7 +489,8 @@ IA.medios = (function () {
     if (b.gira) return 'Ya están de gira.';
     const c = costoGira(b, g);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c);
+    ART.negocio.pagar(0, 'produccion', c);
+    b.giras = (b.giras || 0) + 1;
     const ult = st().p.filter(function (p) { return p.cfg.banda === b.id && p.pub !== undefined; }).pop();
     const q = ult ? ult.pub : 50;
     const total = Math.round(c * g.f / (g.f > 1 ? 2.2 : 1) * Math.pow(q / 60, 1.5) * (0.6 + Math.min(2, b.fans / 1e6)) * (b.reu ? 1.5 : 1));
@@ -360,9 +505,9 @@ IA.medios = (function () {
     if (b.m.some(function (x) { const t = T.porId(x); return !t || t.mu; })) return 'Falta alguien que ya no está.';
     const c = Math.round(tip() * 0.3);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'talento', c);
+    ART.negocio.pagar(0, 'talento', c);
     b.sep = null; b.rel = 60; b.reu = 1; b.hasta = S.t + 52 * 3; b.fans = Math.round(b.fans * 1.3);
-    N.emit('noticia', { tipo: 'estudio', texto: '¡' + b.nom + ' vuelve a reunirse!', importante: true });
+    N.emit('noticia', { tipo: 'estudio', texto: '¡' + b.nom + (/^(Los|Las) /.test(b.nom) ? ' vuelven' : ' vuelve') + ' a reunirse!', importante: true });
     return '';
   }
   function mensualBandas() {
@@ -372,13 +517,13 @@ IA.medios = (function () {
       b.rel = Math.round(N.limitar(b.rel + N.normal(-1, 2), 0, 100));
       b.fans = Math.round(b.fans * (0.995 + Math.max(0, b.rel - 50) / 5000));
       if (b.tipo === 'banda' && b.rel < 20 && N.probabilidad(0.15)) { b.sep = S.t; N.emit('noticia', { tipo: 'estudio', texto: b.nom + ' se separa: ya no se soportan.', importante: true }); }
-      if (b.hasta < S.t && b.tipo !== 'x') { b.hasta = S.t + 52 * 2; IA.negocio.pagar(0, 'talento', Math.round(costoContrato(b.m) * 0.5)); }
+      if (b.hasta < S.t && b.tipo !== 'x') { b.hasta = S.t + 52 * 2; ART.negocio.pagar(0, 'talento', Math.round(costoContrato(b.m) * 0.5)); }
     });
   }
   function semanaGiras() {
     st().bandas.forEach(function (b) {
       if (!b.gira) return;
-      IA.negocio.cobrarEn(0, 'musica', b.gira.porSem); st().ing.musica = (st().ing.musica || 0) + b.gira.porSem;
+      ART.negocio.cobrarEn(0, 'musica', b.gira.porSem); st().ing.musica = (st().ing.musica || 0) + b.gira.porSem;
       b.fans = Math.round(b.fans * 1.01 + 200);
       if (--b.gira.sem <= 0) { b.gira = null; b.reu = 0; }
     });
@@ -390,7 +535,7 @@ IA.medios = (function () {
   function plataformas(anio) { const a = anio || N.anio(); return PLAT.filter(function (p) { return p.desde <= a && p.hasta >= a; }).map(function (p) { return { id: p.id, nombre: p.nombre, cuota: cuota(p.id, a), kit: !!st().kits[p.id], muere: p.hasta, costoKit: costoKit(p) }; }); }
   function platsRecomendadas(a) { return plataformas(a).sort(function (x, y) { return y.cuota - x.cuota; }).slice(0, 2).map(function (p) { return p.id; }); }
   function costoKit() { return Math.round(tip() * 0.04); }
-  function comprarKit(id) { const S = N.S; if (st().kits[id]) return 'Ya tienes ese kit.'; const p = plat(id); if (!p || p.desde > N.anio() || p.hasta < N.anio()) return 'Esa plataforma no está a la venta.'; if (S.estudios[0].caja < costoKit()) return 'No alcanza la caja.'; IA.negocio.pagar(0, 'investigacion', costoKit()); st().kits[id] = N.S.t; return ''; }
+  function comprarKit(id) { const S = N.S; if (st().kits[id]) return 'Ya tienes ese kit.'; const p = plat(id); if (!p || p.desde > N.anio() || p.hasta < N.anio()) return 'Esa plataforma no está a la venta.'; if (S.estudios[0].caja < costoKit()) return 'No alcanza la caja.'; ART.negocio.pagar(0, 'investigacion', costoKit()); st().kits[id] = N.S.t; return ''; }
   function motor(id) { return id ? st().motores.concat(st().motorLic).filter(function (m) { return m.id === +id; })[0] || null : null; }
   function funcionesDe(a) { return FUNCIONES.filter(function (f) { return f.desde <= (a || N.anio()); }); }
   function estrellasMotor(fun, anio) { const disp = funcionesDe(anio).length; return N.limitar(Math.round(1 + 4 * fun.length / Math.max(1, disp)), 1, 5); }
@@ -402,15 +547,15 @@ IA.medios = (function () {
     if (!fun.length) return 'Elige al menos una función.';
     const c = costoMotor(fun);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'investigacion', c);
-    st().motores.push({ id: N.sigId(), nom: (nom || 'Motor ' + N.elegir(D.titulo1)).slice(0, 30), fun: fun, est: estrellasMotor(fun), anio: N.anio(), de: 0 });
+    ART.negocio.pagar(0, 'investigacion', c);
+    st().motores.push({ id: N.sigId(), nom: (nom || 'Motor ' + ART.titulos.sustantivo()).slice(0, 30), fun: fun, est: estrellasMotor(fun), anio: N.anio(), de: 0 });
     return '';
   }
   function licenciarMotor(i) {
     const S = N.S, of = st().ofMot[+i];
     if (!of) return 'Esa oferta venció.';
     if (S.estudios[0].caja < of.precio) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'investigacion', of.precio); if (S.estudios[of.est]) S.estudios[of.est].caja += of.precio;
+    ART.negocio.pagar(0, 'investigacion', of.precio); if (S.estudios[of.est]) S.estudios[of.est].caja += of.precio;
     st().motorLic.push({ id: N.sigId(), nom: of.nom, fun: of.fun, est: of.est5, anio: N.anio(), de: of.est, hasta: S.t + 52 * 3 });
     st().ofMot.splice(+i, 1);
     return '';
@@ -422,7 +567,7 @@ IA.medios = (function () {
     if (N.anio() < 2005) return 'El contenido descargable llega con las tiendas digitales.';
     const c = Math.round(p.costo * 0.15);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c); p.gas += c;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c;
     p.R = Math.round(p.R * 0.3 + c * 1.8 * Math.pow(p.pub / 60, 2)); p.pw = 1; p.et = 'lanzado'; p.dlc = (p.dlc || 0) + 1;
     return '';
   }
@@ -442,7 +587,7 @@ IA.medios = (function () {
     if (p.cfg.trad >= 12) return 'Ya está en todos los idiomas.';
     const c = Math.round(tip() * 0.004);
     if (S.estudios[0].caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'produccion', c); p.gas += c;
+    ART.negocio.pagar(0, 'produccion', c); p.gas += c;
     p.cfg.trad++; p.R = Math.round(p.R * 1.06 + c * 1.5); if (p.et === 'catalogo') { p.et = 'lanzado'; p.pw = 20; }
     return '';
   }
@@ -451,8 +596,8 @@ IA.medios = (function () {
     const S = N.S, m = MED[med];
     if (anio < m.premioDesde) return;
     const mios = st().p.filter(function (p) { return p.med === med && p.anio === anio && p.pub !== undefined; });
-    const rivs = IA.rivales.activos();
-    const nom = function () { return { tit: IA.obras.tituloNuevo(['Drama']), est: rivs.length ? N.elegir(rivs).id : -1, crit: Math.round(N.normal(76, 8)), pub: Math.round(N.normal(76, 8)) }; };
+    const rivs = ART.rivales.activos();
+    const nom = function () { return { tit: ART.obras.tituloNuevo(['Drama']), est: rivs.length ? N.elegir(rivs).id : -1, crit: Math.round(N.normal(76, 8)), pub: Math.round(N.normal(76, 8)) }; };
     const cand = mios.map(function (p) { return { tit: p.tit, est: 0, crit: p.crit, pub: p.pub, p: p }; }).concat([nom(), nom(), nom(), nom(), nom(), nom()]);
     const cats = [['mejor', 'Mejor ' + (med === 'musica' ? 'álbum' : med === 'juegos' ? 'juego' : med === 'teatro' ? 'obra' : 'libro') + ' del año', function (x) { return x.crit + x.pub; }], ['critica', 'Premio de la crítica', function (x) { return x.crit; }], ['publico', 'Favorito del público', function (x) { return x.pub; }]];
     const r = { med: med, nombre: m.premio, anio: anio, cats: cats.map(function (c) { const g = cand.slice().sort(function (a, b) { return c[2](b) - c[2](a); })[0]; if (g.p) { g.p.prem = (g.p.prem || 0) + 1; S.estudios[0].fama = N.redondear(Math.min(1, S.estudios[0].fama + 0.003 * (1 - S.estudios[0].fama)), 3); } return { nombre: c[1], tit: g.tit, est: g.est }; }) };
@@ -464,10 +609,10 @@ IA.medios = (function () {
     const S = N.S, a = N.anio(), s = st();
     Object.keys(MED).forEach(function (med) { premiar(med, a - 1); });
     // Tus motores: los rivales te los licencian
-    s.motores.forEach(function (m) { if (N.probabilidad(0.15 * m.est) && a - m.anio < 12) { const pago = Math.round(tip() * 0.03 * m.est); IA.negocio.cobrarEn(0, 'juegos', pago); s.ing.juegos = (s.ing.juegos || 0) + pago; } });
+    s.motores.forEach(function (m) { if (N.probabilidad(0.15 * m.est) && a - m.anio < 12) { const pago = Math.round(tip() * 0.03 * m.est); ART.negocio.cobrarEn(0, 'juegos', pago); s.ing.juegos = (s.ing.juegos || 0) + pago; } });
     s.motorLic = s.motorLic.filter(function (m) { return m.hasta > S.t; });
     s.ofMot = [];
-    if (a >= 1980) IA.rivales.activos().slice(0, 3).forEach(function (e) {
+    if (a >= 1980) ART.rivales.activos().slice(0, 3).forEach(function (e) {
       const fun = funcionesDe(a).filter(function () { return N.probabilidad(0.7); }).map(function (f) { return f.id; });
       if (fun.length) s.ofMot.push({ est: e.id, nom: 'Motor ' + e.nombre.split(' ')[0], fun: fun, est5: estrellasMotor(fun, a), precio: Math.round(tip() * 0.06 * estrellasMotor(fun, a)) });
     });
@@ -490,8 +635,8 @@ IA.medios = (function () {
     if (!x) return 'Ese teatro no existe.';
     if (teatros().length >= 6) return 'Ya tienes 6 teatros.';
     const c = precioTeatro(id);
-    if (IA.negocio.cajaLibre(0) < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'construccion', c);
+    if (ART.negocio.cajaLibre(0) < c) return 'No alcanza la caja.';
+    ART.negocio.pagar(0, 'construccion', c);
     teatros().push({ id: N.sigId(), tipo: id, desde: S.t });
     N.emit('noticia', { tipo: 'estudio', texto: 'Compras un ' + x.nombre.toLowerCase() + ': tus obras de ese tamaño ahorran la sala y, cuando está libre, se alquila.', importante: true });
     return '';
@@ -500,7 +645,7 @@ IA.medios = (function () {
     const l = teatros(), t = l.filter(function (x) { return x.id === +idT; })[0];
     if (!t) return 'No es tu teatro.';
     if (enUso(t)) return 'Hay una obra tuya en cartel en ese teatro.';
-    IA.negocio.cobrarEn(0, 'ventaTeatros', Math.round(precioTeatro(t.tipo) * 0.8));
+    ART.negocio.cobrarEn(0, 'ventaTeatros', Math.round(precioTeatro(t.tipo) * 0.8));
     st().teatros = l.filter(function (x) { return x !== t; });
     return '';
   }
@@ -522,8 +667,8 @@ IA.medios = (function () {
     l.forEach(function (t) {
       const x = teatroTipo(t.tipo);
       if (!x) return;
-      IA.negocio.pagar(0, 'mantenimiento', Math.round(ep(x.precio) * 0.02 / 52)); // impuestos y arreglos: 2 % al año
-      if (u[t.id] === undefined) IA.negocio.cobrarEn(0, 'alquilerTeatros', Math.round(x.asientos * 7 * ep(2.5) * N.limitar(0.55 + N.normal(0, 0.15), 0.2, 0.9)));
+      ART.negocio.pagar(0, 'mantenimiento', Math.round(ep(x.precio) * 0.02 / 52)); // impuestos y arreglos: 2 % al año
+      if (u[t.id] === undefined) ART.negocio.cobrarEn(0, 'alquilerTeatros', Math.round(x.asientos * 7 * ep(2.5) * N.limitar(0.55 + N.normal(0, 0.15), 0.2, 0.9)));
     });
   }
   function cuotaMercado(med) { const a = N.anio(), v = (st().ing[med] || 0) * 52 / Math.max(1, N.semana()); return v / (ep(N.interp(MERCADO[med], a) * 1e9, a)); }
@@ -540,7 +685,7 @@ IA.medios = (function () {
       return { med: med, nombre: MED[med].nombre, disponible: disponible(med), proyectos: ps.length, enMarcha: enMarcha(med), ing: st().ing[med] || 0, premios: st().premios.filter(function (r) { return r.med === med; }).reduce(function (s, r) { return s + r.cats.filter(function (c) { return c.est === 0; }).length; }, 0) };
     });
   }
-  return { MED: MED, FMT_MUSICA: FMT_MUSICA, PLAT: PLAT, FUNCIONES: FUNCIONES, ESCALAS_J: ESCALAS_J, MODELOS: MODELOS, SALAS: SALAS, TAPAS: TAPAS, TAMANOS: TAMANOS, GIRAS: GIRAS, CERT: CERT,
+  return { ESTILOS_MED: ESTILOS_MED, estilosMedio: estilosMedio, estiloMedio: estiloMedio, estiloAfin: estiloAfin, DIMENSIONES: DIMENSIONES, MODOS_J: MODOS_J, ESTUDIOS_GRAB: ESTUDIOS_GRAB, PROMOS_M: PROMOS_M, PLAT_MUSICA: PLAT_MUSICA, EXTENSIONES: EXTENSIONES, TIRADAS: TIRADAS, PRECIOS_T: PRECIOS_T, dimensionesDe: dimensionesDe, gustoDim: gustoDim, partesMusica: partesMusica, bonoTV: bonoTV, concierto: concierto, de: de, MED: MED, FMT_MUSICA: FMT_MUSICA, PLAT: PLAT, FUNCIONES: FUNCIONES, ESCALAS_J: ESCALAS_J, MODELOS: MODELOS, SALAS: SALAS, TAPAS: TAPAS, TAMANOS: TAMANOS, GIRAS: GIRAS, CERT: CERT,
     disponible: disponible, tipos: tipos, familias: familias, porId: porId, proyectos: proyectos, capacidad: capacidad, enMarcha: enMarcha, habMedio: habMedio, equipoRecomendado: equipoRecomendado,
     borrador: borrador, recalcular: recalcular, validar: validar, iniciar: iniciar, potencial: potencial, formatosMusica: formatosMusica, unidades: unidades, gira: gira, grabar: grabar,
     banda: banda, bandas: bandas, costoContrato: costoContrato, firmarBanda: firmarBanda, practicar: practicar, costoGira: costoGira, irDeGira: irDeGira, reunir: reunir,

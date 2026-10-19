@@ -1,12 +1,12 @@
 /* ==== módulo: produccion ==== */
 // Etapas de la obra: desarrollo, preproducción, rodaje y posproducción, con su costo semana a semana.
-// El productor, el liderazgo y la excelencia del director y del diseñador (tu documento), la experiencia y los
+// El productor, el liderazgo y la excelencia del director y del diseñador, la experiencia y los
 // rasgos del equipo controlan el sobrecosto. Cada semana puede pasar algo (incidentes) o surgir un dilema que
 // decides tú; dos semanas antes de terminar se hace la prueba de público; la línea de producción compara el
-// presupuesto acordado con el costo real y el set nuevo se guarda para otras obras (todo en IA.rodaje).
-IA.produccion = (function () {
+// presupuesto acordado con el costo real y el set nuevo se guarda para otras obras (todo en ART.rodaje).
+ART.produccion = (function () {
   'use strict';
-  const N = IA.n, T = IA.talentos, O = IA.obras, E = IA.economia;
+  const N = ART.n, T = ART.talentos, O = ART.obras, E = ART.economia;
   const SIGUIENTE = { desarrollo: 'preproduccion', preproduccion: 'rodaje', rodaje: 'posproduccion', posproduccion: 'lista' };
 
   // Arranca una obra: paga los contratos, reserva al equipo y fija duraciones y sobrecosto
@@ -24,7 +24,7 @@ IA.produccion = (function () {
     let veteranos = 0;
     O.idsEquipo(o).forEach(function (id) {
       const t = T.porId(id);
-      const r = t && IA.datos.rasgos[t.rasgo];
+      const r = t && ART.datos.rasgos[t.rasgo];
       if (r) riesgo += r[1] / 3;
       if (t && t.obras >= 15) veteranos++;
     });
@@ -32,7 +32,7 @@ IA.produccion = (function () {
     o.sobre = N.redondear(N.limitar(1 + N.normal(riesgo, 0.05), 0.92, 1.3), 3);
     o.pp = Math.round(o.pp * (1 - (ctx.ahorro || 0)));
     const total = o.dur.desarrollo + o.semProd;
-    if (o.est === 0) IA.rodaje.iniciarLinea(o);
+    if (o.est === 0) ART.rodaje.iniciarLinea(o);
     const ids = O.idsEquipo(o);
     // Cada cargo cobra 20 de energía; quien llega cansado rinde menos en esta obra
     T.ocupar(ids, N.S.t + total);
@@ -50,12 +50,12 @@ IA.produccion = (function () {
   }
   // Una semana de producción para todas las obras en marcha
   function semana(ctx) {
-    const R = IA.rodaje;
+    const R = ART.rodaje;
     const lista = O.activas().slice();
     for (let i = 0; i < lista.length; i++) {
       const o = lista[i];
       if (!SIGUIENTE[o.et]) continue;
-      if (IA.historia.pausa(o) || IA.historia.climaCierra(o)) continue; // huelgas y clima
+      if (ART.historia.pausa(o) || ART.historia.climaCierra(o)) continue; // huelgas y clima
       // Una decisión pendiente detiene la obra (sin gastar); sin respuesta, el equipo hace lo más prudente
       if (o.dil) {
         if (!R.vencido(o)) continue;

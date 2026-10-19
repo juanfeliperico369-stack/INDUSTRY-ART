@@ -1,8 +1,8 @@
 /* ==== módulo: idioma ==== */
 // Inglés: el juego se escribe en español y, con el idioma en inglés, todo lo que aparece en pantalla pasa por el
-// diccionario (IA.INGLES, armado desde todos los textos del juego): primero la frase completa y, si no, cada
+// diccionario (ART.INGLES, armado desde todos los textos del juego): primero la frase completa y, si no, cada
 // fragmento conocido (las frases que el juego arma con datos). Un observador traduce lo nuevo en cuanto aparece.
-IA.idioma = (function () {
+ART.idioma = (function () {
   'use strict';
   let actual = 'es', mapa = null, re = null, obs = null;
   const LETRA = 'A-Za-zÁÉÍÓÚÜÑáéíóúüñ';
@@ -23,10 +23,10 @@ IA.idioma = (function () {
   let cargando = null;
   function cargar() {
     if (mapa || cargando) return cargando || Promise.resolve();
-    if (!(IA.INGLES_Z85 || IA.INGLES_GZ) || typeof DecompressionStream === 'undefined') { mapa = IA.INGLES || {}; return Promise.resolve(); }
+    if (!(ART.INGLES_Z85 || ART.INGLES_GZ) || typeof DecompressionStream === 'undefined') { mapa = ART.INGLES || {}; return Promise.resolve(); }
     let u;
-    if (IA.INGLES_Z85) u = deZ85(IA.INGLES_Z85, IA.INGLES_LEN);
-    else { const bin = atob(IA.INGLES_GZ); u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); }
+    if (ART.INGLES_Z85) u = deZ85(ART.INGLES_Z85, ART.INGLES_LEN);
+    else { const bin = atob(ART.INGLES_GZ); u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); }
     cargando = new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(function (txt) {
       const m = {};
       txt.split('\n').forEach(function (l) { const k = l.indexOf('\t'); if (k > 0) m[l.slice(0, k)] = l.slice(k + 1); });
@@ -80,6 +80,10 @@ IA.idioma = (function () {
     preparar();
     let t = s.trim();
     if (mapa[t] !== undefined) return s.replace(t, mapa[t]);
+    const ti = ART.titulos.ingles(t); // un título inventado completo
+    if (ti) return s.replace(t, ti);
+    // Títulos entre comillas dentro de una frase
+    s = s.replace(/«([^«»]{2,70})»/g, function (m, x) { const e = ART.titulos.ingles(x); return e ? '«' + e + '»' : m; });
     const tm = t.charAt(0).toLowerCase() + t.slice(1); // frase que empieza con mayúscula solo por ir al principio
     if (tm !== t && mapa[tm] !== undefined) return s.replace(t, mapa[tm].charAt(0).toUpperCase() + mapa[tm].slice(1));
     // Frases con huecos: se reemplazan donde aparezcan (los huecos se traducen aparte)
@@ -90,15 +94,17 @@ IA.idioma = (function () {
     return s;
   }
   const ATRIBUTOS = ['placeholder', 'title', 'aria-label'];
+  // Lo que ya viene escrito en inglés (data-fijo) no pasa por el diccionario
+  function fijo(n) { const e = n.nodeType === 1 ? n : n.parentNode; return !!(e && e.closest && e.closest('[data-fijo]')); }
   function nodo(raiz) {
-    if (actual !== 'en' || !raiz) return;
+    if (actual !== 'en' || !raiz || fijo(raiz)) return;
     if (raiz.nodeType === 3) { const v = texto(raiz.nodeValue); if (v !== raiz.nodeValue) raiz.nodeValue = v; return; }
     if (raiz.nodeType !== 1 || raiz.tagName === 'SCRIPT' || raiz.tagName === 'STYLE' || raiz.tagName === 'TEXTAREA') return;
     ATRIBUTOS.forEach(function (a) { const v = raiz.getAttribute && raiz.getAttribute(a); if (v) { const w = texto(v); if (w !== v) raiz.setAttribute(a, w); } });
     const tw = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     let n = tw.nextNode();
     while (n) {
-      if (n.nodeType === 3) { if (!n.parentNode || ['SCRIPT', 'STYLE', 'TEXTAREA'].indexOf(n.parentNode.tagName) < 0) { const v = texto(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; } }
+      if (n.nodeType === 3) { if (!n.parentNode || (['SCRIPT', 'STYLE', 'TEXTAREA'].indexOf(n.parentNode.tagName) < 0 && !fijo(n))) { const v = texto(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; } }
       else ATRIBUTOS.forEach(function (a) { const v = n.getAttribute(a); if (v) { const w = texto(v); if (w !== v) n.setAttribute(a, w); } });
       n = tw.nextNode();
     }
@@ -124,7 +130,7 @@ IA.idioma = (function () {
     if (lienzo || typeof CanvasRenderingContext2D === 'undefined') return;
     lienzo = true;
     const f = CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string' && mapa) { const t = s.trim(); if (mapa[t] !== undefined) a[0] = s.replace(t, mapa[t]); } return f.apply(this, a); }; // en los lienzos, solo frases completas: un póster no queda a medio traducir
+    CanvasRenderingContext2D.prototype.fillText = function (s) { const a = Array.prototype.slice.call(arguments); if (actual === 'en' && typeof s === 'string' && mapa) { const t = s.trim(); if (mapa[t] !== undefined) a[0] = s.replace(t, mapa[t]); else { const ti = ART.titulos.ingles(t) || ART.titulos.ingles(t.charAt(0) + t.slice(1).toLowerCase()); if (ti) a[0] = s.replace(t, t === t.toUpperCase() ? ti.toUpperCase() : ti); } } return f.apply(this, a); }; // en los lienzos, solo frases completas: un póster no queda a medio traducir
   }
   function poner(id) {
     actual = id === 'en' ? 'en' : 'es';

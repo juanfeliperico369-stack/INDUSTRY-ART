@@ -4,9 +4,9 @@
 // analista), cada uno con un efecto que no se acumula; el reclutamiento pagado (rápido o estándar) con su bandeja
 // de candidatos; la capacitación (intensiva más allá del nivel 50); el personal libre que se suma a una producción;
 // y los fans del estudio.
-IA.sede = (function () {
+ART.sede = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia;
+  const N = ART.n, D = ART.datos, E = ART.economia;
 
   const NIVELES = [
     { n: 1, nombre: 'Cuarto alquilado', tope: 2, fijo: 0.002, costo: 0, texto: 'Un escritorio, una ventana que no cierra y una cafetera heredada. El teléfono es del vecino.' },
@@ -44,7 +44,7 @@ IA.sede = (function () {
   function mejorar() {
     const e = puedeMejorar();
     if (e) return e;
-    IA.negocio.pagar(0, 'construccion', costoMejora());
+    ART.negocio.pagar(0, 'construccion', costoMejora());
     est0().sede = (est0().sede || 1) + 1;
     N.emit('noticia', { tipo: 'estudio', texto: 'Te mudas: ahora tu sede es ' + nivelSede().nombre.toLowerCase() + '.', importante: true });
     return '';
@@ -59,7 +59,7 @@ IA.sede = (function () {
   function nombreNuevo() {
     const reg = est0().reg;
     const sx = N.probabilidad(0.5) ? 'M' : 'F';
-    return IA.talentos.nombreNuevo(reg, sx);
+    return ART.talentos.nombreNuevo(reg, sx);
   }
   function reclutar(tipo, rolId) {
     const S = N.S, r = RECLUTAR[tipo];
@@ -67,7 +67,7 @@ IA.sede = (function () {
     if (S.recl) return 'Ya hay una búsqueda en curso.';
     const c = Math.round(tipico() * r.costo);
     if (est0().caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'personal', c);
+    ART.negocio.pagar(0, 'personal', c);
     S.recl = { tipo: tipo, rol: rolId, fin: S.t + r.semanas };
     return '';
   }
@@ -86,7 +86,7 @@ IA.sede = (function () {
     }
     personal().forEach(function (p) {
       if (p.cap && S.t >= p.cap.fin) { p.niv = Math.min(90, p.niv + p.cap.gana); p.sal = salario(p.niv); delete p.cap; N.emit('noticia', { tipo: 'estudio', texto: p.nom + ' termina su capacitación: nivel ' + p.niv + '.' }); }
-      if (p.obra) { const o = IA.obras.porId(p.obra); if (!o || ['lista', 'cartelera', 'terminada'].indexOf(o.et) >= 0) delete p.obra; }
+      if (p.obra) { const o = ART.obras.porId(p.obra); if (!o || ['lista', 'cartelera', 'terminada'].indexOf(o.et) >= 0) delete p.obra; }
     });
   }
   function aceptar(id) {
@@ -107,13 +107,13 @@ IA.sede = (function () {
     if (p.niv >= 90) return 'Ya está en lo más alto.';
     const c = costoCapacitar(p);
     if (est0().caja < c) return 'No alcanza la caja.';
-    IA.negocio.pagar(0, 'academia', c);
+    ART.negocio.pagar(0, 'academia', c);
     p.cap = { fin: N.S.t + (p.niv >= 50 ? 6 : 3), gana: p.niv >= 50 ? 6 : 8 };
     return '';
   }
   // El personal libre se suma al instante a una producción en marcha: +1 en su departamento para esa obra
   function asignar(id, obraId) {
-    const p = personal().filter(function (x) { return x.id === id; })[0], o = IA.obras.porId(obraId);
+    const p = personal().filter(function (x) { return x.id === id; })[0], o = ART.obras.porId(obraId);
     if (!p || !o || o.est !== 0) return 'No se puede.';
     if (!rol(p.rol).dep) return 'Su rol trabaja para todo el estudio, no para una obra.';
     if (p.obra) return 'Ya está en otra producción.';
@@ -128,7 +128,7 @@ IA.sede = (function () {
     return m;
   }
   function fuerza(p) { return p ? (p.niv >= 70 ? 2 : p.niv >= 40 ? 1 : 0.5) : 0; }
-  // Bonos a los departamentos de una obra tuya (los suma IA.negocio.bonos)
+  // Bonos a los departamentos de una obra tuya (los suma ART.negocio.bonos)
   function bonos(b, obra) {
     ROLES.forEach(function (r) {
       if (!r.dep) return;
@@ -153,7 +153,7 @@ IA.sede = (function () {
     S.fans = Math.max(0, Math.round((S.fans || 0) + nuevos));
     o.fans = nuevos;
   }
-  function M_() { return 1 / Math.max(1, IA.mundo.precioEntrada ? IA.mundo.precioEntrada('nam', N.anio()) : 10); }
+  function M_() { return 1 / Math.max(1, ART.mundo.precioEntrada ? ART.mundo.precioEntrada('nam', N.anio()) : 10); }
   function anual() { const S = N.S; S.fans = Math.round((S.fans || 0) * 0.96); }
 
   return {

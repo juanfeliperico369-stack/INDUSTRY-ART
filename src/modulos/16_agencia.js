@@ -4,13 +4,13 @@
 // talento (biografía, desempeño por familia, capacidades, medios, otras habilidades, fama por región, relaciones,
 // ventajas, historial, premios e ingresos) con sus acciones: contratar para una obra en marcha o nueva, contrato
 // exclusivo, comprar la exclusividad a un rival y academia con beca.
-IA.agencia = (function () {
+ART.agencia = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, X = IA.taxonomia, E = IA.economia, M = IA.mundo, O = IA.obras, T = IA.talentos;
-  const J = IA.juego, U = IA.ui, t = IA.t, esc = N.esc;
+  const N = ART.n, D = ART.datos, X = ART.taxonomia, E = ART.economia, M = ART.mundo, O = ART.obras, T = ART.talentos;
+  const J = ART.juego, U = ART.ui, t = ART.t, esc = N.esc;
   const dinero = U.dinero, icono = U.icono, ac = U.accion;
 
-  // ---------- Filtros del buscador (tu documento: nombre, overall, costo, sexo, talento, retirado o activo, orden) ----------
+  // ---------- Filtros del buscador (nombre, overall, costo, sexo, talento, retirado o activo, orden) ----------
   const ft = { of: '', q: '', sx: '', estado: 'activos', disp: false, ovMin: 0, ovMax: 100, cMin: '', cMax: '', orden: 'valor', dir: 'desc', avanzado: false, n: 40, solo: '' };
   const ORDENES = [['valor', 'Recomendado'], ['overall', 'Overall'], ['fama', 'Popularidad'], ['costo', 'Costo'], ['taquilla', 'Taquilla de su carrera'], ['nombre', 'Nombre'], ['edad', 'Edad'], ['energia', 'Energía'], ['disponible', 'Disponibilidad']];
   function barra(v, max, clase) { return '<span class="mini" style="width:60px"><i class="' + (clase || '') + '" style="width:' + Math.round(N.limitar(v / (max || 100), 0, 1) * 100) + '%"></i></span>'; }
@@ -70,18 +70,44 @@ IA.agencia = (function () {
   // SECCIÓN TALENTO
   // =====================================================================
   function talento() {
-    const S = N.S, av = S.avatar;
-    let h = '<div class="titulo-sec"><h2>' + esc(t('sec_talento')) + '</h2><div class="fila"><button class="ayuda-i" data-a="ayuda" data-v="talento" aria-label="' + t('ayuda') + '">i</button></div></div>';
+    const S = N.S, av = S.avatar, sec = U.estado.sub.talento || 'catalogo';
+    let h = '<div class="titulo-sec"><h2>' + esc(t('sec_talento')) + '</h2><div class="fila"><button class="btn primario" data-a="crearTalentoForm">' + icono('persona') + 'Crear talento</button><button class="ayuda-i" data-a="ayuda" data-v="talento" aria-label="' + t('ayuda') + '">i</button></div></div>';
+    const exclusivos = T.activos().filter(function (x) { return T.exclusivoDe(x) === 0; });
+    const estudiando = S.talentos.filter(function (x) { return x.es && x.es.fin > S.t; });
+    h += '<div class="pestanas" role="tablist">' + [['catalogo', 'Catálogo'], ['oficina', 'Oficina (' + exclusivos.length + ')'], ['academia', 'Academia (' + estudiando.length + ')'], ['avatar', 'Tu avatar']].map(function (p) {
+      return '<button class="pestana' + (p[0] === sec ? ' on' : '') + '" role="tab" aria-selected="' + (p[0] === sec) + '" data-a="sub" data-s="talento" data-v="' + p[0] + '">' + esc(p[1]) + '</button>';
+    }).join('') + '</div>';
+    const filaT = function (x, extra) { return '<button class="tarjeta toque fila" style="width:100%;text-align:left" data-a="verTalento" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece"><b>' + esc(x.nom) + '</b><span class="tenue chico">' + esc(oficioNombre(x)) + ' · ' + (N.anio() - x.nac) + ' años · overall ' + T.overall(x) + '</span>' + (extra ? '<span class="chico">' + extra + '</span>' : '') + '</div></button>'; };
+    if (sec === 'avatar') {
     // Tu avatar y su academia
     const bonos = (av.esp || []).map(function (x) { return D.oficio(x).nombre + ' +' + (1 + ((av.ac && av.ac[x]) || 0)); }).concat(Object.keys(av.ac || {}).filter(function (x) { return (av.esp || []).indexOf(x) < 0; }).map(function (x) { return D.oficio(x).nombre + ' +' + av.ac[x]; }));
     h += '<div class="tarjeta"><div class="fila"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece"><span class="tenue chico">' + t('tu_avatar') + '</span><h3 style="margin:2px 0">' + esc(av.nom) + '</h3><span>' + (N.anio() - av.nac) + ' años · ' + esc(N.S.estudios[0].personalidad) + '</span>' +
       '<span class="chico">En tus obras: ' + esc(bonos.join(' · ')) + '</span>' + (av.es && av.es.fin > S.t ? '<span class="chico oro">Estudiando ' + esc(T.curso(av.es.c).nombre) + ' hasta ' + esc(U.fechaCorta(av.es.fin)) + '</span>' : '') + '</div></div>' +
-      '<div class="fila envolver"><button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><button class="btn" data-a="agAspecto">Cambiar tu aspecto</button></div><span class="nota info"><span>Puedes ganar hasta +5 en cada oficio estudiando.</span> <span>En tus obras puedes ponerte en el equipo como ' + esc(IA.carrera.oficiosAvatar().map(function (x) { return D.oficio(x).nombre.toLowerCase(); }).join(', ')) + ' (sin cobrar).</span> <span>Tu vida, tus encargos y tu retiro están en Estudio.</span></span></div>';
+      '<div class="fila envolver"><button class="btn" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Estudiar (academia)</button><button class="btn" data-a="agAspecto">Cambiar tu aspecto</button></div><span class="nota info"><span>Puedes ganar hasta +5 en cada oficio estudiando.</span> <span>En tus obras puedes ponerte en el equipo como ' + esc(ART.carrera.oficiosAvatar().map(function (x) { return D.oficio(x).nombre.toLowerCase(); }).join(', ')) + ' (sin cobrar).</span> <span>Tu vida, tus encargos y tu retiro están en Estudio.</span></span></div>';
+    }
+    if (sec === 'oficina') {
+      // Tu gente: exclusivos, promesas y becados, la lista corta y el personal de la sede
+      const promesas = T.activos().filter(function (x) { return x.beca || x.prom || (x.desc && !x.rev && T.exclusivoDe(x) === 0); }).sort(function (a, b) { return (b.prom || 0) - (a.prom || 0); });
+      const corta = (S.listaCorta || []).map(function (id) { return T.porId(id); }).filter(Boolean);
+      h += '<p class="nota info">Tu oficina de talentos: quién firmó en exclusiva contigo, las promesas que descubriste o becaste y tu lista corta para el próximo casting.</p>';
+      h += '<h3>Exclusivos (' + exclusivos.length + ')</h3>' + (exclusivos.length ? '<div class="col">' + exclusivos.map(function (x) { return filaT(x, 'Contrato hasta ' + esc(U.fechaCorta(x.exH)) + ' · ' + dinero(x.exS || 0) + ' al año'); }).join('') + '</div>' : '<p class="tenue">Nadie firmó en exclusiva todavía: abre un talento y ofrécele un contrato.</p>');
+      h += '<h3>Promesas y becados (' + promesas.length + ')</h3>' + (promesas.length ? '<p class="nota">Toca a una persona para ver su ficha: ahí la contratas en exclusiva, la sumas a una obra o la becas en la academia.</p><div class="col">' + promesas.map(function (x) { return filaT(x, (x.beca ? 'Becado por tu estudio' : 'Promesa descubierta · potencial ' + x.pot) + (T.exclusivoDe(x) === 0 ? ' · exclusiva tuya' : ' · libre para contratar')); }).join('') + '</div>' : '<p class="tenue">Busca promesas abajo o beca a alguien en la academia.</p>');
+      h += '<h3>Lista corta (' + corta.length + ')</h3>' + (corta.length ? '<div class="col">' + corta.map(function (x) { return filaT(x); }).join('') + '</div>' : '<p class="tenue">Marca talentos con la estrella para tenerlos a mano.</p>');
     // Promesas
     const espera = S.tPromesas ? Math.max(0, J.ESPERA_PROMESAS - (S.t - S.tPromesas)) : 0;
     h += '<div class="tarjeta"><b>Buscar promesas</b><p class="nota" style="margin:2px 0">Tus cazatalentos encuentran 3 jóvenes con mucho potencial. Conocerás su potencial real, su primer contrato sale 30 % más barato y te tienen lealtad.</p><div class="fila envolver">' +
       '<select data-c="agPromesaOf" aria-label="Oficio a buscar"><option value="">Cualquier oficio</option>' + D.oficios.map(function (o) { return '<option value="' + o.id + '"' + (ft.promOf === o.id ? ' selected' : '') + '>' + esc(o.nombre) + '</option>'; }).join('') + '</select>' +
       '<button class="btn primario" data-a="agPromesas"' + (espera ? ' disabled' : '') + '>' + (espera ? 'De nuevo en ' + espera + ' semanas' : 'Buscar · ' + dinero(J.costoPromesas())) + '</button></div></div>';
+      h += '<div class="fila" style="margin-top:8px"><button class="btn" data-a="agIrSede">Sede y personal de oficina</button></div>';
+    }
+    if (sec === 'academia') {
+      h += '<p class="nota info">En la academia tus talentos (y tu avatar) suben de nivel en un área: cuesta dinero y semanas sin trabajar, pero vuelven mejores. Abre un talento y toca «Academia» para inscribirlo.</p>';
+      h += '<h3>Estudiando ahora (' + estudiando.length + ')</h3>' + (estudiando.length ? '<div class="col">' + estudiando.map(function (x) { return filaT(x, esc(T.curso(x.es.c) ? T.curso(x.es.c).nombre : 'Curso') + ' hasta ' + esc(U.fechaCorta(x.es.fin))); }).join('') + '</div>' : '<p class="tenue">Nadie está estudiando.</p>');
+      const graduados = S.talentos.filter(function (x) { return x.ac && Object.keys(x.ac).length && !x.ret; }).slice(0, 30);
+      h += '<h3>Con estudios</h3>' + (graduados.length ? '<div class="col">' + graduados.map(function (x) { return filaT(x, Object.keys(x.ac).map(function (k) { return D.oficio(k).nombre + ' +' + x.ac[k]; }).join(' · ')); }).join('') + '</div>' : '<p class="tenue">Todavía nadie se graduó.</p>');
+      h += '<div class="fila" style="margin-top:8px"><button class="btn primario" data-a="agAcademia" data-v="avatar">' + icono('mas') + 'Inscribir a tu avatar</button></div>';
+    }
+    if (sec === 'catalogo') {
     // Catálogo por gremios con conteo
     const activos = T.activos();
     const cuenta = {}; activos.forEach(function (x) { cuenta[x.of] = (cuenta[x.of] || 0) + 1; });
@@ -111,9 +137,11 @@ IA.agencia = (function () {
       return '<button class="tarjeta toque fila" style="width:100%;text-align:left" data-a="verTalento" data-v="' + x.id + '"><canvas class="retrato" data-retrato="' + x.id + '"></canvas><div class="col crece"><b>' + esc(x.nom) + '</b><span class="chico">' + esc(oficioNombre(x)) + ' · ' + (N.anio() - x.nac) + ' años · ' + esc(D.pais(x.pais).nombre) + ' · ' + esc(T.personalidad(x).txt) + '</span>' +
         '<span class="chico">Overall ' + T.overall(x) + ' · ' + t('tal_habilidad').toLowerCase() + ' ' + Math.round(x.hab) + ' · ' + t('tal_fama').toLowerCase() + ' ' + Math.round(x.fama * 100) + (x.ret ? '' : ' · energía ' + barra(en, 100, en < 40 ? 'mal' : '')) + '</span>' + (etiquetas(x) ? '<span>' + etiquetas(x) + '</span>' : '') + '</div><b class="cifra">' + dinero(T.tarifaPara(x, 0)) + '</b></button>';
     }).join('') + '</div>' + (l.length > ft.n ? '<button class="btn bloque" data-a="agMas">' + t('ver') + ' más</button>' : '');
+    }
     return h;
   }
   function render(mantener) { U.renderVista(mantener); }
+  ac('agIrSede', function () { U.irA('negocio', 'sede'); });
   ac('agOficio', function (v) { ft.of = v; ft.n = 40; render(); });
   ac('agNivel', function (v) { ft.nivel = v; ft.n = 40; render(true); });
   ac('agLetra', function (v) { ft.letra = v; ft.n = 40; render(true); });
@@ -140,8 +168,9 @@ IA.agencia = (function () {
   ac('agPromesas', function () {
     const r = J.buscarPromesas(ft.promOf || '');
     if (r.error) { U.aviso(r.error, 'mal'); return; }
-    IA.arte.sonido('exito');
+    ART.arte.sonido('exito');
     ft.solo = 'promesas'; ft.avanzado = true; ft.estado = 'activos'; ft.of = ''; ft.q = '';
+    U.estado.sub.talento = 'oficina'; // aparecen en la Oficina, listas para contratar
     U.aviso('Tus cazatalentos encontraron ' + r.talentos.length + ' promesas');
     U.refrescar();
   });
@@ -149,6 +178,8 @@ IA.agencia = (function () {
   // =====================================================================
   // FICHA DEL TALENTO
   // =====================================================================
+  // Un rasgo que se recuerda de cada talento (de la Final)
+  const RASGOS_FISICOS = ['rostro expresivo', 'voz grave', 'sonrisa amplia', 'mirada intensa', 'pecas', 'cicatriz pequeña', 'lunar', 'tatuajes', 'voz dulce', 'porte elegante'];
   function fichaTalento(id) {
     const x = T.porId(id);
     if (!x) return '<p class="tenue">Este talento ya no está en el mundo.</p>';
@@ -157,9 +188,10 @@ IA.agencia = (function () {
     const exc = T.exclusivoDe(x);
     let h = '<div class="fila" style="align-items:flex-start"><canvas class="retrato grande" data-retrato="' + x.id + '"></canvas><div class="col crece"><h2 style="margin:0">' + esc(x.nom) + '</h2>' +
       '<span>' + esc(oficioNombre(x)) + (x.h2 ? ' · también ' + esc(Object.keys(x.h2).map(function (k) { return T.nombreOficio(x, k).toLowerCase() + ' (' + Math.round(x.h2[k]) + ')'; }).join(', ')) : '') + '</span>' +
-      '<span class="tenue">' + e + ' años · ' + esc(D.pais(x.pais).nombre) + ' · ' + (x.sx === 'F' ? t('mujer') : t('hombre')) + (x.idi ? ' · habla ' + esc(x.idi.map(function (i) { return i.toLowerCase(); }).join(', ')) : '') + '</span>' +
+      '<span class="tenue">' + e + ' años · ' + esc(D.pais(x.pais).nombre) + ' · ' + (x.sx === 'F' ? t('mujer') : t('hombre')) + ' · ' + esc(RASGOS_FISICOS[N.hash('f' + x.id) % RASGOS_FISICOS.length]) + (x.idi ? ' · habla ' + esc(x.idi.map(function (i) { return i.toLowerCase(); }).join(', ')) : '') + '</span>' +
       '<span class="oro">' + esc(per.txt) + ' · impulsa ' + per.valor + ' % la popularidad</span><span>' + etiquetas(x) + '</span></div></div>';
     h += '<p>' + esc(T.biografia(x)) + '</p>';
+    if (x.propio && !x.jugador && !x.mu || S.sandbox && !x.mu) h += '<div class="fila"><button class="btn" data-a="tnEditar" data-v="' + x.id + '">' + icono('pincel') + 'Editar talento</button></div>';
     const pot = T.potencialConocido(x) ? Math.round(x.pot) : '?';
     h += '<div class="kpis" style="margin:10px 0">' + kpi('Overall', T.overall(x)) + kpi(t('tal_habilidad'), Math.round(x.hab)) + kpi('Potencial', pot) + kpi(t('tal_fama'), Math.round(x.fama * 100)) + kpi('Poder de estrella', ex.poder) +
       kpi(t('tal_tarifa'), dinero(T.tarifaPara(x, 0))) + kpi('Energía', x.ret ? '—' : T.energia(x)) + kpi('Moral', x.ret ? '—' : T.moral(x)) + kpi('Proyectos activos', (x.act || 0) + ' de ' + T.MAX_PROYECTOS) +
@@ -169,7 +201,7 @@ IA.agencia = (function () {
     const pares = S.talentos.filter(function (y) { return y.of === x.of && !y.ret && !y.mu && y.cp; }).slice(0, 300);
     const prom = T.CAPACIDADES.map(function (_, i) { return pares.length ? pares.reduce(function (a, y) { return a + y.cp[i]; }, 0) / pares.length : 50; });
     const gr = U.grafica('radarT' + x.id, function (cv) {
-      IA.arte.radar(cv, [T.CAPACIDADES.map(function (_, i) { return x.cp ? x.cp[i] : x.hab; }), prom], T.CAPACIDADES, { leyenda: [x.nom.split(' ')[0], 'Promedio de su oficio'] });
+      ART.arte.radar(cv, [T.CAPACIDADES.map(function (_, i) { return x.cp ? x.cp[i] : x.hab; }), prom], T.CAPACIDADES, { leyenda: [x.nom.split(' ')[0], 'Promedio de su oficio'] });
     });
     h += '<canvas class="lienzo" style="height:230px;max-width:420px;margin:0 auto;display:block" data-grafica="' + gr + '" role="img" aria-label="Radar de capacidades"></canvas>';
     const nv = T.nivel(x), falta = T.faltaPrestigio(x, 0);
@@ -203,7 +235,7 @@ IA.agencia = (function () {
       return '<button class="tarjeta toque fila entre" style="width:100%" data-a="verTalento" data-v="' + q.o.id + '"><span>' + esc(q.o.nom) + ' <span class="tenue chico">' + esc(oficioNombre(q.o)) + '</span></span><span class="' + (q.v > 0 ? 'bien' : 'mal') + '">' + esc(tipo) + ' (' + signo(q.v) + ')</span></button>';
     }).join('') + '<p class="nota info">La química del equipo clave (dirección, guion y protagonistas) suma o resta hasta 4 puntos de calidad.</p>' : '<p class="tenue">Las amistades, rivalidades y parejas nacen trabajando juntos.</p>');
     // Historial y premios
-    const obras = S.obras.filter(function (o) { return (o.eq && O.idsEquipo(o).indexOf(id) >= 0) || (x.hist && x.hist.indexOf(o.id) >= 0); }).slice(-15).reverse();
+    const obras = S.obras.filter(function (o) { return (o.eq && O.idsEquipo(o).indexOf(id) >= 0) || (Array.isArray(x.hist) && x.hist.indexOf(o.id) >= 0); }).slice(-15).reverse();
     h += '<h3>' + t('tal_obras') + '</h3>' + (obras.length ? obras.map(function (o) {
       const m = O.multiplicador(o);
       return '<button class="tarjeta toque fila entre" style="width:100%" data-a="verObra" data-v="' + o.id + '"><span>«' + esc(o.tit) + '» <span class="tenue chico">' + esc(S.estudios[o.est].nombre) + ' · ' + (o.anio || O.NOMBRE_ETAPA[o.et]) + '</span></span>' + (o.et === 'terminada' ? '<span class="etiqueta ' + (m >= 2.5 ? 'bien' : m < 1.4 ? 'mal' : '') + '">×' + U.decimal(m, 2) + '</span>' : '') + '</button>';
@@ -247,7 +279,7 @@ IA.agencia = (function () {
     const p = v.split('|');
     const err = J.contratarEnObra(+p[0], +p[1], p[2], p[3] || undefined);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('dinero');
+    ART.arte.sonido('dinero');
     U.aviso('Contratado');
     ui.panel = null;
     U.renderBarra();
@@ -255,7 +287,7 @@ IA.agencia = (function () {
   });
   ac('agNuevaObra', function (v) {
     ui.panel = null;
-    if (IA.creacion.crearCon) IA.creacion.crearCon(+v);
+    if (ART.creacion.crearCon) ART.creacion.crearCon(+v);
   });
   // ---------- Contratos exclusivos ----------
   ac('agExclusivo', function (v) {
@@ -272,14 +304,14 @@ IA.agencia = (function () {
     const p = v.split('|');
     const err = J.firmarExclusivo(+p[0], +p[1]);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('exito');
+    ART.arte.sonido('exito');
     U.aviso('Contrato exclusivo firmado');
     cerrarPanel(+p[0]);
   });
   ac('agComprarEx', function (v) {
     const err = J.comprarExclusividad(+v);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('dinero');
+    ART.arte.sonido('dinero');
     U.aviso('Ahora está libre: puedes contratarlo o firmarle un exclusivo');
     U.renderBarra();
     cerrarPanel(+v);
@@ -323,7 +355,7 @@ IA.agencia = (function () {
     const p = v.split('|');
     const err = J.estudiar(p[0] === 'avatar' ? 'avatar' : +p[0], p[1], p[2]);
     if (err) { U.aviso(err, 'mal'); return; }
-    IA.arte.sonido('exito');
+    ART.arte.sonido('exito');
     U.aviso(p[0] === 'avatar' ? 'Empiezas a estudiar' : 'Beca pagada: empieza a estudiar');
     U.renderBarra();
     if (p[0] === 'avatar') { U.cerrarModal(); U.refrescar(); } else cerrarPanel(+p[0]);
@@ -333,7 +365,7 @@ IA.agencia = (function () {
   function formAspecto() {
     const av = N.S.avatar, a = Object.assign({}, U.comoRetrato({ id: 999999, nom: av.nom, sx: av.sx, nac: av.nac, of: 'produccion', reg: N.S.estudios[0].reg }).aspecto);
     return '<h2>Tu aspecto</h2><div class="fila" id="agAspVista" style="align-items:flex-start"><canvas class="retrato grande" data-retrato="999999"></canvas><div class="col crece">' +
-      IA.arte.OPCIONES_ASPECTO.filter(function (x) { return !x[3] || x[3] === av.sx; }).map(function (x) {
+      ART.arte.OPCIONES_ASPECTO.filter(function (x) { return !x[3] || x[3] === av.sx; }).map(function (x) {
         return '<label class="campo" style="margin:0"><span>' + x[1] + '</span><select data-c="agAsp" data-k="' + x[0] + '">' + x[2].map(function (n, i) { return '<option value="' + i + '"' + ((+a[x[0]] || 0) === i ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></label>';
       }).join('') + '</div></div><button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>';
   }
@@ -342,7 +374,7 @@ IA.agencia = (function () {
     const av = N.S.avatar, k = el.getAttribute('data-k');
     const base = U.comoRetrato({ id: 999999, nom: av.nom, sx: av.sx, nac: av.nac, of: 'produccion', reg: N.S.estudios[0].reg }).aspecto;
     const a = Object.assign({}, base); a[k] = ['gafas', 'aretes', 'pecas'].indexOf(k) >= 0 ? +v === 1 : +v;
-    av.asp = IA.juego.aspectoValido(a);
+    av.asp = ART.juego.aspectoValido(a);
     U.dibujar(document.getElementById('agAspVista'));
     U.dibujar(document.getElementById('vista'));
   });

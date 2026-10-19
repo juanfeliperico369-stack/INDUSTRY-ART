@@ -3,12 +3,12 @@
 // noticias); cada mes, gastos fijos, decisiones de rivales y tendencias; cada año, impuestos, edades, retiros,
 // nuevas generaciones y balance. El ritmo lo elige el jugador: +1 semana, +1 mes, hasta el próximo evento o
 // automático.
-IA.juego = (function () {
+ART.juego = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, M = IA.mundo, E = IA.economia, T = IA.talentos, O = IA.obras;
-  const PR = IA.produccion, L = IA.lanzamiento, R = IA.rivales, PM = IA.premios, NG = IA.negocio;
-  const ANIO_MIN = 1850, ANIO_MAX = 2100;
-  // Los valores de tu documento (de $500 a $1 B) con pasos intermedios para que el recomendado sea justo
+  const N = ART.n, D = ART.datos, M = ART.mundo, E = ART.economia, T = ART.talentos, O = ART.obras;
+  const PR = ART.produccion, L = ART.lanzamiento, R = ART.rivales, PM = ART.premios, NG = ART.negocio;
+  const ANIO_MIN = 1700, ANIO_MAX = 2100;
+  // Capital de $500 a $1 B con pasos intermedios para que el recomendado sea justo
   const CAPITALES = [500, 1e3, 2.5e3, 5e3, 1e4, 2.5e4, 5e4, 1e5, 2.5e5, 5e5, 1e6, 2.5e6, 5e6, 1e7, 2.5e7, 5e7, 1e8, 2.5e8, 5e8, 1e9];
   const DIFICULTADES = [
     { id: 'facil', nombre: 'Fácil', rivales: -4 },
@@ -28,7 +28,7 @@ IA.juego = (function () {
   }
   function estadoBase(op) {
     return {
-      v: IA.VERSION_GUARDADO, juego: 'INDUSTRY ART', semilla: String(op.semilla), rng: N.estadoNuevo(op.semilla),
+      v: ART.VERSION_GUARDADO, juego: 'INDUSTRY ART', semilla: String(op.semilla), rng: N.estadoNuevo(op.semilla),
       y0: op.anio, t: 0, sigId: 0, escenario: op.escenario || 'medio', dificultad: op.dificultad || 'normal',
       estudios: [], talentos: [], obras: [], premios: [], noticias: [], resumenAnios: {}, encajeVisto: {},
       mundo: { tendencias: {} },
@@ -73,7 +73,7 @@ IA.juego = (function () {
     T.generarInicial();
     const av = op.avatar || {};
     const esp = (av.especialidades || ['produccion', 'direccion', 'guion']).filter(function (x, i, a) { return D.oficio(x) && a.indexOf(x) === i; }).slice(0, 3);
-    S.avatar = { nom: (av.nombre || 'Felipe').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
+    S.avatar = { nom: (av.nombre || 'OneZero').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
     if (av.aspecto) S.avatar.asp = aspectoValido(av.aspecto);
     const vis = D.visiones.filter(function (v) { return v.id === S.estudios[0].vision; })[0];
     if (vis && vis.fama) S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);
@@ -85,18 +85,19 @@ IA.juego = (function () {
     e0.region0 = tarjeta ? tarjeta.id : 'independiente';
     if (op.enfoque) e0.enf = { gen: (op.enfoque.gen || []).slice(0, 3), tem: (op.enfoque.tem || []).slice(0, 3) };
     e0.suf = op.sufijo || '';
+    if (op.rasgo) { e0.rasgoP = op.rasgo; S.avatar.rasgo = op.rasgo; } // personalidad del dueño: tipo y rasgo, como en la Final
     e0.sede = 1; e0.staff = [];
     S.fans = Math.round(e0.fama * 2000);
     S.recordatorios = [];
-    IA.carrera.iniciar(op);
-    IA.historia.inicio(); // hitos ya pasados
-    IA.metas.iniciar(op); // modo, reto y tutorial
-    IA.banco.semilla(pais.region, S.dificultad); // deuda semilla
+    ART.carrera.iniciar(op);
+    ART.historia.inicio(); // hitos ya pasados
+    ART.metas.iniciar(op); // modo, reto y tutorial
+    ART.banco.semilla(pais.region, S.dificultad); // deuda semilla
     O.reindexar();
     noticia({ tipo: 'estudio', texto: 'Nace ' + S.estudios[0].nombre + ' en ' + pais.nombre + '. ' + M.era(anio) + '.', importante: true });
     // El mundo no arranca vacío: los rivales ya tienen obras en marcha y hay guiones en venta
     R.mensual(NG.contextoDe(1));
-    IA.ideas.renovarGuiones();
+    ART.ideas.renovarGuiones();
     N.emit('partidaNueva', S);
     return S;
   }
@@ -108,24 +109,24 @@ IA.juego = (function () {
     N.on('aviso', function (a) { noticia({ tipo: a.tipo, texto: a.texto, importante: true }); });
     N.on('hito', hito);
     N.on('obraLista', function (o) {
-      IA.historia.censurar(o); // Código de Producción
-      if (o.tv) IA.tv.alQuedarLista(o); // tramas de la serie
+      ART.historia.censurar(o); // Código de Producción
+      if (o.tv) ART.tv.alQuedarLista(o); // tramas de la serie
       if (o.est !== 0) R.alQuedarLista(o, NG.contextoDe(o.est));
     });
     N.on('estreno', function (o) {
-      IA.prensa.alEstrenar(o); // promesas de la rueda de prensa
-      IA.franquicias.alEstrenar(o); // fatiga de la franquicia
-      if (o.est === 0) IA.critica.resenar(o); // reseñas y proyección para la prensa
+      ART.prensa.alEstrenar(o); // promesas de la rueda de prensa
+      ART.franquicias.alEstrenar(o); // fatiga de la franquicia
+      if (o.est === 0) ART.critica.resenar(o); // reseñas y proyección para la prensa
       const m = N.S.mercado;
       m.famMes[o.fam] = (m.famMes[o.fam] || 0) + 1;
       if (o.est === 0) noticia({ tipo: 'estreno', texto: N.S.avatar.nom + ' presenta «' + o.tit + '»: llega a los cines.' });
     });
     N.on('obraTerminada', function (o) {
       if (o.anio === undefined) o.anio = N.anio(o.fe !== undefined ? o.fe : N.S.t); // series y estrenos directos también tienen año
-      IA.sede.alTerminar(o); // fans
-      IA.critica.alTerminar(o); // cronología
-      IA.franquicias.alTerminar(o); // popularidad de los personajes
-      IA.imperio.alTerminar(o); // coproducciones, encargos, financiación y distribución
+      ART.sede.alTerminar(o); // fans
+      ART.critica.alTerminar(o); // cronología
+      ART.franquicias.alTerminar(o); // popularidad de los personajes
+      ART.imperio.alTerminar(o); // coproducciones, encargos, financiación y distribución
       if (o.est === 0 && !o.tv) noticia({ tipo: 'resultado', texto: '«' + o.tit + '» deja la cartelera con {$} de taquilla.', monto: o.bruto, importante: true });
     });
     N.on('premios', function (r) {
@@ -160,12 +161,12 @@ IA.juego = (function () {
     if (N.anio() < D.CINE_DESDE) return 'El cine nace en ' + D.CINE_DESDE + ': hasta entonces produce teatro, libros y música (Obras › Teatro, Libros o Música).';
     const gen = O.validarGeneros(b.gen);
     if (gen) return gen;
-    const idea = IA.ideas.validar(b, N.anio());
+    const idea = ART.ideas.validar(b, N.anio());
     if (idea) return idea;
     if (O.clasificacionesDisponibles(N.anio(), b.gen).indexOf(b.clas) < 0) return 'Esa clasificación no está disponible en ' + N.anio() + '.';
-    if (!O.equipoCompleto(b)) return IA.rodaje.necesita(b, 'animacion') && (b.eq.animacion === undefined || b.eq.animacion === null) && !IA.rodaje.esExterno(b, 'animacion') ?
+    if (!O.equipoCompleto(b)) return ART.rodaje.necesita(b, 'animacion') && (b.eq.animacion === undefined || b.eq.animacion === null) && !ART.rodaje.esExterno(b, 'animacion') ?
       'Falta quien anime: contrata un animador o encarga la animación a un estudio externo.' : 'Falta completar el equipo.';
-    const rod = IA.rodaje.validar(b, N.anio());
+    const rod = ART.rodaje.validar(b, N.anio());
     if (rod) return rod;
     const ocupados = O.idsEquipo(b).filter(function (id) { return !T.disponible(T.porId(id), 0); });
     if (ocupados.length) { const t = T.porId(ocupados[0]); return (t ? t.nom : 'Alguien del equipo') + ' ya no está disponible.'; }
@@ -182,24 +183,35 @@ IA.juego = (function () {
     if (S.estudios[0].caja < costo) return b.derechos ? 'No alcanza la caja para los contratos y los derechos.' : 'No alcanza la caja para los contratos.';
     return '';
   }
+  // Fondos e incentivos de cine: un estudio chico recibe una parte del costo de cada obra, como con los fondos nacionales
+  // que nacieron en Francia en 1946 y los incentivos fiscales de hoy. Es para independientes: se pierde con más del
+  // 1,5 % del mercado.
+  function fondoCine(b) {
+    const S = N.S, a = N.anio(), h = S.fin.hist[S.fin.hist.length - 1];
+    if (a < 1946 || (h && h.cuota >= 0.015)) return 0;
+    const pct = a < 1990 ? 0.08 : 0.12;
+    return Math.round(Math.min((O.costoTalento(b) + (b.pp || 0)) * pct, ART.economia.presupuestoTipico(a) * 0.15));
+  }
   function iniciarObra(b) {
     const err = puedeIniciar(b);
     if (err) return { error: err };
-    IA.ideas.marcarEncaje(b);
+    ART.ideas.marcarEncaje(b);
     if (b.derechos) NG.pagar(0, 'derechos', b.derechos);
-    if (b.mat) IA.ideas.registrarUso(b.mat, N.anio());
+    if (b.mat) ART.ideas.registrarUso(b.mat, N.anio());
     // Un guion propio se usa una sola vez
     if (b.guionId) N.S.guionesPropios = (N.S.guionesPropios || []).filter(function (g) { return g.id !== b.guionId; });
     const o = PR.iniciar(b, NG.contextoDe(0));
-    if (IA.imperio.moral()) O.idsEquipo(o).forEach(function (id) { const ta = T.porId(id); if (ta) T.cambiarMoral(ta, IA.imperio.moral()); }); // cafetería
-    IA.ideas.registrarPremisas(o, N.anio());
+    const fondo = fondoCine(b);
+    if (fondo) { NG.cobrarEn(0, 'fondos', fondo); noticia({ tipo: 'negocio', texto: 'El fondo de cine de ' + (D.pais(N.S.estudios[0].pais) || { nombre: 'tu país' }).nombre + ' aporta {$} a «' + o.tit + '».', monto: fondo }); }
+    if (ART.imperio.moral()) O.idsEquipo(o).forEach(function (id) { const ta = T.porId(id); if (ta) T.cambiarMoral(ta, ART.imperio.moral()); }); // cafetería
+    ART.ideas.registrarPremisas(o, N.anio());
     // Arquetipo carismático: el equipo llega con más moral
-    const ar = IA.carrera.arquetipo();
+    const ar = ART.carrera.arquetipo();
     if (ar && ar.moral) O.idsEquipo(o).forEach(function (id) { const ta = T.porId(id); if (ta) T.cambiarMoral(ta, ar.moral); });
     // Experiencia en los géneros del enfoque
     const est = N.S.estudios[0], g0 = (o.gen || [])[0];
     if (est.enf && est.enf.gen.indexOf(g0) >= 0) { est.expG = est.expG || {}; est.expG[g0] = (est.expG[g0] || 0) + 1; }
-    noticia({ tipo: 'estudio', texto: 'Empieza el desarrollo de «' + o.tit + '».' + (b.mat ? ' Basada en «' + IA.taxonomia.material(b.mat).tit + '».' : '') });
+    noticia({ tipo: 'estudio', texto: 'Empieza el desarrollo de «' + o.tit + '».' + (b.mat ? ' Basada en «' + ART.taxonomia.material(b.mat).tit + '».' : '') });
     return { obra: o };
   }
   // ---------- Talentos: exclusivos, academia, promesas y contratar en una obra en marcha ----------
@@ -277,7 +289,7 @@ IA.juego = (function () {
     if (!t) return 'Ese talento no existe.';
     if (O.idsEquipo(o).indexOf(id) >= 0) return t.nom + ' ya está en «' + o.tit + '».';
     const c = { rol: rol, imp: imp };
-    const r = T.negociar(t, Object.assign({ est: 0, rol: rol, imp: imp, clas: Math.max(0, IA.taxonomia.ORDEN_CLAS.indexOf(o.clas)), dir: T.porId(o.eq.direccion) ? T.porId(o.eq.direccion).hab : undefined, amor: o.cont ? o.cont.amor : 0 }, c));
+    const r = T.negociar(t, Object.assign({ est: 0, rol: rol, imp: imp, clas: Math.max(0, ART.taxonomia.ORDEN_CLAS.indexOf(o.clas)), dir: T.porId(o.eq.direccion) ? T.porId(o.eq.direccion).hab : undefined, amor: o.cont ? o.cont.amor : 0 }, c));
     if (r.estado === 'rechaza' || r.estado === 'exige') return t.nom + ': ' + r.texto.toLowerCase() + '.';
     const pct = r.estado === 'contraoferta' ? r.pctMin : 0;
     // Cada papel cobra su parte: secundario la mitad, invitado 40 %, cameo 15 %
@@ -290,12 +302,12 @@ IA.juego = (function () {
     else if (imp === 'cameo') o.eq.cam = (o.eq.cam || []).concat([id]);
     else {
       o.eq.int = (o.eq.int || []).concat([id]);
-      if (o.pj) o.pj.push({ n: IA.ideas.nombrePersonaje(IA.ideas.regionDe(o), t.sx), e: N.anio() - t.nac, s: t.sx, i: imp || 'secundario', a: (t.pap && t.pap[0]) || 'Aliado', t: id });
+      if (o.pj) o.pj.push({ n: ART.ideas.nombrePersonaje(ART.ideas.regionDe(o), t.sx), e: N.anio() - t.nac, s: t.sx, i: imp || 'secundario', a: (t.pap && t.pap[0]) || 'Aliado', t: id });
     }
     if (o.pj && (imp === 'invitado' || imp === 'cameo')) o.pj.push({ n: t.nom, e: N.anio() - t.nac, s: t.sx, i: imp, a: (t.pap && t.pap[0]) || 'Testigo', t: id });
     if (pct) { o.pctT = o.pctT || {}; o.pctT[id] = pct; }
     if (previo !== null && previo !== undefined) T.liberar([previo]);
-    T.ocupar([id], N.S.t + IA.produccion.semanasRestantes(o));
+    T.ocupar([id], N.S.t + ART.produccion.semanasRestantes(o));
     NG.pagar(0, 'talento', fee);
     T.pagarA(id, fee);
     o.cf = Math.round((o.cf || 0) + fee);
@@ -307,12 +319,12 @@ IA.juego = (function () {
   function decidirDilema(obraId, i) {
     const o = O.porId(obraId);
     if (!o || o.est !== 0 || !o.dil) return 'No hay nada que decidir.';
-    return IA.rodaje.decidir(o, i, NG.contexto());
+    return ART.rodaje.decidir(o, i, NG.contexto());
   }
   function decidirPrueba(obraId, id) {
     const o = O.porId(obraId);
     if (!o || o.est !== 0) return 'No hay prueba pendiente.';
-    return IA.rodaje.decidirPrueba(o, id, NG.contexto());
+    return ART.rodaje.decidirPrueba(o, id, NG.contexto());
   }
   function decisionesPendientes() { return O.activas().filter(function (o) { return o.est === 0 && (o.dil || (o.prueba && !o.prueba.ok)); }); }
   // Comprar un guion ya escrito: se paga ahora y queda en tus guiones hasta que lo produzcas
@@ -333,10 +345,10 @@ IA.juego = (function () {
     if (o.prog) return 'La obra ya tiene fecha de estreno.';
     if (o.tv) return 'Las series se emiten: elige dónde en su ficha.';
     if (o.fest && o.fest.hasta > t) return 'Está inscrita en un festival: no puede estrenarse antes de que termine.';
-    const p = IA.estreno.normalizar(o, plan, N.anio(t));
-    if (p.via !== 'cines' && !IA.ventanas.viasDirectas(N.anio(t)).some(function (v) { return v.id === p.via; })) return 'Esa vía de estreno todavía no existe.';
+    const p = ART.estreno.normalizar(o, plan, N.anio(t));
+    if (p.via !== 'cines' && !ART.ventanas.viasDirectas(N.anio(t)).some(function (v) { return v.id === p.via; })) return 'Esa vía de estreno todavía no existe.';
     if (p.via === 'cines' && Object.keys(p.reg).every(function (r) { return p.reg[r] === 'retener'; })) return 'Si retienes todas las regiones, no hay estreno en cines: elige al menos una o estrena directo.';
-    const c = IA.estreno.costos(o, p, nivM, N.anio(t));
+    const c = ART.estreno.costos(o, p, nivM, N.anio(t));
     if (N.S.estudios[0].caja < c.total) return 'No alcanza la caja para ese plan.';
     L.programar(o, t, nivM, NG.contexto(), p);
     return '';
@@ -350,15 +362,15 @@ IA.juego = (function () {
     const antes = { caja: S.estudios[0].caja, t: S.t };
     PR.semana(ctx);
     L.semana(ctx);
-    IA.ventanas.semana(ctx);
+    ART.ventanas.semana(ctx);
     NG.semana();
-    IA.sede.semana(); // reclutamiento y capacitación
-    IA.carrera.semana(); // encargos y vida ligera de tu avatar
-    IA.prensa.semana(); // rivales que mueven fechas
-    IA.tv.semana(); IA.streaming.semana(); IA.franquicias.semana(); // series, canal, plataforma y licencias
-    IA.historia.semana(); IA.eventos.semana(); IA.banco.semana(); IA.imperio.semana(); // historia, eventos, banco e imperio
-    IA.medios.semana(); // música, videojuegos, teatro y libros
-    IA.metas.semana(); // tutorial
+    ART.sede.semana(); // reclutamiento y capacitación
+    ART.carrera.semana(); // encargos y vida ligera de tu avatar
+    ART.prensa.semana(); // rivales que mueven fechas
+    ART.tv.semana(); ART.streaming.semana(); ART.franquicias.semana(); // series, canal, plataforma y licencias
+    ART.historia.semana(); ART.eventos.semana(); ART.banco.semana(); ART.imperio.semana(); // historia, eventos, banco e imperio
+    ART.medios.semana(); // música, videojuegos, teatro y libros
+    ART.metas.semana(); // tutorial
     const ceremonia = PM.semana();
     academia();
     S.t++;
@@ -373,14 +385,14 @@ IA.juego = (function () {
       S.mercado.famMes = {};
       R.mensual(NG.contextoDe(1));
       T.mensual(NG.contexto()); // salarios de los contratos exclusivos
-      IA.estreno.mensual(NG.contexto()); // cadenas de cines y cines propios
+      ART.estreno.mensual(NG.contexto()); // cadenas de cines y cines propios
       // El mercado de guiones se renueva cada mes
-      IA.ideas.renovarGuiones();
-      IA.critica.cartaMensual(); IA.critica.numeroRevista(); // cartas de fans y revista
-      IA.franquicias.mensual(); IA.tv.mensual(); // ofertas por tus franquicias y patrocinadores
-      IA.banco.mensual(); IA.imperio.mensual(); // cuotas, junta, sedes, filiales y encargos
-      IA.medios.mensual(); // bandas
-      IA.metas.mensual(); // misiones y logros
+      ART.ideas.renovarGuiones();
+      ART.critica.cartaMensual(); ART.critica.numeroRevista(); // cartas de fans y revista
+      ART.franquicias.mensual(); ART.tv.mensual(); // ofertas por tus franquicias y patrocinadores
+      ART.banco.mensual(); ART.imperio.mensual(); // cuotas, junta, sedes, filiales y encargos
+      ART.medios.mensual(); // bandas
+      ART.metas.mensual(); // misiones y logros
     }
     if (nuevoAnio) {
       const cerrado = N.anio() - 1;
@@ -388,13 +400,13 @@ IA.juego = (function () {
       R.anual();
       T.anual();
       T.exclusivosRivales();
-      IA.ventanas.anual();
-      IA.sede.anual();
-      IA.carrera.anual();
-      IA.franquicias.anual();
-      IA.banco.anual(S.estudios[0].util); IA.imperio.anual(); // dividendos, inventos y filiales
-      IA.medios.anual(); // premios Vinilo, Cartucho, Telón y Pluma; motores
-      IA.metas.anual(); // campaña por décadas y retos
+      ART.ventanas.anual();
+      ART.sede.anual();
+      ART.carrera.anual();
+      ART.franquicias.anual();
+      ART.banco.anual(S.estudios[0].util); ART.imperio.anual(); // dividendos, inventos y filiales
+      ART.medios.anual(); // premios Vinilo, Cartucho, Telón y Pluma; motores
+      ART.metas.anual(); // campaña por décadas y retos
       O.compactar();
       if (S.fin.hist.length) N.emit('finAnio', S.fin.hist[S.fin.hist.length - 1]);
     }
@@ -430,8 +442,8 @@ IA.juego = (function () {
     if (O.activas().some(function (o) { return o.est === 0 && (o.dil || (o.prueba && !o.prueba.ok)); })) return 'decision';
     if (S.evento) return 'evento'; // eventos con decisión
     if (O.activas().some(function (o) { return o.est === 0 && o.et === 'lista' && o.prog && o.fe === S.t; })) return 'estreno';
-    if (IA.cal.recordatoriosDeSemana(S.t).length) return 'recordatorio'; // tus recordatorios detienen el tiempo
-    if (IA.carrera.pendiente()) return 'vida';
+    if (ART.cal.recordatoriosDeSemana(S.t).length) return 'recordatorio'; // tus recordatorios detienen el tiempo
+    if (ART.carrera.pendiente()) return 'vida';
     if (N.semana() === 1) return 'anio';
     return '';
   }
@@ -462,14 +474,14 @@ IA.juego = (function () {
       if (S.quiebra) { motivo = 'quiebra'; break; }
       if (huboCeremonia) { motivo = 'premios'; if (modo === 'evento' || modo === 'semana') break; }
       if (modo === 'evento') { motivo = hayEvento(); if (motivo) break; }
-      else if (IA.cal.recordatoriosDeSemana(S.t).length || (modo && modo.hasta !== undefined && IA.carrera.pendiente())) { motivo = IA.cal.recordatoriosDeSemana(S.t).length ? 'recordatorio' : 'vida'; break; }
+      else if (ART.cal.recordatoriosDeSemana(S.t).length || (modo && modo.hasta !== undefined && ART.carrera.pendiente())) { motivo = ART.cal.recordatoriosDeSemana(S.t).length ? 'recordatorio' : 'vida'; break; }
     }
     void ing0; void gas0;
     return { semanas: n, desde: t0, hasta: S.t, caja: S.estudios[0].caja - caja0, ingresos: ingAcum, gastos: gasAcum, motivo: motivo };
   }
 
   return {
-    ANIO_MIN: ANIO_MIN, ANIO_MAX: ANIO_MAX, aspectoValido: aspectoValido, CAPITALES: CAPITALES, DIFICULTADES: DIFICULTADES,
+    fondoCine: fondoCine, ANIO_MIN: ANIO_MIN, ANIO_MAX: ANIO_MAX, aspectoValido: aspectoValido, CAPITALES: CAPITALES, DIFICULTADES: DIFICULTADES,
     capitalRecomendado: capitalRecomendado, nuevaPartida: nuevaPartida, conectar: conectar, noticia: noticia,
     puedeIniciar: puedeIniciar, iniciarObra: iniciarObra, programarEstreno: programarEstreno, comprarGuion: comprarGuion,
     firmarExclusivo: firmarExclusivo, comprarExclusividad: comprarExclusividad, cancelarExclusivo: cancelarExclusivo, estudiar: estudiar,

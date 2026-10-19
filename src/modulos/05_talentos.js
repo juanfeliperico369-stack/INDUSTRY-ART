@@ -6,15 +6,15 @@
 // +10 al mes) y moral, relaciones (amistad, rivalidad, pareja), negociación, contratos exclusivos, academia,
 // promesas que se descubren y ciclo de vida (niños actores, retiro entre 70 y 100 con regresos, muerte poco
 // probable). La tarifa sale del mercado (economia.tarifa). Los que no trabajan se actualizan una vez al año.
-IA.talentos = (function () {
+ART.talentos = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos;
+  const N = ART.n, D = ART.datos;
   const PESO_REGION = { nam: 0.28, eur: 0.25, asi: 0.2, lat: 0.14, afr: 0.08, oce: 0.05 };
   const CAPACIDADES = ['Excelencia', 'Creatividad', 'Inteligencia', 'Liderazgo', 'Paciencia'];
   const EJES = ['Acción', 'Imaginación', 'Suspenso', 'Drama', 'Humor', 'Familia', 'Arte', 'Romance']; // = D.ORDEN_FAM
   const MEDIOS = ['cine', 'tv', 'musica', 'juegos', 'teatro', 'libros'];
-  const ENERGIA_CARGO = 20, ENERGIA_MES = 10, MAX_PROYECTOS = 2; // tu documento: casi siempre en 2 proyectos a la vez
-  const MAX_ACADEMIA = 5; // hasta +5 de experiencia por estudios en cada oficio (tu documento)
+  const ENERGIA_CARGO = 20, ENERGIA_MES = 10, MAX_PROYECTOS = 2; // casi siempre en 2 proyectos a la vez
+  const MAX_ACADEMIA = 5; // hasta +5 de experiencia por estudios en cada oficio
   let indice = null; // id -> talento (se reconstruye al cargar)
   let porOficio = null; // oficio -> talentos en el mismo orden de la lista (para buscar rápido)
 
@@ -80,7 +80,7 @@ IA.talentos = (function () {
       if (t.dob === undefined) t.dob = Math.round(N.limitar(nz(45, 16), 5, 99));
       if (!t.pap) {
         const a = D.ORDEN_FAM.indexOf(D.ORDEN_FAM[t.af.indexOf(Math.max.apply(null, t.af))]);
-        const lista = IA.taxonomia ? IA.taxonomia.arquetipos.map(function (x) { return x.id; }) : ['Héroe'];
+        const lista = ART.taxonomia ? ART.taxonomia.arquetipos.map(function (x) { return x.id; }) : ['Héroe'];
         t.pap = [lista[(a * 3 + Math.floor(azar() * 5)) % lista.length], lista[Math.floor(azar() * lista.length)]].filter(function (x, i, l) { return l.indexOf(x) === i; });
       }
     }
@@ -168,7 +168,7 @@ IA.talentos = (function () {
     return energia(t) >= ENERGIA_CARGO && (t.act || 0) < MAX_PROYECTOS;
   }
   function ocupado(t) { return (t.act || 0) > 0; }
-  function tarifa(t) { return IA.economia.tarifa(t, N.anio()); }
+  function tarifa(t) { return ART.economia.tarifa(t, N.anio()); }
   // Lo que le cuesta a un estudio: el exclusivo ya cobra su salario y los becados hacen precio
   function tarifaPara(t, estId) {
     if (!t) return 0;
@@ -271,11 +271,25 @@ IA.talentos = (function () {
     return Math.max(0, nivel(t).prestigio - Math.round((est ? est.fama : 0) * 100));
   }
   // Crear un talento propio: con nombre, oficio, sexo y edad; la habilidad sale de un potencial modesto
+  // Un talento creado por el jugador: nombre, oficio (y otro), país, potencial, rasgo, familia fuerte, aspecto y biografía.
+  // Fuera del Editor Sandbox el potencial llega hasta 80, así nadie crea una estrella hecha.
   function crearPropio(op) {
     const anio = N.anio();
     const edad = N.limitar(Math.round(op.edad || 25), 8, 80);
-    const t = crear(op.of || 'interprete', edad, anio, { reg: op.reg, sx: op.sx, pot: N.limitar(op.pot || 62, 30, 80), pasado: false });
+    const p = op.pais ? D.pais(op.pais) : null, reg = p ? p.region : op.reg;
+    const t = crear(op.of || 'interprete', edad, anio, { reg: reg, sx: op.sx, pot: N.limitar(op.pot || 62, 30, op.sinTope ? 99 : 80), pasado: false });
+    if (p) { t.pais = p.id; t.idi = null; completar(t, N.azar); }
     if (op.nom) t.nom = String(op.nom).slice(0, 40);
+    if (op.of2 && op.of2 !== t.of && D.oficio(op.of2)) { t.h2 = {}; t.h2[op.of2] = Math.round(N.limitar(t.hab - 12, 10, 95)); }
+    if (op.rasgo !== undefined) t.rasgo = D.rasgos[op.rasgo] ? op.rasgo : '';
+    const i = D.ORDEN_FAM.indexOf(op.fuerte);
+    if (i >= 0 && t.af) { t.af[i] = Math.max(t.af[i], 5); }
+    const j = D.ORDEN_FAM.indexOf(op.debil);
+    if (j >= 0 && j !== i && t.af) { t.af[j] = Math.min(t.af[j], -4); }
+    if (op.asp) t.asp = op.asp;
+    if (op.bio) t.bioP = String(op.bio).slice(0, 280);
+    // Un personaje histórico llega con el talento y la fama de su época dorada
+    if (op.hist) { t.histP = op.hist; t.hab = Math.round(N.limitar(op.hab || t.hab, 10, 99)); t.fama = N.redondear(N.limitar(op.fama || t.fama, 0, 1), 3); t.cp = null; completar(t, N.azar); }
     t.propio = 1;
     N.S.talentos.push(t);
     reindexar();
@@ -295,7 +309,7 @@ IA.talentos = (function () {
     if (!disponible(t, c.est || 0)) return { estado: 'rechaza', texto: (t.act || 0) >= MAX_PROYECTOS ? 'Ya está en ' + MAX_PROYECTOS + ' proyectos' : 'Sin energía (recupera 10 al mes)' };
     const e = N.anio() - t.nac;
     if (t.jugador && (c.est || 0) === 0) return e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2) ? { estado: 'rechaza', texto: 'Eres menor de edad: solo obras hasta PG-13' } : { estado: 'acepta', texto: 'Eres tú: trabajas gratis en tu propia obra' };
-    if (c.clas !== undefined && c.clas > t.cmax) return { estado: 'rechaza', texto: 'No hace obras de clasificación ' + IA.taxonomia.ORDEN_CLAS[c.clas] };
+    if (c.clas !== undefined && c.clas > t.cmax) return { estado: 'rechaza', texto: 'No hace obras de clasificación ' + ART.taxonomia.ORDEN_CLAS[c.clas] };
     if (e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2)) return { estado: 'rechaza', texto: 'Es menor de edad: solo obras hasta PG-13' };
     const m = moral(t);
     if (m < 22) return { estado: 'rechaza', texto: 'Está desmotivado' };
@@ -345,7 +359,7 @@ IA.talentos = (function () {
       const valor = t.hab + t.fama * 12 + (o.fam ? afinidad(t, o.fam) * 0.4 : 0);
       // La tarifa solo se calcula si podría entrar entre los mejores (es lo más caro de la búsqueda)
       if (top.length >= k && valor <= top[top.length - 1].v) continue;
-      const f = exclusivoDe(t) === estId ? 0 : IA.economia.tarifa(t, anio);
+      const f = exclusivoDe(t) === estId ? 0 : ART.economia.tarifa(t, anio);
       if (f > tope) continue;
       {
         top.push({ t: t, v: valor });
@@ -410,7 +424,7 @@ IA.talentos = (function () {
   // ---------- Después del estreno: fama, moral, alcance, relaciones e historial ----------
   function trasEstreno(obra, rendimiento) {
     const ids = [obra.eq.direccion, obra.eq.guion].concat(obra.eq.int || []);
-    const bruto2025 = IA.mundo.aHoy(obra.bruto || 0, obra.anio || N.anio());
+    const bruto2025 = ART.mundo.aHoy(obra.bruto || 0, obra.anio || N.anio());
     ids.forEach(function (id, k) {
       const t = porId(id);
       if (!t) return;
@@ -423,11 +437,11 @@ IA.talentos = (function () {
       cambiarMoral(t, rendimiento >= 2 ? 10 : rendimiento < 1 ? -8 : 2);
     });
     // Todo el equipo suma taquilla a su carrera
-    IA.obras.idsEquipo(obra).forEach(function (id) {
+    ART.obras.idsEquipo(obra).forEach(function (id) {
       const t = porId(id);
       if (!t) return;
       t.tq = Math.round((t.tq || 0) + bruto2025);
-      if (obra.est === 0) { t.hist = (t.hist || []).concat([obra.id]).slice(-15); }
+      if (obra.est === 0) { t.hist = (Array.isArray(t.hist) ? t.hist : []).concat([obra.id]).slice(-15); }
     });
     // Trabajar juntos crea amistades o rivalidades (los éxitos unen; los fracasos y los egos separan)
     const clave = ids.map(porId).filter(Boolean).slice(0, 4);
@@ -442,7 +456,7 @@ IA.talentos = (function () {
     }
   }
   // Ingresos de carrera (dólares de hoy) al firmar
-  function pagarA(id, monto) { const t = porId(id); if (t && monto > 0) t.gan = Math.round((t.gan || 0) + IA.mundo.aHoy(monto, N.anio())); }
+  function pagarA(id, monto) { const t = porId(id); if (t && monto > 0) t.gan = Math.round((t.gan || 0) + ART.mundo.aHoy(monto, N.anio())); }
 
   // ---------- Contratos exclusivos (el salario anual sigue a la época: sale de la tarifa) ----------
   function salarioExclusivo(t) { return Math.round(tarifa(t) * 1.8); }
@@ -472,7 +486,7 @@ IA.talentos = (function () {
       }
       const m = (t.exS || 0) / 12;
       ctx.pagar(t.ex, 'exclusivos', m);
-      t.gan = Math.round((t.gan || 0) + IA.mundo.aHoy(m, N.anio()));
+      t.gan = Math.round((t.gan || 0) + ART.mundo.aHoy(m, N.anio()));
     }
   }
   // Comprar la exclusividad que tiene un rival: se le paga lo que falta por 1,3
@@ -490,7 +504,7 @@ IA.talentos = (function () {
     if (area.indexOf('fam:') === 0) return 50 + afinidad(t, area.slice(4)) * 5;
     return t.h2 && t.h2[area] ? t.h2[area] : 20;
   }
-  function costoCurso(t, c, area) { return Math.round(IA.economia.presupuestoTipico(N.anio()) * 0.0006 * c.costo * Math.max(0.25, Math.pow(nivelEn(t, area) / 50, 2))); }
+  function costoCurso(t, c, area) { return Math.round(ART.economia.presupuestoTipico(N.anio()) * 0.0006 * c.costo * Math.max(0.25, Math.pow(nivelEn(t, area) / 50, 2))); }
   function puedeEstudiar(t, c, area) {
     if (!t || t.ret || t.mu) return 'Está retirado.';
     if (estudiando(t)) return 'Ya está estudiando.';
@@ -551,7 +565,7 @@ IA.talentos = (function () {
       const o = of || N.elegir(D.oficios.map(function (x) { return x.id; }));
       const nino = o === 'interprete' && N.probabilidad(0.3);
       const t = crear(o, nino ? N.entero(8, 14) : N.entero(18, 23), anio, { pot: N.entero(74, 94), pasado: false });
-      t.desc = 1;
+      t.desc = 1; t.prom = N.S.t + 1; // la encontraron tus cazatalentos (semana + 1: nunca vale 0)
       cambiarMoral(t, 15);
       N.S.talentos.push(t);
       out.push(t);
@@ -560,7 +574,7 @@ IA.talentos = (function () {
     return out;
   }
   // El potencial solo se conoce de verdad si lo descubriste o si trabajó contigo
-  function potencialConocido(t) { return !!(t.desc || t.beca || (t.hist && t.hist.length)); }
+  function potencialConocido(t) { return !!(t.desc || t.beca || (Array.isArray(t.hist) && t.hist.length)); }
 
   // ---------- Una vez al año: edades, crecimiento, retiro, regresos, muertes y nuevas generaciones ----------
   function anual() {
@@ -574,7 +588,8 @@ IA.talentos = (function () {
       const pMuerte = 0.0008 + (e > 60 ? (e - 60) * 0.0012 : 0) + (e > 85 ? (e - 85) * 0.006 : 0);
       if (N.probabilidad(pMuerte) || e >= 105) {
         t.mu = anio; if (!t.ret) t.ret = anio;
-        if (t.fama > 0.35 || t.premios > 0) N.emit('noticia', { tipo: 'talento', texto: 'Fallece ' + t.nom + ' a los ' + e + ' años.', importante: t.fama > 0.6 });
+        const fe = t.funda && S.estudios[t.funda] ? ', ' + (t.sx === 'F' ? 'fundadora' : 'fundador') + ' de ' + S.estudios[t.funda].nombre + ',' : '';
+        if (t.fama > 0.35 || t.premios > 0 || fe) N.emit('noticia', { tipo: 'talento', texto: 'Fallece ' + t.nom + fe + ' a los ' + e + ' años.', importante: t.fama > 0.6 });
         continue;
       }
       if (t.ret) {
@@ -604,8 +619,10 @@ IA.talentos = (function () {
     Object.keys(D.poblacionTalentos).forEach(function (of) {
       const falta = D.poblacionTalentos[of] - (conteo[of] || 0);
       const extra = N.entero(0, 2);
-      for (let i = 0; i < falta + extra; i++) S.talentos.push(crear(of, N.entero(18, 26), anio));
+      for (let i = 0; i < falta + extra; i++) S.talentos.push(hijoDe(of, anio) || crear(of, N.entero(18, 26), anio));
     });
+    revelacion(anio);
+    centenarios(anio);
     // Siempre hay niños actores (un 3 % de los intérpretes) para los papeles infantiles
     const ninos = S.talentos.filter(function (t) { return !t.ret && t.of === 'interprete' && anio - t.nac < 16; }).length;
     for (let i = ninos; i < Math.round(D.poblacionTalentos.interprete * 0.03); i++) S.talentos.push(crear('interprete', N.entero(7, 12), anio));
@@ -615,6 +632,36 @@ IA.talentos = (function () {
     reindexar();
     S.talentos.forEach(function (t) { if (t.rel) Object.keys(t.rel).forEach(function (k) { if (!indice[k]) delete t.rel[k]; }); });
   }
+  // ---------- Vida del mundo: familias, revelaciones y aniversarios ----------
+  // A veces quien debuta trae un apellido conocido y algo del talento de la familia
+  function hijoDe(of, anio) {
+    if (!N.probabilidad(0.04)) return null;
+    const c = N.S.talentos.filter(function (t) { const e = anio - t.nac; return t.fama >= 0.45 && e >= 42 && e <= 85 && !t.mu && !(t.hijos >= 2); });
+    if (!c.length) return null;
+    const p = N.elegir(c), h = crear(of, N.entero(18, 24), anio, { reg: p.reg, pot: Math.round(N.limitar((p.pot + N.normal(60, 13)) / 2 + 4, 20, 99)), pasado: false });
+    const ap = p.nom.split(' ').slice(1).join(' '), pila = p.nom.split(' ')[0];
+    let nom = h.nom.split(' ')[0];
+    for (let i = 0; i < 6 && nom === pila; i++) nom = nombreNuevo(p.reg, h.sx).split(' ')[0]; // nunca el mismo nombre que su madre o su padre
+    if (ap && nom !== pila) h.nom = nom + ' ' + ap;
+    h.pais = p.pais; delete h.idi; completar(h, N.azar); h.nomPadre = p.nom; h.fama = N.redondear(Math.max(h.fama, p.fama * 0.25), 3);
+    p.hijos = (p.hijos || 0) + 1;
+    if (p.fama > 0.6) N.emit('noticia', { tipo: 'talento', texto: 'Debuta ' + h.nom + ', ' + (h.sx === 'F' ? 'hija' : 'hijo') + ' de ' + p.nom + '.' });
+    return h;
+  }
+  // Cada año la prensa elige una revelación: joven, con mucho potencial y poca fama; desde ahí todos la conocen
+  function revelacion(anio) {
+    const c = N.S.talentos.filter(function (t) { const e = anio - t.nac; return !t.ret && !t.rev && e >= 17 && e <= 28 && t.pot >= 80 && t.fama < 0.2; });
+    if (!c.length || !N.probabilidad(0.7)) return;
+    const t = c.sort(function (a, b) { return b.pot - a.pot; })[N.entero(0, Math.min(3, c.length - 1))];
+    t.rev = anio; t.desc = 1; t.fama = N.redondear(Math.min(1, t.fama + 0.12), 3);
+    N.emit('noticia', { tipo: 'talento', texto: 'La prensa elige a ' + t.nom + ' (' + nombreOficio(t).toLowerCase() + ') como la revelación del año.' });
+  }
+  // Cien años del nacimiento de las leyendas del arte y de las de tu propia partida
+  function centenarios(anio) {
+    const H = ART.hitosArte, S = N.S;
+    if (H && H.PERSONAS && anio > S.y0) Object.keys(H.PERSONAS).forEach(function (k) { const p = H.PERSONAS[k]; if (p[4] + 100 === anio && p[5] && p[5] < anio) N.emit('noticia', { tipo: 'historia', texto: 'Se cumplen cien años del nacimiento de ' + p[0] + '.' }); });
+    S.talentos.forEach(function (t) { if (t.premios > 0 && t.mu && t.nac + 100 === anio) N.emit('noticia', { tipo: 'historia', texto: 'Se cumplen cien años del nacimiento de ' + t.nom + ', ' + (t.sx === 'F' ? 'legendaria ' : 'legendario ') + nombreOficio(t).toLowerCase() + '.', importante: true }); });
+  }
   // Los rivales firman exclusivos con algunas estrellas libres
   function exclusivosRivales() {
     const S = N.S;
@@ -622,7 +669,7 @@ IA.talentos = (function () {
       const est = S.estudios[i];
       if (est.quebrado) continue;
       const tienen = S.talentos.filter(function (t) { return exclusivoDe(t) === i; }).length;
-      if (tienen >= 2 || est.caja < IA.economia.presupuestoTipico(N.anio()) * est.tam * 8 || !N.probabilidad(0.35)) continue;
+      if (tienen >= 2 || est.caja < ART.economia.presupuestoTipico(N.anio()) * est.tam * 8 || !N.probabilidad(0.35)) continue;
       const cand = S.talentos.filter(function (t) { return !t.ret && !t.mu && exclusivoDe(t) === null && t.fama >= 0.35 && t.fama - est.fama < 0.45 && t.of === 'interprete'; })
         .sort(function (a, b) { return b.fama - a.fama; }).slice(0, 5);
       if (!cand.length) continue;
@@ -653,9 +700,14 @@ IA.talentos = (function () {
     if (t.idi) s += 'Habla ' + t.idi.map(function (x) { return x.toLowerCase(); }).join(', ').replace(/, ([^,]*)$/, ' y $1') + '. ';
     if (t.obras) s += 'Lleva ' + t.obras + ' obra' + (t.obras > 1 ? 's' : '') + (t.exitos ? (t.exitos === 1 ? ', una de ellas un éxito' : ', ' + t.exitos + ' de ellas éxitos') : '') + (t.premios ? ', y ' + t.premios + ' premio' + (t.premios > 1 ? 's' : '') : '') + '. ';
     else s += e < 18 ? 'Es una promesa que todavía no debuta. ' : 'Todavía no tiene obras en su carrera. ';
+    if (t.nomPadre) s += (t.sx === 'F' ? 'Hija' : 'Hijo') + ' de ' + t.nomPadre + ': el oficio le viene de familia. ';
+    if (t.hijos) s += t.hijos === 1 ? 'Uno de sus hijos siguió sus pasos. ' : 'Dos de sus hijos siguieron sus pasos. ';
+    if (t.funda && N.S.estudios[t.funda]) s += 'Fundó su propio estudio, ' + N.S.estudios[t.funda].nombre + '. ';
+    if (t.rev) s += 'La prensa ' + (t.sx === 'F' ? 'la' : 'lo') + ' eligió como la revelación de ' + t.rev + '. ';
     if (t.vu) s += 'Volvió del retiro' + (t.vu > 1 ? ' ' + t.vu + ' veces' : '') + '. ';
     if (t.ret && !t.mu) s += 'Se retiró en ' + t.ret + '. ';
     if (t.mu) s += 'Falleció en ' + t.mu + '. ';
+    if (t.bioP) s += t.bioP + (/[.!?…]$/.test(t.bioP) ? '' : '.');
     return s.trim();
   }
 

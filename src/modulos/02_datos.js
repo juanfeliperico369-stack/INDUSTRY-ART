@@ -1,8 +1,8 @@
 /* ==== módulo: datos ==== */
 // Listas y tablas del juego, separadas de la lógica para que el Editor y las traducciones las cambien
-// sin tocar el código. Rescatado del juego original: nombres por región (NMR), países (CY), rasgos (TRA),
+// sin tocar el código: nombres por región, países, rasgos,
 // personalidades (TI), tonos (TO), prioridades (PR), clasificaciones (AG), rivales (RV), temas (DX.tm).
-IA.datos = (function () {
+ART.datos = (function () {
   'use strict';
   const sp = function (s) { return s.split(','); };
 
@@ -109,15 +109,18 @@ IA.datos = (function () {
     { id: 'edicion', nombre: 'Editor', dep: 'Edición', base: 0.006 },
     { id: 'arte', nombre: 'Diseñador de arte y tecnología', dep: 'Arte y diseño', base: 0.008 },
     { id: 'interprete', nombre: 'Intérprete', dep: 'Actuación', base: 0.022 },
-    // Cine a fondo: departamentos que antes cubría el diseñador de arte
-    { id: 'vestuario', nombre: 'Diseñador de vestuario', dep: 'Vestuario y maquillaje', base: 0.005 },
-    { id: 'efectos', nombre: 'Supervisor de efectos', dep: 'Efectos', base: 0.007 },
     { id: 'animacion', nombre: 'Animador', dep: 'Animación', base: 0.008 },
   ];
+  // Puestos que ya no se contratan: del vestuario y los efectos se encarga el diseñador de arte y tecnología.
+  // Siguen aquí para leer las obras y los talentos de las partidas viejas.
+  const oficiosRetirados = [
+    { id: 'vestuario', nombre: 'Diseñador de vestuario', dep: 'Vestuario y maquillaje', base: 0.005 },
+    { id: 'efectos', nombre: 'Supervisor de efectos', dep: 'Efectos', base: 0.007 },
+  ];
   // Cuántos talentos de cada oficio hay en el mundo (se mantiene con nuevas generaciones)
-  const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 90, interprete: 380, vestuario: 60, efectos: 60, animacion: 60 };
+  const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 130, interprete: 380, animacion: 60 };
 
-  // ---------- Familias y géneros del cine (pestaña Taxonomía del plan) ----------
+  // ---------- Familias y géneros del cine (pestaña Taxonomía) ----------
   // edades: afinidad de cada grupo [niños 0-12, adolescentes 13-17, jóvenes 18-34, adultos 35-59, mayores 60+]
   // inclina: 'pub' (público), 'crit' (crítica) o 'eq' (equilibrio). costo: producción típica relativa.
   // semanas: temporada favorable (bono de género). pesos: reparto ideal de los departamentos.
@@ -184,7 +187,7 @@ IA.datos = (function () {
     return ENCAJE[i][j];
   }
 
-  // ---------- Clasificaciones (las de tu documento, con tus palabras) ----------
+  // ---------- Clasificaciones por edad ----------
   // acceso: parte de cada grupo de edad que puede entrar [niños, adolescentes, jóvenes, adultos, mayores]
   // NC-17 es para 17 años y se queda en el grupo de adolescentes (decidido). Las de adultos agregan "siempre sugerido".
   // Tu documento da cuánto rinde cada una: G 60 %, PG 70 %, PG-13 100 %, 16 90 %, NC-17 80 %, 18 50 %, R 40 %, X 30 %
@@ -251,9 +254,9 @@ IA.datos = (function () {
     { id: 'Televisión', desde: 1936, plato: 1, meds: [], canal: 0.6, efecto: 'Plató incluido y tu canal propio cuesta 40 % menos' },
     { id: 'Música', desde: 1877, meds: ['musica'], rebaja: 0.85, efecto: 'Sin plató; en música, +1 proyecto a la vez y 15 % menos de costo' },
     { id: 'Videojuegos', desde: 1972, meds: ['juegos'], rebaja: 0.85, efecto: 'Sin plató; en videojuegos, +1 proyecto a la vez y 15 % menos de costo' },
-    { id: 'Teatro', desde: 1850, meds: ['teatro'], rebaja: 0.85, efecto: 'Sin plató; en teatro, +1 obra a la vez y 15 % menos de costo' },
-    { id: 'Editorial', desde: 1850, meds: ['libros'], rebaja: 0.85, efecto: 'Sin plató; en libros, +1 proyecto a la vez y 15 % menos de costo' },
-    { id: 'Mixto', desde: 1850, meds: ['musica', 'juegos', 'teatro', 'libros'], efecto: 'Sin plató; +1 proyecto a la vez en música, videojuegos, teatro y libros' },
+    { id: 'Teatro', desde: 1700, meds: ['teatro'], rebaja: 0.85, efecto: 'Sin plató; en teatro, +1 obra a la vez y 15 % menos de costo' },
+    { id: 'Editorial', desde: 1700, meds: ['libros'], rebaja: 0.85, efecto: 'Sin plató; en libros, +1 proyecto a la vez y 15 % menos de costo' },
+    { id: 'Mixto', desde: 1700, meds: ['musica', 'juegos', 'teatro', 'libros'], efecto: 'Sin plató; +1 proyecto a la vez en música, videojuegos, teatro y libros' },
   ];
   const CINE_DESDE = 1895;
   function industria(id) { return industrias.filter(function (x) { return x.id === id; })[0] || industrias[0]; }
@@ -264,7 +267,7 @@ IA.datos = (function () {
     { nombre: 'Aurora Films', pais: 'us', familia: 'DR', tam: 1.4, calidad: 4, riesgo: 0.4, logo: 3 },
     { nombre: 'Nova Pictures', pais: 'us', familia: 'AA', tam: 1.6, calidad: 0, riesgo: 0.7, logo: 11 },
     { nombre: 'Kappa Studios', pais: 'gb', familia: 'SM', tam: 1.0, calidad: 2, riesgo: 0.5, logo: 22 },
-    { nombre: 'Lumen Corp', pais: 'fr', familia: 'AV', tam: 0.7, calidad: 5, riesgo: 0.3, logo: 37 },
+    { nombre: 'Albor Corp', pais: 'fr', familia: 'AV', tam: 0.7, calidad: 5, riesgo: 0.3, logo: 37 },
     { nombre: 'Tigre Media', pais: 'mx', familia: 'HM', tam: 0.8, calidad: -1, riesgo: 0.5, logo: 45 },
     { nombre: 'Órbita Games', pais: 'kr', familia: 'IM', tam: 0.9, calidad: 1, riesgo: 0.8, logo: 58 },
     { nombre: 'Sol Naciente', pais: 'jp', familia: 'FJ', tam: 1.0, calidad: 2, riesgo: 0.4, logo: 66 },
@@ -272,8 +275,6 @@ IA.datos = (function () {
   ];
 
   // ---------- Títulos ----------
-  const titulo1 = sp('Noche,Eco,Frontera,Aurora,Sombra,Vértigo,Marea,Cenizas,Reflejo,Horizonte,Umbral,Cometa,Silencio,Laberinto,Faro,Destello,Tormenta,Jardín,Carnaval,Espejismo,Relámpago,Abismo,Brújula,Linterna,Hierro,Ceniza,Selva,Oasis,Péndulo,Rastro');
-  const titulo2 = sp('de cristal,final,eterno,sin nombre,perdido,del norte,en llamas,de invierno,secreto,imposible,de medianoche,del sur,salvaje,prohibido,de plata,sin regreso,dorado,de papel,en la niebla,del fin del mundo');
   const temas = ['Actuación', 'Adolescencia', 'Adultez', 'Aislamiento', 'Alquimia', 'Ambición', 'América', 'Amistad', 'Amor', 'Anarquismo', 'Antiguo Egipto', 'Arte', 'Artes', 'Asesinos', 'Ateísmo', 'Bien y mal', 'Bombas nucleares', 'Búsqueda', 'Caballeros', 'Capitalismo', 'Carrera espacial', 'Caza', 'China imperial', 'Cibernética', 'Ciencia', 'Cine', 'Civilización y barbarie', 'Civilizaciones precolombinas', 'Clase social', 'Clonación', 'Codicia', 'Colonialismo', 'Cómics', 'Comunismo', 'Conciencia', 'Conocimiento', 'Corrupción', 'Cruzadas', 'Culpa', 'Culpabilidad', 'Culturas indígenas', 'Depresión', 'Descubrimientos', 'Deshumanización', 'Desigualdad', 'Destino', 'Dictadura', 'Dictaduras', 'Dinero', 'Dios', 'Dioses', 'Discriminación', 'Drogas', 'Dudas', 'Duelo', 'Elegancia', 'Elfos', 'Empatía', 'Enanos', 'Entrenamiento', 'Era digital', 'Era victoriana', 'Esclavitud', 'Espacio', 'Esparta', 'Esperanza', 'Evolución', 'Exclusión', 'Exilio', 'Existencia', 'Existencialismo', 'Éxito', 'Explotación', 'Fama', 'Familia', 'Fascismo', 'Fe', 'Fiebre del oro', 'Filosofía', 'Fracaso', 'Gánsteres', 'Genética', 'Gladiadores', 'Globalización', 'Gran Depresión', 'Grecia clásica', 'Guerra', 'Guerra de trincheras', 'Guerra Fría', 'Guerras napoleónicas', 'Hackers', 'Hechiceros', 'Hermanos', 'Héroes', 'Historietas', 'Holocausto', 'Honor', 'Humanidad', 'Humanidad y máquinas', 'Humildad', 'Humor', 'IA', 'Identidad', 'Ilustración', 'Imperialismo', 'Imperio mongol', 'Imperio romano', 'Imprenta', 'Incas', 'Independencias', 'India antigua', 'Infancia', 'Informática', 'Injusticia', 'Inmortalidad', 'Inquisición', 'Islámico', 'Japón feudal', 'Justicia', 'Las pirámides', 'Lealtad', 'Libertad', 'Literatura', 'Lo prohibido', 'Locura', 'Mafia', 'Magia', 'Magos', 'Mangas', 'Mayas', 'Medieval', 'Memoria', 'Mentiras', 'Mesopotamia', 'Miedo', 'Migración', 'Minería', 'Moda', 'Monarquías', 'Moralidad', 'Mortalidad', 'Muerte', 'Muro de Berlín', 'Música', 'Naturaleza', 'Nazismo', 'Negocios', 'Nihilismo', 'Obsesión', 'Ocultismo', 'Olímpicos', 'Orcos', 'Orden y caos', 'Paz', 'Peloponeso', 'Perdón', 'Peste negra', 'Piratas', 'Planetas', 'Pobreza', 'Poder', 'Política', 'Prehistoria', 'Primera Guerra Mundial', 'Progreso', 'Propaganda', 'Racismo', 'Radicalización', 'Realidad virtual', 'Rebelión', 'Redención', 'Reinado del Terror', 'Religión', 'Renacimiento', 'Resistencia', 'Revolución', 'Revolución francesa', 'Revolución industrial', 'Revolución rusa', 'Revoluciones artísticas', 'Revoluciones tecnológicas', 'Reyes', 'Riqueza', 'Rivalidad', 'Robos', 'Ruta de la Seda', 'Sacrificio', 'Salvaje oeste', 'Secretos', 'Segunda Guerra Mundial', 'Ser humano', 'Siglo XIX', 'Socialismo', 'Sociedad', 'Soledad', 'Sueños', 'Superhéroes', 'Supervivencia', 'Tecnología', 'Templarios', 'Tenochtitlan', 'Terrorismo', 'Tiempo', 'Traición', 'Trauma', 'Vejez', 'Venganza', 'Verdad', 'Videojuegos', 'Vigilancia', 'Vikingos', 'Villanos', 'Xenofobia'];
 
   // ---------- Marketing: canales que aparecen en su época ----------
@@ -288,6 +289,14 @@ IA.datos = (function () {
     { id: 'internet', nombre: 'Internet', desde: 1995, hasta: 9999, peso: 1.0, alcance: 1.0, edades: [0.5, 1.2, 1.3, 1.0, 0.5] },
     { id: 'redes', nombre: 'Redes sociales', desde: 2006, hasta: 9999, peso: 1.4, alcance: 1.3, edades: [0.4, 1.5, 1.4, 0.9, 0.4] },
     { id: 'influencers', nombre: 'Creadores de contenido', desde: 2012, hasta: 9999, peso: 0.9, alcance: 1.1, edades: [0.8, 1.6, 1.3, 0.6, 0.2] },
+    // De la Final: más tipos de marketing para elegir
+    { id: 'marcas', nombre: 'Promociones con marcas', desde: 1930, hasta: 9999, peso: 0.6, alcance: 1.0, edades: [1.4, 1.3, 1.0, 0.8, 0.6] },
+    { id: 'gira', nombre: 'Gira mundial de prensa', desde: 1920, hasta: 9999, peso: 0.5, alcance: 0.9, edades: [0.6, 0.9, 1.1, 1.2, 1.1] },
+    { id: 'cable', nombre: 'TV por cable', desde: 1975, hasta: 9999, peso: 0.7, alcance: 1.0, edades: [1.0, 1.1, 1.1, 1.1, 0.9] },
+    { id: 'web', nombre: 'Web interactiva', desde: 1998, hasta: 9999, peso: 0.4, alcance: 0.8, edades: [0.6, 1.3, 1.2, 0.9, 0.4] },
+    { id: 'correos', nombre: 'Correos a fans', desde: 1997, hasta: 9999, peso: 0.3, alcance: 0.6, edades: [0.3, 0.9, 1.1, 1.1, 0.8] },
+    { id: 'movil', nombre: 'Anuncios en el móvil', desde: 2008, hasta: 9999, peso: 0.8, alcance: 1.2, edades: [0.6, 1.5, 1.4, 0.9, 0.5] },
+    { id: 'streaming', nombre: 'Anuncios en streaming', desde: 2010, hasta: 9999, peso: 0.8, alcance: 1.1, edades: [0.9, 1.3, 1.3, 1.0, 0.6] },
     { id: 'inmersiva', nombre: 'Publicidad inmersiva', desde: 2038, hasta: 9999, peso: 1.2, alcance: 1.3, edades: [0.8, 1.4, 1.3, 1.0, 0.6] },
     { id: 'neural', nombre: 'Anuncios sensoriales', desde: 2088, hasta: 9999, peso: 1.2, alcance: 1.4, edades: [0.5, 1.2, 1.3, 1.1, 0.8] },
   ];
@@ -320,6 +329,17 @@ IA.datos = (function () {
     { id: 'efectos', nombre: 'Taller de efectos', desde: 1925, costo: 0.6, bono: { arte: 5 }, efecto: '+5 al arte y los efectos' },
     { id: 'marketing', nombre: 'Departamento de marketing', desde: 1915, costo: 0.35, marketing: 0.15, efecto: 'Tus campañas rinden 15 % más' },
     { id: 'archivo', nombre: 'Archivo y bóveda', desde: 1900, costo: 0.25, fijo: -0.1, efecto: 'Ordena el estudio: −10 % de gastos fijos' },
+    // Más infraestructura, del taller de 1700 a los laboratorios del futuro
+    { id: 'ensayos', nombre: 'Sala de ensayos', desde: 1700, costo: 0.25, bono: { interprete: 2 }, efecto: '+2 a la actuación: el elenco llega ensayado' },
+    { id: 'vestuario', nombre: 'Taller artesanal de vestuario', desde: 1700, costo: 0.25, bono: { vestuario: 3 }, efecto: '+3 en vestuario y maquillaje' },
+    { id: 'escenografia', nombre: 'Taller de escenografía', desde: 1750, costo: 0.3, bono: { arte: 2 }, efecto: '+2 en diseño de arte' },
+    { id: 'revelado', nombre: 'Laboratorio de revelado', desde: 1910, costo: 0.35, bono: { fotografia: 3 }, efecto: '+3 en fotografía' },
+    { id: 'foley', nombre: 'Estudio de Foley', desde: 1927, costo: 0.3, bono: { musica: 2 }, efecto: '+2 en música y sonido: pasos, puertas y lluvia hechos a mano' },
+    { id: 'masterizacion', nombre: 'Estudio de masterización', desde: 1948, costo: 0.35, bono: { musica: 2, edicion: 1 }, efecto: '+2 en música y +1 en edición' },
+    { id: 'realidad', nombre: 'Sala de realidad mixta', desde: 2035, costo: 0.9, bono: { fotografia: 3 }, efecto: '+3 en fotografía: el público entra en la historia' },
+    { id: 'volumetrico', nombre: 'Estudio volumétrico', desde: 2046, costo: 1, bono: { fotografia: 2, arte: 2 }, efecto: '+2 en fotografía y arte: escenas que se ven desde cualquier lado' },
+    { id: 'neuronal', nombre: 'Laboratorio neuronal', desde: 2085, costo: 1.2, bono: { direccion: 3 }, efecto: '+3 en dirección: obras que se sienten por dentro' },
+    { id: 'sinteticos', nombre: 'Granja de talentos sintéticos', desde: 2125, costo: 1.2, bono: { interprete: 3 }, efecto: '+3 en actuación con intérpretes que nunca envejecen' },
   ];
   const terrenos = [
     { id: 'backlot', nombre: 'Backlot (calles y sets)', desde: 1910, costo: 1.4, capacidad: 2, ahorro: 0.08, efecto: '+2 proyectos a la vez y −8 % en producción' },
@@ -335,6 +355,15 @@ IA.datos = (function () {
     { id: 't_bosque', nombre: 'Bosque propio', terreno: 'bosque', desde: 1910, costo: 0.4, efecto: 'Rodar en el bosque: más barato, más seguro y una semana menos' },
     { id: 't_tropico', nombre: 'Finca en el trópico', terreno: 'tropico', desde: 1920, costo: 0.5, efecto: 'Rodar en el trópico: más barato, más seguro y una semana menos' },
     { id: 't_artico', nombre: 'Base en el ártico', terreno: 'artico', desde: 1935, costo: 0.7, efecto: 'Rodar en el ártico: más barato, más seguro y una semana menos' },
+    // Infraestructura del futuro (ficción)
+    { id: 'submarino', nombre: 'Plató submarino', desde: 2067, costo: 1.1, bono: { arte: 3 }, familias: ['AA', 'IM', 'AV'], efecto: '+3 en aventura, acción e imaginación con la luz del océano' },
+    { id: 'domo', nombre: 'Domo de clima artificial', desde: 2078, costo: 1.2, ahorro: 0.04, efecto: '−4 % en producción: llueve o hace sol cuando el guion lo pide' },
+    { id: 'orbital', nombre: 'Plató orbital', desde: 2100, costo: 2, capacidad: 1, bono: { arte: 3 }, efecto: '+1 proyecto a la vez y +3 en arte: rodajes en gravedad cero' },
+    { id: 'puerto', nombre: 'Puerto espacial de producción', desde: 2120, costo: 2.2, capacidad: 1, ahorro: 0.04, efecto: '+1 proyecto a la vez y −4 % en producción' },
+    { id: 'marte', nombre: 'Base de rodaje en Marte', desde: 2190, costo: 2.4, bono: { arte: 4 }, familias: ['IM', 'AA'], efecto: '+4 en imaginación y acción: paisajes del planeta rojo' },
+    { id: 'anfiteatro', nombre: 'Anfiteatro holográfico', desde: 2196, costo: 1.8, bono: { efectos: 4 }, efecto: '+4 en efectos: decorados que se pueden tocar' },
+    { id: 'nave', nombre: 'Nave estudio', desde: 2222, costo: 2.6, capacidad: 1, bono: { fotografia: 2, musica: 2 }, efecto: '+1 proyecto a la vez, +2 en fotografía y en música: filma y graba entre planetas' },
+    { id: 'lunar', nombre: 'Plató lunar', desde: 2250, costo: 2, capacidad: 2, ahorro: 0.05, efecto: '+2 proyectos a la vez y −5 % en producción: en la Luna rodar sale más barato' },
     { id: 't_mar', nombre: 'Costa y muelle propios', terreno: 'mar', desde: 1915, costo: 0.6, efecto: 'Rodar en el mar: más barato, más seguro y una semana menos' },
   ];
   const MAX_PISOS = 10, MAX_TERRENOS = 10;
@@ -363,6 +392,7 @@ IA.datos = (function () {
   // ---------- Cronología real 1850-2026 y eras de ficción hasta 2150 (pestaña Datos del mundo) ----------
   // Sin personas reales ni marcas. Fechas verificadas con fuentes.
   const cronologia = [
+    [1700, 'Ilustración: teatro, ópera y libros por suscripción; la música vive en partituras'],
     [1850, 'Teatro, libros y folletines por entregas dominan el entretenimiento'],
     [1877, 'Se inventa el fonógrafo: aparece la música grabada en cilindros'],
     [1887, 'Se inventa el disco plano'],
@@ -413,6 +443,7 @@ IA.datos = (function () {
   ];
   // Tecnologías del cine que cambian la calidad esperada
   const tecnologias = [
+    { anio: 1700, nombre: 'Teatro e imprenta' }, { anio: 1850, nombre: 'Teatro, libros y folletines' }, { anio: 1877, nombre: 'Fonógrafo' },
     { anio: 1895, nombre: 'Cine mudo' }, { anio: 1927, nombre: 'Cine sonoro' }, { anio: 1935, nombre: 'Color' },
     { anio: 1953, nombre: 'Pantalla ancha' }, { anio: 1977, nombre: 'Efectos de nueva generación' },
     { anio: 1995, nombre: 'Animación 3D' }, { anio: 2009, nombre: '3D digital' }, { anio: 2022, nombre: 'IA generativa' },
@@ -423,11 +454,11 @@ IA.datos = (function () {
   // capital: múltiplo del capital recomendado; prestigio: 0 a 100; competencia: 1 baja … 3 alta
   const regionesInicio = [
     { id: 'losangeles', nombre: 'Los Ángeles', pais: 'us', desde: 1910, mercado: 'El mercado más grande del mundo', competencia: 3, capital: 1, prestigio: 8, texto: 'Sol todo el año y las majors a la vuelta de la esquina.' },
-    { id: 'nuevayork', nombre: 'Nueva York', pais: 'us', desde: 1850, mercado: 'Grande y exigente', competencia: 3, capital: 1, prestigio: 7, texto: 'Teatro, prensa y dinero: todo pasa primero aquí.' },
-    { id: 'londres', nombre: 'Londres', pais: 'gb', desde: 1850, mercado: 'Grande, con tradición teatral', competencia: 2, capital: 1, prestigio: 8, texto: 'Escenarios centenarios y una crítica implacable.' },
-    { id: 'paris', nombre: 'París', pais: 'fr', desde: 1850, mercado: 'Mediano, amante del arte', competencia: 2, capital: 0.9, prestigio: 10, texto: 'Aquí nació el cine; la crítica pesa más que la taquilla.' },
-    { id: 'berlin', nombre: 'Berlín', pais: 'de', desde: 1850, mercado: 'Mediano y experimental', competencia: 2, capital: 0.9, prestigio: 7, texto: 'Vanguardia, sombras largas y cabarets.' },
-    { id: 'roma', nombre: 'Roma', pais: 'it', desde: 1850, mercado: 'Mediano', competencia: 2, capital: 0.85, prestigio: 7, texto: 'Grandes platós y una historia que se filma sola.' },
+    { id: 'nuevayork', nombre: 'Nueva York', pais: 'us', desde: 1700, mercado: 'Grande y exigente', competencia: 3, capital: 1, prestigio: 7, texto: 'Teatro, prensa y dinero: todo pasa primero aquí.' },
+    { id: 'londres', nombre: 'Londres', pais: 'gb', desde: 1700, mercado: 'Grande, con tradición teatral', competencia: 2, capital: 1, prestigio: 8, texto: 'Escenarios centenarios y una crítica implacable.' },
+    { id: 'paris', nombre: 'París', pais: 'fr', desde: 1700, mercado: 'Mediano, amante del arte', competencia: 2, capital: 0.9, prestigio: 10, texto: 'Aquí nació el cine; la crítica pesa más que la taquilla.' },
+    { id: 'berlin', nombre: 'Berlín', pais: 'de', desde: 1700, mercado: 'Mediano y experimental', competencia: 2, capital: 0.9, prestigio: 7, texto: 'Vanguardia, sombras largas y cabarets.' },
+    { id: 'roma', nombre: 'Roma', pais: 'it', desde: 1700, mercado: 'Mediano', competencia: 2, capital: 0.85, prestigio: 7, texto: 'Grandes platós y una historia que se filma sola.' },
     { id: 'bombay', nombre: 'Bombay', pais: 'in', desde: 1913, mercado: 'Enorme y musical', competencia: 2, capital: 0.6, prestigio: 4, texto: 'Canciones, familias numerosas y salas siempre llenas.' },
     { id: 'lagos', nombre: 'Lagos', pais: 'ng', desde: 1992, mercado: 'Joven y veloz', competencia: 1, capital: 0.4, prestigio: 2, texto: 'Se filma rápido, barato y para millones en video.' },
     { id: 'cdmx', nombre: 'Ciudad de México', pais: 'mx', desde: 1896, mercado: 'Grande en Latinoamérica', competencia: 2, capital: 0.6, prestigio: 5, texto: 'Melodramas, comedias y una época de oro por delante.' },
@@ -470,10 +501,11 @@ IA.datos = (function () {
     { id: 'bangkok', nombre: 'Bangkok', pais: 'th', desde: 1897, mercado: 'Mediano', competencia: 1, capital: 0.45, prestigio: 3, texto: 'Rodajes de acción, mercados flotantes y precios bajos.' },
     { id: 'melbourne', nombre: 'Melbourne', pais: 'au', desde: 1850, mercado: 'Pequeño y artístico', competencia: 1, capital: 0.8, prestigio: 5, texto: 'Aquí se rodó en 1906 el primer largometraje narrativo de la historia.' },
     { id: 'wellington', nombre: 'Wellington', pais: 'nz', desde: 1990, mercado: 'Pequeño', competencia: 1, capital: 0.6, prestigio: 5, texto: 'Talleres de efectos de primer nivel y paisajes de fantasía.' },
-    { id: 'independiente', nombre: 'Independiente (donde quieras)', pais: null, desde: 1850, mercado: 'El de tu país', competencia: 1, capital: 0.5, prestigio: 1, texto: 'Sin padrinos: poco dinero, toda la libertad.' },
+    { id: 'independiente', nombre: 'Independiente (donde quieras)', pais: null, desde: 1700, mercado: 'El de tu país', competencia: 1, capital: 0.5, prestigio: 1, texto: 'Sin padrinos: poco dinero, toda la libertad.' },
   ];
   // Tarjetas de era: 3 reglas del negocio de cada época (lo que ya hace la economía)
   const erasInicio = [
+    { desde: 1700, hasta: 1849, nombre: 'Ilustración y teatro', reglas: ['El teatro y la ópera son el gran espectáculo', 'Los libros se venden por suscripción y en folletos', 'La música vive en partituras y conciertos'] },
     { desde: 1850, hasta: 1894, nombre: 'Antes del cine', reglas: ['El teatro y la linterna mágica son el espectáculo', 'Los públicos son chicos y locales', 'La prensa decide qué se ve'] },
     { desde: 1895, hasta: 1926, nombre: 'Cine mudo', reglas: ['Películas cortas, baratas y rápidas', 'Las barreras de idioma casi no existen', 'Las estrellas nacen de un día para otro'] },
     { desde: 1927, hasta: 1947, nombre: 'Época de oro de los estudios', reglas: ['Todo el mundo va al cine cada semana', 'Los estudios tienen a sus estrellas bajo contrato', 'Llega el sonido: hay que doblar'] },
@@ -484,7 +516,8 @@ IA.datos = (function () {
     { desde: 2020, hasta: 2049, nombre: 'Streaming', reglas: ['Las plataformas compiten con los cines', 'Las ventanas se acortan', 'El público global decide'] },
     { desde: 2050, hasta: 9999, nombre: 'Futuro', reglas: ['Experiencias inmersivas', 'Talento humano y artificial conviven', 'Mercados nuevos que aún no existen'] },
   ];
-  const sufijosLogo = sp('Pictures,Studios,Films,Productions,Entertainment,Media,Animation,Company,Cinema,Arts');
+  // Lo que va en la línea del letrero, debajo del nombre (si no eliges, sale el tipo de industria)
+  const sufijosLogo = sp('Grupo de medios,Estudio de cine,Cine y televisión,Productora,Producciones,Compañía,Corporación,Casa productora,Estudios,Discográfica,Casa editorial,Compañía de teatro,Estudio de videojuegos,Colectivo,Independiente,Entretenimiento');
   // Motor del mercado por era (ADN del mercado)
   const motorMercado = [[1850, 'El teatro y las ferias'], [1895, 'Las novedades del cinematógrafo'], [1927, 'El cine sonoro y las estrellas'], [1948, 'La pelea contra la televisión'],
     [1967, 'Los autores y la libertad'], [1975, 'El taquillazo de verano'], [1980, 'El video casero'], [2000, 'El DVD y los efectos digitales'], [2012, 'Las franquicias y el streaming'], [2030, 'Las plataformas globales'], [2060, 'La experiencia inmersiva']];
@@ -496,12 +529,12 @@ IA.datos = (function () {
     clasificaciones: clasificaciones, ANIO_CLASIFICACION_POR_EDADES: ANIO_CLASIFICACION_POR_EDADES,
     tonos: tonos, rasgos: rasgos, personalidades: personalidades,
     tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, industrias: industrias, industria: industria, CINE_DESDE: CINE_DESDE, rivales: rivales,
-    titulo1: titulo1, titulo2: titulo2, temas: temas,
+    temas: temas,
     canales: canales, nivelesMarketing: nivelesMarketing, escalas: escalas,
     pisos: pisos, terrenos: terrenos, MAX_PISOS: MAX_PISOS, MAX_TERRENOS: MAX_TERRENOS,
     premios: premios, cronologia: cronologia, tecnologias: tecnologias,
     region: buscador(regiones), pais: buscador(paises), familia: buscador(familias),
-    clasificacion: buscador(clasificaciones), oficio: buscador(oficios),
+    clasificacion: buscador(clasificaciones), oficio: buscador(oficios.concat(oficiosRetirados)),
   };
   // Búsqueda por id con un índice (se usa miles de veces por semana)
   function buscador(lista) {

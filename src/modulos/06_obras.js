@@ -1,20 +1,22 @@
 /* ==== módulo: obras ==== */
 // La ficha de cada obra y su creación: el borrador con todos los campos de la fábrica de ideas, el equipo,
-// los costos y las semanas de cada etapa. Las reglas de la idea (clasificación, encaje, sinopsis) viven en IA.ideas.
-IA.obras = (function () {
+// los costos y las semanas de cada etapa. Las reglas de la idea (clasificación, encaje, sinopsis) viven en ART.ideas.
+ART.obras = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, T = IA.talentos;
+  const N = ART.n, D = ART.datos, E = ART.economia, T = ART.talentos;
   const ETAPAS = ['desarrollo', 'preproduccion', 'rodaje', 'posproduccion', 'lista', 'cartelera', 'terminada'];
   const NOMBRE_ETAPA = {
     desarrollo: 'Desarrollo', preproduccion: 'Preproducción', rodaje: 'Rodaje', posproduccion: 'Posproducción',
     lista: 'Lista para estrenar', cartelera: 'En cartelera', emision: 'En emisión', terminada: 'Terminada',
   };
   const ROLES = ['guion', 'direccion', 'produccion', 'fotografia', 'musica', 'edicion', 'arte'];
-  // Vestuario, efectos y animación. Se contratan cuando la obra los necesita; efectos y animación también
-  // pueden encargarse a un estudio externo (sin vestuario o efectos propios, el diseñador de arte se ocupa)
-  const ROLES_EXTRA = ['vestuario', 'efectos', 'animacion'];
-  const TODOS_ROLES = ROLES.concat(ROLES_EXTRA);
-  function rolesDe(o) { return ROLES.concat(ROLES_EXTRA.filter(function (r) { return IA.rodaje.necesita(o, r) && !IA.rodaje.esExterno(o, r); })); }
+  // Animación: se contrata cuando la obra es animada o se encarga a un estudio externo. Del vestuario y los
+  // efectos se encarga el diseñador de arte y tecnología (los efectos también pueden encargarse afuera).
+  const ROLES_EXTRA = ['animacion'];
+  // Puestos de las partidas viejas: se leen en las obras ya hechas, pero ya no se contratan
+  const ROLES_RETIRADOS = ['vestuario', 'efectos'];
+  const TODOS_ROLES = ROLES.concat(ROLES_RETIRADOS, ROLES_EXTRA);
+  function rolesDe(o) { return ROLES.concat(ROLES_EXTRA.filter(function (r) { return ART.rodaje.necesita(o, r) && !ART.rodaje.esExterno(o, r); })); }
   let indice = null;
 
   // Las obras activas (no terminadas) se guardan aparte en memoria: así el juego no recorre miles de obras
@@ -36,18 +38,7 @@ IA.obras = (function () {
   function enCartelera() { return activas().filter(function (o) { return o.et === 'cartelera'; }); }
 
   // ---------- Títulos ----------
-  function tituloNuevo(gen) {
-    const fam = D.familiaDe[gen && gen[0]] || 'DR';
-    const t1 = N.elegir(D.titulo1), t2 = N.elegir(D.titulo2);
-    const r = N.azar();
-    if (r < 0.55) return t1 + ' ' + t2;
-    if (r < 0.75) return 'El ' + t1.toLowerCase() + ' ' + t2;
-    if (r < 0.9) {
-      const tema = N.elegir(D.temas);
-      return (fam === 'SM' ? 'Sombras de ' : fam === 'RD' ? 'Un amor y ' : fam === 'AA' ? 'Operación ' : '') + tema;
-    }
-    return t1;
-  }
+  function tituloNuevo(gen) { return ART.titulos.nuevo(gen); }
   // Clasificaciones disponibles en el año (antes de 1968 la censura no deja estrenar lo más fuerte)
   function clasificacionesDisponibles(anio, gen) {
     const erotico = gen && gen.indexOf('Erótico') >= 0;
@@ -60,7 +51,7 @@ IA.obras = (function () {
   // La recomendada sale del contenido típico de la familia (la clasificación se calcula desde el contenido)
   function clasificacionRecomendada(gen, anio) {
     const fam = D.familiaDe[gen[0]] || 'DR';
-    return IA.ideas.clasificar({ gen: gen, clasN: fam === 'AV' }, anio);
+    return ART.ideas.clasificar({ gen: gen, clasN: fam === 'AV' }, anio);
   }
   // Reglas de la combinación de géneros. Devuelve un texto de error o ''.
   function validarGeneros(gen, anio) {
@@ -92,19 +83,19 @@ IA.obras = (function () {
       tem: o.tem ? o.tem.slice() : [N.elegir(D.temas)], esc: escala, anioPlan: anio, eq: { int: [] }, nivM: 2,
     };
     CAMPOS_IDEA.forEach(function (k) { if (o[k] !== undefined) b[k] = N.copiar(o[k]); });
-    if (o.completa) IA.ideas.completar(b, anio);
+    if (o.completa) ART.ideas.completar(b, anio);
     if (b.clasN === undefined && fam === 'AV') b.clasN = true; // el arte y la vanguardia van al circuito de festivales (N)
-    b.clas = o.clas || IA.ideas.clasificar(b, anio);
-    b.pp = Math.round(IA.ideas.costoProduccion(b, anio) * (o.costoPais || 1));
+    b.clas = o.clas || ART.ideas.clasificar(b, anio);
+    b.pp = Math.round(ART.ideas.costoProduccion(b, anio) * (o.costoPais || 1));
     return b;
   }
   // Recalcula lo que depende de las decisiones (familia, contenido, clasificación y costo) sin tocar el equipo
   function recalcular(b) {
     const anio = N.anio();
     b.fam = D.familiaDe[b.gen[0]] || 'DR';
-    if (b.cont || IA.ideas.hayNinos(b)) IA.ideas.normalizar(b, anio); else b.clas = IA.ideas.clasificar(b, anio);
+    if (b.cont || ART.ideas.hayNinos(b)) ART.ideas.normalizar(b, anio); else b.clas = ART.ideas.clasificar(b, anio);
     if (b.presM) b.esc = escalaCercana(b.presM);
-    b.pp = Math.round(IA.ideas.costoProduccion(b, anio));
+    b.pp = Math.round(ART.ideas.costoProduccion(b, anio) * (1 + ART.ideas.paqueteMusica(b.mus).k));
     return b;
   }
   function escalaCercana(m) {
@@ -138,12 +129,12 @@ IA.obras = (function () {
     const anio = N.anio();
     const tipico = E.presupuestoTipico(anio);
     const a = ambicion === undefined ? 1 : ambicion;
-    const k = IA.taxonomia.ORDEN_CLAS.indexOf(o.clas);
+    const k = ART.taxonomia.ORDEN_CLAS.indexOf(o.clas);
     const op = { est: o.est, fam: o.fam || D.familiaDe[o.gen[0]], clas: k >= 0 ? k : 2 };
     const usados = [];
-    // Los roles opcionales que ya no hacen falta (menos efectos, estudio externo) se sueltan
+    // Los roles opcionales que ya no hacen falta (obra sin animación, estudio externo) se sueltan
     const roles = rolesDe(o);
-    ROLES_EXTRA.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
+    ROLES_EXTRA.concat(ROLES_RETIRADOS).forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
     roles.forEach(function (r) {
       if (o.eq[r] !== undefined && o.eq[r] !== null) { usados.push(o.eq[r]); return; }
       const of = D.oficio(r);
@@ -152,7 +143,7 @@ IA.obras = (function () {
       const t = T.mejorDisponible(r, of.base * tipico * 2.2 * a, usados, null, azarEleccion, opR) || T.mejorDisponible(r, Infinity, usados, null, 0, opR);
       if (t) { o.eq[r] = t.id; usados.push(t.id); }
       // Sin animador libre, la animación se encarga a un estudio externo
-      else if (r === 'animacion') { o.ext = o.ext || {}; o.ext.animacion = IA.rodaje.externosDisponibles('animacion', anio).length > 1 ? 'reconocido' : 'local'; }
+      else if (r === 'animacion') { o.ext = o.ext || {}; o.ext.animacion = ART.rodaje.externosDisponibles('animacion', anio).length > 1 ? 'reconocido' : 'local'; }
     });
     const dirHab = T.porId(o.eq.direccion) ? T.porId(o.eq.direccion).hab : undefined;
     (o.eq.inv || []).concat(o.eq.cam || []).forEach(function (id) { usados.push(id); });
@@ -206,7 +197,7 @@ IA.obras = (function () {
     return out;
   }
   function contextoNegociacion(o, c) {
-    const k = IA.taxonomia.ORDEN_CLAS.indexOf(o.clas);
+    const k = ART.taxonomia.ORDEN_CLAS.indexOf(o.clas);
     const d = T.porId(o.eq.direccion);
     return { est: o.est, rol: c.rol, imp: c.imp, clas: k >= 0 ? k : 2, dir: d && c.rol !== 'direccion' ? d.hab : undefined, amor: o.cont ? o.cont.amor : 0, fam: o.fam };
   }
@@ -241,19 +232,19 @@ IA.obras = (function () {
     return quitados;
   }
   // Recomendado completo: arma el equipo y lo negocia hasta que todos firman (máximo 4 vueltas)
-  // Ajusta solo los roles opcionales (vestuario, efectos y animación) sin tocar el resto del equipo
+  // Ajusta solo el rol opcional (animación) sin tocar el resto del equipo
   function ajustarRolesExtra(o, ambicion) {
     const roles = rolesDe(o);
-    ROLES_EXTRA.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
+    ROLES_EXTRA.concat(ROLES_RETIRADOS).forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
     const tipico = E.presupuestoTipico(N.anio()), a = ambicion || 1;
-    const k = IA.taxonomia.ORDEN_CLAS.indexOf(o.clas);
+    const k = ART.taxonomia.ORDEN_CLAS.indexOf(o.clas);
     const op = { est: o.est, fam: o.fam || D.familiaDe[o.gen[0]], clas: k >= 0 ? k : 2 };
     const usados = idsEquipo(o);
     ROLES_EXTRA.forEach(function (r) {
       if (roles.indexOf(r) < 0 || (o.eq[r] !== undefined && o.eq[r] !== null)) return;
       const t = T.mejorDisponible(r, D.oficio(r).base * tipico * 2.2 * a, usados, null, 0, op) || T.mejorDisponible(r, Infinity, usados, null, 0, op);
       if (t) { o.eq[r] = t.id; usados.push(t.id); }
-      else if (r === 'animacion') { o.ext = o.ext || {}; o.ext.animacion = IA.rodaje.externosDisponibles('animacion', N.anio()).length > 1 ? 'reconocido' : 'local'; }
+      else if (r === 'animacion') { o.ext = o.ext || {}; o.ext.animacion = ART.rodaje.externosDisponibles('animacion', N.anio()).length > 1 ? 'reconocido' : 'local'; }
     });
     return o;
   }
@@ -272,7 +263,7 @@ IA.obras = (function () {
   function equipoCompleto(o) {
     if (!ROLES.every(function (r) { return o.eq[r] !== undefined && o.eq[r] !== null; }) || !o.eq.int || !o.eq.int.length) return false;
     // Una obra animada necesita quien anime: un animador o un estudio externo
-    if (IA.rodaje.necesita(o, 'animacion') && !(o.eq.animacion !== undefined && o.eq.animacion !== null) && !IA.rodaje.esExterno(o, 'animacion')) return false;
+    if (ART.rodaje.necesita(o, 'animacion') && !(o.eq.animacion !== undefined && o.eq.animacion !== null) && !ART.rodaje.esExterno(o, 'animacion')) return false;
     // Con personajes, cada protagonista y secundario necesita intérprete
     return !o.pj || o.pj.every(function (p) { return (p.i !== 'protagonista' && p.i !== 'secundario') || (p.t !== null && p.t !== undefined); });
   }
@@ -284,8 +275,8 @@ IA.obras = (function () {
     const r = rapidez || {};
     const anio = o.anioPlan || N.anio();
     const f = esc.semanas * N.interp(EPOCA_DURACION, anio);
-    const a = IA.ideas.ajusteSemanas(o, anio); // animación, duración, efectos, IA e idea automática
-    const tv = IA.tv.factorSemanas(o); // series: más episodios, más rodaje
+    const a = ART.ideas.ajusteSemanas(o, anio); // animación, duración, efectos, IA e idea automática
+    const tv = ART.tv.factorSemanas(o); // series: más episodios, más rodaje
     return {
       desarrollo: Math.max(1, Math.round(5 * f) - (r.guion || 0) + a.desarrollo),
       preproduccion: Math.max(1, Math.round(4 * f) + (a.preExtra || 0)),
@@ -302,10 +293,10 @@ IA.obras = (function () {
     const q = E.calidadBase(o, T.porId, bonos || {});
     const ct = costoTalento(o);
     const cm = E.marketingTipico(N.anio()) * D.nivelesMarketing[o.nivM === undefined ? 2 : o.nivM].mult;
-    const pp = Math.round(o.pp * (1 - IA.negocio.ahorro(o.est)));
+    const pp = Math.round(o.pp * (1 - ART.negocio.ahorro(o.est)));
     const der = o.derechos || 0;
     const calidad = Math.round(N.limitar(q, 1, 99));
-    return { calidad: calidad, talento: ct, produccion: pp, marketing: cm, derechos: der, total: ct + pp + cm + der, retorno: IA.ideas.retornoEstimado(calidad) };
+    return { calidad: calidad, talento: ct, produccion: pp, marketing: cm, derechos: der, total: ct + pp + cm + der, retorno: ART.ideas.retornoEstimado(calidad) };
   }
   // Convierte el borrador en obra real (la producción la mueve cada semana)
   function crear(b) {
@@ -319,14 +310,14 @@ IA.obras = (function () {
     o.bruto = 0; o.parte = 0;
     o.cr = creditos(o);
     if (o.est === 0 && o.pj) {
-      o.sin = o.sin || IA.ideas.sinopsis(o);
-      o.frc = IA.ideas.fraseCritica(o);
-      o.frp = IA.ideas.frasePremio(o);
+      o.sin = o.sin || ART.ideas.sinopsis(o);
+      o.frc = ART.ideas.fraseCritica(o);
+      o.frp = ART.ideas.frasePremio(o);
     }
     registrar(o);
-    if (o.fr) IA.franquicias.alCrear(o); // franquicias
-    if (o.tv) IA.tv.alCrear(o); // series vendidas con el pitch
-    IA.imperio.alCrear(o); // encargos recibidos
+    if (o.fr) ART.franquicias.alCrear(o); // franquicias
+    if (o.tv) ART.tv.alCrear(o); // series vendidas con el pitch
+    ART.imperio.alCrear(o); // encargos recibidos
     return o;
   }
   // Créditos con nombre (quedan aunque el talento se retire y se borre del mundo)
@@ -408,7 +399,7 @@ IA.obras = (function () {
         const k = o.anio;
         const r = S.resumenAnios[k] = S.resumenAnios[k] || { obras: 0, bruto2025: 0 };
         r.obras++;
-        r.bruto2025 += Math.round(IA.mundo.aHoy(o.bruto || 0, o.anio));
+        r.bruto2025 += Math.round(ART.mundo.aHoy(o.bruto || 0, o.anio));
       });
       const borrar = {};
       viejas.forEach(function (o) { borrar[o.id] = 1; });
@@ -418,7 +409,7 @@ IA.obras = (function () {
   }
 
   return {
-    ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, ROLES_EXTRA: ROLES_EXTRA, TODOS_ROLES: TODOS_ROLES, rolesDe: rolesDe, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
+    ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, ROLES_EXTRA: ROLES_EXTRA, ROLES_RETIRADOS: ROLES_RETIRADOS, TODOS_ROLES: TODOS_ROLES, rolesDe: rolesDe, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
     delEstudio: delEstudio, enProduccion: enProduccion, enCartelera: enCartelera, tituloNuevo: tituloNuevo,
     clasificacionesDisponibles: clasificacionesDisponibles, clasificacionRecomendada: clasificacionRecomendada,
     contratos: contratos, negociaciones: negociaciones, resolverNegociaciones: resolverNegociaciones, equipoNegociado: equipoNegociado,

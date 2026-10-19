@@ -2,9 +2,9 @@
 // Tu avatar: trasfondo, arquetipo de liderazgo y especialidades; modo carrera (empezar como talento, con
 // encargos de los estudios); vida ligera con mini decisiones (cada opción arriesga algo); edad, salud, retiro,
 // muerte (normalmente entre los 85 y los 100) y heredero.
-IA.carrera = (function () {
+ART.carrera = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia;
+  const N = ART.n, D = ART.datos, E = ART.economia;
 
   const TRASFONDOS = [
     { id: 'artistas', nombre: 'Familia de artistas', texto: 'Creciste entre camerinos: el estudio empieza con algo de prestigio (+5).', fama: 0.05 },
@@ -12,18 +12,24 @@ IA.carrera = (function () {
     { id: 'autodidacta', nombre: 'Autodidacta', texto: 'Aprendiste solo, escribiendo de noche: +1 al guion.', bono: { guion: 1 } },
     { id: 'contador', nombre: 'Contador', texto: 'Cada peso cuenta: −5 % en los gastos fijos.', fijo: 0.05 },
     { id: 'vendedor', nombre: 'Vendedor ambulante', texto: 'Sabes vender lo que sea: las campañas rinden un 5 % más.', mkt: 0.05 },
+    { id: 'critico', nombre: 'Crítico de cine', texto: 'Sabes lo que buscan los críticos: +1 al guion y a la dirección.', bono: { guion: 1, direccion: 1 } },
+    { id: 'tecnico', nombre: 'Técnico de efectos', texto: 'Vienes del taller: +1 al arte y la tecnología de tus obras.', bono: { arte: 1 } },
+    { id: 'musico', nombre: 'Músico callejero', texto: 'Tocaste en la calle: +1 a la música de tus obras.', bono: { musica: 1 } },
   ];
   const ARQUETIPOS = [
     { id: 'visionario', nombre: 'Visionario', texto: 'Apuestas por ideas nuevas: +1 a la crítica.', crit: 1 },
     { id: 'carismatico', nombre: 'Carismático', texto: 'Todos quieren trabajar contigo: el equipo llega con más moral.', moral: 8 },
     { id: 'metodico', nombre: 'Metódico', texto: 'Planillas para todo: un 3 % menos de costo de producción.', ahorro: 0.03 },
     { id: 'audaz', nombre: 'Audaz', texto: 'Te la juegas: +1 al público, pero los dilemas pesan más.', pub: 1 },
+    { id: 'gestor', nombre: 'Gestor', texto: 'Todo bajo control: un 3 % menos de sobrecosto.', ahorro: 0.03 },
+    { id: 'showman', nombre: 'Showman', texto: 'Tus estrenos son un espectáculo: +1 al público.', pub: 1 },
+    { id: 'artesano', nombre: 'Artesano', texto: 'Cuidas cada detalle: +1 a la crítica.', crit: 1 },
   ];
   function trasfondo() { const a = N.S.avatar; return TRASFONDOS.filter(function (x) { return x.id === (a && a.tf); })[0] || null; }
   function arquetipo() { const a = N.S.avatar; return ARQUETIPOS.filter(function (x) { return x.id === (a && a.arq); })[0] || null; }
   function edad() { const a = N.S.avatar; return a ? N.anio() - a.nac : 0; }
 
-  // Efectos del avatar en tus obras (los suma IA.negocio.bonos)
+  // Efectos del avatar en tus obras (los suma ART.negocio.bonos)
   function bonos(b) {
     const tf = trasfondo(), ar = arquetipo();
     if (tf && tf.bono) Object.keys(tf.bono).forEach(function (k) { b[k] = (b[k] || 0) + tf.bono[k]; });
@@ -49,7 +55,7 @@ IA.carrera = (function () {
     a.of = op.oficio && D.oficio(op.oficio) ? op.oficio : (a.esp && a.esp[0]) || 'direccion';
     asegurarTalento();
   }
-  function talentoAvatar() { const a = N.S.avatar; return a && a.tal ? IA.talentos.porId(a.tal) : null; }
+  function talentoAvatar() { const a = N.S.avatar; return a && a.tal ? ART.talentos.porId(a.tal) : null; }
   // Crea el talento del avatar si falta (partidas de antes, o tras heredar el estudio)
   function asegurarTalento() {
     const S = N.S, a = S.avatar;
@@ -57,7 +63,7 @@ IA.carrera = (function () {
     let t = talentoAvatar();
     if (t && !t.mu && !t.ret) return t;
     const of = a.of && D.oficio(a.of) ? a.of : (a.esp && a.esp[0]) || 'direccion';
-    t = IA.talentos.crearPropio({ of: of, edad: edad(), sx: a.sx, nom: a.nom, pot: 66, reg: S.estudios[0].reg });
+    t = ART.talentos.crearPropio({ of: of, edad: edad(), sx: a.sx, nom: a.nom, pot: 66, reg: S.estudios[0].reg });
     t.jugador = 1;
     if (a.modo !== 'carrera') { t.ex = 0; t.exH = 1e9; } // como dueño no trabajas para los rivales
     a.tal = t.id; a.of = of;
@@ -67,7 +73,7 @@ IA.carrera = (function () {
   function oficiosAvatar() { const a = N.S.avatar; return a ? [a.of].concat(a.esp || [], ['interprete']).filter(function (x, i, l) { return x && l.indexOf(x) === i; }) : []; }
 
   // ---------- Modo carrera: encargos de los estudios ----------
-  function tarifa() { const t = talentoAvatar(); return t ? IA.talentos.tarifaPara(t, 1) : 0; }
+  function tarifa() { const t = talentoAvatar(); return t ? ART.talentos.tarifaPara(t, 1) : 0; }
   function nuevaOferta() {
     const S = N.S, t = talentoAvatar();
     if (!t || S.trabajo) return;
@@ -77,7 +83,7 @@ IA.carrera = (function () {
     const sem = N.entero(8, 20);
     S.ofertas = (S.ofertas || []).filter(function (o) { return o.vence > S.t; });
     if (S.ofertas.length >= 3) S.ofertas.shift();
-    S.ofertas.push({ id: N.sigId(), est: e.id, nombreEst: e.nombre, tit: IA.obras.tituloNuevo([N.elegir(D.familia(N.elegir(D.ORDEN_FAM)).generos)]),
+    S.ofertas.push({ id: N.sigId(), est: e.id, nombreEst: e.nombre, tit: ART.obras.tituloNuevo([N.elegir(D.familia(N.elegir(D.ORDEN_FAM)).generos)]),
       sal: Math.round(tarifa() * N.entero(80, 130) / 100), sem: sem, vence: S.t + 6 });
     N.emit('noticia', { tipo: 'estudio', texto: e.nombre + ' te ofrece un encargo como ' + D.oficio(t.of).nombre.toLowerCase() + '.', importante: true });
   }
@@ -85,9 +91,9 @@ IA.carrera = (function () {
     const S = N.S, o = (S.ofertas || []).filter(function (x) { return x.id === id; })[0], t = talentoAvatar();
     if (!o || !t) return 'Esa oferta ya no está.';
     if (S.trabajo) return 'Ya estás en un encargo.';
-    if (IA.talentos.energia(t) < 20) return 'Estás sin energía: descansa un mes.';
+    if (ART.talentos.energia(t) < 20) return 'Estás sin energía: descansa un mes.';
     S.trabajo = { est: o.est, nombreEst: o.nombreEst, tit: o.tit, sal: o.sal, fin: S.t + o.sem };
-    t.en = Math.max(0, IA.talentos.energia(t) - 20); t.enT = S.t;
+    t.en = Math.max(0, ART.talentos.energia(t) - 20); t.enT = S.t;
     S.ofertas = S.ofertas.filter(function (x) { return x.id !== id; });
     return '';
   }
@@ -121,10 +127,10 @@ IA.carrera = (function () {
     let txt = '';
     const aplicar = function (x) {
       const tip = E.presupuestoTipico(N.anio());
-      if (x.caja) { if (x.caja < 0) IA.negocio.pagar(0, 'personal', -x.caja * tip); else IA.negocio.cobrarEn(0, 'reestrenos', x.caja * tip); }
+      if (x.caja) { if (x.caja < 0) ART.negocio.pagar(0, 'personal', -x.caja * tip); else ART.negocio.cobrarEn(0, 'reestrenos', x.caja * tip); }
       if (x.fama) S.estudios[0].fama = N.redondear(N.limitar(S.estudios[0].fama + x.fama, 0.01, 1), 3);
       if (x.salud) S.avatar.salud = N.limitar((S.avatar.salud || 80) + x.salud, 5, 100);
-      if (x.moral) S.talentos.forEach(function (t) { if (t.ex === 0 && t.exH > S.t) IA.talentos.cambiarMoral(t, x.moral); });
+      if (x.moral) S.talentos.forEach(function (t) { if (t.ex === 0 && t.exH > S.t) ART.talentos.cambiarMoral(t, x.moral); });
       if (x.texto) txt = x.texto;
     };
     aplicar(op);
@@ -141,7 +147,7 @@ IA.carrera = (function () {
     S.herederos = [0, 1, 2].map(function (i) {
       const sx = tipos[i % 4].indexOf('Hij') === 0 ? (i === 0 ? 'F' : 'M') : N.elegir(['F', 'M']);
       const ed = N.entero(22, 45);
-      return { id: i, rel: tipos[i], nom: IA.talentos.nombreNuevo(S.estudios[0].reg, sx).split(' ')[0] + ' ' + a.nom.split(' ').slice(-1)[0], sx: sx, edad: ed,
+      return { id: i, rel: tipos[i], nom: ART.talentos.nombreNuevo(S.estudios[0].reg, sx).split(' ')[0] + ' ' + a.nom.split(' ').slice(-1)[0], sx: sx, edad: ed,
         esp: [a.esp[i % a.esp.length]].concat(N.elegir([['guion'], ['direccion'], ['produccion'], ['musica']])) };
     });
   }
@@ -173,7 +179,7 @@ IA.carrera = (function () {
     // Encargo terminado: cobras y creces
     if (S.trabajo && S.t >= S.trabajo.fin) {
       const t = talentoAvatar();
-      IA.negocio.cobrarEn(0, 'carrera', S.trabajo.sal);
+      ART.negocio.cobrarEn(0, 'carrera', S.trabajo.sal);
       if (t) { t.obras = (t.obras || 0) + 1; t.hab = Math.min(99, t.hab + 1); t.fama = N.redondear(Math.min(1, t.fama + 0.015), 3); }
       N.emit('noticia', { tipo: 'estudio', texto: 'Terminas «' + S.trabajo.tit + '» para ' + S.trabajo.nombreEst + ' y cobras tu parte.', importante: true });
       delete S.trabajo;

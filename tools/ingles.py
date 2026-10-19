@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Arma src/modulos/01_ingles.js: el diccionario español → inglés (comprimido con gzip en base64).
-Uso: python3 tools/ingles.py diccionario.json [más.json ...]   (objetos {"español": "english"})"""
-import sys, json, gzip, base64
+"""Arma src/modulos/01_ingles.js: el diccionario español → inglés comprimido (gzip en Z85).
+Uso: python3 tools/ingles.py [diccionario.json ...]
+Sin argumentos lee tools/ingles/diccionario.json (objeto {"español": "english"}); con varios, los une en orden."""
+import sys, json, gzip, os, re
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+rutas = sys.argv[1:] or [os.path.join(RAIZ, 'tools', 'ingles', 'diccionario.json')]
 d = {}
-for ruta in sys.argv[1:]:
+for ruta in rutas:
     d.update(json.load(open(ruta, encoding='utf-8')))
 # Las entradas que quedan igual en inglés (nombres, países) solo sirven si protegen a una frase de traducirse a medias:
 # si ninguna de sus palabras tiene traducción, no cambian nada y se dejan fuera del archivo.
-import re
 traducen = {k.lower() for k, v in d.items() if k != v and len(k.strip()) >= 3}
 def protege(k):
     if '{' in k: return False
@@ -23,7 +25,7 @@ try:  # zopfli (si está instalado) da un gzip estándar unos 5 % más chico; el
     import zopfli.gzip
     comprimido = zopfli.gzip.compress(crudo, numiterations=15)
 except ImportError:
-    comprimido = gzip.compress(crudo, 9)
+    comprimido = gzip.compress(crudo, 9, mtime=0)
 # Z85 con '~' en lugar de '/' (así nunca aparece «</» dentro del script; sin comillas ni barra invertida) ocupa 25 % más que los datos; base64, 33 %
 Z85 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!~*?&<>()[]{}@%$#'
 datos = comprimido + b'\0' * ((4 - len(comprimido) % 4) % 4)
@@ -32,8 +34,8 @@ for i in range(0, len(datos), 4):
     v = int.from_bytes(datos[i:i + 4], 'big')
     z.append(''.join(Z85[(v // 85 ** k) % 85] for k in range(4, -1, -1)))
 z85 = ''.join(z)
-assert not any(p in z85.lower() for p in ('</', '<!--', '<script')), 'Z85 armó una secuencia que rompe el <script>; cambia numiterations'
-with open('src/modulos/01_ingles.js', 'w', encoding='utf-8', newline='\n') as f:
+assert not any(p in z85.lower() for p in ('</', '<!--', '<script')), 'Z85 armó una secuencia que rompe el <script>; cambia el nivel de compresión'
+with open(os.path.join(RAIZ, 'src', 'modulos', '01_ingles.js'), 'w', encoding='utf-8', newline='\n') as f:
     f.write('/* ==== módulo: ingles ==== */\n// Diccionario español → inglés (' + str(len(lineas)) + ' frases), comprimido en Z85; lo arma tools/ingles.py\n'
-            'IA.INGLES_LEN = ' + str(len(comprimido)) + ';\nIA.INGLES_Z85 = \'' + z85 + '\';\n')
+            'ART.INGLES_LEN = ' + str(len(comprimido)) + ';\nART.INGLES_Z85 = \'' + z85 + '\';\n')
 print(len(lineas), 'frases,', len(z85) // 1024, 'KB')

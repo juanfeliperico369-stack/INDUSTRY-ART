@@ -3,10 +3,10 @@
 // «solo lo mío»; saltar a una fecha; avanzar hasta un día; recordatorios con nota) y de lo nuevo del estudio: sede
 // por niveles y personal de oficina (Negocio › Sede), tu avatar (vida ligera, encargos, retiro y heredero),
 // menú rápido de departamentos, fans, ADN del mercado y el menú de pausa.
-IA.calendarioUI = (function () {
+ART.calendarioUI = (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, M = IA.mundo, O = IA.obras, C = IA.cal, U = IA.ui, esc = N.esc;
-  const dinero = U.dinero, ac = U.accion, t = IA.t;
+  const N = ART.n, D = ART.datos, E = ART.economia, M = ART.mundo, O = ART.obras, C = ART.cal, U = ART.ui, esc = N.esc;
+  const dinero = U.dinero, ac = U.accion, t = ART.t;
   const est0 = function () { return N.S.estudios[0]; };
   function kpi(nombre, valor, clase) { return '<div class="kpi"><span>' + esc(nombre) + '</span><b class="cifra ' + (clase || '') + '">' + esc(valor) + '</b></div>'; }
   function chip(txt, accion, valor, on) { return '<button class="chip' + (on ? ' on' : '') + '" data-a="' + accion + '" data-v="' + esc(valor) + '" aria-pressed="' + !!on + '">' + esc(txt) + '</button>'; }
@@ -146,18 +146,18 @@ IA.calendarioUI = (function () {
     if (e) { U.aviso(e, 'mal'); return; }
     U.aviso('Recordatorio guardado'); refrescar();
   });
-  ac('calAvanzarHasta', function (v) { if (IA.pantallas.avanzarHasta) IA.pantallas.avanzarHasta(+v); });
-  ac('calProgramar', function (v) { const p = v.split(':'); IA.distribucion.abrir(+p[0], +p[1]); });
+  ac('calAvanzarHasta', function (v) { if (ART.pantallas.avanzarHasta) ART.pantallas.avanzarHasta(+v); });
+  ac('calProgramar', function (v) { const p = v.split(':'); ART.distribucion.abrir(+p[0], +p[1]); });
 
   // =====================================================================
   // ESTUDIO: sede, departamentos, avatar y fans
   // =====================================================================
   function tarjetasEstudio() {
-    const S = N.S, est = est0(), sd = IA.sede.nivelSede(), a = S.avatar, CA = IA.carrera;
-    let h = '<div class="tarjeta"><h3>Tu sede: ' + esc(sd.nombre) + '</h3><p class="nota">' + esc(sd.texto) + '</p><div class="kpis">' + kpi('Personal', IA.sede.personal().length + ' / ' + sd.tope) + kpi('Fans', U.grande(S.fans || 0)) + kpi('Influencia', est.influencia || 0) + '</div><button class="btn" data-a="irSede">Sede y personal</button></div>';
+    const S = N.S, est = est0(), sd = ART.sede.nivelSede(), a = S.avatar, CA = ART.carrera;
+    let h = '<div class="tarjeta"><h3>Tu sede: ' + esc(sd.nombre) + '</h3><p class="nota">' + esc(sd.texto) + '</p><div class="kpis">' + kpi('Personal', ART.sede.personal().length + ' / ' + sd.tope) + kpi('Fans', U.grande(S.fans || 0)) + kpi('Influencia', est.influencia || 0) + '</div><button class="btn" data-a="irSede">Sede y personal</button></div>';
     // Menú rápido de departamentos (tus pisos)
     const pisos = []; est.pisos.forEach(function (p) { if (pisos.indexOf(p) < 0) pisos.push(p); });
-    h += '<div class="tarjeta"><h3>Departamentos</h3><div class="chips">' + pisos.map(function (p) { const i = IA.negocio.infoPiso(p); return '<button class="chip" data-a="verDepto" data-v="' + p + '">' + esc(i.nombre) + '</button>'; }).join('') + '</div></div>';
+    h += '<div class="tarjeta"><h3>Departamentos</h3><div class="chips">' + pisos.map(function (p) { const i = ART.negocio.infoPiso(p); return '<button class="chip" data-a="verDepto" data-v="' + p + '">' + esc(i.nombre) + '</button>'; }).join('') + '</div></div>';
     if (a && !a.fin) {
       const tf = CA.trasfondo(), ar = CA.arquetipo(), ta = CA.talentoAvatar();
       h += '<div class="tarjeta"><h3>' + esc(a.nom) + (a.gen > 1 ? ' <span class="etiqueta">generación ' + a.gen + '</span>' : '') + '</h3><div class="kpis">' + kpi('Edad', CA.edad()) + kpi('Salud', Math.round(a.salud || 0)) +
@@ -172,16 +172,16 @@ IA.calendarioUI = (function () {
   }
   ac('irSede', function () { U.irA('negocio', 'sede'); });
   ac('verDepto', function (v) {
-    const i = IA.negocio.infoPiso(v), n = est0().pisos.filter(function (x) { return x === v; }).length;
-    const gente = IA.sede.personal().filter(function (p) { const r = IA.sede.rol(p.rol); return r.dep && i.bono && i.bono[r.dep]; });
+    const i = ART.negocio.infoPiso(v), n = est0().pisos.filter(function (x) { return x === v; }).length;
+    const gente = ART.sede.personal().filter(function (p) { const r = ART.sede.rol(p.rol); return r.dep && i.bono && i.bono[r.dep]; });
     U.modal('<h2>' + esc(i.nombre) + '</h2><p>' + esc(i.efecto) + '</p><p class="tenue">Tienes ' + n + '.</p>' + (gente.length ? '<p>Trabajan aquí: ' + gente.map(function (p) { return esc(p.nom); }).join(', ') + '</p>' : '') + '<button class="btn primario bloque" data-a="cerrarModal">' + t('aceptar') + '</button>');
   });
-  ac('carAceptar', function (v) { const e = IA.carrera.aceptarOferta(+v); if (e) U.aviso(e, 'mal'); else U.aviso('Encargo aceptado'); U.refrescar(); });
-  ac('carRechazar', function (v) { IA.carrera.rechazarOferta(+v); U.refrescar(); });
+  ac('carAceptar', function (v) { const e = ART.carrera.aceptarOferta(+v); if (e) U.aviso(e, 'mal'); else U.aviso('Encargo aceptado'); U.refrescar(); });
+  ac('carRechazar', function (v) { ART.carrera.rechazarOferta(+v); U.refrescar(); });
   ac('carRetiro', function () {
     U.modal('<h2>Retirarte</h2><p>Tu avatar deja el estudio y eliges a quién se lo entregas. La partida sigue con tu heredero.</p><div class="col"><button class="btn peligro" data-a="carRetiroSi">Sí, retirarme</button><button class="btn" data-a="cerrarModal">Seguir trabajando</button></div>');
   });
-  ac('carRetiroSi', function () { IA.carrera.retirarse(); mostrarPendientes(); });
+  ac('carRetiroSi', function () { ART.carrera.retirarse(); mostrarPendientes(); });
   // Vida ligera y heredero: ventanas al avanzar
   function mostrarPendientes() {
     const S = N.S;
@@ -191,7 +191,7 @@ IA.calendarioUI = (function () {
       }).join('') + '</div>');
       return true;
     }
-    const v = IA.carrera.vidaPendiente();
+    const v = ART.carrera.vidaPendiente();
     if (v) {
       U.modal('<h2>Tu vida</h2><p>' + esc(v.texto) + '</p><div class="col">' + v.ops.map(function (o, i) { return '<button class="btn" data-a="carVida" data-v="' + i + '">' + esc(o.t) + '</button>'; }).join('') + '</div><p class="nota info">Cada opción arriesga algo.</p>');
       return true;
@@ -203,8 +203,8 @@ IA.calendarioUI = (function () {
     }
     return false;
   }
-  ac('carHeredero', function (v) { IA.carrera.elegirHeredero(+v); U.cerrarModal(); U.refrescar(); });
-  ac('carVida', function (v) { const txt = IA.carrera.decidirVida(+v); U.cerrarModal(); if (txt) U.aviso(txt); U.refrescar(); });
+  ac('carHeredero', function (v) { ART.carrera.elegirHeredero(+v); U.cerrarModal(); U.refrescar(); });
+  ac('carVida', function (v) { const txt = ART.carrera.decidirVida(+v); U.cerrarModal(); if (txt) U.aviso(txt); U.refrescar(); });
   ac('carRecVisto', function () { const S = N.S; C.recordatoriosDeSemana(S.t).forEach(function (r) { C.quitarRecordatorio(r.id); }); U.cerrarModal(); U.refrescar(); });
   ac('verFans', function () {
     const S = N.S;
@@ -215,7 +215,7 @@ IA.calendarioUI = (function () {
   // NEGOCIO › SEDE Y PERSONAL
   // =====================================================================
   function negocioSede() {
-    const S = N.S, SD = IA.sede, sd = SD.nivelSede();
+    const S = N.S, SD = ART.sede, sd = SD.nivelSede();
     let h = '<div class="tarjeta"><h3>' + esc(sd.nombre) + ' (nivel ' + sd.n + ' de 5)</h3><p class="nota">' + esc(sd.texto) + '</p><div class="kpis">' + kpi('Tope de personal', sd.tope) + kpi('Gasto fijo de la sede y el personal', dinero(SD.gastoFijoMes()) + '/mes') + '</div>';
     const sig = SD.NIVELES[sd.n];
     if (sig) { const e = SD.puedeMejorar(); h += '<p class="chico">Siguiente: <b>' + esc(sig.nombre) + '</b> (tope ' + sig.tope + '). ' + esc(sig.texto) + '</p><button class="btn' + (e ? '' : ' primario') + '" data-a="sedeMejorar"' + (e ? ' disabled title="' + esc(e) + '"' : '') + '>Mudarte · ' + dinero(SD.costoMejora()) + '</button>'; }
@@ -242,13 +242,13 @@ IA.calendarioUI = (function () {
     return h;
   }
   const res = function (e, ok) { if (e) U.aviso(e, 'mal'); else if (ok) U.aviso(ok); U.refrescar(); };
-  ac('sedeMejorar', function () { res(IA.sede.mejorar(), '¡Mudanza lista!'); });
-  ac('staffCap', function (v) { res(IA.sede.capacitar(+v), 'Empieza la capacitación'); });
-  ac('staffAsignar', function (v) { const p = v.split(':'); res(IA.sede.asignar(+p[0], +p[1]), 'Se suma a la producción'); });
-  ac('staffDespedir', function (v) { IA.sede.despedir(+v); res('', 'Despedido'); });
-  ac('staffReclutar', function (v) { const s = document.getElementById('reclRol'); res(IA.sede.reclutar(v, s ? s.value : 'productor'), 'Búsqueda iniciada'); });
-  ac('staffAceptar', function (v) { res(IA.sede.aceptar(+v), 'Bienvenido al equipo'); });
-  ac('staffRechazar', function (v) { IA.sede.rechazar(+v); res('', ''); });
+  ac('sedeMejorar', function () { res(ART.sede.mejorar(), '¡Mudanza lista!'); });
+  ac('staffCap', function (v) { res(ART.sede.capacitar(+v), 'Empieza la capacitación'); });
+  ac('staffAsignar', function (v) { const p = v.split(':'); res(ART.sede.asignar(+p[0], +p[1]), 'Se suma a la producción'); });
+  ac('staffDespedir', function (v) { ART.sede.despedir(+v); res('', 'Despedido'); });
+  ac('staffReclutar', function (v) { const s = document.getElementById('reclRol'); res(ART.sede.reclutar(v, s ? s.value : 'productor'), 'Búsqueda iniciada'); });
+  ac('staffAceptar', function (v) { res(ART.sede.aceptar(+v), 'Bienvenido al equipo'); });
+  ac('staffRechazar', function (v) { ART.sede.rechazar(+v); res('', ''); });
 
   // ADN del mercado por era (Negocio › Mercado)
   function adnMercado() {
@@ -263,23 +263,11 @@ IA.calendarioUI = (function () {
   // MENÚ DE PAUSA
   // =====================================================================
   ac('abrirPausa', function () {
+    ART.publicacion.anuncioEnPausa(); // edición con anuncios: si ya toca, sale uno al pausar
     U.modal('<div class="fila entre"><h2>Pausa</h2><button class="ico" data-a="cerrarModal" aria-label="' + t('cerrar') + '">' + U.icono('cerrar') + '</button></div><div class="col">' +
       '<button class="btn primario" data-a="cerrarModal">Seguir</button>' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button>' : '') +
-      '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' + (N.S ? '<button class="btn" data-a="crearTalentoForm">Crear talento (Editor)</button>' : '') +
+      '<button class="btn" data-a="abrirAjustes">' + t('ajustes') + '</button>' + (N.S ? '<button class="btn" data-a="crearTalentoForm">Crear talento</button>' : '') +
       '<button class="btn" data-a="ayuda" data-v="inicio_guia">Guía</button>' + (N.S ? '<button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') + '</div>');
   });
-  ac('crearTalentoForm', function () {
-    U.modal('<h2>Crear talento</h2><p class="nota info">Tu propio talento entra al mundo con una habilidad modesta que crece con el trabajo.</p>' +
-      '<label class="campo"><span>Nombre</span><input type="text" maxlength="40" id="ctNom" value=""></label>' +
-      '<label class="campo"><span>Oficio</span><select id="ctOf">' + D.oficios.map(function (o) { return '<option value="' + o.id + '">' + esc(o.nombre) + '</option>'; }).join('') + '</select></label>' +
-      '<div class="fila"><label class="campo crece"><span>Sexo</span><select id="ctSx"><option value="F">' + t('mujer') + '</option><option value="M">' + t('hombre') + '</option></select></label><label class="campo crece"><span>Edad</span><input type="number" min="8" max="80" value="25" id="ctEd"></label></div>' +
-      '<button class="btn primario bloque" data-a="crearTalentoSi">Crear</button><p></p><button class="btn bloque" data-a="cerrarModal">' + t('cerrar') + '</button>');
-  });
-  ac('crearTalentoSi', function () {
-    const g = function (id) { const el = document.getElementById(id); return el ? el.value : ''; };
-    const ta = IA.talentos.crearPropio({ nom: g('ctNom').trim() || undefined, of: g('ctOf'), sx: g('ctSx'), edad: +g('ctEd') || 25, reg: est0().reg });
-    U.cerrarModal(); U.aviso('Nace ' + ta.nom); U.acciones.verTalento(String(ta.id));
-  });
-
   return { calendario: calendario, tarjetasEstudio: tarjetasEstudio, mostrarPendientes: mostrarPendientes, negocioSede: negocioSede, adnMercado: adnMercado };
 })();

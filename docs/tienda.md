@@ -44,7 +44,7 @@ INDUSTRY ART es un simulador de estudio de cine profundo, para jugar a tu ritmo 
 
 Todos los nombres de personas, estudios y obras del juego son inventados.
 
-Ideado y creado por OneZero. Programado junto a Lumen.
+Ideado y creado por OneZero. Programado por Faro.
 
 ## English
 
@@ -71,7 +71,7 @@ INDUSTRY ART is a deep film studio simulator you play at your own pace, fully of
 
 All people, studios and works in the game are fictional.
 
-Conceived and created by OneZero. Programmed together with Lumen.
+Conceived and created by OneZero. Programmed by Faro.
 
 ## Imágenes (ya hechas, en `docs/tienda/`)
 

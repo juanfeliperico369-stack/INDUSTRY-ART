@@ -5,9 +5,9 @@
 // regla real (fijas, Pascua gregoriana, Acción de Gracias, luna nueva para el Año Nuevo chino y Diwali, calendario
 // islámico tabular para el Eid al-Fitr), el circuito anual fijo de premiaciones, festivales y convenciones, y los
 // eventos de tu partida (estrenos, producción, nómina, contratos, cumpleaños y recordatorios).
-IA.cal = (function () {
+ART.cal = (function () {
   'use strict';
-  const N = IA.n;
+  const N = ART.n;
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   const MESES_C = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
@@ -250,8 +250,8 @@ IA.cal = (function () {
       add(diaDelAnio(v.y, v.m, v.d), { tipo: 'estreno', titulo: '«' + o.tit + '» · ' + S.estudios[o.est].nombre, mio: o.est === 0, obra: o.id, reg: TODAS });
     });
     // Tus producciones: cuándo quedan listas (estimado)
-    if (IA.obras && IA.produccion) IA.obras.enProduccion(0).forEach(function (o) {
-      const t = S.t + IA.produccion.semanasRestantes(o);
+    if (ART.obras && ART.produccion) ART.obras.enProduccion(0).forEach(function (o) {
+      const t = S.t + ART.produccion.semanasRestantes(o);
       if (N.anio(t) !== y) return;
       const fi = inicioDeT(t);
       add(diaDelAnio(fi.y, fi.m, fi.d), { tipo: 'produccion', titulo: '«' + o.tit + '» quedaría lista (estimado)', mio: true, obra: o.id });
@@ -269,14 +269,14 @@ IA.cal = (function () {
       if (N.anio(ta.exH) === y) { const fi = inicioDeT(ta.exH); add(diaDelAnio(fi.y, fi.m, fi.d), { tipo: 'talento', titulo: 'Termina el contrato exclusivo de ' + ta.nom, mio: true, talento: ta.id }); }
     });
     // Historia del año (el día exacto llega con el mundo vivo)
-    (IA.datos.cronologia || []).forEach(function (c) { if (c[0] === y) add(diaDelAnio(y, 0, 1), { tipo: 'historia', titulo: c[1], reg: TODAS }); });
+    (ART.datos.cronologia || []).forEach(function (c) { if (c[0] === y) add(diaDelAnio(y, 0, 1), { tipo: 'historia', titulo: c[1], reg: TODAS }); });
     // Tus recordatorios
     (S.recordatorios || []).forEach(function (r) { if (r.y === y && r.m === m) add(n0 + r.d - 1, { tipo: 'recordatorio', titulo: r.nota || 'Recordatorio', mio: true, rec: r.id }); });
     return out;
   }
   // Competencia de una semana para un estreno: tranquila, movida o saturada
   function competencia(t, excluir) {
-    const c = IA.lanzamiento ? IA.lanzamiento.competenciaPrevista(t, excluir) : 0;
+    const c = ART.lanzamiento ? ART.lanzamiento.competenciaPrevista(t, excluir) : 0;
     return c < 1.5 ? { id: 'tranquila', nombre: 'tranquila', v: c } : c < 3.5 ? { id: 'movida', nombre: 'movida', v: c } : { id: 'saturada', nombre: 'saturada', v: c };
   }
   // Estaciones por hemisferio

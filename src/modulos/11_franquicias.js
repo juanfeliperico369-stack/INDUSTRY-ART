@@ -4,10 +4,10 @@
 // temporada de una serie), personajes con ficha y popularidad, llamada al elenco original, licencias y derivados
 // canon o no canon, crossovers, canon con continuidades, compra y venta (también de obras sueltas), ofertas de
 // rivales, biografía con nivel de clásico, mente maestra y fatiga del público.
-IA.franquicias = (function () {
+ART.franquicias = (function () {
   'use strict';
-  const N = IA.n, O = IA.obras, D = IA.datos;
-  const tip = function () { return IA.economia.presupuestoTipico(N.anio()); };
+  const N = ART.n, O = ART.obras, D = ART.datos;
+  const tip = function () { return ART.economia.presupuestoTipico(N.anio()); };
   const CAMINOS = [
     { id: 'secuela', nombre: 'Secuela', des: 6, fat: 0.18, elenco: 1, texto: 'Sigue la historia con el mismo elenco: la más pedida y la que más cansa.' },
     { id: 'precuela', nombre: 'Precuela', des: 4, fat: 0.14, elenco: 0.5, texto: 'Cuenta lo que pasó antes; parte del elenco vuelve.' },
@@ -34,7 +34,7 @@ IA.franquicias = (function () {
   function estrenadas(f) { return obras(f).filter(function (o) { return o.pub !== undefined && o.et !== 'lista'; }); }
   function persDe(o) {
     return (o.pj || []).filter(function (p) { return p.i !== 'extra'; }).slice(0, 6).map(function (p, i) {
-      const t = IA.talentos.porId(p.t);
+      const t = ART.talentos.porId(p.t);
       return { n: p.n, s: p.s, a: p.a, i: p.i, pop: Math.round(N.limitar((o.pub || 50) * (p.i === 'protagonista' ? 0.8 : 0.5), 5, 90)), t: p.t, tn: t ? t.nom : '', org: o.id, k: i };
     });
   }
@@ -62,7 +62,7 @@ IA.franquicias = (function () {
     const es = estrenadas(f).slice(-3);
     if (!es.length) return 0;
     const pub = es.reduce(function (a, o) { return a + o.pub; }, 0) / es.length;
-    const br = es.reduce(function (a, o) { return a + (o.bruto || 0); }, 0) / es.length / IA.economia.presupuestoTipico(N.anio(es[es.length - 1].fe || N.S.t));
+    const br = es.reduce(function (a, o) { return a + (o.bruto || 0); }, 0) / es.length / ART.economia.presupuestoTipico(N.anio(es[es.length - 1].fe || N.S.t));
     return Math.round(N.limitar((pub - 50) / 2.2 + Math.log(1 + Math.max(0, br)) * 5, -10, 16));
   }
   function biografia(f) {
@@ -81,7 +81,7 @@ IA.franquicias = (function () {
     const f = fo && fo.o ? fo : null, lista = f ? estrenadas(f) : [fo];
     const tipico = tip();
     let v = 0.15 * tipico;
-    lista.forEach(function (o) { const ed = Math.max(0, N.anio() - N.anio(o.fe || N.S.t)); v += tipico * Math.min(1.5, ((o.bruto || 0) + (o.ing || 0)) / IA.economia.presupuestoTipico(N.anio(o.fe || N.S.t)) * 0.12) * Math.pow(0.97, ed) + tipico * Math.max(0, (o.pub || 50) - 55) / 200; });
+    lista.forEach(function (o) { const ed = Math.max(0, N.anio() - N.anio(o.fe || N.S.t)); v += tipico * Math.min(1.5, ((o.bruto || 0) + (o.ing || 0)) / ART.economia.presupuestoTipico(N.anio(o.fe || N.S.t)) * 0.12) * Math.pow(0.97, ed) + tipico * Math.max(0, (o.pub || 50) - 55) / 200; });
     if (f) v *= (1 - f.fat * 0.6) * (1 + biografia(f).nivel * 0.12);
     return Math.round(v);
   }
@@ -108,8 +108,8 @@ IA.franquicias = (function () {
     const res = [];
     (b.pj || []).forEach(function (p, i) {
       if (p.t === null || p.t === undefined) return;
-      const t = IA.talentos.porId(p.t);
-      let ok = !!t && IA.talentos.disponible(t, b.est) && N.probabilidad(cam.elenco);
+      const t = ART.talentos.porId(p.t);
+      let ok = !!t && ART.talentos.disponible(t, b.est) && N.probabilidad(cam.elenco);
       if (ok && t) {
         const prob = 0.85 - (t.fama > 0.7 && (base.pub || 50) < 50 ? 0.35 : 0) + ((base.pub || 50) > 70 ? 0.1 : 0) - (N.anio() - t.nac > 70 ? 0.3 : 0);
         ok = N.probabilidad(N.limitar(prob, 0.1, 0.97));
@@ -136,20 +136,20 @@ IA.franquicias = (function () {
       if (pers) { b.pj.forEach(function (p) { if (p.n === pers.n) p.i = 'protagonista'; else if (p.i === 'protagonista') p.i = 'secundario'; }); }
       if (cam.id === 'reboot' || cam.id === 'remake') b.pj.forEach(function (p) { p.t = null; });
     }
-    if (!b.arco || !(b.prob && b.prob.length)) IA.ideas.recomendarHistoria(b, N.anio()); // lo borrado al compactar la obra vieja
+    if (!b.arco || !(b.prob && b.prob.length)) ART.ideas.recomendarHistoria(b, N.anio()); // lo borrado al compactar la obra vieja
     b.fr = f.id; b.cam = cam.id; b.frN = f.o.length + 1;
     b.cnt = cam.id === 'reboot' ? 0 : base.cnt || 1;
     if (medio === 'tv' || cam.id === 'temporada') {
       b.med = 'tv';
-      b.tv = cam.id === 'temporada' && base.tv ? Object.assign(N.copiar(base.tv), { temp: (base.tv.temp || 1) + 1 }) : IA.tv.configInicial(N.anio());
+      b.tv = cam.id === 'temporada' && base.tv ? Object.assign(N.copiar(base.tv), { temp: (base.tv.temp || 1) + 1 }) : ART.tv.configInicial(N.anio());
       delete b.tv.em; delete b.tv.ren; delete b.tv.tr; delete b.tv.pil;
-      b.min = base.med === 'tv' && base.min ? base.min : IA.tv.formato(b.tv.fmt).min;
+      b.min = base.med === 'tv' && base.min ? base.min : ART.tv.formato(b.tv.fmt).min;
     }
     b.tit = tituloPara(f, cam, base, pers);
     const lla = cam.elenco > 0 ? llamarElenco(b, base, cam) : [];
     if (cam.elenco === 0) (b.pj || []).forEach(function (p) { p.t = null; });
     O.equipoRecomendado(b, 1);
-    if (f.mente !== null) { const m = IA.talentos.porId(f.mente); if (m && IA.talentos.disponible(m, 0)) b.eq.produccion = m.id; }
+    if (f.mente !== null) { const m = ART.talentos.porId(f.mente); if (m && ART.talentos.disponible(m, 0)) b.eq.produccion = m.id; }
     O.recalcular(b);
     return { b: b, elenco: lla, f: f };
   }
@@ -221,7 +221,7 @@ IA.franquicias = (function () {
       let q = f.pers.filter(function (x) { return x.n === p.n; })[0];
       if (!q) { if (f.pers.length >= (f.est === 0 ? 12 : 4)) return; q = { n: p.n, s: p.s, a: p.a, i: p.i, pop: 30, k: f.pers.length, org: o.id }; f.pers.push(q); }
       q.pop = Math.round(N.limitar(q.pop * 0.6 + (o.pub || 50) * (p.i === 'protagonista' ? 0.5 : 0.35) + (o.bruto > tip() ? 4 : 0), 1, 99));
-      if (p.t !== null && p.t !== undefined) { q.t = p.t; const t = IA.talentos.porId(p.t); q.tn = t ? t.nom : q.tn; }
+      if (p.t !== null && p.t !== undefined) { q.t = p.t; const t = ART.talentos.porId(p.t); q.tn = t ? t.nom : q.tn; }
     });
   }
   // ---------- Licencias y derivados ----------
@@ -248,7 +248,7 @@ IA.franquicias = (function () {
   }
   function renombrarContinuidad(frId, cntId, nom) { const f = porId(frId), c = f && f.cont.filter(function (x) { return x.id === +cntId; })[0]; if (c && nom) c.nom = nom.slice(0, 40); }
   function asignarMente(frId, tid) {
-    const f = porId(frId), t = IA.talentos.porId(+tid);
+    const f = porId(frId), t = ART.talentos.porId(+tid);
     if (!f || f.est !== 0) return 'No es tuya.';
     if (tid === null || tid === '') { f.mente = null; return ''; }
     if (!t || t.of !== 'produccion') return 'La mente maestra debe ser un productor.';
@@ -273,8 +273,8 @@ IA.franquicias = (function () {
     const precio = f ? precioCompra(f) : Math.round(valor(o) * 1.25);
     if (S.estudios[0].caja < precio) return 'No alcanza la caja.';
     const vend = f ? f.est : o.est;
-    IA.negocio.pagar(0, 'derechos', precio);
-    IA.negocio.cobrarEn(vend, 'derechos', precio);
+    ART.negocio.pagar(0, 'derechos', precio);
+    ART.negocio.cobrarEn(vend, 'derechos', precio);
     const F = f || materializar(o);
     F.est = 0; F.mente = null;
     obras(F).forEach(function (x) { x.der = 0; });
@@ -285,7 +285,7 @@ IA.franquicias = (function () {
     const f = porId(frId), S = N.S;
     if (!f || f.est !== 0) return 'No es tuya.';
     const p = precio || valor(f);
-    IA.negocio.cobrarEn(0, 'licencias', p);
+    ART.negocio.cobrarEn(0, 'licencias', p);
     S.estudios[estId].caja -= p;
     f.est = estId; f.mente = null; f.lic = [];
     obras(f).forEach(function (x) { x.der = estId; });
@@ -315,7 +315,7 @@ IA.franquicias = (function () {
       if (f.est !== 0 || !f.lic.length) return;
       let s = 0;
       f.lic = f.lic.filter(function (l) { if (l.hasta <= S.t) return false; s += l.sem; return true; });
-      if (s) IA.negocio.cobrarEn(0, 'licencias', s);
+      if (s) ART.negocio.cobrarEn(0, 'licencias', s);
     });
   }
   function anual() { st().lista.forEach(function (f) { f.fat = N.redondear(f.fat * 0.82, 3); }); }

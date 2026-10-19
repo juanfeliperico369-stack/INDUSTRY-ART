@@ -1,11 +1,11 @@
 // Pruebas de reglas (clasificación, dominio público, Erótico, inflación, población, economía…).
 // Viven fuera del juego porque al jugador no le sirven y pesaban 30 KB: las cargan tools/bot.js y las
-// pruebas en el navegador (después de abrir el juego) o en Node. Agregan IA.pruebas.reglas().
+// pruebas en el navegador (después de abrir el juego) o en Node. Agregan ART.pruebas.reglas().
 (function () {
   'use strict';
-  const N = IA.n, D = IA.datos, E = IA.economia, O = IA.obras, T = IA.talentos, L = IA.lanzamiento, NG = IA.negocio, X = IA.taxonomia;
+  const N = ART.n, D = ART.datos, E = ART.economia, O = ART.obras, T = ART.talentos, L = ART.lanzamiento, NG = ART.negocio, X = ART.taxonomia;
   function reglas() {
-    const X = IA.taxonomia, I = IA.ideas, M = IA.mundo;
+    const X = ART.taxonomia, I = ART.ideas, M = ART.mundo;
     const r = [];
     const prueba = function (nombre, ok, detalle) { r.push({ nombre: nombre, ok: !!ok, detalle: detalle || '' }); };
     const idea = function (gen, cont, extra) { return Object.assign({ gen: gen, cont: Object.assign({ violencia: 0, lenguaje: 0, amor: 0, consumo: 0, terror: 0 }, cont) }, extra || {}); };
@@ -34,7 +34,7 @@
     prueba('Erótico nunca con públicos infantiles', !!I.validar(idea(['Erótico'], { amor: 3 }, { pubs: ['Adolescentes'] }), 2000));
     prueba('Erótico solo con personajes adultos', !!I.validar(idea(['Erótico'], { amor: 3 }, { pj: [{ n: 'A', e: 16, s: 'F', i: 'protagonista', a: 'Amante' }], prob: ['Amor'], arco: 'pozo', nat: 'f', tipo: 'real' }), 2000));
     prueba('Con menores el amor no pasa de romántico', (function () { const b = idea(['Drama'], { amor: 4 }, { pj: [{ n: 'A', e: 14, s: 'F', i: 'protagonista', a: 'Héroe' }] }); I.normalizar(b, 2000); return b.cont.amor <= 1; })());
-    prueba('Con niños en el elenco la obra no pasa de PG-13', (function () { const b = idea(['Terror'], { violencia: 5, lenguaje: 4, terror: 4 }, { pj: [{ n: 'A', e: 12, s: 'M', i: 'protagonista', a: 'Héroe' }] }); I.normalizar(b, 2000); return IA.taxonomia.ORDEN_CLAS.indexOf(b.clas) <= 2; })());
+    prueba('Con niños en el elenco la obra no pasa de PG-13', (function () { const b = idea(['Terror'], { violencia: 5, lenguaje: 4, terror: 4 }, { pj: [{ n: 'A', e: 12, s: 'M', i: 'protagonista', a: 'Héroe' }] }); I.normalizar(b, 2000); return ART.taxonomia.ORDEN_CLAS.indexOf(b.clas) <= 2; })());
     // Dominio público: vida del autor + 70
     const dracula = X.dominio.filter(function (m) { return m.tit === 'Drácula'; })[0];
     prueba('Drácula no es libre en 1982', !I.esLibre(dracula, 1982));
@@ -87,7 +87,7 @@
       prueba('La academia no pasa de +5 por oficio', (function () { const t = { hab: 40, of: 'guion', ac: { guion: 5 }, af: [0, 0, 0, 0, 0, 0, 0, 0], en: 100, enT: S.t, act: 0 }; return /\+5/.test(T.puedeEstudiar(t, T.curso('taller'), 'guion')); })());
     }
     // V19 · Cine a fondo
-    const R = IA.rodaje, S = N.S;
+    const R = ART.rodaje, S = N.S;
     prueba('Las notas de los departamentos van de F a A+', R.letra(95) === 'A+' && R.letra(70) === 'B' && R.letra(20) === 'F');
     prueba('El CGI no existe antes de 1973', !R.metodosDisponibles(1960).some(function (m) { return m.id === 'cgi'; }) && R.metodosDisponibles(1980).some(function (m) { return m.id === 'cgi'; }));
     prueba('IMAX y 3D llegan en su año', X.formatos.visual.some(function (f) { return f.id === 'IMAX' && f.desde === 1970; }) && X.formatos.visual.some(function (f) { return f.id === '3D' && f.desde === 1953; }));
@@ -99,7 +99,7 @@
       let suma = 0;
       Object.keys(id).forEach(function (k) { suma += id[k]; });
       prueba('El reparto ideal del presupuesto suma 100 %', Math.abs(suma - 1) < 0.01, Math.round(suma * 100) + ' %');
-      const p0 = IA.ideas.pesos(muestra, D.familia(muestra.fam));
+      const p0 = ART.ideas.pesos(muestra, D.familia(muestra.fam));
       prueba('Vestuario y efectos pesan en la calidad', p0.vestuario > 0 && p0.efectos > 0);
       const quitado = Object.assign({}, muestra, { rep: Object.assign({}, id, { efectos: id.efectos * 0.2, produccion: id.produccion + id.efectos * 0.8 }) });
       prueba('Quitarle presupuesto a un departamento le baja la nota', R.efectoReparto(quitado, 'efectos') < -5);
@@ -132,18 +132,18 @@
       prueba('Un dilema de rodaje aplica sus efectos', N.anio() < 1930 || !enRodaje.dil && enRodaje.sr === 5 && enRodaje.dq === 2);
     }
     // V20 · Lanzamiento
-    const ES = IA.estreno, V = IA.ventanas;
+    const ES = ART.estreno, V = ART.ventanas;
     prueba('Las festividades suben a su familia en su región', M.bonoRegion('FJ', 'nam', 47, 2000) > 1 && M.bonoRegion('FJ', 'asi', 47, 2000) === 1);
     // Calendario completo (V21): días de la semana reales y festividades con su regla
-    const C = IA.cal;
+    const C = ART.cal;
     prueba('El 1 de enero de 1850 fue martes', C.diaSemana(1850, 0, 1) === 1);
     prueba('Pascua de 2024: 31 de marzo', C.pascua(2024).m === 2 && C.pascua(2024).d === 31);
     prueba('Año Nuevo chino de 2024: 10 de febrero (luna nueva)', (function () { const f = C.lunaNuevaDesde(2024, 0, 21, 8); return f.m === 1 && f.d === 10; })());
     prueba('Acción de Gracias de 2024: 28 de noviembre', (function () { const x = C.fiestasAnio(2024).filter(function (f) { return f.id === 'gracias'; })[0]; const d = C.desdeDiaDelAnio(2024, x.ini); return d.m === 10 && d.d === 28; })());
     prueba('El factor semanal queda entre ×0,80 y ×1,40', [1, 20, 26, 47, 52].every(function (s) { const v = E.pronosticoSemana(s, 'FJ', 'nam'); return v >= 0.8 && v <= 1.4; }));
     prueba('Ningún festival usa un nombre real', !C.circuitoAnio(2000).some(function (x) { return /Cannes|Venecia|Berlinale|Sundance|Oscar|Emmy|Grammy/.test(x.nombre); }));
-    prueba('Una Leyenda viva pide prestigio 45', IA.talentos.NIVELES[3].prestigio === 45);
-    prueba('Hay 56 premisas y tropos', IA.ideas.TODAS_PREMISAS.length === 56, IA.ideas.TODAS_PREMISAS.length);
+    prueba('Una Leyenda viva pide prestigio 45', ART.talentos.NIVELES[3].prestigio === 45);
+    prueba('Hay 56 premisas y tropos', ART.ideas.TODAS_PREMISAS.length === 56, ART.ideas.TODAS_PREMISAS.length);
     prueba('Las ventanas llegan en su año (TV 1955, video 1977, streaming 2007)', V.disponibles(1950).length === 0 && V.disponibles(1960).length === 1 && V.disponibles(1980).length === 2 && V.disponibles(2010).length === 3);
     prueba('Directo a video desde 1980 y a streaming desde 2010', V.viasDirectas(1979).length === 0 && V.viasDirectas(1985).length === 1 && V.viasDirectas(2015).length === 2);
     prueba('Las certificaciones de video empiezan en 1979 y suben de oro a diamante', V.ANIO_CERT === 1979 && V.CERTIFICACIONES[0].copias < V.CERTIFICACIONES[1].copias && V.CERTIFICACIONES[1].copias < V.CERTIFICACIONES[2].copias);
@@ -174,11 +174,11 @@
         conVest.eq.arte = arteOrig;
         prueba('El diseñador de arte y tecnología también pesa en vestuario', h2 < h1);
       }
-      prueba('Los rivales también guardan sets', IA.rodaje.capacidadSets(1) >= 2);
+      prueba('Los rivales también guardan sets', ART.rodaje.capacidadSets(1) >= 2);
     }
     // V29 · Contra los Datos: calendario, inflación, población, dominio público y Erótico
     {
-      const C = IA.cal, fi = function (y, id) { return C.fiestasAnio(y).filter(function (f) { return f.id === id; })[0]; };
+      const C = ART.cal, fi = function (y, id) { return C.fiestasAnio(y).filter(function (f) { return f.id === id; })[0]; };
       const pa = C.pascua(2024), pa2 = C.pascua(2025);
       prueba('Pascua 2024 cae el 31 de marzo y la de 2025 el 20 de abril', pa.m === 2 && pa.d === 31 && pa2.m === 3 && pa2.d === 20, JSON.stringify([pa, pa2]));
       prueba('Año Nuevo chino 2024 empieza el 10 de febrero', fi(2024, 'lunar') && fi(2024, 'lunar').ini === 41);
@@ -193,17 +193,17 @@
     }
     // V26 · Metas, modos y editor
     {
-      const Mt = IA.metas;
-      prueba('Hay tres modos y cinco dificultades', Mt.MODOS.length === 3 && IA.juego.DIFICULTADES.length === 5);
+      const Mt = ART.metas;
+      prueba('Hay tres modos y cinco dificultades', Mt.MODOS.length === 3 && ART.juego.DIFICULTADES.length === 5);
       prueba('Hay cuatro retos finales', Mt.RETOS.length === 4);
       prueba('Hay al menos 30 logros', Mt.LOGROS.length >= 30, Mt.LOGROS.length);
-      prueba('Cada dificultad tiene su texto con humor', IA.juego.DIFICULTADES.every(function (d) { return !!Mt.HUMOR[d.id]; }));
+      prueba('Cada dificultad tiene su texto con humor', ART.juego.DIFICULTADES.every(function (d) { return !!Mt.HUMOR[d.id]; }));
       prueba('El progreso de los retos va de 0 a 1', Mt.RETOS.every(function (r) { const p = Mt.progresoReto(r.id); return p >= 0 && p <= 1; }));
       prueba('El paquete del editor se puede leer', (function () { try { return JSON.parse(Mt.exportarPaquete()).tipo === 'paquete-industry-art'; } catch (e) { return false; } })());
     }
     // V25 · Música, videojuegos, teatro y libros
     {
-      const Md = IA.medios;
+      const Md = ART.medios;
       prueba('Hay cuatro medios nuevos con su premio', Object.keys(Md.MED).length === 4 && Object.keys(Md.MED).every(function (k) { return !!Md.MED[k].premio; }));
       prueba('Los formatos de música suman 1', Math.abs(Md.formatosMusica(N.anio()).reduce(function (s, f) { return s + f.parte; }, 0) - 1) < 1e-6 || N.anio() < 1877);
       prueba('Las cuotas de las plataformas suman 1', N.anio() < 1972 || Math.abs(Md.plataformas().reduce(function (s, p) { return s + p.cuota; }, 0) - 1) < 1e-6);
@@ -214,21 +214,21 @@
     }
     // V24 · Mundo vivo y negocio
     {
-      const B = IA.banco;
-      prueba('Hay 80 eventos con decisiones', IA.eventos.EV.length === 80, IA.eventos.EV.length);
-      prueba('Cada evento tiene al menos dos opciones', IA.eventos.EV.every(function (e) { return e[5].length >= 2; }));
-      prueba('Hay al menos 50 inventos', IA.historia.INVENTOS.length >= 50, IA.historia.INVENTOS.length);
+      const B = ART.banco;
+      prueba('Hay 80 eventos con decisiones', ART.eventos.EV.length === 80, ART.eventos.EV.length);
+      prueba('Cada evento tiene al menos dos opciones', ART.eventos.EV.every(function (e) { return e[5].length >= 2; }));
+      prueba('Hay al menos 50 inventos', ART.historia.INVENTOS.length >= 50, ART.historia.INVENTOS.length);
       prueba('Hay al menos 30 construcciones', D.pisos.length + D.terrenos.length >= 30, D.pisos.length + D.terrenos.length);
       prueba('El puntaje de crédito va de 300 a 850', B.puntaje() >= 300 && B.puntaje() <= 850, B.puntaje());
       prueba('La quiebra tiene tres salidas', B.salidasQuiebra().length === 3);
-      prueba('Los hitos están en orden de fecha', IA.historia.HITOS.every(function (x, i, a) { return !i || (a[i - 1][0] * 400 + a[i - 1][1] * 32 + a[i - 1][2]) <= (x[0] * 400 + x[1] * 32 + x[2]); }));
-      prueba('El factor de guerras y crisis está acotado', IA.datos.regiones.every(function (r) { const f = IA.historia.factorMercado(r.id); return f >= 0.3 && f <= 1.15; }));
+      prueba('Los hitos están en orden de fecha', ART.historia.HITOS.every(function (x, i, a) { return !i || (a[i - 1][0] * 400 + a[i - 1][1] * 32 + a[i - 1][2]) <= (x[0] * 400 + x[1] * 32 + x[2]); }));
+      prueba('El factor de guerras y crisis está acotado', ART.datos.regiones.every(function (r) { const f = ART.historia.factorMercado(r.id); return f >= 0.3 && f <= 1.15; }));
       prueba('Ningún estudio quebrado sigue filmando obras nuevas', O.activas().every(function (o) { const e = N.S.estudios[o.est]; return !e.quebrado || o.t0 <= (e.quebrado - N.S.y0 + 1) * 52; }));
       prueba('El socio nunca tiene la mayoría', !N.S.socio || N.S.socio.parte < 0.5);
     }
     // V23 · Franquicias, TV y streaming
     {
-      const TV = IA.tv, F = IA.franquicias;
+      const TV = ART.tv, F = ART.franquicias;
       const b1 = TV.aplicar({ gen: ['Drama'] }, { fmt: 'telenovela', eps: 999 }), b2 = TV.aplicar({ gen: ['Drama'] }, { fmt: 'miniserie', eps: 1 });
       prueba('Una temporada va de 2 a 300 episodios', b1.tv.eps === 300 && b2.tv.eps === 2, b1.tv.eps + ' / ' + b2.tv.eps);
       const b3 = TV.aplicar({ gen: ['Drama'], min: 500 }, { fmt: 'vivo' }), b4 = TV.aplicar({ gen: ['Drama'], min: 1 }, { fmt: 'vivo' });
@@ -237,12 +237,12 @@
       prueba('El reboot baja la fatiga y la secuela la sube', F.camino('reboot').fat < 0 && F.camino('secuela').fat > 0);
       prueba('El horario familiar multa el contenido para adultos', TV.multable({ clas: 'R' }) && !TV.multable({ clas: 'G' }) && TV.FRANJAS.filter(function (x) { return x.fam; }).length >= 2);
       prueba('La parrilla tiene 7 días y 6 franjas', TV.DIAS.length === 7 && TV.FRANJAS.length === 6);
-      prueba('La plataforma tiene tres planes', IA.streaming.PLANES.length === 3);
+      prueba('La plataforma tiene tres planes', ART.streaming.PLANES.length === 3);
       const vivas = F.lista();
       prueba('Toda franquicia viva tiene al menos una obra y un canon', vivas.every(function (f) { return f.o.length >= 1 && f.cont.length >= 1; }), vivas.length);
       prueba('El efecto de la franquicia en el deseo está acotado', N.S.obras.every(function (o) { const v = F.bonoDeseo(o); return v >= -15 && v <= 18; }));
       // Dinero y matemática
-      const NGc = IA.negocio, uh = N.S.fin.hist[N.S.fin.hist.length - 1];
+      const NGc = ART.negocio, uh = N.S.fin.hist[N.S.fin.hist.length - 1];
       prueba('El impuesto es el 25 % de la utilidad operativa del año', !uh || Math.abs(Math.max(0, uh.util) * E.P.IMPUESTO - uh.imp) <= 2, uh ? uh.anio + ': ' + uh.util + ' → ' + uh.imp : '');
       prueba('Préstamos, socio y acciones son capital: mueven la caja pero no la utilidad', NGc.esCapital('prestamo') && NGc.esCapital('amortizacion') && NGc.esCapital('socio') && !NGc.esCapital('taquilla') &&
         NGc.total({ ing: { prestamo: 5, taquilla: 3 }, gas: {} }, 'ing') === 3 && NGc.total({ ing: { prestamo: 5, taquilla: 3 }, gas: {} }, 'ing', true) === 8);
@@ -251,33 +251,33 @@
     }
     // Inicio desde 1850 y tipo de industria (en una partida aparte; al final se vuelve a la de antes)
     {
-      const antes = N.S, Md = IA.medios;
+      const antes = N.S, Md = ART.medios;
       prueba('Cada industria existe desde su año y tiene efecto', D.industrias.every(function (x) { return x.desde >= 1850 && x.efecto && x.meds; }) && D.industria('Teatro').desde === 1850 && D.industria('Videojuegos').desde === 1972);
-      IA.juego.nuevaPartida({ semilla: 'reglas-1850', anio: 1850, bot: true, industria: 'Cine' });
+      ART.juego.nuevaPartida({ semilla: 'reglas-1850', anio: 1850, bot: true, industria: 'Cine' });
       const e0 = N.S.estudios[0];
-      prueba('Se puede empezar en 1850; sin cine, la industria pasa a Teatro y no hay plató', IA.juego.ANIO_MIN === 1850 && N.anio() === 1850 && e0.industria === 'Teatro' && e0.pisos.join() === 'oficinas');
-      prueba('Antes de 1895 no se puede iniciar una película', /1895/.test(IA.juego.puedeIniciar({ gen: ['Drama'] })));
+      prueba('Se puede empezar en 1850; sin cine, la industria pasa a Teatro y no hay plató', ART.juego.ANIO_MIN === 1850 && N.anio() === 1850 && e0.industria === 'Teatro' && e0.pisos.join() === 'oficinas');
+      prueba('Antes de 1895 no se puede iniciar una película', /1895/.test(ART.juego.puedeIniciar({ gen: ['Drama'] })));
       prueba('El teatro y los libros sí se pueden producir en 1850', Md.disponible('teatro') && Md.disponible('libros') && !Md.disponible('musica'));
       prueba('La industria Teatro da +1 obra a la vez en teatro y 15 % menos de costo', Md.capacidad('teatro') === Md.capacidad('libros') + 1 &&
-        Math.abs(Md.borrador('teatro', { esc: 1 }).pp / (IA.mundo.aEpoca(4e7, 1850) * 0.015 * 0.85) - 1) < 0.01);
-      for (let i = 0; i < 26; i++) IA.juego.avanzarSemana();
+        Math.abs(Md.borrador('teatro', { esc: 1 }).pp / (ART.mundo.aEpoca(4e7, 1850) * 0.015 * 0.85) - 1) < 0.01);
+      for (let i = 0; i < 26; i++) ART.juego.avanzarSemana();
       prueba('Los rivales no estrenan películas antes de 1895', N.S.obras.every(function (o) { return o.est === 0; }) && N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }).length >= 5);
-      prueba('El capital recomendado alcanza para una obra de teatro chica', IA.juego.capitalRecomendado(1850) >= 1e6 && IA.juego.capitalRecomendado(1900) === 2.5e5);
-      N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
+      prueba('El capital recomendado alcanza para una obra de teatro chica', ART.juego.capitalRecomendado(1850) >= 1e6 && ART.juego.capitalRecomendado(1900) === 2.5e5);
+      N.S = antes; ART.obras.reindexar(); ART.talentos.reindexar();
     }
     // V36: obras libres con sus personajes, avatar en tus obras, teatros propios, letrero, ciudades y aspecto
     {
-      const antes = N.S, Md = IA.medios;
+      const antes = N.S, Md = ART.medios;
       prueba('Las 82 obras libres tienen sinopsis y personajes de siempre', [...Array(82).keys()].every(function (i) { const c = X.canon(X.material('dp' + (i + 1))); return c && c.sin && c.pj.length >= 3 && c.pj.some(function (p) { return p.i === 'protagonista'; }); }));
-      IA.juego.nuevaPartida({ semilla: 'reglas-36', anio: 1990, bot: true, avatar: { nombre: 'Ana', sexo: 'F', edad: 30, aspecto: { piel: 99, pelo: -3, gafas: 1 } } });
-      IA.carrera.iniciar({ modo: 'dueno', oficio: 'direccion' });
+      ART.juego.nuevaPartida({ semilla: 'reglas-36', anio: 1990, bot: true, avatar: { nombre: 'Ana', sexo: 'F', edad: 30, aspecto: { piel: 99, pelo: -3, gafas: 1 } } });
+      ART.carrera.iniciar({ modo: 'dueno', oficio: 'direccion' });
       const asp = N.S.avatar.asp;
       prueba('El aspecto del avatar se guarda dentro de sus rangos', asp && asp.piel === 7 && asp.pelo === 0 && asp.gafas === true);
-      const b = IA.obras.borrador(0, { gen: ['Romance'], escala: 1, completa: true });
+      const b = ART.obras.borrador(0, { gen: ['Romance'], escala: 1, completa: true });
       I.usarMaterial(b, 'dp8', 1990); I.generarPersonajes(b);
       prueba('Romeo y Julieta trae a Romeo y a Julieta', b.pj.some(function (p) { return p.n === 'Romeo'; }) && b.pj.some(function (p) { return p.n === 'Julieta'; }) && /Verona/.test(I.sinopsis(b)));
-      const av = IA.carrera.talentoAvatar();
-      prueba('Tu avatar es un talento tuyo: trabaja gratis y acepta tus obras', av && av.jugador && T.tarifaPara(av, 0) === 0 && T.negociar(av, { est: 0, rol: 'direccion' }).estado === 'acepta' && IA.carrera.oficiosAvatar().indexOf('interprete') >= 0);
+      const av = ART.carrera.talentoAvatar();
+      prueba('Tu avatar es un talento tuyo: trabaja gratis y acepta tus obras', av && av.jugador && T.tarifaPara(av, 0) === 0 && T.negociar(av, { est: 0, rol: 'direccion' }).estado === 'acepta' && ART.carrera.oficiosAvatar().indexOf('interprete') >= 0);
       prueba('Como dueño, tu avatar no trabaja para los rivales', !T.disponible(av, 1) && T.disponible(av, 0));
       const caja0 = N.S.estudios[0].caja = 1e12;
       prueba('Se compra un teatro y queda en tu lista', Md.comprarTeatro('mediana') === '' && Md.teatros().length === 1 && N.S.estudios[0].caja < caja0);
@@ -285,12 +285,12 @@
       Md.semana();
       prueba('Un teatro libre se alquila y deja dinero cada semana', (N.S.fin.mes.ing.alquilerTeatros || 0) > ing0);
       prueba('Se puede vender un teatro propio', Md.venderTeatro(Md.teatros()[0].id) === '' && Md.teatros().length === 0);
-      prueba('El letrero usa el tipo de letra elegido (cada una distinta)', new Set([...Array(20).keys()].map(function (f) { return IA.arte.fuenteLetra(f, 20); })).size === 20);
+      prueba('El letrero usa el tipo de letra elegido (cada una distinta)', new Set([...Array(20).keys()].map(function (f) { return ART.arte.fuenteLetra(f, 20); })).size === 20);
       prueba('Hay 40 ciudades o más para empezar, todas en países del juego', D.regionesInicio.length >= 40 && D.regionesInicio.every(function (r) { return !r.pais || D.pais(r.pais); }));
-      prueba('Cada rival activo se puede comprar o explica por qué no', N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }).every(function (e) { return typeof IA.imperio.puedeComprar(e.id) === 'string'; }));
-      N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
+      prueba('Cada rival activo se puede comprar o explica por qué no', N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }).every(function (e) { return typeof ART.imperio.puedeComprar(e.id) === 'string'; }));
+      N.S = antes; ART.obras.reindexar(); ART.talentos.reindexar();
     }
     return r;
   }
-  IA.pruebas.reglas = reglas;
+  ART.pruebas.reglas = reglas;
 })();
