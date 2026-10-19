@@ -29,7 +29,7 @@ ART.distribucion = (function () {
   function abrir(id, semana) {
     const o = O.porId(+id);
     if (!o) return;
-    pg.id = o.id; pg.t = semana && semana > N.S.t && semana <= N.S.t + 12 ? semana : 0; pg.nivM = 2;
+    pg.id = o.id; pg.t = semana && semana > N.S.t && semana <= N.S.t + 12 ? semana : 0; pg.nivM = 2; pg.tipo = 'equilibrada';
     pg.plan = ES.planPorDefecto(o, N.anio());
     U.abrirFicha(fichaPlan(), 'programar');
   }
@@ -93,6 +93,7 @@ ART.distribucion = (function () {
       const cs = E.canalesDe(anio);
       const ev = ES.evaluarMix(o, p.mix, anio);
       const f = ES.factorCampana(prueba);
+      h += '<h4 style="margin:10px 0 4px">Tipo de campaña</h4><div class="chips">' + TIPOS_CAMPANA.map(function (x) { return chip(x.nombre, 'plTipo', x.id, pg.tipo === x.id); }).join('') + '</div><p class="nota info">' + esc((TIPOS_CAMPANA.filter(function (x) { return x.id === pg.tipo; })[0] || TIPOS_CAMPANA[0]).texto) + ' Después puedes afinar cada canal.</p>';
       h += '<h4 style="margin:10px 0 4px">Mezcla de canales de ' + anio + '</h4><p class="nota info">Cada canal llega mejor a unas edades. Poner todo en uno rinde menos (rendimientos decrecientes).</p>';
       cs.forEach(function (ch) {
         const v = Math.round((p.mix && p.mix[ch.id] !== undefined ? p.mix[ch.id] : ch.peso) * 100);
@@ -140,6 +141,22 @@ ART.distribucion = (function () {
   ac('plVia', function (v) { pg.plan.via = v; refrescar(); });
   ac('plSemana', function (v) { pg.t = +v; refrescar(); });
   ac('plNivel', function (v) { pg.nivM = +v; refrescar(); });
+  // Tipos de campaña (como en la Final): cada uno reparte el gasto entre los canales de su público
+  const TIPOS_CAMPANA = [
+    { id: 'equilibrada', nombre: 'Equilibrada', texto: 'Un poco de todo, según lo que rinde cada canal en la época.', mas: [] },
+    { id: 'juvenil', nombre: 'Juvenil', texto: 'Redes, tráiler, móvil y streaming: llega a adolescentes y jóvenes.', mas: ['redes', 'influencers', 'trailer', 'movil', 'streaming', 'web', 'revistas'] },
+    { id: 'familiar', nombre: 'Familiar', texto: 'Televisión, carteles y promociones con marcas: llega a niños y familias.', mas: ['tv', 'cable', 'carteles', 'marcas'] },
+    { id: 'prestigio', nombre: 'De prestigio', texto: 'Prensa, revistas y gira de prensa: llega a adultos y a la crítica.', mas: ['prensa', 'revistas', 'gira', 'radio', 'correos'] },
+    { id: 'calle', nombre: 'De calle', texto: 'Carteles, radio y prensa: barata y cercana.', mas: ['carteles', 'radio', 'prensa'] },
+    { id: 'digital', nombre: 'Digital', texto: 'Internet, web interactiva, correos a fans y anuncios inmersivos.', mas: ['internet', 'web', 'correos', 'redes', 'inmersiva', 'neural'] },
+  ];
+  ac('plTipo', function (v) {
+    const tc = TIPOS_CAMPANA.filter(function (x) { return x.id === v; })[0];
+    if (!tc || !pg.plan) return;
+    pg.tipo = v; pg.plan.mix = {};
+    E.canalesDe(anioPlan()).forEach(function (c) { pg.plan.mix[c.id] = tc.mas.length ? (tc.mas.indexOf(c.id) >= 0 ? Math.min(2, c.peso * 2) : c.peso * 0.3) : c.peso; });
+    refrescar();
+  });
   ac('plReg', function (v, el) {
     const r = el.getAttribute('data-k');
     pg.plan.reg[r] = v;

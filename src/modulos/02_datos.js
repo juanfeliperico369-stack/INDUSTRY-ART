@@ -289,6 +289,14 @@ ART.datos = (function () {
     { id: 'internet', nombre: 'Internet', desde: 1995, hasta: 9999, peso: 1.0, alcance: 1.0, edades: [0.5, 1.2, 1.3, 1.0, 0.5] },
     { id: 'redes', nombre: 'Redes sociales', desde: 2006, hasta: 9999, peso: 1.4, alcance: 1.3, edades: [0.4, 1.5, 1.4, 0.9, 0.4] },
     { id: 'influencers', nombre: 'Creadores de contenido', desde: 2012, hasta: 9999, peso: 0.9, alcance: 1.1, edades: [0.8, 1.6, 1.3, 0.6, 0.2] },
+    // De la Final: más tipos de marketing para elegir
+    { id: 'marcas', nombre: 'Promociones con marcas', desde: 1930, hasta: 9999, peso: 0.6, alcance: 1.0, edades: [1.4, 1.3, 1.0, 0.8, 0.6] },
+    { id: 'gira', nombre: 'Gira mundial de prensa', desde: 1920, hasta: 9999, peso: 0.5, alcance: 0.9, edades: [0.6, 0.9, 1.1, 1.2, 1.1] },
+    { id: 'cable', nombre: 'TV por cable', desde: 1975, hasta: 9999, peso: 0.7, alcance: 1.0, edades: [1.0, 1.1, 1.1, 1.1, 0.9] },
+    { id: 'web', nombre: 'Web interactiva', desde: 1998, hasta: 9999, peso: 0.4, alcance: 0.8, edades: [0.6, 1.3, 1.2, 0.9, 0.4] },
+    { id: 'correos', nombre: 'Correos a fans', desde: 1997, hasta: 9999, peso: 0.3, alcance: 0.6, edades: [0.3, 0.9, 1.1, 1.1, 0.8] },
+    { id: 'movil', nombre: 'Anuncios en el móvil', desde: 2008, hasta: 9999, peso: 0.8, alcance: 1.2, edades: [0.6, 1.5, 1.4, 0.9, 0.5] },
+    { id: 'streaming', nombre: 'Anuncios en streaming', desde: 2010, hasta: 9999, peso: 0.8, alcance: 1.1, edades: [0.9, 1.3, 1.3, 1.0, 0.6] },
     { id: 'inmersiva', nombre: 'Publicidad inmersiva', desde: 2038, hasta: 9999, peso: 1.2, alcance: 1.3, edades: [0.8, 1.4, 1.3, 1.0, 0.6] },
     { id: 'neural', nombre: 'Anuncios sensoriales', desde: 2088, hasta: 9999, peso: 1.2, alcance: 1.4, edades: [0.5, 1.2, 1.3, 1.1, 0.8] },
   ];
