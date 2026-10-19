@@ -364,6 +364,7 @@ ART.ideas = (function () {
     // Los temas que escribiste para el material (o tu retoque de una obra libre) pasan a la adaptación
     const ret = N.S && N.S.edit && N.S.edit.pdo && N.S.edit.pdo[id], tems = (ret && ret.tem && ret.tem.length ? ret.tem : m.tem) || [];
     if (tems.length) b.tem = tems.filter(function (x) { return X.famTema[x]; }).slice(0, LIMITES.tem);
+    if (m.prob && m.prob.length) b.prob = m.prob.filter(function (x) { return X.famProblema[x]; }).slice(0, LIMITES.prob); // problemáticas de la obra
     b.derechos = costoDerechos(m, anio);
     if (m.grupo === 'tono' && !b.suave) {
       b.cont = Object.assign({}, contenidoDe(b));
