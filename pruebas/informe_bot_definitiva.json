@@ -1,0 +1,2412 @@
+{
+ "fecha": "2026-10-19",
+ "hasta": 2100,
+ "resultados": [
+  {
+   "estrategia": "prudente",
+   "desde": 1900,
+   "hasta": 2100,
+   "semilla": "bot-prudente-1900",
+   "obras": 12389,
+   "obrasJugador": 3821,
+   "multMediano": 2.0818338988020564,
+   "sobre5": 0.03834046331423036,
+   "pierden": 0.3567681007345226,
+   "multMedianoJugador": 2.5658026460126817,
+   "pierdenJugador": 0.15440984035592778,
+   "crecimiento30": 0.13351831774307832,
+   "crecimientoArranque": 0.6567227497951906,
+   "crecimientoTotal": 0.032435964583832355,
+   "crecimientoMediano": 0.016106576641362835,
+   "premiosJugador": 0.0035087719298245615,
+   "premiosTotal": 855,
+   "aniosAMajor": 17,
+   "cuotaMax": 0.1221,
+   "cuotaMedia": 0.07699899999999998,
+   "cajaFinal2025": 67064399836,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 613,
+   "ideas": {
+    "obras": 4045,
+    "material": 279,
+    "guion": 761,
+    "ia": 97,
+    "efectos": 1,
+    "aplaudidos": 0,
+    "repudiados": 1,
+    "clasificaciones": {
+     "16": 483,
+     "18": 55,
+     "PG-13": 2379,
+     "G": 419,
+     "PG": 589,
+     "N": 120
+    },
+    "adaptacionesRivales": 73
+   },
+   "produccion": {
+    "obras": 3821,
+    "metodos": {
+     "mixto": 1748,
+     "set": 1438,
+     "locacion": 583,
+     "practicos": 35,
+     "cgi": 17
+    },
+    "estilos": {
+     "clasico": 3737,
+     "documental": 24,
+     "contemplativo": 25,
+     "found": 35
+    },
+    "pruebas": {
+     "pulir": 1020,
+     "estrenar": 2400,
+     "reeditar": 378,
+     "regrabar": 19
+    },
+    "sets": 1609,
+    "externos": 0,
+    "dilemas": 603,
+    "sobrecosto": 0.07699994316069647
+   },
+   "lanzamiento": {
+    "obras": 4027,
+    "directos": 0,
+    "oro": 917,
+    "platino": 548,
+    "diamante": 389,
+    "reestrenos": 52,
+    "parteVentanas": 0.4994142094158986,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2800162533395307,
+    "sobre90": 0.005244755244755245,
+    "perfectos": 0,
+    "vivos": 1144,
+    "ninos": 11,
+    "exclusivos": 5,
+    "relaciones": 495,
+    "parejas": 23,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 13.201701923078284,
+    "peorSemana": 109.90000000037253,
+    "sAnio": 0.6864885000000708,
+    "peorAnio": 1.4667999999998138,
+    "guardado150": 11587273,
+    "guardadoFinal": 14520212
+   },
+   "guardado150": {
+    "json": 11587273,
+    "comprimido": 2038889
+   },
+   "guardadoFinal": {
+    "json": 14520212,
+    "comprimido": 2524271,
+    "comp": "gzip"
+   },
+   "memoria": 212000000,
+   "medios": {
+    "libros": {
+     "n": 178,
+     "mediana": 2.3964788016808027,
+     "pierden": 0.1404494382022472
+    },
+    "musica": {
+     "n": 475,
+     "mediana": 2.590293755247887,
+     "pierden": 0.08210526315789474
+    },
+    "teatro": {
+     "n": 330,
+     "mediana": 1.5133511743003607,
+     "pierden": 0.22424242424242424
+    },
+    "juegos": {
+     "n": 39,
+     "mediana": 1.941351168961475,
+     "pierden": 0.07692307692307693
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "prudente",
+   "desde": 2000,
+   "hasta": 2100,
+   "semilla": "bot-prudente-2000",
+   "obras": 6005,
+   "obrasJugador": 1883,
+   "multMediano": 2.1427384513127286,
+   "sobre5": 0.03630308076602831,
+   "pierden": 0.351706910907577,
+   "multMedianoJugador": 2.5170349570834554,
+   "pierdenJugador": 0.1571959638874137,
+   "crecimiento30": 0.13282987160507376,
+   "crecimientoArranque": 0.09448498740596523,
+   "crecimientoTotal": 0.054929837741782395,
+   "crecimientoMediano": 0.027876213424573804,
+   "premiosJugador": 0,
+   "premiosTotal": 495,
+   "aniosAMajor": 17,
+   "cuotaMax": 0.103,
+   "cuotaMedia": 0.076073,
+   "cajaFinal2025": 75885700874,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 396,
+   "ideas": {
+    "obras": 2024,
+    "material": 146,
+    "guion": 355,
+    "ia": 81,
+    "efectos": 1,
+    "aplaudidos": 1,
+    "repudiados": 0,
+    "clasificaciones": {
+     "16": 227,
+     "18": 51,
+     "PG-13": 1069,
+     "G": 289,
+     "PG": 339,
+     "N": 49
+    },
+    "adaptacionesRivales": 73
+   },
+   "produccion": {
+    "obras": 1883,
+    "metodos": {
+     "locacion": 287,
+     "set": 814,
+     "mixto": 772,
+     "cgi": 10
+    },
+    "estilos": {
+     "clasico": 1824,
+     "found": 33,
+     "contemplativo": 17,
+     "documental": 9
+    },
+    "pruebas": {
+     "estrenar": 1165,
+     "reeditar": 187,
+     "pulir": 521,
+     "regrabar": 9
+    },
+    "sets": 881,
+    "externos": 0,
+    "dilemas": 297,
+    "sobrecosto": 0.08203427062319402
+   },
+   "lanzamiento": {
+    "obras": 2006,
+    "directos": 1,
+    "oro": 874,
+    "platino": 440,
+    "diamante": 173,
+    "reestrenos": 3,
+    "parteVentanas": 0.5039231111225503,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.28656928487014505,
+    "sobre90": 0.001762114537444934,
+    "perfectos": 0,
+    "vivos": 1135,
+    "ninos": 11,
+    "exclusivos": 5,
+    "relaciones": 517,
+    "parejas": 21,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 11.68326923076959,
+    "peorSemana": 63.40000000037253,
+    "sAnio": 0.6075300000000187,
+    "peorAnio": 1.0063000000007452,
+    "guardado150": null,
+    "guardadoFinal": 9685868
+   },
+   "guardado150": null,
+   "guardadoFinal": {
+    "json": 9685868,
+    "comprimido": 1761761,
+    "comp": "gzip"
+   },
+   "memoria": 76600000,
+   "medios": {
+    "juegos": {
+     "n": 31,
+     "mediana": 1.8462691194327325,
+     "pierden": 0.0967741935483871
+    },
+    "libros": {
+     "n": 128,
+     "mediana": 0.9686309498677331,
+     "pierden": 0.265625
+    },
+    "musica": {
+     "n": 291,
+     "mediana": 1.4576166268105923,
+     "pierden": 0.13058419243986255
+    },
+    "teatro": {
+     "n": 274,
+     "mediana": 1.0887344527595186,
+     "pierden": 0.14963503649635038
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 1900,
+   "hasta": 2100,
+   "semilla": "bot-normal-1900",
+   "obras": 12024,
+   "obrasJugador": 3277,
+   "multMediano": 2.009504181981683,
+   "sobre5": 0.0374251497005988,
+   "pierden": 0.38772455089820357,
+   "multMedianoJugador": 2.602426705276987,
+   "pierdenJugador": 0.16295392126945377,
+   "crecimiento30": 0.1615783386630254,
+   "crecimientoArranque": 0.5254001730151456,
+   "crecimientoTotal": 0.036866145692668884,
+   "crecimientoMediano": 0.019041470679274308,
+   "premiosJugador": 0.022222222222222223,
+   "premiosTotal": 855,
+   "aniosAMajor": 15,
+   "cuotaMax": 0.1504,
+   "cuotaMedia": 0.08957250000000005,
+   "cajaFinal2025": 66244513052,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 759,
+   "ideas": {
+    "obras": 3476,
+    "material": 236,
+    "guion": 631,
+    "ia": 267,
+    "efectos": 46,
+    "aplaudidos": 30,
+    "repudiados": 16,
+    "clasificaciones": {
+     "16": 404,
+     "18": 48,
+     "PG-13": 2042,
+     "G": 404,
+     "PG": 483,
+     "N": 95
+    },
+    "adaptacionesRivales": 101
+   },
+   "produccion": {
+    "obras": 3277,
+    "metodos": {
+     "set": 1245,
+     "locacion": 530,
+     "mixto": 1162,
+     "practicos": 124,
+     "cgi": 216
+    },
+    "estilos": {
+     "clasico": 3106,
+     "espectaculo": 90,
+     "contemplativo": 31,
+     "documental": 16,
+     "found": 34
+    },
+    "pruebas": {
+     "estrenar": 2880,
+     "pulir": 339,
+     "reeditar": 51,
+     "regrabar": 5
+    },
+    "sets": 1240,
+    "externos": 0,
+    "dilemas": 553,
+    "sobrecosto": 0.058000009230309235
+   },
+   "lanzamiento": {
+    "obras": 3460,
+    "directos": 0,
+    "oro": 704,
+    "platino": 665,
+    "diamante": 540,
+    "reestrenos": 129,
+    "parteVentanas": 0.5187992769045163,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2691703673869847,
+    "sobre90": 0.00441696113074205,
+    "perfectos": 0,
+    "vivos": 1132,
+    "ninos": 11,
+    "exclusivos": 2,
+    "relaciones": 463,
+    "parejas": 15,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 12.655250000000054,
+    "peorSemana": 82.90000000037253,
+    "sAnio": 0.6580730000000028,
+    "peorAnio": 1.243300000000745,
+    "guardado150": 11038400,
+    "guardadoFinal": 13741666
+   },
+   "guardado150": {
+    "json": 11038400,
+    "comprimido": 1945679
+   },
+   "guardadoFinal": {
+    "json": 13741666,
+    "comprimido": 2379473,
+    "comp": "gzip"
+   },
+   "memoria": 212000000,
+   "medios": {
+    "libros": {
+     "n": 177,
+     "mediana": 2.0591519291910307,
+     "pierden": 0.14689265536723164
+    },
+    "musica": {
+     "n": 514,
+     "mediana": 2.7058502980382397,
+     "pierden": 0.07587548638132295
+    },
+    "teatro": {
+     "n": 343,
+     "mediana": 1.2716773393219256,
+     "pierden": 0.21282798833819241
+    },
+    "juegos": {
+     "n": 38,
+     "mediana": 1.4560152234059123,
+     "pierden": 0.07894736842105263
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 2000,
+   "hasta": 2100,
+   "semilla": "bot-normal-2000",
+   "obras": 6100,
+   "obrasJugador": 2034,
+   "multMediano": 2.078603590673648,
+   "sobre5": 0.03885245901639344,
+   "pierden": 0.35508196721311475,
+   "multMedianoJugador": 2.4291251696436635,
+   "pierdenJugador": 0.1902654867256637,
+   "crecimiento30": 0.13234361583217402,
+   "crecimientoArranque": 0.08092421032508978,
+   "crecimientoTotal": 0.05438364027014564,
+   "crecimientoMediano": 0.02616145786070767,
+   "premiosJugador": 0.026262626262626262,
+   "premiosTotal": 495,
+   "aniosAMajor": 15,
+   "cuotaMax": 0.1591,
+   "cuotaMedia": 0.10560900000000001,
+   "cajaFinal2025": 63939869393,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 351,
+   "ideas": {
+    "obras": 2203,
+    "material": 184,
+    "guion": 347,
+    "ia": 206,
+    "efectos": 24,
+    "aplaudidos": 16,
+    "repudiados": 7,
+    "clasificaciones": {
+     "16": 252,
+     "18": 48,
+     "PG": 296,
+     "PG-13": 1291,
+     "G": 258,
+     "N": 57,
+     "R": 1
+    },
+    "adaptacionesRivales": 80
+   },
+   "produccion": {
+    "obras": 2034,
+    "metodos": {
+     "mixto": 843,
+     "set": 760,
+     "locacion": 356,
+     "cgi": 75
+    },
+    "estilos": {
+     "clasico": 1893,
+     "found": 44,
+     "espectaculo": 68,
+     "documental": 10,
+     "contemplativo": 19
+    },
+    "pruebas": {
+     "estrenar": 1776,
+     "pulir": 220,
+     "regrabar": 1,
+     "reeditar": 34
+    },
+    "sets": 947,
+    "externos": 0,
+    "dilemas": 373,
+    "sobrecosto": 0.0569999955181717
+   },
+   "lanzamiento": {
+    "obras": 2181,
+    "directos": 1,
+    "oro": 765,
+    "platino": 680,
+    "diamante": 366,
+    "reestrenos": 40,
+    "parteVentanas": 0.5261143490638437,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.26401714927775755,
+    "sobre90": 0.0017497812773403325,
+    "perfectos": 0,
+    "vivos": 1143,
+    "ninos": 11,
+    "exclusivos": 4,
+    "relaciones": 522,
+    "parejas": 27,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 11.125134615386441,
+    "peorSemana": 60.39999999944121,
+    "sAnio": 0.578507000000095,
+    "peorAnio": 0.97,
+    "guardado150": null,
+    "guardadoFinal": 10320961
+   },
+   "guardado150": null,
+   "guardadoFinal": {
+    "json": 10320961,
+    "comprimido": 1879351,
+    "comp": "gzip"
+   },
+   "memoria": 68000000,
+   "medios": {
+    "musica": {
+     "n": 322,
+     "mediana": 1.2513039686967609,
+     "pierden": 0.10248447204968944
+    },
+    "teatro": {
+     "n": 279,
+     "mediana": 1.2137712074840348,
+     "pierden": 0.2616487455197133
+    },
+    "libros": {
+     "n": 115,
+     "mediana": 1.1594712457703151,
+     "pierden": 0.16521739130434782
+    },
+    "juegos": {
+     "n": 32,
+     "mediana": 1.9120462364553512,
+     "pierden": 0.0625
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 1900,
+   "hasta": 2100,
+   "semilla": "bot-agresiva-1900",
+   "obras": 12572,
+   "obrasJugador": 3275,
+   "multMediano": 2.0090540149638945,
+   "sobre5": 0.04104358892777601,
+   "pierden": 0.383391664015272,
+   "multMedianoJugador": 2.963311158199958,
+   "pierdenJugador": 0.10076335877862595,
+   "crecimiento30": 0.15416300439707364,
+   "crecimientoArranque": 0.6773246460597875,
+   "crecimientoTotal": 0.033815809343996195,
+   "crecimientoMediano": 0.013756976321996683,
+   "premiosJugador": 0.12280701754385964,
+   "premiosTotal": 855,
+   "aniosAMajor": 15,
+   "cuotaMax": 0.2128,
+   "cuotaMedia": 0.1345025,
+   "cajaFinal2025": 97807787352,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 663,
+   "ideas": {
+    "obras": 3441,
+    "material": 234,
+    "guion": 659,
+    "ia": 402,
+    "efectos": 73,
+    "aplaudidos": 41,
+    "repudiados": 30,
+    "clasificaciones": {
+     "16": 460,
+     "18": 49,
+     "PG-13": 1947,
+     "PG": 513,
+     "G": 360,
+     "N": 112
+    },
+    "adaptacionesRivales": 105
+   },
+   "produccion": {
+    "obras": 3275,
+    "metodos": {
+     "mixto": 1003,
+     "locacion": 536,
+     "set": 1290,
+     "practicos": 133,
+     "cgi": 313
+    },
+    "estilos": {
+     "clasico": 3008,
+     "espectaculo": 188,
+     "documental": 6,
+     "contemplativo": 33,
+     "found": 40
+    },
+    "pruebas": {
+     "estrenar": 3155,
+     "pulir": 94,
+     "reeditar": 25
+    },
+    "sets": 1167,
+    "externos": 0,
+    "dilemas": 555,
+    "sobrecosto": 0.04500044005730919
+   },
+   "lanzamiento": {
+    "obras": 3424,
+    "directos": 0,
+    "oro": 273,
+    "platino": 737,
+    "diamante": 1007,
+    "reestrenos": 139,
+    "parteVentanas": 0.5390028936771455,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.26072554936566456,
+    "sobre90": 0.003527336860670194,
+    "perfectos": 0,
+    "vivos": 1134,
+    "ninos": 11,
+    "exclusivos": 3,
+    "relaciones": 477,
+    "parejas": 21,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 12.175500000000824,
+    "peorSemana": 74,
+    "sAnio": 0.6331260000000428,
+    "peorAnio": 1.3009000000003725,
+    "guardado150": 11220382,
+    "guardadoFinal": 14160037
+   },
+   "guardado150": {
+    "json": 11220382,
+    "comprimido": 1961632
+   },
+   "guardadoFinal": {
+    "json": 14160037,
+    "comprimido": 2442058,
+    "comp": "gzip"
+   },
+   "memoria": 212000000,
+   "medios": {
+    "libros": {
+     "n": 182,
+     "mediana": 1.95659860543288,
+     "pierden": 0.12087912087912088
+    },
+    "musica": {
+     "n": 519,
+     "mediana": 2.683018524500608,
+     "pierden": 0.07707129094412331
+    },
+    "teatro": {
+     "n": 354,
+     "mediana": 1.4827507532222022,
+     "pierden": 0.2570621468926554
+    },
+    "juegos": {
+     "n": 50,
+     "mediana": 2.265472263306779,
+     "pierden": 0.04
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 2000,
+   "hasta": 2100,
+   "semilla": "bot-agresiva-2000",
+   "obras": 6167,
+   "obrasJugador": 1908,
+   "multMediano": 2.024822156520811,
+   "sobre5": 0.03843035511593968,
+   "pierden": 0.3799254094373277,
+   "multMedianoJugador": 2.591791855443428,
+   "pierdenJugador": 0.1441299790356394,
+   "crecimiento30": 0.21787485473227175,
+   "crecimientoArranque": -0.09508858035847323,
+   "crecimientoTotal": 0.08163225094160476,
+   "crecimientoMediano": 0.027514015845625073,
+   "premiosJugador": 0.09090909090909091,
+   "premiosTotal": 495,
+   "aniosAMajor": 21,
+   "cuotaMax": 0.2184,
+   "cuotaMedia": 0.14345699999999997,
+   "cajaFinal2025": 107440303818,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 375,
+   "ideas": {
+    "obras": 2040,
+    "material": 151,
+    "guion": 342,
+    "ia": 474,
+    "efectos": 92,
+    "aplaudidos": 56,
+    "repudiados": 34,
+    "clasificaciones": {
+     "16": 242,
+     "18": 49,
+     "PG-13": 1153,
+     "PG": 308,
+     "G": 236,
+     "N": 52
+    },
+    "adaptacionesRivales": 94
+   },
+   "produccion": {
+    "obras": 1908,
+    "metodos": {
+     "mixto": 567,
+     "locacion": 295,
+     "set": 764,
+     "cgi": 282
+    },
+    "estilos": {
+     "clasico": 1759,
+     "documental": 6,
+     "found": 29,
+     "espectaculo": 97,
+     "contemplativo": 17
+    },
+    "pruebas": {
+     "estrenar": 1828,
+     "reeditar": 14,
+     "pulir": 66
+    },
+    "sets": 811,
+    "externos": 0,
+    "dilemas": 305,
+    "sobrecosto": 0.04800015156902826
+   },
+   "lanzamiento": {
+    "obras": 2020,
+    "directos": 3,
+    "oro": 351,
+    "platino": 878,
+    "diamante": 609,
+    "reestrenos": 66,
+    "parteVentanas": 0.5426387060847531,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2629110618377836,
+    "sobre90": 0.0017683465959328027,
+    "perfectos": 0,
+    "vivos": 1131,
+    "ninos": 11,
+    "exclusivos": 1,
+    "relaciones": 527,
+    "parejas": 18,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 10.585403846153774,
+    "peorSemana": 63.59999999962747,
+    "sAnio": 0.5504409999999963,
+    "peorAnio": 0.874,
+    "guardado150": null,
+    "guardadoFinal": 10189288
+   },
+   "guardado150": null,
+   "guardadoFinal": {
+    "json": 10189288,
+    "comprimido": 1844430,
+    "comp": "gzip"
+   },
+   "memoria": 86400000,
+   "medios": {
+    "libros": {
+     "n": 123,
+     "mediana": 1.6123252907245906,
+     "pierden": 0.13821138211382114
+    },
+    "musica": {
+     "n": 267,
+     "mediana": 1.1188783966831537,
+     "pierden": 0.15355805243445692
+    },
+    "juegos": {
+     "n": 30,
+     "mediana": 2.0088637976081536,
+     "pierden": 0.13333333333333333
+    },
+    "teatro": {
+     "n": 266,
+     "mediana": 1.1299283143947843,
+     "pierden": 0.18421052631578946
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "prudente",
+   "desde": 1900,
+   "hasta": 2100,
+   "semilla": "b2-prudente-1900",
+   "obras": 13281,
+   "obrasJugador": 3800,
+   "multMediano": 2.1045395966100564,
+   "sobre5": 0.04201490851592501,
+   "pierden": 0.35298546796174984,
+   "multMedianoJugador": 2.6085382339039045,
+   "pierdenJugador": 0.14578947368421052,
+   "crecimiento30": 0.16069629247005612,
+   "crecimientoArranque": 0.5420434222604873,
+   "crecimientoTotal": 0.03178534979174574,
+   "crecimientoMediano": 0.02009913705467281,
+   "premiosJugador": 0,
+   "premiosTotal": 855,
+   "aniosAMajor": 15,
+   "cuotaMax": 0.1166,
+   "cuotaMedia": 0.07612849999999996,
+   "cajaFinal2025": 29036473965,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 707,
+   "ideas": {
+    "obras": 4021,
+    "material": 299,
+    "guion": 704,
+    "ia": 96,
+    "efectos": 8,
+    "aplaudidos": 7,
+    "repudiados": 1,
+    "clasificaciones": {
+     "16": 496,
+     "18": 76,
+     "PG-13": 2223,
+     "G": 413,
+     "PG": 708,
+     "N": 105
+    },
+    "adaptacionesRivales": 117
+   },
+   "produccion": {
+    "obras": 3800,
+    "metodos": {
+     "mixto": 1656,
+     "locacion": 509,
+     "set": 1579,
+     "practicos": 31,
+     "cgi": 25
+    },
+    "estilos": {
+     "clasico": 3710,
+     "documental": 20,
+     "contemplativo": 27,
+     "found": 43
+    },
+    "pruebas": {
+     "pulir": 1066,
+     "estrenar": 2322,
+     "reeditar": 399,
+     "regrabar": 11
+    },
+    "sets": 1645,
+    "externos": 0,
+    "dilemas": 577,
+    "sobrecosto": 0.08399999559758675
+   },
+   "lanzamiento": {
+    "obras": 4006,
+    "directos": 0,
+    "oro": 933,
+    "platino": 531,
+    "diamante": 382,
+    "reestrenos": 44,
+    "parteVentanas": 0.5055916389882908,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2783047031430292,
+    "sobre90": 0.002626970227670753,
+    "perfectos": 0,
+    "vivos": 1142,
+    "ninos": 11,
+    "exclusivos": 0,
+    "relaciones": 515,
+    "parejas": 29,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 13.158874999999535,
+    "peorSemana": 108.70000000018626,
+    "sAnio": 0.6842614999999758,
+    "peorAnio": 1.5864000000003726,
+    "guardado150": 11664476,
+    "guardadoFinal": 14932457
+   },
+   "guardado150": {
+    "json": 11664476,
+    "comprimido": 2042973
+   },
+   "guardadoFinal": {
+    "json": 14932457,
+    "comprimido": 2610148,
+    "comp": "gzip"
+   },
+   "memoria": 225000000,
+   "medios": {
+    "libros": {
+     "n": 212,
+     "mediana": 2.762471623128869,
+     "pierden": 0.10849056603773585
+    },
+    "musica": {
+     "n": 510,
+     "mediana": 2.599102005934304,
+     "pierden": 0.054901960784313725
+    },
+    "teatro": {
+     "n": 351,
+     "mediana": 1.5675622905118831,
+     "pierden": 0.24216524216524216
+    },
+    "juegos": {
+     "n": 52,
+     "mediana": 1.6731162142454952,
+     "pierden": 0.07692307692307693
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "prudente",
+   "desde": 2000,
+   "hasta": 2100,
+   "semilla": "b2-prudente-2000",
+   "obras": 6020,
+   "obrasJugador": 1840,
+   "multMediano": 2.091548047010197,
+   "sobre5": 0.04053156146179402,
+   "pierden": 0.37508305647840534,
+   "multMedianoJugador": 2.4621033328042206,
+   "pierdenJugador": 0.2048913043478261,
+   "crecimiento30": 0.13442273342299127,
+   "crecimientoArranque": 0.09476293963367222,
+   "crecimientoTotal": 0.05268479955708738,
+   "crecimientoMediano": 0.026318157169052503,
+   "premiosJugador": 0.00202020202020202,
+   "premiosTotal": 495,
+   "aniosAMajor": 18,
+   "cuotaMax": 0.12,
+   "cuotaMedia": 0.074023,
+   "cajaFinal2025": 62804758589,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 365,
+   "ideas": {
+    "obras": 1976,
+    "material": 137,
+    "guion": 317,
+    "ia": 91,
+    "efectos": 9,
+    "aplaudidos": 5,
+    "repudiados": 4,
+    "clasificaciones": {
+     "16": 236,
+     "18": 29,
+     "PG-13": 1134,
+     "PG": 319,
+     "N": 47,
+     "G": 211
+    },
+    "adaptacionesRivales": 99
+   },
+   "produccion": {
+    "obras": 1840,
+    "metodos": {
+     "set": 727,
+     "mixto": 796,
+     "locacion": 297,
+     "cgi": 20
+    },
+    "estilos": {
+     "found": 35,
+     "clasico": 1789,
+     "contemplativo": 11,
+     "documental": 5
+    },
+    "pruebas": {
+     "estrenar": 1119,
+     "reeditar": 184,
+     "pulir": 528,
+     "regrabar": 8
+    },
+    "sets": 831,
+    "externos": 0,
+    "dilemas": 330,
+    "sobrecosto": 0.08199990555896974
+   },
+   "lanzamiento": {
+    "obras": 1961,
+    "directos": 2,
+    "oro": 863,
+    "platino": 375,
+    "diamante": 157,
+    "reestrenos": 3,
+    "parteVentanas": 0.5055617759542286,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.28179776564691794,
+    "sobre90": 0.004366812227074236,
+    "perfectos": 0,
+    "vivos": 1145,
+    "ninos": 11,
+    "exclusivos": 3,
+    "relaciones": 528,
+    "parejas": 26,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 10.896653846154312,
+    "peorSemana": 73.40000000037253,
+    "sAnio": 0.5666260000000242,
+    "peorAnio": 0.9795,
+    "guardado150": null,
+    "guardadoFinal": 9743167
+   },
+   "guardado150": null,
+   "guardadoFinal": {
+    "json": 9743167,
+    "comprimido": 1775809,
+    "comp": "gzip"
+   },
+   "memoria": 68000000,
+   "medios": {
+    "musica": {
+     "n": 306,
+     "mediana": 1.4124725267864946,
+     "pierden": 0.09803921568627451
+    },
+    "libros": {
+     "n": 134,
+     "mediana": 1.166277680290239,
+     "pierden": 0.1865671641791045
+    },
+    "teatro": {
+     "n": 275,
+     "mediana": 1.2395986517799242,
+     "pierden": 0.14909090909090908
+    },
+    "juegos": {
+     "n": 30,
+     "mediana": 1.7236365336521848,
+     "pierden": 0.1
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 1900,
+   "hasta": 2100,
+   "semilla": "b2-normal-1900",
+   "obras": 13372,
+   "obrasJugador": 3343,
+   "multMediano": 1.9713362227236244,
+   "sobre5": 0.03410110679030811,
+   "pierden": 0.3948549207298833,
+   "multMedianoJugador": 2.574391994123724,
+   "pierdenJugador": 0.16542028118456475,
+   "crecimiento30": 0.14015630267875268,
+   "crecimientoArranque": 0.5892383802636323,
+   "crecimientoTotal": 0.03477237172309855,
+   "crecimientoMediano": 0.020266484035049936,
+   "premiosJugador": 0.011695906432748537,
+   "premiosTotal": 855,
+   "aniosAMajor": 16,
+   "cuotaMax": 0.1426,
+   "cuotaMedia": 0.08613250000000003,
+   "cajaFinal2025": 67984063783,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 702,
+   "ideas": {
+    "obras": 3559,
+    "material": 270,
+    "guion": 625,
+    "ia": 161,
+    "efectos": 12,
+    "aplaudidos": 6,
+    "repudiados": 6,
+    "clasificaciones": {
+     "16": 469,
+     "18": 49,
+     "PG": 645,
+     "PG-13": 1798,
+     "N": 94,
+     "G": 504
+    },
+    "adaptacionesRivales": 115
+   },
+   "produccion": {
+    "obras": 3343,
+    "metodos": {
+     "set": 1535,
+     "mixto": 1162,
+     "locacion": 536,
+     "practicos": 63,
+     "cgi": 47
+    },
+    "estilos": {
+     "clasico": 3199,
+     "espectaculo": 88,
+     "documental": 11,
+     "contemplativo": 19,
+     "found": 26
+    },
+    "pruebas": {
+     "estrenar": 2847,
+     "pulir": 432,
+     "reeditar": 62,
+     "regrabar": 1
+    },
+    "sets": 1361,
+    "externos": 0,
+    "dilemas": 534,
+    "sobrecosto": 0.05397763535022615
+   },
+   "lanzamiento": {
+    "obras": 3540,
+    "directos": 0,
+    "oro": 689,
+    "platino": 714,
+    "diamante": 485,
+    "reestrenos": 104,
+    "parteVentanas": 0.5178821310789784,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2596000328320929,
+    "sobre90": 0.00441696113074205,
+    "perfectos": 0,
+    "vivos": 1132,
+    "ninos": 11,
+    "exclusivos": 1,
+    "relaciones": 517,
+    "parejas": 22,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 12.708028846152683,
+    "peorSemana": 81.90000000037253,
+    "sAnio": 0.6608174999999396,
+    "peorAnio": 1.2482000000001863,
+    "guardado150": 11051763,
+    "guardadoFinal": 14146342
+   },
+   "guardado150": {
+    "json": 11051763,
+    "comprimido": 1954602
+   },
+   "guardadoFinal": {
+    "json": 14146342,
+    "comprimido": 2487057,
+    "comp": "gzip"
+   },
+   "memoria": 212000000,
+   "medios": {
+    "libros": {
+     "n": 184,
+     "mediana": 2.6130668912880424,
+     "pierden": 0.11413043478260869
+    },
+    "musica": {
+     "n": 485,
+     "mediana": 2.4369936543198163,
+     "pierden": 0.07628865979381444
+    },
+    "teatro": {
+     "n": 351,
+     "mediana": 1.6600867413060802,
+     "pierden": 0.21937321937321938
+    },
+    "juegos": {
+     "n": 44,
+     "mediana": 1.8430227802725676,
+     "pierden": 0.045454545454545456
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "normal",
+   "desde": 2000,
+   "hasta": 2100,
+   "semilla": "b2-normal-2000",
+   "obras": 6469,
+   "obrasJugador": 2045,
+   "multMediano": 2.0400582174617394,
+   "sobre5": 0.037100015458339776,
+   "pierden": 0.3706909877879116,
+   "multMedianoJugador": 2.4709619894290147,
+   "pierdenJugador": 0.17555012224938876,
+   "crecimiento30": 0.14944053138843794,
+   "crecimientoArranque": 0.06172373524625341,
+   "crecimientoTotal": 0.05692541906535875,
+   "crecimientoMediano": 0.022376965668985616,
+   "premiosJugador": 0.022222222222222223,
+   "premiosTotal": 495,
+   "aniosAMajor": 15,
+   "cuotaMax": 0.1482,
+   "cuotaMedia": 0.10673299999999993,
+   "cajaFinal2025": 66381356763,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 367,
+   "ideas": {
+    "obras": 2219,
+    "material": 145,
+    "guion": 379,
+    "ia": 213,
+    "efectos": 22,
+    "aplaudidos": 14,
+    "repudiados": 8,
+    "clasificaciones": {
+     "16": 251,
+     "18": 53,
+     "PG": 356,
+     "PG-13": 1232,
+     "G": 268,
+     "N": 58,
+     "R": 1
+    },
+    "adaptacionesRivales": 81
+   },
+   "produccion": {
+    "obras": 2045,
+    "metodos": {
+     "set": 829,
+     "mixto": 799,
+     "locacion": 353,
+     "cgi": 64
+    },
+    "estilos": {
+     "clasico": 1931,
+     "found": 41,
+     "documental": 11,
+     "espectaculo": 50,
+     "contemplativo": 12
+    },
+    "pruebas": {
+     "estrenar": 1766,
+     "reeditar": 38,
+     "pulir": 237,
+     "regrabar": 1
+    },
+    "sets": 938,
+    "externos": 0,
+    "dilemas": 373,
+    "sobrecosto": 0.050999831083911706
+   },
+   "lanzamiento": {
+    "obras": 2197,
+    "directos": 1,
+    "oro": 777,
+    "platino": 677,
+    "diamante": 345,
+    "reestrenos": 35,
+    "parteVentanas": 0.5248433664397668,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2687585841351069,
+    "sobre90": 0.0026362038664323375,
+    "perfectos": 0,
+    "vivos": 1138,
+    "ninos": 11,
+    "exclusivos": 3,
+    "relaciones": 543,
+    "parejas": 30,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 11.59144230769374,
+    "peorSemana": 59,
+    "sAnio": 0.6027550000000744,
+    "peorAnio": 1.0377000000001864,
+    "guardado150": null,
+    "guardadoFinal": 10503690
+   },
+   "guardado150": null,
+   "guardadoFinal": {
+    "json": 10503690,
+    "comprimido": 1919334,
+    "comp": "gzip"
+   },
+   "memoria": 72200000,
+   "medios": {
+    "libros": {
+     "n": 133,
+     "mediana": 1.6996631552939383,
+     "pierden": 0.12030075187969924
+    },
+    "musica": {
+     "n": 306,
+     "mediana": 1.4703726142480522,
+     "pierden": 0.1111111111111111
+    },
+    "teatro": {
+     "n": 276,
+     "mediana": 0.9642832245102507,
+     "pierden": 0.19202898550724637
+    },
+    "juegos": {
+     "n": 35,
+     "mediana": 2.4457957635968093,
+     "pierden": 0.05714285714285714
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 1900,
+   "hasta": 2100,
+   "semilla": "b2-agresiva-1900",
+   "obras": 12249,
+   "obrasJugador": 3231,
+   "multMediano": 2.0225618827879597,
+   "sobre5": 0.04245244509755899,
+   "pierden": 0.38239856314801207,
+   "multMedianoJugador": 2.9003358091146394,
+   "pierdenJugador": 0.11637264004952028,
+   "crecimiento30": 0.13948255414275823,
+   "crecimientoArranque": 0.7126581923878128,
+   "crecimientoTotal": 0.033517338443999956,
+   "crecimientoMediano": 0.022253314445970007,
+   "premiosJugador": 0.11228070175438597,
+   "premiosTotal": 855,
+   "aniosAMajor": 15,
+   "cuotaMax": 0.2082,
+   "cuotaMedia": 0.13153399999999993,
+   "cajaFinal2025": 114046682847,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 688,
+   "ideas": {
+    "obras": 3437,
+    "material": 256,
+    "guion": 626,
+    "ia": 379,
+    "efectos": 80,
+    "aplaudidos": 47,
+    "repudiados": 31,
+    "clasificaciones": {
+     "16": 450,
+     "18": 59,
+     "PG": 476,
+     "N": 105,
+     "PG-13": 2036,
+     "G": 310,
+     "R": 1
+    },
+    "adaptacionesRivales": 113
+   },
+   "produccion": {
+    "obras": 3231,
+    "metodos": {
+     "set": 1176,
+     "locacion": 536,
+     "mixto": 1064,
+     "practicos": 149,
+     "cgi": 306
+    },
+    "estilos": {
+     "clasico": 2995,
+     "espectaculo": 179,
+     "documental": 9,
+     "contemplativo": 21,
+     "found": 27
+    },
+    "pruebas": {
+     "pulir": 109,
+     "reeditar": 16,
+     "estrenar": 3100,
+     "regrabar": 1
+    },
+    "sets": 1102,
+    "externos": 0,
+    "dilemas": 536,
+    "sobrecosto": 0.04642898444855881
+   },
+   "lanzamiento": {
+    "obras": 3418,
+    "directos": 0,
+    "oro": 265,
+    "platino": 737,
+    "diamante": 968,
+    "reestrenos": 141,
+    "parteVentanas": 0.5344582231662631,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.2598064187468161,
+    "sobre90": 0.004420866489832007,
+    "perfectos": 0,
+    "vivos": 1131,
+    "ninos": 11,
+    "exclusivos": 5,
+    "relaciones": 486,
+    "parejas": 19,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 12.159874999998943,
+    "peorSemana": 77.79999999981374,
+    "sAnio": 0.632313499999945,
+    "peorAnio": 1.2867999999998136,
+    "guardado150": 10935817,
+    "guardadoFinal": 14164160
+   },
+   "guardado150": {
+    "json": 10935817,
+    "comprimido": 1902831
+   },
+   "guardadoFinal": {
+    "json": 14164160,
+    "comprimido": 2456778,
+    "comp": "gzip"
+   },
+   "memoria": 212000000,
+   "medios": {
+    "libros": {
+     "n": 175,
+     "mediana": 1.7694563610097733,
+     "pierden": 0.09142857142857143
+    },
+    "musica": {
+     "n": 499,
+     "mediana": 2.546556155792618,
+     "pierden": 0.08617234468937876
+    },
+    "teatro": {
+     "n": 307,
+     "mediana": 1.611520311723218,
+     "pierden": 0.28664495114006516
+    },
+    "juegos": {
+     "n": 36,
+     "mediana": 2.6830987968749875,
+     "pierden": 0.05555555555555555
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  },
+  {
+   "estrategia": "agresiva",
+   "desde": 2000,
+   "hasta": 2100,
+   "semilla": "b2-agresiva-2000",
+   "obras": 6095,
+   "obrasJugador": 2041,
+   "multMediano": 2.066215246506117,
+   "sobre5": 0.04298605414273995,
+   "pierden": 0.3775225594749795,
+   "multMedianoJugador": 2.7453771575880643,
+   "pierdenJugador": 0.14159725624693778,
+   "crecimiento30": 0.13410375153870202,
+   "crecimientoArranque": 0.1561447266687841,
+   "crecimientoTotal": 0.051127451513561795,
+   "crecimientoMediano": 0.025048984578240008,
+   "premiosJugador": 0.1393939393939394,
+   "premiosTotal": 495,
+   "aniosAMajor": 15,
+   "cuotaMax": 0.2162,
+   "cuotaMedia": 0.16402600000000003,
+   "cajaFinal2025": 94851911950,
+   "investigaciones": 0,
+   "quiebra": null,
+   "rescatesRivales": 393,
+   "ideas": {
+    "obras": 2193,
+    "material": 143,
+    "guion": 353,
+    "ia": 495,
+    "efectos": 83,
+    "aplaudidos": 46,
+    "repudiados": 37,
+    "clasificaciones": {
+     "16": 160,
+     "18": 48,
+     "PG-13": 1290,
+     "R": 2,
+     "N": 52,
+     "G": 270,
+     "PG": 371
+    },
+    "adaptacionesRivales": 77
+   },
+   "produccion": {
+    "obras": 2041,
+    "metodos": {
+     "mixto": 651,
+     "locacion": 354,
+     "set": 755,
+     "cgi": 281
+    },
+    "estilos": {
+     "clasico": 1870,
+     "found": 25,
+     "contemplativo": 6,
+     "espectaculo": 133,
+     "documental": 7
+    },
+    "pruebas": {
+     "estrenar": 1943,
+     "pulir": 72,
+     "reeditar": 23,
+     "regrabar": 2
+    },
+    "sets": 858,
+    "externos": 0,
+    "dilemas": 378,
+    "sobrecosto": 0.051000017061139546
+   },
+   "lanzamiento": {
+    "obras": 2173,
+    "directos": 0,
+    "oro": 322,
+    "platino": 821,
+    "diamante": 847,
+    "reestrenos": 75,
+    "parteVentanas": 0.5431242766417271,
+    "promos": 0
+   },
+   "talentos": {
+    "parteTalento": 0.26131796863021434,
+    "sobre90": 0.00699912510936133,
+    "perfectos": 0,
+    "vivos": 1143,
+    "ninos": 11,
+    "exclusivos": 3,
+    "relaciones": 512,
+    "parejas": 25,
+    "retiroMin": 70
+   },
+   "errores": [],
+   "rendimiento": {
+    "msSemana": 11.446903846152306,
+    "peorSemana": 93.5,
+    "sAnio": 0.5952389999999199,
+    "peorAnio": 1.0199000000013039,
+    "guardado150": null,
+    "guardadoFinal": 10439743
+   },
+   "guardado150": null,
+   "guardadoFinal": {
+    "json": 10439743,
+    "comprimido": 1873686,
+    "comp": "gzip"
+   },
+   "memoria": 81400000,
+   "medios": {
+    "musica": {
+     "n": 315,
+     "mediana": 1.1894360388923122,
+     "pierden": 0.17142857142857143
+    },
+    "juegos": {
+     "n": 41,
+     "mediana": 1.9577570277506742,
+     "pierden": 0.024390243902439025
+    },
+    "teatro": {
+     "n": 275,
+     "mediana": 1.3871317294371401,
+     "pierden": 0.2909090909090909
+    },
+    "libros": {
+     "n": 118,
+     "mediana": 1.1789867783654204,
+     "pierden": 0.11864406779661017
+    }
+   },
+   "pruebaGuardado": {
+    "guardar": true,
+    "cargar": true,
+    "error": ""
+   }
+  }
+ ],
+ "lento": {
+  "abrir": 0.993,
+  "semanaConPantalla": 53.61538461538461,
+  "porSeccion": {
+   "estudio": 53.61538461538461,
+   "obras": 41.46153846153846,
+   "mundo": 38.95384615380317,
+   "negocio": 59.976923076865766,
+   "talento": 21.484615384601057
+  },
+  "anioSinPantalla": 0.931
+ },
+ "reglas": [
+  {
+   "nombre": "Contenido nulo da G",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia leve da PG",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia moderada da PG-13",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Lenguaje rudo da 16",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Amor candente da NC-17 (17 años)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia gráfica da 18",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Violencia sangrienta da R",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Amor explícito da X",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La parte más fuerte manda",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Contenido moderado puede ir como N",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "N no admite contenido fuerte",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Lo de adultos dice «siempre sugerido»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Antes de 1968 la censura limita a 16",
+   "ok": true,
+   "detalle": "16"
+  },
+  {
+   "nombre": "Gore sube la clasificación a R",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico es siempre de adultos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico no existe antes de 1968",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico nunca con familia y juventud",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico nunca con públicos infantiles",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Erótico solo con personajes adultos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Con menores el amor no pasa de romántico",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Con niños en el elenco la obra no pasa de PG-13",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Drácula no es libre en 1982",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Drácula es libre desde 1983",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Comprar los derechos antes de liberarse cuesta",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La Odisea es libre siempre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay más de 200 obras de dominio público",
+   "ok": true,
+   "detalle": 236
+  },
+  {
+   "nombre": "La regla es ajustable (vida + 50 libera antes)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Inflación: ida y vuelta a dólares de hoy",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Inflación: un dólar de 1900 vale más de 25 de hoy",
+   "ok": true,
+   "detalle": "38.7"
+  },
+  {
+   "nombre": "Población 1900 ≈ 1.650 millones",
+   "ok": true,
+   "detalle": "1.65"
+  },
+  {
+   "nombre": "Población 2000 ≈ 6.150 millones",
+   "ok": true,
+   "detalle": "6.15"
+  },
+  {
+   "nombre": "Población 2024 ≈ 8.100 millones",
+   "ok": true,
+   "detalle": "8.16"
+  },
+  {
+   "nombre": "Listas completas: 300 temas o más, 300 subgéneros o más, 53 problemáticas, 34 ficciones",
+   "ok": true,
+   "detalle": "{\"temas\":364,\"subgeneros\":385,\"problematicas\":53,\"ficcion\":34,\"dominio\":236,\"arcos\":7,\"subarcos\":10}"
+  },
+  {
+   "nombre": "Más de 1.000 talentos vivos",
+   "ok": true,
+   "detalle": 1111
+  },
+  {
+   "nombre": "Nadie tiene todo en 100",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un 90 o más es raro (3 % o menos)",
+   "ok": true,
+   "detalle": "0.4 %"
+  },
+  {
+   "nombre": "Un cargo cuesta 20 de energía y se recuperan 10 al mes",
+   "ok": true,
+   "detalle": "80 → 100"
+  },
+  {
+   "nombre": "Nadie trabaja en más de 2 proyectos a la vez",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Nadie se retira antes de los 70",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los niños actores solo hacen obras hasta PG-13",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una estrella rechaza a un estudio sin fama",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Con porcentaje, el salario fijo baja",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El salario exclusivo sigue a la época (1,8 veces la tarifa)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las tarifas suben con la época, no con el presupuesto de la obra",
+   "ok": true,
+   "detalle": "9832 → 295648"
+  },
+  {
+   "nombre": "La academia no pasa de +5 por oficio",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las notas de los departamentos van de F a A+",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El CGI no existe antes de 1973",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "IMAX y 3D llegan en su año",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los incentivos de Colombia rigen desde 2013",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El reparto ideal del presupuesto suma 100 %",
+   "ok": true,
+   "detalle": "100 %"
+  },
+  {
+   "nombre": "Vestuario y efectos pesan en la calidad",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Quitarle presupuesto a un departamento le baja la nota",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Reusar un set abarata la producción y acorta la preproducción",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Rodar en un terreno propio es más barato",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una obra animada lleva diseño de arte en el equipo",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Pulir tras la prueba de público suma público y semanas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un dilema de rodaje aplica sus efectos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las festividades suben a su familia en su región",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El 1 de enero de 1850 fue martes",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Pascua de 2024: 31 de marzo",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Año Nuevo chino de 2024: 10 de febrero (luna nueva)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Acción de Gracias de 2024: 28 de noviembre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El factor semanal queda entre ×0,80 y ×1,40",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Cada festival y premio del circuito tiene nombre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una Leyenda viva pide prestigio 45",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay 56 premisas y tropos",
+   "ok": true,
+   "detalle": 56
+  },
+  {
+   "nombre": "Las ventanas llegan en su año (TV 1955, video 1977, streaming 2007)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Directo a video desde 1980 y a streaming desde 2010",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las certificaciones de video empiezan en 1979 y suben de oro a diamante",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Antes de la TV todo sale de la taquilla",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Retener una región: no se estrena allí y la campaña cuesta menos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El estreno escalonado llega 4 semanas después",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Doblar evita perder público por el idioma",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La mezcla de canales recomendada rinde al menos como la de siempre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un reestreno necesita 7 años desde el estreno",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los rivales también guardan sets",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Pascua 2024 cae el 31 de marzo y la de 2025 el 20 de abril",
+   "ok": true,
+   "detalle": "[{\"y\":2024,\"m\":2,\"d\":31},{\"y\":2025,\"m\":3,\"d\":20}]"
+  },
+  {
+   "nombre": "Año Nuevo chino 2024 empieza el 10 de febrero",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Acción de Gracias 2024 es el 28 de noviembre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El 1 de enero de 2024 fue lunes",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Población mundial de 2025 cerca de 8.200 millones",
+   "ok": true,
+   "detalle": 8223
+  },
+  {
+   "nombre": "Un dólar de 1950 vale unos 13 de 2025",
+   "ok": true,
+   "detalle": "13.4"
+  },
+  {
+   "nombre": "La inflación de 2022 fue de 7 % a 9 %",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Con los años hay más obras en dominio público",
+   "ok": true,
+   "detalle": "148 → 235"
+  },
+  {
+   "nombre": "El Erótico no se puede antes de su año",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay tres modos y cinco dificultades",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay cuatro retos finales",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay al menos 30 logros",
+   "ok": true,
+   "detalle": 54
+  },
+  {
+   "nombre": "Cada dificultad tiene su texto con humor",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El progreso de los retos va de 0 a 1",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El paquete del editor se puede leer",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay cuatro medios nuevos con su premio",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los formatos de música suman 1",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las cuotas de las plataformas suman 1",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un juego va a una a cuatro plataformas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La ocupación del teatro va de 5 % a 100 %",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Ninguna venta es negativa o infinita",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los motores tienen de 1 a 5 estrellas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay más de 200 eventos con decisiones",
+   "ok": true,
+   "detalle": 214
+  },
+  {
+   "nombre": "Cada evento tiene al menos dos opciones",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay al menos 50 inventos",
+   "ok": true,
+   "detalle": 129
+  },
+  {
+   "nombre": "Hay al menos 30 construcciones",
+   "ok": true,
+   "detalle": 54
+  },
+  {
+   "nombre": "El puntaje de crédito va de 300 a 850",
+   "ok": true,
+   "detalle": 340
+  },
+  {
+   "nombre": "La quiebra tiene tres salidas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los hitos están en orden de fecha",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El factor de guerras y crisis está acotado",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Ningún estudio quebrado sigue filmando obras nuevas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El socio nunca tiene la mayoría",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Una temporada va de 2 a 300 episodios",
+   "ok": true,
+   "detalle": "300 / 2"
+  },
+  {
+   "nombre": "Un episodio va de 5 a 180 minutos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay siete caminos de continuación",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El reboot baja la fatiga y la secuela la sube",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El horario familiar multa el contenido para adultos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La parrilla tiene 7 días y 8 franjas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La plataforma tiene tres planes",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Toda franquicia viva tiene al menos una obra y un canon",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El efecto de la franquicia en el deseo está acotado",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El impuesto es el 25 % de la utilidad operativa del año",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Préstamos, socio y acciones son capital: mueven la caja pero no la utilidad",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La caja y las cifras del estudio no tienen NaN ni infinitos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Ida y vuelta entre dinero de la época y dólares de hoy",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Cada industria existe desde su año y tiene efecto",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Se puede empezar en 1850; sin cine, la industria pasa a Teatro y no hay plató",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Antes de 1895 no se puede iniciar una película",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El teatro, los libros y las partituras se pueden producir en 1850",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La industria Teatro da +1 obra a la vez en teatro y 15 % menos de costo",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Los rivales no estrenan películas antes de 1895",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El capital recomendado alcanza para una obra de teatro chica",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Las 82 obras libres tienen sinopsis y personajes de siempre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El aspecto del avatar se guarda dentro de sus rangos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Romeo y Julieta trae a Romeo y a Julieta",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Tu avatar es un talento tuyo: trabaja gratis y acepta tus obras",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Como dueño, tu avatar no trabaja para los rivales",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Se compra un teatro y queda en tu lista",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un teatro libre se alquila y deja dinero cada semana",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Se puede vender un teatro propio",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "El letrero usa el tipo de letra elegido (cada una distinta)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Hay 40 ciudades o más para empezar, todas en países del juego",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Cada rival activo se puede comprar o explica por qué no",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "En 1990 las consolas no aceptan juegos para adultos (máximo 16)",
+   "ok": true,
+   "detalle": "16"
+  },
+  {
+   "nombre": "El teatro trae protagonista con intérprete",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Un papel de teatro sin intérprete impide empezar",
+   "ok": true,
+   "detalle": "Falta quien interprete a Sin actor (secundario)."
+  },
+  {
+   "nombre": "Los libros traen personajes sin intérprete",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "La música no tiene personajes con nombre",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Entre todos los financiadores no pasan del 85 %",
+   "ok": true,
+   "detalle": "{\"ids\":[\"copro\",\"preventa\",\"inversores\",\"marcas\"],\"k\":{\"copro\":255000,\"preventa\":170000,\"inversores\":340000,\"marcas\":85000},\"socios\":850000,\"prest\":0,\"propio\":150000,\"partes\":{\"copro\":0.3,\"preventa\":0.25,\"inversores\":0.45},\"lim\":0}"
+  },
+  {
+   "nombre": "El subsidio cultural no apoya superproducciones",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Más pulido: más calidad, más tiempo y más costo",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "nombre": "Desde 1985 la música con lenguaje crudo lleva aviso de letras explícitas",
+   "ok": true,
+   "detalle": ""
+  }
+ ],
+ "verif": {
+  "errores": [],
+  "pasos": 1286,
+  "clics": 720,
+  "vistas": 376,
+  "semanas": 312,
+  "medios": {
+   "cine": "empezó",
+   "musica": "empezó",
+   "teatro": "empezó",
+   "libros": "empezó",
+   "tv": "empezó",
+   "juegos": "empezó"
+  },
+  "anios": [
+   1925,
+   1995,
+   2040
+  ],
+  "ms": 8974,
+  "ok": true
+ }
+}
