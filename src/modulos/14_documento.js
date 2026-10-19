@@ -182,7 +182,7 @@ ART.documento = (function () {
     tm.actos.forEach(function (a) { l.push('', tr(a.titulo)); a.parrafos.forEach(function (p) { l.push(tr(p)); }); });
     l.push('', tr('Escaleta'));
     tm.escaleta.forEach(function (x, i) { l.push((i + 1) + '. ' + tr(x[0]) + ': ' + tr(x[1])); });
-    if (o.pj && o.pj.length) { l.push('', tr('Personajes')); o.pj.forEach(function (p) { l.push('- ' + p.n + ', ' + p.e + ' · ' + tr(p.a) + ' · ' + tr(descriptor(p))); }); }
+    if (o.pj && o.pj.length) { l.push('', tr('Personajes')); o.pj.forEach(function (p) { l.push('- ' + p.n + ', ' + p.e + ' · ' + tr(X.nombreArquetipo(p.a, p.s)) + ' · ' + tr(descriptor(p))); }); }
     const eq = equipo(o), tc = tecnicos(o);
     if (eq.length) { l.push('', tr('Equipo')); eq.forEach(function (f) { l.push('- ' + tr(f[0]) + ': ' + f[1]); }); }
     if (tc.length) { l.push('', tr('Datos técnicos')); tc.forEach(function (f) { l.push('- ' + tr(f[0]) + ': ' + tr(f[1])); }); }
@@ -394,7 +394,7 @@ ART.documento = (function () {
     tm.actos.forEach(function (a) { l.push('', '### ' + tr(a.titulo), ''); a.parrafos.forEach(function (x) { l.push(tr(x), ''); }); });
     l.push('### ' + tr('Escaleta'), '');
     tm.escaleta.forEach(function (x, i) { l.push((i + 1) + '. **' + tr(x[0]) + ':** ' + tr(x[1])); });
-    if (o.pj && o.pj.length) { l.push('', '## ' + tr('Personajes'), ''); o.pj.forEach(function (p) { l.push('- **' + p.n + '**, ' + p.e + ' · ' + tr(p.a) + ' · ' + tr(descriptor(p))); }); }
+    if (o.pj && o.pj.length) { l.push('', '## ' + tr('Personajes'), ''); o.pj.forEach(function (p) { l.push('- **' + p.n + '**, ' + p.e + ' · ' + tr(X.nombreArquetipo(p.a, p.s)) + ' · ' + tr(descriptor(p))); }); }
     const eq = equipo(o), tc = tecnicos(o);
     if (eq.length) { l.push('', '## ' + tr('Equipo creativo'), '', '| | |', '|---|---|'); eq.forEach(function (x) { l.push(fila(x)); }); }
     if (tc.length) { l.push('', '## ' + tr('Datos técnicos'), '', '| | |', '|---|---|'); tc.forEach(function (x) { l.push(fila(x)); }); }

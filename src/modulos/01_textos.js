@@ -41,7 +41,7 @@ ART.textos = {
     generos_ayuda: 'Elige de 1 a 3 géneros. La familia pesa en la calidad; el encaje entre familias se descubre usándolo.',
     encaje: 'Encaje', encaje_desconocido: 'Encaje por descubrir', tono: 'Tono', clasificacion: 'Clasificación',
     escala_ayuda: 'Más presupuesto ayuda, pero cada vez menos: duplicarlo siempre suma lo mismo.',
-    equipo_ayuda: 'Cada talento cobra su precio de mercado; nunca depende del presupuesto de tu obra. Vestuario, efectos y animación tienen sus propios talentos (o un estudio externo).',
+    equipo_ayuda: 'Cada talento cobra su precio de mercado; nunca depende del presupuesto de tu obra. Del vestuario y los efectos se encarga el diseñador de arte y tecnología; la animación tiene sus propios talentos (o un estudio externo).',
     costo_talento: 'Contratos', costo_produccion: 'Producción', costo_marketing: 'Marketing (estimado)', costo_total: 'Total estimado',
     calidad_esperada: 'Calidad esperada', semanas_produccion: 'Semanas de producción', iniciar: 'Iniciar producción',
     titulo_obra: 'Título', otro_titulo: 'Otro título', progreso: 'Progreso', etapa: 'Etapa',

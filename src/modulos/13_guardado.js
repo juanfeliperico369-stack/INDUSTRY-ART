@@ -90,6 +90,17 @@ ART.guardado = (function () {
     const viejas = /^Los (de |del |en |sin |final|eterno|perdido|secreto|imposible|salvaje|prohibido|dorado)/;
     if (S.med && S.med.bandas) S.med.bandas.forEach(function (b) { if (viejas.test(b.nom)) b.nom = ART.titulos.banda(); });
   };
+  // 4.0 (equipo): ya no hay diseñador de vestuario ni supervisor de efectos; esos talentos pasan a ser
+  // diseñadores de arte y tecnología y las obras sin terminar los sueltan
+  MIGRACIONES[39] = function (S) {
+    const viejos = ['vestuario', 'efectos'];
+    (S.talentos || []).forEach(function (t) {
+      if (viejos.indexOf(t.of) >= 0) { t.of = 'arte'; if (t.h2) { viejos.forEach(function (k) { delete t.h2[k]; }); delete t.h2.arte; } }
+      if (t.esp) t.esp = t.esp.map(function (k) { return viejos.indexOf(k) >= 0 ? 'arte' : k; }).filter(function (k, i, a) { return a.indexOf(k) === i; });
+    });
+    if (S.avatar && viejos.indexOf(S.avatar.of) >= 0) S.avatar.of = 'arte';
+    (S.obras || []).forEach(function (o) { if (o.et !== 'terminada' && o.eq) viejos.forEach(function (k) { delete o.eq[k]; }); });
+  };
   MIGRACIONES[37] = function () { /* 3.0: el canal (24 horas, 8 franjas) y la plataforma se ponen al día solos al usarlos */ };
   MIGRACIONES[29] = function () { /* Errores e inglés, sin datos nuevos */ };
   MIGRACIONES[28] = function () { /* Interfaz y rendimiento, sin datos nuevos */ };

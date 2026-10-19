@@ -71,6 +71,40 @@ ART.medios = (function () {
     { id: 'rv', nombre: 'Realidad virtual', desde: 2016, k: 2.2, sem: 1.5, gusto: [[2016, 0.35], [2030, 0.6], [2045, 0.95], [2080, 1.1], [2150, 0.9]], texto: 'Necesita un visor: público pequeño que crece; inmersión total.', plat: 'visor' },
     { id: 'neuro', nombre: 'Inmersión neuronal', desde: 2085, k: 3, sem: 1.7, gusto: [[2085, 0.6], [2100, 1.2], [2150, 1.6]], texto: 'Se siente con todo el cuerpo: el futuro del juego.', plat: 'neuro' },
   ];
+  // Estilos de producción de cada medio: k multiplica el costo; los géneros afines suman público
+  const ESTILOS_MED = [
+    { id: 'estandar', nombre: 'Estándar', desde: 0, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 1, crit: 0, pub: 0, texto: 'Lo de siempre: sin riesgos ni sorpresas.' },
+    { id: 'mas16', nombre: '+16', desde: 0, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 1, crit: 0, pub: 0, gen: 'Acción,Terror,Thriller,Crimen,Shooter,Trap,Rap', texto: 'Más fuerte de lo habitual: atrae a los jóvenes y aleja a las familias.' },
+    { id: 'adultos', nombre: 'Adultos', desde: 0, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 1, crit: 1, pub: 0, gen: 'Drama,Romance,Crimen,Noir,Novela negra', texto: 'Temas y miradas para gente grande, sin concesiones.' },
+    { id: 'glamour', nombre: 'Glamour', desde: 0, meds: ['teatro', 'musica'], k: 1.12, crit: -1, pub: 1, gen: 'Romance,Musical,Comedia,Drama,Pop,Disco,Balada', texto: 'Vestuario, estrellas y brillo: el público viene a mirar.' },
+    { id: 'caricatura', nombre: 'Caricatura', desde: 0, meds: ['juegos', 'teatro', 'libros'], k: 0.95, crit: -1, pub: 1, gen: 'Comedia,Familiar,Aventura,Infantil,Plataformas,Party', texto: 'Todo exagerado, rápido y gracioso.' },
+    { id: 'anime', nombre: 'Anime', desde: 1958, meds: ['juegos', 'libros'], k: 0.9, crit: 1, pub: 1, gen: 'Acción,Fantasía,Ciencia ficción,Aventura,Romance,RPG,Manga,Shōnen,Shōjo', texto: 'Ojos grandes, acción y emociones intensas.' },
+    { id: 'espectaculo', nombre: 'Gran espectáculo', desde: 0, meds: ['juegos', 'teatro'], k: 1.15, crit: -1, pub: 2, gen: 'Épico,Acción,Aventura,Fantasía,Musical,Ciencia ficción,Bélico,Ópera', texto: 'Multitudes, efectos y decorados enormes: llena salas, pero cuesta.' },
+    { id: 'contemplativo', nombre: 'Contemplativo', desde: 1950, meds: ['juegos', 'libros'], k: 0.95, crit: 3, pub: -3, gen: 'Drama,Romance,Ciencia ficción,Poesía,Literaria', texto: 'Ritmo lento y silencio: el tiempo también cuenta.' },
+    { id: 'independiente', nombre: 'Independiente de bajo costo', desde: 1950, meds: ['juegos', 'teatro', 'musica', 'libros'], k: 0.75, crit: 1, pub: -1, gen: 'Drama,Comedia,Terror,Romance,Indie', texto: 'Pocos recursos y mucha libertad: el riesgo lo pones tú.' },
+    { id: 'videoclip', nombre: 'Videoclip', desde: 1981, meds: ['musica'], k: 1.1, crit: -1, pub: 1, gen: 'Pop,Hip hop,Electrónica,K-Pop,Dance,Rock', texto: 'Montaje rápido, música y colores fuertes.' },
+    { id: 'found', nombre: 'Metraje encontrado', desde: 1980, meds: ['juegos'], k: 0.6, crit: -1, pub: 0, gen: 'Terror,Horror,Misterio,Supervivencia', texto: 'Grabaciones «reales» halladas: barato y aterrador.' },
+    { id: 'plano', nombre: 'Plano secuencia', desde: 1948, meds: ['juegos'], k: 1.05, crit: 2, pub: 0, gen: 'Acción,Shooter,Sigilo,Horror', texto: 'Sin cortes: difícil de hacer, inolvidable si sale bien.' },
+    { id: 'stopmotion', nombre: 'Stop motion', desde: 1900, meds: ['juegos'], k: 1.1, crit: 1, pub: 0, gen: 'Aventura,Puzzle,Plataformas,Horror', texto: 'Figuras movidas cuadro a cuadro: lento, artesanal y encantador.' },
+    { id: 'expresionista', nombre: 'Expresionista', desde: 1919, meds: ['teatro', 'libros'], k: 1, crit: 2, pub: -1, gen: 'Terror,Drama,Psicológico,Gótico,Experimental', texto: 'Luces y sombras torcidas: el miedo se ve en los decorados.' },
+    { id: 'commedia', nombre: 'Commedia dell\'arte', desde: 0, meds: ['teatro'], k: 0.85, crit: 1, pub: 1, gen: 'Comedia,Farsa,Improvisación,Tragicomedia', texto: 'Máscaras, improvisación y personajes de siempre.' },
+    { id: 'guinol', nombre: 'Gran guiñol', desde: 1897, meds: ['teatro'], k: 0.9, crit: -1, pub: 1, gen: 'Terror,Misterio,Melodrama', texto: 'Teatro de sustos y sangre de mentira.' },
+    { id: 'sinfonico', nombre: 'Sinfónico', desde: 1700, meds: ['musica', 'teatro'], k: 1.4, crit: 2, pub: 0, gen: 'Clásica,Banda sonora,Ópera,Musical,Metal', texto: 'Orquesta completa: grandeza y emoción.' },
+    { id: 'acustico', nombre: 'Acústico', desde: 0, meds: ['musica'], k: 0.8, crit: 1, pub: 0, gen: 'Folk,Clásica,Indie,Jazz,Bolero,Balada,Country,Flamenco', texto: 'Pocos instrumentos y la voz al frente.' },
+    { id: 'lofi', nombre: 'Lo-fi casero', desde: 1990, meds: ['musica'], k: 0.5, crit: 0, pub: -1, gen: 'Indie,Hip hop,Electrónica,Pop,Lo-fi', texto: 'Grabado en casa, con encanto imperfecto.' },
+    { id: 'folletin', nombre: 'Folletín por entregas', desde: 1836, meds: ['libros'], k: 0.9, crit: -1, pub: 1, gen: 'Romance,Drama,Aventura,Misterio,Serializada,Novela', texto: 'Capítulos que terminan en suspenso: el lector vuelve cada semana.' },
+    { id: 'pulp', nombre: 'Pulp', desde: 1896, meds: ['libros'], k: 0.7, crit: -2, pub: 1, gen: 'Aventura,Ciencia ficción,Misterio,Terror,Crimen,Pulp', texto: 'Papel barato y emoción sin pausa.' },
+    { id: 'pixel', nombre: 'Pixel art', desde: 1971, meds: ['juegos'], k: 0.8, crit: 1, pub: 0, gen: 'Plataformas,Aventura,RPG,Acción,Puzzle,Arcade,Metroidvania,Roguelike', texto: 'Gráficos de cuadritos con aire de clásico.' },
+    { id: 'realista', nombre: 'Superproducción realista', desde: 2000, meds: ['juegos'], k: 1.5, crit: 0, pub: 2, gen: 'Acción,Aventura,Mundo abierto,Shooter,Carreras,Deportes', texto: 'Gráficos de cine y mundos enormes: el juego más caro del año.' },
+  ];
+  function estilosMedio(med, a) { a = a || N.anio(); return ESTILOS_MED.filter(function (e) { return e.meds.indexOf(med) >= 0 && e.desde <= a; }); }
+  function estiloMedio(id) { return de(ESTILOS_MED, id, 'estandar'); }
+  // Si el género del proyecto es afín al estilo (comparación por palabras: «Indie» sirve para «Indie / Alternativa»)
+  function estiloAfin(es, gen) {
+    if (!es.gen || !gen) return false;
+    const g = String(gen).toLowerCase();
+    return es.gen.split(',').some(function (x) { return g.indexOf(x.toLowerCase()) >= 0; });
+  }
   const MODOS_J = [{ id: 'solo', nombre: 'Un jugador', desde: 1972, k: 1, f: 1, d: 0 }, { id: 'local', nombre: 'Multijugador local', desde: 1975, k: 1.08, f: 1.06, d: 0.005 },
     { id: 'online', nombre: 'En línea', desde: 1995, k: 1.2, f: 1.12, d: 0.02 }, { id: 'masivo', nombre: 'Masivo en línea', desde: 1997, k: 1.6, f: 1.2, d: 0.04, servidores: 1 }];
   // Música: grabación, video, promoción y plataformas de cada época (nombres inventados)
@@ -168,6 +202,7 @@ ART.medios = (function () {
       const ex = de(EXTENSIONES, b.cfg.ext, 'novela'), ti = de(TIRADAS, b.cfg.tirada, 'normal');
       k *= ex.k * ti.k * (b.cfg.firmas ? 1.1 : 1); sem = Math.round(sem * ex.sem);
     }
+    k *= estiloMedio(b.cfg.pst).k;
     b.pp = Math.round(t * k);
     b.costo = Math.round(b.pp + costoEquipo(b.eq, b.med));
     b.sem = Math.max(2, Math.round(sem * (1 + b.esc * 0.15)));
@@ -219,6 +254,10 @@ ART.medios = (function () {
     p.q = Math.round(q);
     p.crit = Math.round(N.limitar(q + N.normal(0, 6) + (fam && fam.inclina === 'crit' ? 3 : 0), 1, 99));
     p.pub = Math.round(N.limitar(q + tend * 10 + N.normal(0, 6) + (fam && fam.inclina === 'pub' ? 3 : 0) - (p.cfg.anti === 2 ? 2 : 0) - (p.cfg.modelo === 'gratis' ? 1 : 0), 1, 99));
+    // Estilo de producción y modas del género (las de la taxonomía)
+    const es = estiloMedio(p.cfg.pst), moda = X.modaSub([p.gen], N.anio());
+    p.crit = Math.round(N.limitar(p.crit + es.crit * 2 + moda.crit * 2, 1, 99));
+    p.pub = Math.round(N.limitar(p.pub + es.pub * 2 + (estiloAfin(es, p.gen) ? 3 : 0) + moda.pub * 3, 1, 99));
   }
   // Lo que puede ganar en total (repartido semana a semana con su caída)
   function potencial(p) {
@@ -645,7 +684,7 @@ ART.medios = (function () {
       return { med: med, nombre: MED[med].nombre, disponible: disponible(med), proyectos: ps.length, enMarcha: enMarcha(med), ing: st().ing[med] || 0, premios: st().premios.filter(function (r) { return r.med === med; }).reduce(function (s, r) { return s + r.cats.filter(function (c) { return c.est === 0; }).length; }, 0) };
     });
   }
-  return { DIMENSIONES: DIMENSIONES, MODOS_J: MODOS_J, ESTUDIOS_GRAB: ESTUDIOS_GRAB, PROMOS_M: PROMOS_M, PLAT_MUSICA: PLAT_MUSICA, EXTENSIONES: EXTENSIONES, TIRADAS: TIRADAS, PRECIOS_T: PRECIOS_T, dimensionesDe: dimensionesDe, gustoDim: gustoDim, partesMusica: partesMusica, bonoTV: bonoTV, concierto: concierto, de: de, MED: MED, FMT_MUSICA: FMT_MUSICA, PLAT: PLAT, FUNCIONES: FUNCIONES, ESCALAS_J: ESCALAS_J, MODELOS: MODELOS, SALAS: SALAS, TAPAS: TAPAS, TAMANOS: TAMANOS, GIRAS: GIRAS, CERT: CERT,
+  return { ESTILOS_MED: ESTILOS_MED, estilosMedio: estilosMedio, estiloMedio: estiloMedio, estiloAfin: estiloAfin, DIMENSIONES: DIMENSIONES, MODOS_J: MODOS_J, ESTUDIOS_GRAB: ESTUDIOS_GRAB, PROMOS_M: PROMOS_M, PLAT_MUSICA: PLAT_MUSICA, EXTENSIONES: EXTENSIONES, TIRADAS: TIRADAS, PRECIOS_T: PRECIOS_T, dimensionesDe: dimensionesDe, gustoDim: gustoDim, partesMusica: partesMusica, bonoTV: bonoTV, concierto: concierto, de: de, MED: MED, FMT_MUSICA: FMT_MUSICA, PLAT: PLAT, FUNCIONES: FUNCIONES, ESCALAS_J: ESCALAS_J, MODELOS: MODELOS, SALAS: SALAS, TAPAS: TAPAS, TAMANOS: TAMANOS, GIRAS: GIRAS, CERT: CERT,
     disponible: disponible, tipos: tipos, familias: familias, porId: porId, proyectos: proyectos, capacidad: capacidad, enMarcha: enMarcha, habMedio: habMedio, equipoRecomendado: equipoRecomendado,
     borrador: borrador, recalcular: recalcular, validar: validar, iniciar: iniciar, potencial: potencial, formatosMusica: formatosMusica, unidades: unidades, gira: gira, grabar: grabar,
     banda: banda, bandas: bandas, costoContrato: costoContrato, firmarBanda: firmarBanda, practicar: practicar, costoGira: costoGira, irDeGira: irDeGira, reunir: reunir,

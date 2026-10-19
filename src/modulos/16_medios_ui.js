@@ -127,6 +127,9 @@ ART.mediosUI = (function () {
     h += '<label class="campo"><span>Tipo</span>' + sel('mdTipo', Md.tipos(b.med).map(function (t) { return [t.id, t.nombre]; }), b.tipo) + '</label><label class="campo"><span>Género</span>' + sel('mdGen', gens, b.gen) + '</label>';
     h += '<label class="campo"><span>Tamaño</span>' + sel('mdEsc', b.med === 'juegos' ? Md.ESCALAS_J.filter(function (e) { return !e.desde || e.desde <= a; }).map(function (e, i) { return [i, e.nombre]; }) : [[0, 'Pequeño'], [1, 'Mediano'], [2, 'Grande']], b.esc) + '</label>';
     const c = b.cfg;
+    const pst = Md.estiloMedio(c.pst);
+    h += '<label class="campo"><span>Estilo de producción</span>' + sel('mdCfg', Md.estilosMedio(b.med, a).map(function (x) { return [x.id, x.nombre + (x.k !== 1 ? ' · costo ×' + U.decimal(x.k, 2) : '')]; }), pst.id, 'pst') + '</label>' +
+      '<p class="nota info">' + esc(pst.texto) + (pst.crit || pst.pub ? ' Crítica ' + (pst.crit > 0 ? '+' : '') + pst.crit * 2 + ', público ' + (pst.pub > 0 ? '+' : '') + pst.pub * 2 + '.' : '') + (Md.estiloAfin(pst, b.gen) ? ' Le va bien a este género (+3 al público).' : '') + '</p>';
     if (b.med === 'musica') {
       h += '<label class="campo"><span>Banda o solista</span>' + sel('mdCfg', [['', '— ninguna —']].concat(Md.bandas().filter(function (x) { return !x.sep; }).map(function (x) { return [x.id, x.nom]; })), c.banda || '', 'banda') + '</label>';
       if (b.tipo === 'banda') h += '<label class="campo"><span>Película</span>' + sel('mdCfg', [['', '— elige —']].concat(N.S.obras.filter(function (o) { return o.est === 0 && !o.tv; }).slice(-15).map(function (o) { return [o.id, o.tit]; })), c.peli || '', 'peli') + '</label>';

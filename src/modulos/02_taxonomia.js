@@ -32,6 +32,9 @@ ART.taxonomia = (function () {
     { id: 'animacion', nombre: 'Animación', desde: 1908, costo: 1.15, semanas: 1.45, pesos: { arte: 1.9, interprete: 0.45, fotografia: 0.6 }, edades: [1.35, 1.1, 1, 0.92, 0.9], efecto: 'Más arte y más tiempo; gusta a niños y familias' },
     { id: 'hibrido', nombre: 'Híbrido (real y animación)', desde: 1945, costo: 1.3, semanas: 1.25, pesos: { arte: 1.5 }, edades: [1.2, 1.1, 1, 0.95, 0.9], pub: 1, efecto: 'Caro y vistoso: +1 al público' },
     { id: 'documental', nombre: 'Documental', desde: 1922, costo: 0.45, semanas: 0.8, realidad: true, crit: 2, pub: -4, pesos: { interprete: 0.4, edicion: 1.6, fotografia: 1.3 }, edades: [0.5, 0.7, 0.9, 1.2, 1.3], efecto: 'Barato: +2 a la crítica, −4 al público' },
+    { id: 'captura', nombre: 'Captura de movimiento', desde: 2004, costo: 1.25, semanas: 1.4, pesos: { arte: 1.4, interprete: 0.9 }, edades: [1.1, 1.2, 1.1, 0.95, 0.9], pub: 1, efecto: 'Actores reales dentro de personajes digitales: caro, +1 al público' },
+    { id: 'digitales', nombre: 'Actores digitales', desde: 2031, costo: 1.15, semanas: 1.2, pesos: { arte: 1.3, interprete: 0.7 }, crit: -1, pub: 1, efecto: 'Intérpretes creados por computadora o con licencia: +1 al público, −1 a la crítica' },
+    { id: 'volumetrica', nombre: 'Captura volumétrica', desde: 2046, costo: 1.35, semanas: 1.3, pesos: { arte: 1.5, fotografia: 1.2 }, edades: [1, 1.2, 1.2, 1, 0.9], pub: 2, efecto: 'Escenas grabadas en tres dimensiones que se recorren: muy caro, +2 al público' },
     { id: 'jugable', nombre: 'Historia jugable', desde: 2018, costo: 1.2, semanas: 1.2, pub: 1, edades: [0.8, 1.4, 1.3, 0.8, 0.5], efecto: 'El público elige el camino: +1 al público joven' },
   ];
 
@@ -112,25 +115,64 @@ ART.taxonomia = (function () {
     { id: 'EM', nombre: 'Equipo y misión', items: sp('Aprendiz que supera al maestro,Equipo improbable,Expedición,Misión sin regreso,Rescate,Reunir al equipo,Torneo'), afin: ['AA', 'FJ', 'IM'] },
   ];
 
-  // ---------- Subgéneros: 38 son también géneros (usan la familia de su género) y 47 propios en 5 familias ----------
+  // ---------- Subgéneros: 38 son también géneros (usan la familia de su género), 179 propios en 12 familias y, además,
+  // los géneros de los otros medios que sirven de subgénero (se agregan en listaSubgeneros) ----------
   // afin: encaje de la familia del subgénero con cada familia del cine (++ 3, + 1, 0, − 2)
   const subgenerosGenero = sp('Acción,Aventura,Ciencia ficción,Fantasía,Terror,Thriller,Misterio,Crimen,Policial,Noir,Drama,Romance,Comedia,Musical,Histórico,Bélico,Western,Superhéroes,Biográfico,Político,Social,Deportivo,Judicial,Espionaje,Religioso,Falso documental,Experimental,Surrealista,Adolescentes,Melodrama,Parodia,Infantil,Catástrofes,Épico,Artes,Monstruos,Festivo,Folklórico');
   const familiasSub = [
-    { id: 'FT', nombre: 'Futuros y tecnología', items: sp('Apocalíptico,Biopunk,Climáticas,Cósmico,Cyberpunk,Dieselpunk,Distopía,Extraterrestres,Futurismo,Mecha,Post apocalíptico,Robótica,Solarpunk,Space opera,Steampunk,Western espacial,Tecnología,Ucronía,Utopía,Viajes en el tiempo'),
+    { id: 'FT', nombre: 'Futuros y tecnología', items: sp('Apocalíptico,Ciencia ficción dura,Ciencia ficción militar,Climáticas,Colonias espaciales,Cósmico,Distopía,Extraterrestres,Futurismo,Inmersión virtual,Mecha,Nave generacional,Post apocalíptico,Primer contacto,Realidad simulada,Rebelión de las máquinas,Robótica,Space opera,Tecnología,Terraformación,Transhumanismo,Ucronía,Utopía,Viajes en el tiempo,Western espacial'),
       afin: { AA: 1, IM: 3, SM: 1, DR: 0, HM: 0, FJ: 0, AV: 1, RD: -2 } },
-    { id: 'FM', nombre: 'Fantasía y mito', items: sp('Artes marciales,Crepuscular,Fantasía oscura,Folklore,Isekai,Leyendas,Magia,Mitología,Realismo mágico,Wuxia'),
+    { id: 'FM', nombre: 'Fantasía y mito', items: sp('Artes marciales,Crepuscular,Espada y brujería,Fantasía oscura,Fantasía urbana,Folklore,Grimdark,Isekai,Leyendas,Magia,Mitología,Realismo mágico,Wuxia'),
       afin: { AA: 1, IM: 3, SM: 0, DR: 0, HM: 0, FJ: 1, AV: 1, RD: 0 } },
-    { id: 'HO', nombre: 'Horror', items: sp('Corporal,Gore,Gótico,Kaiju,Lovecraftiano,Paranormal,Psicológico,Slasher,Zombies'),
+    { id: 'HO', nombre: 'Horror', items: sp('Brujería,Casa embrujada,Corporal,Gore,Gótico,Gótico romántico,Horror analógico,Horror folclórico,Horror tecnológico,Kaiju,Licántropos,Lovecraftiano,Monstruo marino,Paranormal,Posesiones,Psicológico,Slasher,Splatterpunk,Survival horror,Vampírico,Zombies'),
       afin: { AA: 0, IM: 1, SM: 3, DR: -2, HM: -2, FJ: -2, AV: 1, RD: -2 } },
-    { id: 'CM', nombre: 'Crimen y misterio', items: sp('Detectives,Heist,Neo-noir'),
+    { id: 'CM', nombre: 'Crimen y misterio', items: sp('Asesino en serie,Detective privado,Detectives,Estafa,Habitación cerrada,Heist,Mafia,Narcos,Neo-noir,Policías corruptos,¿Quién lo hizo?'),
       afin: { AA: 1, IM: 0, SM: 3, DR: 1, HM: 0, FJ: -2, AV: 0, RD: 0 } },
     { id: 'VO', nombre: 'Vida, oficio y sátira', items: sp('Médico,Militar,Sátira,Supervivencia,Urbano,Viajes'),
       afin: { AA: 1, IM: 0, SM: 0, DR: 3, HM: 1, FJ: 0, AV: 1, RD: 0 } },
+    { id: 'MV', nombre: 'Motor y velocidad', items: sp('Arrancones,Carreras callejeras,Carreras de autos,Drift,Karting,Monoplazas,Motociclismo,Rally,Resistencia,Stock cars en óvalo,Todoterreno'),
+      afin: { AA: 3, IM: 0, SM: 1, DR: 0, HM: 1, FJ: 1, AV: -2, RD: 0 } },
+    { id: 'PK', nombre: 'Familia punk (retrofuturismos)', items: sp('Atompunk,Biopunk,Casetepunk,Clockpunk,Cyberpunk,Decopunk,Dieselpunk,Elfpunk,Esperanzapunk,Fantasía de lámparas de gas,Lunarpunk,Mitopunk,Nanopunk,Postcyberpunk,Raypunk,Retrofuturismo,Silkpunk,Solarpunk,Steampunk'),
+      afin: { AA: 1, IM: 3, SM: 1, DR: 0, HM: 0, FJ: 0, AV: 1, RD: -2 } },
+    { id: 'HE', nombre: 'Historia y época', items: sp('Años locos,Belle Époque,Caballerías,Capa y espada,Colonial,Faraónico,Feudal japonés,Gauchesco,Imperial chino,Medieval,Napoleónico,Péplum,Piratas,Regencia,Revolucionario,Samuráis,Victoriano,Vikingos'),
+      afin: { AA: 3, IM: 0, SM: 0, DR: 3, HM: -2, FJ: -2, AV: 0, RD: 1 } },
+    { id: 'AE', nombre: 'Aventura y exploración', items: sp('Alta montaña,Búsqueda del tesoro,Expedición polar,Exploradores,Mundo perdido,Náufragos,Safari,Selva,Submarino,Viajes extraordinarios'),
+      afin: { AA: 3, IM: 1, SM: 0, DR: 0, HM: 1, FJ: 3, AV: -2, RD: 0 } },
+    { id: 'DC', nombre: 'Deporte y competencia', items: sp('Ajedrez,Básquet,Béisbol,Boxeo,Deportes extremos,Equitación,Fútbol,Olímpico,Surf,Torneo'),
+      afin: { AA: 3, IM: -2, SM: 0, DR: 3, HM: 1, FJ: 1, AV: -2, RD: 0 } },
+    { id: 'RV', nombre: 'Relaciones y vida cotidiana', items: sp('Amor de verano,Amor imposible,Bodas,Comedia romántica,Divorcio,Drama de oficina,Drama familiar,Gastronómico,Vecinos,Vida de barrio,Vida rural'),
+      afin: { AA: -2, IM: -2, SM: 0, DR: 3, HM: 3, FJ: 1, AV: 0, RD: 3 } },
+    { id: 'MS', nombre: 'Música y escena', items: sp('Biografía musical,Cabaret,Circo,Musical de escenario,Ópera rock,Revista musical,Vodevil,Zarzuela'),
+      afin: { AA: 0, IM: 0, SM: -2, DR: 1, HM: 3, FJ: 1, AV: 1, RD: 1 } },
   ];
+  // Modas de subgéneros: en esos años suman público; si llegan 30 años antes, la obra se adelanta a su época
+  // (menos público, más culto)
+  const modasSub = [['Cyberpunk', 1982, 2000], ['Steampunk', 1987, 2015], ['Dieselpunk', 2001, 2025], ['Solarpunk', 2008, 2040],
+    ['Biopunk', 1990, 2010], ['Atompunk', 1995, 2020], ['Postcyberpunk', 1995, 2015], ['Retrofuturismo', 1975, 2000],
+    ['Esperanzapunk', 2017, 2045], ['Lunarpunk', 2020, 2050], ['Nanopunk', 2030, 2060], ['Slasher', 1978, 1990], ['Zombies', 2002, 2016],
+    ['Vampírico', 2005, 2012], ['Isekai', 2012, 2025], ['Kaiju', 1954, 1975], ['Western espacial', 1977, 1990], ['Space opera', 1977, 1995],
+    ['Battle royale', 2017, 2023], ['K-Pop', 2012, 2025], ['Synthwave', 2011, 2020], ['Lo-fi', 2017, 2025], ['Metroidvania', 2009, 2020],
+    ['Novela visual', 2005, 2020], ['True crime', 2014, 2025], ['Reality', 2000, 2012], ['Telenovela', 1970, 2000],
+    ['Gótico romántico', 1790, 1830], ['Capa y espada', 1840, 1960], ['Péplum', 1950, 1965], ['Piratas', 1935, 1955],
+    ['Comedia romántica', 1985, 2005], ['Viajes extraordinarios', 1863, 1910], ['Serializada', 1836, 1880],
+    ['Superhéroes', 2008, 2023], ['Heist', 1999, 2008], ['Distopía', 2008, 2016], ['Post apocalíptico', 1979, 1990],
+    ['Casa embrujada', 1960, 1982], ['Survival horror', 1996, 2008], ['Mecha', 1979, 1999], ['Wuxia', 1965, 1980],
+    ['Artes marciales', 1971, 1985], ['Fantasía urbana', 1995, 2015]].map(function (m) { return { id: m[0], desde: m[1], hasta: m[2] }; });
+  function modaSub(subs, anio) {
+    const r = { pub: 0, crit: 0, notas: [] };
+    (subs || []).forEach(function (x) {
+      const m = modasSub.filter(function (y) { return y.id === x; })[0];
+      if (!m) return;
+      if (anio >= m.desde && anio <= m.hasta) { r.pub += 1; r.notas.push([1, x + ' está de moda']); }
+      else if (anio < m.desde - 30) { r.pub -= 1; r.crit += 1; r.notas.push([0, x + ': adelantado a su época']); }
+    });
+    r.pub = Math.max(-2, Math.min(2, r.pub)); r.crit = Math.min(2, r.crit);
+    return r;
+  }
   // Subgéneros que suben la clasificación (siempre con guiños: en pantalla nada es gráfico)
   const subMinimos = { Gore: { violencia: 5 }, Slasher: { violencia: 4 }, Corporal: { terror: 4 } };
 
-  // ---------- Temas: 227 en 8 familias (217 del documento y 10 deportes nuevos, marcados con *) ----------
+  // ---------- Temas y tópicos: 380 en 19 familias (los 10 deportes nuevos van marcados con *) ----------
   const familiasTema = [
     { id: 'EV', nombre: 'Emociones y vínculos', items: sp('Aislamiento,Amistad,Amor,Culpa,Culpabilidad,Depresión,Dudas,Duelo,Empatía,Esperanza,Familia,Hermanos,Lealtad,Locura,Memoria,Mentiras,Miedo,Obsesión,Perdón,Rivalidad,Secretos,Soledad,Traición,Trauma,Venganza'),
       afin: { AA: 0, IM: 0, SM: 1, DR: 3, HM: 0, FJ: 1, AV: 1, RD: 3 } },
@@ -148,6 +190,28 @@ ART.taxonomia = (function () {
       afin: { AA: 3, IM: 3, SM: 0, DR: -2, HM: 0, FJ: 1, AV: -2, RD: 0 } },
     { id: 'EH', nombre: 'Épocas e historia', items: sp('América,Antiguo Egipto,China imperial,Civilizaciones,Cruzadas,Culturas indígenas,Descubrimientos,Era digital,Era victoriana,Esparta,Fiebre del oro,Gladiadores,Globalización,Gran Depresión,Grecia clásica,Guerra de trincheras,Guerra Fría,Guerras napoleónicas,Holocausto,Ilustración,Imperio mongol,Imperio romano,Imprenta,Incas,Independencia,Independencias,India antigua,Inquisición,Islámico,Japón feudal,Las pirámides,Mayas,Medieval,Mesopotamia,Muro de Berlín,Nazismo,Olímpicos,Peloponeso,Peste negra,Piratas,Precolombinas,Prehistoria,Primera Guerra Mundial,Reinado del Terror,Renacimiento,Resistencia,Revolución francesa,Revolución industrial,Revolución rusa,Revoluciones artísticas,Revoluciones tecnológicas,Ruta de la Seda,Salvaje oeste,Segunda Guerra Mundial,Siglo XIX,Templarios,Tenochtitlan,Vikingos'),
       afin: { AA: 3, IM: 0, SM: 0, DR: 3, HM: -2, FJ: -2, AV: 0, RD: 1 } },
+    { id: 'FO', nombre: 'Fantasía oscura y lo sobrenatural', items: sp('Brujas y aquelarres,Casas embrujadas,Castillos góticos,Cazadores de monstruos,Criaturas de la noche,Demonios,Exorcismos,Fantasmas,Hombres lobo,Inmortales malditos,Linajes de sangre,Maldiciones antiguas,Momias,Nigromancia,No muertos,Pactos con el diablo,Posesiones,Sectas,Vampiros'),
+      afin: { AA: 0, IM: 3, SM: 3, DR: 0, HM: -2, FJ: -2, AV: 1, RD: 1 } },
+    { id: 'MV', nombre: 'Motor y velocidad', items: sp('Arrancones,Autos clásicos,Camiones y todoterreno,Carreras callejeras,Carreras clandestinas,Drift,Escuderías y pilotos,Gran premio,Karting,Mecánicos y talleres,Monoplazas de máxima categoría,Motociclismo,Persecuciones,Rally,Récords de velocidad,Resistencia de 24 horas,Stock cars en óvalo'),
+      afin: { AA: 3, IM: 0, SM: 1, DR: 1, HM: 1, FJ: 1, AV: -2, RD: 0 } },
+    { id: 'TC', nombre: 'Tópicos clásicos', items: sp('Castigo,Celos,Creación,Deber,Deseo,Despedida,Engaño,Historia,Ingenio,Sabiduría,Seducción,Transformación,Valentía'),
+      afin: { AA: 0, IM: 1, SM: 1, DR: 3, HM: 1, FJ: 0, AV: 1, RD: 3 } },
+    { id: 'TD', nombre: 'Trabajo, dinero y oficios', items: sp('Apuestas,Ascenso social,Corporaciones,Desempleo,Deudas,El oficio,Emprendimiento,Estafas,Herencia,Huelga,Lujo,Sindicatos'),
+      afin: { AA: 0, IM: -2, SM: 1, DR: 3, HM: 3, FJ: 0, AV: 1, RD: 0 } },
+    { id: 'LV', nombre: 'Lugares y viajes', items: sp('Carretera,Ciudad,Desierto,Frontera,Hogar,Islas,Mar,Montaña,Pueblo,Puertos,Raíces,Trenes'),
+      afin: { AA: 3, IM: 1, SM: 0, DR: 1, HM: 1, FJ: 1, AV: 1, RD: 1 } },
+    { id: 'NP', nombre: 'Naturaleza y planeta', items: sp('Agua,Animales,Bosques,Cambio climático,Desastres naturales,Estaciones del año,Extinción,Océanos,Selvas,Volcanes'),
+      afin: { AA: 3, IM: 1, SM: 0, DR: 1, HM: 0, FJ: 3, AV: 1, RD: -2 } },
+    { id: 'FE', nombre: 'Futuro y especulación', items: sp('Colonias en el espacio,Contacto extraterrestre,Fin del mundo,Inmortalidad digital,Megaciudades,Mundos paralelos,Realidad simulada,Robots,Transhumanismo,Viajes en el tiempo'),
+      afin: { AA: 1, IM: 3, SM: 1, DR: 0, HM: 0, FJ: 0, AV: 1, RD: -2 } },
+    { id: 'IJ', nombre: 'Infancia, escuela y juventud', items: sp('Acoso escolar,Campamentos,Crecer,Escuela,Graduación,Juegos de infancia,Mascotas,Pandillas,Primer amor,Rebeldía'),
+      afin: { AA: 0, IM: 1, SM: -2, DR: 1, HM: 3, FJ: 3, AV: 0, RD: 1 } },
+    { id: 'CU', nombre: 'Cuerpo y mente', items: sp('Belleza,Cuerpo,Discapacidad,Insomnio,Medicina,Mente,Salud pública'),
+      afin: { AA: -2, IM: 0, SM: 1, DR: 3, HM: 0, FJ: 0, AV: 3, RD: 1 } },
+    { id: 'FR', nombre: 'Fiestas, ritos y tradiciones', items: sp('Bodas y casamientos,Carnaval,Día de Muertos,Folclor,Funerales,Gastronomía,Leyendas urbanas,Navidad,Peregrinaciones,Ritos de paso'),
+      afin: { AA: 0, IM: 1, SM: 0, DR: 1, HM: 3, FJ: 3, AV: 1, RD: 1 } },
+    { id: 'TL', nombre: 'Tópicos literarios', items: sp('Amor cortés,Amor post mortem,Beatus ille,Carpe diem,Descenso a los infiernos,Edad de oro,El mundo al revés,Homo viator,La vida es sueño,Locus amoenus,Memento mori,Menosprecio de corte,Tempus fugit,Theatrum mundi,Ubi sunt,Vanitas').concat(['Collige, virgo, rosas']),
+      afin: { AA: -2, IM: 1, SM: 0, DR: 3, HM: 0, FJ: -2, AV: 3, RD: 3 } },
   ];
   const DEPORTES_NUEVOS = sp('Ajedrez,Atletismo,Automovilismo,Baloncesto,Béisbol,Boxeo,Ciclismo,Deportes electrónicos,Natación,Tenis');
 
@@ -419,6 +483,8 @@ ART.taxonomia = (function () {
   ];
   // Los extras y los terceros (figurantes, dobles y personal de apoyo) son un número, no personajes
   const MAX_EXTRAS = 20, MAX_TERCEROS = 100;
+  const ARQ_FEM = { 'Héroe': 'Heroína', Antihéroe: 'Antiheroína', Mentor: 'Mentora', Aliado: 'Aliada', Villano: 'Villana', Embaucador: 'Embaucadora',
+    'Guardián': 'Guardiana', Sabio: 'Sabia', Explorador: 'Exploradora', Creador: 'Creadora', Cuidador: 'Cuidadora', Mago: 'Maga', 'Bufón': 'Bufona', 'Huérfano': 'Huérfana' };
   // Arquetipos (Jung, Campbell y Vogler) con su palabra para la sinopsis según el sexo [él, ella]
   const arquetipos = [
     ['Héroe', 'un héroe improbable', 'una heroína improbable'], ['Antihéroe', 'un antihéroe sin escrúpulos', 'una antiheroína sin escrúpulos'],
@@ -432,7 +498,10 @@ ART.taxonomia = (function () {
     ['Cuidador', 'un protector abnegado', 'una protectora abnegada'], ['Mago', 'un mago que cambia el mundo', 'una maga que cambia el mundo'],
     ['Bufón', 'un bromista incorregible', 'una bromista incorregible'], ['Huérfano', 'un huérfano que busca su lugar', 'una huérfana que busca su lugar'],
     ['Rival', 'un rival de toda la vida', 'una rival de toda la vida'], ['Testigo', 'un testigo incómodo', 'una testigo incómoda'],
-  ].map(function (a) { return { id: a[0], m: a[1], f: a[2] }; });
+    ['Normal', 'un hombre común', 'una mujer común'],
+  ].map(function (a) { return { id: a[0], m: a[1], f: a[2], fem: ARQ_FEM[a[0]] || a[0] }; });
+  // El nombre del arquetipo según el sexo del personaje (Heroína, Villana, Maga…)
+  function nombreArquetipo(id, sexo) { const a = arquetipos.filter(function (x) { return x.id === id; })[0]; return a && sexo === 'F' ? a.fem : id; }
   // Oficios del protagonista por género (dan sabor a la sinopsis) [él, ella]
   const oficiosGenero = {
     'Western': ['un pistolero', 'una pistolera'], 'Bélico': ['un soldado', 'una enfermera de guerra'], 'Espionaje': ['un espía', 'una espía'],
@@ -629,22 +698,78 @@ ART.taxonomia = (function () {
     for (let i = 0; i < familiasProblema.length; i++) if (familiasProblema[i].items[p]) return familiasProblema[i].items[p];
     return 'enfrenta lo que nadie más quiso enfrentar';
   }
+  // Géneros de los otros medios que sirven de subgénero (los que no están ya en la lista), por medio y familia
+  const NOMBRE_MEDIO_SUB = { tv: 'Televisión', juegos: 'Videojuegos', teatro: 'Teatro', musica: 'Música', libros: 'Libros' };
+  const subgenerosMedios = (function () {
+    const ya = {};
+    subgenerosGenero.concat.apply(subgenerosGenero, familiasSub.map(function (f) { return f.items; })).forEach(function (x) { ya[x] = 1; });
+    ya['Erótico'] = ya['Erótica'] = ya['Estándar'] = 1;
+    const out = [];
+    ['tv', 'juegos', 'teatro', 'musica', 'libros'].forEach(function (m) {
+      generosMedio[m].forEach(function (f) {
+        const L = f.generos.filter(function (g) { return !ya[g]; });
+        L.forEach(function (g) { ya[g] = 1; famSub[g] = 'G:' + f.eje; });
+        if (L.length) out.push({ id: m + f.id, nombre: NOMBRE_MEDIO_SUB[m] + ' · ' + f.nombre, items: alfa(L), medio: 1 });
+      });
+    });
+    return out;
+  })();
   function listaSubgeneros() {
     const out = [{ id: 'GEN', nombre: 'Los géneros como subgénero', items: alfa(subgenerosGenero) }];
     familiasSub.forEach(function (f) { out.push({ id: f.id, nombre: f.nombre, items: alfa(f.items) }); });
-    return out;
+    return out.concat(subgenerosMedios);
+  }
+
+  // ---------- Explorar por etiquetas: 16 etiquetas que cruzan subgéneros, temas, problemáticas y premisas ----------
+  const etiquetas = [
+    ['Época', /histor|época|siglo|mediev|antig|imperi|victorian|colonial|napole|regencia|vikingo|samur|faraón|péplum|capa y espada|caballer|belle époque|años locos|feudal|gauch|revoluc|piratas|egipto|roma|grecia|incas|mayas|tenochtitlan|renacimiento|ilustración|prehistoria|cruzadas|templarios|esparta|gladiador|mongol|ruta de la seda|salvaje oeste|era victoriana|fiebre del oro/i],
+    ['Futuro y ciencia', /futur|ciencia|tecnolog|robot|espacio|planeta|cyber|punk|\bia\b|clon|genétic|virtual|colonia|máquina|inform|hacker|nuclear|cibern|terraform|transhuman|simulad|extraterr|mecha|space|ucron|utop|distop|apocal|viajes en el tiempo|bucle temporal|visitante del futuro|evolución|carrera espacial|megaciudad|inmortalidad digital/i],
+    ['Fantasía y mito', /fantas|mito|magia|mago|maga|hechic|elfo|enano|orco|dragón|leyend|folkl|folcl|isekai|wuxia|brujer|espada y|hada|dioses|caballeros|reyes|monarqu|elegido|profecía|maldici|crepuscular|realismo mágico|lámparas de gas/i],
+    ['Oscuro y miedo', /terror|horror|miedo|gore|vamp|zomb|fantasma|demon|exorc|poses|slasher|gótic|sangre|muerte|asesin|sect|nigrom|licántrop|lobo|momia|kaiju|monstru|oscur|grimdark|criaturas|no muertos|pacto|splatter|embrujad|paranormal|lovecraft|cósmico|psicológico|corporal|tormentos|última noche|memento mori|descenso a los infiernos|infierno/i],
+    ['Familiar e infantil', /famil|infan|niñ|juvenil|escuela|mascota|campament|cuento|fábula|crecer|adolesc|shōnen|shōjo|marioneta|hermanos|primer amor|juegos de infancia|graduación|mayoría de edad|novela de formación|educativo|animales/i],
+    ['Romance y deseo', /amor|romanc|romántic|boda|casamiento|seduc|deseo|celos|bolero|balada|triángulo|matrimonio|enamor|pareja|cortés|citas|collige|josei|telenovela|soap|melodrama|k-drama/i],
+    ['Humor', /humor|comedia|sátir|parodi|farsa|enredo|absurd|sitcom|sketch|bufón|caricatura|mundo al revés|ingenio|tragicomedia|vodevil|cabaret|confusión|intercambio de cuerpos|mentira que crece|pareja dispareja|festivo|late night|party/i],
+    ['Crimen y misterio', /crimen|detect|misterio|robo|heist|golpe|mafia|narco|gangst|gánst|policía|policial|noir|negra|estafa|chantaje|investig|secuestro|culpable|asesino|habitación cerrada|quién lo hizo|true crime|judicial|tribunal|identidad secreta|doble agente|desaparición|espionaje|espías|sigilo|procedimental|secreto/i],
+    ['Sociedad y poder', /poder|polític|sociedad|social|clase|dictadura|corrupc|revoluc|rebel|injusticia|desigualdad|racismo|discrimin|esclav|explot|imperialismo|propaganda|vigilancia|huelga|sindicat|corporac|trono|sistema|migración|exilio|guerra|bélic|militar|terroris|xenofob|colonialismo|justicia|anarqu|comunis|fascis|capitalis|socialis|ascenso y caída|david contra goliat|último bastión|menosprecio de corte/i],
+    ['Vida interior', /soledad|duelo|culpa|identidad|memoria|locura|depresión|trauma|existencia|sueño|mente|conciencia|redención|perdón|dudas|obsesión|psicolog|insomnio|vejez|carpe diem|tempus fugit|ubi sunt|vanitas|vida es sueño|amnesia|ego|dilema|empatía|esperanza|aislamiento|humildad|segunda oportunidad|empezar de cero|beatus ille|homo viator|contemplativ/i],
+    ['Acción y aventura', /acción|aventur|viaje|explor|expedici|tesoro|selva|náufrag|persecuc|batall|lucha|artes marciales|misión|rescate|escape|torneo|western|safari|alta montaña|submarino|superhéroe|asedio|invasión|equipo improbable|reunir al equipo|shooter|battle royale|metroidvania|mundo abierto|plataformas|arcade|búsqueda/i],
+    ['Deporte y velocidad', /deport|fútbol|boxeo|olímp|ajedrez|tenis|béisbol|básquet|baloncesto|ciclismo|natación|atletismo|carreras?\b(?! espacial)|motor|\bautos?\b|automov|drift|rally|kart|monoplaza|moto|velocidad|arrancon|stock car|todoterreno|surf|equitación|extremo|gran premio|escudería|piloto|resistencia de|mecánicos|caza|entrenamiento/i],
+    ['Arte y cultura', /\barte|músic|danza|teatro|ópera|pintur|literat|poes|cine|actuación|museo|circo|zarzuela|musical|escena|cultur|vanguard|experimental|performativ|instalaci|moda|elegancia|fama|cómic|historieta|manga|videojuego|theatrum mundi|locus amoenus|revoluciones artísticas|jazz|rock|pop|clásica|folk/i],
+    ['Naturaleza', /naturalez|animal|océan|\bmar\b|bosque|selva|clima|volcán|desierto|isla|montaña|estaciones|agua|extinci|ecolog|vida salvaje|rural|campo|pradera|ártico|desastres|catástrofe|tormenta|supervivencia|naufrag|solarpunk/i],
+    ['Fe y filosofía', /\bfe\b|dios|relig|filosof|espiritu|sagrad|alma|ateísmo|existencial|nihil|ocult|sacramental|ritual|peregrin|destino|bien y mal|moralidad|verdad|sabiduría|alquimia|inquisición|conocimiento|orden y caos|sacrificio|condena/i],
+    ['Dinero y trabajo', /dinero|riqueza|pobreza|negocio|oficio|trabajo|deuda|herencia|lujo|apuesta|emprend|desempleo|codicia|ascenso social|corporac|sindicat|huelga|minería|oficina|capitalismo|gestión|tycoon|el gran golpe|último trabajo|economía|médico|estafas/i],
+  ].map(function (e) { return { id: e[0], re: e[1] }; });
+  // Las etiquetas de un elemento; los de una familia heredan además la de su familia
+  const ETQ_FAMILIA = { FT: 'Futuro y ciencia', PK: 'Futuro y ciencia', FM: 'Fantasía y mito', HO: 'Oscuro y miedo', CM: 'Crimen y misterio',
+    VO: 'Sociedad y poder', MV: 'Deporte y velocidad', HE: 'Época', AE: 'Acción y aventura', DC: 'Deporte y velocidad', RV: 'Romance y deseo',
+    MS: 'Arte y cultura', FO: 'Oscuro y miedo', EH: 'Época', FH: 'Fantasía y mito', IF: 'Fe y filosofía', TD: 'Dinero y trabajo', NP: 'Naturaleza',
+    FE: 'Futuro y ciencia', IJ: 'Familiar e infantil', EV: 'Vida interior', TL: 'Vida interior', CU: 'Vida interior', SP: 'Sociedad y poder',
+    AO: 'Arte y cultura', LV: 'Acción y aventura', FR: 'Arte y cultura' };
+  function etiquetasDe(x, famId) {
+    const r = etiquetas.filter(function (e) { return e.re.test(x); }).map(function (e) { return e.id; });
+    const f = ETQ_FAMILIA[famId];
+    if (f && r.indexOf(f) < 0) r.push(f);
+    return r;
+  }
+  // Lo que cumple todas las etiquetas elegidas, por lista: subgéneros, temas, problemáticas y premisas
+  function explorar(ets) {
+    if (!ets || !ets.length) return { sub: [], tem: [], prob: [], pre: [] };
+    const ok = function (x, f) { const e = etiquetasDe(x, f); return ets.every(function (t) { return e.indexOf(t) >= 0; }); };
+    const de = function (fams, campo) { const out = []; fams.forEach(function (f) { (Array.isArray(f.items) ? f.items : Object.keys(f.items)).forEach(function (x) { if (ok(x, f[campo || 'id'])) out.push(x); }); }); return alfa(out); };
+    return { sub: de(listaSubgeneros()), tem: de(familiasTema), prob: de(familiasProblema), pre: de(familiasPremisa) };
   }
   function contar() {
     let temas = 0, sub = subgenerosGenero.length, prob = 0, fic = 0;
     familiasTema.forEach(function (f) { temas += f.items.length; });
     familiasSub.forEach(function (f) { sub += f.items.length; });
+    subgenerosMedios.forEach(function (f) { sub += f.items.length; });
     familiasProblema.forEach(function (f) { prob += Object.keys(f.items).length; });
     familiasFiccion.forEach(function (f) { fic += f.items.length; });
     return { temas: temas, subgeneros: sub, problematicas: prob, ficcion: fic, dominio: dominio.length, arcos: arcos.length, subarcos: subarcos.length };
   }
   // Ordena cada familia en orden alfabético (las familias quedan en su orden fijo)
   familiasTema.forEach(function (f) { f.items = alfa(f.items); });
-  // La lista plana de temas del resto del juego pasa a ser la completa de la taxonomía (227)
+  // La lista plana de temas del resto del juego pasa a ser la completa de la taxonomía
   D.temas = alfa([].concat.apply([], familiasTema.map(function (f) { return f.items; })));
   familiasSub.forEach(function (f) { f.items = alfa(f.items); });
   familiasFiccion.forEach(function (f) { f.items = alfa(f.items); });
@@ -652,7 +777,8 @@ ART.taxonomia = (function () {
   return {
     canon: canon,
     medios: medios, tiposPorMedio: tiposPorMedio, tiposCine: tiposCine, generosMedio: generosMedio, tablaEncaje: tablaEncaje,
-    subgenerosGenero: subgenerosGenero, familiasSub: familiasSub, subMinimos: subMinimos, listaSubgeneros: listaSubgeneros,
+    subgenerosGenero: subgenerosGenero, familiasSub: familiasSub, subMinimos: subMinimos, listaSubgeneros: listaSubgeneros, subgenerosMedios: subgenerosMedios,
+    modasSub: modasSub, modaSub: modaSub, etiquetas: etiquetas, etiquetasDe: etiquetasDe, explorar: explorar,
     familiasTema: familiasTema, familiasPremisa: familiasPremisa, DEPORTES_NUEVOS: DEPORTES_NUEVOS, familiasProblema: familiasProblema, fraseProblema: fraseProblema,
     arcos: arcos, subarcos: subarcos, familiasFiccion: familiasFiccion,
     corrientesCine: corrientesCine, corrientesMedio: corrientesMedio, ESTANDAR: ESTANDAR, efectoCorriente: efectoCorriente,
@@ -660,7 +786,7 @@ ART.taxonomia = (function () {
     ORDEN_CLAS: ORDEN_CLAS, contenido: contenido, contenidoFamilia: contenidoFamilia,
     DURACION_TIPICA: DURACION_TIPICA, categoriaDuracion: categoriaDuracion, complejidad: complejidad, ritmo: ritmo, efectos: efectos,
     epocas: epocas, epocasDisponibles: epocasDisponibles, lugaresExtra: lugaresExtra, idiomas: idiomas,
-    publicos: publicos, sexoFamilia: sexoFamilia, importancias: importancias, MAX_EXTRAS: MAX_EXTRAS, MAX_TERCEROS: MAX_TERCEROS, arquetipos: arquetipos, oficiosGenero: oficiosGenero,
+    publicos: publicos, sexoFamilia: sexoFamilia, importancias: importancias, MAX_EXTRAS: MAX_EXTRAS, MAX_TERCEROS: MAX_TERCEROS, arquetipos: arquetipos, nombreArquetipo: nombreArquetipo, oficiosGenero: oficiosGenero,
     dominio: dominio, generosDeCine: generosDeCine, REGLA_DOMINIO: REGLA_DOMINIO,
     famSub: famSub, famTema: famTema, famProblema: famProblema, famFiccion: famFiccion, contar: contar,
     tipoCine: function (id) { return tiposCine.filter(function (x) { return x.id === id; })[0] || tiposCine[0]; },

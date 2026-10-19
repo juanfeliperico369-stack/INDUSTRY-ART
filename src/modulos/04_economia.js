@@ -134,8 +134,8 @@ ART.economia = (function () {
     } else {
       const t = talentos(eq[dep]);
       if (dep === 'vestuario' || dep === 'efectos' || dep === 'animacion') {
-        // El diseñador de arte y tecnología está a cargo de estas áreas: con especialista o estudio externo,
-        // su mano pesa un cuarto; sin ellos, se ocupa él solo y rinde un poco menos
+        // El diseñador de arte y tecnología está a cargo de estas áreas: con animador o estudio externo, su mano
+        // pesa un cuarto; sin ellos, se ocupa él solo (vestuario y efectos siempre son suyos)
         const arte = talentos(eq.arte);
         const ha = arte ? ART.talentos.habilidadEn(arte, obra, 'arte') : 35;
         if (t) h = 0.75 * hab(t) + 0.25 * ha;

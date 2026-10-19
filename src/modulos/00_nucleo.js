@@ -3,7 +3,7 @@
 // La partida vive en ART.n.S: un solo objeto de datos, sin funciones adentro.
 var ART = {};
 ART.VERSION = '4.0';
-ART.VERSION_GUARDADO = 38;
+ART.VERSION_GUARDADO = 39;
 // Banderas de edición en un solo lugar (completa o gratuita).
 ART.EDICION = { nombre: 'completa', ranurasManuales: 5, autoguardados: 3, bot: true };
 

@@ -11,7 +11,7 @@ ART.creacion = (function () {
   const dinero = U.dinero, icono = U.icono, ac = U.accion;
 
   // ---------- Estado de la pantalla ----------
-  const cr = { b: null, etapa: 'camino', paso: 0, rol: null, picker: null, q: '', abiertas: { obra: 1, generos: 1, historia: 1 }, grupoMat: 'todos', qMat: '', taxMedio: 'cine' };
+  const cr = { b: null, etapa: 'camino', paso: 0, rol: null, picker: null, q: '', abiertas: { obra: 1, generos: 1, historia: 1 }, grupoMat: 'todos', qMat: '', taxMedio: 'cine', etq: [], taxEtq: [] };
   let modo = 'rapido';
   try { modo = localStorage.getItem('ia.modoCrear') || 'rapido'; } catch (e) { modo = 'rapido'; }
   function anio() { return N.anio(); }
@@ -279,7 +279,7 @@ ART.creacion = (function () {
     if (inc('tem')) h += '<h4>Temas (' + (b.tem || []).length + '/' + I.LIMITES.tem + ')' + candado(b, 'tem') + '</h4><div class="chips">' + sugeridosTemas(b).map(function (x) {
       const on = b.tem.indexOf(x) >= 0;
       return chip(x, 'crTema', x, on, lockT || (!on && b.tem.length >= I.LIMITES.tem));
-    }).join('') + '</div>' + (lockT ? '' : '<button class="btn" data-a="crPicker" data-v="tem">Ver los 227 temas</button>');
+    }).join('') + '</div>' + (lockT ? '' : '<button class="btn" data-a="crPicker" data-v="tem">Ver los ' + X.contar().temas + ' temas</button>');
     if (inc('prob')) h += '<h4>Problemática o argumento (' + (b.prob || []).length + '/' + I.LIMITES.prob + ', al menos 1)' + candado(b, 'prob') + '</h4><div class="chips">' + sugeridosProblemas(b).map(function (x) {
       const on = b.prob.indexOf(x) >= 0;
       return chip(x, 'crProb', x, on, lockP || (!on && b.prob.length >= I.LIMITES.prob));
@@ -408,7 +408,7 @@ ART.creacion = (function () {
         '<div class="chips" style="margin:4px 0">' + IMP_NOMBRADAS.map(function (im) { return chip(IMP_CORTO[im.id], 'crPjImp', i + '|' + im.id, p.i === im.id, false, ' title="' + im.nombre + '" style="min-width:48px"'); }).join('') + '</div>' +
         '<div class="fila envolver"><label class="campo" style="width:80px"><span>Edad</span><input type="number" min="1" max="110" value="' + p.e + '" data-c="crPjEdad" data-k="' + i + '"></label>' +
         '<label class="campo"><span>Sexo</span><select data-c="crPjSexo" data-k="' + i + '"><option value="F"' + (p.s === 'F' ? ' selected' : '') + '>' + t('mujer') + '</option><option value="M"' + (p.s === 'M' ? ' selected' : '') + '>' + t('hombre') + '</option></select></label>' +
-        '<label class="campo crece"><span>Arquetipo</span><select data-c="crPjArq" data-k="' + i + '">' + X.arquetipos.map(function (a) { return '<option' + (a.id === p.a ? ' selected' : '') + '>' + esc(a.id) + '</option>'; }).join('') + '</select></label></div>' +
+        '<label class="campo crece"><span>Arquetipo</span><select data-c="crPjArq" data-k="' + i + '">' + X.arquetipos.map(function (a) { return '<option value="' + esc(a.id) + '"' + (a.id === p.a ? ' selected' : '') + '>' + esc(p.s === 'F' ? a.fem : a.id) + '</option>'; }).join('') + '</select></label></div>' +
         '<div class="fila entre"><span class="chico">' + (ta ? 'Lo interpreta <b>' + esc(ta.nom) + '</b> · ' + t('tal_habilidad').toLowerCase() + ' ' + Math.round(ta.hab) + ' · fama ' + Math.round(ta.fama * 100) + ' · ' + dinero(costoDe(b, ta.id, p.i)) + avisoActor(p, ta) : '<span class="mal">Falta contratar a su intérprete</span>') + '</span><span class="fila">' +
           (ta ? '<button class="btn" data-a="crPjQuitarInt" data-v="' + i + '">Quitar</button>' : '') + '<button class="btn" data-a="crPjInt" data-v="' + i + '">' + (ta ? 'Cambiar' : 'Contratar') + '</button></span></div>' +
         (ta ? filaContrato(b, ta) : '') + (cr.rol === 'pj:' + i ? listaCandidatos(cr.rol) : '') + '</div>';
@@ -444,13 +444,12 @@ ART.creacion = (function () {
     const Rr = ART.rodaje;
     ['efectos', 'animacion'].forEach(function (r) {
       if (!Rr.necesita(b, r)) return;
-      const ops = [['', 'Contratar talento propio']].concat(Rr.externosDisponibles(r, anio()).map(function (e) {
+      const ops = [['', r === 'efectos' ? 'Los hace el diseñador de arte y tecnología' : 'Contratar talento propio']].concat(Rr.externosDisponibles(r, anio()).map(function (e) {
         return [e.id, e.nombre + ' · nivel ' + Math.round(e.nivel + N.limitar((anio() - e.desde) / 25, 0, 6)) + ' · ' + Math.round(e.costo * 100) + ' % de la producción'];
       }));
-      h += '<label class="campo"><span>' + (r === 'efectos' ? 'Efectos' : 'Animación') + ': ¿talento propio o estudio externo?</span>' + sel('ext.' + r, ops, (b.ext && b.ext[r]) || '') + '</label>';
+      h += '<label class="campo"><span>' + (r === 'efectos' ? 'Efectos: ¿en casa o con un estudio externo?' : 'Animación: ¿talento propio o estudio externo?') + '</span>' + sel('ext.' + r, ops, (b.ext && b.ext[r]) || '') + '</label>';
     });
-    if (!Rr.necesita(b, 'efectos')) h += '<p class="nota info">Con efectos normales, el diseñador de arte se ocupa de ellos; desde «Bastantes», o con CGI o efectos prácticos, conviene un supervisor de efectos.</p>';
-    h += '<p class="nota info">El diseñador de arte y tecnología está a cargo de vestuario, efectos y animación: aunque contrates especialistas o un estudio externo, su nota pesa una cuarta parte en esas áreas.</p>';
+    h += '<p class="nota info">El diseñador de arte y tecnología se encarga de los sets, el vestuario, el maquillaje y los efectos. Si la obra lleva muchos efectos, puedes encargarlos además a un estudio externo; en la animación, con un animador o un estudio externo, su nota pesa una cuarta parte.</p>';
     h += O.rolesDe(b).map(function (r) {
       const ta = T.porId(b.eq[r]);
       const fijo = r === 'guion' && b.guionPagado;
@@ -523,9 +522,9 @@ ART.creacion = (function () {
   }
   // ---------- Selector de listas grandes (con buscador) ----------
   function gruposPicker(k) {
-    if (k === 'tem') return X.familiasTema.map(function (f) { return { nombre: f.nombre, items: f.items }; });
+    if (k === 'tem') return X.familiasTema.map(function (f) { return { id: f.id, nombre: f.nombre, items: f.items }; });
     if (k === 'sub') return X.listaSubgeneros();
-    if (k === 'prob') return X.familiasProblema.map(function (f) { return { nombre: f.nombre, items: Object.keys(f.items).sort(function (x, y) { return x.localeCompare(y, 'es'); }) }; });
+    if (k === 'prob') return X.familiasProblema.map(function (f) { return { id: f.id, nombre: f.nombre, items: Object.keys(f.items).sort(function (x, y) { return x.localeCompare(y, 'es'); }) }; });
     if (k === 'fic') return X.familiasFiccion.map(function (f) { return { nombre: f.nombre + (f.crit || f.pub ? ' (crítica ' + signo(f.crit) + ', público ' + signo(f.pub) + ')' : ''), items: f.items }; });
     const g = {};
     X.publicos.forEach(function (p) { (g[p.grupo] = g[p.grupo] || []).push(p.id); });
@@ -537,7 +536,12 @@ ART.creacion = (function () {
     const max = k === 'fic' ? 1 : I.LIMITES[k];
     const elegidos = k === 'fic' ? [b.fic] : (b[k] || []);
     return gruposPicker(k).map(function (g) {
-      const items = g.items.filter(function (x) { return !q || x.toLowerCase().indexOf(q) >= 0; });
+      const items = g.items.filter(function (x) {
+        if (q && x.toLowerCase().indexOf(q) < 0) return false;
+        if (!cr.etq.length || ['sub', 'tem', 'prob'].indexOf(k) < 0) return true;
+        const e = X.etiquetasDe(x, g.id);
+        return cr.etq.every(function (t) { return e.indexOf(t) >= 0; });
+      });
       if (!items.length) return '';
       return '<h4 style="margin:8px 0 4px">' + esc(g.nombre) + '</h4><div class="chips">' + items.map(function (x) {
         const on = elegidos.indexOf(x) >= 0;
@@ -551,8 +555,14 @@ ART.creacion = (function () {
     const max = k === 'fic' ? 1 : I.LIMITES[k];
     const n = k === 'fic' ? 1 : (b[k] || []).length;
     return '<div class="tarjeta picker"><div class="fila entre"><b>' + esc(NOMBRE_PICKER[k]) + ' (' + n + '/' + max + ')</b><button class="btn primario" data-a="crPickerCerrar">Listo</button></div>' +
-      (k === 'tem' ? '<p class="nota info">227 temas en 8 familias; los 10 deportes nuevos llevan *.</p>' : '') +
+      (k === 'tem' ? '<p class="nota info">' + X.contar().temas + ' temas y tópicos en ' + X.familiasTema.length + ' familias; los 10 deportes nuevos llevan *.</p>' : '') +
+      (['sub', 'tem', 'prob'].indexOf(k) >= 0 ? chipsEtiquetas('crEtq', cr.etq) : '') +
       '<input type="search" placeholder="Buscar" value="' + esc(cr.q) + '" data-i="crBuscar" style="margin:6px 0"><div id="crPickLista">' + listaPicker() + '</div></div>';
+  }
+  // Explorar por etiquetas (hasta 3): filtra subgéneros, temas, problemáticas y premisas que las cumplen todas
+  function chipsEtiquetas(accion, elegidas) {
+    return '<details class="nota"' + (elegidas.length ? ' open' : '') + '><summary><b>Explorar por etiquetas</b> (' + elegidas.length + '/3)</summary><div class="chips">' +
+      X.etiquetas.map(function (e) { const on = elegidas.indexOf(e.id) >= 0; return chip(e.id, accion, e.id, on, !on && elegidas.length >= 3); }).join('') + '</div></details>';
   }
 
   // =====================================================================
@@ -698,6 +708,7 @@ ART.creacion = (function () {
     if (b.presM >= 2) r.push([0, 'Presupuesto alto: más techo y más riesgo']); else if (b.presM <= 0.5) r.push([1, 'Presupuesto bajo: poco que perder']);
     if (p.acc < 0.85) r.push([-1, 'La clasificación ' + b.clas + ' deja fuera a parte del público']);
     if (fam.inclina === 'crit') r.push([0, 'Género de crítica: brilla más en premios que en taquilla']);
+    X.modaSub(b.sub, anio()).notas.forEach(function (n) { r.push(n); });
     const mor = I.bonoMoraleja(b);
     if (mor > 0) r.push([1, 'La moraleja encaja con el género']); else if (mor < 0) r.push([-1, 'Al público familiar le gustan los finales con lección']);
     const fondo = ART.juego.fondoCine && !N.S.taller ? ART.juego.fondoCine(b) : 0;
@@ -977,6 +988,9 @@ ART.creacion = (function () {
   // ---------- Selector de listas ----------
   ac('crPicker', function (v) { if (!cr.b) return; cr.picker = v; cr.q = ''; refrescar(); irAPicker(); });
   ac('crPickerCerrar', function () { cr.picker = null; cr.q = ''; refrescar(); });
+  function alternarEtq(L, v) { const i = L.indexOf(v); if (i >= 0) L.splice(i, 1); else if (L.length < 3) L.push(v); }
+  ac('crEtq', function (v) { alternarEtq(cr.etq, v); refrescar(); });
+  ac('taxEtq', function (v) { alternarEtq(cr.taxEtq, v); U.refrescar(); });
   ac('crBuscar', function (v) { cr.q = v; const l = document.getElementById('crPickLista'); if (l) l.innerHTML = listaPicker(); });
   ac('crPick', function (v) {
     const b = cr.b, k = cr.picker;
@@ -1143,7 +1157,7 @@ ART.creacion = (function () {
     if (o.pj && o.pj.length) {
       h += '<h3>Personajes</h3><div class="col">' + o.pj.map(function (p) {
         const ta = p.t !== null && p.t !== undefined ? T.porId(p.t) : null;
-        return '<div class="fila entre chico"><span><b>' + esc(p.n) + '</b> · ' + p.e + ' años · ' + esc(p.a) + '</span><span class="tenue">' + esc((X.importancias.filter(function (x) { return x.id === p.i; })[0] || {}).nombre || '') + (ta ? ' · ' + esc(ta.nom) : '') + '</span></div>';
+        return '<div class="fila entre chico"><span><b>' + esc(p.n) + '</b> · ' + p.e + ' años · ' + esc(X.nombreArquetipo(p.a, p.s)) + '</span><span class="tenue">' + esc((X.importancias.filter(function (x) { return x.id === p.i; })[0] || {}).nombre || '') + (ta ? ' · ' + esc(ta.nom) : '') + '</span></div>';
       }).join('') + '</div>';
     }
     return h;
@@ -1173,17 +1187,30 @@ ART.creacion = (function () {
       h += '<h3>Subgéneros (' + cnt.subgeneros + ')</h3>' + X.listaSubgeneros().map(function (g) { return '<p class="chico"><b>' + esc(g.nombre) + ':</b> ' + esc(g.items.join(', ')) + '</p>'; }).join('');
       h += '<h3>Temas (' + cnt.temas + ')</h3>' + X.familiasTema.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(f.items.map(function (x) { return X.DEPORTES_NUEVOS.indexOf(x) >= 0 ? x + '*' : x; }).join(', ')) + '</p>'; }).join('');
       h += '<h3>Problemáticas y argumentos (' + cnt.problematicas + ')</h3>' + X.familiasProblema.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(Object.keys(f.items).sort(function (x, y) { return x.localeCompare(y, 'es'); }).join(', ')) + '</p>'; }).join('');
+      h += '<h3>Premisas y tropos (' + X.familiasPremisa.reduce(function (n, f) { return n + f.items.length; }, 0) + ')</h3>' + X.familiasPremisa.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(f.items.join(', ')) + '</p>'; }).join('');
       h += '<h3>Arcos y subarcos</h3>' + X.arcos.map(function (a) { return '<p class="chico"><b>' + esc(a.nombre) + '</b> (' + esc(a.orig) + ')</p>'; }).join('') + '<p class="chico">Subarcos: ' + esc(X.subarcos.map(function (s) { return s.nombre + ' (' + s.orig + ')'; }).join(', ')) + '</p>';
       h += '<h3>Tipos de ficción (' + cnt.ficcion + ')</h3>' + X.familiasFiccion.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(f.items.join(', ')) + '</p>'; }).join('');
       h += '<h3>Corrientes del cine</h3><p class="chico">' + esc(X.ESTANDAR) + ' · ' + esc(X.corrientesCine.map(function (c) { return c.id + ' (' + c.desde + ')'; }).join(' · ')) + '</p>';
       h += '<h3>Estilos, tonos y prioridades</h3><p class="chico">Estilos: ' + esc(X.estilos.map(function (s) { return s.id; }).join(', ')) + '<br>Tonos: ' + esc(D.tonos.map(function (x) { return x.id; }).join(', ')) + '<br>Prioridades: ' + esc(X.prioridades.map(function (p) { return p.nombre; }).join(', ')) + '</p>';
       h += '<h3>Épocas, idiomas y públicos</h3><p class="chico">Épocas: ' + esc(X.epocas.map(function (e) { return e.nombre; }).join(', ')) + '<br>Idiomas: ' + esc(X.idiomas.map(function (x) { return x.id; }).join(', ')) + '<br>Públicos: ' + esc(X.publicos.map(function (p) { return p.id; }).join(', ')) + '</p>';
-      h += '<h3>Arquetipos de personajes</h3><p class="chico">' + esc(X.arquetipos.map(function (a) { return a.id; }).join(', ')) + '</p>';
+      h += '<h3>Estilos de producción</h3><p class="chico">' + esc(ART.rodaje.ESTILOS.map(function (e) { return e.nombre + ' (' + e.desde + ')'; }).join(' · ')) + '</p>';
+      h += '<h3>Arquetipos de personajes</h3><p class="chico">' + esc(X.arquetipos.map(function (a) { return a.id + (a.fem !== a.id ? ' / ' + a.fem : ''); }).join(', ')) + '</p>';
       h += '<h3>Dominio público (' + cnt.dominio + ' obras)</h3><p class="chico">' + esc(X.dominio.map(function (d) { return d.tit; }).join(' · ')) + '</p>';
     } else {
       h += '<h3>Tipos de obra</h3><p class="chico">' + esc(X.tiposPorMedio[m].join(', ')) + '</p>';
       h += '<h3>Corrientes</h3><p class="chico">' + esc(X.ESTANDAR) + ' · ' + esc(X.corrientesMedio[m].map(function (c) { return c[1] + (c[0] ? ' (' + c[0] + ')' : ' (desde el inicio)'); }).join(' · ')) + '</p>';
-      h += '<p class="nota info">Subgéneros, temas, problemáticas, arcos y tipos de ficción son los mismos para todos los medios.</p>';
+      h += '<h3>Estilos de producción</h3><p class="chico">' + esc(ART.medios.ESTILOS_MED.filter(function (e) { return e.meds.indexOf(m) >= 0; }).map(function (e) { return e.nombre + (e.desde ? ' (' + e.desde + ')' : ''); }).join(' · ') || '—') + '</p>';
+      h += '<p class="nota info">Subgéneros, temas, problemáticas, arcos y tipos de ficción son los mismos para todos los medios (están en la vista de cine).</p>';
+    }
+    // Modas: cuándo cada subgénero o género llena salas (y cuándo llega demasiado pronto)
+    const a = anio();
+    h += '<h3>Modas de subgéneros y géneros</h3><p class="chico">' + X.modasSub.map(function (x) { const ya = a >= x.desde && a <= x.hasta; return (ya ? '<b>' : '') + esc(x.id) + ' (' + x.desde + '–' + x.hasta + ')' + (ya ? ' · de moda</b>' : ''); }).join(' · ') + '</p>' +
+      '<p class="nota info">En sus años suma público; si llega más de 30 años antes, la obra se adelanta a su época: menos público y un poco más de crítica.</p>';
+    // Explorar por etiquetas
+    h += '<h3>Explorar por etiquetas</h3>' + chipsEtiquetas('taxEtq', cr.taxEtq);
+    if (cr.taxEtq.length) {
+      const r = X.explorar(cr.taxEtq);
+      h += [['Subgéneros', r.sub], ['Temas y tópicos', r.tem], ['Problemáticas', r.prob], ['Premisas', r.pre]].map(function (x) { return '<p class="chico"><b>' + x[0] + ' (' + x[1].length + '):</b> ' + (x[1].length ? esc(x[1].join(', ')) : '—') + '</p>'; }).join('');
     }
     return h;
   }

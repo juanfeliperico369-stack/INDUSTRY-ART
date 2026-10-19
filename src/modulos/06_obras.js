@@ -10,10 +10,12 @@ ART.obras = (function () {
     lista: 'Lista para estrenar', cartelera: 'En cartelera', emision: 'En emisión', terminada: 'Terminada',
   };
   const ROLES = ['guion', 'direccion', 'produccion', 'fotografia', 'musica', 'edicion', 'arte'];
-  // Vestuario, efectos y animación. Se contratan cuando la obra los necesita; efectos y animación también
-  // pueden encargarse a un estudio externo (sin vestuario o efectos propios, el diseñador de arte se ocupa)
-  const ROLES_EXTRA = ['vestuario', 'efectos', 'animacion'];
-  const TODOS_ROLES = ROLES.concat(ROLES_EXTRA);
+  // Animación: se contrata cuando la obra es animada o se encarga a un estudio externo. Del vestuario y los
+  // efectos se encarga el diseñador de arte y tecnología (los efectos también pueden encargarse afuera).
+  const ROLES_EXTRA = ['animacion'];
+  // Puestos de las partidas viejas: se leen en las obras ya hechas, pero ya no se contratan
+  const ROLES_RETIRADOS = ['vestuario', 'efectos'];
+  const TODOS_ROLES = ROLES.concat(ROLES_RETIRADOS, ROLES_EXTRA);
   function rolesDe(o) { return ROLES.concat(ROLES_EXTRA.filter(function (r) { return ART.rodaje.necesita(o, r) && !ART.rodaje.esExterno(o, r); })); }
   let indice = null;
 
@@ -130,9 +132,9 @@ ART.obras = (function () {
     const k = ART.taxonomia.ORDEN_CLAS.indexOf(o.clas);
     const op = { est: o.est, fam: o.fam || D.familiaDe[o.gen[0]], clas: k >= 0 ? k : 2 };
     const usados = [];
-    // Los roles opcionales que ya no hacen falta (menos efectos, estudio externo) se sueltan
+    // Los roles opcionales que ya no hacen falta (obra sin animación, estudio externo) se sueltan
     const roles = rolesDe(o);
-    ROLES_EXTRA.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
+    ROLES_EXTRA.concat(ROLES_RETIRADOS).forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
     roles.forEach(function (r) {
       if (o.eq[r] !== undefined && o.eq[r] !== null) { usados.push(o.eq[r]); return; }
       const of = D.oficio(r);
@@ -230,10 +232,10 @@ ART.obras = (function () {
     return quitados;
   }
   // Recomendado completo: arma el equipo y lo negocia hasta que todos firman (máximo 4 vueltas)
-  // Ajusta solo los roles opcionales (vestuario, efectos y animación) sin tocar el resto del equipo
+  // Ajusta solo el rol opcional (animación) sin tocar el resto del equipo
   function ajustarRolesExtra(o, ambicion) {
     const roles = rolesDe(o);
-    ROLES_EXTRA.forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
+    ROLES_EXTRA.concat(ROLES_RETIRADOS).forEach(function (r) { if (roles.indexOf(r) < 0 && o.eq[r] !== undefined) delete o.eq[r]; });
     const tipico = E.presupuestoTipico(N.anio()), a = ambicion || 1;
     const k = ART.taxonomia.ORDEN_CLAS.indexOf(o.clas);
     const op = { est: o.est, fam: o.fam || D.familiaDe[o.gen[0]], clas: k >= 0 ? k : 2 };
@@ -407,7 +409,7 @@ ART.obras = (function () {
   }
 
   return {
-    ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, ROLES_EXTRA: ROLES_EXTRA, TODOS_ROLES: TODOS_ROLES, rolesDe: rolesDe, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
+    ETAPAS: ETAPAS, NOMBRE_ETAPA: NOMBRE_ETAPA, ROLES: ROLES, ROLES_EXTRA: ROLES_EXTRA, ROLES_RETIRADOS: ROLES_RETIRADOS, TODOS_ROLES: TODOS_ROLES, rolesDe: rolesDe, reindexar: reindexar, porId: porId, tocar: tocar, activas: activas,
     delEstudio: delEstudio, enProduccion: enProduccion, enCartelera: enCartelera, tituloNuevo: tituloNuevo,
     clasificacionesDisponibles: clasificacionesDisponibles, clasificacionRecomendada: clasificacionRecomendada,
     contratos: contratos, negociaciones: negociaciones, resolverNegociaciones: resolverNegociaciones, equipoNegociado: equipoNegociado,

@@ -26,6 +26,12 @@ ART.premios = (function () {
   }
   function hab(id) { const t = id !== undefined && id !== null ? T.porId(id) : null; return t ? t.hab : 50; }
   // Puntaje de una obra en una categoría según el jurado (más la campaña de premios y el gusto del año)
+  // Quién recibe el premio de un oficio: vestuario y efectos van al diseñador de arte y tecnología si la obra no
+  // tuvo especialista (los puestos de las partidas viejas)
+  function rolPremio(o, rol) {
+    const id = o.eq[rol];
+    return (id === undefined || id === null) && (rol === 'vestuario' || rol === 'efectos') ? o.eq.arte : id;
+  }
   function puntaje(g, cat, o, gusto) {
     let base;
     if (g.jurado === 'publico') base = o.pub * 0.8 + Math.min(20, Math.log10(1 + (o.ent || 0)) * 2);
@@ -36,7 +42,7 @@ ART.premios = (function () {
     const c = D.premios.categorias.filter(function (x) { return x.id === cat; })[0];
     if (cat === 'direccion') base = base * 0.8 + hab(o.eq.direccion) * 0.2;
     else if (cat === 'guion') base = base * 0.8 + hab(o.eq.guion) * 0.2;
-    else if (c && c.rol) base = base * 0.4 + hab(o.eq[c.rol]) * 0.6;
+    else if (c && c.rol) base = base * 0.4 + hab(rolPremio(o, c.rol)) * 0.6;
     const camp = (N.S.campanias || {})[o.id];
     const extra = camp && camp.indexOf(g.id) >= 0 ? 4 : 0;
     return base + extra + (gusto === o.fam ? 5 : 0) + N.normal(0, 4);
@@ -75,7 +81,7 @@ ART.premios = (function () {
       const quien = ga.nombre || (c.id === 'direccion' ? ga.o.cr.direccion : c.id === 'guion' ? ga.o.cr.guion : '');
       let idT = null;
       if (c.id === 'direccion') idT = ga.o.eq.direccion; else if (c.id === 'guion') idT = ga.o.eq.guion; else if (ga.k !== undefined) idT = ga.o.eq.int[ga.k];
-      else { const cc = D.premios.categorias.filter(function (x) { return x.id === c.id; })[0]; if (cc && cc.rol) idT = ga.o.eq[cc.rol]; }
+      else { const cc = D.premios.categorias.filter(function (x) { return x.id === c.id; })[0]; if (cc && cc.rol) idT = rolPremio(ga.o, cc.rol); }
       const est = S.estudios[ga.o.est];
       const t = idT !== null && idT !== undefined ? T.porId(idT) : null;
       if (g.id === 'quimera') {

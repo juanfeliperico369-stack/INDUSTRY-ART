@@ -77,6 +77,10 @@ ART.rodaje = (function () {
     { id: 'caricatura', nombre: 'Caricatura', desde: 1910, costo: 0.95, crit: -1, pub: 1, ama: [0, 1], rechaza: [3, 4], dep: { animacion: 1 }, texto: 'Exagerado y colorido: lo aman niños y adolescentes.' },
     { id: 'anime', nombre: 'Anime', desde: 1960, costo: 0.9, crit: 1, pub: 1, ama: [1, 2], rechaza: [4], dep: { animacion: 2 }, texto: 'Estética japonesa: adolescentes y jóvenes en todo el mundo.' },
     { id: 'virtual', nombre: 'Producción virtual', desde: 2019, costo: 1.05, crit: 0, pub: 1, ama: [1, 2], rechaza: [], dep: { arte: 2, efectos: 2 }, texto: 'Escenarios en pantallas gigantes: una semana menos de posproducción.' },
+    // De la Final: tres maneras de filmar con su época
+    { id: 'expresionista', nombre: 'Expresionista', desde: 1919, costo: 1.02, crit: 2, pub: -1, ama: [3], rechaza: [0], familias: ['SM', 'AV'], dep: { arte: 2, fotografia: 1 }, texto: 'Luces y sombras torcidas: el miedo se ve en los decorados; +2 a la crítica.' },
+    { id: 'neorrealista', nombre: 'Neorrealista', desde: 1945, costo: 0.7, crit: 2, pub: -1, ama: [3, 4], rechaza: [1], familias: ['DR'], dep: { arte: -2 }, texto: 'Calles reales y actores sin fama: la vida tal cual; 30 % más barato y +2 a la crítica.' },
+    { id: 'stopmotion', nombre: 'Stop motion', desde: 1900, costo: 1.1, crit: 1, pub: 0, ama: [0, 1], rechaza: [], familias: ['FJ', 'IM'], dep: { arte: 2, animacion: 2 }, texto: 'Figuras movidas cuadro a cuadro: lento, artesanal y encantador.' },
   ];
   // Estudios externos de efectos y animación (cobran una parte del presupuesto de producción)
   const EXTERNOS = {
@@ -191,8 +195,8 @@ ART.rodaje = (function () {
   function animada(o) { return o.tipo === 'animacion' || o.tipo === 'hibrido'; }
 
   // ---------- Roles nuevos: quién los necesita ----------
-  // Vestuario siempre ayuda; efectos cuando hay efectos de verdad; animación en las obras animadas (sin
-  // supervisor de efectos o diseñador de vestuario, el diseñador de arte se ocupa y rinde un poco menos)
+  // Vestuario siempre ayuda; efectos cuando hay efectos de verdad (entonces se pueden encargar a un estudio
+  // externo); animación en las obras animadas. Del vestuario y los efectos se encarga el diseñador de arte.
   function necesita(o, r) {
     if (r === 'vestuario') return o.tipo !== 'animacion' && o.tipo !== 'documental';
     if (r === 'efectos') return ART.ideas.nivelEfectos(o) >= 3 || o.met === 'cgi' || o.met === 'practicos' || o.pst === 'espectaculo' || o.pst === 'virtual';
@@ -232,8 +236,7 @@ ART.rodaje = (function () {
   // Habilidad del departamento cuando no hay talento propio: estudio externo o el diseñador de arte
   function habilidadSinTalento(o, dep, habArte) {
     if (esExterno(o, dep)) return nivelExterno(o, dep);
-    if (dep === 'vestuario') return habArte * 0.85;
-    if (dep === 'efectos') return habArte * 0.8;
+    if (dep === 'vestuario' || dep === 'efectos') return habArte;
     if (dep === 'animacion') return 25;
     return 35;
   }

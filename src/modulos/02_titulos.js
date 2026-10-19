@@ -121,6 +121,8 @@ ART.titulos = (function () {
     if (!t || t.length > 70) return null;
     const T = preparar(), x = String(t).trim();
     let m;
+    // Secuelas: «Los pequeños caballos 2» → «The Little Horses 2»
+    if ((m = /^(.+) (\d{1,2}|II|III|IV|V|VI)$/.exec(x))) { const b = ingles(m[1]); return b ? b + ' ' + m[2] : null; }
     const S = function (k) { return T.sus[k] ? T.sus[k][2] : null; };
     const art = '(El|La|Los|Las)';
     if ((m = new RegExp('^(' + T.rS + ') (' + T.rA + ')$').exec(x)) && S(m[1])) return T.adj[m[2]] + ' ' + S(m[1]);

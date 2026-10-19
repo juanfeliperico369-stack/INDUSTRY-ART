@@ -109,13 +109,16 @@ ART.datos = (function () {
     { id: 'edicion', nombre: 'Editor', dep: 'Edición', base: 0.006 },
     { id: 'arte', nombre: 'Diseñador de arte y tecnología', dep: 'Arte y diseño', base: 0.008 },
     { id: 'interprete', nombre: 'Intérprete', dep: 'Actuación', base: 0.022 },
-    // Cine a fondo: departamentos que antes cubría el diseñador de arte
-    { id: 'vestuario', nombre: 'Diseñador de vestuario', dep: 'Vestuario y maquillaje', base: 0.005 },
-    { id: 'efectos', nombre: 'Supervisor de efectos', dep: 'Efectos', base: 0.007 },
     { id: 'animacion', nombre: 'Animador', dep: 'Animación', base: 0.008 },
   ];
+  // Puestos que ya no se contratan: del vestuario y los efectos se encarga el diseñador de arte y tecnología.
+  // Siguen aquí para leer las obras y los talentos de las partidas viejas.
+  const oficiosRetirados = [
+    { id: 'vestuario', nombre: 'Diseñador de vestuario', dep: 'Vestuario y maquillaje', base: 0.005 },
+    { id: 'efectos', nombre: 'Supervisor de efectos', dep: 'Efectos', base: 0.007 },
+  ];
   // Cuántos talentos de cada oficio hay en el mundo (se mantiene con nuevas generaciones)
-  const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 90, interprete: 380, vestuario: 60, efectos: 60, animacion: 60 };
+  const poblacionTalentos = { guion: 110, direccion: 110, produccion: 90, fotografia: 90, musica: 80, edicion: 80, arte: 130, interprete: 380, animacion: 60 };
 
   // ---------- Familias y géneros del cine (pestaña Taxonomía) ----------
   // edades: afinidad de cada grupo [niños 0-12, adolescentes 13-17, jóvenes 18-34, adultos 35-59, mayores 60+]
@@ -523,7 +526,7 @@ ART.datos = (function () {
     pisos: pisos, terrenos: terrenos, MAX_PISOS: MAX_PISOS, MAX_TERRENOS: MAX_TERRENOS,
     premios: premios, cronologia: cronologia, tecnologias: tecnologias,
     region: buscador(regiones), pais: buscador(paises), familia: buscador(familias),
-    clasificacion: buscador(clasificaciones), oficio: buscador(oficios),
+    clasificacion: buscador(clasificaciones), oficio: buscador(oficios.concat(oficiosRetirados)),
   };
   // Búsqueda por id con un índice (se usa miles de veces por semana)
   function buscador(lista) {

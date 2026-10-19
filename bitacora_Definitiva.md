@@ -1,4 +1,4 @@
-# Bitácora · INDUSTRY ART Definitiva (4.0, guardado 38)
+# Bitácora · INDUSTRY ART Definitiva (4.0, guardado 39)
 
 Base: la Definitiva 3.0 (guardado 37), con lo que faltaba de la Final y de la V36. No se quitó nada: todo se complementó.
 Ideado y creado por OneZero · programado por Faro.
@@ -46,6 +46,32 @@ Ideado y creado por OneZero · programado por Faro.
 - Estilo más sereno, como el de la Final: colores planos, sin brillos; la selección se ve sin gritar.
 - El número de versión ya no aparece en los créditos, la portada ni los documentos.
 
+## Taxonomía completa de la Final
+
+- **Subgéneros**: 385 (antes 85). Los 12 grupos de la Final: Futuros y tecnología, Fantasía y mito, Horror, Crimen y
+  misterio, Vida y oficio, Motor y velocidad, Familia punk (retrofuturismos), Historia y época, Aventura y exploración,
+  Deporte y competencia, Relaciones y vida cotidiana, Música y escena; y además los géneros de la televisión, los
+  videojuegos, el teatro, la música y los libros que sirven de subgénero.
+- **Temas y tópicos**: 364 en 19 familias (antes 227 en 8): fantasía oscura y lo sobrenatural, motor y velocidad,
+  tópicos clásicos, trabajo y dinero, lugares y viajes, naturaleza, futuro, infancia y escuela, cuerpo y mente, fiestas y
+  ritos, y los tópicos literarios (carpe diem, memento mori, theatrum mundi…).
+- **Modas**: 44 subgéneros y géneros tienen sus años de moda (el cyberpunk de 1982 a 2000, el péplum de 1950 a 1965, el
+  K-pop de 2012 a 2025…): en esos años suman público; si llegan 30 años antes, la obra se adelanta a su época.
+- **Explorar por etiquetas**: 16 etiquetas (Época, Futuro y ciencia, Oscuro y miedo…) que filtran subgéneros, temas,
+  problemáticas y premisas, en Crear obra y en Obras › Taxonomía.
+- **Estilos de producción**: Expresionista, Neorrealista y Stop motion en el cine; en teatro, música, libros y videojuegos
+  sus estilos propios (Commedia dell'arte, Gran guiñol, Sinfónico, Acústico, Lo-fi casero, Folletín por entregas, Pulp,
+  Pixel art, Superproducción realista y los generales).
+- **Tipos de película**: Captura de movimiento (2004), Actores digitales (2031) y Captura volumétrica (2046).
+- **Arquetipos** con su forma femenina (Heroína, Villana, Maga…) y el arquetipo Normal.
+- La pestaña Taxonomía muestra además las premisas, los estilos, las modas y el explorador.
+
+## Equipo
+
+- Ya no hay Diseñador de vestuario ni Supervisor de efectos: de eso se encarga el Diseñador de arte y tecnología, con su
+  nota completa. Los efectos pueden encargarse además a un estudio externo. En las partidas viejas esos talentos pasan a
+  ser diseñadores de arte y las obras sin terminar los sueltan; los premios de vestuario y efectos van al diseñador de arte.
+
 ## Ediciones y paquetes
 
 Dos ediciones con todo desbloqueado: **completa** (de pago, sin anuncios) y **con anuncios** (gratis: uno al abrir y,
@@ -53,13 +79,13 @@ como mucho, otro cada 20 minutos en una pausa). Android con dos sabores (`.aab` 
 probar), iPhone por edición, PC (Windows, macOS y Linux), página instalable, Steam y Epic Games. Detalle en
 `docs/ediciones_y_tiendas.md`.
 
-## Pruebas (bot, estrategia normal, 200 años cada una)
+## Pruebas (bot, estrategia normal, 200 años cada una, con la taxonomía completa y el equipo nuevo)
 
 | Partida | Resultado |
 |---|---|
-| 1700 → 1900 | Sin errores · llega al cine con 4.000 M$ de hoy (antes 7.900) · obras que pierden 37 % · crecimiento real 5 % al año · todavía no es major en 1900 · guarda 288 KB comprimido |
-| 1900 → 2100 | Sin errores · major a los 27 años · obras que pierden 41 % · crecimiento 12 % al año · 11 % de los premios principales · cuota máxima 15 % · guarda 2,4 MB comprimido |
-| 2100 → 2300 | Sin errores (antes quebraba en 2117), ya con las crisis y la tecnología del futuro · major a los 15 años · obras que pierden 37 % · crecimiento 11 % al año · cuota máxima 14 % · guarda 2,9 MB comprimido |
+| 1700 → 1900 | Sin errores · llega al cine con 3.800 M$ de hoy · obras que pierden 35 % · crecimiento real 5 % al año · todavía no es major en 1900 · guarda 274 KB comprimido |
+| 1900 → 2100 | Sin errores · major a los 18 años · obras que pierden 38 % · crecimiento 12 % al año · cuota máxima 14 % · guarda 2,5 MB comprimido |
+| 2100 → 2300 | Sin errores, con las crisis y la tecnología del futuro · major a los 15 años · obras que pierden 35 % · crecimiento 10 % al año · cuota máxima 15 % · guarda 2,9 MB comprimido |
 
 Prueba de humo, todas las pestañas de las cinco secciones en 1750, 2000 y 2250, taller, editor de material,
 creador de talentos, modo inglés y las dos ediciones: sin errores en la página. APK de las dos ediciones verificados

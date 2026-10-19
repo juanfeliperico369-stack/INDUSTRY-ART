@@ -706,6 +706,8 @@ ART.ideas = (function () {
     if ((o.extras || 0) >= 12 && (fam === 'AA' || (o.epo && o.epo !== 'actualidad'))) pub += 1;
     add(ART.rodaje.ajusteNotas(o, anio)); // estilo de producción, método, terreno y sets
     pub += efectoPremisas(o, anio); // premisas y tropos
+    const mo = X.modaSub(o.sub, anio); // subgéneros de moda o adelantados a su época
+    crit += mo.crit; pub += mo.pub;
     add(efectoEnfoque(o)); // enfoque del estudio
     return { crit: crit, pub: pub };
   }
@@ -802,6 +804,7 @@ ART.ideas = (function () {
     if (enc >= 4) r.push('La combinación de géneros, temas y época encajó muy bien.');
     else if (enc <= -2) r.push('La combinación de géneros, temas y época chocó.');
     if (o.mat) { const m = X.material(o.mat); if (m) r.push('Basada en «' + m.tit + '»: una historia que el público ya conocía.'); }
+    X.modaSub(o.sub, o.anioPlan || N.anio()).notas.forEach(function (n) { r.push(n[1] + '.'); });
     return r;
   }
 
