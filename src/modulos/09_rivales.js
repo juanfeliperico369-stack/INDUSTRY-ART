@@ -33,6 +33,17 @@ ART.rivales = (function () {
     { anio: 2031, nombre: 'Sintética', pais: 'us', familia: 'IM', tam: 0.8, calidad: 1, riesgo: 0.9, texto: 'Todo hecho con IA' },
     { anio: 2058, nombre: 'Megaciudad Films', pais: 'ng', familia: 'DR', tam: 0.8, calidad: 2, riesgo: 0.5, texto: 'Historias de las nuevas megaciudades' },
     { anio: 2104, nombre: 'Órbita Baja', pais: 'us', familia: 'IM', tam: 0.7, calidad: 2, riesgo: 0.8, texto: 'Cine filmado en órbita' },
+    { anio: 2036, nombre: 'Inmersa', pais: 'kr', familia: 'IM', tam: 0.7, calidad: 0, riesgo: 0.6, texto: 'Experiencias inmersivas' },
+    { anio: 2072, nombre: 'Holograma Norte', pais: 'ca', familia: 'FJ', tam: 0.6, calidad: 2, riesgo: 0.6, texto: 'Teatro holográfico' },
+    { anio: 2090, nombre: 'Pulso Neural', pais: 'jp', familia: 'IM', tam: 0.6, calidad: 2, riesgo: 0.6, texto: 'Obras que se sienten' },
+    { anio: 2130, nombre: 'Colectivo Sintético', pais: 'us', familia: 'DR', tam: 0.7, calidad: 3, riesgo: 0.6, texto: 'Talentos sintéticos' },
+    { anio: 2155, nombre: 'Colonia Creativa Selene', pais: 'us', familia: 'IM', tam: 0.6, calidad: 2, riesgo: 0.6, texto: 'Obras hechas en la Luna' },
+    { anio: 2172, nombre: 'Hélice Sintética', pais: 'cn', familia: 'SM', tam: 0.7, calidad: 1, riesgo: 0.6, texto: 'Mundos persistentes y música generada' },
+    { anio: 2198, nombre: 'Coro de Titán', pais: 'it', familia: 'DR', tam: 0.5, calidad: 3, riesgo: 0.6, texto: 'Teatro y ópera de hologramas' },
+    { anio: 2224, nombre: 'Archivo Vivo', pais: 'fr', familia: 'AA', tam: 0.6, calidad: 1, riesgo: 0.6, texto: 'Remakes del catálogo de la humanidad' },
+    { anio: 2247, nombre: 'Fábrica de Sueños Ganímedes', pais: 'us', familia: 'AA', tam: 0.8, calidad: 1, riesgo: 0.6, texto: 'Superproducciones para sueños compartidos' },
+    { anio: 2269, nombre: 'Colectivo Raíz', pais: 'mx', familia: 'DR', tam: 0.5, calidad: 3, riesgo: 0.6, texto: 'Obras hechas a mano y en vivo' },
+    { anio: 2286, nombre: 'Biblioteca Infinita', pais: 'in', familia: 'RD', tam: 0.5, calidad: 2, riesgo: 0.6, texto: 'Libros de memoria implantada' },
   ];
   // ---------- Estudios que nacen solos ----------
   // El mundo quiere más estudios a medida que crece el mercado. La mitad los funda una estrella o un director famoso

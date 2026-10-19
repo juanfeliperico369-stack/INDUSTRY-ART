@@ -146,15 +146,19 @@ ART.arte = (function () {
     '"Arial Black",sans-serif', '"Comic Sans MS",cursive', 'Garamond,serif', '"Brush Script MT",cursive',
     '"Lucida Console",monospace', 'Copperplate,fantasy', 'Optima,sans-serif', 'Futura,sans-serif',
     '"Gill Sans",sans-serif', 'Rockwell,serif', 'Didot,serif', 'Baskerville,serif',
+    // Doce más: la de títulos del juego (va incrustada, se ve igual en todos lados) y clásicas de imprenta y cartelería
+    "'Titulos',Impact,sans-serif", '"Book Antiqua",Palatino,serif', '"Century Gothic",Futura,sans-serif', '"Franklin Gothic Medium","Arial Narrow",sans-serif',
+    '"Lucida Handwriting",cursive', '"Segoe Script","Brush Script MT",cursive', 'Papyrus,fantasy', '"Bodoni MT",Didot,serif',
+    'Cambria,Georgia,serif', '"Segoe UI",Roboto,sans-serif', 'Consolas,"Courier New",monospace', '"Avenir Next",Avenir,sans-serif',
   ];
   const colorFondo = (i) => `hsl(${(i | 0) * 18},40%,${12 + ((i | 0) % 4) * 3}%)`;
   const colorFrente = (i) => `hsl(${(i | 0) * 18},78%,60%)`;
   // Color de las letras del letrero: 0 blanco, 1 crema, 2 dorado; el resto, un tono vivo de la rueda de color
   const colorTexto = (i) => (i | 0) === 0 ? '#ffffff' : (i | 0) === 1 ? '#f3e2b8' : (i | 0) === 2 ? '#f5c542' : `hsl(${(i | 0) * 18},85%,72%)`;
   // Tipo de letra: familia, grosor, cursiva y espaciado. Como muchos celulares no tienen esas fuentes, el grosor, la
-  // cursiva y el espaciado hacen que cada una de las 20 se vea distinta en cualquier aparato.
+  // cursiva y el espaciado hacen que cada una de las 32 se vea distinta en cualquier aparato.
   function estiloLetra(f) {
-    f = (f | 0) % 20;
+    f = (f | 0) % FUENTES.length;
     return { fam: FUENTES[f], peso: [700, 400, 900][f % 3], cursiva: f % 4 === 3, espacio: [0, 0.08, 0.18, -0.02, 0.04][f % 5] };
   }
   function fuenteLetra(f, px) { const e = estiloLetra(f); return (e.cursiva ? 'italic ' : '') + e.peso + ' ' + Math.round(px) + 'px ' + e.fam; }
@@ -281,7 +285,7 @@ ART.arte = (function () {
 
   function logoAleatorio(n) {
     const q = azar(hash('logo#' + n));
-    return { s: entero(q, 0, 19), c: entero(q, 0, 19), b: entero(q, 0, 19), t: entero(q, 0, 19), f: entero(q, 0, 19) };
+    return { s: entero(q, 0, 19), c: entero(q, 0, 19), b: entero(q, 0, 19), t: entero(q, 0, 19), f: entero(q, 0, FUENTES.length - 1) };
   }
 
   const colorLogo = (L) => colorFrente(L ? L.c : 6);

@@ -47,7 +47,9 @@ ART.pantallas = (function () {
   const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'OneZero', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
     tipo: 'Estudio', industria: 'Cine', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
     region: 'losangeles', sufijo: 'Pictures', tf: 'escuela', arq: 'visionario', modo: 'dueno', oficio: 'direccion', enfG: ['Drama', 'Comedia', 'Aventura'], enfT: ['', '', ''] };
-  const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville'];
+  const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville',
+    'Títulos del juego', 'Book Antiqua', 'Century Gothic', 'Franklin Gothic', 'Lucida Handwriting', 'Segoe Script', 'Papyrus', 'Bodoni', 'Cambria', 'Segoe UI', 'Consolas', 'Avenir'];
+  function maxLogo(k) { return k === 'f' ? NOMBRES_FUENTE.length - 1 : 19; }
   // Nueva partida en cinco pasos: época, lugar, tu estudio, tú y la partida. Solo se abre un paso a la vez; los
   // demás muestran en una línea lo que ya elegiste. «Empezar» está siempre al final.
   const PASOS_NP = ['Época', 'Lugar', 'Tu estudio', 'Tu avatar', 'La partida'];
@@ -193,7 +195,7 @@ ART.pantallas = (function () {
   const NOMBRES_LOGO = { s: 'Tipo de logo', c: 'Color del logo', b: 'Color de fondo', t: 'Color de letras', f: 'Tipo de letra' };
   function textoLogo(k, v) { return k === 'f' ? NOMBRES_FUENTE[v] : String(+v + 1) + ' de 20'; }
   function deslizadorLogo(k, v, accion) {
-    return '<label class="campo rango"><span>' + NOMBRES_LOGO[k] + ': <b id="lg-' + accion + '-' + k + '">' + esc(textoLogo(k, v)) + '</b></span><input type="range" min="0" max="19" step="1" value="' + v + '" data-i="' + accion + '" data-c="' + accion + 'Fin" data-k="' + k + '" aria-label="' + NOMBRES_LOGO[k] + '"></label>';
+    return '<label class="campo rango"><span>' + NOMBRES_LOGO[k] + ': <b id="lg-' + accion + '-' + k + '">' + esc(textoLogo(k, v)) + '</b></span><input type="range" min="0" max="' + maxLogo(k) + '" step="1" value="' + v + '" data-i="' + accion + '" data-c="' + accion + 'Fin" data-k="' + k + '" aria-label="' + NOMBRES_LOGO[k] + '"></label>';
   }
   // Panel, textura, posición del logo y la línea con la industria
   function opcionesLetrero(L, quien) {
@@ -210,7 +212,7 @@ ART.pantallas = (function () {
   ac('lgInd', function (v, el) { const L = el.getAttribute('data-k') === 'np' ? U.estado.logoNuevo : est0().logo; if (!L) return; L.ind = v ? 1 : 0; cacheT = -1; if (el.getAttribute('data-k') === 'np') redibujarNP(); else U.refrescar(); });
   function moverLogo(L, el, accion, raiz) {
     const k = el.getAttribute('data-k');
-    L[k] = N.limitar(Math.round(+el.value), 0, 19);
+    L[k] = N.limitar(Math.round(+el.value), 0, maxLogo(k));
     const lbl = document.getElementById('lg-' + accion + '-' + k);
     if (lbl) lbl.textContent = textoLogo(k, L[k]);
     const r = document.getElementById(raiz);
@@ -321,13 +323,20 @@ ART.pantallas = (function () {
     fechas.sort(function (a, b) { return a.t - b.t; });
     return fechas.slice(0, 8);
   }
+  // Estudio: Inicio, Metas y Editor (como en la Final; Metas y Editor siguen también en Mundo)
   function estudio() {
+    const s = sub('estudio', 'inicio');
+    const tabs = pestanas('estudio', [['inicio', 'Inicio'], ['metas', 'Metas'], ['editor', 'Editor']], s);
+    if (s === 'metas' || s === 'editor') return titulo(est0().nombre, 'estudio') + tabs + (s === 'metas' ? ART.metasUI.metas() : ART.metasUI.editor());
+    return estudioInicio(tabs);
+  }
+  function estudioInicio(tabs) {
     const S = N.S, est = est0();
     const cuota = NG.cuotaAnioActual(0);
     const enMarcha = O.enProduccion(0).length;
     const tl = tareas();
     const fechas = proximasFechas();
-    return titulo(est.nombre, 'estudio') +
+    return titulo(est.nombre, 'estudio') + tabs +
       '<canvas id="lienzoEstudio" class="estudio-lienzo" role="img" aria-label="Tu estudio: toca un piso para ver su departamento" data-a="tocarEstudio"></canvas>' +
       '<div class="dos" style="margin-top:10px"><div>' +
       '<div class="tarjeta"><h3>' + t('est_tareas') + '</h3>' + (tl.length ? tl.map(function (x) {
@@ -448,11 +457,29 @@ ART.pantallas = (function () {
     return '<div class="tarjeta toque" data-a="verObra" data-v="' + o.id + '"><canvas class="poster" data-poster="' + o.id + '"></canvas><div class="col crece">' +
       '<b>' + esc(o.tit) + '</b><span class="tenue chico">' + esc(generosTxt(o)) + ' · ' + esc(o.clas) + (o.est !== 0 ? ' · ' + esc(nombreEstudio(o.est)) : '') + '</span>' + (extra || '') + '</div></div>';
   }
+  // Material propio y con licencia, guiones a la venta y la taxonomía completa de la fábrica de ideas
+  function obrasExtra(s) {
+    const S = N.S;
+    if (s === 'taxonomia') return ART.creacion.taxonomia();
+    if (s === 'material') {
+      const libres = ART.taxonomia.dominio.filter(function (m) { return ART.ideas.esLibre(m, N.anio()); }).length;
+      return ART.materialUI.tarjetaPropios() + '<div class="tarjeta"><h3>Adaptar un material</h3><p class="nota info">Novelas, obras de teatro, cómics y juegos para adaptar: ' + libres + ' ya son de dominio público y el resto se compra con derechos.</p>' +
+        '<button class="btn primario" data-a="obDesdeMaterial">' + icono('libro') + 'Crear una obra desde un material</button></div>';
+    }
+    const propios = S.guionesPropios || [], venta = S.guiones || [];
+    const fila = function (g, propio) { return '<div class="cal-ev"><div class="col crece"><b>' + esc((g.idea.gen || []).join(' · ')) + '</b><span class="tenue chico">' + (propio ? 'Tuyo · calificación ' + g.calif : 'Lectura ' + (g.lect !== undefined ? g.lect : g.calif) + ' · ' + dinero(g.precio)) + '</span></div></div>'; };
+    return '<div class="tarjeta"><h3>Guiones</h3><p class="nota info">Guiones ya escritos: los compras y los produces sin esperar el desarrollo. Los tuyos llegan por eventos, encargos y talentos.</p>' +
+      (propios.length ? '<h4>Tus guiones (' + propios.length + ')</h4>' + propios.map(function (g) { return fila(g, true); }).join('') : '') +
+      '<h4>En venta (' + venta.length + ')</h4>' + (venta.length ? venta.slice(0, 12).map(function (g) { return fila(g, false); }).join('') : '<p class="tenue">No hay guiones en venta ahora.</p>') +
+      '<div class="fila" style="margin-top:8px"><button class="btn primario" data-a="obGuiones">Ver, leer y comprar guiones</button></div></div>';
+  }
+  ac('obDesdeMaterial', function () { U.acciones.crearObra(); U.acciones.crCamino('material'); });
+  ac('obGuiones', function () { U.acciones.crearObra(); U.acciones.crCamino('guion'); });
   function obras() {
     const s = sub('obras', 'marcha');
     const marcha = O.enProduccion(0), listas = O.delEstudio(0, ['lista']), cart = O.delEstudio(0, ['cartelera', 'emision']);
     let h = titulo(t('sec_obras'), 'obras', '<button class="btn primario" data-a="crearObra">' + icono('mas') + t('crear_obra') + '</button>' + (ART.tv.puedeTV(N.anio()) ? '<button class="btn" data-a="tvNuevaSerie">' + icono('mas') + 'Nueva serie</button>' : '')) +
-      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')], ['franquicias', 'Franquicias'], ['adquisicion', 'Adquisición'], ['musica', 'Música'], ['juegos', 'Videojuegos'], ['teatro', 'Teatro'], ['libros', 'Libros'], ['filmografia', 'Filmografía'], ['panel', 'Panel']], s);
+      pestanas('obras', [['marcha', t('obras_marcha') + ' (' + marcha.length + ')'], ['listas', t('obras_listas') + ' (' + listas.length + ')'], ['cartelera', t('obras_cartelera') + ' (' + cart.length + ')'], ['catalogo', t('obras_catalogo')], ['franquicias', 'Franquicias'], ['adquisicion', 'Adquisición'], ['musica', 'Música'], ['juegos', 'Videojuegos'], ['teatro', 'Teatro'], ['libros', 'Libros'], ['filmografia', 'Filmografía'], ['panel', 'Panel'], ['material', 'Material'], ['guiones', 'Guiones'], ['taxonomia', 'Taxonomía']], s);
     h += '<div class="lista-obras">';
     if (s === 'marcha') {
       h += ART.teleUI.pilotos();
@@ -476,6 +503,8 @@ ART.pantallas = (function () {
       h += '</div>' + (s === 'franquicias' ? ART.teleUI.franquicias() : ART.teleUI.adquisicion()) + '<div>';
     } else if (s === 'filmografia' || s === 'panel') {
       h += '</div>' + (s === 'panel' ? ART.prensaUI.panel() : ART.prensaUI.filmografia()) + '<div>';
+    } else if (s === 'material' || s === 'guiones' || s === 'taxonomia') {
+      h += '</div>' + obrasExtra(s) + '<div>';
     } else {
       const cat = N.S.obras.filter(function (o) { return o.est === 0 && o.et === 'terminada'; }).sort(function (a, b) { return b.fe - a.fe; });
       const tope = U.estado.catalogoVer || 30; // De 30 en 30 (un catálogo de cientos de obras pesaba en el celular)
@@ -672,8 +701,8 @@ ART.pantallas = (function () {
   // =====================================================================
   function negocio() {
     const s = sub('negocio', 'finanzas');
-    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['banco', 'Banco'], ['imperio', 'Imperio'], ['mercado', t('neg_mercado')]], s) +
-      ({ finanzas: nFinanzas, estudio: nEstudio, sede: ART.calendarioUI.negocioSede, distribucion: ART.distribucion.negocioDistribucion, canal: ART.teleUI.canal, streaming: ART.teleUI.streaming, banco: ART.imperioUI.banco, imperio: ART.imperioUI.imperio, mercado: nMercado }[s] || nFinanzas)();
+    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['banco', 'Banco'], ['imperio', 'Imperio'], ['inventos', 'Inventos'], ['mercado', t('neg_mercado')]], s) +
+      ({ finanzas: nFinanzas, estudio: nEstudio, sede: ART.calendarioUI.negocioSede, distribucion: ART.distribucion.negocioDistribucion, canal: ART.teleUI.canal, streaming: ART.teleUI.streaming, banco: ART.imperioUI.banco, imperio: ART.imperioUI.imperio, inventos: ART.imperioUI.inventos, mercado: nMercado }[s] || nFinanzas)();
   }
   // Primero lo operativo y la utilidad; debajo, el capital (préstamos, socio, acciones), que mueve la caja pero no paga impuestos
   function tablaLibro(libro) {

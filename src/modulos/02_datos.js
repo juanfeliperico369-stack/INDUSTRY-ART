@@ -318,6 +318,17 @@ ART.datos = (function () {
     { id: 'efectos', nombre: 'Taller de efectos', desde: 1925, costo: 0.6, bono: { arte: 5 }, efecto: '+5 al arte y los efectos' },
     { id: 'marketing', nombre: 'Departamento de marketing', desde: 1915, costo: 0.35, marketing: 0.15, efecto: 'Tus campañas rinden 15 % más' },
     { id: 'archivo', nombre: 'Archivo y bóveda', desde: 1900, costo: 0.25, fijo: -0.1, efecto: 'Ordena el estudio: −10 % de gastos fijos' },
+    // Más infraestructura, del taller de 1700 a los laboratorios del futuro
+    { id: 'ensayos', nombre: 'Sala de ensayos', desde: 1700, costo: 0.25, bono: { interprete: 2 }, efecto: '+2 a la actuación: el elenco llega ensayado' },
+    { id: 'vestuario', nombre: 'Taller artesanal de vestuario', desde: 1700, costo: 0.25, bono: { vestuario: 3 }, efecto: '+3 en vestuario y maquillaje' },
+    { id: 'escenografia', nombre: 'Taller de escenografía', desde: 1750, costo: 0.3, bono: { arte: 2 }, efecto: '+2 en diseño de arte' },
+    { id: 'revelado', nombre: 'Laboratorio de revelado', desde: 1910, costo: 0.35, bono: { fotografia: 3 }, efecto: '+3 en fotografía' },
+    { id: 'foley', nombre: 'Estudio de Foley', desde: 1927, costo: 0.3, bono: { musica: 2 }, efecto: '+2 en música y sonido: pasos, puertas y lluvia hechos a mano' },
+    { id: 'masterizacion', nombre: 'Estudio de masterización', desde: 1948, costo: 0.35, bono: { musica: 2, edicion: 1 }, efecto: '+2 en música y +1 en edición' },
+    { id: 'realidad', nombre: 'Sala de realidad mixta', desde: 2035, costo: 0.9, bono: { fotografia: 3 }, efecto: '+3 en fotografía: el público entra en la historia' },
+    { id: 'volumetrico', nombre: 'Estudio volumétrico', desde: 2046, costo: 1, bono: { fotografia: 2, arte: 2 }, efecto: '+2 en fotografía y arte: escenas que se ven desde cualquier lado' },
+    { id: 'neuronal', nombre: 'Laboratorio neuronal', desde: 2085, costo: 1.2, bono: { direccion: 3 }, efecto: '+3 en dirección: obras que se sienten por dentro' },
+    { id: 'sinteticos', nombre: 'Granja de talentos sintéticos', desde: 2125, costo: 1.2, bono: { interprete: 3 }, efecto: '+3 en actuación con intérpretes que nunca envejecen' },
   ];
   const terrenos = [
     { id: 'backlot', nombre: 'Backlot (calles y sets)', desde: 1910, costo: 1.4, capacidad: 2, ahorro: 0.08, efecto: '+2 proyectos a la vez y −8 % en producción' },
@@ -333,6 +344,15 @@ ART.datos = (function () {
     { id: 't_bosque', nombre: 'Bosque propio', terreno: 'bosque', desde: 1910, costo: 0.4, efecto: 'Rodar en el bosque: más barato, más seguro y una semana menos' },
     { id: 't_tropico', nombre: 'Finca en el trópico', terreno: 'tropico', desde: 1920, costo: 0.5, efecto: 'Rodar en el trópico: más barato, más seguro y una semana menos' },
     { id: 't_artico', nombre: 'Base en el ártico', terreno: 'artico', desde: 1935, costo: 0.7, efecto: 'Rodar en el ártico: más barato, más seguro y una semana menos' },
+    // Infraestructura del futuro (ficción)
+    { id: 'submarino', nombre: 'Plató submarino', desde: 2067, costo: 1.1, bono: { arte: 3 }, familias: ['AA', 'IM', 'AV'], efecto: '+3 en aventura, acción e imaginación con la luz del océano' },
+    { id: 'domo', nombre: 'Domo de clima artificial', desde: 2078, costo: 1.2, ahorro: 0.04, efecto: '−4 % en producción: llueve o hace sol cuando el guion lo pide' },
+    { id: 'orbital', nombre: 'Plató orbital', desde: 2100, costo: 2, capacidad: 1, bono: { arte: 3 }, efecto: '+1 proyecto a la vez y +3 en arte: rodajes en gravedad cero' },
+    { id: 'puerto', nombre: 'Puerto espacial de producción', desde: 2120, costo: 2.2, capacidad: 1, ahorro: 0.04, efecto: '+1 proyecto a la vez y −4 % en producción' },
+    { id: 'marte', nombre: 'Base de rodaje en Marte', desde: 2190, costo: 2.4, bono: { arte: 4 }, familias: ['IM', 'AA'], efecto: '+4 en imaginación y acción: paisajes del planeta rojo' },
+    { id: 'anfiteatro', nombre: 'Anfiteatro holográfico', desde: 2196, costo: 1.8, bono: { efectos: 4 }, efecto: '+4 en efectos: decorados que se pueden tocar' },
+    { id: 'nave', nombre: 'Nave estudio', desde: 2222, costo: 2.6, capacidad: 1, bono: { fotografia: 2, musica: 2 }, efecto: '+1 proyecto a la vez, +2 en fotografía y en música: filma y graba entre planetas' },
+    { id: 'lunar', nombre: 'Plató lunar', desde: 2250, costo: 2, capacidad: 2, ahorro: 0.05, efecto: '+2 proyectos a la vez y −5 % en producción: en la Luna rodar sale más barato' },
     { id: 't_mar', nombre: 'Costa y muelle propios', terreno: 'mar', desde: 1915, costo: 0.6, efecto: 'Rodar en el mar: más barato, más seguro y una semana menos' },
   ];
   const MAX_PISOS = 10, MAX_TERRENOS = 10;

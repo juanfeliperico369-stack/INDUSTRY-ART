@@ -77,13 +77,30 @@ ART.imperioUI = (function () {
       (a >= 1950 ? '<div class="fila">' + sel('imEvObra', [['', 'Sin obra en especial']].concat(O.enProduccion(0).concat(O.delEstudio(0, ['lista'])).map(function (o) { return [o.id, o.tit]; })), '') + btn('Organizar convención · ' + dinero(I.costoEvento()), 'imEvento', '', 'primario') + '</div>' : '');
     const inv = I.investigando();
     h += '<h3>Investigación</h3>' + (inv ? '<p class="bien">Investigas «' + esc(I.invento(inv.id).nombre) + '»: faltan ' + inv.sr + ' semanas.</p>' : '') + '<p class="nota info">Un invento propio o licenciado da +1 a su departamento (hasta +3) mientras es novedad (hasta 5 años después de llegar al mundo).</p><div class="col">' +
-      ART.historia.INVENTOS.filter(function (x) { const e = I.estadoInvento(x); return e !== 'mundo' || x.anio > a - 5; }).slice(0, 14).map(function (x) {
-        const e = I.estadoInvento(x), nom = { tuyo: 'Tuyo', licencia: 'Licenciado', mundo: 'Ya llegó al mundo', rival: 'Lo tiene un rival', investigable: 'Investigable', futuro: 'Futuro' }[e];
-        const accion = e === 'investigable' ? btn('Investigar · ' + dinero(I.costoInvento(x)) + ' · ' + I.semanasInvento(x) + ' sem', 'imInvestigar', x.id, 'primario', inv ? 'Ya investigas otra cosa' : '') : e === 'rival' ? btn('Licenciar · ' + dinero(I.costoLicenciaTec(x)), 'imLicTec', x.id) : '';
-        return '<div class="cal-ev"><b class="cifra">' + x.anio + '</b><div class="col crece"><span>' + esc(x.nombre) + '</span><span class="tenue chico">' + esc(nom) + ' · ' + esc(ART.rodaje.nombreDep(x.dep)) + '</span></div>' + accion + '</div>';
-      }).join('') + '</div>';
+      inventosPorAnio().filter(function (x) { const e = I.estadoInvento(x); return e !== 'mundo' || x.anio > a - 5; }).slice(0, 14).map(filaInvento).join('') + '</div>' +
+      '<button class="btn" data-a="imVerInventos">Ver todos los inventos hasta 2300</button>';
     return h;
   }
+  // Inventos en orden de llegada (los de ficción se agregaron al final de la lista para no cambiar ids)
+  function inventosPorAnio() { return ART.historia.INVENTOS.slice().sort(function (x, y) { return x.anio - y.anio; }); }
+  function filaInvento(x) {
+    const inv = I.investigando(), e = I.estadoInvento(x), nom = { tuyo: 'Tuyo', licencia: 'Licenciado', mundo: 'Ya llegó al mundo', rival: 'Lo tiene un rival', investigable: 'Investigable', futuro: 'Futuro' }[e];
+    const accion = e === 'investigable' ? btn('Investigar · ' + dinero(I.costoInvento(x)) + ' · ' + I.semanasInvento(x) + ' sem', 'imInvestigar', x.id, 'primario', inv ? 'Ya investigas otra cosa' : '') : e === 'rival' ? btn('Licenciar · ' + dinero(I.costoLicenciaTec(x)), 'imLicTec', x.id) : '';
+    return '<div class="cal-ev"><b class="cifra">' + x.anio + '</b><div class="col crece"><span>' + esc(x.nombre) + (x.anio > 2026 ? ' <span class="etiqueta">ficción</span>' : '') + '</span><span class="tenue chico">' + esc(nom) + ' · ' + esc(ART.rodaje.nombreDep(x.dep)) + '</span></div>' + accion + '</div>';
+  }
+  // Negocio › Inventos: toda la tecnología del arte, de 1895 a 2300
+  function inventos() {
+    const a = N.anio(), L = inventosPorAnio(), inv = I.investigando();
+    const grupo = function (titulo, l) { return l.length ? '<h3>' + titulo + ' (' + l.length + ')</h3><div class="col">' + l.map(filaInvento).join('') + '</div>' : ''; };
+    const est = function (x) { return I.estadoInvento(x); };
+    return '<p class="nota info">Cada invento da +1 a su departamento (hasta +3) a quien lo tiene antes que el mundo y hasta 5 años después. Investiga los que se acercan o licencia los que ya tiene un rival. Los posteriores a 2026 son ficción basada en predicciones.</p>' +
+      (inv ? '<p class="bien">Investigas «' + esc(I.invento(inv.id).nombre) + '»: faltan ' + inv.sr + ' semanas.</p>' : '') +
+      grupo('Para investigar o licenciar', L.filter(function (x) { const e = est(x); return e === 'investigable' || e === 'rival'; })) +
+      grupo('Tuyos y licenciados', L.filter(function (x) { const e = est(x); return e === 'tuyo' || e === 'licencia'; })) +
+      grupo('Lo que viene', L.filter(function (x) { return est(x) === 'futuro'; })) +
+      '<details><summary class="tenue">Ya llegaron al mundo (' + L.filter(function (x) { return est(x) === 'mundo'; }).length + ')</summary><div class="col">' + L.filter(function (x) { return est(x) === 'mundo'; }).reverse().map(filaInvento).join('') + '</div></details>';
+  }
+  ac('imVerInventos', function () { U.irA('negocio', 'inventos'); });
   ac('imSede', function () { avisar(I.abrirSede(val('imPais')), 'Sede abierta'); });
   ac('imCerrarSede', function (v) { I.cerrarSede(v); U.refrescar(); });
   ac('imComprarEst', function (v) { avisar(I.comprarEstudio(+v), 'Estudio comprado: ahora es tu filial'); U.refrescar(); });
@@ -200,5 +217,5 @@ ART.imperioUI = (function () {
   }
   ac('qbSalir', function (v) { const e = B.salir(v); if (e) return U.aviso(e, 'mal'); if (v === 'terminar') return quiebra(); U.cerrarModal(); U.aviso('El estudio sigue en pie'); U.refrescar(); });
 
-  return { banco: banco, imperio: imperio, rivales: rivales, historia: historia, bitacora: bitacora, curiosidad: curiosidad, mostrarEvento: mostrarEvento, quiebra: quiebra };
+  return { banco: banco, imperio: imperio, inventos: inventos, rivales: rivales, historia: historia, bitacora: bitacora, curiosidad: curiosidad, mostrarEvento: mostrarEvento, quiebra: quiebra };
 })();

@@ -233,6 +233,30 @@ ART.historia = (function () {
     [2020, 4, 23, 'Un concierto dentro de un videojuego reúne a millones de espectadores'],
     [2024, 7, 26, 'Huelga de actores de videojuegos por el uso de sus voces con IA'],
   ]);
+  // El futuro de ficción hasta 2300
+  HITOS.push.apply(HITOS, [
+    [2027, 6, 1, 'Huelga por las voces sintéticas en el doblaje'],
+    [2029, 4, 17, 'Ley mundial de autoría: lo hecho con IA debe decirlo'],
+    [2042, 6, 21, 'Primera serie interactiva de alcance masivo: el público decide la trama'],
+    [2050, 2, 3, 'Una temporada de tormentas cierra rodajes en tres continentes'],
+    [2058, 8, 12, 'Las megaciudades superan a los suburbios'],
+    [2078, 5, 5, 'Los mayores de 60 son el público más grande'],
+    [2085, 3, 9, 'Primeras obras con interfaces neuronales'],
+    [2092, 11, 23, 'Debate mundial sobre la censura de lo que se siente'],
+    [2100, 7, 4, 'Primer rodaje en órbita'],
+    [2112, 1, 15, 'Abren salas en las colonias orbitales'],
+    [2125, 6, 30, 'Los talentos sintéticos obtienen derechos'],
+    [2140, 9, 9, 'Archivo eterno: las obras ya no se pierden'],
+    [2141, 7, 20, 'Primer concierto en la Luna'],
+    [2175, 5, 1, 'Primer festival de cine en Marte'],
+    [2187, 3, 3, 'Primera película filmada en Marte'],
+    [2196, 2, 2, 'Hologramas sólidos: el teatro se puede tocar'],
+    [2231, 9, 9, 'Traducción mental: todas las obras en todos los idiomas'],
+    [2250, 3, 3, 'Abren los platós lunares'],
+    [2263, 6, 6, 'Estreno simultáneo en tres planetas'],
+    [2290, 12, 12, 'Se inaugura el Archivo de la Humanidad'],
+    [2300, 12, 31, 'Fin del recorrido: seis siglos de historia del arte'],
+  ]);
   HITOS.sort(function (a, b) { return (a[0] - b[0]) || (a[1] - b[1]) || (a[2] - b[2]); });
   // Periodos con efecto (t de inicio y fin se calculan con la fecha real)
   const PERIODOS = [
@@ -251,6 +275,19 @@ ART.historia = (function () {
     { id: 'asia1997', ini: [1997, 7, 2], fin: [1998, 12, 31], reg: ['asi'], f: 0.9 },
     { id: 'sars', ini: [2003, 3, 12], fin: [2003, 7, 5], reg: ['asi'], f: 0.85 },
     { id: 'crisis2008', ini: [2008, 9, 15], fin: [2009, 6, 30], f: 0.93 },
+    // El futuro (ficción): huelgas, crisis, guerras, una pandemia en las colonias y un renacimiento del teatro en vivo
+    { id: 'vocesSint', ini: [2027, 6, 1], fin: [2027, 9, 30], pausa: 'desarrollo' },
+    { id: 'eticaNeural', ini: [2089, 1, 10], fin: [2090, 1, 10], f: 0.9 },
+    { id: 'vejez', ini: [2096, 4, 1], fin: [2098, 4, 1], f: 0.93 },
+    { id: 'agua', ini: [2118, 5, 1], fin: [2121, 5, 1], f: 0.85 },
+    { id: 'redesOrb', ini: [2160, 3, 1], fin: [2163, 3, 1], f: 0.85 },
+    { id: 'marteReb', ini: [2175, 2, 1], fin: [2177, 2, 1], f: 0.9 },
+    { id: 'fiebreCol', ini: [2188, 6, 1], fin: [2190, 6, 1], f: 0.6 },
+    { id: 'teatroVivo', ini: [2205, 1, 1], fin: [2215, 1, 1], f: 1.1 },
+    { id: 'hieloLunas', ini: [2232, 9, 1], fin: [2234, 9, 1], f: 0.85 },
+    { id: 'orbitas', ini: [2255, 8, 1], fin: [2258, 8, 1], f: 0.85 },
+    { id: 'huelgaSint', ini: [2260, 4, 1], fin: [2260, 9, 1], pausa: 'rodaje' },
+    { id: 'desconexion', ini: [2280, 1, 1], fin: [2284, 1, 1], f: 0.8 },
   ];
   // Los 50 inventos del cine y los del futuro: dan +2 a su departamento a quien los tiene antes que el mundo
   // (y hasta 5 años después). Se investigan o se licencian a quien los tenga.
@@ -268,6 +305,15 @@ ART.historia = (function () {
     [2019, 'Plató virtual con pantallas', 'arte'], [2022, 'Imágenes generadas con IA', 'efectos'], [2028, 'Doblaje con IA', 'edicion'], [2033, 'Actores digitales con licencia', 'interprete'],
     [2040, 'Salas de realidad mixta', 'fotografia'], [2048, 'Hologramas en escena', 'efectos'], [2060, 'Sets climáticos virtuales', 'arte'], [2075, 'Guion asistido por emociones', 'guion'],
     [2088, 'Interfaz neuronal de rodaje', 'direccion'], [2105, 'Cámaras orbitales', 'fotografia'], [2130, 'Talentos sintéticos con derechos', 'interprete'], [2145, 'Montaje por pensamiento', 'edicion'],
+    // Tecnologías de ficción hasta 2300 (van al final para no cambiar los ids de las partidas guardadas)
+    [2042, 'Series interactivas', 'guion'], [2046, 'Captura volumétrica en vivo', 'fotografia'], [2058, 'Cámaras enjambre', 'fotografia'], [2060, 'Sonido háptico', 'musica'],
+    [2067, 'Estudios submarinos', 'arte'], [2071, 'Proyección holográfica en casa', 'efectos'], [2078, 'Clima a pedido', 'produccion'], [2093, 'Obras que se sienten', 'direccion'],
+    [2100, 'Plató en órbita', 'produccion'], [2105, 'Libros vivos', 'guion'], [2110, 'Telepresencia de actores', 'interprete'], [2116, 'Transmisión entre colonias', 'edicion'],
+    [2132, 'Conciertos en gravedad cero', 'musica'], [2140, 'Archivo eterno de obras', 'edicion'], [2150, 'Cielo como pantalla', 'efectos'], [2160, 'Sueños compartidos', 'direccion'],
+    [2178, 'Memoria implantada con permiso', 'guion'], [2185, 'Rodaje en Marte', 'arte'], [2196, 'Hologramas sólidos en escena', 'efectos'], [2205, 'Teatro en las colonias', 'direccion'],
+    [2214, 'Mundos persistentes entre planetas', 'animacion'], [2222, 'Grabación en el espacio profundo', 'fotografia'], [2231, 'Traducción mental instantánea', 'edicion'], [2240, 'Mundos de realidad total', 'animacion'],
+    [2250, 'Platós lunares', 'arte'], [2262, 'Estrenos interplanetarios simultáneos', 'produccion'], [2272, 'Coautores sintéticos con firma', 'guion'], [2285, 'Locaciones en asteroides', 'arte'],
+    [2290, 'Archivo de la humanidad', 'produccion'],
   ].map(function (x, i) { return { id: 'inv' + i, anio: x[0], nombre: x[1], dep: x[2] }; });
   function tDe(y, m, d) { return ART.cal.tDeFecha(y, m - 1, d); } // los hitos usan meses 1–12; el calendario, 0–11
   // La partida recuerda hasta qué semana procesó los hitos (tv), no su posición en la lista: así se pueden agregar

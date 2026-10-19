@@ -555,7 +555,7 @@ ART.creacion = (function () {
     const b = cr.b;
     let h = '<div class="fila entre"><h2>' + t('crear_obra') + '</h2><button class="btn" data-a="crModo" data-v="detallado">Modo detallado</button></div>';
     h += '<div class="cr-pasos" role="tablist">' + PASOS.map(function (p, i) { return '<button class="cr-paso' + (i === cr.paso ? ' on' : i < cr.paso ? ' hecho' : '') + '" role="tab" aria-selected="' + (i === cr.paso) + '" data-a="crIrPaso" data-v="' + i + '"><b>' + (i < cr.paso ? '✓' : i + 1) + '</b><span>' + t(p) + '</span></button>'; }).join('') + '</div><div class="cr-progreso"><i style="width:' + Math.round(cr.paso / (PASOS.length - 1) * 100) + '%"></i></div>';
-    if (cr.paso === 0) h += bloqueGeneros(b);
+    if (cr.paso === 0) h += (N.anio() >= D.CINE_DESDE ? bloqueObra(b) : '') + bloqueGeneros(b); // el tipo de obra se elige también en el modo rápido
     else if (cr.paso === 1) h += bloqueHistoria(b, false) + (cr.picker ? '' : bloqueTono(b) + '<p class="tenue">' + esc(I.sinopsis(b)) + '</p>');
     else if (cr.paso === 2) {
       h += '<p class="nota info">' + t('escala_ayuda') + '</p>' + D.escalas.map(function (es, i) {
