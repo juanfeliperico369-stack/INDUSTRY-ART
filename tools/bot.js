@@ -3,9 +3,9 @@
  * Bot de pruebas de INDUSTRY ART en un navegador real (Chromium sin pantalla).
  * Juega 3 estrategias (prudente, normal, agresiva) desde 1900 y desde 2000 hasta 2150 con semillas fijas,
  * revisa las metas de balance, los errores, los tiempos y el tamaño del guardado comprimido, y escribe
- * pruebas/informe_bot_v36.md y pruebas/informe_bot_v36.json, con las pruebas de reglas de la V17 a la V36.
+ * pruebas/informe_bot_definitiva.md y pruebas/informe_bot_definitiva.json, con las pruebas de reglas y el verificador del juego.
  *
- * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_v36.html]
+ * Uso:  node tools/bot.js [--hasta 2150] [--semillas bot,b2] [--html INDUSTRY_ART_Definitiva.html]
  * Necesita Playwright (en el entorno de Claude viene instalado; no hace falta npm install).
  */
 const path = require('path');
@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const arg = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const HASTA = +arg('hasta', 2150);
 const SEMILLAS = arg('semillas', 'bot,b2').split(',');
-const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_v36.html'));
+const HTML = path.resolve(RAIZ, arg('html', 'INDUSTRY_ART_Definitiva.html'));
 const ESTRATEGIAS = ['prudente', 'normal', 'agresiva'];
 const DESDE = [1900, 2000];
 
@@ -27,6 +27,7 @@ async function partida(navegador, estrategia, desde, semilla) {
   pagina.on('pageerror', (e) => errores.push('Error de página: ' + e.message));
   pagina.on('console', (m) => { if (m.type() === 'error') errores.push('Consola: ' + m.text()); });
   await pagina.goto('file://' + HTML);
+  await pagina.evaluate(() => { window.IA = window.IA || window.ART; });
   const r = await pagina.evaluate(async (op) => {
     let foto150 = null;
     const res = IA.pruebas.jugar({
@@ -38,6 +39,13 @@ async function partida(navegador, estrategia, desde, semilla) {
     const final = await IA.guardado.medir();
     res.guardadoFinal = final;
     res.memoria = performance.memory ? performance.memory.usedJSHeapSize : null;
+    const meds = {};
+    (IA.medios ? IA.medios.proyectos() : []).filter((p) => p.pub !== undefined && p.tipo !== 'jingle').forEach((p) => {
+      const m = meds[p.med] = meds[p.med] || [];
+      m.push((p.ing + (p.finJ ? p.finJ.ap : 0) - p.gas) / Math.max(1, p.costo));
+    });
+    res.medios = {};
+    Object.keys(meds).forEach((k) => { const v = meds[k].sort((a, b) => a - b); res.medios[k] = { n: v.length, mediana: v[v.length >> 1], pierden: v.filter((x) => x < 0).length / v.length }; });
     // Prueba de guardado real en IndexedDB y de carga
     const g = await IA.guardado.guardar('m5');
     const c = await IA.guardado.cargar('m5');
@@ -56,6 +64,7 @@ async function rendimientoLento(navegador) {
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   const t0 = Date.now();
   await pagina.goto('file://' + HTML);
+  await pagina.evaluate(() => { window.IA = window.IA || window.ART; });
   await pagina.waitForSelector('#btnContinuar, .portada');
   const abrir = Date.now() - t0;
   const r = await pagina.evaluate(() => {
@@ -98,9 +107,13 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   // Pruebas de reglas (clasificación, dominio público, Erótico, inflación y población)
   const pr = await navegador.newPage();
   await pr.goto('file://' + HTML);
+  await pr.evaluate(() => { window.IA = window.IA || window.ART; });
   await pr.addScriptTag({ path: path.join(RAIZ, 'tools', 'reglas.js') }); // las reglas viven fuera del juego
   const reglas = await pr.evaluate(() => { IA.juego.nuevaPartida({ semilla: 'reglas', anio: 2000, bot: true }); return IA.pruebas.reglas(); });
+  const verif = await pr.evaluate(() => (IA.verificador ? IA.verificador.correr() : null));
   await pr.close();
+  if (verif)
+    console.log('verificador', verif.ok ? 'sin errores' : verif.errores.length + ' errores', verif.vistas + ' pantallas', verif.clics + ' botones');
   console.log('reglas', reglas.filter((x) => x.ok).length + '/' + reglas.length);
   await navegador.close();
 
@@ -115,7 +128,7 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
     ['Cuota de mercado', 'menos de 35 %', (r) => r.cuotaMax < 0.35, (r) => pct(r.cuotaMax) + ' máx.'],
   ];
   const fecha = new Date().toISOString().slice(0, 10);
-  let md = '# Informe del bot · INDUSTRY ART V22\n\n';
+  let md = '# Informe del bot · INDUSTRY ART Definitiva\n\n';
   md += `Fecha: ${fecha} · Navegador: Chromium sin pantalla · ${resultados.length} partidas hasta ${HASTA} · semillas fijas: ${SEMILLAS.join(', ')}\n\n`;
   const totalErrores = resultados.reduce((a, r) => a + r.errores.filter((e) => !/^Quiebra del bot/.test(e)).length, 0);
   md += `**Errores del juego en todas las partidas: ${totalErrores}.** Quiebras del bot: ${resultados.filter((r) => r.quiebra).length}.\n\n`;
@@ -131,6 +144,12 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   for (const r of resultados) {
     md += `| ${r.estrategia} | ${r.desde} | ${r.semilla.split('-')[0]} | ×${r.multMediano.toFixed(2)} | ${pct(r.sobre5)} | ${pct(r.pierden)} | ${pct(r.crecimiento30)} | ${pct(r.crecimientoArranque)} | ${pct(r.premiosJugador)} | ${r.aniosAMajor === null ? 'nunca' : r.aniosAMajor} | ${pct(r.cuotaMax)} | ×${r.multMedianoJugador.toFixed(2)} | ${pct(r.pierdenJugador)} | ${r.rescatesRivales} |\n`;
   }
+  md += '\n## Música, videojuegos, teatro y libros\n\nResultado neto sobre el costo de cada proyecto terminado (ventas, aportes de socios y gastos), estrategia normal.\n\n| Medio | Proyectos | Mediana | Pierden |\n|---|---|---|---|\n';
+  const mm = {};
+  resultados.filter((r) => r.estrategia === 'normal' && r.medios).forEach((r) => Object.keys(r.medios).forEach((k) => { const x = mm[k] = mm[k] || { n: 0, med: 0, p: 0 }; x.n += r.medios[k].n; x.med += r.medios[k].mediana * r.medios[k].n; x.p += r.medios[k].pierden * r.medios[k].n; }));
+  Object.keys(mm).sort().forEach((k) => { md += `| ${k} | ${mm[k].n} | ${(mm[k].med / mm[k].n).toFixed(2).replace('.', ',')} | ${pct(mm[k].p / mm[k].n)} |\n`; });
+  if (verif)
+    md += `\n## Verificador del juego\n\n${verif.vistas} pantallas, ${verif.clics} botones, ${verif.semanas} semanas simuladas en ${verif.anios.join(', ')}: ` + (verif.ok ? '**sin errores**.' : `**${verif.errores.length} problemas**:\n\n` + verif.errores.slice(0, 40).map((e) => '- ' + e).join('\n')) + '\n';
   md += '\n## Pruebas de reglas\n\n' + `**${reglas.filter((x) => x.ok).length} de ${reglas.length} pasan.**\n\n| Regla | Resultado |\n|---|---|\n` + reglas.map((x) => `| ${x.nombre} | ${x.ok ? '✅' : '❌'}${x.detalle ? ' ' + x.detalle : ''} |`).join('\n') + '\n';
   md += '\n## Fábrica de ideas: qué usó el bot\n\n| Estrategia | Desde | Semilla | Obras | Material | Guion comprado | IA | Efectos grandes (aplaudidos / repudiados) | Clasificaciones | Adaptaciones de rivales |\n|---|---|---|---|---|---|---|---|---|---|\n';
   for (const r of resultados) {
@@ -168,8 +187,8 @@ const med = (v) => { const s = v.slice().sort((a, b) => a - b); return s.length 
   md += `| Guardar y cargar en IndexedDB | sin fallos | ${resultados.every((r) => r.pruebaGuardado.guardar && r.pruebaGuardado.cargar) ? 'todas bien' : 'FALLÓ: ' + resultados.map((r) => r.pruebaGuardado.error).join('; ')} |\n`;
   md += '\n## Errores\n\n' + (totalErrores ? resultados.map((r) => r.errores.map((e) => `- ${r.estrategia} ${r.desde}: ${e}`).join('\n')).filter(Boolean).join('\n') : 'Ninguno.') + '\n';
   fs.mkdirSync(path.join(RAIZ, 'pruebas'), { recursive: true });
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v36.md'), md);
-  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_v36.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento, reglas }, null, 1));
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_definitiva.md'), md);
+  fs.writeFileSync(path.join(RAIZ, 'pruebas', 'informe_bot_definitiva.json'), JSON.stringify({ fecha, hasta: HASTA, resultados, lento, reglas, verif }, null, 1));
   console.log(md);
   process.exit(totalErrores ? 1 : 0);
 })();
