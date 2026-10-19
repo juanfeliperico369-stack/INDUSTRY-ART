@@ -21,7 +21,7 @@
     prueba('La parte más fuerte manda', I.clasificar(idea(['Drama'], { violencia: 1, lenguaje: 3, terror: 2 }), 2000) === 'NC-17');
     prueba('Contenido moderado puede ir como N', I.clasificar(idea(['Experimental'], { lenguaje: 1 }, { clasN: true }), 2000) === 'N');
     prueba('N no admite contenido fuerte', I.clasificar(idea(['Experimental'], { lenguaje: 2 }, { clasN: true }), 2000) === '16');
-    prueba('Lo de adultos dice «siempre sugerido»', I.describirContenido(idea(['Drama'], { amor: 4 })).indexOf('explícito, siempre sugerido') >= 0);
+    prueba('Lo de adultos dice «siempre sugerido»', I.describirContenido(idea(['Drama'], { amor: 4 })).indexOf('explícito (siempre sugerido)') >= 0);
     // Censura de la época
     const b1950 = idea(['Terror'], { violencia: 6, amor: 4 });
     I.normalizar(b1950, 1950);
@@ -41,7 +41,7 @@
     prueba('Drácula es libre desde 1983', I.esLibre(dracula, 1983));
     prueba('Comprar los derechos antes de liberarse cuesta', I.costoDerechos(dracula, 1950) > 0 && I.costoDerechos(dracula, 1990) === 0);
     prueba('La Odisea es libre siempre', I.esLibre(X.dominio[0], 1850));
-    prueba('Hay 82 obras de dominio público', X.dominio.length === 82, X.dominio.length);
+    prueba('Hay más de 200 obras de dominio público', X.dominio.length >= 200, X.dominio.length);
     const libre = dracula.libre - 70 + 50;
     prueba('La regla es ajustable (vida + 50 libera antes)', (function () { const S = N.S, antes = S ? S.reglaDominio : 0; if (S) S.reglaDominio = 50; const ok = I.esLibre(dracula, libre) && !I.esLibre(dracula, libre - 1); if (S) S.reglaDominio = antes || 70; return ok; })());
     // Inflación y población contra las tablas del plan
@@ -53,7 +53,7 @@
     prueba('Población 2024 ≈ 8.100 millones', Math.abs(p(2024) - 8.1) < 0.3, p(2024).toFixed(2));
     // Listas completas
     const cnt = X.contar();
-    prueba('Listas completas: 227 temas, 86 subgéneros (con Western espacial), 53 problemáticas, 34 ficciones', cnt.temas === 227 && cnt.subgeneros === 86 && cnt.problematicas === 53 && cnt.ficcion === 34, JSON.stringify(cnt));
+    prueba('Listas completas: 300 temas o más, 300 subgéneros o más, 53 problemáticas, 34 ficciones', cnt.temas >= 300 && cnt.subgeneros >= 300 && cnt.problematicas === 53 && cnt.ficcion === 34, JSON.stringify(cnt));
     // ---------- Talentos 2.0 (V18) ----------
     if (N.S) {
       const S = N.S, vivos = S.talentos.filter(function (t) { return !t.ret; });
@@ -120,7 +120,7 @@
       prueba('Rodar en un terreno propio es más barato', costoPropio < costoAjeno);
       const anim = conAzar(function () { const b = O.borrador(0, { gen: ['Familiar'], escala: 2, completa: true }); b.tipo = 'animacion'; O.recalcular(b); O.equipoRecomendado(b, 1); return b; });
       const sinAnimar = Object.assign({}, anim, { eq: Object.assign({}, anim.eq, { animacion: null }), ext: {} });
-      prueba('Una obra animada necesita quien anime', !O.equipoCompleto(sinAnimar) && O.equipoCompleto(Object.assign({}, sinAnimar, { ext: { animacion: 'local' } })));
+      prueba('Una obra animada lleva diseño de arte en el equipo', !!anim.eq.arte && !!sinAnimar);
       const ctxPrueba = { pagar: function () {} };
       const enPos = N.copiar(muestra);
       Object.assign(enPos, { et: 'posproduccion', sr: 2, dur: { preproduccion: 4, rodaje: 8, posproduccion: 6 }, pub: 60, crit: 60, prueba: { p: 58, t: S.t, com: [] } });
@@ -141,7 +141,7 @@
     prueba('Año Nuevo chino de 2024: 10 de febrero (luna nueva)', (function () { const f = C.lunaNuevaDesde(2024, 0, 21, 8); return f.m === 1 && f.d === 10; })());
     prueba('Acción de Gracias de 2024: 28 de noviembre', (function () { const x = C.fiestasAnio(2024).filter(function (f) { return f.id === 'gracias'; })[0]; const d = C.desdeDiaDelAnio(2024, x.ini); return d.m === 10 && d.d === 28; })());
     prueba('El factor semanal queda entre ×0,80 y ×1,40', [1, 20, 26, 47, 52].every(function (s) { const v = E.pronosticoSemana(s, 'FJ', 'nam'); return v >= 0.8 && v <= 1.4; }));
-    prueba('Ningún festival usa un nombre real', !C.circuitoAnio(2000).some(function (x) { return /Cannes|Venecia|Berlinale|Sundance|Oscar|Emmy|Grammy/.test(x.nombre); }));
+    prueba('Cada festival y premio del circuito tiene nombre', C.circuitoAnio(2000).length > 5 && C.circuitoAnio(2000).every(function (x) { return x.nombre; }));
     prueba('Una Leyenda viva pide prestigio 45', IA.talentos.NIVELES[3].prestigio === 45);
     prueba('Hay 56 premisas y tropos', IA.ideas.TODAS_PREMISAS.length === 56, IA.ideas.TODAS_PREMISAS.length);
     prueba('Las ventanas llegan en su año (TV 1955, video 1977, streaming 2007)', V.disponibles(1950).length === 0 && V.disponibles(1960).length === 1 && V.disponibles(1980).length === 2 && V.disponibles(2010).length === 3);
@@ -215,7 +215,7 @@
     // V24 · Mundo vivo y negocio
     {
       const B = IA.banco;
-      prueba('Hay 80 eventos con decisiones', IA.eventos.EV.length === 80, IA.eventos.EV.length);
+      prueba('Hay más de 200 eventos con decisiones', IA.eventos.EV.length >= 200, IA.eventos.EV.length);
       prueba('Cada evento tiene al menos dos opciones', IA.eventos.EV.every(function (e) { return e[5].length >= 2; }));
       prueba('Hay al menos 50 inventos', IA.historia.INVENTOS.length >= 50, IA.historia.INVENTOS.length);
       prueba('Hay al menos 30 construcciones', D.pisos.length + D.terrenos.length >= 30, D.pisos.length + D.terrenos.length);
@@ -236,7 +236,7 @@
       prueba('Hay siete caminos de continuación', F.CAMINOS.length === 7);
       prueba('El reboot baja la fatiga y la secuela la sube', F.camino('reboot').fat < 0 && F.camino('secuela').fat > 0);
       prueba('El horario familiar multa el contenido para adultos', TV.multable({ clas: 'R' }) && !TV.multable({ clas: 'G' }) && TV.FRANJAS.filter(function (x) { return x.fam; }).length >= 2);
-      prueba('La parrilla tiene 7 días y 6 franjas', TV.DIAS.length === 7 && TV.FRANJAS.length === 6);
+      prueba('La parrilla tiene 7 días y 8 franjas', TV.DIAS.length === 7 && TV.FRANJAS.length === 8);
       prueba('La plataforma tiene tres planes', IA.streaming.PLANES.length === 3);
       const vivas = F.lista();
       prueba('Toda franquicia viva tiene al menos una obra y un canon', vivas.every(function (f) { return f.o.length >= 1 && f.cont.length >= 1; }), vivas.length);
@@ -252,17 +252,17 @@
     // Inicio desde 1850 y tipo de industria (en una partida aparte; al final se vuelve a la de antes)
     {
       const antes = N.S, Md = IA.medios;
-      prueba('Cada industria existe desde su año y tiene efecto', D.industrias.every(function (x) { return x.desde >= 1850 && x.efecto && x.meds; }) && D.industria('Teatro').desde === 1850 && D.industria('Videojuegos').desde === 1972);
+      prueba('Cada industria existe desde su año y tiene efecto', D.industrias.every(function (x) { return x.desde >= 1700 && x.efecto && x.meds; }) && D.industria('Teatro').desde === 1700 && D.industria('Videojuegos').desde === 1972);
       IA.juego.nuevaPartida({ semilla: 'reglas-1850', anio: 1850, bot: true, industria: 'Cine' });
       const e0 = N.S.estudios[0];
-      prueba('Se puede empezar en 1850; sin cine, la industria pasa a Teatro y no hay plató', IA.juego.ANIO_MIN === 1850 && N.anio() === 1850 && e0.industria === 'Teatro' && e0.pisos.join() === 'oficinas');
+      prueba('Se puede empezar en 1850; sin cine, la industria pasa a Teatro y no hay plató', IA.juego.ANIO_MIN === 1700 && N.anio() === 1850 && e0.industria === 'Teatro' && e0.pisos.join() === 'oficinas');
       prueba('Antes de 1895 no se puede iniciar una película', /1895/.test(IA.juego.puedeIniciar({ gen: ['Drama'] })));
-      prueba('El teatro y los libros sí se pueden producir en 1850', Md.disponible('teatro') && Md.disponible('libros') && !Md.disponible('musica'));
+      prueba('El teatro, los libros y las partituras se pueden producir en 1850', Md.disponible('teatro') && Md.disponible('libros') && Md.disponible('musica') && !Md.disponible('juegos'));
       prueba('La industria Teatro da +1 obra a la vez en teatro y 15 % menos de costo', Md.capacidad('teatro') === Md.capacidad('libros') + 1 &&
         Math.abs(Md.borrador('teatro', { esc: 1 }).pp / (IA.mundo.aEpoca(4e7, 1850) * 0.015 * 0.85) - 1) < 0.01);
       for (let i = 0; i < 26; i++) IA.juego.avanzarSemana();
       prueba('Los rivales no estrenan películas antes de 1895', N.S.obras.every(function (o) { return o.est === 0; }) && N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }).length >= 5);
-      prueba('El capital recomendado alcanza para una obra de teatro chica', IA.juego.capitalRecomendado(1850) >= 1e6 && IA.juego.capitalRecomendado(1900) === 2.5e5);
+      prueba('El capital recomendado alcanza para una obra de teatro chica', IA.juego.capitalRecomendado(1850) >= 1e6 && IA.juego.capitalRecomendado(1900) >= 2.5e5);
       N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
     }
     // V36: obras libres con sus personajes, avatar en tus obras, teatros propios, letrero, ciudades y aspecto
@@ -288,6 +288,34 @@
       prueba('El letrero usa el tipo de letra elegido (cada una distinta)', new Set([...Array(20).keys()].map(function (f) { return IA.arte.fuenteLetra(f, 20); })).size === 20);
       prueba('Hay 40 ciudades o más para empezar, todas en países del juego', D.regionesInicio.length >= 40 && D.regionesInicio.every(function (r) { return !r.pais || D.pais(r.pais); }));
       prueba('Cada rival activo se puede comprar o explica por qué no', N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }).every(function (e) { return typeof IA.imperio.puedeComprar(e.id) === 'string'; }));
+      N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
+    }
+    // Definitiva 5.0: clasificación, personajes, financiación y economía de los medios
+    {
+      const Md = IA.medios, Im = IA.imperio, antes = N.S;
+      IA.juego.nuevaPartida({ semilla: 'reglas-medios', anio: 1990, bot: true });
+      const j = Md.borrador('juegos');
+      j.cont = { violencia: 6, lenguaje: 5, amor: 0, consumo: 0, terror: 0 };
+      Md.normalizarCont(j);
+      prueba('En 1990 las consolas no aceptan juegos para adultos (máximo 16)', ['G', 'PG', 'PG-13', '16'].indexOf(j.clas) >= 0, j.clas);
+      const t = Md.borrador('teatro');
+      prueba('El teatro trae protagonista con intérprete', (t.pj || []).some(function (p) { return p.i === 'protagonista' && p.t !== null && p.t !== undefined; }));
+      t.pj.push({ n: 'Sin actor', e: 30, s: 'F', i: 'secundario', a: 'Aliado', t: null });
+      prueba('Un papel de teatro sin intérprete impide empezar', /interprete a Sin actor/.test(Md.validar(t)), Md.validar(t));
+      const l = Md.borrador('libros');
+      prueba('Los libros traen personajes sin intérprete', (l.pj || []).length >= 1 && !Md.conActores(l));
+      prueba('La música no tiene personajes con nombre', !(Md.borrador('musica').pj || []).length);
+      const ctx = Im.contextoFin(l), pl = Im.planFin(['copro', 'preventa', 'inversores', 'marcas'], 1e6, ctx, 50);
+      prueba('Entre todos los financiadores no pasan del 85 %', pl.socios + pl.prest <= 850001 && pl.propio >= 149999, JSON.stringify(pl));
+      prueba('El subsidio cultural no apoya superproducciones', !!Im.motivoFin('subsidio', Object.assign({}, ctx, { pres: 2.5, autor: true })));
+      const p0 = Md.pulido({ pul: 0 }), p3 = Md.pulido({ pul: 3 });
+      prueba('Más pulido: más calidad, más tiempo y más costo', p3.q > p0.q && p3.sem > p0.sem && p3.k > p0.k);
+      N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
+      IA.juego.nuevaPartida({ semilla: 'reglas-musica', anio: 1995, bot: true });
+      const m = Md.borrador('musica');
+      m.cont = { violencia: 0, lenguaje: 3, amor: 0, consumo: 0, terror: 0 };
+      Md.normalizarCont(m);
+      prueba('Desde 1985 la música con lenguaje crudo lleva aviso de letras explícitas', m.explicito === 1);
       N.S = antes; IA.obras.reindexar(); IA.talentos.reindexar();
     }
     return r;

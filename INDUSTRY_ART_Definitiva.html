@@ -10893,7 +10893,8 @@ ART.medios = (function () {
     'use strict';
     const N = ART.n, D = ART.datos, X = ART.taxonomia, T = ART.talentos;
     const ESCALA_MUSICA = 0.22;
-    const tip = function (a, med) { a = a || N.anio(); return Math.max(ART.economia.presupuestoTipico(a), ART.mundo.aEpoca(med === 'teatro' ? 4e7 : 4e6, a)); };
+    const tip = function (a, med) { a = a || N.anio(); return med === 'teatro' ? ART.mundo.aEpoca(4e7, a) : Math.max(ART.economia.presupuestoTipico(a), ART.mundo.aEpoca(4e6, a)); };
+    function kEquipo(med, a) { a = a || N.anio(); return MED[med].eqk * (med === 'teatro' ? Math.min(1, ART.mundo.aEpoca(4e7, a) / Math.max(1, ART.economia.presupuestoTipico(a))) : 1); }
     function industria() { const e = N.S && N.S.estudios[0]; return D.industria(e && e.industria); }
     function especial(med) { return industria().meds.indexOf(med) >= 0; }
     const ep = function (v, a) { return ART.mundo.aEpoca(v, a || N.anio()); };
@@ -11052,7 +11053,7 @@ ART.medios = (function () {
         { id: 'mixto', nombre: 'Fijo + 10 % de lo que gane', k: 0.8, reg: 0.1, texto: 'El líder cobra el 10 % de los ingresos.' },
         { id: 'regalias', nombre: 'Mitad fija + 18 % de lo que gane', k: 0.5, reg: 0.18, texto: 'Barato al empezar; el equipo se reparte el 18 % de los ingresos.' }];
     function contrato(id) { return CONTRATOS.filter(function (x) { return x.id === id; })[0] || CONTRATOS[1]; }
-    function costoEquipo(eq, med, con) { return eq.reduce(function (s, id) { const t = T.porId(id); return s + (t ? T.tarifaPara(t, 0) * MED[med].eqk : 0); }, 0) * contrato(con).k; }
+    function costoEquipo(eq, med, con) { const k = kEquipo(med); return eq.reduce(function (s, id) { const t = T.porId(id); return s + (t ? T.tarifaPara(t, 0) * k : 0); }, 0) * contrato(con).k; }
     function borrador(med, op) {
         const a = N.anio(), o = op || {};
         const tp = tipos(med)[0], fam = familias(med)[0];
@@ -11140,6 +11141,7 @@ ART.medios = (function () {
         { id: 2, nombre: 'Pulido', sem: 0.12, q: 1.5, k: 1.03, texto: 'Unas semanas más para corregir detalles.' },
         { id: 3, nombre: 'Mucho pulido', sem: 0.25, q: 2.5, k: 1.06, texto: 'Se revisa todo dos veces: tarda y cuesta más.' }];
     const ANIO_VOCES = 1990, ANIO_EXPLICITO = 1985, ANIO_CLAS_JUEGOS = 1994;
+    const OCUP_T = { ref: 74, exp: 1.6, base: 0.88, deriva: 64, cansa: 0.004, ext: 0.92 };
     const COMPRIME_Q = 0.72, POT_MED = { musica: 0.42, libros: 0.55, juegos: 0.6 }, SUERTE = 0.6;
     function comprimir(q) { return 50 + (q - 50) * COMPRIME_Q; }
     const GEN_EXPLICITO = ['Hip hop', 'Rap', 'Trap', 'Metal', 'Punk', 'Drill', 'Reguetón', 'Grunge'];
@@ -11344,7 +11346,7 @@ ART.medios = (function () {
         return (b.pj || []).filter(function (p) { if (p.t === null || p.t === undefined || eqI.indexOf(p.t) >= 0 || vistos[p.t])
             return false; vistos[p.t] = 1; return true; });
     }
-    function costoPj(b, p) { const t = T.porId(p.t); return t && !t.jugador ? T.tarifaPara(t, 0) * MED[b.med].eqk * (IMP_K[p.i] || 0.3) * (b.med === 'juegos' ? 0.4 : 1) * contrato(b.con).k : 0; }
+    function costoPj(b, p) { const t = T.porId(p.t); return t && !t.jugador ? T.tarifaPara(t, 0) * kEquipo(b.med) * (IMP_K[p.i] || 0.3) * (b.med === 'juegos' ? 0.4 : 1) * contrato(b.con).k : 0; }
     function costoReparto(b) { return conActores(b) ? actoresPj(b).reduce(function (s, p) { return s + costoPj(b, p); }, 0) : 0; }
     function idsActores(b) { return actoresPj(b).map(function (p) { return p.t; }); }
     function bonoReparto(b) {
@@ -11887,7 +11889,7 @@ ART.medios = (function () {
         if (p.med === 'teatro') {
             p.et = 'temporada';
             p.semT = 0;
-            p.ocup = N.redondear(N.limitar(Math.pow(p.pub / 70, 1.5) * 0.8, 0.15, 1), 3);
+            p.ocup = N.redondear(N.limitar(Math.pow(p.pub / OCUP_T.ref, OCUP_T.exp) * OCUP_T.base * ({ chica: 1.1, mediana: 1, grande: 0.88, anfiteatro: 0.72 }[p.cfg.sala] || 1), 0.1, 1), 3);
             p.malas = 0;
         }
         else {
@@ -12125,11 +12127,11 @@ ART.medios = (function () {
     function semanaTeatro(p) {
         const s = sala(p.cfg.sala), a = N.anio();
         p.semT++;
-        p.ocup = N.redondear(N.limitar(p.ocup + (p.pub - 60) / 600 + N.normal(0, 0.02), 0.05, 1), 3);
+        p.ocup = N.redondear(N.limitar(p.ocup + (p.pub - OCUP_T.deriva) / 500 - (p.semT > 8 ? OCUP_T.cansa : 0) + N.normal(0, 0.02), 0.05, 1), 3);
         const pt = de(PRECIOS_T, p.cfg.precio, 'normal');
         const entradas = Math.round(s.asientos * p.cfg.funciones * N.limitar(p.ocup + pt.ocup, 0.03, 1) * (p.gira ? 0.8 : 1));
         const ing = Math.round(entradas * ep(p.gira ? pt.p * 0.67 : pt.p, a));
-        const gas = Math.round((p.pp || p.costo * 0.3) * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 35 : 45, a) * (enTeatroPropio(p) ? 0.6 : 1));
+        const gas = Math.round((p.pp || p.costo * 0.3) * 0.03 + s.asientos * p.cfg.funciones * (p.gira ? 0.8 : 1) * ep(p.gira ? 44 : 58, a) * (enTeatroPropio(p) ? 0.6 : 1));
         cobrar(p, ing);
         ART.negocio.pagar(0, 'produccion', gas);
         p.gas += gas;
@@ -12138,9 +12140,9 @@ ART.medios = (function () {
         p.hs.push(ing);
         if (p.hs.length > 30)
             p.hs.shift();
-        p.malas = p.ocup < 0.25 ? p.malas + 1 : 0;
+        p.malas = p.ocup < 0.25 || ing < gas ? p.malas + 1 : 0;
         const dura = p.gira ? p.gira * 2 : p.cfg.semanas;
-        if (!p.gira && p.semT >= dura && p.ocup >= 0.8 && (p.ext || 0) < 4) {
+        if (!p.gira && p.semT >= dura && p.ocup >= OCUP_T.ext && (p.ext || 0) < 4) {
             p.ext = (p.ext || 0) + 1;
             p.cfg.semanas += 8;
             N.emit('noticia', { tipo: 'estudio', texto: '«' + p.tit + '» llena la sala: extienden la temporada.' });
@@ -12507,7 +12509,7 @@ ART.medios = (function () {
         });
     }
     return { ESTILOS_MED: ESTILOS_MED, estilosMedio: estilosMedio, estiloMedio: estiloMedio, estiloAfin: estiloAfin, DIMENSIONES: DIMENSIONES, MODOS_J: MODOS_J, ESTUDIOS_GRAB: ESTUDIOS_GRAB, PROMOS_M: PROMOS_M, PLAT_MUSICA: PLAT_MUSICA, EXTENSIONES: EXTENSIONES, TIRADAS: TIRADAS, PRECIOS_T: PRECIOS_T, dimensionesDe: dimensionesDe, gustoDim: gustoDim, partesMusica: partesMusica, bonoTV: bonoTV, concierto: concierto, de: de, MED: MED, FMT_MUSICA: FMT_MUSICA, PLAT: PLAT, FUNCIONES: FUNCIONES, ESCALAS_J: ESCALAS_J, MODELOS: MODELOS, SALAS: SALAS, TAPAS: TAPAS, TAMANOS: TAMANOS, GIRAS: GIRAS, CERT: CERT,
-        disponible: disponible, tipos: tipos, familias: familias, porId: porId, proyectos: proyectos, capacidad: capacidad, enMarcha: enMarcha, habMedio: habMedio, equipoRecomendado: equipoRecomendado, presBono: presBono, costoEquipo: costoEquipo, CONTRATOS: CONTRATOS, contrato: contrato,
+        disponible: disponible, tipos: tipos, familias: familias, porId: porId, proyectos: proyectos, capacidad: capacidad, enMarcha: enMarcha, habMedio: habMedio, equipoRecomendado: equipoRecomendado, presBono: presBono, costoEquipo: costoEquipo, kEquipo: kEquipo, CONTRATOS: CONTRATOS, contrato: contrato,
         borrador: borrador, recalcular: recalcular, validar: validar, iniciar: iniciar, potencial: potencial, PULIDO: PULIDO, pulido: pulido, LIM_PJ: LIM_PJ, IMP_K: IMP_K,
         conPersonajes: conPersonajes, conActores: conActores, limitesPj: limitesPj, contenido: contenido, contenidoBase: contenidoBase, censuraMd: censuraMd, maxNivelMd: maxNivelMd, indiceMd: indiceMd,
         normalizarCont: normalizarCont, nombreClas: nombreClas, accesoMd: accesoMd, ajusteContenido: ajusteContenido, aceptaClas: aceptaClas, generarPj: generarPj, completarReparto: completarReparto, pjNuevo: pjNuevo, asignarActores: asignarActores,
@@ -27088,7 +27090,7 @@ ART.mediosUI = (function () {
         return l;
     }
     function tabEquipo(b) {
-        const of = slotsMd(b), k = Md.MED[b.med].eqk * Md.contrato(b.con).k, con = Md.contrato(b.con);
+        const of = slotsMd(b), k = Md.kEquipo(b.med) * Md.contrato(b.con).k, con = Md.contrato(b.con);
         let h = '<p class="nota info">Elige a cada integrante: el primero lidera el proyecto y pesa más en la calidad. Cada uno cobra su tarifa.</p><div class="fila" style="gap:6px;flex-wrap:wrap">' + btn('Equipo recomendado', 'mdEqRec') + btn('Otro equipo al azar', 'mdOtroEq') + '</div>' +
             '<h4>Contrato del equipo</h4><div class="chips">' + Md.CONTRATOS.map(function (x) { return chipMd(x.nombre, 'mdCon', x.id, x.id === con.id); }).join('') + '</div><p class="nota">' + esc(con.texto) + (b.cfg.banda ? ' La banda cobra su 15 % aparte.' : '') + '</p>';
         h += of.map(function (o, i) {
@@ -29341,7 +29343,7 @@ ART.pruebas = (function () {
                 break;
             const r = ART.juego.iniciarObra(b);
             if (r.error) {
-                if (registroErrores)
+                if (registroErrores && !/intérprete/.test(r.error))
                     registroErrores.push('El bot no pudo iniciar una obra en ' + N.anio() + ': ' + r.error);
                 break;
             }
@@ -29631,7 +29633,7 @@ ART.pruebas = (function () {
         if (NG.cajaLibre(0) < (b.pp + O.costoTalento(b)) * 1.6)
             return;
         const r = ART.juego.iniciarObra(b);
-        if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad|contratar/.test(r.error))
+        if (r.error && registroErrores && !/disponible|equipo|exige|firma|realidad|contratar|intérprete/.test(r.error))
             registroErrores.push('Bot en ' + anio + ': ' + r.error);
     }
     function contar(lista, x) { let c = 0; lista.forEach(function (y) { if (y === x)

@@ -21,8 +21,8 @@ Fecha: 19 de octubre de 2026 · unión de la Definitiva (4.0) con todo lo que tr
 
 ## Economía, matemática y lógica
 - **Calidad de los medios a la par del cine.** La música, los videojuegos, el teatro y los libros salían con público de 88 a 91 casi siempre (el cine del jugador ronda 79). Ahora la calidad se comprime alrededor de 50 y quedan en 77 a 83: las notas altas vuelven a significar algo y los premios de cada medio se disputan.
-- **Ventas con riesgo real.** Antes ningún libro, disco o videojuego perdía dinero (ganaban de 3 a 7 veces su costo). Ahora cada lanzamiento tiene su suerte de mercado y cada medio su escala: la mediana gana entre 0,8 y 1,2 veces su costo y pierde entre el 14 % y el 22 %, como un negocio de verdad.
-- **Teatro viable.** El costo de cada semana de función ya no se calcula sobre lo que cobró el elenco (que se paga al firmar), sino sobre la producción: antes la mitad de las obras perdía dinero aunque llenara la sala.
+- **Ventas con riesgo real.** Antes ningún libro, disco o videojuego perdía dinero (ganaban de 3 a 7 veces su costo). Ahora cada lanzamiento tiene su suerte de mercado y cada medio su escala: la mediana gana entre 0,6 y 1,4 veces su costo y pierde entre el 16 % y el 25 % de los proyectos, como un negocio de verdad.
+- **Teatro viable en todas las épocas.** El costo del teatro ya no sigue al presupuesto del cine (que crece mucho más que el precio de una entrada): desde 2030 casi toda obra perdía dinero. Cada semana de función cuesta según las butacas y la producción, no según lo que cobró el elenco al firmar. Llenar la sala depende de la calidad y del tamaño de la sala (una sala chica se llena más fácil que un anfiteatro), el público se cansa en temporadas largas y una obra que pierde dinero tres semanas seguidas baja el telón.
 - **Pagos a socios bien contados.** Lo que se lleva un coproductor o un inversor ahora es un gasto del año (antes se contaba como movimiento de capital y la ganancia salía inflada y con más impuesto).
 - **«Financiar proyectos ajenos» funciona.** Dos funciones tenían el mismo nombre y el botón no hacía nada.
 - **Equipos que aceptan la obra.** El equipo recomendado y el reparto automático ya no proponen a quien no hace obras de esa clasificación ni a menores en obras fuertes.
@@ -35,7 +35,7 @@ Fecha: 19 de octubre de 2026 · unión de la Definitiva (4.0) con todo lo que tr
 - Versión del guardado: 40; migración desde la 39 (y desde todas las anteriores). Los proyectos en marcha toman la clasificación de su género la primera vez que se calculan.
 
 ## Pruebas
-- Sintaxis de todo el código, verificador del juego sin errores, migración de una partida de la 4.0 jugada 30 años, bot de 3 estrategias y metas de balance (ver `pruebas/informe_bot_definitiva.md`).
+- Sintaxis de todo el código, verificador del juego sin errores, migración de una partida de la 4.0 jugada 30 años, pruebas de reglas al día (las de la V36 que ya no aplicaban se actualizaron y hay pruebas nuevas de clasificación, personajes, financiación y pulido), bot de 3 estrategias y metas de balance (ver `pruebas/informe_bot_definitiva.md`).
 
 ## Qué probar en el celular (3 cosas)
 - Crea un videojuego en 1998: mira la pestaña Público, sube la violencia y mira cómo cambia la clasificación y el alcance.
