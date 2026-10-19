@@ -34,7 +34,7 @@ ART.pantallas = (function () {
   function portada() {
     const op = function (accion, ic, texto, extra) { return '<button class="btn' + (extra || '') + '" data-a="' + accion + '">' + icono(ic) + '<span>' + texto + '</span>' + icono('flecha').replace('<svg', '<svg class="flecha"') + '</button>'; };
     return '<div class="portada"><div class="escena"><canvas id="lienzoEstudio" class="estudio-lienzo" data-demo="1"></canvas></div>' +
-      '<div class="marquesina"><h1>' + t('juego') + '</h1><p class="lema">' + t('subtitulo') + '</p><span class="version">' + t('version', { v: ART.VERSION }) + '</span></div>' +
+      '<div class="marquesina"><h1>' + t('juego') + '</h1><p class="lema">' + t('subtitulo') + '</p></div>' +
       '<div class="menu-juego">' +
       '<button class="btn primario" data-a="continuar" id="btnContinuar" disabled>' + icono('avanzar') + '<span>' + t('continuar') + '</span>' + icono('flecha').replace('<svg', '<svg class="flecha"') + '</button>' +
       op('nuevaPartida', 'mas', t('nueva_partida')) +
@@ -46,7 +46,7 @@ ART.pantallas = (function () {
   }
   const np = { nombre: 'INDUSTRY ART', anio: 1900, pais: 'us', capital: 0, dificultad: 'normal', escenario: 'medio', semilla: '', avNombre: 'OneZero', avSexo: 'M', avEdad: 30, personalidad: 'Normal', logoN: 8,
     tipo: 'Estudio', industria: 'Cine', vision: 'Alcance Comercial', publico: 'General', esp: ['produccion', 'direccion', 'guion'],
-    region: 'losangeles', sufijo: 'Pictures', tf: 'escuela', arq: 'visionario', modo: 'dueno', oficio: 'direccion', enfG: ['Drama', 'Comedia', 'Aventura'], enfT: ['', '', ''] };
+    region: 'losangeles', sufijo: '', tf: 'escuela', arq: 'visionario', modo: 'dueno', oficio: 'direccion', enfG: ['Drama', 'Comedia', 'Aventura'], enfT: ['', '', ''] };
   const NOMBRES_FUENTE = ['Georgia', 'Impact', 'Courier', 'Trebuchet', 'Palatino', 'Verdana', 'Tahoma', 'Times', 'Arial Black', 'Comic', 'Garamond', 'Brush Script', 'Lucida', 'Copperplate', 'Optima', 'Futura', 'Gill Sans', 'Rockwell', 'Didot', 'Baskerville',
     'Títulos del juego', 'Book Antiqua', 'Century Gothic', 'Franklin Gothic', 'Lucida Handwriting', 'Segoe Script', 'Papyrus', 'Bodoni', 'Cambria', 'Segoe UI', 'Consolas', 'Avenir'];
   function maxLogo(k) { return k === 'f' ? NOMBRES_FUENTE.length - 1 : 19; }
@@ -104,8 +104,8 @@ ART.pantallas = (function () {
       },
       function () { // 3 · Tu estudio
         return '<label class="campo"><span>' + t('np_nombre') + '</span><input type="text" maxlength="40" value="' + esc(np.nombre) + '" data-i="npNombre" data-k="nombre"></label>' +
-          '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Sufijo del logo</span><select data-c="np" data-k="sufijo">' + ops([['', 'Sin sufijo']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
-          '<h3>Logo y letrero</h3><p class="nota info">El letrero corona la fachada de tu estudio y firma tus pósters. Elige panel, textura, dónde van el logo y el nombre, y los colores y el tipo de letra; lo verás en vivo abajo. Puedes cambiarlo cuando quieras en Estudio, en «Identidad del estudio».</p><div id="npLogoVista"><canvas data-letrero="nuevo" data-nombre="' + esc(np.nombre) + '" data-ind="' + esc(indNp().id) + '" style="width:100%;height:76px" role="img" aria-label="Vista previa del letrero"></canvas>' +
+          '<div class="fila envolver"><button class="btn" data-a="npDadoNombre">' + icono('dado') + ' Otro nombre</button><label class="campo crece" style="margin:0"><span>Línea del letrero (sufijo)</span><select data-c="npSufijo">' + ops([['', 'Según la industria']].concat(D.sufijosLogo.map(function (x) { return [x, x]; })), np.sufijo) + '</select></label></div>' +
+          '<h3>Logo y letrero</h3><p class="nota info">El letrero corona la fachada de tu estudio y firma tus pósters. Elige panel, textura, dónde van el logo y el nombre, y los colores y el tipo de letra; lo verás en vivo abajo. Puedes cambiarlo cuando quieras en Estudio, en «Identidad del estudio».</p><div id="npLogoVista"><canvas data-letrero="nuevo" data-nombre="' + esc(np.nombre) + '" data-suf="' + esc(np.sufijo || '') + '" data-ind="' + esc(indNp().id) + '" style="width:100%;height:76px" role="img" aria-label="Vista previa del letrero"></canvas>' +
           '<div class="fila" style="margin-top:8px"><canvas data-logo="nuevo" style="width:56px;height:56px"></canvas><button class="btn" data-a="otroLogo">' + icono('dado') + t('np_logo_otro') + '</button></div></div>' +
           '<div class="tarjeta">' + opcionesLetrero(L, 'np') + num('s') + num('c') + num('b') + num('t') + num('f') + '</div>' +
           '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:170px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
@@ -132,7 +132,7 @@ ART.pantallas = (function () {
           '<label class="campo"><span>Arquetipo de liderazgo</span><select data-c="np" data-k="arq">' + ops(ART.carrera.ARQUETIPOS.map(function (x) { return [x.id, x.nombre + ' · ' + x.texto]; }), np.arq) + '</select></label>' +
           '<label class="campo"><span>Cómo empiezas</span><select data-c="npModo">' + ops([['dueno', 'Dueño de estudio'], ['carrera', 'Modo carrera: también recibes encargos de otros estudios']], np.modo) + '</select></label>' +
           '<label class="campo"><span>Tu oficio cuando trabajas en una obra</span><select data-c="np" data-k="oficio">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.oficio) + '</select><span class="nota info">Puedes ponerte en el equipo de tus obras en este oficio (y en tus especialidades), sin cobrar. En modo carrera, además, otros estudios te contratan.</span></label>' +
-          '<label class="campo"><span>' + t('np_personalidad') + '</span><select data-c="np" data-k="personalidad">' + ops(D.personalidades.map(function (p) { return [p.id, p.id]; }), np.personalidad) + '</select></label>' +
+          '<label class="campo"><span>' + t('np_personalidad') + '</span><select data-c="np" data-k="personalidad">' + D.personalidades.map(function (p) { return '<optgroup label="' + esc(p.id + ' · +' + p.valor + ' % popularidad') + '">' + p.rasgos.map(function (r) { const v = p.id + '|' + r, on = np.personalidad === v || (np.personalidad === p.id && r === p.rasgos[0]); return '<option value="' + esc(v) + '"' + (on ? ' selected' : '') + '>' + esc(p.id + ' - ' + r) + '</option>'; }).join('') + '</optgroup>'; }).join('') + '</select></label>' +
           '<span class="nota info">Tus tres especialidades (+1 en esos departamentos de tus obras):</span><div class="fila envolver">' + [0, 1, 2].map(function (i) {
             return '<label class="campo crece"><span>Especialidad ' + (i + 1) + '</span><select data-c="npEsp" data-k="' + i + '">' + ops(D.oficios.map(function (o) { return [o.id, o.nombre]; }), np.esp[i]) + '</select></label>';
           }).join('') + '</div>';
@@ -171,6 +171,11 @@ ART.pantallas = (function () {
   // Tipo de industria; si el año elegido es anterior a ese medio, se usa el que corresponde a la época
   function indNp() { const x = D.industria(np.industria); return x.desde <= np.anio && x.id === np.industria ? x : D.industria(np.anio >= D.CINE_DESDE ? 'Cine' : 'Teatro'); }
   ac('npInd', function (v) { np.industria = v; const y = document.getElementById('vista').scrollTop; U.acciones.nuevaPartida(); document.getElementById('vista').scrollTop = y; });
+  ac('npSufijo', function (v) {
+    np.sufijo = v;
+    const cv = document.querySelector('canvas[data-letrero="nuevo"]');
+    if (cv) { cv.setAttribute('data-suf', v); U.dibujar(document.getElementById('npLogoVista')); }
+  });
   ac('npNombre', function (v) {
     np.nombre = v; cacheT = -1;
     const cv = document.querySelector('canvas[data-letrero="nuevo"]');
@@ -272,7 +277,7 @@ ART.pantallas = (function () {
     J.nuevaPartida({
       semilla: (np.semilla || '').trim() || String(Date.now() % 1e9), anio: np.anio, nombre: (np.nombre || '').trim() || 'INDUSTRY ART',
       logo: U.estado.logoNuevo, pais: np.pais, capital: np.capital || J.capitalRecomendado(np.anio), dificultad: np.dificultad,
-      escenario: np.escenario, personalidad: np.personalidad, creado: new Date().toISOString(),
+      escenario: np.escenario, personalidad: String(np.personalidad).split('|')[0], rasgo: String(np.personalidad).split('|')[1] || '', creado: new Date().toISOString(),
       tipo: np.tipo, vision: np.vision, publico: np.publico, industria: indNp().id,
       avatar: { nombre: (np.avNombre || '').trim() || 'OneZero', sexo: np.avSexo, edad: edad, especialidades: np.esp, aspecto: aspectoNp() },
       modoJuego: np.modoJuego, reto: np.reto === undefined ? undefined : np.reto || null, tutorial: !!np.tutorial, perso: np.perso,
@@ -701,8 +706,8 @@ ART.pantallas = (function () {
   // =====================================================================
   function negocio() {
     const s = sub('negocio', 'finanzas');
-    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['banco', 'Banco'], ['imperio', 'Imperio'], ['inventos', 'Inventos'], ['mercado', t('neg_mercado')]], s) +
-      ({ finanzas: nFinanzas, estudio: nEstudio, sede: ART.calendarioUI.negocioSede, distribucion: ART.distribucion.negocioDistribucion, canal: ART.teleUI.canal, streaming: ART.teleUI.streaming, banco: ART.imperioUI.banco, imperio: ART.imperioUI.imperio, inventos: ART.imperioUI.inventos, mercado: nMercado }[s] || nFinanzas)();
+    return titulo(t('sec_negocio'), 'negocio') + pestanas('negocio', [['finanzas', t('neg_finanzas')], ['estudio', t('neg_estudio')], ['sede', 'Sede y personal'], ['distribucion', 'Distribución'], ['canal', 'Canal de TV'], ['streaming', 'Streaming'], ['banco', 'Banco'], ['inversiones', 'Inversiones'], ['colaboraciones', 'Colaboraciones'], ['imperio', 'Imperio'], ['inventos', 'Inventos'], ['casino', 'Casino'], ['mercado', t('neg_mercado')]], s) +
+      ({ finanzas: nFinanzas, estudio: nEstudio, sede: ART.calendarioUI.negocioSede, distribucion: ART.distribucion.negocioDistribucion, canal: ART.teleUI.canal, streaming: ART.teleUI.streaming, banco: ART.imperioUI.banco, imperio: ART.imperioUI.imperio, inventos: ART.imperioUI.inventos, inversiones: ART.imperioUI.inversiones, colaboraciones: ART.imperioUI.colaboraciones, casino: ART.imperioUI.casino, mercado: nMercado }[s] || nFinanzas)();
   }
   // Primero lo operativo y la utilidad; debajo, el capital (préstamos, socio, acciones), que mueve la caja pero no paga impuestos
   function tablaLibro(libro) {
@@ -767,6 +772,7 @@ ART.pantallas = (function () {
     // Editar la descripción del estudio: logo con deslizadores, público, visión y tipo de industria
     const opsSel = function (k, lista, actual) { return '<select data-c="estEditar" data-k="' + k + '">' + lista.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (x[0] === actual ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>'; };
     h += '<h3>Identidad del estudio</h3><div class="tarjeta"><div id="estLogoVista"><canvas data-letrero="0" style="width:100%;height:76px" role="img" aria-label="Tu letrero"></canvas><div class="fila" style="margin-top:6px"><canvas data-logo="0" style="width:56px;height:56px"></canvas><b>' + esc(est.nombre) + '</b></div></div>' +
+      '<label class="campo"><span>Línea del letrero (sufijo)</span><select data-c="estSufijo">' + [['', 'Según la industria']].concat(D.sufijosLogo.concat(est.suf && D.sufijosLogo.indexOf(est.suf) < 0 ? [est.suf] : []).map(function (x) { return [x, x]; })).map(function (x) { return '<option value="' + esc(x[0]) + '"' + ((est.suf || '') === x[0] ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select></label>' +
       opcionesLetrero(est.logo, 'est') + ['s', 'c', 'b', 't', 'f'].map(function (k) { return deslizadorLogo(k, est.logo[k] || 0, 'estLogo'); }).join('') +
       '<div class="fila"><label class="btn">' + (U.logoPropio() ? 'Cambiar la imagen del logo' : 'Usar una imagen propia') + '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-c="estLogoImg" class="oculto"></label>' +
       (U.logoPropio() ? '<button class="btn" data-a="estLogoQuitar">Volver al logo dibujado</button>' : '') + '</div>' +
@@ -779,6 +785,7 @@ ART.pantallas = (function () {
   }
   ac('estLogo', function (v, el) { const est = est0(); est.logo = Object.assign({}, est.logo); moverLogo(est.logo, el, 'estLogo', 'estLogoVista'); cacheT = -1; if (U.renderBarra) U.renderBarra(); });
   ac('estLogoFin', function () { U.refrescar(); });
+  ac('estSufijo', function (v) { est0().suf = v; cacheT = -1; if (U.renderBarra) U.renderBarra(); U.refrescar(); });
   ac('desarmarSet', function (v) {
     const est = est0(), id = +v;
     const usa = O.activas().filter(function (o) { return o.est === 0 && o.setR === id && ['lista', 'cartelera', 'terminada'].indexOf(o.et) < 0; })[0];
@@ -835,7 +842,7 @@ ART.pantallas = (function () {
       '<p></p><div class="col">' + (N.S ? '<button class="btn" data-a="abrirGuardado">' + t('gua_titulo') + '</button><button class="btn" data-a="laboratorio">' + t('aj_laboratorio') + '</button><button class="btn peligro" data-a="salir">' + t('aj_salir') + '</button>' : '') +
       (ART.publicacion.privacidadDisponible() ? '<button class="btn" data-a="privacidadAnuncios">Privacidad de los anuncios</button>' : '') + '</div>' +
       compraCompleta() +
-      '<p class="nota">' + t('juego') + ' ' + ART.VERSION + ' · ' + ART.publicacion.nombrePlataforma() + ' · ' + ART.publicacion.nombreEdicion() + ' · ' + t('creditos') + '</p>';
+      '<p class="nota">' + t('juego') + ' · ' + ART.publicacion.nombrePlataforma() + ' · ' + ART.publicacion.nombreEdicion() + ' · ' + t('creditos') + '</p>';
   }
   // Compra única «Versión completa» (solo quita el anuncio); en la web y en PC no aparece
   function compraCompleta() {

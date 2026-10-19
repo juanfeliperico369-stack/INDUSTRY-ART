@@ -17,9 +17,13 @@ ART.banco = (function () {
   const COMPANIAS = [
     { id: 'tren', nombre: 'Ferrocarriles del Norte', desde: 1850, hasta: 1960, mu: 0.03, vol: 0.12 }, { id: 'tel', nombre: 'Telégrafos Unidos', desde: 1850, hasta: 1940, mu: 0.02, vol: 0.1 },
     { id: 'acero', nombre: 'Acero Cóndor', desde: 1880, hasta: 2150, mu: 0.03, vol: 0.15 }, { id: 'petro', nombre: 'Petróleos Atalaya', desde: 1905, hasta: 2070, mu: 0.05, vol: 0.22 },
-    { id: 'radio', nombre: 'Radio Faro', desde: 1920, hasta: 1990, mu: 0.06, vol: 0.2 }, { id: 'elec', nombre: 'Electrónica Kumo', desde: 1950, hasta: 2150, mu: 0.07, vol: 0.25 },
-    { id: 'red', nombre: 'Red Prisma', desde: 1995, hasta: 2150, mu: 0.09, vol: 0.35 }, { id: 'nube', nombre: 'Nube Austral', desde: 2005, hasta: 2150, mu: 0.08, vol: 0.3 },
-    { id: 'robot', nombre: 'Robótica Ámbar', desde: 2025, hasta: 2150, mu: 0.08, vol: 0.32 }, { id: 'orbita', nombre: 'Vía Orbital', desde: 2070, hasta: 2150, mu: 0.07, vol: 0.3 },
+    { id: 'radio', nombre: 'Radio Faro', desde: 1920, hasta: 1990, mu: 0.06, vol: 0.2 }, { id: 'elec', nombre: 'Electrónica Kumo', desde: 1950, hasta: 2300, mu: 0.07, vol: 0.25 },
+    { id: 'red', nombre: 'Red Prisma', desde: 1995, hasta: 2300, mu: 0.09, vol: 0.35 }, { id: 'nube', nombre: 'Nube Austral', desde: 2005, hasta: 2220, mu: 0.08, vol: 0.3 },
+    { id: 'robot', nombre: 'Robótica Ámbar', desde: 2025, hasta: 2300, mu: 0.08, vol: 0.32 }, { id: 'orbita', nombre: 'Vía Orbital', desde: 2070, hasta: 2300, mu: 0.07, vol: 0.3 },
+    // Más compañías, como en la Final: de los primeros fonógrafos a las del futuro
+    { id: 'disco', nombre: 'Fonógrafos Lira', desde: 1890, hasta: 1985, mu: 0.05, vol: 0.2 }, { id: 'aero', nombre: 'Aerolíneas Cénit', desde: 1925, hasta: 2200, mu: 0.05, vol: 0.25 },
+    { id: 'consola', nombre: 'Consolas Pixelia', desde: 1975, hasta: 2300, mu: 0.08, vol: 0.38 }, { id: 'fusion', nombre: 'Fusión Boreal', desde: 2110, hasta: 2300, mu: 0.08, vol: 0.3 },
+    { id: 'helice', nombre: 'Colonias Hélice', desde: 2150, hasta: 2300, mu: 0.07, vol: 0.4 }, { id: 'mente', nombre: 'Mente Común', desde: 2200, hasta: 2300, mu: 0.1, vol: 0.45 },
   ];
   const SOCIOS = ['Grupo Inversor Alameda', 'Capital Horizonte', 'Fondo Tres Ríos', 'Inversiones Brújula', 'Familia Valdés-Orón'];
   function st() {
@@ -155,6 +159,8 @@ ART.banco = (function () {
   }
   // ---------- Inversiones ----------
   function companias() { const a = N.anio(); return COMPANIAS.filter(function (c) { return c.desde <= a && c.hasta >= a; }); }
+  // Acciones de los rivales: su índice sube y baja con sus utilidades (id «r» + número del estudio)
+  function rivalesCotizan() { return ART.rivales.activos().filter(function (e) { return !e.filial; }).map(function (e) { return { id: 'r' + e.id, nombre: e.nombre, rival: e.id }; }); }
   function precio(id) { const p = st().precios[id]; return p === undefined ? 100 : p; }
   function precios() {
     const b = st(), crisis = ART.historia.factorMercado('nam');
@@ -165,11 +171,18 @@ ART.banco = (function () {
       else p = p * Math.exp(c.mu / 12 - c.vol * c.vol / 24 + c.vol / Math.sqrt(12) * N.normal(0, 1) + (crisis < 0.95 ? -0.03 : 0));
       b.precios[c.id] = N.redondear(N.limitar(p, 1, 1e6), 2);
     });
+    N.S.estudios.forEach(function (e) {
+      if (!e.id || (b.precios['r' + e.id] === undefined && !b.acc['r' + e.id] && e.quebrado)) return;
+      let p = precio('r' + e.id);
+      if (e.quebrado) p = Math.max(1, p * 0.5);
+      else p = p * Math.exp(N.limitar((e.util || 0) / Math.max(1, tip() * (e.tam || 1) * 6), -0.12, 0.12) + 0.004 + N.normal(0, 0.05));
+      b.precios['r' + e.id] = N.redondear(N.limitar(p, 1, 1e6), 2);
+    });
   }
   function valorAccion(id) { const a = st().acc[id]; return a ? Math.round(a.n * precio(id) * ART.mundo.aEpoca(1, N.anio()) * 1000) / 1000 : 0; }
   function valorInversiones() { return Object.keys(st().acc).reduce(function (s, id) { return s + valorAccion(id); }, 0); }
   function comprarAccion(id, monto) {
-    const S = N.S, b = st(), c = companias().filter(function (x) { return x.id === id; })[0];
+    const S = N.S, b = st(), c = companias().concat(rivalesCotizan()).filter(function (x) { return x.id === id; })[0];
     monto = Math.round(+monto || 0);
     if (!c) return 'No cotiza.';
     if (monto <= 0 || S.estudios[0].caja < monto) return 'No alcanza la caja.';
@@ -225,7 +238,7 @@ ART.banco = (function () {
     const S = N.S;
     if (S.marca && S.marca.devolver > 0) { const d = Math.round(S.marca.devolver / Math.max(1, S.marca.hasta - S.t)); S.fans += d; S.marca.devolver -= d; if (S.t >= S.marca.hasta) delete S.marca; }
   }
-  return { ESCALONES: ESCALONES, COMPANIAS: COMPANIAS, deuda: deuda, puntaje: puntaje, escalon: escalon, limite: limite, tasa: tasa, cuota: cuota, pedir: pedir, prepagar: prepagar,
+  return { rivalesCotizan: rivalesCotizan, ESCALONES: ESCALONES, COMPANIAS: COMPANIAS, deuda: deuda, puntaje: puntaje, escalon: escalon, limite: limite, tasa: tasa, cuota: cuota, pedir: pedir, prepagar: prepagar,
     agregarCuenta: agregarCuenta, cuentasDelMes: cuentasDelMes, mensual: mensual, socio: socio, entraSocio: entraSocio, opinar: opinar, valorEstudio: valorEstudio, recomprar: recomprar,
     anual: anual, salidasQuiebra: salidasQuiebra, salir: salir, companias: companias, precio: precio, valorAccion: valorAccion, valorInversiones: valorInversiones,
     comprarAccion: comprarAccion, venderAccion: venderAccion, balance: balance, semilla: semilla, costoMarca: costoMarca, cambiarMarca: cambiarMarca, semana: semana,

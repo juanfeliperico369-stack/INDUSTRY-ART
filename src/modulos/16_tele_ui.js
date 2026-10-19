@@ -32,6 +32,32 @@ ART.teleUI = (function () {
     h += '<h3>Obras que pueden ser franquicia</h3><div class="col">' + (sueltas.length ? sueltas.map(function (o) {
       return '<div class="tarjeta"><div class="fila entre"><b>' + esc(o.tit) + '</b><span class="tenue chico">' + (o.tv ? 'Serie' : 'Cine') + ' · público ' + o.pub + '</span></div><div class="fila">' + btn('Continuación', 'tvContinuar', o.id, 'primario') + btn('Registrar', 'tvRegistrar', o.id) + '</div></div>';
     }).join('') : '<p class="tenue">Estrena obras para verlas aquí.</p>') + '</div>';
+    return h + comprarFranquicias();
+  }
+  // Comprar franquicias directamente: las de los rivales (primero las consolidadas, con 3 entregas o más) y las famosas
+  // del mundo, que llegan con licencia para adaptarlas
+  function comprarFranquicias() {
+    const S = N.S, a = N.anio();
+    const precio = function (f) { return Math.round(F.valor(f) * (S.estudios[f.est] && S.estudios[f.est].quebrado ? 0.6 : 1.25)); };
+    const rivales = F.lista().filter(function (f) { return f.est > 0 && F.estrenadas(f).length; })
+      .sort(function (x, y) { return F.estrenadas(y).length - F.estrenadas(x).length || F.valor(y) - F.valor(x); }).slice(0, 24);
+    const fila = function (f) {
+      const n = F.estrenadas(f).length;
+      return '<div class="cal-ev"><div class="col crece"><b>' + esc(f.nom) + '</b><span class="tenue chico">' + esc(nomEst(f.est)) + ' · ' + N.cuenta(n, 'entrega', 'entregas') + (n >= 3 ? ' · consolidada' : '') + '</span></div>' +
+        '<button class="btn" data-a="tvComprar" data-v="franquicia|' + f.id + '">Comprar · ' + dinero(precio(f)) + '</button></div>';
+    };
+    const consolidadas = rivales.filter(function (f) { return F.estrenadas(f).length >= 3; }), otras = rivales.filter(function (f) { return F.estrenadas(f).length < 3; });
+    let h = '<h3>Comprar franquicias</h3><p class="nota info">Compra la franquicia entera a un rival: sus obras pasan a ser tuyas para continuarlas (secuelas, precuelas, spin-offs y reboots) y licenciar a sus personajes. Las consolidadas valen más, pero ya tienen público.</p>';
+    h += '<h4>Consolidadas de los rivales (' + consolidadas.length + ')</h4>' + (consolidadas.length ? '<div class="col">' + consolidadas.map(fila).join('') + '</div>' : '<p class="tenue">Ningún rival tiene todavía una franquicia de 3 entregas o más.</p>');
+    h += '<h4>Otras franquicias de los rivales (' + otras.length + ')</h4>' + (otras.length ? '<div class="col">' + otras.map(fila).join('') + '</div>' : '<p class="tenue">Por ahora no hay otras.</p>');
+    const mios = ((S.edit && S.edit.mat) || []).map(function (m) { return m.tit; });
+    const famosas = ART.hitosArte.obrasHasta(a).filter(function (x) { return ['Cómic', 'Videojuego', 'Película', 'Serie', 'Novela', 'Manga', 'Saga'].indexOf(x.o.tipo) >= 0 && mios.indexOf(x.o.tit) < 0; }).slice(0, 15);
+    const pr = ART.metas.precioLicencia(90);
+    h += '<h4>Franquicias famosas del mundo (licencia)</h4><p class="nota">Compras la licencia para adaptarlas: quedan en Obras › Material y en Crear obra › Usar material.</p>' +
+      (famosas.length ? '<div class="col">' + famosas.map(function (x) {
+        return '<div class="cal-ev"><b class="cifra">' + x.h[0] + '</b><div class="col crece"><b>' + esc(x.o.tit) + '</b><span class="tenue chico">' + esc(x.o.tipo + (x.o.autor ? ' · ' + x.o.autor : '')) + '</span></div>' +
+          '<button class="btn" data-a="tvLicFamosa" data-v="' + x.i + '">Licencia · ' + (S.sandbox ? 'gratis' : dinero(pr)) + '</button></div>';
+      }).join('') + '</div>' : '<p class="tenue">Todavía no hay franquicias famosas en ' + a + '.</p>');
     return h;
   }
   function fichaFranquicia(id) {
@@ -132,6 +158,14 @@ ART.teleUI = (function () {
     h += '<h3>Dominio público</h3><div class="col">' + (libres.length ? libres.map(function (x) { return fila(x, true); }).join('') : '<p class="tenue">Nada libre todavía.</p>') + '</div>';
     return h;
   }
+  ac('tvLicFamosa', function (v) {
+    const o = ART.hitosArte.obra(+v), M = ART.metas;
+    if (!o) return;
+    const e = M.guardarMaterial({ tit: o.tit, autor: o.autor, anio: o.anio, tipo: M.TIPOS_MATERIAL.indexOf(o.tipo) >= 0 ? o.tipo : 'Novela', gen: o.gen.filter(function (g) { return ART.datos.familiaDe[g]; }).slice(0, 3), lic: 1, fama: 90, sin: o.sin, tem: [], pjs: '' }, null);
+    if (e) { U.aviso(e, 'mal'); return; }
+    U.aviso('Licencia de «' + o.tit + '» comprada: ya puedes adaptarla');
+    U.refrescar();
+  });
   ac('tvComprar', function (v) { const p = v.split('|'); avisar(F.comprar(p[0], +p[1]), 'Derechos comprados: ya puedes continuarla'); U.refrescar(); });
   ac('tvAdaptar', function (v) {
     const b = ART.creacion.conAzarUI(function () { const x = O.borrador(0, { gen: ['Drama'], escala: 2, completa: true }); ART.ideas.usarMaterial(x, v, N.anio()); if (!(x.prob && x.prob.length)) ART.ideas.recomendarHistoria(x, N.anio()); ART.ideas.generarPersonajes(x); O.equipoRecomendado(x, 1); O.recalcular(x); return x; });

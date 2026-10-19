@@ -68,6 +68,19 @@
       ],
       "category": "Game",
       "artifactName": "INDUSTRY-ART-${version}-Linux.${ext}"
+    },
+    "appx": {
+      "identityName": "OneZero.INDUSTRYART",
+      "publisher": "CN=00000000-0000-0000-0000-000000000000",
+      "publisherDisplayName": "OneZero",
+      "applicationId": "INDUSTRYART",
+      "displayName": "INDUSTRY ART",
+      "backgroundColor": "#0b1020",
+      "languages": [
+        "es-ES",
+        "en-US"
+      ],
+      "artifactName": "INDUSTRY-ART-${version}-MicrosoftStore.${ext}"
     }
   }
 }

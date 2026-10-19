@@ -585,3 +585,22 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 .curio-todos { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--panel2) 80%, transparent); }
 .curio-pocos { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--dorado) 10%, var(--panel2)); border-left: 3px solid var(--dorado); }
 .curio-pocos b { color: var(--dorado); }
+
+/* ===================== Estilo sereno (lo intuitivo de la Final con lo nuevo) =====================
+   Colores planos, sin brillos ni degradados en chips, botones y tarjetas; la selección se reconoce por el borde, el
+   fondo suave y la marca, sin gritar. Va al final para mandar sobre los estilos anteriores. */
+.chip.on { background: var(--panel2); background: color-mix(in srgb, var(--acento) 22%, var(--panel2)); border-color: var(--acento); color: var(--texto); box-shadow: none; font-weight: 700; }
+.chip.on::before { content: '✓ '; color: var(--acento); }
+.chip:disabled { opacity: .45; }
+.btn { background: var(--panel2); box-shadow: none; }
+.btn.primario { background: var(--acento); box-shadow: none; }
+.tarjeta { background: var(--panel); box-shadow: none; }
+.pestana.on { background: var(--panel2); box-shadow: inset 0 -2px 0 var(--sec); }
+.nav.on::before { box-shadow: none; }
+.nav.on svg { filter: none; transform: none; }
+.avanzar { box-shadow: none; }
+.avanzar.auto { background: var(--rosa); animation: none; }
+.titulo-sec h2 { text-shadow: none; }
+.titulo-sec h2::after { box-shadow: none; }
+.cr12 h3 { margin: 0 0 6px; color: var(--sec); }
+@media (prefers-reduced-motion: no-preference) { .chip, .btn { transition: background .15s, border-color .15s; } }

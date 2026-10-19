@@ -85,6 +85,7 @@ ART.juego = (function () {
     e0.region0 = tarjeta ? tarjeta.id : 'independiente';
     if (op.enfoque) e0.enf = { gen: (op.enfoque.gen || []).slice(0, 3), tem: (op.enfoque.tem || []).slice(0, 3) };
     e0.suf = op.sufijo || '';
+    if (op.rasgo) { e0.rasgoP = op.rasgo; S.avatar.rasgo = op.rasgo; } // personalidad del dueño: tipo y rasgo, como en la Final
     e0.sede = 1; e0.staff = [];
     S.fans = Math.round(e0.fama * 2000);
     S.recordatorios = [];

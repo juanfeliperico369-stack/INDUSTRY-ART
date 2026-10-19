@@ -565,7 +565,7 @@ ART.talentos = (function () {
       const o = of || N.elegir(D.oficios.map(function (x) { return x.id; }));
       const nino = o === 'interprete' && N.probabilidad(0.3);
       const t = crear(o, nino ? N.entero(8, 14) : N.entero(18, 23), anio, { pot: N.entero(74, 94), pasado: false });
-      t.desc = 1;
+      t.desc = 1; t.prom = N.S.t + 1; // la encontraron tus cazatalentos (semana + 1: nunca vale 0)
       cambiarMoral(t, 15);
       N.S.talentos.push(t);
       out.push(t);

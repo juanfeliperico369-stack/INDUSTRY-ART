@@ -87,11 +87,11 @@ ART.agencia = (function () {
     }
     if (sec === 'oficina') {
       // Tu gente: exclusivos, promesas y becados, la lista corta y el personal de la sede
-      const promesas = T.activos().filter(function (x) { return x.beca || (x.desc && T.exclusivoDe(x) === 0); });
+      const promesas = T.activos().filter(function (x) { return x.beca || x.prom || (x.desc && !x.rev && T.exclusivoDe(x) === 0); }).sort(function (a, b) { return (b.prom || 0) - (a.prom || 0); });
       const corta = (S.listaCorta || []).map(function (id) { return T.porId(id); }).filter(Boolean);
       h += '<p class="nota info">Tu oficina de talentos: quién firmó en exclusiva contigo, las promesas que descubriste o becaste y tu lista corta para el próximo casting.</p>';
       h += '<h3>Exclusivos (' + exclusivos.length + ')</h3>' + (exclusivos.length ? '<div class="col">' + exclusivos.map(function (x) { return filaT(x, 'Contrato hasta ' + esc(U.fechaCorta(x.exH)) + ' · ' + dinero(x.exS || 0) + ' al año'); }).join('') + '</div>' : '<p class="tenue">Nadie firmó en exclusiva todavía: abre un talento y ofrécele un contrato.</p>');
-      h += '<h3>Promesas y becados (' + promesas.length + ')</h3>' + (promesas.length ? '<div class="col">' + promesas.map(function (x) { return filaT(x, x.beca ? 'Becado por tu estudio' : 'Promesa descubierta · potencial ' + x.pot); }).join('') + '</div>' : '<p class="tenue">Busca promesas abajo o beca a alguien en la academia.</p>');
+      h += '<h3>Promesas y becados (' + promesas.length + ')</h3>' + (promesas.length ? '<p class="nota">Toca a una persona para ver su ficha: ahí la contratas en exclusiva, la sumas a una obra o la becas en la academia.</p><div class="col">' + promesas.map(function (x) { return filaT(x, (x.beca ? 'Becado por tu estudio' : 'Promesa descubierta · potencial ' + x.pot) + (T.exclusivoDe(x) === 0 ? ' · exclusiva tuya' : ' · libre para contratar')); }).join('') + '</div>' : '<p class="tenue">Busca promesas abajo o beca a alguien en la academia.</p>');
       h += '<h3>Lista corta (' + corta.length + ')</h3>' + (corta.length ? '<div class="col">' + corta.map(function (x) { return filaT(x); }).join('') + '</div>' : '<p class="tenue">Marca talentos con la estrella para tenerlos a mano.</p>');
     // Promesas
     const espera = S.tPromesas ? Math.max(0, J.ESPERA_PROMESAS - (S.t - S.tPromesas)) : 0;
@@ -170,6 +170,7 @@ ART.agencia = (function () {
     if (r.error) { U.aviso(r.error, 'mal'); return; }
     ART.arte.sonido('exito');
     ft.solo = 'promesas'; ft.avanzado = true; ft.estado = 'activos'; ft.of = ''; ft.q = '';
+    U.estado.sub.talento = 'oficina'; // aparecen en la Oficina, listas para contratar
     U.aviso('Tus cazatalentos encontraron ' + r.talentos.length + ' promesas');
     U.refrescar();
   });

@@ -10,14 +10,15 @@ Uso:
                                                        Android y app/escritorio/www (completa)
   python3 tools/preparar_app.py --edicion completa    la app de iPhone/Android de app/www con esa edición
   python3 tools/preparar_app.py --tienda steam        app/escritorio/www para Steam (o epic, o directo)
-  python3 tools/preparar_app.py --web                 además dist/web: la página instalable (PWA) para Windows, macOS y Linux
+  python3 tools/preparar_app.py --web                 además dist/web (página instalable, completa) y dist/web-anuncios
+                                                       (el juego en el navegador con anuncios alrededor; AdSense en app/config.json › web)
 
 Pone el identificador de AdMob en el AndroidManifest y en el Info.plist de iOS (con el permiso de rastreo de Apple)."""
 import argparse, glob, json, os, plistlib, re, shutil
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP = os.path.join(RAIZ, 'app')
 EDICIONES = ('completa', 'anuncios')
-TIENDAS = ('directo', 'steam', 'epic')
+TIENDAS = ('directo', 'steam', 'epic', 'microsoft')
 
 ap = argparse.ArgumentParser(description='Prepara el HTML del juego para cada paquete')
 ap.add_argument('--edicion', choices=EDICIONES, help='edición de app/www (si no, la de app/config.json)')
@@ -90,6 +91,59 @@ if args.web:
     for n in ('icono-192.png', 'icono-512.png'):
         if os.path.exists(icono):
             shutil.copyfile(icono, os.path.join(web, n))
+
+# Navegador con anuncios: el juego (edición con anuncios) en el centro y los anuncios alrededor, nunca encima
+if args.web:
+    web2 = os.path.join(RAIZ, 'dist', 'web-anuncios')
+    os.makedirs(web2, exist_ok=True)
+    open(os.path.join(web2, 'juego.html'), 'w', encoding='utf-8').write(html_con({'edicion': 'anuncios', 'web': 1}))
+    w = cfg.get('web') or {}
+    ad = w.get('adsense') or {}
+    cliente, ranuras = (ad.get('cliente') or '').strip(), ad.get('ranuras') or {}
+
+    def espacio(nombre, ancho, alto):
+        r = (ranuras.get(nombre) or '').strip()
+        if cliente and r:
+            return ('<ins class="adsbygoogle" style="display:inline-block;width:%dpx;height:%dpx" data-ad-client="%s" data-ad-slot="%s"></ins>'
+                    '<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>' % (ancho, alto, cliente, r))
+        # Sin cuenta de AdSense: solo se ve el lugar del anuncio, para revisar el diseño
+        return '<div class="hueco" style="width:%dpx;height:%dpx">Espacio publicitario</div>' % (ancho, alto)
+    script = ('<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=%s" crossorigin="anonymous"></script>' % cliente) if cliente else ''
+    completa = (w.get('enlaceCompleta') or '').strip()
+    pie = ('<a href="%s" target="_blank" rel="noopener">Juega sin anuncios: consigue la edición completa</a>' % completa) if completa else 'Juega sin anuncios con la edición completa'
+    open(os.path.join(web2, 'index.html'), 'w', encoding='utf-8').write("""<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INDUSTRY ART</title><meta name="description" content="Dirige un estudio de arte de 1700 a 2300: teatro, libros, música, cine, televisión y videojuegos.">
+<meta name="theme-color" content="#0b1020"><link rel="icon" href="icono-192.png">%s
+<style>
+html,body{margin:0;height:100%%;background:#0b1020;color:#c9cbe0;font:14px system-ui,sans-serif}
+.marco{display:grid;height:100%%;grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+.lado{display:none}.franja{display:flex;justify-content:center;align-items:center;padding:4px 0;min-height:58px}
+.juego{border:0;width:100%%;height:100%%;display:block;background:#0b1020}
+.hueco{display:flex;align-items:center;justify-content:center;border:1px dashed #3a4170;color:#6a70a0;font-size:12px;box-sizing:border-box}
+.pie{text-align:center;font-size:12px;padding:2px 0 6px}.pie a{color:#f5c542}
+.ancho{display:none}
+@media (min-width:1000px){.franja{min-height:98px}.estrecho{display:none}.ancho{display:block}}
+@media (min-width:1360px){.marco{grid-template-columns:180px 1fr 180px;grid-template-rows:auto 1fr auto}
+ .lado{display:flex;justify-content:center;align-items:flex-start;padding-top:12px}.franja,.pie{grid-column:1 / -1}}
+</style></head><body><div class="marco">
+<div class="franja"><div class="ancho">%s</div><div class="estrecho">%s</div></div>
+<div class="lado">%s</div>
+<iframe class="juego" src="juego.html" title="INDUSTRY ART" allow="fullscreen"></iframe>
+<div class="lado">%s</div>
+<div class="franja abajo"><div class="ancho">%s</div><div class="estrecho">%s</div></div>
+<div class="pie">%s · <a href="privacidad.html">Privacidad</a></div>
+</div></body></html>
+""" % (script, espacio('arriba', 728, 90), espacio('arriba', 320, 50), espacio('izquierda', 160, 600), espacio('derecha', 160, 600),
+       espacio('abajo', 728, 90), espacio('abajo', 320, 50), pie))
+    if cliente:
+        open(os.path.join(web2, 'ads.txt'), 'w').write('google.com, %s, DIRECT, f08c47fec0942fa0\n' % cliente.replace('ca-pub-', 'pub-'))
+    priv = os.path.join(RAIZ, 'docs', 'privacidad.html')
+    if os.path.exists(priv):
+        shutil.copyfile(priv, os.path.join(web2, 'privacidad.html'))
+    icono = os.path.join(APP, 'escritorio', 'build', 'icon.png')
+    if os.path.exists(icono):
+        shutil.copyfile(icono, os.path.join(web2, 'icono-192.png'))
 
 anuncios = cfg['edicion'] == 'anuncios'
 man = os.path.join(APP, 'android', 'app', 'src', 'main', 'AndroidManifest.xml')

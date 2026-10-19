@@ -15,5 +15,17 @@
       "app": "ca-app-pub-3940256099942544~1458002511",
       "intersticial": "ca-app-pub-3940256099942544/4411468910"
     }
+  },
+  "web": {
+    "adsense": {
+      "cliente": "",
+      "ranuras": {
+        "arriba": "",
+        "izquierda": "",
+        "derecha": "",
+        "abajo": ""
+      }
+    },
+    "enlaceCompleta": ""
   }
 }

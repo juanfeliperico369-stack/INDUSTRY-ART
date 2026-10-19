@@ -312,7 +312,7 @@ ART.documento = (function () {
     const tc = tecnicos(o);
     if (tc.length) b += p('Datos técnicos', 'Heading1') + tabla(tc);
     if (o.diario) { b += p('Notas del autor', 'Heading1'); String(o.diario).split(/\n+/).forEach(function (x) { b += p(x); }); }
-    b += p('Ideado y creado por OneZero · Programado por Faro · INDUSTRY ART ' + ART.VERSION, 'Small', true);
+    b += p('Ideado y creado por OneZero · Programado por Faro · INDUSTRY ART', 'Small', true);
     const ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"';
     const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + ns + '><w:body>' + b +
       '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>';
@@ -378,7 +378,7 @@ ART.documento = (function () {
     if (eq.length) b += '<h2>' + h('Equipo creativo') + '</h2>' + tablaHTML(eq);
     if (tc.length) b += '<h2>' + h('Datos técnicos') + '</h2>' + tablaHTML(tc);
     if (o.diario) b += '<h2>' + h('Notas del autor') + '</h2>' + String(o.diario).split(/\n+/).map(function (x) { return '<p>' + N.esc(x) + '</p>'; }).join('');
-    b += '<p class="pie">' + h(ART.publicacion ? ART.publicacion.creditos().join(' · ') : 'Ideado y creado por OneZero') + ' · INDUSTRY ART ' + ART.VERSION + '</p>';
+    b += '<p class="pie">' + h(ART.publicacion ? ART.publicacion.creditos().join(' · ') : 'Ideado y creado por OneZero') + ' · INDUSTRY ART</p>';
     return '<!DOCTYPE html><html lang="' + (ART.idioma && ART.idioma.actual() === 'en' ? 'en' : 'es') + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + h(o.tit || 'Idea') + '</title><style>' + css + '</style></head><body>' + b + '</body></html>';
   }
   // ---------- Markdown ----------
@@ -398,7 +398,7 @@ ART.documento = (function () {
     const eq = equipo(o), tc = tecnicos(o);
     if (eq.length) { l.push('', '## ' + tr('Equipo creativo'), '', '| | |', '|---|---|'); eq.forEach(function (x) { l.push(fila(x)); }); }
     if (tc.length) { l.push('', '## ' + tr('Datos técnicos'), '', '| | |', '|---|---|'); tc.forEach(function (x) { l.push(fila(x)); }); }
-    l.push('', '---', '_INDUSTRY ART ' + ART.VERSION + '_');
+    l.push('', '---', '_INDUSTRY ART_');
     return l.join('\n');
   }
   // ---------- Elegir el formato de la descarga ----------

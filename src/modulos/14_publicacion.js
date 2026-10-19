@@ -19,7 +19,7 @@ ART.publicacion = (function () {
     }
   };
   const NOMBRES = { android: 'Android', ios: 'iPhone', pc: 'PC', web: 'Web' };
-  const TIENDAS = { steam: 'Steam', epic: 'Epic Games', mac: 'Mac', windows: 'Windows', linux: 'Linux' };
+  const TIENDAS = { steam: 'Steam', epic: 'Epic Games', microsoft: 'Microsoft Store', mac: 'Mac', windows: 'Windows', linux: 'Linux' };
   let privacidad = false; // el usuario puede cambiar su consentimiento (lo dice Google al pedirlo)
   const CLAVE_COMPRA = 'industryart_completa';
   let completa = leerCompra(), precioTexto = '';

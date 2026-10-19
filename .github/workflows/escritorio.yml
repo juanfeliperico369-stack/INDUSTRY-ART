@@ -12,7 +12,7 @@ on:
         description: 'todos, windows, mac o linux'
         default: 'todos'
       tienda:
-        description: 'directo (instaladores), steam o epic (carpetas para subir con steamcmd o BuildPatchTool)'
+        description: 'directo (instaladores), microsoft (paquete .appx para Microsoft Store, solo Windows), steam o epic (carpetas para steamcmd o BuildPatchTool)'
         default: 'directo'
 jobs:
   pc:
@@ -62,7 +62,8 @@ jobs:
             [ "${{ matrix.nombre }}" = "mac" ] && EXTRA="-c.mac.identity=- -c.mac.hardenedRuntime=false"
           fi
           T="${{ github.event.inputs.tienda || 'directo' }}"
-          if [ "$T" = "directo" ]; then npx electron-builder ${{ matrix.args }} --publish never $EXTRA
+          if [ "$T" = "microsoft" ]; then [ "${{ matrix.nombre }}" = "windows" ] && npx electron-builder --win appx --publish never || echo 'Microsoft Store: solo Windows'
+          elif [ "$T" = "directo" ]; then npx electron-builder ${{ matrix.args }} --publish never $EXTRA
           else npx electron-builder ${{ matrix.args }} --dir --publish never $EXTRA; fi
       - uses: actions/upload-artifact@v4
         if: steps.toca.outputs.si == '1'
@@ -74,6 +75,7 @@ jobs:
             app/escritorio/dist/*.AppImage
             app/escritorio/dist/*.deb
             app/escritorio/dist/*.zip
+            app/escritorio/dist/*.appx
             app/escritorio/dist/*-unpacked/
             app/escritorio/dist/mac*/
-          if-no-files-found: error
+          if-no-files-found: warn

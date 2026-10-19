@@ -256,8 +256,8 @@ ART.ui = (function () {
       cv.width = w * d; cv.height = h * d;
       const c = cv.getContext('2d');
       c.setTransform(d, 0, 0, d, 0, 0);
-      const ind = est ? est.industria : cv.getAttribute('data-ind');
-      ART.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'), null, ind ? subIndustria(ind) : '');
+      const ind = est ? est.industria : cv.getAttribute('data-ind'), suf = est ? est.suf : cv.getAttribute('data-suf');
+      ART.arte.letrero(c, w, h, est ? est.logo : estado.logoNuevo, est ? est.nombre : cv.getAttribute('data-nombre'), null, suf || (ind ? subIndustria(ind) : ''));
     });
     r.querySelectorAll('canvas[data-grafica]').forEach(function (cv) {
       const g = graficas[cv.getAttribute('data-grafica')];

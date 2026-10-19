@@ -34,6 +34,18 @@ Ideado y creado por OneZero · programado por Faro.
 - **Tipografías**: 32 para el letrero (las 20 de la Final y 12 más, entre ellas la de títulos del juego).
 - **Datos históricos**: 141 en las «i» (50 nuevos, revisados uno por uno).
 
+## Pedidos de la última revisión
+
+- Crear obra: el medio (cine, televisión, música, videojuegos, teatro, libros) se elige ahí mismo; ya no aparecen todos
+  marcados. Modo rápido de 12 decisiones como en la Final (además del de 5 y del detallado).
+- Personalidad del dueño con sus rasgos (Pretencioso, Antiposer, Normal, Poser y Rockstar, cada uno con los suyos).
+- El sufijo va en la línea del letrero, donde dice «Grupo de medios», y se cambia también en Estudio › Identidad.
+- Talento › Oficina: las promesas que encuentran tus cazatalentos aparecen ahí, listas para contratar desde su ficha.
+- Obras › Franquicias: comprar franquicias de los rivales (las consolidadas primero) y licencias de franquicias famosas.
+- Negocio: pestañas de Inversiones (con acciones de los rivales y compañías hasta 2300), Colaboraciones y Casino.
+- Estilo más sereno, como el de la Final: colores planos, sin brillos; la selección se ve sin gritar.
+- El número de versión ya no aparece en los créditos, la portada ni los documentos.
+
 ## Ediciones y paquetes
 
 Dos ediciones con todo desbloqueado: **completa** (de pago, sin anuncios) y **con anuncios** (gratis: uno al abrir y,

@@ -24,7 +24,12 @@ internet. Las partidas de todas las versiones anteriores (desde la V16) se abren
   (Material, Guiones, Taxonomía) y Negocio › Inventos; 32 tipografías para el letrero; 141 datos históricos en las «i».
 - **Dos ediciones** con todo desbloqueado: completa (de pago, sin anuncios) y con anuncios (gratis). Ver
   [docs/ediciones_y_tiendas.md](docs/ediciones_y_tiendas.md): Android, iPhone, Windows, macOS, Linux, web, Steam y Epic Games.
-- Interfaz de videojuego con colores por sección y por época, español e inglés completos.
+- **Crear obra como en la Final**: el medio se elige en el mismo creador, y hay modo rápido de 5 o de 12 decisiones y
+  modo detallado; personalidad del dueño con su rasgo; sufijo en la línea del letrero.
+- **Negocio completo**: Inversiones (compañías hasta 2300 y acciones de los rivales), Colaboraciones (coproducciones,
+  encargos, financiación y distribución), compra directa de franquicias de rivales y licencias de franquicias famosas,
+  y un **Casino** con dinero del juego (ruleta, dados, tragamonedas de cine y apuestas a la taquilla).
+- Interfaz de videojuego con colores por sección y por época, con un estilo sereno; español e inglés completos.
 
 ## Qué hay en este repositorio
 
@@ -35,7 +40,7 @@ internet. Las partidas de todas las versiones anteriores (desde la V16) se abren
 | `bitacora_Definitiva.md` | La bitácora corta de la Definitiva (las de la V16 a la V36 también están) |
 | `docs/ediciones_y_tiendas.md` | Las dos ediciones y cómo se arma y se publica cada paquete |
 | `steam/`, `epic/` | Archivos de subida a Steam (SteamPipe) y a la Epic Games Store (BuildPatchTool) |
-| `app/` | Las apps: Android e iPhone (Capacitor: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
+| `app/` | Las apps: Android e iPhone (Capacitor, ediciones completa y con anuncios) y PC en `app/escritorio/` (Electron: descarga directa, Microsoft Store, Steam y Epic, de pago) |
 | `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone, la app de PC y la versión web |
 | `docs/publicar_google_play.md`, `docs/publicar_app_store.md`, `docs/publicar_pc.md` | Guías para publicar en cada tienda |
 | `docs/tienda.md`, `docs/tienda/`, `docs/privacidad.html` | Fichas de las tiendas, imágenes y política de privacidad |

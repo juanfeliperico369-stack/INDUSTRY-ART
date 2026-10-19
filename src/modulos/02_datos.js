@@ -505,7 +505,8 @@ ART.datos = (function () {
     { desde: 2020, hasta: 2049, nombre: 'Streaming', reglas: ['Las plataformas compiten con los cines', 'Las ventanas se acortan', 'El público global decide'] },
     { desde: 2050, hasta: 9999, nombre: 'Futuro', reglas: ['Experiencias inmersivas', 'Talento humano y artificial conviven', 'Mercados nuevos que aún no existen'] },
   ];
-  const sufijosLogo = sp('Pictures,Studios,Films,Productions,Entertainment,Media,Animation,Company,Cinema,Arts');
+  // Lo que va en la línea del letrero, debajo del nombre (si no eliges, sale el tipo de industria)
+  const sufijosLogo = sp('Grupo de medios,Estudio de cine,Cine y televisión,Productora,Producciones,Compañía,Corporación,Casa productora,Estudios,Discográfica,Casa editorial,Compañía de teatro,Estudio de videojuegos,Colectivo,Independiente,Entretenimiento');
   // Motor del mercado por era (ADN del mercado)
   const motorMercado = [[1850, 'El teatro y las ferias'], [1895, 'Las novedades del cinematógrafo'], [1927, 'El cine sonoro y las estrellas'], [1948, 'La pelea contra la televisión'],
     [1967, 'Los autores y la libertad'], [1975, 'El taquillazo de verano'], [1980, 'El video casero'], [2000, 'El DVD y los efectos digitales'], [2012, 'Las franquicias y el streaming'], [2030, 'Las plataformas globales'], [2060, 'La experiencia inmersiva']];

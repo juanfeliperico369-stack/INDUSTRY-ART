@@ -144,7 +144,7 @@ ART.creacion = (function () {
     return '<div class="fila entre"><span>' + t('costo_total') + ' <b class="cifra ' + (est.total > libre ? 'mal' : '') + '">' + dinero(est.total) + '</b></span><span>' + t('calidad_esperada').split(' ')[0] + ' <b>' + Math.max(1, est.calidad - 6) + '–' + Math.min(99, est.calidad + 6) + '</b></span><span title="Retorno orientativo">×' + U.decimal(est.retorno[0], 1) + '–×' + U.decimal(est.retorno[1], 1) + '</span></div>' +
       '<div class="fila entre chico"><span>' + textoEncaje(b) + '</span><span>' + esc(b.clas) + ' · ' + O.semanasTotales(b, NG.rapidez(0)) + ' sem. <button class="btn" style="padding:2px 10px" data-a="crPieDetalle">' + (cr.pieAbierto ? 'Menos' : 'Detalle') + '</button> <button class="btn" style="padding:2px 10px" data-a="crVerResumen">Predicción</button></span></div>' +
       (cr.pieAbierto ? '<div class="chips" style="margin:4px 0 0">' + notasTxt(b) + '<button class="chip" data-a="crDocIdea">Documento de la idea (.docx)</button></div><div class="nota" style="margin:2px 0 0">' + t('costo_talento') + ' ' + dinero(est.talento) + ' · ' + t('costo_produccion') + ' ' + dinero(est.produccion) + (est.derechos ? ' · derechos ' + dinero(est.derechos) : '') + ' · marketing ~' + dinero(est.marketing) + ' · ' + t('caja_libre') + ' ' + dinero(libre) + ' · retorno orientativo ×' + U.decimal(est.retorno[0], 1) + ' a ×' + U.decimal(est.retorno[1], 1) + ' (multiplicador de lo invertido)</div>' : '') +
-      (err && (modo === 'detallado' || cr.paso >= 4) ? '<p class="mal chico" style="margin:4px 0 0">' + esc(err) + '</p>' : '');
+      (err && (modo !== 'rapido' || cr.paso >= 4) ? '<p class="mal chico" style="margin:4px 0 0">' + esc(err) + '</p>' : '');
   }
   // Los totales quedan fijos al final de la creación (no persiguen el desplazamiento)
   // La idea todavía en borrador también se puede descargar como documento
@@ -164,10 +164,16 @@ ART.creacion = (function () {
   function vistaCamino() {
     const S = N.S, a = anio();
     let h = '<h2>' + t('crear_obra') + '</h2><p class="nota info">Primero, de dónde sale la idea. Todo se puede cambiar antes de empezar.</p>';
+    // El medio se elige aquí mismo: cine sigue en este creador; la televisión arma una serie; música, videojuegos, teatro
+    // y libros abren su propio creador
+    const Md = ART.medios;
     h += '<h3>Medio</h3><div class="chips">' + X.medios.map(function (m) {
-      return '<span class="chip on">' + esc(m.nombre) + '</span>';
-    }).join('') + '</div><p class="nota info">Aquí se crean películas' + (a >= 1936 ? ' y series' : '') + '. La música, los videojuegos, el teatro y los libros se producen en Obras, cada uno en su pestaña.</p>';
-    h += '<h3>Modo</h3><div class="chips">' + chip('Rápido · 5 decisiones', 'crModo', 'rapido', modo === 'rapido') + chip('Detallado · todas las listas', 'crModo', 'detallado', modo === 'detallado') + '</div>';
+      if (m.id === 'cine') return chip(m.nombre + (a < D.CINE_DESDE ? ' · ' + D.CINE_DESDE : ''), 'crMedio', 'cine', a >= D.CINE_DESDE, a < D.CINE_DESDE);
+      if (m.id === 'tv') return chip(m.nombre + (ART.tv.puedeTV(a) ? '' : ' · ' + m.desde), 'tvNuevaSerie', '', false, !ART.tv.puedeTV(a));
+      const ok = Md.disponible(m.id);
+      return chip(m.nombre + (ok ? '' : ' · ' + (Md.MED[m.id] ? Md.MED[m.id].desde : m.desde)), 'mdNuevo', m.id, false, !ok);
+    }).join('') + '</div><p class="nota info">Cine se arma aquí; Televisión arma una serie; Música, Videojuegos, Teatro y Libros abren su propio creador.</p>';
+    h += '<h3>Modo</h3><div class="chips">' + chip('Rápido · 5 decisiones', 'crModo', 'rapido', modo === 'rapido') + chip('Rápido · 12 decisiones', 'crModo', 'rapido12', modo === 'rapido12') + chip('Detallado · todas las listas', 'crModo', 'detallado', modo === 'detallado') + '</div>';
     const nG = (S.guiones || []).length, nP = (S.guionesPropios || []).length;
     h += '<div class="col" style="margin-top:12px;gap:8px">' +
       tarjetaCamino('nueva', 'Idea nueva', 'Tú decides todo, con «recomendado» y dado en cada paso.') +
@@ -259,41 +265,43 @@ ART.creacion = (function () {
     X.familiasProblema.filter(function (f) { return pref.indexOf(f.id) >= 0; }).forEach(function (f) { Object.keys(f.items).forEach(function (x) { if (out.indexOf(x) < 0) out.push(x); }); });
     return out.slice(0, 12);
   }
-  function bloqueHistoria(b, completo) {
+  // solo: las partes que se muestran (rec, nat, sub, tem, prob, arco, pre, mor, sarc); sin solo, todas
+  function bloqueHistoria(b, completo, solo) {
     if (cr.picker === 'tem' || cr.picker === 'sub' || cr.picker === 'prob' || cr.picker === 'fic') return bloquePicker(b);
+    const inc = function (k) { return !solo || solo.indexOf(k) >= 0; };
     const lockT = bloqueado(b, 'tem'), lockP = bloqueado(b, 'prob'), lockA = bloqueado(b, 'arco');
     let h = '';
-    if (!lockT || !lockP) h += '<div class="fila envolver" style="margin-bottom:6px"><button class="btn" data-a="crHistRec">' + icono('varita') + t('recomendado') + '</button><button class="btn" data-a="crHistDado">' + icono('dado') + t('dado') + '</button></div>';
+    if (inc('rec') && (!lockT || !lockP)) h += '<div class="fila envolver" style="margin-bottom:6px"><button class="btn" data-a="crHistRec">' + icono('varita') + t('recomendado') + '</button><button class="btn" data-a="crHistDado">' + icono('dado') + t('dado') + '</button></div>';
     if (completo) {
-      h += '<h4>Naturaleza</h4><div class="chips">' + chip('Ficción', 'crNat', 'f', b.nat !== 'r') + chip('Realidad', 'crNat', 'r', b.nat === 'r') + '</div>';
-      h += '<h4>Subgéneros (' + (b.sub || []).length + '/' + I.LIMITES.sub + ', opcional)' + candado(b, 'sub') + '</h4><p class="chico">' + esc((b.sub || []).join(' · ') || '—') + '</p>' + (bloqueado(b, 'sub') ? '' : '<button class="btn" data-a="crPicker" data-v="sub">Elegir subgéneros</button>');
+      if (inc('nat')) h += '<h4>Naturaleza</h4><div class="chips">' + chip('Ficción', 'crNat', 'f', b.nat !== 'r') + chip('Realidad', 'crNat', 'r', b.nat === 'r') + '</div>';
+      if (inc('sub')) h += '<h4>Subgéneros (' + (b.sub || []).length + '/' + I.LIMITES.sub + ', opcional)' + candado(b, 'sub') + '</h4><p class="chico">' + esc((b.sub || []).join(' · ') || '—') + '</p>' + (bloqueado(b, 'sub') ? '' : '<button class="btn" data-a="crPicker" data-v="sub">Elegir subgéneros</button>');
     }
-    h += '<h4>Temas (' + (b.tem || []).length + '/' + I.LIMITES.tem + ')' + candado(b, 'tem') + '</h4><div class="chips">' + sugeridosTemas(b).map(function (x) {
+    if (inc('tem')) h += '<h4>Temas (' + (b.tem || []).length + '/' + I.LIMITES.tem + ')' + candado(b, 'tem') + '</h4><div class="chips">' + sugeridosTemas(b).map(function (x) {
       const on = b.tem.indexOf(x) >= 0;
       return chip(x, 'crTema', x, on, lockT || (!on && b.tem.length >= I.LIMITES.tem));
     }).join('') + '</div>' + (lockT ? '' : '<button class="btn" data-a="crPicker" data-v="tem">Ver los 227 temas</button>');
-    h += '<h4>Problemática o argumento (' + (b.prob || []).length + '/' + I.LIMITES.prob + ', al menos 1)' + candado(b, 'prob') + '</h4><div class="chips">' + sugeridosProblemas(b).map(function (x) {
+    if (inc('prob')) h += '<h4>Problemática o argumento (' + (b.prob || []).length + '/' + I.LIMITES.prob + ', al menos 1)' + candado(b, 'prob') + '</h4><div class="chips">' + sugeridosProblemas(b).map(function (x) {
       const on = b.prob.indexOf(x) >= 0;
       return chip(x, 'crProb', x, on, lockP || (!on && b.prob.length >= I.LIMITES.prob));
     }).join('') + '</div>' + (lockP ? '' : '<button class="btn" data-a="crPicker" data-v="prob">Ver las 53</button>');
-    h += '<h4>Arco narrativo' + (b.nat === 'r' ? ' (opcional en realidad)' : ' (obligatorio en ficción)') + candado(b, 'arco') + '</h4><div class="chips">' + X.arcos.map(function (a) {
+    if (inc('arco')) h += '<h4>Arco narrativo' + (b.nat === 'r' ? ' (opcional en realidad)' : ' (obligatorio en ficción)') + candado(b, 'arco') + '</h4><div class="chips">' + X.arcos.map(function (a) {
       return chip(a.nombre, 'crArco', a.id, b.arco === a.id, lockA);
     }).join('') + '</div>';
     // Premisas y tropos: 0 a 2; encajan con ciertas familias y las muy usadas cansan
     b.pre = b.pre || [];
     const famB = b.fam || D.familiaDe[(b.gen || [])[0]];
-    h += '<h4>Premisas y tropos (' + b.pre.length + '/2, opcional)</h4><p class="nota info">Encajan mejor con algunas familias (★) y las que el mundo usa mucho cansan al público.</p>' +
+    if (inc('pre')) h += '<h4>Premisas y tropos (' + b.pre.length + '/2, opcional)</h4><p class="nota info">Encajan mejor con algunas familias (★) y las que el mundo usa mucho cansan al público.</p>' +
       '<label class="campo"><span>Familia de premisas</span><select data-c="crPreFam">' + X.familiasPremisa.map(function (f) { return '<option value="' + f.id + '"' + (cr.preFam === f.id ? ' selected' : '') + '>' + esc(f.nombre) + (f.afin.indexOf(famB) >= 0 ? ' ★' : '') + '</option>'; }).join('') + '</select></label><div class="chips">' +
       (X.familiasPremisa.filter(function (f) { return f.id === (cr.preFam || X.familiasPremisa[0].id); })[0].items).concat(b.pre.filter(function (p) { return (X.familiasPremisa.filter(function (f) { return f.id === (cr.preFam || X.familiasPremisa[0].id); })[0].items).indexOf(p) < 0; })).map(function (p) {
         const on = b.pre.indexOf(p) >= 0, u = I.usosPremisa(p, anio());
         return chip(p + (u >= 4 ? ' (muy usada)' : ''), 'crPre', p, on, !on && b.pre.length >= 2);
       }).join('') + '</div>';
     const arco = X.arco(b.arco);
-    if (arco) h += '<p class="nota">' + esc(arco.nombre) + ': ' + esc(arco.final) + (arco.crit || arco.pub ? ' · crítica ' + signo(arco.crit) + ', público ' + signo(arco.pub) : '') + '</p>';
+    if (arco && inc('arco')) h += '<p class="nota">' + esc(arco.nombre) + ': ' + esc(arco.final) + (arco.crit || arco.pub ? ' · crítica ' + signo(arco.crit) + ', público ' + signo(arco.pub) : '') + '</p>';
     const famM = b.fam || D.familiaDe[(b.gen || [])[0]];
-    h += '<label class="campo"><span>Moraleja de la historia (opcional)</span><select data-c="crMor"><option value="">— sin elegir —</option>' + I.MORALEJAS.map(function (m) { return '<option value="' + esc(m.id) + '"' + (b.mor === m.id ? ' selected' : '') + '>' + esc(m.id) + (m.fam.indexOf(famM) >= 0 ? ' ★' : '') + '</option>'; }).join('') + '</select></label>' +
+    if (inc('mor')) h += '<label class="campo"><span>Moraleja de la historia (opcional)</span><select data-c="crMor"><option value="">— sin elegir —</option>' + I.MORALEJAS.map(function (m) { return '<option value="' + esc(m.id) + '"' + (b.mor === m.id ? ' selected' : '') + '>' + esc(m.id) + (m.fam.indexOf(famM) >= 0 ? ' ★' : '') + '</option>'; }).join('') + '</select></label>' +
       '<p class="nota info">La lección que deja la obra. Si encaja con el género (★) suma 1 a la calidad; las historias familiares sin moraleja restan 1.</p>';
-    if (completo) {
+    if (completo && inc('sarc')) {
       h += '<h4>Subarcos (hasta ' + I.LIMITES.sarc + ', opcional)</h4><div class="chips">' + X.subarcos.map(function (s) {
         const on = (b.sarc || []).indexOf(s.id) >= 0;
         return chip(s.nombre, 'crSubarco', s.id, on, bloqueado(b, 'sarc') || (!on && (b.sarc || []).length >= I.LIMITES.sarc));
@@ -550,6 +558,17 @@ ART.creacion = (function () {
   // =====================================================================
   // MODO RÁPIDO Y MODO DETALLADO
   // =====================================================================
+  // Presupuesto por escala (lo usan el modo rápido y el de 12 decisiones)
+  function bloqueEscala(b) {
+    let h = '';
+    h += '<p class="nota info">' + t('escala_ayuda') + '</p>' + D.escalas.map(function (es, i) {
+      const pp = E.produccionTipica(anio(), b.fam) * es.mult * O.escalaTono(b.tono) * I.factorCosto(b, anio());
+      return '<button class="tarjeta toque fila entre" style="width:100%;' + (Math.abs(b.presM - es.mult) < 0.01 ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="crEscala" data-v="' + i + '"><b>' + es.nombre + '</b><span>' + dinero(pp) + '</span></button>';
+    }).join('');
+    h += textoEscala(b);
+    h += rango('pres', 0, 100, sliderDePres(b.presM), 'Presupuesto de producción', textoRango(b, 'pres'));
+    return h;
+  }
   const PASOS = ['paso_generos', 'paso_historia', 'paso_escala', 'paso_equipo', 'paso_titulo', 'paso_resumen'];
   function vistaRapida() {
     const b = cr.b;
@@ -558,12 +577,7 @@ ART.creacion = (function () {
     if (cr.paso === 0) h += (N.anio() >= D.CINE_DESDE ? bloqueObra(b) : '') + bloqueGeneros(b); // el tipo de obra se elige también en el modo rápido
     else if (cr.paso === 1) h += bloqueHistoria(b, false) + (cr.picker ? '' : bloqueTono(b) + '<p class="tenue">' + esc(I.sinopsis(b)) + '</p>');
     else if (cr.paso === 2) {
-      h += '<p class="nota info">' + t('escala_ayuda') + '</p>' + D.escalas.map(function (es, i) {
-        const pp = E.produccionTipica(anio(), b.fam) * es.mult * O.escalaTono(b.tono) * I.factorCosto(b, anio());
-        return '<button class="tarjeta toque fila entre" style="width:100%;' + (Math.abs(b.presM - es.mult) < 0.01 ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="crEscala" data-v="' + i + '"><b>' + es.nombre + '</b><span>' + dinero(pp) + '</span></button>';
-      }).join('');
-      h += textoEscala(b);
-      h += rango('pres', 0, 100, sliderDePres(b.presM), 'Presupuesto de producción', textoRango(b, 'pres'));
+      h += bloqueEscala(b);
       if (!b.tv) h += chipsDuracion(b);
       // Cómo se filma: el método, con el recomendado marcado; el resto queda en lo ideal
       const rec = ART.rodaje.metodoRecomendado(b, anio());
@@ -754,13 +768,40 @@ ART.creacion = (function () {
     return h;
   }
   function fichaCrear() {
-    if (cr.b && (cr.b.tv || cr.b.fr) && cr.etapa === 'idea') return ART.teleUI.bannerCrear(cr.b) + (modo === 'rapido' ? vistaRapida() : vistaDetallada()); // series y continuaciones
+    if (cr.b && (cr.b.tv || cr.b.fr) && cr.etapa === 'idea') return ART.teleUI.bannerCrear(cr.b) + vistaModo(); // series y continuaciones
     if (cr.etapa === 'camino' || !cr.b && cr.etapa === 'idea') return vistaCamino();
     if (cr.etapa === 'guiones') return vistaGuiones();
     if (cr.etapa === 'material') return vistaMaterial();
-    return modo === 'rapido' ? vistaRapida() : vistaDetallada();
+    return vistaModo();
   }
+  function vistaModo() { return modo === 'rapido' ? vistaRapida() : modo === 'rapido12' ? vista12() : vistaDetallada(); }
   function refrescar() { U.refrescarFicha(fichaCrear()); }
+  ac('crMedio', function () { /* el cine ya es este creador */ });
+  // ---------- Modo rápido de 12 decisiones (como en la Final): todo en una página, en orden ----------
+  function vista12() {
+    const b = cr.b;
+    const sec = function (n, titulo, html) { return '<div class="tarjeta cr12"><h3>' + n + ' · ' + esc(titulo) + '</h3>' + html + '</div>'; };
+    let h = '<div class="fila entre"><h2>' + t('crear_obra') + '</h2><div class="fila"><button class="btn" data-a="crModo" data-v="rapido">5 decisiones</button><button class="btn" data-a="crModo" data-v="detallado">Detallado</button></div></div>';
+    if (cr.picker) return h + bloquePicker(b) + pie(b);
+    const fr = b.fr ? '<p>' + esc('Continúa una franquicia tuya.') + '</p>' : '<p class="nota">Tu obra funda una franquicia nueva con su mismo nombre. Para continuar una tuya (secuela, precuela, spin-off o reboot) usa «Continuar» en Obras › Franquicias.</p><button class="btn" data-a="crIrFranq">' + icono('libro') + 'Ir a mis franquicias</button>';
+    h += sec(1, 'Tipo de obra', bloqueObra(b) + bloqueHistoria(b, true, ['nat']));
+    h += sec(2, 'Título', bloqueTitulo(b));
+    h += sec(3, 'Franquicia', fr);
+    h += sec(4, 'Géneros principales (hasta 3)', bloqueGeneros(b));
+    h += sec(5, 'Subgéneros', bloqueHistoria(b, true, ['sub']));
+    h += sec(6, 'Temas y tópicos', bloqueHistoria(b, true, ['rec', 'tem', 'prob', 'pre']) + bloqueMundo(b));
+    h += sec(7, 'Arco de la historia y moraleja', bloqueHistoria(b, true, ['arco', 'mor']));
+    h += sec(8, 'Estilo y tono', bloqueEstilo(b) + rango('rit', 0, 4, b.rit, 'Ritmo', textoRango(b, 'rit')));
+    h += sec(9, 'Clasificación por edades', '<p>' + textoClas(b) + '</p>' + bloquePublico(b));
+    h += sec(10, 'Duración', (b.tv ? '' : chipsDuracion(b)) + rango('min', 1, 300, b.min, 'Duración', textoRango(b, 'min')));
+    h += sec(11, 'Protagonistas y personajes', bloquePersonajes(b));
+    h += sec(12, 'Modo de presupuesto', bloqueEscala(b));
+    h += '<div class="tarjeta cr12"><h3>Antes de producir · equipo y música</h3>' + bloqueEquipo(b, false) + '</div>';
+    h += '<div class="tarjeta cr12"><h3>Resumen y predicción</h3>' + bloqueResumen(b) + '</div>';
+    h += pie(b) + '<div class="fila entre" style="margin-top:8px"><button class="btn" data-a="crVolverCamino">' + t('atras') + '</button>' + botonFinal() + '</div>';
+    return h;
+  }
+  ac('crIrFranq', function () { U.cerrarFicha(); U.irA('obras', 'franquicias'); });
   function irAPicker() {
     setTimeout(function () { const p = document.querySelector('#ficha .picker'); if (p && p.scrollIntoView) p.scrollIntoView({ block: 'start' }); }, 0);
   }
@@ -775,7 +816,7 @@ ART.creacion = (function () {
     U.abrirFicha(fichaCrear(), 'crear');
   });
   ac('crModo', function (v) {
-    modo = v === 'detallado' ? 'detallado' : 'rapido';
+    modo = v === 'detallado' || v === 'rapido12' ? v : 'rapido';
     try { localStorage.setItem('ia.modoCrear', modo); } catch (e) { /* sin almacenamiento */ }
     cr.picker = null; cr.rol = null;
     refrescar();
