@@ -5310,7 +5310,7 @@ ART.talentos = (function () {
         return Math.round(60 + (t.mo - 60) * Math.pow(0.93, meses));
     }
     function cambiarMoral(t, d) { t.mo = Math.round(N.limitar(moral(t) + d, 0, 100)); t.moT = N.S.t; }
-    function exclusivoDe(t) { return t.ex !== undefined && t.ex !== null && t.exH > N.S.t ? t.ex : null; }
+    function exclusivoDe(t) { return t && t.ex !== undefined && t.ex !== null && t.exH > N.S.t ? t.ex : null; }
     function estudiando(t) { return !!(t.es && t.es.fin > N.S.t); }
     function disponible(t, estId) {
         if (!t || t.ret || t.mu || estudiando(t))
@@ -10498,7 +10498,7 @@ ART.banco = (function () {
         const S = N.S, hueco = Math.max(0, -S.estudios[0].caja);
         return [
             { id: 'terminar', nombre: 'Terminar la partida', texto: 'El estudio cierra. Puedes cargar otra partida.' },
-            { id: 'rescate', nombre: 'Rescate bancario', texto: 'El banco cubre el hueco y te presta ' + din(hueco + tip() * 2) + ' más caro. Baja tu prestigio.', ok: puntaje() >= 380 || !(S.rescatesJ > 0) },
+            { id: 'rescate', nombre: 'Rescate bancario', texto: 'El banco cubre el hueco y te presta ' + din(hueco + tip() * 2) + ' a 10 años, más caro. Baja tu prestigio.', ok: puntaje() >= 380 || !(S.rescatesJ > 0) },
             { id: 'socio', nombre: 'Buscar un socio', texto: 'Un inversionista pone ' + din(hueco + tip() * 3) + ' a cambio del 35 % del estudio.', ok: !S.socio || S.socio.parte < 0.45 },
         ];
     }
@@ -10515,7 +10515,7 @@ ART.banco = (function () {
         }
         const hueco = Math.max(0, -S.estudios[0].caja);
         if (id === 'rescate') {
-            pedir(hueco + Math.round(tip() * 2), 60, 'rescate');
+            pedir(hueco + Math.round(tip() * 2), 120, 'rescate');
             S.estudios[0].fama = N.redondear(Math.max(0.01, S.estudios[0].fama - 0.05), 3);
             S.rescatesJ = (S.rescatesJ || 0) + 1;
         }

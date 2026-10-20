@@ -137,3 +137,9 @@ Revisadas las funciones de la versión final que el autor marcó como mejores y 
 # Ajuste · clasificación y multiplicadores realistas
 - **Los talentos ya no rechazan una obra por su clasificación.** Si la obra es más fuerte de lo que suelen aceptar, trabajan igual: rinden 4 puntos menos y cobran 8 % más por cada nivel de diferencia (en cine y en los demás medios). La tarjeta del candidato lo avisa y el precio mostrado ya lo incluye. Solo se mantiene la protección legal: un menor de edad no trabaja en obras para adultos.
 - **Multiplicadores del calendario realistas**: los del documento (×2, ×9, ×11…) son una escala de intensidad, no multiplicadores de dinero. Ahora cada festividad suma entre 0,5 y 13 % de público (más para los géneros que nombra), todas juntas nunca más de 15 %, y el calendario del documento pesa una cuarta parte de la temporada real. La agenda y la lista de fechas de estreno muestran el efecto real en porcentaje.
+
+# Búsqueda de errores
+- **Prueba de mono** (`tools/pruebas/mono.js`): toca botones y cambia desplegables, números, deslizadores y textos al azar en pantallas, fichas y ventanas, avanzando el tiempo. Encontró un error real: las negociaciones del equipo fallaban cuando un integrante ya no existía (por ejemplo, un talento que murió durante la preparación); afectaba el creador de cine en pestañas de equipo y personajes. Arreglado. Después: 0 errores en 8.800 acciones en 12 épocas distintas (1780–2250).
+- **Partida larga** (`largo.js`, 1850–2100): sin errores; semana media de 3 a 31 ms y guardado que crece de forma estable.
+- **Números** (`numeros.js`, 40 años desde 1760 y desde 1990): ningún NaN, infinito ni negativo imposible en toda la partida.
+- **Quiebra** (`quiebra.js`): las tres salidas (cerrar, rescate bancario, socio) funcionan. El rescate ahora es a 10 años (antes 5): con 5 años las cuotas volvían a hundir la caja en dos meses.
