@@ -22469,6 +22469,8 @@ ART.ui = (function () {
             ART.arte.posterEn(cv, { id: N.hash(tit), titulo: tit, generos: [cv.getAttribute('data-gen') || 'Drama'], temas: [], anio: +cv.getAttribute('data-anio') || N.anio(), etapa: 'terminada', crit: null, pub: null, clas: cv.getAttribute('data-clas') || 'PG', premiosGanados: 0, creditos: {}, estudio: { nombre: cv.getAttribute('data-est') || '', logo: null } });
             return;
         }
+        if (!N.S)
+            return;
         const o = ART.obras.porId(+v);
         if (o)
             ART.arte.posterEn(cv, ART.obras.paraPoster(o));
@@ -22484,6 +22486,8 @@ ART.ui = (function () {
                 ART.arte.retratoEn(cv, estado.talentoNuevo, estado.talentoNuevo.anio);
             return;
         }
+        if (!N.S)
+            return;
         const id = +cv.getAttribute('data-retrato');
         const tal = id === 999999 ? avatarComoTalento() : ART.talentos.porId(id);
         if (tal)
@@ -22500,6 +22504,8 @@ ART.ui = (function () {
                     return;
                 vigia.unobserve(e.target);
                 vigilados.delete(e.target);
+                if (!document.body.contains(e.target))
+                    return;
                 if (e.target.hasAttribute('data-poster'))
                     dibujarPoster(e.target);
                 else
