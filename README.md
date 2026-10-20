@@ -1,6 +1,6 @@
 # INDUSTRY ART (Industria del Arte)
 
-Simulador 2D de gestión y rol de un estudio de arte, de 1700 a 2300. **Edición Definitiva 6.0**. Ideado y creado por OneZero;
+Simulador 2D de gestión y rol de un estudio de arte, de 1700 a 2300. Versión **1.0**. Ideado y creado por OneZero;
 programado junto a Lumen. El plan completo está en `docs/` (Plan Maestro en Word, PDF y texto).
 
 ## Cómo jugar
@@ -12,11 +12,11 @@ Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v41.html` | El juego, **Edición Definitiva 6.0** (V41) |
-| `INDUSTRY_ART_v40.html` | La versión 5.0 (V40), base de la Edición Definitiva |
+| `INDUSTRY_ART_v41.html` | El juego, versión **1.0** (V41) |
+| `INDUSTRY_ART_v40.html` | La versión 5.0 (V40), base de la 1.0 |
 | `INDUSTRY_ART_v36.html` | La versión 2.1 (V36, armada desde `src/`) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
-| `bitacora_v41.md` | La bitácora de la Edición Definitiva 6.0 |
+| `bitacora_v41.md` | La bitácora de la versión 1.0 (V41) |
 | `bitacora_v36.md` | La bitácora corta de la V36 · 2.1, inicio por pasos, tu avatar en tus obras y clásicos con sus personajes (las de la V21 a la V35 también están) |
 | `app/` | Las apps: Android e iPhone (Capacitor 8: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
 | `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone (TestFlight), la app de PC y la versión web |
