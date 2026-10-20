@@ -213,3 +213,9 @@ Pendiente, y depende de ti:
 - La «Guía» por etapas y los botones de tiempo de la Final quedaron en otra forma; las construcciones siguen sin niveles (se pueden comprar varias).
 - «Paquetes de prensa» y «Crear estudio» de la Final no se agregaron.
 - El guardado sigue grande en partidas muy largas: unos 17 MB en 2100.
+
+### Franquicias (revisión pedida)
+- **Crossovers:** cada franquicia admite hasta 3. Hay «Obra juntas» con cada una y un «Gran crossover» que junta las 4. La obra en conjunto aparece en el canon de cada franquicia, y «Separar franquicias» la deja en ambas.
+- **Línea por fecha de estreno:** muestra el orden real en que salieron las obras, en horizontal. No se edita.
+- **Cronología del canon:** es editable. Las obras se ordenan con las flechas ↑ ↓. Cada spin-off, remake, historia paralela, soft reboot o reboot abre una **rama** que nace de su obra de origen y se dibuja debajo de su rama madre. Las ramas se pueden renombrar, y las obras se pueden pasar de una rama a otra o sacar del canon. La secuela va después y la precuela antes de su obra.
+- Probado: tres crossovers aceptados y el cuarto rechazado, el gran crossover de 4 franquicias, las ramas de spin-off, remake e historia paralela, el reordenamiento y la separación. El verificador dio 0 errores.
