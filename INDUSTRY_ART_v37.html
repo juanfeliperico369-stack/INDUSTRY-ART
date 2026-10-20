@@ -11015,6 +11015,79 @@ ART.franquicias = (function () {
         N.emit('noticia', { tipo: 'estudio', texto: 'Vendes «' + f.nom + '» a ' + S.estudios[estId].nombre + '.', importante: true });
         return '';
     }
+    function probVenta(f, estId, pct) {
+        const e = N.S.estudios[estId], p = valor(f) * pct / 100;
+        if (!e || e.quebrado || e.caja < p)
+            return 0;
+        return N.limitar(1.6 - pct / 100, 0.03, 0.95);
+    }
+    function esperaVenta(f) { return f && f.espera > N.S.t ? f.espera - N.S.t : 0; }
+    function proponerVenta(frId, estId, pct) {
+        const f = porId(frId), S = N.S;
+        if (!f || f.est !== 0)
+            return { error: 'No es tuya.' };
+        if (f.sub)
+            return { error: 'Está en subasta.' };
+        if (esperaVenta(f))
+            return { error: 'Espera ' + esperaVenta(f) + ' semanas para otra propuesta.' };
+        pct = N.limitar(Math.round(+pct || 100), 50, 200);
+        const e = S.estudios[estId], precio = Math.round(valor(f) * pct / 100);
+        if (!e || e.quebrado)
+            return { error: 'Ese estudio no existe.' };
+        if (e.caja < precio)
+            return { error: e.nombre + ' no tiene ' + ART.ui.dinero(precio) + ' en caja.' };
+        if (N.probabilidad(probVenta(f, estId, pct))) {
+            vender(frId, estId, precio);
+            return { ok: true, texto: e.nombre + ' acepta: vendes «' + f.nom + '» por ' + ART.ui.dinero(precio) + '.' };
+        }
+        f.espera = S.t + 4;
+        return { ok: false, texto: e.nombre + ' rechaza la oferta. Espera 4 semanas para proponer otra.' };
+    }
+    function subastar(frId, pct) {
+        const f = porId(frId), S = N.S;
+        if (!f || f.est !== 0)
+            return 'No es tuya.';
+        if (f.sub)
+            return 'Ya está en subasta.';
+        if (esperaVenta(f))
+            return 'Espera ' + esperaVenta(f) + ' semanas.';
+        f.sub = { fin: S.t + 3, reserva: Math.round(valor(f) * N.limitar(+pct || 80, 30, 200) / 100), pujas: [] };
+        N.emit('noticia', { tipo: 'estudio', texto: 'Subastas los derechos de «' + f.nom + '»: los rivales tienen 3 semanas para pujar.' });
+        return '';
+    }
+    function semanaSubastas() {
+        const S = N.S;
+        st().lista.forEach(function (f) {
+            const x = f.sub;
+            if (!x)
+                return;
+            if (f.est !== 0) {
+                delete f.sub;
+                return;
+            }
+            const v = valor(f), mejor = x.pujas.length ? x.pujas[x.pujas.length - 1].monto : 0;
+            S.estudios.forEach(function (e) {
+                if (!e.id || e.quebrado || !N.probabilidad(0.45))
+                    return;
+                const oferta = Math.round(Math.max(mejor * 1.06, v * (0.6 + N.azar() * 0.7)));
+                if (oferta > mejor && oferta <= e.caja * 0.6 && (!x.pujas.length || x.pujas[x.pujas.length - 1].est !== e.id))
+                    x.pujas.push({ est: e.id, monto: oferta });
+            });
+            x.pujas.sort(function (a, b) { return a.monto - b.monto; });
+            if (S.t < x.fin)
+                return;
+            const gana = x.pujas[x.pujas.length - 1];
+            delete f.sub;
+            if (gana && gana.monto >= x.reserva && S.estudios[gana.est].caja >= gana.monto) {
+                vender(f.id, gana.est, gana.monto);
+                N.emit('noticia', { tipo: 'estudio', texto: 'Cierra la subasta: ' + S.estudios[gana.est].nombre + ' gana «' + f.nom + '» con ' + ART.ui.dinero(gana.monto) + '.', importante: true });
+            }
+            else {
+                f.espera = S.t + 8;
+                N.emit('noticia', { tipo: 'estudio', texto: 'La subasta de «' + f.nom + '» cierra sin llegar al precio mínimo.', importante: true });
+            }
+        });
+    }
     function aceptarOferta(i) { const S = N.S, x = (S.ofFr || [])[+i]; if (!x)
         return 'Ya venció.'; return vender(x.fr, x.est, x.precio); }
     function rechazarOferta(i) { const S = N.S; (S.ofFr || []).splice(+i, 1); }
@@ -11036,6 +11109,7 @@ ART.franquicias = (function () {
     }
     function semana() {
         const S = N.S;
+        semanaSubastas();
         st().lista.forEach(function (f) {
             if (f.est !== 0 || !f.lic.length)
                 return;
@@ -11072,6 +11146,7 @@ ART.franquicias = (function () {
         crossover: crossover, separar: separar, continuarCruce: continuarCruce, alCrear: alCrear, bonoDeseo: bonoDeseo, bonoConocimiento: bonoConocimiento, alEstrenar: alEstrenar,
         alTerminar: alTerminar, productos: productos, ingresoLicencia: ingresoLicencia, licenciar: licenciar, moverContinuidad: moverContinuidad, renombrarContinuidad: renombrarContinuidad,
         asignarMente: asignarMente, enVenta: enVenta, comprar: comprar, vender: vender, aceptarOferta: aceptarOferta, rechazarOferta: rechazarOferta, mensual: mensual, semana: semana,
+        probVenta: probVenta, esperaVenta: esperaVenta, proponerVenta: proponerVenta, subastar: subastar,
         anual: anual, secuelaRival: secuelaRival, prepararRival: prepararRival };
 })();
 ART.imperio = (function () {
@@ -29481,8 +29556,18 @@ ART.teleUI = (function () {
             const ult = b.linea.filter(function (o) { return o.pub !== undefined; }).pop();
             h += '<h3>Acciones</h3><div class="fila">' + (ult ? btn('Continuación', 'tvContinuar', ult.id, 'primario') : '') + btn('Renombrar', 'tvRegistrar', b.linea[0].id) + '</div>';
             const compradores = N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; });
-            if (compradores.length)
-                h += '<div class="fila">' + sel('tvVendA', compradores.map(function (e) { return [e.id, e.nombre]; }), st.vendA || compradores[0].id) + btn('Vender por ' + dinero(F.valor(f)), 'tvVender', f.id) + '</div>';
+            if (compradores.length) {
+                const comp = compradores.filter(function (e) { return e.id === st.vendA; })[0] || compradores[0], pct = st.vendPct || 100, precio = Math.round(F.valor(f) * pct / 100), espera = F.esperaVenta(f);
+                h += '<h3>Vender</h3><p class="nota">Valor estimado: <b>' + dinero(F.valor(f)) + '</b>. Cerca del valor casi siempre aceptan; si pides mucho más, pocos estudios se interesan.</p>' +
+                    '<div class="fila envolver">' + sel('tvVendA', compradores.map(function (e) { return [e.id, e.nombre + ' · caja ' + dinero(e.caja)]; }), comp.id) + '</div>' +
+                    '<label class="campo rango"><span>Precio: <b>' + dinero(precio) + '</b> (' + pct + ' % del valor) · probabilidad de que acepte: ' + Math.round(F.probVenta(f, comp.id, pct) * 100) + ' %</span><input type="range" min="50" max="200" step="5" value="' + pct + '" data-c="tvVendPct"></label>';
+                if (f.sub)
+                    h += '<div class="tarjeta"><b>En subasta</b> hasta ' + esc(U.fechaCorta(f.sub.fin)) + ' · precio mínimo ' + dinero(f.sub.reserva) + '<br><span class="chico">' + (f.sub.pujas.length ? f.sub.pujas.slice().reverse().map(function (p) { return esc(nomEst(p.est)) + ': ' + dinero(p.monto); }).join(' · ') : 'Aún sin pujas.') + '</span></div>';
+                else if (espera)
+                    h += '<p class="nota mal">Espera ' + espera + ' semanas para otra propuesta o subasta.</p>';
+                else
+                    h += '<div class="fila envolver">' + btn('Proponer venta', 'tvProponer', f.id, 'primario') + btn('Subastar derechos (3 semanas, mínimo ' + dinero(precio) + ')', 'tvSubastar', f.id) + '</div>';
+            }
         }
         return h + '<button class="btn bloque" data-a="cerrarModal">Cerrar</button>';
     }
@@ -29541,7 +29626,25 @@ ART.teleUI = (function () {
     ac('tvSeparar', function (v) { const p = v.split('|'); F.separar(+p[0], +p[1]); U.modal(fichaFranquicia(p[0])); });
     ac('tvCruce', function (v) { const p = v.split('|'), r = ART.creacion.conAzarUI(function () { return F.continuarCruce(+p[0], +p[1]); }); if (r.error)
         return avisar(r.error); abrirBorrador(r); });
-    ac('tvVendA', function (v) { st.vendA = +v; });
+    ac('tvVendA', function (v) { st.vendA = +v; if (st.fr)
+        U.modal(fichaFranquicia(st.fr)); });
+    ac('tvVendPct', function (v) { st.vendPct = N.limitar(Math.round(+v || 100), 50, 200); if (st.fr)
+        U.modal(fichaFranquicia(st.fr)); });
+    ac('tvProponer', function (v) {
+        const cs = N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; });
+        const r = F.proponerVenta(+v, st.vendA || (cs[0] && cs[0].id), st.vendPct || 100);
+        if (r.error)
+            return avisar(r.error);
+        U.aviso(r.texto, r.ok ? '' : 'mal');
+        if (r.ok) {
+            U.cerrarModal();
+            U.refrescar();
+        }
+        else
+            U.modal(fichaFranquicia(v));
+    });
+    ac('tvSubastar', function (v) { const e = F.subastar(+v, st.vendPct || 100); avisar(e, 'Subasta abierta'); if (!e)
+        U.modal(fichaFranquicia(v)); });
     ac('tvVender', function (v) { const cs = N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }); avisar(F.vender(+v, st.vendA || cs[0].id), 'Franquicia vendida'); U.cerrarModal(); U.refrescar(); });
     ac('tvVenderOf', function (v) { avisar(F.aceptarOferta(+v), 'Franquicia vendida'); U.refrescar(); });
     ac('tvRechazarOf', function (v) { F.rechazarOferta(+v); U.refrescar(); });

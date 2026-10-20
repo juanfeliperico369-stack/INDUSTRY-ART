@@ -91,3 +91,8 @@ El juego cubre seis siglos (1700–2300). La historia real llega a 2026; desde a
 - **Cines**: cadenas con precio según lo que rinden (unos 7 años de ingreso), ventajas moderadas y fama mínima para comprarlas; cines propios menos desbalanceados.
 - **Crítica con dispersión real**: la ejecución de cada rodaje varía; la estimación en pantalla usa la misma escala.
 - **Fama** que depende de la calidad y del resultado de cada estreno (antes subía con el volumen) y se desgasta un poco más cada año.
+
+## Paridad con la versión final
+Revisadas las funciones de la versión final que el autor marcó como mejores y las demás por palabras clave (temas y daltonismo, tutorial, velocidad, exportar e importar, doblaje, telenovelas, huelgas, rankings, logros, bitácora, coproducciones, compra de estudios): V37 ya las tiene. Faltaban, y se agregaron en la ficha de cada franquicia:
+- **Proponer venta con precio negociado**: eliges comprador y precio (50 a 200 % del valor); cerca del valor casi siempre aceptan y si pides mucho más pocos se interesan (probabilidad visible). Tras un rechazo hay que esperar 4 semanas.
+- **Subastar los derechos**: 3 semanas de pujas de los rivales con precio mínimo; si no se llega, la franquicia sigue siendo tuya y hay que esperar 8 semanas.
