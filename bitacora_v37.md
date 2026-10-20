@@ -96,3 +96,15 @@ El juego cubre seis siglos (1700–2300). La historia real llega a 2026; desde a
 Revisadas las funciones de la versión final que el autor marcó como mejores y las demás por palabras clave (temas y daltonismo, tutorial, velocidad, exportar e importar, doblaje, telenovelas, huelgas, rankings, logros, bitácora, coproducciones, compra de estudios): V37 ya las tiene. Faltaban, y se agregaron en la ficha de cada franquicia:
 - **Proponer venta con precio negociado**: eliges comprador y precio (50 a 200 % del valor); cerca del valor casi siempre aceptan y si pides mucho más pocos se interesan (probabilidad visible). Tras un rechazo hay que esperar 4 semanas.
 - **Subastar los derechos**: 3 semanas de pujas de los rivales con precio mínimo; si no se llega, la franquicia sigue siendo tuya y hay que esperar 8 semanas.
+
+# Sesión 5 de 6 · Jugabilidad, errores y pulido
+
+## Arreglos
+- **Era previa al cine (1700–1895)**: la regla de dividendos usaba el presupuesto típico de cine, que antes de 1895 vale unos pocos dólares, y se llevaba todas las ganancias de teatro y libros; la caja se quedaba en ~0,8 M durante 150 años. Ahora la junta reparte solo lo que supera el mayor de dos valores, 12 presupuestos típicos o el 80 % del gasto anual del estudio, y lo mismo vale para los rivales. Con eso el teatro y los libros sostienen a un estudio en crecimiento.
+- **Videojuegos**: las dimensiones holográfica y de realidad total mostraban «undefined» en el creador; ya tienen su icono.
+
+## Verificación nueva (se puede repetir)
+- `recorrido.js`: el bot juega 15 años desde 1750, 1900, 2026 y 2200 y luego se abren las 46 pantallas de las cinco secciones, buscando errores y textos rotos (NaN, undefined, Infinity): **0 errores**.
+- `fichas.js`: fichas de obras propias y rivales, talentos, proyectos de cada medio y todas las pestañas del creador de cine, series, teatro, libros, música y videojuegos en 1760, 1960, 2030 y 2210–2250: **0 errores** tras el arreglo.
+- `guardado.js`: guardar, avanzar, cargar y seguir un año (subastas, especialidades, galas y obras se conservan): **sin errores**.
+- `econ.js` 1900–2050: caja de 1.000 M en 1990 y 4.400 M en 2020, rival mayor en la misma liga, 20–40 % de obras con pérdida, crítica 65–68 con desviación ~10.

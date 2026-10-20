@@ -13555,12 +13555,10 @@ ART.negocio = (function () {
                 pagar(i, 'impuestos', util * E.impuesto(anioCerrado));
         }
         const jug = S.estudios[0];
-        if (jug.util > 0 && jug.caja > 12 * tipicoCerrado)
-            pagar(0, 'dividendos', Math.round(Math.min((jug.caja - 12 * tipicoCerrado) * 0.35, jug.util * 0.9)));
-        for (let i = 1; i < S.estudios.length; i++) {
-            const e = S.estudios[i];
-            if (!e.quebrado && e.util > 0 && e.caja > 12 * tipicoCerrado)
-                pagar(i, 'dividendos', Math.round(Math.min((e.caja - 12 * tipicoCerrado) * 0.35, e.util * 0.9)));
+        for (let i = 0; i < S.estudios.length; i++) {
+            const e = S.estudios[i], reserva = Math.max(12 * tipicoCerrado, 0.8 * (e.gasAnio || 0));
+            if (!e.quebrado && e.util > 0 && e.caja > reserva)
+                pagar(i, 'dividendos', Math.round(Math.min((e.caja - reserva) * 0.35, e.util * 0.9)));
         }
         const totRef = totalReferencia(m.anio, anioCerrado);
         const cuota = totRef > 0 ? (m.anio.porEstudio[0] || 0) / totRef : 0;
@@ -28012,7 +28010,7 @@ ART.mediosUI = (function () {
             const dimSel = Md.de(Md.DIMENSIONES, c.dim, '2d');
             h += '<h4>Tipo de videojuego</h4><div class="md-dims">' + Md.DIMENSIONES.map(function (x) {
                 const ok = x.desde <= a, g = ok ? Md.gustoDim(x.id, a) : 0;
-                return '<button class="md-dim' + (c.dim === x.id ? ' on' : '') + '" data-a="mdDim" data-v="' + x.id + '"' + (ok ? '' : ' disabled') + '><b>' + ({ texto: '⌨', '2d': '▦', iso: '◇', '3d': '⬢', rv: '◉', neuro: '✺' }[x.id]) + ' ' + esc(x.nombre) + '</b><span class="chico">' + (ok ? 'Público ×' + U.decimal(g, 2) + ' · costo ×' + U.decimal(x.k, 2) : 'Llega en ' + x.desde) + '</span></button>';
+                return '<button class="md-dim' + (c.dim === x.id ? ' on' : '') + '" data-a="mdDim" data-v="' + x.id + '"' + (ok ? '' : ' disabled') + '><b>' + ({ texto: '⌨', '2d': '▦', iso: '◇', '3d': '⬢', rv: '◉', neuro: '✺', holo: '◈', total: '✦' }[x.id] || '◆') + ' ' + esc(x.nombre) + '</b><span class="chico">' + (ok ? 'Público ×' + U.decimal(g, 2) + ' · costo ×' + U.decimal(x.k, 2) : 'Llega en ' + x.desde) + '</span></button>';
             }).join('') + '</div><p class="nota info">' + esc(dimSel.texto) + '</p>';
             h += '<label class="campo"><span>Modo de juego</span>' + sel('mdCfg', Md.MODOS_J.filter(function (x) { return x.desde <= a; }).map(function (x) { return [x.id, x.nombre + (x.id === 'masivo' ? ' (servidores: 8 % de lo que gane)' : x.d ? ' (dura más en venta)' : '')]; }), c.modo || 'solo', 'modo') + '</label>';
         }
