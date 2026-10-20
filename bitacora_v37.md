@@ -124,3 +124,12 @@ Revisadas las funciones de la versión final que el autor marcó como mejores y 
 4. Economía realista: presupuestos e inflación históricos, impuestos por época, gastos fijos, dividendos, taquilla, piratería y cines recalibrados, crítica con dispersión, fama por calidad; venta negociada y subasta de franquicias como en la versión final.
 5. Era previa al cine jugable, errores corregidos y recorridos automáticos de pantallas, fichas, creadores y guardado.
 6. Inglés de todo lo nuevo, pruebas en el repositorio y verificación final.
+
+# Ajuste tras la revisión del autor · selector de talento como en la versión final
+- **Tu avatar en cualquier puesto** también en teatro, libros, música y videojuegos (antes solo en cine): aparece primero en el desplegable y en el selector, marcado «(tú)», sin costo. Fuera de su oficio y de sus cuatro especialidades rinde el 60 %, igual que cualquier talento.
+- **«Ver talentos»** en cada puesto del equipo: pantalla de selección como la de la versión final, con buscador, «solo de oficio» o «cualquier talento», sexo, edad (menores de 18, 18 a 30, 31 a 45, 46 a 60, más de 60), complexión (delgada, atlética, media, robusta, corpulenta) y orden por habilidad, precio, fama o edad. Cada tarjeta muestra retrato, edad, sexo, país, complexión, personalidad, oficio, habilidad en ese papel, fama y precio.
+- El desplegable de cada puesto muestra también a quienes dominan ese oficio como segundo, tercer o cuarto oficio, y la ficha del elegido dice edad, sexo, habilidad en el papel y lo que cobra.
+- En cine, el selector suma los mismos filtros de sexo, edad y complexión.
+- La calidad de los proyectos de música, teatro, libros y videojuegos ahora sí penaliza a quien trabaja fuera de su oficio.
+- **Fecha de estreno**: cada semana muestra el multiplicador del documento para su mes y su estación, además de la temporada y la competencia.
+- Prueba nueva: `tools/pruebas/equipo.js`. Recorrido de 46 pantallas en 4 épocas, fichas y economía: sin errores.

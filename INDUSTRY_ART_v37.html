@@ -11772,6 +11772,11 @@ ART.medios = (function () {
     function capacidad(med) { return 2 + (ART.imperio.tiene(MED[med].cap) ? 1 : 0) + (especial(med) ? 1 : 0); }
     function enMarcha(med) { return proyectos(med).filter(function (p) { return p.et === 'produccion' || p.et === 'ensayo'; }).length; }
     function habMedio(t, med) { return T.perfilExtra(t).medios[med] || t.hab; }
+    function habEquipo(t, med) {
+        const ofs = MED[med].of, av = t.jugador && N.S.avatar ? N.S.avatar.esp || [] : [];
+        const dentro = ofs.indexOf(t.of) >= 0 || Object.keys(t.h2 || {}).some(function (o) { return ofs.indexOf(o) >= 0; }) || av.some(function (o) { return ofs.indexOf(o) >= 0; });
+        return habMedio(t, med) * (dentro ? 1 : 0.6);
+    }
     function equipoRecomendado(med, esc, b) {
         const usados = {}, eq = [];
         MED[med].of.forEach(function (of, i) {
@@ -12395,7 +12400,7 @@ ART.medios = (function () {
     }
     function estimar(b) {
         const ts = b.eq.map(T.porId).filter(Boolean);
-        let q = ts.length ? ts.reduce(function (s2, t, i) { return s2 + habMedio(t, b.med) * (i === 0 ? 1.5 : 1); }, 0) / (ts.length + 0.5) : 40;
+        let q = ts.length ? ts.reduce(function (s2, t, i) { return s2 + habEquipo(t, b.med) * (i === 0 ? 1.5 : 1); }, 0) / (ts.length + 0.5) : 40;
         q += b.esc * 3 + presBono(b);
         const bd = b.cfg.banda ? banda(b.cfg.banda) : null;
         if (bd)
@@ -12529,7 +12534,7 @@ ART.medios = (function () {
     }
     function calificar(p) {
         const ts = p.eq.map(T.porId).filter(Boolean);
-        let q = ts.length ? ts.reduce(function (s, t, i) { return s + habMedio(t, p.med) * (i === 0 ? 1.5 : 1); }, 0) / (ts.length + 0.5) : 40;
+        let q = ts.length ? ts.reduce(function (s, t, i) { return s + habEquipo(t, p.med) * (i === 0 ? 1.5 : 1); }, 0) / (ts.length + 0.5) : 40;
         q += p.esc * 3 + presBono(p) + (p.dq || 0) + pulido(p).q + bonoReparto(p).q + depBono(p).q + guionBono(p);
         const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
         if (bd)
@@ -25570,6 +25575,9 @@ ART.creacion = (function () {
             lista = lista.filter(function (x) { return T.exclusivoDe(x) === 0; });
         else if (cr.fx === 'principal')
             lista = lista.filter(function (x) { return x.of === of; });
+        ART.selTalento.cuando(function () { if (cr.b)
+            refrescar(); });
+        lista = lista.filter(ART.selTalento.pasa);
         const orden = { mejor: function (a, c) { return valor(c) - valor(a); }, hab: function (a, c) { return habRol(c) - habRol(a); }, fama: function (a, c) { return c.fama - a.fama; },
             barato: function (a, c) { return tarifaRol(a) - tarifaRol(c); }, afinidad: function (a, c) { return T.afinidad(c, b.fam) - T.afinidad(a, b.fam); }, joven: function (a, c) { return c.nac - a.nac; } }[cr.fo || 'mejor'] || null;
         const total = lista.length, tope = cr.fn || 30;
@@ -25580,7 +25588,7 @@ ART.creacion = (function () {
             lista = [av].concat(lista.filter(function (x) { return x.id !== av.id; }));
         const ctrl = '<input type="search" placeholder="Buscar por nombre, oficio o país" value="' + esc(cr.fq || '') + '" data-c="crCandBuscar" style="margin:4px 0">' +
             '<div class="chips">' + [['mejor', 'Mejor para el papel'], ['hab', 'Habilidad'], ['fama', 'Fama'], ['barato', 'Más barato'], ['afinidad', 'Afinidad'], ['joven', 'Más joven']].map(function (o) { return chip(o[1], 'crCandOrden', o[0], (cr.fo || 'mejor') === o[0]); }).join('') + '</div>' +
-            '<div class="chips">' + [['', 'Todos'], ['principal', 'Solo de este oficio'], ['propios', 'Tus exclusivos']].map(function (o) { return chip(o[1], 'crCandFiltro', o[0], (cr.fx || '') === o[0]); }).join('') + '</div>' +
+            '<div class="chips">' + [['', 'Todos'], ['principal', 'Solo de este oficio'], ['propios', 'Tus exclusivos']].map(function (o) { return chip(o[1], 'crCandFiltro', o[0], (cr.fx || '') === o[0]); }).join('') + '</div>' + ART.selTalento.filtrosExtra() +
             '<p class="chico tenue">' + total + ' disponibles · se muestran ' + Math.min(total, tope) + '. Quien trabaja fuera de su oficio rinde menos (60 % de su habilidad, salvo que domine ese oficio).</p>';
         const k = X.ORDEN_CLAS.indexOf(b.clas);
         const d = T.porId(b.eq.direccion);
@@ -26814,7 +26822,7 @@ ART.distribucion = (function () {
             const comp = L.competenciaPrevista(tt, o.id);
             const fs = M.festividades(sem, est.reg, N.anio(tt)).map(function (f) { return f.nombre; });
             h += '<button class="tarjeta toque fila entre" style="width:100%;margin:0;' + (pg.t === tt ? 'border-color:var(--acento);border-width:2px' : '') + '" data-a="plSemana" data-v="' + tt + '"><span>' + esc(U.fechaEstreno(tt)) + ' <span class="tenue chico">· en ' + k + ' sem.</span>' + (fs.length ? '<br><span class="chico oro">' + esc(fs.join(', ')) + '</span>' : '') + (tt === mejor ? ' <span class="etiqueta oro">mejor</span>' : '') + '</span>' +
-                '<span class="chico" style="text-align:right">×' + U.decimal(temp, 2) + ' temporada<br>' + ART.cal.competencia(tt, o.id).nombre + ' (' + U.decimal(comp, 1) + ')</span></button>';
+                '<span class="chico" style="text-align:right">×' + U.decimal(temp, 2) + ' temporada<br>' + esc(ART.cal.mesDoc(sem)[0] + ' ×' + ART.cal.mesDoc(sem)[3] + ' · ' + ART.cal.estacionDoc(sem)[0].toLowerCase() + ' ×' + ART.cal.estacionDoc(sem)[3]) + '<br>' + ART.cal.competencia(tt, o.id).nombre + ' (' + U.decimal(comp, 1) + ')</span></button>';
         }
         h += '</div>';
         if (p.via === 'cines') {
@@ -27660,6 +27668,65 @@ ART.materialUI = (function () {
     }
     return { nuevo: nuevo, editar: editar, tarjetaPropios: tarjetaPropios, desdeHito: desdeHito };
 })();
+ART.selTalento = (function () {
+    'use strict';
+    const N = ART.n, D = ART.datos, esc = N.esc;
+    const CX = ['Delgada', 'Atlética', 'Media', 'Robusta', 'Corpulenta'];
+    const EDADES = [['', 'Todas las edades'], ['0-17', 'Menores de 18'], ['18-30', '18 a 30'], ['31-45', '31 a 45'], ['46-60', '46 a 60'], ['61-200', 'Más de 60']];
+    const f = { q: '', modo: 'oficio', sx: '', edad: '', cx: '', orden: 'hab', n: 30 };
+    let alCambiar = null;
+    function complexion(t) { return CX[t.cx !== undefined ? t.cx : N.hash('cx|' + t.id + '|' + t.nom) % CX.length]; }
+    function edad(t) { return N.anio() - t.nac; }
+    function reiniciar() { f.q = ''; f.modo = 'oficio'; f.sx = ''; f.edad = ''; f.cx = ''; f.orden = 'hab'; f.n = 30; }
+    function chip(txt, k, v) { const on = String(f[k]) === String(v); return '<button class="chip' + (on ? ' on' : '') + '" data-a="stFiltro" data-v="' + esc(k + '|' + v) + '" aria-pressed="' + on + '">' + esc(txt) + '</button>'; }
+    function filtros(nomOficio, conModo) {
+        return '<input type="search" placeholder="Buscar por nombre" value="' + esc(f.q) + '" data-c="stBuscar" style="margin:6px 0">' +
+            (conModo ? '<div class="chips">' + chip('Solo ' + nomOficio.toLowerCase() + ' de oficio', 'modo', 'oficio') + chip('Cualquier talento', 'modo', 'todos') + '</div>' : '') +
+            '<h4 style="margin:6px 0 2px">Sexo</h4><div class="chips">' + chip('Todos', 'sx', '') + chip('Mujeres', 'sx', 'F') + chip('Hombres', 'sx', 'M') + '</div>' +
+            '<h4 style="margin:6px 0 2px">Edad</h4><div class="chips">' + EDADES.map(function (e) { return chip(e[1], 'edad', e[0]); }).join('') + '</div>' +
+            '<h4 style="margin:6px 0 2px">Complexión</h4><div class="chips">' + chip('Cualquiera', 'cx', '') + CX.map(function (c) { return chip(c, 'cx', c); }).join('') + '</div>' +
+            '<h4 style="margin:6px 0 2px">Ordenar por</h4><div class="chips">' + chip('Habilidad', 'orden', 'hab') + chip('Precio', 'orden', 'precio') + chip('Fama', 'orden', 'fama') + chip('Edad', 'orden', 'edad') + '</div>';
+    }
+    function filtrosExtra() {
+        return '<div class="chips">' + chip('Todos', 'sx', '') + chip('Mujeres', 'sx', 'F') + chip('Hombres', 'sx', 'M') + '</div><div class="chips">' + EDADES.map(function (e) { return chip(e[1], 'edad', e[0]); }).join('') + '</div>' +
+            '<div class="chips">' + chip('Cualquier complexión', 'cx', '') + CX.map(function (c) { return chip(c, 'cx', c); }).join('') + '</div>';
+    }
+    function pasa(t) {
+        const rg = f.edad ? f.edad.split('-').map(Number) : null;
+        return (!f.sx || t.sx === f.sx) && (!rg || (edad(t) >= rg[0] && edad(t) <= rg[1])) && (!f.cx || complexion(t) === f.cx);
+    }
+    function filtrar(lista, of, habFn, precioFn) {
+        const q = f.q.toLowerCase(), rg = f.edad ? f.edad.split('-').map(Number) : null;
+        const l = lista.filter(function (t) {
+            if (q && t.nom.toLowerCase().indexOf(q) < 0)
+                return false;
+            if (f.modo === 'oficio' && of && t.of !== of && !(t.h2 && t.h2[of]) && !t.jugador)
+                return false;
+            if (f.sx && t.sx !== f.sx)
+                return false;
+            if (rg && (edad(t) < rg[0] || edad(t) > rg[1]))
+                return false;
+            return !f.cx || complexion(t) === f.cx;
+        });
+        const cl = { hab: function (t) { return -habFn(t); }, precio: function (t) { return precioFn(t); }, fama: function (t) { return -t.fama; }, edad: function (t) { return edad(t); } }[f.orden];
+        return l.sort(function (a, b) { return (b.jugador ? 1 : 0) - (a.jugador ? 1 : 0) || cl(a) - cl(b); });
+    }
+    function rinde(t, of) { return !of || t.of === of || (t.h2 && t.h2[of]) || of === 'interprete' ? 1 : 0.6; }
+    function tarjeta(t, of, hab, precio, accion, dinero) {
+        const p = D.pais(t.pais), r = rinde(t, of);
+        return '<div class="tarjeta fila" style="gap:10px;align-items:center"><canvas class="retrato" data-retrato="' + t.id + '"></canvas><div class="col crece"><b>' + esc(t.nom) + (t.jugador ? ' (tú)' : '') + '</b>' +
+            '<span class="tenue chico">' + edad(t) + ' años · ' + (t.sx === 'F' ? 'mujer' : 'hombre') + ' · ' + esc(p ? p.nombre : '') + ' · ' + esc(complexion(t).toLowerCase()) + ' · ' + esc(ART.talentos.personalidad(t).txt) + '</span>' +
+            '<span class="chico">' + esc(D.oficio(t.of).nombre) + (r < 1 ? ' · <span class="mal">fuera de su oficio: rinde 60 %</span>' : '') + ' · habilidad en el papel ' + Math.round(hab * r) + ' · fama ' + Math.round(t.fama * 100) + '</span></div>' +
+            '<div class="col" style="align-items:flex-end;gap:4px"><b class="cifra">' + (precio ? dinero(precio) : 'sin costo') + '</b><button class="btn primario" data-a="' + accion + '" data-v="' + t.id + '">Elegir</button></div></div>';
+    }
+    ART.ui.accion('stFiltro', function (v) { const i = v.indexOf('|'); f[v.slice(0, i)] = v.slice(i + 1); f.n = 30; if (alCambiar)
+        alCambiar(); });
+    ART.ui.accion('stBuscar', function (v) { f.q = String(v || '').slice(0, 40); f.n = 30; if (alCambiar)
+        alCambiar(); });
+    ART.ui.accion('stMas', function () { f.n += 30; if (alCambiar)
+        alCambiar(); });
+    return { f: f, filtros: filtros, filtrosExtra: filtrosExtra, pasa: pasa, filtrar: filtrar, tarjeta: tarjeta, rinde: rinde, complexion: complexion, reiniciar: reiniciar, cuando: function (fn) { alCambiar = fn; } };
+})();
 ART.mediosUI = (function () {
     'use strict';
     const N = ART.n, U = ART.ui, Md = ART.medios, T = ART.talentos, D = ART.datos, esc = N.esc;
@@ -28062,9 +28129,12 @@ ART.mediosUI = (function () {
     }
     function candidatosMd(b, of, actual) {
         const usados = b.eqS.filter(function (x) { return x !== null && x !== undefined && x !== actual; });
-        let l = T.disponibles(of, 0).filter(function (t) { return usados.indexOf(t.id) < 0; });
+        let l = N.S.talentos.filter(function (t) { return (t.of === of || (t.h2 && t.h2[of])) && T.disponible(t, 0) && usados.indexOf(t.id) < 0; });
         l.sort(function (x, y) { return Md.habMedio(y, b.med) - Md.habMedio(x, b.med); });
         l = l.slice(0, 40);
+        const av = ART.carrera.asegurarTalento();
+        if (av && usados.indexOf(av.id) < 0 && T.disponible(av, 0))
+            l = [av].concat(l.filter(function (t) { return t.id !== av.id; }));
         const ta = actual !== null && actual !== undefined ? T.porId(actual) : null;
         if (ta && l.indexOf(ta) < 0)
             l.unshift(ta);
@@ -28076,11 +28146,12 @@ ART.mediosUI = (function () {
             '<h4>Contrato del equipo</h4><div class="chips">' + Md.CONTRATOS.map(function (x) { return chipMd(x.nombre, 'mdCon', x.id, x.id === con.id); }).join('') + '</div><p class="nota">' + esc(con.texto) + (b.cfg.banda ? ' La banda cobra su 15 % aparte.' : '') + '</p>';
         h += of.map(function (o, i) {
             const actual = b.eqS[i], ta = actual !== null && actual !== undefined ? T.porId(actual) : null, nom = (ART.datos.oficio(o) || { nombre: o }).nombre;
-            return '<div class="tarjeta" style="padding:8px 10px;margin:8px 0 0"><div class="fila entre"><b>' + esc(nom) + (i === 0 ? ' · lidera' : '') + '</b>' + (ta ? '<span class="cifra">' + dinero(Math.round(T.tarifaPara(ta, 0) * k)) + '</span>' : '') + '</div>' +
+            return '<div class="tarjeta" style="padding:8px 10px;margin:8px 0 0"><div class="fila entre"><b>' + esc(nom) + (i === 0 ? ' · lidera' : '') + '</b>' + btn('Ver talentos', 'mdVerTal', i) + '</div>' +
                 '<select data-c="mdEqSel" data-k="' + i + '" aria-label="' + esc(nom) + '"><option value="">— nadie —</option>' + candidatosMd(b, o, actual).map(function (t) {
-                return '<option value="' + t.id + '"' + (t.id === actual ? ' selected' : '') + '>' + esc(t.nom + ' · ' + Md.habMedio(t, b.med) + ' · ' + (N.anio() - t.nac) + ' años · ' + dinero(Math.round(T.tarifaPara(t, 0) * k))) + '</option>';
+                const r = ART.selTalento.rinde(t, o);
+                return '<option value="' + t.id + '"' + (t.id === actual ? ' selected' : '') + '>' + esc(t.nom + (t.jugador ? ' (tú)' : '') + ' · ' + Math.round(Md.habMedio(t, b.med) * r) + ' · ' + (N.anio() - t.nac) + ' años · ' + (r < 1 ? 'otro oficio · ' : '') + (T.tarifaPara(t, 0) ? dinero(Math.round(T.tarifaPara(t, 0) * k)) : 'sin costo')) + '</option>';
             }).join('') + '</select>' +
-                (ta ? '<p class="tenue chico" style="margin:4px 0 0">' + esc(T.personalidad(ta).txt) + ' · fama ' + Math.round((ta.fama || 0) * 100) + '</p>' : '<p class="mal chico" style="margin:4px 0 0">Puesto vacío: la calidad baja.</p>') + '</div>';
+                (ta ? '<p class="tenue chico" style="margin:4px 0 0">' + (N.anio() - ta.nac) + ' años · ' + (ta.sx === 'F' ? 'mujer' : 'hombre') + ' · habilidad ' + Math.round(Md.habMedio(ta, b.med) * ART.selTalento.rinde(ta, o)) + (ART.selTalento.rinde(ta, o) < 1 ? ' (fuera de su oficio)' : '') + ' · ' + esc(T.personalidad(ta).txt) + ' · fama ' + Math.round((ta.fama || 0) * 100) + ' · ' + (T.tarifaPara(ta, 0) ? 'cobra ' + dinero(Math.round(T.tarifaPara(ta, 0) * k)) : 'sin costo') + '</p>' : '<p class="mal chico" style="margin:4px 0 0">Puesto vacío: la calidad baja.</p>') + '</div>';
         }).join('');
         return h;
     }
@@ -28106,7 +28177,40 @@ ART.mediosUI = (function () {
             h += '<p class="mal chico">' + esc(err) + '</p>';
         return h;
     }
+    function pickerMd(b) {
+        const of = slotsMd(b)[st.pick], nom = (ART.datos.oficio(of) || { nombre: of }).nombre, ST = ART.selTalento, k = Md.kEquipo(b.med) * Md.contrato(b.con).k;
+        ST.cuando(function () { if (st.b && st.pick !== null && st.pick !== undefined)
+            refrescarNuevo(); });
+        const usados = b.eqS.filter(function (x, j) { return x !== null && x !== undefined && j !== st.pick; });
+        const av = ART.carrera.asegurarTalento();
+        const base = N.S.talentos.filter(function (t) { return !t.mu && !t.ret && T.disponible(t, 0) && usados.indexOf(t.id) < 0; });
+        if (av && base.indexOf(av) < 0 && usados.indexOf(av.id) < 0)
+            base.unshift(av);
+        const precio = function (t) { return Math.round(T.tarifaPara(t, 0) * k); };
+        const l = ST.filtrar(base, of, function (t) { return Md.habMedio(t, b.med) * ST.rinde(t, of); }, precio);
+        let h = '<div class="fila entre"><h2>Elegir ' + esc(nom.toLowerCase()) + '</h2>' + btn('‹ Volver', 'mdPickVolver') + '</div><p class="nota">Filtra y compara habilidad, edad, aspecto y precio. Tu avatar puede tomar cualquier puesto; fuera de su oficio rinde el 60 %.</p>' + ST.filtros(nom, true);
+        h += '<p class="chico tenue">' + l.length + ' talento(s) · se muestran ' + Math.min(l.length, ST.f.n) + '</p>' + l.slice(0, ST.f.n).map(function (t) { return ST.tarjeta(t, of, Md.habMedio(t, b.med), precio(t), 'mdPickElegir', dinero); }).join('');
+        if (l.length > ST.f.n)
+            h += btn('Ver 30 más', 'stMas');
+        return h;
+    }
+    ac('mdVerTal', function (v) { st.pick = +v; ART.selTalento.reiniciar(); refrescarNuevo(); });
+    ac('mdPickVolver', function () { st.pick = null; refrescarNuevo(); });
+    ac('mdPickElegir', function (v) {
+        const b = st.b, k = st.pick;
+        slotsMd(b);
+        const viejo = b.eqS[k];
+        b.eqS[k] = +v;
+        b.eq = b.eqS.filter(function (x) { return x !== null && x !== undefined; });
+        (b.pj || []).forEach(function (p) { if (p.t === viejo && viejo !== null && viejo !== undefined)
+            p.t = b.eqS[k]; });
+        Md.asignarActores(b);
+        st.pick = null;
+        refrescarNuevo();
+    });
     function fichaNuevo() {
+        if (st.pick !== null && st.pick !== undefined && st.b && st.tab === 'equipo')
+            return pickerMd(prepararArte(st.b));
         const b = prepararArte(st.b), m = Md.MED[b.med], TB = tabsDe(b), tab = TB.some(function (x) { return x[0] === st.tab; }) ? st.tab : 'idea', k = TB.map(function (x) { return x[0]; }).indexOf(tab);
         let h = '<div class="fila entre"><h2>Nuevo proyecto · ' + esc(m.nombre) + '</h2>' + btn('Volver', 'mdVolver') + '</div>';
         h += '<div class="cr-tabs" role="tablist">' + TB.map(function (x, i) {
@@ -28125,6 +28229,7 @@ ART.mediosUI = (function () {
     function nuevo(med, op) {
         const o = op || {};
         st.tab = 'idea';
+        st.pick = null;
         st.b = ART.creacion.conAzarUI(function () {
             const b = Md.borrador(med);
             prepararArte(b);
