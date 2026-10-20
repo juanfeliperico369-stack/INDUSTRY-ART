@@ -133,3 +133,7 @@ Revisadas las funciones de la versión final que el autor marcó como mejores y 
 - La calidad de los proyectos de música, teatro, libros y videojuegos ahora sí penaliza a quien trabaja fuera de su oficio.
 - **Fecha de estreno**: cada semana muestra el multiplicador del documento para su mes y su estación, además de la temporada y la competencia.
 - Prueba nueva: `tools/pruebas/equipo.js`. Recorrido de 46 pantallas en 4 épocas, fichas y economía: sin errores.
+
+# Ajuste · clasificación y multiplicadores realistas
+- **Los talentos ya no rechazan una obra por su clasificación.** Si la obra es más fuerte de lo que suelen aceptar, trabajan igual: rinden 4 puntos menos y cobran 8 % más por cada nivel de diferencia (en cine y en los demás medios). La tarjeta del candidato lo avisa y el precio mostrado ya lo incluye. Solo se mantiene la protección legal: un menor de edad no trabaja en obras para adultos.
+- **Multiplicadores del calendario realistas**: los del documento (×2, ×9, ×11…) son una escala de intensidad, no multiplicadores de dinero. Ahora cada festividad suma entre 0,5 y 13 % de público (más para los géneros que nombra), todas juntas nunca más de 15 %, y el calendario del documento pesa una cuarta parte de la temporada real. La agenda y la lista de fechas de estreno muestran el efecto real en porcentaje.
