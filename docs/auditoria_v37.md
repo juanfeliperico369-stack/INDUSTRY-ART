@@ -183,3 +183,33 @@ Se jugaron dos partidas con el bot: estrategia normal de 1700 a 2300 y agresiva 
 2. **Nuevo: giro argumental (opcional)** en la historia de los 6 medios: cine, TV, música, videojuegos, teatro y libros. Hay 32 tipos, entre ellos «El aliado era el traidor», «El narrador no es confiable», «Todo era un sueño», «Era una simulación», «El tiempo era un bucle», «El héroe es el villano», «La profecía se cumple al revés» y «Final circular». La ★ marca los que encajan con el género. Si encaja, suma 1 a la calidad. En una obra familiar, un giro que no encaja resta 1. Se ve en la predicción y en la ficha de la obra, y sale en el documento .docx. Probado en los 6 medios, más el verificador en 1925 y 2040: 0 errores.
 
 Los demás puntos de este informe quedan pendientes, para que decidas qué corregir.
+
+---
+
+## Estado final: `INDUSTRY_ART.html` (versión 5.0)
+Corregido: la migración de partidas viejas; los anuncios (uno por sesión, en la primera pausa natural, y nunca al abrir); el enlace a la política de privacidad dentro de la app; el Casino declarado en las guías y en la privacidad; el botón «Atrás» de Android (`@capacitor/app`); las versiones 5.0 en las apps y las recetas; el inglés (de 529 frases sin traducir quedan 70, casi todas nombres propios y listas); las herramientas de prueba, que ahora solo se ven con `?dev`; la confirmación en las acciones que no se deshacen; los botones «Borrar partida» y «Nombre de la partida»; las estadísticas que ahora suman los 6 medios; los textos desactualizados y las notas de registro de cambios; los créditos; el «Laboratorio neuronal» repetido; los años vacíos del historial; el formato del dinero y de la tasa.
+
+Agregado:
+- 17 infraestructuras del documento.
+- Más categorías de premios: Editorial Book Award con 15 y festivales con 13.
+- 4 «Precios del mundo» en el editor.
+- La «Guía de la partida» con el consejo del momento.
+- Atajos de teclado: M, E, A, C, G y P.
+- El giro argumental (32 tipos).
+- Los needle drops: 10 tipos en los 6 medios, con un contexto distinto en cada medio.
+- Los géneros Halloween, Navidad, Pascua y Festival en los 6 medios. Rinden más en su fiesta: unos +20 a +27 % en esas semanas.
+- Paquetes para Microsoft Store (appx) y carpetas para Steam y Epic.
+
+Pruebas:
+- Sintaxis revisada con `node --check`.
+- Verificador en 1700, 1925, 1995 y 2200: 0 errores.
+- Partidas de la V36 y la V20 importadas sin errores.
+- Partida de 1850 a 2100: sin errores ni números rotos.
+- Pruebas propias de cada función nueva: todas pasaron.
+
+Pendiente, y depende de ti:
+- Cargar los identificadores reales de AdMob y los certificados de firma.
+- Cambiar el `publisher` del appx por el de Partner Center.
+- La «Guía» por etapas y los botones de tiempo de la Final quedaron en otra forma; las construcciones siguen sin niveles (se pueden comprar varias).
+- «Paquetes de prensa» y «Crear estudio» de la Final no se agregaron.
+- El guardado sigue grande en partidas muy largas: unos 17 MB en 2100.

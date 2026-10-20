@@ -1,21 +1,21 @@
 # INDUSTRY ART (Industria del Arte)
 
-Simulador 2D de gestión y rol de un estudio de arte, de 1850 a 2150 y más. Ideado y creado por OneZero;
-programado junto a Lumen. El plan completo está en `docs/` (Plan Maestro en Word, PDF y texto).
+Simulador 2D de gestión y rol de un estudio de arte, de 1700 a 2300. Ideado y creado por OneZero. El plan completo está en `docs/` (Plan Maestro en Word, PDF y texto).
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v36.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
-Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34 y la V35 se abren en la V36 (se migran solas).
+Abre **`INDUSTRY_ART.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34 y la V35 se abren en la versión final (se migran solas).
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v36.html` | El juego, versión 2.1 (V36, armado desde `src/`) |
+| `INDUSTRY_ART.html` | **El juego final, versión 5.0** (guardado V40): giro argumental, needle drops, géneros de fiestas (Halloween, Navidad, Pascua, Festival) y las correcciones de `docs/auditoria_v37.md` |
+| `INDUSTRY_ART_v36.html` | La versión 2.1 (V36, armada desde `src/`; `src/` sigue en la V36) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
 | `bitacora_v36.md` | La bitácora corta de la V36 · 2.1, inicio por pasos, tu avatar en tus obras y clásicos con sus personajes (las de la V21 a la V35 también están) |
-| `app/` | Las apps: Android e iPhone (Capacitor 8: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
+| `app/` | Las apps: Android e iPhone (Capacitor 8: gratis con un anuncio por sesión en la primera pausa y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
 | `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone (TestFlight), la app de PC y la versión web |
 | `docs/publicar_google_play.md`, `docs/publicar_app_store.md`, `docs/publicar_pc.md` | Guías para publicar en cada tienda |
 | `docs/tienda.md`, `docs/tienda/`, `docs/privacidad.html` | Fichas de las tiendas, imágenes y política de privacidad |
@@ -45,4 +45,4 @@ node tools/imagenes_app.js                   # íconos, pantallas de inicio e im
 
 ## Publicar
 
-Paso a paso: [Google Play](docs/publicar_google_play.md) · [App Store](docs/publicar_app_store.md) · [PC](docs/publicar_pc.md). Precio (decidido en la V32): gratis con un anuncio al abrir, y una compra única «Versión completa» que solo quita el anuncio.
+Paso a paso: [Google Play](docs/publicar_google_play.md) · [App Store](docs/publicar_app_store.md) · [PC](docs/publicar_pc.md). Precio (decidido en la V32): gratis con un anuncio por sesión en la primera pausa, y una compra única «Versión completa» que solo quita el anuncio.

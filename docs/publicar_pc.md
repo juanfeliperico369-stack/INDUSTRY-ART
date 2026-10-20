@@ -49,3 +49,7 @@ npm run armar                                           # arma el instalador de 
 ```
 
 F11 pone la pantalla completa.
+
+## Microsoft Store, Steam y Epic (versión 5.0)
+- **Microsoft Store:** la receta de PC ahora arma también un paquete `.appx`. Antes de subirlo, cambia en `app/escritorio/package.json` › `appx` los campos `identityName` y `publisher` por los que te da Partner Center (Producto › Identidad del producto). La tienda firma el paquete.
+- **Steam y Epic:** se sube la carpeta sin empaquetar (`dist/win-unpacked`, `dist/linux-unpacked`, `dist/mac*`) con SteamPipe o BuildPatchTool. Configura la nube de Steam apuntando a la carpeta de datos de la app (allí viven las partidas). Si publicas logros en una tienda, Epic pide tenerlos también en la suya: revisa sus condiciones antes de enviar.

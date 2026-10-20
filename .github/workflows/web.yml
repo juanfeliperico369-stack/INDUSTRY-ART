@@ -10,7 +10,7 @@ jobs:
     environment: { name: github-pages }
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir -p sitio && cp "$(ls INDUSTRY_ART_v*.html | sort -t v -k2 -n | tail -1)" sitio/index.html && cp docs/privacidad.html sitio/privacidad.html
+      - run: mkdir -p sitio && cp INDUSTRY_ART.html sitio/index.html && cp docs/privacidad.html sitio/privacidad.html
       - uses: actions/upload-pages-artifact@v3
         with: { path: sitio }
       - uses: actions/deploy-pages@v4

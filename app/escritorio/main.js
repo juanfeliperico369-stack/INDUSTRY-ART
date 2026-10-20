@@ -20,6 +20,8 @@ function crear() {
   ventana.webContents.on('before-input-event', (e, t) => {
     if (t.type === 'keyDown' && t.key === 'F11') { ventana.setFullScreen(!ventana.isFullScreen()); e.preventDefault(); }
   });
+  // El juego no usa cámara, micrófono, ubicación ni notificaciones
+  ventana.webContents.session.setPermissionRequestHandler((wc, permiso, responder) => responder(false));
   ventana.once('ready-to-show', () => ventana.show());
   ventana.loadFile(path.join(__dirname, 'www', 'index.html'));
 }

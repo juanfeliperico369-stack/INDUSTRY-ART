@@ -8,7 +8,7 @@ Uso: python3 tools/preparar_app.py"""
 import glob, json, os, plistlib, re
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP = os.path.join(RAIZ, 'app')
-htmls = sorted(glob.glob(os.path.join(RAIZ, 'INDUSTRY_ART_v*.html')), key=lambda p: int(re.search(r'_v(\d+)', p).group(1)))
+htmls = [os.path.join(RAIZ, 'INDUSTRY_ART.html')] if os.path.exists(os.path.join(RAIZ, 'INDUSTRY_ART.html')) else sorted(glob.glob(os.path.join(RAIZ, 'INDUSTRY_ART_v*.html')), key=lambda p: int(re.search(r'_v(\d+)', p).group(1)))
 cfg = json.load(open(os.path.join(APP, 'config.json'), encoding='utf-8'))
 base = open(htmls[-1], encoding='utf-8').read()
 

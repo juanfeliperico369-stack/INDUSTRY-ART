@@ -72,6 +72,6 @@ En App Store Connect › TestFlight agrega tu correo como probador interno, inst
   4. En TestFlight, las compras son de prueba y no cobran.
 - **Privacidad de la app** (versión gratis), según la guía de Google para AdMob: *Ubicación aproximada*, *Identificadores › ID del dispositivo*, *Datos de uso › Interacción con el producto y Datos de publicidad*, *Diagnóstico*. Todos con el uso «Publicidad de terceros», no vinculados a tu identidad. El ID del dispositivo sí se usa para **rastreo**. En la versión de pago: «No se recopilan datos».
 - **URL de privacidad**: la misma de Google Play (ver la guía de Google Play, paso 5).
-- **Clasificación por edad**: responde con la verdad: violencia de ficción y temas sexuales sugeridos poco frecuentes, sin desnudos, sin apuestas, sin chat. Debería salir 16+.
+- **Clasificación por edad**: responde con la verdad: violencia de ficción y temas sexuales sugeridos poco frecuentes, sin desnudos, **apuestas simuladas: sí, poco frecuentes** (el Casino usa solo dinero del juego), sin apuestas con dinero real, sin chat. Debería salir 17+ por las apuestas simuladas.
 - **Cifrado**: ya va declarado en la app (no usa cifrado propio), así que Apple no pregunta.
 - **Enviar a revisión**: Apple tarda de 1 a 3 días. Si la rechazan por «la app es solo un sitio web» (regla 4.2), responde que es un juego completo que funciona sin internet, con guardado local, y adjunta un video corto.

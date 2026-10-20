@@ -67,4 +67,7 @@ jobs:
             app/escritorio/dist/*.exe
             app/escritorio/dist/*.dmg
             app/escritorio/dist/*.AppImage
+            app/escritorio/dist/*.appx
+            app/escritorio/dist/*-unpacked/**
+            app/escritorio/dist/mac*/**
           if-no-files-found: error

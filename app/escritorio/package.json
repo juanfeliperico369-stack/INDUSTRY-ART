@@ -1,7 +1,7 @@
 {
   "name": "industry-art-pc",
   "productName": "INDUSTRY ART",
-  "version": "2.1.0",
+  "version": "5.0.0",
   "description": "INDUSTRY ART para PC (Windows, macOS y Linux)",
   "author": "OneZero",
   "private": true,
@@ -21,10 +21,11 @@
     "publish": null,
     "files": ["main.js", "www/index.html", "build/icon.png"],
     "directories": { "output": "dist", "buildResources": "build" },
-    "win": { "target": ["nsis", "portable"] },
+    "win": { "target": ["nsis", "portable", "appx", "dir"] },
+    "appx": { "identityName": "OneZero.INDUSTRYART", "publisher": "CN=OneZero", "publisherDisplayName": "OneZero", "displayName": "INDUSTRY ART", "applicationId": "INDUSTRYART" },
     "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "artifactName": "INDUSTRY-ART-${version}-Windows-instalador.${ext}" },
     "portable": { "artifactName": "INDUSTRY-ART-${version}-Windows-portable.${ext}" },
     "mac": { "target": [{ "target": "dmg", "arch": ["universal"] }], "category": "public.app-category.simulation-games", "artifactName": "INDUSTRY-ART-${version}-macOS.${ext}" },
-    "linux": { "target": ["AppImage"], "category": "Game", "artifactName": "INDUSTRY-ART-${version}-Linux.${ext}" }
+    "linux": { "target": ["AppImage", "dir"], "category": "Game", "artifactName": "INDUSTRY-ART-${version}-Linux.${ext}" }
   }
 }

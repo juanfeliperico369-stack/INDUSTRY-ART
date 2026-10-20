@@ -59,7 +59,7 @@ Después borra `llave.txt` de tu computadora.
 
 Repositorio › **Actions › App de Android › Run workflow**.
 - Rama: `main` (o la rama de trabajo).
-- Modo: `gratis` (un anuncio al abrir) o `pago` (sin anuncios).
+- Modo: `gratis` (un anuncio por sesión, en la primera pausa) o `pago` (sin anuncios).
 
 Tarda unos 6 minutos. Al final, en la misma página, descarga **industry-art-aab** y descomprímelo: adentro está `app-release.aab`. Cada corrida sube el número de versión sola.
 
@@ -72,7 +72,7 @@ Tarda unos 6 minutos. Al final, en la misma página, descarga **industry-art-aab
    - Con GitHub Pro (o haciendo público este repositorio): Settings › Pages › Source: GitHub Actions, y corre a mano la receta «Versión web».
 4. **Contenido de la app** (menú «Política»):
    - **Anuncios**: «Sí, contiene anuncios».
-   - **Clasificación de contenido**: categoría Juego. Responde con la verdad: violencia de ficción, temas sexuales sugeridos sin desnudos explícitos (género Erótico), sin apuestas con dinero real, sin chat. Debería salir 16+.
+   - **Clasificación de contenido**: categoría Juego. Responde con la verdad: violencia de ficción, temas sexuales sugeridos sin desnudos explícitos (género Erótico), **apuestas simuladas: sí** (Casino con dinero del juego), sin apuestas con dinero real, sin chat. Debería salir 16+ (PEGI 12–16 según el país).
    - **Público objetivo**: 16 años o más. No marques «atrae a niños».
    - **Seguridad de los datos** (solo versión gratis): «Recopila datos: sí» › *Identificadores del dispositivo u otros (ID de publicidad)* › propósito *Publicidad*, compartido con Google AdMob, cifrado en tránsito, no se puede pedir que se borre desde la app. Las partidas no salen del teléfono. En la versión de pago: «No recopila datos».
    - **ID de publicidad**: «Sí, usa el ID de publicidad» (gratis).
@@ -82,7 +82,7 @@ Tarda unos 6 minutos. Al final, en la misma página, descarga **industry-art-aab
 1. **Perfil de pagos**: Play Console › Configuración › Perfil de pagos. Llena tus datos y una cuenta bancaria. Sin esto Google no deja vender.
 2. **Monetizar › Productos › Productos integrados en la aplicación** › Crear producto:
    - ID del producto: **`version_completa`** (tiene que ser exacto, porque el juego lo busca con ese nombre).
-   - Nombre: «Versión completa». Descripción: «Quita el anuncio al abrir. El juego es el mismo para todos.»
+   - Nombre: «Versión completa». Descripción: «Quita los anuncios. El juego es el mismo para todos.»
    - Precio: el que quieras (**3 USD**, decisión de la V32). Google lo convierte a cada país, y el juego muestra el precio que manda la tienda.
    - Actívalo.
 3. **Probar sin pagar**: Configuración › **Pruebas de licencias** › agrega tu Gmail y los de tus probadores. Con esas cuentas, la compra sale como «prueba» y no cobra.
