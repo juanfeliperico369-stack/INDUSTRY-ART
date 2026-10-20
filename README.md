@@ -1,6 +1,6 @@
 # INDUSTRY ART (Industria del Arte)
 
-Simulador 2D de gestión y rol de un estudio de arte, de 1850 a 2150 y más. Ideado y creado por OneZero;
+Simulador 2D de gestión y rol de un estudio de arte, de 1700 a 2300. Ideado y creado por OneZero;
 programado junto a Lumen. El plan completo está en `docs/` (Plan Maestro en Word, PDF y texto).
 
 ## Cómo jugar
@@ -12,7 +12,8 @@ Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v37.html` | El juego, V37 (base «Definitiva», archivo único; ver `bitacora_v37.md`) |
+| `INDUSTRY_ART_v37.html` | **El juego, versión definitiva V37** (archivo único, 1700–2300; lo nuevo de las 6 sesiones está en `bitacora_v37.md`) |
+| `tools/pruebas/` | Pruebas automáticas de la V37 en un navegador real: `econ.js` (economía por época), `recorrido.js` (46 pantallas en 4 épocas), `fichas.js` (fichas y creadores), `guardado.js`, `humo.js`, `futuro.js`, `ingles.js` |
 | `INDUSTRY_ART_v36.html` | El juego, versión 2.1 (V36, armado desde `src/`) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
 | `bitacora_v36.md` | La bitácora corta de la V36 · 2.1, inicio por pasos, tu avatar en tus obras y clásicos con sus personajes (las de la V21 a la V35 también están) |
@@ -34,6 +35,8 @@ Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22
 | `legado/` | La V15 original (sigue jugable aparte) y su código desarmado |
 
 ## Para programar la siguiente versión
+
+> La V37 es un archivo único que se edita directamente (no sale de `src/`, que corresponde a la V36). Para comprobarla: `node tools/pruebas/recorrido.js $PWD/INDUSTRY_ART_v37.html`, `node tools/pruebas/fichas.js $PWD/INDUSTRY_ART_v37.html` y `node tools/pruebas/econ.js $PWD/INDUSTRY_ART_v37.html 1900 2050 normal 10`.
 
 ```bash
 python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v36.html

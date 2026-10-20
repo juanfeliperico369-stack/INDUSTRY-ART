@@ -108,3 +108,19 @@ Revisadas las funciones de la versión final que el autor marcó como mejores y 
 - `fichas.js`: fichas de obras propias y rivales, talentos, proyectos de cada medio y todas las pestañas del creador de cine, series, teatro, libros, música y videojuegos en 1760, 1960, 2030 y 2210–2250: **0 errores** tras el arreglo.
 - `guardado.js`: guardar, avanzar, cargar y seguir un año (subastas, especialidades, galas y obras se conservan): **sin errores**.
 - `econ.js` 1900–2050: caja de 1.000 M en 1990 y 4.400 M en 2020, rival mayor en la misma liga, 20–40 % de obras con pérdida, crítica 65–68 con desviación ~10.
+
+# Sesión 6 de 6 · Versión definitiva
+
+- **Inglés completo de lo nuevo**: 147 frases añadidas al diccionario (agenda y festividades, premios y categorías, historial y premios en vivo, buscador, estadísticas, creador de obras y selector de equipo, cines, editor de avatar, venta y subasta de franquicias, eras, tipos de cine y épocas del futuro).
+- **Apps**: las recetas de Android, iPhone, PC y web toman siempre el HTML más nuevo, así que ya publican la V37 sin cambios.
+- **Pruebas en el repositorio** (`tools/pruebas/`): economía por época, recorrido de 46 pantallas en cuatro épocas, fichas y creadores de los seis medios, guardado y carga, inglés.
+- **Revisión visual en celular** (390 px) de la agenda anual y del editor de avatar.
+- **Recorrido final**: 1720, 1950, 2040 y 2250, 46 pantallas cada una, 0 errores de consola o de página y ningún texto roto.
+
+## Resumen de la V37 (sesiones 1 a 6)
+1. Calendario con el año completo del documento, cambio de medio al crear, 142 obras históricas licenciables con personajes, compra y venta de cadenas de cines, editor completo del avatar con cuatro especialidades, selector de equipo con buscador, filtros y tu avatar.
+2. Premios del documento: Academia y Emmy con sus categorías, fase de nominados, premios por medio en su semana, festivales por región, historial de 13 Awards, premios en vivo, estadísticas y buscador.
+3. Ficción hasta 2300: 56 obras y 39 artistas inventados, 96 sucesos y 9 periodos, eras, tipos de cine, plataformas, formatos, críticos, épocas, modas y corrientes; inicio hasta 2250.
+4. Economía realista: presupuestos e inflación históricos, impuestos por época, gastos fijos, dividendos, taquilla, piratería y cines recalibrados, crítica con dispersión, fama por calidad; venta negociada y subasta de franquicias como en la versión final.
+5. Era previa al cine jugable, errores corregidos y recorridos automáticos de pantallas, fichas, creadores y guardado.
+6. Inglés de todo lo nuevo, pruebas en el repositorio y verificación final.
