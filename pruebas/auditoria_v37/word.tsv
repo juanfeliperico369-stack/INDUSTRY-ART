@@ -1,0 +1,283 @@
+Nombre de la partida	nombre de la partida
+Especialidad del jugador	especialidad
+Pretencioso	Pretencioso
+Torpe	Torpe
+Intolerante	Intolerante
+Esnob	Esnob
+Antiposer	Antiposer
+Filosófico	Filosófico
+Poser	\bPoser\b
+Colaborativo	Colaborativo
+Rockstar	Rockstar
+Perfeccionista	Perfeccionista
+Diva	\bDiva\b
+Estrella Absoluta	Estrella Absoluta
+Etiqueta Hit	'Hit'|"Hit"|\bHit\b
+Etiqueta Pop	'Pop'|"Pop"
+Etiqueta Culto	Culto
+Etiqueta Invaluable	Invaluable
+Etiqueta Rotten	Rotten
+Regla 10 años derivados	10 años
+Tipo industria Corporación	Corporación
+Tipo industria Colectivo	Colectivo
+Visión Boutique de Culto	Boutique de Culto
+Visión Alcance Tecnológico	Alcance Tecnológico
+Público Cultos/Cinéfilo	Cinéfilo
+20 estilos de logo	estilos de logo|logos
+Tipo de letra	tipo de letra|tipografía
+Capital 1.000.000.000	1\.000\.000\.000|1e9|1000000000
+Cargar 5 partidas	ranura
+Sobrescribir partida	sobrescrib
+Continuar partida	Continuar
+Editar descripción del estudio	Editar (el )?(estudio|descripción|identidad)
+Historial de proyectos paginado	página siguiente|Siguiente página|paginar|Ver más
+Póster por género	póster|poster
+Porcentaje de regalías	regalías
+Crítica especializada	crítica especializada|críticos
+Crítica del público	público
+Hype	hype
+Contiene color sí/no	a color|blanco y negro
+Contiene sonido	sonora|sonido
+Idiomas de la obra	idiomas
+Clase de proyecto Indie/Blockbuster	Blockbuster
+Distribuidora en ficha	Distribuidora|distribuye
+Costos preproducción	preproducción
+Costos posproducción	posproducción
+Taquilla 8 semanas	8 semanas|semana 8
+Mejor semana taquilla	mejor semana
+Primera semana taquilla	primera semana|estreno de
+Nombre franquicia editable	renombrar|cambiar (el )?nombre
+Vender franquicia con precio	vender
+Ofertas de compra aceptar/rechazar	rechazar
+Crossover	crossover
+Historial premios/nominaciones	nominaci
+Perfil del usuario popularidad	popularidad
+Noticias muertes	muri|falleci
+Noticias retiros	retir
+Noticias proyectos cancelados	cancel
+Buscar por overall mín/máx	overall
+Filtro retirados/activos	retirados|activos
+Filtro por género masculino/femenino	Mujer|Hombre
+Ordenar mejor a peor	de mejor a peor|mayor a menor|ordenar
+Buscar obras por fecha	fecha de estreno|por fecha
+Estadísticas multiplicador x2..x5	×2|x2
+Proyecto con mayor ingreso	mayor ingreso|más taquilla|más ganó
+Proyecto mejor valorado	mejor valorad|mejor nota|mejor crítica
+52 semanas	52 semanas
+Multiplicador por estación	estación|estaciones
+San Valentín	San Valentín
+Carnaval	Carnaval
+Fashion Week	Fashion Week|Semana de la moda
+Día de la mujer	Día de la mujer
+Día del libro	Día del libro
+Día de la tierra	Día de la tierra|Día de la Tierra
+Día de los trabajadores	trabajador|Día del trabajo
+Día de la memoria	Día de la memoria
+Orgullo	Orgullo
+Independencia	independencia
+Pop days	Pop days
+Festividades folklóricas	folkl
+Burning man	Burning
+Día de paz	Día de (la )?paz
+Oktoberfest	Oktoberfest
+Diwali	Diwali
+Halloween/Comic Con	Halloween
+Thanksgiving	Acción de Gracias|Thanksgiving
+Navidad	Navidad
+Independent Award	Independ
+Bastard Awards	Bastard
+Music Awards	Music Awards|Premios? (de la )?música|Vinilo
+Premio de la Academia	Academia
+Pulitzer/Editorial Book Award	Pulitzer|Editorial Book|Pluma
+Tony Broadway	Tony|Telón
+Emmy	Emmy|Señal
+Game Award	Game Award|Cartucho
+Pop Awards	Pop Awards
+Festival Mundial del Arte	Festival Mundial
+Cannes	Cannes
+Venecia	Venecia
+Berlinale	Berl[ií]n
+TIFF	TIFF|Toronto
+Sundance	Sundance
+MexAriel/Ariel	Ariel
+Mar del Plata	Mar del Plata
+FICCI/Cartagena	FICCI|Cartagena
+Gramado	Gramado|Kikito
+Marrakech	Marra
+Gouna	Gouna
+Lagos/FESPACO	Lagos|FESPACO|Yennenga
+Tokyo festival	Tok[iy]o
+Shanghái festival	Shangh
+BIFF/Busan	BIFF|Busan
+Sydney	Sydney|Sídney
+Nueva Zelanda festival	Zelanda
+Papúa Nueva Guinea	Papúa|Guinea
+Jurado críticos/académicos/talentos/público	jurado
+Postular a festival	postula
+Subastas festival	subasta
+Mejor Actor de Reparto	reparto
+Mejor Director Invitado	director invitado
+Mejor Interpretación (videojuego)	interpretaci
+Mejor Álbum	Mejor álbum
+Mejor Poema	poema
+Mejor Manga	manga
+Mejor obra de filosofía/economía	filosof
+Mejor Obra (premio máximo)	Mejor obra
+Competencia estrellas 1-5	estrellas
+Comprar estudio rival	comprar
+Simular un mes	\+1 mes
+Deslizador de semanas a avanzar	semanas a avanzar|Avanzar hasta|elegir cuántas
+Comprar idea	comprar (un )?guion|Comprar idea
+Usar material	Usar material
+Ficción o Realidad	ficción|realidad
+Live Action	Live Action|acción real
+Documental	Documental
+Historia jugable	Historia jugable
+Videojuego Película Interactiva	Película interactiva
+Videojuego Conducción	Conducci
+TV Telenovela	Telenovela
+TV Concurso	Concurso
+TV Noticias	Noticias
+Teatro Expositivo	Expositiv
+Teatro Ópera	Ópera
+Teatro Stand Up	Stand ?up
+Música Jingles	Jingle
+Música Singles	Single
+Libro Historieta	Historieta
+Libro Poético	Poétic
+3 géneros desastre	desastre
+Subgéneros	subgénero
+Temas	temas?
+Subtemas	subtema
+Tipos de ficción	tipos? de ficción
+Tópicos	tópico
+Problemáticas	problemática
+Argumentos	argumento
+Arcos	arco
+Duración película 1-300 min	minutos
+Cortometraje	Cortometraje
+Épica	Épica
+Miniserie	Miniserie|mini serie
+Episodios por temporada	episodios
+Duración por episodio	por episodio
+Indie/B/B+/A/AA/AAA/AAAA	AAAA|AAA
+LP/EP/Doble	\bLP\b|\bEP\b
+Micro teatro	Micro ?teatro
+Un acto	Un acto
+Microrrelato	Microrrelato
+Ómnibus	Ómnibus
+Clasificación G/PG/PG-13/NC-17/R/X	NC-17|PG-13
+Clasificación N	'N'
+Complejidad (6 niveles)	Verosímil
+Ritmo (Reflexivo..Entretenido)	Entretenido
+Efectos especiales (Ninguno..Demasiados)	Demasiados
+Presupuesto hasta 1 billón	billón|billones
+Público objetivo hasta 5	Ancianos|Mayores
+Cultura hispano-latinoamericana	hispano|latino
+LGBTQ+	LGBT
+Gamers	Gamers|jugadores
+Teatrófilos	Teatrófilo
+Corriente artística	corriente
+Prioridad Historia/Visual/Sonido/Técnico/Híbrido	Prioridad|Técnico
+Tono Surrealista..Épico	Surrealista
+Estilos artísticos Cubismo	Cubismo
+Estilo Déco	Déco
+Formato 16/35/70 mm	35 mm|70 mm
+Screen X	Screen ?X
+Tecnicolor	Tecnicolor
+Videojuego FPS	FPS
+Fotorrealismo	Fotorrealis
+Vinilo MIXTAPE	Mixtape
+Tapa dura/blanda	Tapa dura|tapa blanda
+De bolsillo	bolsillo
+Audiolibro	Audiolibro|audio libro
+Cantidad de personajes	personajes
+Línea de producción	Línea de producción|En marcha
+Sobrecosto liderazgo/excelencia	sobrecosto|liderazgo
+Semanas restantes	faltan
+Marketing periódico	Periódico
+Marketing revista	Revista
+Marketing televisión abierta	televisión abierta|TV abierta
+Marketing cable	cable
+Marketing radio	Radio
+Marketing vallas	Vallas
+Marketing trailers cines grandes	Tráiler|trailer
+Marketing redes sociales	Redes sociales
+Marketing móvil	Móvil
+Marketing ordenador	Ordenador|computador
+Marketing juguetes	Juguetes
+Marketing coleccionables	Coleccionables
+Marketing web interactiva	Web interactiva|sitio web
+Marketing gira mundial	Gira mundial|gira
+Marketing emails	E-?mails?|correo
+Comprar propuestas (guiones)	guion
+Dos cronologías (canon y estreno)	canon
+Popularidad por personaje	personaje
+Streaming costo 200 M	200 M|200 millones
+Tres precios streaming	anuncios
+Canal de cable 100 M	100 M|100 millones
+Vender derechos exclusivos/globales	derechos globales|globales
+Extender contrato	Extender
+Negociar licencias de contenido	licencias de contenido|Negociar licencias
+Filtro streaming por tipo	Obras de teatro grabadas|Libros digitales
+Parrilla 7 días 24 h	parrilla
+Auto completar parrilla	Autocompletar|Auto completar|Llenar sola|automática
+Cartelera en vivo	Cartelera
+Próximos estrenos por semana	próximos estrenos|Próximamente
+Colaboraciones crossover	coproducc
+Merchandising	merch|Productos
+Comic con propia	convención
+Invertir en compañías	invertir|acciones
+Derechos parciales de franquicia	derechos
+50 inventos	invento
+Ventaja 2 años invento	2 años
+Salvar partida	Guardar
+Salir al menú	Salir al inicio|menú
+Nacionalidad talento	nacionalidad|país
+Idiomas talento	idiomas
+Overall	overall
+Promedio overall	promedio
+Desempeño Drama/Humor/Romance/Acción	Humor
+Capacidades Inteligencia/Creatividad/Sabiduría/Adaptabilidad	Sabiduría
+Habilidades Magnetismo	Magnetismo
+Presencia (teatro)	Presencia
+Rango	Rango
+Doblaje	Doblaje
+Acentos	Acentos
+Estilo	Estilo
+Paciencia	Paciencia
+Conceptos	Conceptos
+Complejidad	Complejidad
+Contenido que acepta	acepta
+Proyectos naturales	naturales
+Poder de estrella	Poder de estrella|poder
+Energía 20/10	Energía
+Contrato exclusivo	exclusiv
+Elenco 10/15/20	extras
+Nombre aleatorio personaje	nombre al azar|aleatorio|🎲
+Featuring en canciones	featuring|invitad
+Reestreno cada 5 años	reestren
+Lanzamiento en disco	disco|DVD|video doméstico
+Lanzamiento físico/exclusivo	físic
+30 países jugables	países
+Fandoms/cines por país	cadena
+Cine propio	cines propios|Cadena de cines propia
+IA reduce gastos	IA
+Botón idea con IA	idea automática|con IA
+Deslizador uso de IA	uso de (la )?IA|cuánta IA|nivel de IA
+Población crece 1850-9.000 M	población
+Época en que se ambienta la historia	ambient|época de la historia|Ambientación
+Países de rodaje	rodaje|locaci
+Premios año anterior	año anterior
+Estudiar +5	\+5
+Canon ramificado	ramific|continuidad
+Continuación	Continuación
+Secuela	Secuela
+Precuela	Precuela
+Spin off	Spin.?off
+Historia paralela	Historia paralela
+Remake	Remake
+Soft reboot	Soft reboot
+Reboot	Reboot
+Hacer crossover	Hacer crossover|crossover
+Separar franquicias	Separar
