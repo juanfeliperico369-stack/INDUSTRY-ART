@@ -4920,6 +4920,7 @@ ART.economia = (function () {
         q += ART.talentos.quimica(obra);
         q += ART.ideas.bonoMoraleja(obra);
         q += ART.ideas.bonoGiro(obra);
+        q += ART.franquicias.bonoCritica(obra);
         const ndb = ART.ideas.bonoNeedle(obra);
         q += (ndb.crit + ndb.pub) / 2;
         eachTalento(obra, talentos, function (t) { if (ART.talentos.ventajas(t).some(function (v) { return v.id === 'Mentor'; }))
@@ -10739,13 +10740,70 @@ ART.franquicias = (function () {
         { id: 'juego', nombre: 'Videojuegos', desde: 1978, k: 1.3 }, { id: 'figuras', nombre: 'Figuras de colección', desde: 1990, k: 0.8 },
     ];
     const NIVELES = ['Nueva', 'Conocida', 'Querida', 'Clásico', 'Clásico inmortal'];
+    const CAMINO_K = { secuela: 1, temporada: 1, precuela: 0.85, spinoff: 0.6, paralela: 0.7, remake: 0.8, softreboot: 0.75, reboot: 0.5, crossover: 1.2 };
+    const CAMINO_CRIT = { secuela: -1, temporada: 0, precuela: 0, spinoff: 1, paralela: 1, remake: -2, softreboot: 0, reboot: 0, crossover: 0 };
+    const BUENAS = ['fresco', 'culto', 'clasico', 'invaluable'], MALAS = ['podrida', 'pop', 'hit', 'olvidado'];
+    function etiquetaBase(o) {
+        if (!o || o.pub === undefined)
+            return null;
+        let id = null;
+        if (O.porId(o.id) && ART.critica) {
+            id = ART.critica.prestigio(o) || ART.critica.recepcion(o);
+        }
+        else
+            id = (o.crit || 0) < 40 ? 'podrida' : (o.pub || 0) >= 80 ? 'hit' : (o.crit || 0) >= 75 ? 'fresco' : null;
+        if (!id)
+            return null;
+        const anios = Math.max(0, N.anio() - N.anio(o.fe || N.S.t));
+        const lt = BUENAS.indexOf(id) >= 0 ? (anios < 10 ? 6 : -4) : MALAS.indexOf(id) >= 0 ? (anios >= 10 ? 5 : -8) : 0;
+        return { id: id, nombre: (ART.critica && ART.critica.ETIQUETAS[id]) || id, anios: anios, lt: lt };
+    }
+    function estimar(baseId, camId, opc) {
+        const base = obraDe(baseId), f = base ? (de(base) || null) : null, op = opc || {};
+        if (!base || !f)
+            return null;
+        const k = CAMINO_K[camId] || 1, es = estrenadas(f);
+        const pub = es.length ? es.reduce(function (a, o) { return a + (o.pub || 50); }, 0) / es.length : 50;
+        const heredado = Math.round((hype(f) * 1.2 + (pub - 50) * 0.25) * k);
+        const fat = Math.round(f.fat * 14 * (camId === 'reboot' ? 0 : camId === 'softreboot' ? 0.5 : 1) * (op.nc ? 0.5 : 1));
+        const tag = etiquetaBase(base);
+        const socios = (op.socios || []).length || (camId === 'crossover' ? 1 : 0);
+        const cruce = Math.min(16, socios * 8);
+        let pers = 0;
+        if (camId === 'spinoff' && op.persK !== undefined && op.persK !== null) {
+            const p = f.pers.filter(function (x) { return x.k === +op.persK; })[0];
+            pers = p ? Math.round((p.pop - 50) / 8) : 0;
+        }
+        const derivado = op.med && ((esMedio(base) ? base.med : base.tv ? 'tv' : 'cine') !== op.med) ? -1 : 0;
+        const nc = op.nc ? -2 : 0;
+        const crit = CAMINO_CRIT[camId] || 0;
+        const total = heredado - fat + (tag ? tag.lt : 0) + cruce + pers + derivado + nc;
+        const partes = ['Hype heredado ' + (heredado >= 0 ? '+' : '') + heredado + ' (×' + k + ' de los fans)'];
+        if (fat)
+            partes.push('fatiga −' + fat);
+        if (tag)
+            partes.push('«' + base.tit + '» es ' + tag.nombre + ' (hace ' + tag.anios + (tag.anios === 1 ? ' año' : ' años') + '): ' + (tag.lt >= 0 ? '+' : '') + tag.lt);
+        if (cruce)
+            partes.push('evento crossover +' + cruce);
+        if (pers)
+            partes.push('personaje al frente ' + (pers > 0 ? '+' : '') + pers);
+        if (derivado)
+            partes.push('derivado en otro medio −1');
+        if (nc)
+            partes.push('fuera del canon −2 (y la mitad de la fatiga)');
+        partes.push('crítica ' + (crit >= 0 ? '+' : '') + crit);
+        return { k: k, heredado: heredado, fat: fat, tag: tag, cruce: cruce, pers: pers, crit: crit, total: total, texto: partes.join(' · ') };
+    }
+    function bonoCritica(o) { return o && o.fr && o.cam ? CAMINO_CRIT[o.cam] || 0 : 0; }
     function camino(id) { return id === 'temporada' ? TEMPORADA : id === 'crossover' ? CROSSOVER : CAMINOS.filter(function (c) { return c.id === id; })[0] || CAMINOS[0]; }
     function st() { const S = N.S; if (!S.franq)
         S.franq = { lista: [], sig: 1 }; return S.franq; }
     function porId(id) { return st().lista.filter(function (f) { return f.id === id; })[0] || null; }
     function de(o) { return o && o.fr ? porId(o.fr) : null; }
     function dueno(o) { const f = de(o); return f ? f.est : o.der !== undefined ? o.der : o.est; }
-    function obras(f) { return f.o.map(O.porId).filter(Boolean); }
+    function obraDe(id) { return O.porId(+id) || (ART.medios && ART.medios.porId ? ART.medios.porId(+id) : null); }
+    function obras(f) { return f.o.map(obraDe).filter(Boolean); }
+    function esMedio(o) { return !!(o && o.med && ['musica', 'juegos', 'teatro', 'libros'].indexOf(o.med) >= 0); }
     function estrenadas(f) { return obras(f).filter(function (o) { return o.pub !== undefined && o.et !== 'lista'; }); }
     function persDe(o) {
         return (o.pj || []).filter(function (p) { return p.i !== 'extra'; }).slice(0, 6).map(function (p, i) {
@@ -10757,7 +10815,7 @@ ART.franquicias = (function () {
         if (o.fr)
             return porId(o.fr);
         const s = st();
-        const f = { id: s.sig++, nom: nom || o.tit, gen: gen || o.gen[0], est: o.der !== undefined ? o.der : o.est, o: [o.id], pers: persDe(o), fat: 0, mente: null, lic: [], xo: [],
+        const f = { id: s.sig++, nom: nom || o.tit, gen: gen || [].concat(o.gens || o.gen || ['Drama'])[0], est: o.der !== undefined ? o.der : o.est, o: [o.id], pers: persDe(o), fat: 0, mente: null, lic: [], xo: [],
             cont: [{ id: 1, nom: 'Canon principal' }], t0: o.fe || N.S.t };
         if (f.est !== 0)
             f.pers = f.pers.slice(0, 3);
@@ -10856,12 +10914,14 @@ ART.franquicias = (function () {
         b.eq.int = (b.pj || []).filter(function (p) { return p.t !== null && p.t !== undefined; }).map(function (p) { return p.t; });
         return res;
     }
-    function continuar(obraId, camId, medio, persK) {
-        const base = O.porId(obraId), err = puedeContinuar(base);
+    function continuar(obraId, camId, medio, persK, opc) {
+        const base = obraDe(obraId), err = puedeContinuar(base);
         if (err)
             return { error: err };
         const f = materializar(base), cam = camino(camId);
-        const op = { gen: base.gen.slice(), escala: base.esc, tono: base.tono, tem: base.tem, completa: true };
+        const op = { gen: [].concat(base.gens || base.gen || []).filter(function (g) { return !!D.familiaDe[g]; }).slice(0, 3), escala: esMedio(base) ? undefined : base.esc, tono: base.tono, tem: base.tem || [], completa: true };
+        if (!op.gen.length)
+            delete op.gen;
         if (cam.id === 'remake' || cam.id === 'reboot') {
             op.arco = base.arco;
             op.prob = base.prob;
@@ -10890,6 +10950,8 @@ ART.franquicias = (function () {
         b.cnt = RAMA_NUEVA.indexOf(cam.id) >= 0 ? 0 : base.cnt || 1;
         b.base = base.id;
         b.cntPadre = base.cnt > 0 ? base.cnt : 1;
+        if (pers)
+            b.persK = pers.k;
         b.ord = cam.id === 'precuela' ? ordDe(base, f) - 0.5 : ordDe(base, f) + 0.5;
         if (medio === 'tv' || cam.id === 'temporada') {
             b.med = 'tv';
@@ -10901,6 +10963,10 @@ ART.franquicias = (function () {
             b.min = base.med === 'tv' && base.min ? base.min : ART.tv.formato(b.tv.fmt).min;
         }
         b.tit = tituloPara(f, cam, base, pers);
+        if (opc && opc.nc)
+            b.cnt = -1;
+        if (opc && opc.titulo)
+            b.tit = String(opc.titulo).slice(0, 60);
         const lla = cam.elenco > 0 ? llamarElenco(b, base, cam) : [];
         if (cam.elenco === 0)
             (b.pj || []).forEach(function (p) { p.t = null; });
@@ -10923,37 +10989,94 @@ ART.franquicias = (function () {
             return 'Cada franquicia admite hasta ' + MAX_CROSSOVER + ' crossovers: separa uno primero.';
         if (!estrenadas(A).length || !estrenadas(B).length)
             return 'Las dos necesitan al menos una obra estrenada.';
-        if (A.xo.indexOf(B.id) < 0)
+        if (A.xo.indexOf(B.id) < 0) {
             A.xo.push(B.id);
-        if (B.xo.indexOf(A.id) < 0)
+            (A.xh = A.xh || []).push({ j: 1, f: B.id, y: N.anio() });
+        }
+        if (B.xo.indexOf(A.id) < 0) {
             B.xo.push(A.id);
+            (B.xh = B.xh || []).push({ j: 1, f: A.id, y: N.anio() });
+        }
         return '';
     }
     function separar(aId, bId) {
         const A = porId(aId), B = porId(bId);
-        if (A)
+        if (A) {
             A.xo = A.xo.filter(function (x) { return x !== bId; });
-        if (B)
+            (A.xh = A.xh || []).push({ j: 0, f: bId, y: N.anio() });
+        }
+        if (B) {
             B.xo = B.xo.filter(function (x) { return x !== aId; });
+            (B.xh = B.xh || []).push({ j: 0, f: aId, y: N.anio() });
+        }
     }
-    function continuarCruce(aId, bIds) {
+    function continuarMedio(obraId, camId, med, persK, opc) {
+        const base = obraDe(obraId), err = puedeContinuar(base);
+        if (err)
+            return { error: err };
+        if (!ART.medios.disponible(med))
+            return { error: 'Ese medio todavía no existe en esta época.' };
+        const f = materializar(base), cam = camino(camId), op = opc || {};
+        const pers = camId === 'spinoff' && persK !== undefined && persK !== null ? f.pers.filter(function (x) { return x.k === +persK; })[0] : null;
+        const RAMA_NUEVA = ['reboot', 'remake', 'spinoff', 'paralela', 'softreboot'];
+        const datos = { fr: f.id, cam: cam.id, base: base.id, cntPadre: cntDe(base, f) > 0 ? cntDe(base, f) : 1, ord: cam.id === 'precuela' ? ordDe(base, f) - 0.5 : ordDe(base, f) + 0.5 };
+        datos.cnt = op.nc ? -1 : RAMA_NUEVA.indexOf(cam.id) >= 0 ? 0 : datos.cntPadre;
+        if (pers)
+            datos.persK = pers.k;
+        const pj = cam.id === 'paralela' ? [] : (base.pj || []).filter(function (p) { return p.i !== 'extra'; }).slice(0, 6).map(function (p) {
+            const q = N.copiar(p);
+            q.t = null;
+            if (pers)
+                q.i = q.n === pers.n ? 'protagonista' : q.i === 'protagonista' ? 'secundario' : q.i;
+            return q;
+        });
+        return { med: med, f: f, tit: op.titulo ? String(op.titulo).slice(0, 48) : tituloPara(f, cam, base, pers), gen: [].concat(base.gens || base.gen || [])[0], datos: datos, pj: pj };
+    }
+    function titulo(obraId, camId, persK) {
+        const base = obraDe(obraId), f = base ? de(base) || null : null;
+        if (!base)
+            return '';
+        const ff = f || { nom: base.tit, o: [base.id], cont: [{ id: 1 }] };
+        const pers = camId === 'spinoff' && f ? f.pers.filter(function (x) { return x.k === +persK; })[0] : null;
+        return camId === 'crossover' ? base.tit : tituloPara(ff, camino(camId), base, pers);
+    }
+    function alMedioLanzado(p) {
+        const f = de(p);
+        if (!f)
+            return;
+        const b = bonoDeseo(p);
+        if (p.R)
+            p.R = Math.round(p.R * N.limitar(1 + b / 40, 0.6, 1.4));
+        if (p.ocup)
+            p.ocup = N.redondear(N.limitar(p.ocup * (1 + b / 60), 0.05, 1), 3);
+        alEstrenar(p);
+        (p.pj || []).forEach(function (q) {
+            const x = f.pers.filter(function (z) { return z.n === q.n; })[0];
+            if (x)
+                x.pop = Math.round(N.limitar(x.pop + ((p.pub || 50) - 50) / 10 + 1, 1, 99));
+        });
+    }
+    function persObras(f, p) { return obras(f).filter(function (o) { return (o.pj || []).some(function (q) { return q.n === p.n; }); }).length; }
+    function continuarCruce(aId, bIds, baseId, camId) {
         const A = porId(aId), ids = String(bIds).split(',').map(Number).filter(function (x, i, a) { return x && a.indexOf(x) === i; }).slice(0, MAX_CROSSOVER);
         const Bs = ids.map(porId).filter(Boolean);
         if (!A || !Bs.length || Bs.some(function (B) { return A.xo.indexOf(B.id) < 0; }))
             return { error: 'Primero une los universos.' };
-        const ua = obras(A).filter(function (o) { return o.pub !== undefined; }).pop();
+        const elegida = baseId ? obraDe(baseId) : null;
+        const ua = elegida && O.porId(elegida.id) && elegida.pub !== undefined ? elegida : obras(A).filter(function (o) { return o.pub !== undefined && O.porId(o.id); }).pop();
         const ubs = Bs.map(function (B) { return obras(B).filter(function (o) { return o.pub !== undefined; }).pop(); });
         if (!ua || ubs.some(function (x) { return !x; }))
             return { error: 'Todas necesitan una obra estrenada.' };
-        const r = continuar(ua.id, 'secuela');
+        const r = continuar(ua.id, camId && camId !== 'crossover' ? camId : 'secuela');
         if (r.error)
             return r;
         const pb = [];
         ubs.forEach(function (ub) { (ub.pj || []).filter(function (p) { return p.i === 'protagonista'; }).slice(0, 1).forEach(function (p) { const q = N.copiar(p); q.i = 'secundario'; pb.push(q); }); });
         r.b.pj = (r.b.pj || []).concat(pb);
         r.b.eq.int = r.b.pj.filter(function (p) { return p.t !== null && p.t !== undefined; }).map(function (p) { return p.t; });
-        r.b.cam = 'crossover';
-        r.b.cnt = ua.cnt > 0 ? ua.cnt : 1;
+        r.b.cam = camId && camId !== 'crossover' ? r.b.cam : 'crossover';
+        if (!camId || camId === 'crossover' || ['secuela', 'precuela'].indexOf(camId) >= 0)
+            r.b.cnt = ua.cnt > 0 ? ua.cnt : 1;
         r.b.frx = Bs.map(function (B) { return B.id; });
         r.b.fr2 = Bs[0].id;
         r.b.tit = [A.nom].concat(Bs.map(function (B) { return B.nom; })).reduce(function (s, n, i, a) { return i === 0 ? n : s + (i === a.length - 1 ? ' y ' : ', ') + n; }, '');
@@ -10980,7 +11103,7 @@ ART.franquicias = (function () {
         if (o.cnt === 0) {
             const id = f.cont.reduce(function (m, c) { return Math.max(m, c.id); }, 0) + 1;
             const cam = o.cam ? camino(o.cam) : null;
-            f.cont.push({ id: id, nom: (cam ? cam.nombre : 'Continuidad') + ': ' + o.tit + ' (' + N.anio() + ')', tipo: o.cam || 'nueva', padre: o.cntPadre || 1, de: o.base || null });
+            f.cont.push({ id: id, nom: (cam ? cam.nombre : 'Continuidad') + ': ' + o.tit + (/\(\d{4}\)\s*$/.test(o.tit) ? '' : ' (' + N.anio() + ')'), tipo: o.cam || 'nueva', padre: o.cntPadre || 1, de: o.base || null });
             o.cnt = id;
         }
         if (typeof o.ord !== 'number')
@@ -11007,8 +11130,41 @@ ART.franquicias = (function () {
         } });
         return { ramas: orden, fuera: lista.filter(function (o) { return cntDe(o, f) === -1; }) };
     }
+    function sumables(f) {
+        return N.S.obras.filter(function (o) {
+            if (o.est !== 0 || o.pub === undefined || o.et === 'lista' || f.o.indexOf(o.id) >= 0)
+                return false;
+            const g = de(o);
+            return !g || (g.o.length === 1 && !g.xo.length);
+        });
+    }
+    function sumar(frId, obraId, camId, baseId) {
+        const f = porId(frId), o = obraDe(obraId), base = obraDe(baseId);
+        if (!f || f.est !== 0)
+            return 'La franquicia no es tuya.';
+        if (!o || sumables(f).indexOf(o) < 0)
+            return 'Esa obra no se puede sumar.';
+        if (!base || f.o.indexOf(base.id) < 0)
+            return 'Elige con qué obra de la franquicia se relaciona.';
+        const cam = camino(camId);
+        const vieja = de(o);
+        if (vieja && vieja !== f)
+            st().lista = st().lista.filter(function (x) { return x !== vieja; });
+        o.fr = f.id;
+        o.cam = cam.id;
+        o.base = base.id;
+        o.cntPadre = cntDe(base, f) > 0 ? cntDe(base, f) : 1;
+        o.cnt = ['secuela', 'precuela', 'temporada'].indexOf(cam.id) >= 0 ? o.cntPadre : 0;
+        o.ord = cam.id === 'precuela' ? ordDe(base, f) - 0.5 : ordDe(base, f) + 0.5;
+        alCrear(o);
+        persDe(o).forEach(function (p) { if (!f.pers.some(function (x) { return x.n === p.n; }) && f.pers.length < 12) {
+            p.k = f.pers.reduce(function (m, x) { return Math.max(m, x.k); }, -1) + 1;
+            f.pers.push(p);
+        } });
+        return '';
+    }
     function moverEnCanon(frId, obraId, dir) {
-        const f = porId(frId), o = O.porId(obraId);
+        const f = porId(frId), o = obraDe(obraId);
         if (!f || !o || f.est !== 0)
             return 'No es tuya.';
         const rama = obras(f).filter(function (x) { return cntDe(x, f) === cntDe(o, f); }).sort(function (a, b) { return ordDe(a, f) - ordDe(b, f); });
@@ -11032,6 +11188,11 @@ ART.franquicias = (function () {
         const f = de(o);
         if (!f || !o.cam)
             return 0;
+        if (o.base && f.est === 0) {
+            const e = estimar(o.base, o.cam, { socios: o.frx || (o.fr2 ? [o.fr2] : []), persK: o.persK, nc: o.cnt === -1, med: esMedio(o) ? o.med : o.tv ? 'tv' : 'cine' });
+            if (e)
+                return Math.round(N.limitar(e.total * 0.5 + (f.mente !== null ? 1.5 : 0), -15, 12));
+        }
         const cam = camino(o.cam);
         let b = hype(f) * (cam.des / 6) * 0.5 + cam.des * 0.35 - f.fat * 14 + (f.mente !== null ? 1.5 : 0);
         if (o.cam === 'remake') {
@@ -11052,7 +11213,7 @@ ART.franquicias = (function () {
             return;
         const cam = camino(o.cam);
         const prev = estrenadas(f).filter(function (x) { return x !== o && x.fe; }).map(function (x) { return x.fe; }).sort(function (a, b) { return b - a; })[0];
-        let d = cam.fat * (f.mente !== null ? 0.6 : 1) + (prev !== undefined && o.fe - prev < 104 ? 0.08 : 0);
+        let d = (cam.fat * (f.mente !== null ? 0.6 : 1) + (prev !== undefined && o.fe - prev < 104 ? 0.08 : 0)) * (o.cnt === -1 ? 0.5 : 1) * (esMedio(o) ? 0.6 : 1);
         f.fat = N.redondear(N.limitar(cam.fat < 0 ? f.fat * (1 + cam.fat) : f.fat + d, 0, 1), 3);
         socios(o).forEach(function (B) { B.fat = N.redondear(N.limitar(B.fat + 0.1, 0, 1), 3); });
     }
@@ -11095,7 +11256,7 @@ ART.franquicias = (function () {
         return '';
     }
     function moverContinuidad(obraId, cntId, frId) {
-        const o = O.porId(obraId), f = frId ? porId(+frId) : de(o);
+        const o = obraDe(obraId), f = frId ? porId(+frId) : de(o);
         if (!o || !f || f.est !== 0)
             return 'No es tuya.';
         let v;
@@ -11300,7 +11461,7 @@ ART.franquicias = (function () {
     }
     return { CAMINOS: CAMINOS, PRODUCTOS: PRODUCTOS, NIVELES: NIVELES, camino: camino, lista: function () { return st().lista; }, porId: porId, de: de, dueno: dueno, obras: obras,
         estrenadas: estrenadas, materializar: materializar, registrar: registrar, hype: hype, biografia: biografia, valor: valor, puedeContinuar: puedeContinuar, continuar: continuar,
-        crossover: crossover, separar: separar, continuarCruce: continuarCruce, canon: canon, moverEnCanon: moverEnCanon, cntDe: cntDe, socios: socios, MAX_CROSSOVER: MAX_CROSSOVER, alCrear: alCrear, bonoDeseo: bonoDeseo, bonoConocimiento: bonoConocimiento, alEstrenar: alEstrenar,
+        crossover: crossover, separar: separar, continuarCruce: continuarCruce, canon: canon, moverEnCanon: moverEnCanon, obraDe: obraDe, esMedio: esMedio, estimar: estimar, bonoCritica: bonoCritica, continuarMedio: continuarMedio, titulo: titulo, alMedioLanzado: alMedioLanzado, persObras: persObras, etiquetaBase: etiquetaBase, CAMINO_CRIT: CAMINO_CRIT, sumables: sumables, sumar: sumar, cntDe: cntDe, socios: socios, MAX_CROSSOVER: MAX_CROSSOVER, alCrear: alCrear, bonoDeseo: bonoDeseo, bonoConocimiento: bonoConocimiento, alEstrenar: alEstrenar,
         alTerminar: alTerminar, productos: productos, ingresoLicencia: ingresoLicencia, licenciar: licenciar, moverContinuidad: moverContinuidad, renombrarContinuidad: renombrarContinuidad,
         asignarMente: asignarMente, enVenta: enVenta, comprar: comprar, vender: vender, aceptarOferta: aceptarOferta, rechazarOferta: rechazarOferta, mensual: mensual, semana: semana,
         probVenta: probVenta, esperaVenta: esperaVenta, proponerVenta: proponerVenta, subastar: subastar,
@@ -12496,6 +12657,11 @@ ART.medios = (function () {
     }
     function arteBono(b) {
         const r = { crit: 0, pub: 0, notas: [] }, gens = generosDe(b), eje = ejeDe(b.med, gens[0]);
+        const fc = b.fr && b.cam ? ART.franquicias.bonoCritica(b) : 0;
+        if (fc) {
+            r.crit += fc;
+            r.notas.push([fc > 0 ? 1 : -1, fc > 0 ? 'La crítica valora este camino de la franquicia' : 'La crítica desconfía de este camino de la franquicia']);
+        }
         if (gens.length > 1) {
             const ej = gens.map(function (g) { return ejeDe(b.med, g); });
             let su = 0, n = 0;
@@ -12714,6 +12880,8 @@ ART.medios = (function () {
             p.ing += pago;
         }
         st().p.push(p);
+        if (p.fr && ART.franquicias.alCrear)
+            ART.franquicias.alCrear(p);
         N.emit('noticia', { tipo: 'estudio', texto: 'Empieza ' + (p.med === 'teatro' ? 'el ensayo de' : 'la producción de') + ' «' + p.tit + '» (' + MED[p.med].nombre.toLowerCase() + ').' });
         return { proyecto: p };
     }
@@ -12841,6 +13009,8 @@ ART.medios = (function () {
                 fr.pers.forEach(function (x) { x.pop = Math.min(99, x.pop + 2); });
         }
         N.emit('noticia', { tipo: 'estudio', texto: '«' + p.tit + '» sale a la venta: crítica ' + p.crit + ', público ' + p.pub + '.', importante: true });
+        if (p.fr && ART.franquicias.alMedioLanzado)
+            ART.franquicias.alMedioLanzado(p);
         registrarComoMaterial(p);
     }
     function registrarComoMaterial(p) {
@@ -28505,6 +28675,18 @@ ART.mediosUI = (function () {
                 Md.aplicarMaterial(b, o.mat);
             if (o.tit)
                 b.tit = String(o.tit).slice(0, 48);
+            if (o.franq) {
+                Object.assign(b, o.franq.datos);
+                const g = o.franq.gen;
+                if (g && Md.familias(med).some(function (x) { return x.generos.indexOf(g) >= 0; })) {
+                    b.gen = g;
+                    b.gens = [g];
+                }
+                if (Md.NARRATIVOS.indexOf(med) >= 0 && o.franq.pj && o.franq.pj.length)
+                    b.pj = N.copiar(o.franq.pj);
+                if (med === 'libros' && b.cfg)
+                    b.cfg.fr = o.franq.datos.fr;
+            }
             const gu = o.guion ? (N.S.guionesPropios || []).filter(function (x) { return x.id === o.guion; })[0] : null;
             if (gu)
                 Md.aplicarGuion(b, gu);
@@ -29901,76 +30083,225 @@ ART.teleUI = (function () {
             }).join('') + '</div>' : '<p class="tenue">Todavía no hay franquicias famosas en ' + a + '.</p>');
         return h;
     }
+    const COLOR_TIPO = { original: '#35d0ba', secuela: '#35d0ba', temporada: '#35d0ba', precuela: '#5b8cff', spinoff: '#ffc857', paralela: '#c38bff', remake: '#ff8f5a', softreboot: '#ff6fb1', reboot: '#ff4f81', crossover: '#ffd166', nueva: '#7ee081' };
+    const DESC_TIPO = {
+        secuela: 'Continúa la historia después de la obra elegida, en la misma línea del canon.',
+        temporada: 'Una temporada más de la serie, en la misma línea del canon.',
+        precuela: 'Cuenta lo que pasó antes de la obra elegida, en la misma línea del canon.',
+        spinoff: 'Sigue a un personaje del mismo universo: abre una rama nueva desde esa obra.',
+        paralela: 'Ocurre al mismo tiempo que la obra elegida, desde otra mirada: rama paralela.',
+        remake: 'Vuelve a contar la misma historia: nueva rama que la refleja.',
+        softreboot: 'Renueva la saga sin borrar lo anterior: rama nueva que hereda parte del canon.',
+        reboot: 'Reinicia todo desde cero: rama independiente y casi sin fatiga.',
+    };
+    const NOMBRE_MEDIO = { cine: 'Película', tv: 'Serie', musica: 'Música', juegos: 'Videojuego', teatro: 'Teatro', libros: 'Libro' };
+    function medioDe(o) { return F.esMedio(o) ? o.med : o.tv || o.med === 'tv' ? 'tv' : 'cine'; }
+    function lienzoPoster(o, w, h) {
+        const st0 = 'width:' + w + 'px;height:' + h + 'px;border-radius:5px;display:block';
+        if (O.porId(o.id))
+            return '<canvas data-poster="' + o.id + '" style="' + st0 + '"></canvas>';
+        return '<canvas data-poster="x" data-tit="' + esc(o.tit) + '" data-gen="' + esc([].concat(o.gens || o.gen || ['Drama'])[0]) + '" data-anio="' + (o.anio || N.anio()) + '" style="' + st0 + '"></canvas>';
+    }
+    function anioDe(o) { return o.fe !== undefined ? N.anio(o.fe) : null; }
+    function corto(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+    function nodoHtml(f, o, x, y, sel, marca) {
+        const an = anioDe(o);
+        return '<button class="fr-nodo" data-a="tvSel" data-v="' + f.id + '|' + o.id + '" style="position:absolute;left:' + x + 'px;top:' + y + 'px;width:78px;padding:0;background:none;border:0;text-align:left;color:inherit;cursor:pointer" aria-label="' + esc(o.tit) + '">' +
+            '<div style="width:50px;height:74px;margin-left:2px;border-radius:6px;padding:2px;' + (sel ? 'background:#35d0ba;' : '') + '">' + lienzoPoster(o, 46, 70) + '</div>' +
+            (marca ? '<div style="width:50px;height:3px;margin:2px 0 0 2px;background:' + marca + '"></div>' : '') +
+            '<div style="margin-top:3px;font-size:11px;line-height:1.2;max-height:2.4em;overflow:hidden;overflow-wrap:anywhere;' + (sel ? 'color:#35d0ba;font-weight:700' : '') + '">' + esc(corto(o.tit, 24)) + '</div>' +
+            '<div class="tenue" style="font-size:10px;white-space:nowrap">' + (an ? an : o.pub === undefined ? 'en curso' : '—') + ' · ' + NOMBRE_MEDIO[medioDe(o)].slice(0, 6) + '</div></button>';
+    }
+    function lineaCanon(f, selId) {
+        const cn = F.canon(f), NW = 84, LH = 150, TOP = 6, NY = 20;
+        const lanes = cn.ramas.filter(function (r) { return r.obras.length || r.c.id === 1; });
+        if (cn.fuera.length)
+            lanes.push({ c: { id: -1, nom: 'Fuera del canon', tipo: 'nueva' }, obras: cn.fuera, nivel: 0, fuera: true });
+        const col = {}, nodos = [], aristas = [], filas = [];
+        let mx = 0;
+        for (let pase = 0; pase < 2; pase++) {
+            nodos.length = 0;
+            aristas.length = 0;
+            filas.length = 0;
+            mx = 0;
+            lanes.forEach(function (r, li) {
+                let s = 0;
+                if (r.c.de && col[r.c.de] !== undefined && !r.fuera)
+                    s = col[r.c.de] + (['paralela', 'remake'].indexOf(r.c.tipo) >= 0 ? 0 : 1);
+                r.obras.forEach(function (o, k) {
+                    col[o.id] = s + k;
+                    nodos.push({ o: o, x: 10 + (s + k) * NW, y: TOP + li * LH + NY, r: r });
+                    mx = Math.max(mx, s + k);
+                });
+                filas.push({ r: r, y: TOP + li * LH, s: s, e: s + Math.max(0, r.obras.length - 1) });
+                if (r.c.de && col[r.c.de] !== undefined && r.obras.length && !r.fuera)
+                    aristas.push({ a: r.c.de, b: r.obras[0].id, t: r.c.tipo });
+            });
+        }
+        const W = Math.max(330, 30 + (mx + 1) * NW), H = TOP + Math.max(1, lanes.length) * LH;
+        const color = function (r) { return r.fuera ? '#8e9ab8' : COLOR_TIPO[r.c.tipo] || '#35d0ba'; };
+        let svg = '<svg width="' + W + '" height="' + H + '" style="position:absolute;left:0;top:0" aria-hidden="true">';
+        for (let x = 6; x < W; x += NW)
+            svg += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="' + H + '" stroke="rgba(255,255,255,.05)"/>';
+        filas.forEach(function (l) {
+            svg += '<line x1="' + (35 + l.s * NW) + '" y1="' + (l.y + NY + 38) + '" x2="' + (35 + l.e * NW) + '" y2="' + (l.y + NY + 38) + '" stroke="' + color(l.r) + '" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/>';
+        });
+        aristas.forEach(function (e) {
+            const A = nodos.filter(function (n) { return n.o.id === e.a; })[0], B = nodos.filter(function (n) { return n.o.id === e.b; })[0];
+            if (!A || !B)
+                return;
+            const x1 = A.x + 27, y1 = A.y + 108, x2 = B.x + 27, y2 = B.y - 4, c = COLOR_TIPO[e.t] || '#999';
+            const dash = e.t === 'paralela' || e.t === 'remake' ? ' stroke-dasharray="6 4"' : e.t === 'reboot' ? ' stroke-dasharray="2 5"' : '';
+            svg += '<path d="M' + x1 + ' ' + y1 + ' C' + x1 + ' ' + (y1 + (y2 - y1) * 0.6) + ' ' + x2 + ' ' + (y2 - (y2 - y1) * 0.6) + ' ' + x2 + ' ' + y2 + '" fill="none" stroke="' + c + '" stroke-width="2"' + dash + '/><circle cx="' + x2 + '" cy="' + y2 + '" r="3" fill="' + c + '"/>';
+        });
+        svg += '</svg>';
+        const etiquetas = filas.map(function (l) {
+            const de = l.r.c.de ? F.obraDe(l.r.c.de) : null;
+            return '<div style="position:absolute;left:' + (6 + l.s * NW) + 'px;top:' + l.y + 'px;background:rgba(13,19,38,.92);padding:0 5px;border-radius:4px;font-size:12px;font-weight:700;color:' + color(l.r) + ';white-space:nowrap">' +
+                esc(l.r.c.id === 1 ? '«' + f.nom + '» · Línea principal' : l.r.c.nom) + (de ? '<span class="tenue" style="font-weight:400"> · desde «' + esc(corto(de.tit, 18)) + '»</span>' : '') + '</div>';
+        }).join('');
+        const html = nodos.map(function (n) { return nodoHtml(f, n.o, n.x, n.y, n.o.id === selId, n.o.fr !== f.id ? '#ff8fb1' : F.socios(n.o).length ? '#ffd166' : ''); }).join('');
+        return '<div id="frCanon" style="overflow-x:auto;border-radius:10px;margin-top:8px"><div style="position:relative;width:' + W + 'px;height:' + H + 'px;background:linear-gradient(135deg,#0d1326,#16203f)">' + svg + etiquetas + html + '</div></div>';
+    }
+    function lineaEstrenos(f, lista) {
+        const NW = 84, W = Math.max(330, 30 + lista.length * NW), H = 124;
+        const svg = '<svg width="' + W + '" height="' + H + '" style="position:absolute;left:0;top:0" aria-hidden="true"><line x1="35" y1="44" x2="' + (35 + Math.max(0, lista.length - 1) * NW) + '" y2="44" stroke="#c9a24a" stroke-opacity=".6" stroke-width="3"/></svg>';
+        return '<div style="overflow-x:auto;border-radius:10px;margin-top:8px"><div style="position:relative;width:' + W + 'px;height:' + H + 'px;background:linear-gradient(135deg,#0d1326,#16203f)">' + svg +
+            lista.map(function (o, i) { return nodoHtml(f, o, 10 + i * NW, 8, false, o.fr !== f.id ? '#ff8fb1' : '#35d0ba'); }).join('') + '</div></div>';
+    }
+    function cifrasFranquicia(f) {
+        const L = F.obras(f), es = L.filter(function (o) { return o.pub !== undefined && o.et !== 'lista'; });
+        const costo = L.reduce(function (a, o) { return a + (F.esMedio(o) ? o.costo || 0 : O.costoTotal ? O.costoTotal(o) || 0 : o.costo || 0); }, 0);
+        const bruto = es.reduce(function (a, o) { return a + (o.bruto || 0) + (o.ing || 0); }, 0);
+        const gan = es.reduce(function (a, o) { return a + (F.esMedio(o) ? (o.ing || 0) - (o.gas || 0) : O.neto ? O.neto(o) || 0 : 0); }, 0);
+        const premios = L.reduce(function (a, o) { return a + (o.aw || []).length + (o.galas || []).length + (o.prem || 0); }, 0);
+        const top = f.pers.slice().sort(function (a, b) { return b.pop - a.pop; }).slice(0, 3);
+        const pop = Math.round(N.limitar((top.length ? top.reduce(function (a, p) { return a + p.pop; }, 0) / top.length : 50) + F.hype(f) * 1.5 - f.fat * 20, 1, 100));
+        return { n: L.length, costo: costo, bruto: bruto, gan: gan, premios: premios, pop: pop };
+    }
+    function panelSeleccion(f, selId, mia) {
+        const o = selId ? F.obraDe(selId) : null;
+        if (!o)
+            return '<p class="tenue chico">Toca una obra del canon para moverla, cambiarla de línea o continuarla.</p>';
+        const cnt = F.cntDe(o, f), tipo = o.cam ? F.camino(o.cam).nombre : 'Original', an = anioDe(o);
+        const ficha = F.esMedio(o) ? btn('Ficha', 'mdVer', o.id) : btn('Ficha', 'verObra', o.id);
+        return '<div class="fila entre"><b>' + esc(o.tit) + '</b><span class="tenue chico">' + esc(tipo) + ' · ' + NOMBRE_MEDIO[medioDe(o)] + ' · ' + (an || 'en curso') + '</span></div>' +
+            (mia ? '<div class="fila envolver" style="margin-top:6px">' + btn('‹ Antes', 'tvCanon', f.id + '|' + o.id + '|-1') + btn('Después ›', 'tvCanon', f.id + '|' + o.id + '|1') + '</div>' +
+                sel('tvCont', f.cont.map(function (x) { return [x.id, x.id === 1 ? '«' + f.nom + '» · Línea principal' : x.nom]; }).concat([['nueva', '+ Nueva línea desde aquí'], ['nocanon', 'Fuera del canon']]), cnt, f.id + '|' + o.id) : '') +
+            '<div class="fila envolver" style="margin-top:6px">' + ficha + (mia && o.pub !== undefined && o.et !== 'lista' ? btn('Continuación', 'tvContinuar', o.id, 'primario') : mia ? '<span class="tenue chico">Podrás continuarla cuando se estrene.</span>' : '') + '</div>';
+    }
     function fichaFranquicia(id) {
         const f = F.porId(+id);
         if (!f)
             return '<p>No existe.</p>';
-        const b = F.biografia(f), mia = f.est === 0, a = N.anio();
-        let h = '<h2>' + esc(f.nom) + '</h2><p class="tenue">' + esc(f.gen) + ' · ' + esc(nomEst(f.est)) + ' · desde ' + N.anio(f.t0) + '</p><div class="kpis">' +
-            kpi('Nivel', b.nombreNivel, b.nivel >= 3 ? 'oro' : '') + kpi('Calidad', b.calidad) + kpi('Hype', (b.hype > 0 ? '+' : '') + b.hype) + kpi('Fatiga', b.fat + ' %', b.fat > 50 ? 'mal' : '') + kpi('Recaudado', dinero(b.bruto)) + kpi('Valor', dinero(F.valor(f))) + '</div>';
-        const nomObra = function (o) { return esc(o.tit) + (o.cam ? ' · ' + esc(F.camino(o.cam).nombre) : '') + (o.tv ? ' · serie' : '') + (o.fr !== f.id ? ' · crossover' : F.socios(o).length ? ' · crossover con ' + esc(F.socios(o).map(function (x) { return x.nom; }).join(', ')) : ''); };
-        h += '<h3>Línea por fecha de estreno</h3><p class="nota info">El orden real en que salieron las obras. No se edita.</p><div class="linea-estrenos" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px">' + b.linea.map(function (o) {
-            return '<button class="tarjeta toque" style="min-width:130px;text-align:left" data-a="verObra" data-v="' + o.id + '"><b class="cifra">' + (o.fe !== undefined ? N.anio(o.fe) : 'Próximamente') + '</b><br><span class="chico">' + nomObra(o) + '</span><br><span class="tenue chico">' + (o.pub !== undefined ? 'público ' + o.pub : esc(O.NOMBRE_ETAPA[o.et] || '')) + '</span></button>';
-        }).join('') + '</div>';
-        const cn = F.canon(f);
-        h += '<h3>Cronología del canon</h3><p class="nota info">El orden dentro de la historia. Cada spin-off, remake, historia paralela, soft reboot o reboot abre una rama nueva que nace de su obra de origen. Ordena con las flechas, cambia una obra de rama o sácala del canon.</p>';
-        h += cn.ramas.filter(function (r) { return r.obras.length || r.c.id === 1; }).map(function (r) {
-            const de = r.c.de ? O.porId(r.c.de) : null;
-            return '<div class="tarjeta" style="margin-left:' + Math.min(4, r.nivel) * 14 + 'px;border-left:3px solid var(--acento,#c9a24a)"><div class="fila entre"><b>' + (r.nivel ? '↳ ' : '') + esc(r.c.nom) + '</b>' + (mia ? '<input data-c="tvRamaNom" data-v="' + f.id + '|' + r.c.id + '" maxlength="40" value="' + esc(r.c.nom) + '" aria-label="Nombre de la rama" style="max-width:150px">' : '') + '</div>' +
-                (de ? '<span class="tenue chico">Nace de «' + esc(de.tit) + '»</span>' : '') +
-                (r.obras.length ? r.obras.map(function (o, k) {
-                    return '<div class="cal-ev"><b class="cifra">' + (k + 1) + '</b><div class="col crece" data-a="verObra" data-v="' + o.id + '" style="cursor:pointer"><span>' + nomObra(o) + '</span><span class="tenue chico">' + (o.fe !== undefined ? 'estreno ' + N.anio(o.fe) : esc(O.NOMBRE_ETAPA[o.et] || '')) + '</span></div>' +
-                        (mia ? btn('↑', 'tvCanon', f.id + '|' + o.id + '|-1', '', k === 0 ? 'Ya es la primera' : '') + btn('↓', 'tvCanon', f.id + '|' + o.id + '|1', '', k === r.obras.length - 1 ? 'Ya es la última' : '') + sel('tvCont', f.cont.map(function (x) { return [x.id, x.nom]; }).concat([['nueva', '+ Nueva rama'], ['nocanon', 'Fuera del canon']]), r.c.id, f.id + '|' + o.id) : '') + '</div>';
-                }).join('') : '<p class="tenue chico">Sin obras en esta rama.</p>') + '</div>';
-        }).join('');
-        if (cn.fuera.length)
-            h += '<div class="tarjeta"><b>Fuera del canon</b>' + cn.fuera.map(function (o) { return '<div class="cal-ev"><div class="col crece"><span>' + nomObra(o) + '</span></div>' + (mia ? sel('tvCont', f.cont.map(function (x) { return [x.id, x.nom]; }).concat([['nocanon', 'Fuera del canon']]), 'nocanon', f.id + '|' + o.id) : '') + '</div>'; }).join('') + '</div>';
-        h += '<h3>Personajes</h3><div class="col">' + f.pers.map(function (p) {
-            return '<div class="cal-ev"><b class="cifra">' + p.pop + '</b><div class="col crece"><span>' + esc(p.n) + ' · ' + esc(p.i || '') + '</span><span class="tenue chico">' + esc(p.a || '') + (p.tn ? ' · lo interpretó ' + esc(p.tn) : '') + '</span></div></div>';
-        }).join('') + '</div>';
+        const b = F.biografia(f), mia = f.est === 0, a = N.anio(), c = cifrasFranquicia(f);
+        const lista = F.obras(f), es = lista.filter(function (o) { return o.pub !== undefined && o.et !== 'lista'; });
+        const ult = es.slice().sort(function (x, y) { return (y.fe || 0) - (x.fe || 0); })[0] || lista[0];
+        if (!st.frSel || !lista.some(function (o) { return o.id === st.frSel; }))
+            st.frSel = ult ? ult.id : null;
+        const primera = lista.slice().sort(function (x, y) { return (x.fe || 1e9) - (y.fe || 1e9); })[0];
+        const origen = primera && primera.mat ? 'Adaptación' : 'Obra original';
+        const socios = f.xo.map(F.porId).filter(Boolean);
+        let h = '<div class="fila entre"><h2>Franquicia</h2><button class="ico" data-a="cerrarModal" aria-label="Cerrar">' + U.icono('cerrar') + '</button></div>';
+        h += '<div class="tarjeta"><div class="fila" style="align-items:flex-start">' + (ult ? lienzoPoster(ult, 64, 96) : '') + '<div class="col crece"><b style="font-size:1.2em">' + esc(f.nom) + '</b><span class="tenue">' + origen + ' · ' + c.n + (c.n === 1 ? ' obra' : ' obras') + ' · ' + esc(nomEst(f.est)) + '</span>' +
+            (socios.length ? '<span style="color:#ffd166">⇄ En crossover con ' + socios.map(function (g) { return '«' + esc(g.nom) + '»'; }).join(', ') + '</span>' : '') +
+            ((f.xh || []).length ? '<span class="tenue chico">' + f.xh.slice(-4).map(function (x) { const g = F.porId(x.f); return (x.j ? 'Crossover con' : 'Separada de') + ' «' + esc(g ? g.nom : '?') + '» (' + x.y + ')'; }).join(' · ') + '</span>' : '') + '</div></div>';
+        if (mia)
+            h += '<div class="fila" style="flex-wrap:nowrap;margin-top:8px"><input id="tvFrNom" maxlength="40" value="' + esc(f.nom) + '" style="flex:1">' + btn('Renombrar', 'tvRenFr', f.id) + '</div>';
+        h += '<div class="kpis" style="margin-top:8px">' + kpi('Popularidad / hype', c.pop + ' %') + kpi('Proyectos', c.n) + kpi('Costo total', dinero(c.costo)) + kpi('Bruto total', dinero(c.bruto)) + kpi('Ganancias', dinero(c.gan), c.gan < 0 ? 'mal' : '') + kpi('Premios', c.premios) + kpi('Valor estimado', dinero(F.valor(f))) + kpi('Nivel', b.nombreNivel) + kpi('Fatiga', b.fat + ' %', b.fat > 50 ? 'mal' : '') + '</div>';
+        if (mia)
+            h += '<div class="fila envolver" style="margin-top:6px">' + socios.map(function (g) { return btn('Separar de «' + g.nom + '»', 'tvSeparar', f.id + '|' + g.id, 'peligro'); }).join('') + btn(st.frVenta ? 'Ocultar venta' : 'Vender', 'tvFrVenta', f.id) + '</div>';
+        h += '</div>';
+        // Canon
+        h += '<div class="tarjeta"><h3>Canon · orden cronológico</h3><p class="nota info">Editable. Cada línea es una continuidad y las ramas salen de la obra que las originó: spin-off, historia paralela, remake, soft reboot y reboot. Toca una obra para moverla o continuarla.</p>' +
+            lineaCanon(f, st.frSel) +
+            '<p class="chico" style="margin-top:6px">' + [['secuela', 'Principal'], ['precuela', 'Precuela'], ['spinoff', 'Spin-off'], ['paralela', 'Paralela'], ['remake', 'Remake'], ['softreboot', 'Soft reboot'], ['reboot', 'Reboot']].map(function (x) { return '<span style="color:' + COLOR_TIPO[x[0]] + '">■</span> ' + x[1]; }).join(' · ') +
+            (socios.length ? ' · <span style="color:#ff8fb1">■</span> obra de otra franquicia · <span style="color:#ffd166">■</span> obra conjunta' : '') + '</p>' +
+            '<div class="tarjeta" style="margin:8px 0 0">' + panelSeleccion(f, st.frSel, mia) + '</div></div>';
+        // Origen por estreno
+        const porFecha = lista.slice().sort(function (x, y) { return (x.fe === undefined ? 1e9 : x.fe) - (y.fe === undefined ? 1e9 : y.fe); });
+        h += '<div class="tarjeta"><h3>Origen · fecha de lanzamiento</h3><p class="tenue chico">Orden real de estreno; no se puede editar.</p>' + lineaEstrenos(f, porFecha) + '</div>';
+        // Taquilla por obra
+        if (es.length) {
+            const mxb = Math.max.apply(null, es.map(function (o) { return (o.bruto || 0) + (o.ing || 0); }).concat([1]));
+            h += '<div class="tarjeta"><h3>Taquilla por obra</h3><div style="display:flex;align-items:flex-end;gap:4px;height:130px;overflow-x:auto">' + porFecha.filter(function (o) { return es.indexOf(o) >= 0; }).map(function (o) {
+                const v = (o.bruto || 0) + (o.ing || 0);
+                return '<div style="flex:0 0 26px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%" title="' + esc(o.tit + ' · ' + dinero(v)) + '"><div style="width:16px;height:' + Math.max(3, Math.round(v / mxb * 100)) + 'px;background:' + (o.fr !== f.id ? '#ff8fb1' : '#35d0ba') + ';border-radius:3px 3px 0 0"></div><span class="tenue" style="font-size:9px;white-space:nowrap;overflow:hidden;width:26px">' + esc(corto(o.tit, 5)) + '</span></div>';
+            }).join('') + '</div></div>';
+        }
+        // Mente maestra y personajes
+        const prods = N.S.talentos.filter(function (t) { return t.of === 'produccion' && !t.ret && !t.mu && t.hab >= 55; }).sort(function (x, y) { return y.hab - x.hab; }).slice(0, 15);
+        const mm = f.mente !== null ? ART.talentos.porId(f.mente) : null;
+        h += '<div class="tarjeta"><h3>★ Nivel: ' + esc(b.nombreNivel) + '</h3>' +
+            (mia ? '<label class="campo"><span>Mente maestra' + (mm ? ': ' + esc(mm.nom) : '') + '</span>' + sel('tvMente', [['', 'Nadie']].concat(prods.map(function (t) { return [t.id, t.nom + ' · ' + t.hab]; })), f.mente === null ? '' : f.mente, f.id) + '</label><p class="nota info">Un productor que guía la franquicia: menos fatiga y más entusiasmo en cada obra nueva.</p>' : (mm ? '<p>Mente maestra: ' + esc(mm.nom) + '</p>' : ''));
+        const pr = F.productos(a), canon = st.licCanon !== 0;
+        h += '<h3>Personajes (' + f.pers.length + ')</h3>' + (f.pers.length ? f.pers.slice().sort(function (x, y) { return y.pop - x.pop; }).map(function (p) {
+            const t = p.t !== undefined && p.t !== null ? ART.talentos.porId(p.t) : null, n = F.persObras(f, p);
+            return '<div class="tarjeta" style="margin:6px 0"><div class="fila entre"><b>' + esc(p.n) + '</b><span class="tenue chico">popularidad ' + Math.round(p.pop) + '</span></div>' +
+                '<span class="tenue chico">' + esc(p.i || '') + (p.a ? ' · ' + esc(p.a) : '') + ' · ' + n + (n === 1 ? ' obra' : ' obras') + (t ? ' · lo interpreta ' + esc(t.nom) : p.tn ? ' · lo interpretó ' + esc(p.tn) : '') + '</span>' +
+                (mia ? '<div class="chips" style="margin:6px 0">' + pr.map(function (x) {
+                    const activa = f.lic.some(function (l) { return l.k === p.k && l.p === x.id && l.hasta > N.S.t; });
+                    return '<button class="chip' + (activa ? ' on' : '') + '" style="min-height:36px;padding:5px 11px;font-size:12px" data-a="tvLicChip" data-v="' + esc(f.id + '|' + p.k + '|' + x.id) + '"' + (activa ? ' aria-pressed="true"' : '') + '>' + esc(x.nombre) + ' · ' + esc(dinero(F.ingresoLicencia(f, p, x, canon))) + '/sem</button>';
+                }).join('') + '</div>' + (es.length ? btn('Obra propia de ' + corto(p.n, 14), 'tvPersObra', f.id + '|' + p.k, 'primario bloque') : '') : '') + '</div>';
+        }).join('') : '<p class="tenue chico">Las obras con personajes con nombre llenan esta lista.</p>');
+        if (mia && f.pers.length)
+            h += '<div class="fila envolver">' + btn('Canon (suma hype)', 'tvLicModo', '1', canon ? 'primario' : '') + btn('No canon (+35 % de dinero, cansa la franquicia)', 'tvLicModo', '0', canon ? '' : 'primario') + '</div><p class="nota info">Las licencias pagan cada semana durante 3 años. Una obra propia de un personaje es un spin-off: dentro del canon abre su rama; fuera del canon cansa la mitad y suma menos hype.</p>';
+        if (f.lic.length)
+            h += '<p class="chico">Licencias activas: ' + f.lic.filter(function (l) { return l.hasta > N.S.t; }).map(function (l) { const p = f.pers.filter(function (x) { return x.k === l.k; })[0]; return esc((F.PRODUCTOS.filter(function (x) { return x.id === l.p; })[0] || {}).nombre || '') + ' de ' + esc(p ? p.n : '') + (l.c ? ' (canon)' : ' (no canon)') + ' · ' + dinero(l.sem) + '/sem'; }).join(' · ') + '</p>';
+        h += '</div>';
         if (mia) {
-            const pr = F.productos(a);
-            h += '<h3>Licencias y derivados</h3>' + (f.lic.length ? '<ul>' + f.lic.map(function (l) { const p = f.pers.filter(function (x) { return x.k === l.k; })[0]; return '<li>' + esc((F.PRODUCTOS.filter(function (x) { return x.id === l.p; })[0] || {}).nombre) + ' de ' + esc(p ? p.n : '') + (l.c ? ' (canon)' : ' (no canon)') + ' · ' + dinero(l.sem) + '/sem hasta ' + N.anio(l.hasta) + '</li>'; }).join('') + '</ul>' : '<p class="tenue chico">Sin licencias.</p>');
-            if (pr.length && f.pers.length)
-                h += '<div class="fila">' + sel('tvLicPers', f.pers.map(function (p) { return [p.k, p.n]; }), st.licP || f.pers[0].k) + sel('tvLicProd', pr.map(function (p) { return [p.id, p.nombre]; }), st.licProd || pr[0].id) +
-                    btn('Canon', 'tvLicenciar', f.id + '|1', 'primario') + btn('No canon (paga más, cansa)', 'tvLicenciar', f.id + '|0') + '</div>';
-            const prods = N.S.talentos.filter(function (t) { return t.of === 'produccion' && !t.ret && !t.mu && t.hab >= 55; }).sort(function (x, y) { return y.hab - x.hab; }).slice(0, 15);
-            h += '<h3>Mente maestra</h3><p class="nota info">Un productor que guía la franquicia: menos fatiga y algo más de entusiasmo.</p>' + sel('tvMente', [['', 'Nadie']].concat(prods.map(function (t) { return [t.id, t.nom + ' · ' + t.hab]; })), f.mente === null ? '' : f.mente, f.id);
-            const otras = F.lista().filter(function (x) { return x.est === 0 && x !== f; });
-            const libres = otras.filter(function (x) { return f.xo.indexOf(x.id) < 0; });
-            h += '<h3>Crossovers (' + f.xo.length + '/' + F.MAX_CROSSOVER + ')</h3><p class="nota info">Une hasta ' + F.MAX_CROSSOVER + ' de tus franquicias con esta. Sus obras en conjunto aparecen en el canon de cada una; al separarlas, lo que hicieron juntas queda en ambas.</p>' +
-                (f.xo.length ? '<div class="col">' + f.xo.map(function (x) { const g = F.porId(x); return g ? '<div class="cal-ev"><div class="col crece"><b>' + esc(g.nom) + '</b><span class="tenue chico">En crossover con «' + esc(f.nom) + '»</span></div>' + btn('Obra juntas', 'tvCruce', f.id + '|' + g.id, 'primario') + btn('Separar franquicias', 'tvSeparar', f.id + '|' + g.id) + '</div>' : ''; }).join('') + '</div>' : '') +
-                (f.xo.length > 1 ? btn('Gran crossover con las ' + (f.xo.length + 1) + ' franquicias', 'tvCruce', f.id + '|' + f.xo.join(','), 'primario bloque') : '') +
-                (f.xo.length < F.MAX_CROSSOVER ? (libres.length ? '<div class="fila">' + sel('tvXo', libres.map(function (x) { return [x.id, x.nom]; }), libres.some(function (x) { return x.id === st.xo; }) ? st.xo : libres[0].id) + btn('Hacer crossover', 'tvUnir', f.id) + '</div>' : '<p class="tenue chico">Necesitas otra franquicia tuya con una obra estrenada.</p>') : '<p class="tenue chico">Llegaste al máximo de ' + F.MAX_CROSSOVER + ' crossovers.</p>');
-            const ult = b.linea.filter(function (o) { return o.pub !== undefined; }).pop();
-            h += '<h3>Acciones</h3><div class="fila">' + (ult ? btn('Continuación', 'tvContinuar', ult.id, 'primario') : '') + btn('Renombrar', 'tvRegistrar', b.linea[0].id) + '</div>';
+            // Crossovers
+            const otras = F.lista().filter(function (x) { return x.est === 0 && x !== f; }), libres = otras.filter(function (x) { return f.xo.indexOf(x.id) < 0; });
+            h += '<div class="tarjeta"><h3>⇄ Crossovers (' + f.xo.length + '/' + F.MAX_CROSSOVER + ')</h3><p class="nota info">Une hasta ' + F.MAX_CROSSOVER + ' de tus franquicias con esta. Sus obras conjuntas aparecen en el canon de cada una; al separarlas, lo que hicieron juntas queda en ambas.</p>' +
+                (socios.length ? '<div class="col">' + socios.map(function (g) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(g.nom) + '</b><span class="tenue chico">' + F.obras(g).length + ' obras</span></div>' + btn('Obra juntas', 'tvCruce', f.id + '|' + g.id, 'primario') + '</div>'; }).join('') + '</div>' : '') +
+                (socios.length > 1 ? btn('Gran crossover con las ' + (socios.length + 1) + ' franquicias', 'tvCruce', f.id + '|' + f.xo.join(','), 'primario bloque') : '') +
+                (f.xo.length < F.MAX_CROSSOVER ? (libres.length ? '<div class="fila">' + sel('tvXo', libres.map(function (x) { return [x.id, x.nom]; }), libres.some(function (x) { return x.id === st.xo; }) ? st.xo : libres[0].id) + btn('Hacer crossover', 'tvUnir', f.id) + '</div>' : '<p class="tenue chico">Necesitas otra franquicia tuya con una obra estrenada.</p>') : '<p class="tenue chico">Llegaste al máximo de ' + F.MAX_CROSSOVER + ' crossovers.</p>') + '</div>';
+            // Sumar obras sueltas
+            const sum = F.sumables(f);
+            if (sum.length)
+                h += '<div class="tarjeta"><h3>Sumar una obra a la franquicia</h3><p class="nota info">Suma una obra tuya ya estrenada como secuela, precuela, spin-off, remake, historia paralela, soft reboot o reboot de una obra de esta franquicia.</p><div class="col">' +
+                    sel('tvSumO', sum.map(function (o) { return [o.id, o.tit + (o.anio ? ' (' + o.anio + ')' : '')]; }), st.sumO || sum[0].id) + sel('tvSumC', F.CAMINOS.map(function (x) { return [x.id, x.nombre]; }), st.sumC || 'secuela') +
+                    sel('tvSumB', porFecha.map(function (o) { return [o.id, 'Relacionada con «' + o.tit + '»']; }), st.sumB || (ult ? ult.id : '')) + btn('Sumar a la franquicia', 'tvSumar', f.id, 'primario') + '</div></div>';
+            // Venta
             const compradores = N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; });
-            if (compradores.length) {
+            if (st.frVenta && compradores.length) {
                 const comp = compradores.filter(function (e) { return e.id === st.vendA; })[0] || compradores[0], pct = st.vendPct || 100, precio = Math.round(F.valor(f) * pct / 100), espera = F.esperaVenta(f);
-                h += '<h3>Vender</h3><p class="nota">Valor estimado: <b>' + dinero(F.valor(f)) + '</b>. Cerca del valor casi siempre aceptan; si pides mucho más, pocos estudios se interesan.</p>' +
-                    '<div class="fila envolver">' + sel('tvVendA', compradores.map(function (e) { return [e.id, e.nombre + ' · caja ' + dinero(e.caja)]; }), comp.id) + '</div>' +
-                    '<label class="campo rango"><span>Precio: <b>' + dinero(precio) + '</b> (' + pct + ' % del valor) · probabilidad de que acepte: ' + Math.round(F.probVenta(f, comp.id, pct) * 100) + ' %</span><input type="range" min="50" max="200" step="5" value="' + pct + '" data-c="tvVendPct"></label>';
-                if (f.sub)
-                    h += '<div class="tarjeta"><b>En subasta</b> hasta ' + esc(U.fechaCorta(f.sub.fin)) + ' · precio mínimo ' + dinero(f.sub.reserva) + '<br><span class="chico">' + (f.sub.pujas.length ? f.sub.pujas.slice().reverse().map(function (p) { return esc(nomEst(p.est)) + ': ' + dinero(p.monto); }).join(' · ') : 'Aún sin pujas.') + '</span></div>';
-                else if (espera)
-                    h += '<p class="nota mal">Espera ' + espera + ' semanas para otra propuesta o subasta.</p>';
-                else
-                    h += '<div class="fila envolver">' + btn('Proponer venta', 'tvProponer', f.id, 'primario') + btn('Subastar derechos (3 semanas, mínimo ' + dinero(precio) + ')', 'tvSubastar', f.id) + '</div>';
+                h += '<div class="tarjeta"><h3>Vender</h3><p class="nota">Valor estimado: <b>' + dinero(F.valor(f)) + '</b>. Cerca del valor casi siempre aceptan; si pides mucho más, pocos estudios se interesan.</p>' +
+                    sel('tvVendA', compradores.map(function (e) { return [e.id, e.nombre + ' · caja ' + dinero(e.caja)]; }), comp.id) +
+                    '<label class="campo rango"><span>Precio: <b>' + dinero(precio) + '</b> (' + pct + ' % del valor) · probabilidad de que acepte: ' + Math.round(F.probVenta(f, comp.id, pct) * 100) + ' %</span><input type="range" min="50" max="200" step="5" value="' + pct + '" data-c="tvVendPct"></label>' +
+                    (f.sub ? '<p><b>En subasta</b> hasta ' + esc(U.fechaCorta(f.sub.fin)) + ' · mínimo ' + dinero(f.sub.reserva) + '</p>' : espera ? '<p class="nota mal">Espera ' + espera + ' semanas para otra propuesta o subasta.</p>' : '<div class="fila envolver">' + btn('Proponer venta', 'tvProponer', f.id, 'primario') + btn('Subastar derechos (3 semanas)', 'tvSubastar', f.id) + '</div>') + '</div>';
             }
         }
         return h + '<button class="btn bloque" data-a="cerrarModal">Cerrar</button>';
     }
+    function opcionesMedio(o) {
+        const a = N.anio(), base = medioDe(o), Md = ART.medios;
+        const L = [['cine', 'Película']].concat(TV.puedeTV(a) ? [['tv', 'Serie de TV']] : []).concat(['musica', 'juegos', 'teatro', 'libros'].filter(function (m) { return Md.disponible(m); }).map(function (m) { return [m, NOMBRE_MEDIO[m]]; }));
+        return L.map(function (x) { return [x[0], x[1] + (x[0] !== base ? ' · derivado' : '')]; });
+    }
     function modalContinuar(oid) {
-        const o = O.porId(+oid), c = st.cont || { cam: 'secuela', med: o && o.tv ? 'tv' : 'cine', k: 0 };
-        st.cont = c;
-        c.o = +oid;
-        const f = F.de(o);
-        let h = '<h2>Continuación de «' + esc(o.tit) + '»</h2>' + (f ? '<p class="tenue">Fatiga de la franquicia: ' + Math.round(f.fat * 100) + ' %</p>' : '') + '<div class="col">' +
-            F.CAMINOS.map(function (x) { return '<label class="cal-ev"><input type="radio" name="cam" data-c="tvCam" value="' + x.id + '"' + (c.cam === x.id ? ' checked' : '') + '><div class="col crece"><b>' + esc(x.nombre) + '</b><span class="tenue chico">' + esc(x.texto) + (['secuela', 'precuela'].indexOf(x.id) >= 0 ? ' Sigue en la misma rama del canon.' : ' Abre una rama nueva del canon.') + '</span></div></label>'; }).join('') + '</div>';
-        h += '<div class="fila"><span>Medio:</span>' + sel('tvMed', [['cine', 'Cine']].concat(TV.puedeTV(N.anio()) ? [['tv', 'Serie de TV']] : []), c.med) + '</div>';
-        if (c.cam === 'spinoff' && o.pj)
-            h += '<div class="fila"><span>Personaje al frente:</span>' + sel('tvPersK', o.pj.map(function (p, i) { return [i, p.n]; }), c.k) + '</div>';
-        return h + '<button class="btn primario bloque" data-a="tvLlamar">Llamar al elenco y preparar</button><button class="btn bloque" data-a="cerrarModal">Cancelar</button>';
+        const o = F.obraDe(+oid), f = F.de(o);
+        let c = st.cont;
+        if (!c || c.o !== +oid)
+            c = st.cont = { o: +oid, cam: 'secuela', med: medioDe(o), k: f && f.pers[0] ? f.pers[0].k : 0, nc: false, soc: [], tit: null };
+        const socios = f ? f.xo.map(F.porId).filter(Boolean) : [];
+        const caminos = (medioDe(o) === 'tv' ? [{ id: 'temporada', nombre: 'Nueva temporada' }] : []).concat(F.CAMINOS);
+        const conSoc = c.soc.length && (c.med === 'cine' || c.med === 'tv');
+        const e = F.estimar(o.id, conSoc ? 'crossover' : c.cam, { socios: conSoc ? c.soc : [], persK: c.k, nc: c.nc, med: c.med });
+        const tit = c.tit !== null ? c.tit : conSoc ? [f.nom].concat(c.soc.map(function (x) { const g = F.porId(x); return g ? g.nom : ''; })).join(' × ') : F.titulo(o.id, c.cam, c.k);
+        let h = '<div class="fila entre"><h2>Continuación</h2><button class="ico" data-a="cerrarModal" aria-label="Cerrar">' + U.icono('cerrar') + '</button></div>' +
+            '<p class="tenue">De «' + esc(o.tit) + '» · ' + NOMBRE_MEDIO[medioDe(o)] + (f ? ' · franquicia «' + esc(f.nom) + '»' : '') + (socios.length ? ' · en crossover con ' + socios.map(function (g) { return '«' + esc(g.nom) + '»'; }).join(', ') : '') + '</p>' +
+            (f ? '<p class="tenue chico">Fatiga de la franquicia: ' + Math.round(f.fat * 100) + ' %</p>' : '');
+        h += '<div class="fila envolver">' + caminos.map(function (x) { return btn(x.nombre, 'tvCam', x.id, c.cam === x.id ? 'primario' : ''); }).join('') + '</div>';
+        h += '<div class="tarjeta"><b style="color:' + (COLOR_TIPO[c.cam] || '#35d0ba') + '">' + esc((caminos.filter(function (x) { return x.id === c.cam; })[0] || {}).nombre || '') + '</b><p class="tenue">' + esc(DESC_TIPO[c.cam] || '') + '</p>' + (e ? '<p class="chico">' + esc(e.texto) + '</p><p class="chico"><b>Efecto en el deseo del público: ' + (e.total >= 0 ? '+' : '') + Math.round(N.limitar(e.total * 0.5, -15, 12)) + '</b></p>' : '') + '</div>';
+        h += '<label class="campo"><span>Formato de la nueva obra (puede ser un derivado en otro medio)</span>' + sel('tvMed', opcionesMedio(o), c.med) + '</label>';
+        if (c.cam === 'spinoff' && f && f.pers.length)
+            h += '<label class="campo"><span>Personaje al frente</span>' + sel('tvPersK', f.pers.map(function (p) { return [p.k, p.n + ' · popularidad ' + Math.round(p.pop)]; }), c.k) + '</label>';
+        if (socios.length && (c.med === 'cine' || c.med === 'tv'))
+            h += '<p class="chico">Obra conjunta con:</p><div class="fila envolver">' + socios.map(function (g) { return btn('«' + g.nom + '»', 'tvSoc', g.id, c.soc.indexOf(g.id) >= 0 ? 'primario' : ''); }).join('') + '</div>';
+        h += '<div class="fila envolver">' + btn('Dentro del canon', 'tvNc', '0', c.nc ? '' : 'primario') + btn('Fuera del canon', 'tvNc', '1', c.nc ? 'primario' : '') + '</div>';
+        h += '<label class="campo"><span>Título</span><input id="tvTit" maxlength="60" value="' + esc(tit) + '"></label>';
+        return h + '<button class="btn primario bloque" data-a="tvLlamar">Continuar al asistente</button>';
     }
     function abrirBorrador(r) {
         let h = '<h2>Llamada al elenco</h2>' + (r.elenco.length ? '<ul>' + r.elenco.map(function (x) { return '<li>' + esc(x.pers) + ': ' + esc(x.actor) + ' ' + (x.ok ? '<b class="bien">acepta</b>' : '<b class="mal">rechaza: el papel queda para un nuevo casting</b>') + '</li>'; }).join('') + '</ul>' : '<p>Este camino trae un elenco nuevo.</p>');
@@ -29979,16 +30310,73 @@ ART.teleUI = (function () {
     }
     ac('tvAbrirCrear', function () { U.cerrarModal(); if (st.borr)
         ART.creacion.abrirCon(st.borr); st.borr = null; });
-    ac('tvVerFr', function (v) { st.fr = +v; U.modal(fichaFranquicia(v)); });
-    ac('tvContinuar', function (v) { const e = F.puedeContinuar(O.porId(+v)); if (e)
-        return avisar(e); st.cont = null; U.modal(modalContinuar(v)); });
-    ac('tvCam', function (v) { st.cont.cam = v; U.modal(modalContinuar(st.cont.o)); });
-    ac('tvMed', function (v) { st.cont.med = v; });
-    ac('tvPersK', function (v) { st.cont.k = +v; });
+    function reabrirFr(id) {
+        const m = document.getElementById('modal'), cj = m && m.querySelector('.caja'), cn = document.getElementById('frCanon');
+        const y1 = m ? m.scrollTop : 0, y2 = cj ? cj.scrollTop : 0, x = cn ? cn.scrollLeft : 0;
+        U.modal(fichaFranquicia(id));
+        const m2 = document.getElementById('modal'), cj2 = m2 && m2.querySelector('.caja'), cn2 = document.getElementById('frCanon');
+        if (m2)
+            m2.scrollTop = y1;
+        if (cj2)
+            cj2.scrollTop = y2;
+        if (cn2)
+            cn2.scrollLeft = x;
+    }
+    ac('tvVerFr', function (v) { if (st.fr !== +v)
+        st.frSel = null; st.fr = +v; st.frVenta = 0; U.modal(fichaFranquicia(v)); });
+    ac('tvSel', function (v) { const p = v.split('|'); st.frSel = +p[1]; reabrirFr(p[0]); });
+    ac('tvRenFr', function (v) { const f = F.porId(+v), el = document.getElementById('tvFrNom'), n = el ? String(el.value).trim().slice(0, 40) : ''; if (f && n && f.est === 0) {
+        f.nom = n;
+        U.aviso('Franquicia renombrada');
+    } reabrirFr(v); });
+    ac('tvFrVenta', function (v) { st.frVenta = st.frVenta ? 0 : 1; reabrirFr(v); });
+    ac('tvLicModo', function (v) { st.licCanon = +v; reabrirFr(st.fr); });
+    ac('tvLicChip', function (v) { const p = v.split('|'); avisar(F.licenciar(+p[0], +p[1], p[2], st.licCanon !== 0), 'Licencia firmada'); reabrirFr(p[0]); });
+    ac('tvPersObra', function (v) {
+        const p = v.split('|'), f = F.porId(+p[0]), k = +p[1], pers = f && f.pers.filter(function (x) { return x.k === k; })[0];
+        if (!pers)
+            return;
+        const es = F.obras(f).filter(function (o) { return o.pub !== undefined && o.et !== 'lista'; });
+        const base = es.filter(function (o) { return (o.pj || []).some(function (q) { return q.n === pers.n; }); }).pop() || es.pop();
+        if (!base)
+            return avisar('La franquicia necesita una obra estrenada.');
+        st.cont = { o: base.id, cam: 'spinoff', med: medioDe(base), k: k, nc: st.licCanon === 0, soc: [], tit: null };
+        U.modal(modalContinuar(base.id));
+    });
+    ac('tvContinuar', function (v) { const e = F.puedeContinuar(F.obraDe(+v)); if (e)
+        return avisar(e); if (!st.cont || st.cont.o !== +v)
+        st.cont = null; U.modal(modalContinuar(v)); });
+    ac('tvCam', function (v) { st.cont.cam = v; st.cont.tit = null; U.modal(modalContinuar(st.cont.o)); });
+    ac('tvMed', function (v) { st.cont.med = v; st.cont.tit = null; U.modal(modalContinuar(st.cont.o)); });
+    ac('tvPersK', function (v) { st.cont.k = +v; st.cont.tit = null; U.modal(modalContinuar(st.cont.o)); });
+    ac('tvSoc', function (v) { const c = st.cont, i = c.soc.indexOf(+v); if (i >= 0)
+        c.soc.splice(i, 1);
+    else
+        c.soc.push(+v); c.tit = null; U.modal(modalContinuar(c.o)); });
+    ac('tvNc', function (v) { st.cont.nc = v === '1'; U.modal(modalContinuar(st.cont.o)); });
     ac('tvLlamar', function () {
-        const c = st.cont, r = ART.creacion.conAzarUI(function () { return F.continuar(c.o, c.cam, c.med, c.cam === 'spinoff' ? c.k : undefined); });
+        const c = st.cont, o = F.obraDe(c.o), el = document.getElementById('tvTit'), tit = el ? String(el.value).trim() : '';
+        const cam = c.cam === 'temporada' && c.med !== 'tv' ? 'secuela' : c.cam;
+        if (['musica', 'juegos', 'teatro', 'libros'].indexOf(c.med) >= 0) {
+            const r = F.continuarMedio(c.o, cam === 'temporada' ? 'secuela' : cam, c.med, cam === 'spinoff' ? c.k : undefined, { nc: c.nc, titulo: tit });
+            if (r.error)
+                return avisar(r.error);
+            U.cerrarModal();
+            st.cont = null;
+            ART.mediosUI.nuevo(c.med, { tit: r.tit, franq: { datos: r.datos, gen: r.gen, pj: r.pj } });
+            return;
+        }
+        const conSoc = c.soc.length > 0, f = F.de(o);
+        const r = ART.creacion.conAzarUI(function () { return conSoc ? F.continuarCruce(f.id, c.soc.join(','), o.id, cam) : F.continuar(c.o, cam, c.med, cam === 'spinoff' ? c.k : undefined, { nc: c.nc, titulo: tit }); });
         if (r.error)
             return avisar(r.error);
+        if (conSoc) {
+            if (c.nc)
+                r.b.cnt = -1;
+            if (tit)
+                r.b.tit = tit.slice(0, 60);
+        }
+        st.cont = null;
         abrirBorrador(r);
     });
     ac('tvRegistrar', function (v) {
@@ -30000,8 +30388,13 @@ ART.teleUI = (function () {
         U.cerrarModal();
         U.refrescar();
     } });
-    ac('tvCont', function (v, el) { const p = String(el.getAttribute('data-v')).split('|'), fr = p.length > 1 ? +p[0] : st.fr, id = +p[p.length - 1]; avisar(F.moverContinuidad(id, v, fr), 'Canon actualizado'); U.modal(fichaFranquicia(st.fr)); });
-    ac('tvCanon', function (v) { const p = v.split('|'); avisar(F.moverEnCanon(+p[0], +p[1], +p[2]), 'Canon actualizado'); U.modal(fichaFranquicia(p[0])); });
+    ac('tvCont', function (v, el) { const p = String(el.getAttribute('data-v')).split('|'), fr = p.length > 1 ? +p[0] : st.fr, id = +p[p.length - 1]; avisar(F.moverContinuidad(id, v, fr), 'Canon actualizado'); reabrirFr(st.fr); });
+    ac('tvSumO', function (v) { st.sumO = +v; });
+    ac('tvSumC', function (v) { st.sumC = v; });
+    ac('tvSumB', function (v) { st.sumB = +v; });
+    ac('tvSumar', function (v) { const f = F.porId(+v), sum = F.sumables(f), lin = F.biografia(f).linea; const o = st.sumO && sum.some(function (x) { return x.id === st.sumO; }) ? st.sumO : sum.length ? sum[0].id : 0;
+        avisar(F.sumar(+v, o, st.sumC || 'secuela', st.sumB && lin.some(function (x) { return x.id === st.sumB; }) ? st.sumB : lin[lin.length - 1].id), 'Obra sumada a la franquicia'); st.sumO = st.sumB = null; reabrirFr(v); });
+    ac('tvCanon', function (v) { const p = v.split('|'); avisar(F.moverEnCanon(+p[0], +p[1], +p[2]), 'Canon actualizado'); reabrirFr(p[0]); });
     ac('tvRamaNom', function (v, el) { const p = el.getAttribute('data-v').split('|'); F.renombrarContinuidad(+p[0], +p[1], String(v || '').trim()); });
     ac('tvLicPers', function (v) { st.licP = +v; });
     ac('tvLicProd', function (v) { st.licProd = v; });
@@ -30009,19 +30402,19 @@ ART.teleUI = (function () {
         const p = v.split('|'), f = F.porId(+p[0]), pr = F.productos(N.anio());
         const e = F.licenciar(+p[0], st.licP !== undefined ? st.licP : f.pers[0].k, st.licProd || pr[0].id, p[1] === '1');
         avisar(e, 'Licencia firmada');
-        U.modal(fichaFranquicia(p[0]));
+        reabrirFr(p[0]);
     });
     ac('tvMente', function (v, el) { avisar(F.asignarMente(+el.getAttribute('data-v'), v === '' ? null : v), 'Mente maestra asignada'); });
     ac('tvXo', function (v) { st.xo = +v; });
     ac('tvUnir', function (v) { const f = F.porId(+v), libres = F.lista().filter(function (x) { return x.est === 0 && x !== f && f.xo.indexOf(x.id) < 0; }); if (!libres.length)
-        return; const id = libres.some(function (x) { return x.id === st.xo; }) ? st.xo : libres[0].id; avisar(F.crossover(+v, id), 'Crossover hecho'); U.modal(fichaFranquicia(v)); });
-    ac('tvSeparar', function (v) { const p = v.split('|'); F.separar(+p[0], +p[1]); U.modal(fichaFranquicia(p[0])); });
+        return; const id = libres.some(function (x) { return x.id === st.xo; }) ? st.xo : libres[0].id; avisar(F.crossover(+v, id), 'Crossover hecho'); reabrirFr(v); });
+    ac('tvSeparar', function (v) { const p = v.split('|'); F.separar(+p[0], +p[1]); reabrirFr(p[0]); });
     ac('tvCruce', function (v) { const p = v.split('|'), r = ART.creacion.conAzarUI(function () { return F.continuarCruce(+p[0], p[1]); }); if (r.error)
         return avisar(r.error); abrirBorrador(r); });
     ac('tvVendA', function (v) { st.vendA = +v; if (st.fr)
-        U.modal(fichaFranquicia(st.fr)); });
+        reabrirFr(st.fr); });
     ac('tvVendPct', function (v) { st.vendPct = N.limitar(Math.round(+v || 100), 50, 200); if (st.fr)
-        U.modal(fichaFranquicia(st.fr)); });
+        reabrirFr(st.fr); });
     ac('tvProponer', function (v) {
         const cs = N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; });
         const r = F.proponerVenta(+v, st.vendA || (cs[0] && cs[0].id), st.vendPct || 100);
@@ -30033,10 +30426,10 @@ ART.teleUI = (function () {
             U.refrescar();
         }
         else
-            U.modal(fichaFranquicia(v));
+            reabrirFr(v);
     });
     ac('tvSubastar', function (v) { const e = F.subastar(+v, st.vendPct || 100); avisar(e, 'Subasta abierta'); if (!e)
-        U.modal(fichaFranquicia(v)); });
+        reabrirFr(v); });
     ac('tvVender', function (v) { const cs = N.S.estudios.filter(function (e) { return e.id > 0 && !e.quebrado; }); avisar(F.vender(+v, st.vendA || cs[0].id), 'Franquicia vendida'); U.cerrarModal(); U.refrescar(); });
     ac('tvVenderOf', function (v) { avisar(F.aceptarOferta(+v), 'Franquicia vendida'); U.refrescar(); });
     ac('tvRechazarOf', function (v) { F.rechazarOferta(+v); U.refrescar(); });

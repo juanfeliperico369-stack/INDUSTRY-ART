@@ -217,5 +217,41 @@ Pendiente, y depende de ti:
 ### Franquicias (revisión pedida)
 - **Crossovers:** cada franquicia admite hasta 3. Hay «Obra juntas» con cada una y un «Gran crossover» que junta las 4. La obra en conjunto aparece en el canon de cada franquicia, y «Separar franquicias» la deja en ambas.
 - **Línea por fecha de estreno:** muestra el orden real en que salieron las obras, en horizontal. No se edita.
-- **Cronología del canon:** es editable. Las obras se ordenan con las flechas ↑ ↓. Cada spin-off, remake, historia paralela, soft reboot o reboot abre una **rama** que nace de su obra de origen y se dibuja debajo de su rama madre. Las ramas se pueden renombrar, y las obras se pueden pasar de una rama a otra o sacar del canon. La secuela va después y la precuela antes de su obra.
-- Probado: tres crossovers aceptados y el cuarto rechazado, el gran crossover de 4 franquicias, las ramas de spin-off, remake e historia paralela, el reordenamiento y la separación. El verificador dio 0 errores.
+- **Ficha de franquicia (rehecha como en la Final):** arriba va una cabecera con el póster, el origen, los crossovers, un campo para renombrar y estos indicadores: popularidad/hype, proyectos, costo, bruto, ganancias, premios, valor, nivel y fatiga.
+- **Cronología del canon:** es un espacio visual que se desplaza en horizontal. Cada obra es un póster y cada rama es una línea con su nombre al inicio. Las ramas se unen con conectores curvos: continuos para spin-off, discontinuos para paralela y remake, punteados para reboot. Si tocas un póster se abre un panel con estas opciones:
+  - mover la obra (‹ Antes / Después ›);
+  - cambiarla de línea, abrir una línea nueva o sacarla del canon;
+  - ver su ficha;
+  - continuarla.
+- **Personajes:** cada uno tiene licencias en chips («Producto · $/sem»), que pueden ser canon o no canon. También puede tener una **obra propia**, dentro o fuera del canon. Esa obra es un spin-off que abre su propia rama, y su popularidad sube cuando se estrena.
+- **Modal de continuación (como en la Final):**
+  - Muestra los caminos en chips, más «Nueva temporada» en TV.
+  - Cada camino tiene su explicación y un cálculo del hype que desglosa el hype heredado, la fatiga, la etiqueta de la obra base, el evento crossover, el personaje, el derivado y lo de fuera del canon.
+  - El formato puede ser película, serie, música, videojuego, teatro o libro. En otro medio es un derivado.
+  - Se puede elegir el personaje, las franquicias socias (obra conjunta), si va dentro o fuera del canon, y el título. Después se pasa a «Continuar al asistente».
+- **Economía:** cada camino aplica un multiplicador al hype y un ajuste a la crítica:
+
+  | Camino | Hype | Crítica |
+  |---|---|---|
+  | Secuela | ×1 | −1 |
+  | Precuela | ×0,85 | 0 |
+  | Spin-off | ×0,6 | +1 |
+  | Historia paralela | ×0,7 | +1 |
+  | Remake | ×0,8 | −2 |
+  | Soft reboot | ×0,75 | 0 |
+  | Reboot | ×0,5 | 0 |
+  | Crossover | ×1,2 | 0 |
+
+  - La etiqueta de la obra base sigue la regla del Word de los 10 años.
+  - La fatiga baja a la mitad fuera del canon y a ×0,6 en los derivados de otro medio.
+  - Las obras de música, videojuegos, teatro y libros también cuentan para la franquicia: suben su popularidad y la de sus personajes.
+- Probado:
+  - los 7 caminos en cine y TV, y los derivados en música, videojuegos, teatro y libros;
+  - la obra conjunta de un crossover;
+  - la obra propia de un personaje fuera del canon;
+  - las licencias;
+  - tres crossovers aceptados y el cuarto rechazado, y el gran crossover de 4 franquicias;
+  - el reordenamiento y la separación;
+  - partidas guardadas en v20 y v36, que se migran sin errores.
+
+  El verificador dio 0 errores.
