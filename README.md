@@ -1,19 +1,22 @@
 # INDUSTRY ART (Industria del Arte)
 
-Simulador 2D de gestión y rol de un estudio de arte, de 1850 a 2150 y más. Ideado y creado por OneZero;
+Simulador 2D de gestión y rol de un estudio de arte, de 1700 a 2300. **Edición Definitiva 6.0**. Ideado y creado por OneZero;
 programado junto a Lumen. El plan completo está en `docs/` (Plan Maestro en Word, PDF y texto).
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v36.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
-Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34 y la V35 se abren en la V36 (se migran solas).
+Abre **`INDUSTRY_ART_v41.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34, la V35, la V36 y la V40 se abren en la V41 (se migran solas).
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v36.html` | El juego, versión 2.1 (V36, armado desde `src/`) |
+| `INDUSTRY_ART_v41.html` | El juego, **Edición Definitiva 6.0** (V41) |
+| `INDUSTRY_ART_v40.html` | La versión 5.0 (V40), base de la Edición Definitiva |
+| `INDUSTRY_ART_v36.html` | La versión 2.1 (V36, armada desde `src/`) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
+| `bitacora_v41.md` | La bitácora de la Edición Definitiva 6.0 |
 | `bitacora_v36.md` | La bitácora corta de la V36 · 2.1, inicio por pasos, tu avatar en tus obras y clásicos con sus personajes (las de la V21 a la V35 también están) |
 | `app/` | Las apps: Android e iPhone (Capacitor 8: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
 | `.github/workflows/` | Recetas en la nube: el `.aab` para Google Play, la app de iPhone (TestFlight), la app de PC y la versión web |
@@ -33,6 +36,9 @@ Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22
 | `legado/` | La V15 original (sigue jugable aparte) y su código desarmado |
 
 ## Para programar la siguiente versión
+
+Desde la V40 el juego vive en un solo HTML (espacio de nombres `ART`); `src/` y `tools/armar.py` corresponden a la V36.
+El propio juego trae su bot (`ART.pruebas.jugar`) y su verificador (`ART.verificador.correr`).
 
 ```bash
 python3 tools/armar.py                       # src/ -> INDUSTRY_ART_v36.html
