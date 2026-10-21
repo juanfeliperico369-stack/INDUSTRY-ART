@@ -11,7 +11,7 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
   - Los talentos tienen una sexta capacidad: Audacia.
 - **Cumpleaños de verdad:** el juego sabe qué día es hoy. Si coincide con tu cumpleaños, en algún momento de la partida llega una felicitación sorpresa. Trae un regalo para tu estudio y el logro «El mejor jugador de INDUSTRY ART».
 - **Tipo de estudio y público objetivo con peso real:** Corporación, Independiente, Colectivo y los demás tipos cambian la crítica, el público, las campañas, la fama inicial y los costos. Lo mismo pasa con el público objetivo.
-- **Nada se elige solo:** el estudio empieza sin géneros (eliges 3, salvo en partida al azar), y una obra nueva empieza vacía. Cada pestaña avisa lo que falta. «Recomendado» completa solo lo pendiente.
+- **Nada se elige solo:** el estudio empieza sin géneros (eliges 3, salvo en partida al azar), y una obra nueva empieza vacía en todos los medios (en música, videojuegos, teatro y libros el tipo y los géneros también empiezan sin marcar). Cada pestaña avisa lo que falta. «Recomendado» completa solo lo pendiente.
 - **Orden nuevo del asistente:**
   1. Obra, géneros e historia (con tramas)
   2. Música
@@ -45,6 +45,8 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
   - Puedes diseñarlo tú: fondo, acento, motivo y letra.
   - También hay un modo automático que se arma con el título, el género y la época.
   - En los otros medios hay una portada automática.
+- **Bachata:** nuevo género musical en «Latino y caribeño», con su moda (2003-2016) y 3 hitos: «Borracho de amor» (1962), «Bachata rosa» de Juan Luis Guerra (1990) y Aventura (2002).
+- **Anti villano / Anti villana:** nuevo arquetipo de personaje, un villano con una causa justa. Cuenta como antagonista en las sinopsis. Javert y el capitán Nemo ahora son anti villanos.
 - **Nombres de muchas culturas:** hay 31 culturas en 6 continentes. El dado abre un selector de continente con Aceptar y Salir. Latinoamérica pasa a llamarse Sudamérica.
 - **Salón de la Fama con historia real:**
   - En Obras, Figuras y Personajes también salen las obras, los artistas y los personajes clásicos reales, marcados como «histórico» o «clásico».
