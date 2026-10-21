@@ -71,7 +71,9 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Contratación:** abre con todos los candidatos y muestra 50 por página, con «Ver 50 más». Ya no se queda solo en los que tienen experiencia.
 - **Personal de apoyo:** hasta 100 en producción y 100 en posproducción. El tope depende del presupuesto: con $500 está bloqueado, y se habilita cuando el presupuesto alcanza.
 
-- **Casino, apuesta a la taquilla:** estaba rota a favor del jugador (ganaba 146 de 150 veces, +111 % por apuesta). Ahora la cuota se calcula con la fuerza real de cada obra, el favorito paga casi 1 a 1 (retorno de 0 % a −4 %) y solo se puede apostar hasta el tope de apuesta en total mientras haya apuestas abiertas. La ruleta (−3 %), el tragamonedas (−4 %) y los dados (−15 %) ya tenían ventaja de casa.
+- **Casino, apuesta a la taquilla:** estaba rota a favor del jugador (ganaba 146 de 150 veces, +111 % por apuesta). Ahora hay azar de verdad: cada película tiene una probabilidad según su recaudación, el favorito no siempre gana, la cuota sale de esa probabilidad con 10 % para la casa (retorno medio cerca de −10 %) y el juego muestra la probabilidad y la ganancia posible. Solo se puede apostar hasta el tope en total mientras haya apuestas abiertas. La ruleta (−3 %), el tragamonedas (−4 %) y los dados (−15 %) ya tenían ventaja de casa.
+
+- **Informe de resultados:** el informe «Por qué funcionó o fracasó» ahora también dice si la calidad fue alta o baja y cuándo influyó la suerte.
 
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
