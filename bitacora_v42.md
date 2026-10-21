@@ -88,6 +88,28 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Obra al azar:** un toque arma una obra completa y te lleva a la última pestaña para empezarla.
 - **Contratar al mejor con un toque:** cada rubro y cada personaje tienen el botón «Mejor» (o «Al mejor»), que elige al mejor candidato disponible sin abrir la lista.
 
+## Historia con consecuencias, material detallado y fichas nuevas
+- **La historia mueve la partida:**
+  - 165 hitos del arte tienen una consecuencia: cuando llega su año, el público pide más de ese tipo de obra. La ficha del hito lo dice («⚡ En tu partida…») y las noticias lo explican.
+  - Hay 45 hitos nuevos del arte, entre ellos:
+    - «La serva padrona», «Chūshingura», «Pedro Páramo» y «Todo se desmorona».
+    - «Sholay» y «La batalla de Argel».
+    - «Doom», «Ringu», «Ciudad de Dios» y «El juego del calamar».
+  - Se suman 36 artistas reales nuevos y 59 hechos del mundo, de la máquina de vapor a la ley europea de inteligencia artificial.
+  - Hay 16 periodos nuevos que cambian el mercado, la censura o las pausas: la crisis del petróleo, la de 2008, el cierre de cines por la COVID, el franquismo, las dictaduras del Cono Sur, la censura soviética y otros. Mundo › Historia explica lo que hace cada periodo activo.
+  - La censura y las pausas de un periodo regional solo afectan a los estudios de esa región.
+- **Curiosidades:** hay 30 nuevas, con 91 en total.
+- **Material de dominio público:**
+  - Hay 325 obras, 59 de ellas nuevas, de Europa, América Latina, África, Asia y obras de culto.
+  - Todas tienen tipo, temas, personajes y sinopsis; antes, 82 no tenían personajes ni sinopsis.
+  - Los datos los generó un agente y otro los verificó (fechas, personajes y si la obra ya es de dominio público).
+- **Fichas rediseñadas:**
+  - **Obra:** indicadores (taquilla, parte del estudio, costo, resultado y multiplicador), barras de crítica, público y expectativa, en qué se gastó, de dónde vino el dinero por ventana, la mejor semana y el acumulado.
+  - **Hito y artista real:** encabezado con el año y una línea de vida del artista con sus hitos.
+  - **Clásico y talento:** sus fichas también se rediseñaron con el mismo estilo.
+- **Tarjetas para compartir:** dato histórico, resultado de una obra, resumen del año y logros. En el celular se comparten; en la web y en PC se descargan.
+- **Comunidad y enlaces:** en Ajustes y en la pausa. Los enlaces están listos para completarse (ver `docs/enlaces.md`, con las plataformas de donación recomendadas).
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
