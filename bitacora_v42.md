@@ -124,6 +124,7 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Presupuestos del documento.** Los topes son 100 millones para música y teatro, 10 millones para libros y 10.000 millones para videojuegos, llevados a la época. En 2001 un álbum puede costar más de 50 millones, como Invincible. Cada nivel dice qué ofrece (por ejemplo, la superproducción trae orquesta sinfónica y coros), y hay un nivel nuevo, «Récord histórico».
 - **Clasificación por edad del documento** en todas las obras (G, PG, PG-13, 16, NC-17, 18, R, X y N), orientativa antes de 1968 (y en videojuegos antes de 1994).
 - **88 idiomas.**
+- **Color de la camisa** del avatar y de los talentos creados, en 12 colores o según la época.
 - **Perfil de bandas y solistas:** integrantes con su ficha, fans, relación, práctica, contrato, discografía y giras. Sus integrantes trabajan también en otras obras.
 - **Obras › Proyectos:** todas las obras de cualquier tipo por etapa (Ideado, Producción, Postproducción, Marketing, Lanzamiento y Terminadas). Películas tiene ahora su propia pestaña con sus datos: estrenadas, en marcha, premios y la más taquillera.
 
