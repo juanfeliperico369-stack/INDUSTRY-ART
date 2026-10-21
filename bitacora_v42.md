@@ -112,6 +112,26 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 
 - **Paquetes de realidad (mods de datos):** se cargan desde la partida nueva o desde Estudio › Editor. Traen compañías reales con su historia, hitos, franquicias, catálogo y valor, además de talentos, material e hitos con consecuencias. También se puede exportar la realidad de tu partida para compartirla y descargar una plantilla. Son solo datos y el juego valida todo. El formato está en `docs/paquetes.md`.
 
+## Asistente de música, videojuegos, teatro y libros
+- **Los mismos tópicos que el cine, en todas las obras.** Subgéneros (hasta 6), temas y tópicos (hasta 9), problemáticas o argumentos (hasta 3) y tipo de ficción, cada uno con su buscador. En los subgéneros salen primero los del propio medio, y los de otros medios quedan plegados.
+- **Verosimilitud por medio.** En música solo salen los temas que caben en canciones. Los de fantasía, futuro, ciencia o motor aparecen cuando el género los pide, como el metal o la electrónica. Las letras tienen su propio «argumento».
+- **Álbum conceptual.** La música suma el arco, la premisa, la moraleja, la época, el lugar y el idioma de las canciones, todos opcionales.
+- **Modo rápido y modo detallado en todas las obras.** Es el mismo interruptor del cine y se recuerda para todo. El modo rápido junta en una página la obra, la historia, el público, la producción, el equipo, el lanzamiento y el resumen.
+- **El lanzamiento y el marketing van al final.** La última pestaña, «Lanzamiento», reúne la promoción, el video y la exclusiva de la música, el modelo y las ediciones de los videojuegos, el precio de la entrada del teatro, y la tirada, los formatos y la gira de firmas de los libros.
+- **La música la firma el equipo.** Ya no hace falta una banda con contrato: un álbum o un sencillo lo firma el intérprete (solista) o el compositor del equipo, y tu avatar puede tener su propio álbum. La fama de quien firma vende el disco, y en las listas aparece su nombre.
+
+## Derechos de autor, anuncios y enlaces
+- **Las obras reales con derechos son referencia histórica.** Las «Franquicias famosas del mundo» y las obras de los hitos ya no se compran fuera del Editor: se ven con su año, junto a los hitos. Solo el Editor (Estudio › Editor › Obras históricas) las hace realidad en tu partida como material. El material de dominio público que todavía tiene derechos se adapta cuando se libera, o antes con el Editor Sandbox.
+- **Anuncios:** la versión web y las gratuitas (free to play) muestran anuncios. Las versiones de pago, la «Versión completa» y la descarga directa para PC no los muestran. La web trae un espacio de Google AdSense que se activa con `ART.ANUNCIOS_WEB`, y la política de privacidad lo explica.
+- **30 espacios de enlace más** (61 en total):
+  - **Comunidad:** wiki, Telegram y WhatsApp.
+  - **Redes:** X, Threads, Bluesky, Mastodon, Twitch y Kick.
+  - **Noticias y prensa:** un grupo nuevo.
+  - **Banda sonora:** Spotify, Apple Music, YouTube Music, SoundCloud y Bandcamp.
+  - **Juega en:** tiendas y portales web.
+  - **Donaciones:** GitHub Sponsors y Liberapay.
+  - **Listas:** AniList, IMDb e IGDB.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
