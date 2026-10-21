@@ -82,6 +82,12 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Monopolio:** las filiales no contaban en tu cuota de mercado, así que se podía comprar a todos los rivales sin que los reguladores intervinieran. Ahora la cuota incluye a las filiales y no se puede comprar un estudio si el grupo pasaría del 45 % del tamaño del sector.
 - **Probado y sin cambios:** las ganancias escalan con la época y la población; los 24 negocios se pagan en 3 a 5 años; el canal de TV se paga en 5 a 8 años; el streaming sin gestión no da ganancia; el editor valida números y no deja pasar código en los nombres; las secuelas y la cronología de las franquicias funcionan.
 
+## Ideas tomadas de la otra versión
+- **Tema «Gris digital»:** grises neutros, un solo color de acento y menos adornos. Es el tema de las instalaciones nuevas; los demás siguen en Ajustes.
+- **Guía de la partida por etapas:** Producción, Lista, Lanzamiento, En cartelera y Catálogo, con una línea de «qué sigue» según tu situación.
+- **Obra al azar:** un toque arma una obra completa y te lleva a la última pestaña para empezarla.
+- **Contratar al mejor con un toque:** cada rubro y cada personaje tienen el botón «Mejor» (o «Al mejor»), que elige al mejor candidato disponible sin abrir la lista.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
