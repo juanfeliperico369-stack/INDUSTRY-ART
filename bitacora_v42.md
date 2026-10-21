@@ -140,6 +140,17 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
   - **Donaciones:** GitHub Sponsors y Liberapay.
   - **Listas:** AniList, IMDb e IGDB.
 
+## Monopolio total
+- **Todo lo comprable se puede comprar:** todos los estudios rivales, todas las cadenas de cines del mundo, teatros sin tope y hasta 40 terrenos (antes eran 16).
+- **La ley antimonopolio sigue, pero ahora es una multa en el contrato.** Comprar un estudio cuando tu grupo pasa el 35 % del mercado cuesta una multa: desde el 15 % del precio, hasta el 60 %. También pagan multa:
+  - la tercera cadena de cines comprada en adelante;
+  - la cuarta cadena de cines propia en adelante;
+  - el séptimo teatro en adelante.
+
+  La investigación anual con multa sigue, pero quita menos fama.
+- **El fallo de 1948** ya no obliga a vender los cines: cobra una multa y los conservas.
+- **Nueva gran meta y logro: «El monopolio total».** Se cumple con todos los estudios rivales como filiales y todas las cadenas de cines del mundo. Tiene su reto con medallas (plazo de 80 años, desde 1910).
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
