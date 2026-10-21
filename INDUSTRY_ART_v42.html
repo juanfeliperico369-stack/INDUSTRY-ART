@@ -1753,8 +1753,9 @@ ART.taxonomia = (function () {
             { id: 'Blanco y negro', desde: 1895 }, { id: 'Tecnicolor', desde: 1935 }, { id: 'Híbrido', desde: 1939 },
             { id: 'General', desde: 1952 }, { id: 'Digital', desde: 1999 },
         ],
-        visual: [{ id: '35 mm', desde: 1895 }, { id: '16 mm', desde: 1923 }, { id: '3D', desde: 1953 }, { id: '70 mm', desde: 1955 }, { id: 'IMAX', desde: 1970 }, { id: 'Digital', desde: 2002 }, { id: 'Screen X', desde: 2013 }],
-        sonido: [{ id: 'Mudo', desde: 1895 }, { id: 'Sonoro', desde: 1927 }],
+        visual: [{ id: '35 mm', desde: 1895 }, { id: '16 mm', desde: 1923 }, { id: '3D', desde: 1953 }, { id: '70 mm', desde: 1955 }, { id: 'IMAX', desde: 1970 }, { id: 'Híbrido', desde: 1999, nombre: 'Híbrido (película y digital)' },
+            { id: 'Digital', desde: 2002, nombre: 'Digital normal' }, { id: 'Digital profesional', desde: 2002 }, { id: 'Screen X', desde: 2013 }],
+        sonido: [{ id: 'Mudo', desde: 1895 }, { id: 'Sonoro', desde: 1927, nombre: 'Sonoro normal' }, { id: 'Sonoro profesional', desde: 1940 }],
     };
     function formatoEstandar(anio) {
         return {
@@ -1814,12 +1815,25 @@ ART.taxonomia = (function () {
         }
         if (v === 'Digital')
             r.costo *= 0.92;
+        if (v === 'Híbrido') {
+            r.costo *= 1.06;
+            r.crit += 1;
+        }
+        if (v === 'Digital profesional') {
+            r.costo *= 1.1;
+            r.crit += 1;
+            r.pub += famId === 'AA' || famId === 'IM' ? 2 : 1;
+        }
         if (s === 'Mudo' && anio >= 1930) {
             r.crit += 1;
             r.pub -= 6;
         }
-        if (s === 'Sonoro' && anio < 1933)
-            r.costo *= 1.12;
+        if (s === 'Sonoro profesional') {
+            r.costo *= anio < 1975 ? 1.12 : 1.06;
+            r.pub += 1;
+            if (famId === 'SM' || famId === 'IM')
+                r.crit += 1;
+        }
         return r;
     }
     const ORDEN_CLAS = ['G', 'PG', 'PG-13', '16', 'NC-17', '18', 'R', 'X'];
@@ -6427,11 +6441,19 @@ ART.ideas = (function () {
         f *= X.estilo(o.estilo).costo || 1;
         f *= ART.imperio.ahorroRodaje(o);
         f *= N.limitar(Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.55), 0.35, 2.2);
-        if (o.rod) {
-            const p = D.pais(o.rod), casa = N.S && N.S.estudios[o.est] ? D.pais(N.S.estudios[o.est].pais) : null;
-            if (p && casa)
-                f *= N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8);
+        const R = ART.rodaje, extra = R.paisesExtra ? R.paisesExtra(o) : [];
+        if (o.rod || extra.length) {
+            const c0 = R.costoPais(o, o.rod, anio, false);
+            if (extra.length) {
+                const cx = extra.reduce(function (s, id) { return s + R.costoPais(o, id, anio, true); }, 0) / extra.length;
+                f *= (0.55 * c0 + 0.45 * cx) * (1 + 0.04 * extra.length);
+            }
+            else
+                f *= c0;
         }
+        const idiX = idiomasExtra(o);
+        if (idiX.length)
+            f *= 1 + 0.03 * idiX.length;
         if (o.ia)
             f *= 1 - 0.4 * o.ia / 100;
         f *= ART.rodaje.factorCosto(o, anio);
@@ -7063,11 +7085,13 @@ ART.ideas = (function () {
                 r[i] *= 1 + (media(focos.map(function (f) { return f.edades[i]; })) - 1) * 0.6;
         return r;
     }
+    function idiomasExtra(o) { return (o.idiX || []).filter(function (x, i, a) { return x && x !== o.idio && a.indexOf(x) === i && X.idioma(x); }).slice(0, 3); }
+    function idiomaLocal(id, reg) { const idi = X.idioma(id); return !!(idi && (idi.universal || idi.regiones.indexOf(reg) >= 0 || idi.paises.some(function (p) { const x = D.pais(p); return x && x.region === reg; }))); }
     function regionExtra(o, reg, anio) {
         let f = 1;
         const idi = X.idioma(o.idio);
         if (idi && !idi.universal && !(v(o, 'fmt', null) && o.fmt.sonido === 'Mudo')) {
-            const local = idi.regiones.indexOf(reg) >= 0 || idi.paises.some(function (p) { const x = D.pais(p); return x && x.region === reg; });
+            const local = idiomaLocal(o.idio, reg) || idiomasExtra(o).some(function (x) { return idiomaLocal(x, reg); });
             if (local)
                 f *= 1.06;
             else if (!(idi.global && anio >= idi.global))
@@ -7203,7 +7227,7 @@ ART.ideas = (function () {
         X.modaSub(o.sub, o.anioPlan || N.anio()).notas.forEach(function (n) { r.push(n[1] + '.'); });
         return r;
     }
-    return { PAQUETES_MUSICA: PAQUETES_MUSICA, paqueteMusica: paqueteMusica, MORALEJAS: MORALEJAS, moraleja: moraleja, bonoMoraleja: bonoMoraleja, GIROS: GIROS, giro: giro, bonoGiro: bonoGiro, NEEDLE_DROPS: NEEDLE_DROPS, needleDrop: needleDrop, needleDisponible: needleDisponible, contextoNeedle: contextoNeedle, bonoNeedle: bonoNeedle,
+    return { idiomasExtra: idiomasExtra, idiomaLocal: idiomaLocal, PAQUETES_MUSICA: PAQUETES_MUSICA, paqueteMusica: paqueteMusica, MORALEJAS: MORALEJAS, moraleja: moraleja, bonoMoraleja: bonoMoraleja, GIROS: GIROS, giro: giro, bonoGiro: bonoGiro, NEEDLE_DROPS: NEEDLE_DROPS, needleDrop: needleDrop, needleDisponible: needleDisponible, contextoNeedle: contextoNeedle, bonoNeedle: bonoNeedle,
         LIMITES: LIMITES, ANIO_IA: ANIO_IA, duracionTipica: duracionTipica, familia: familia, completar: completar,
         nivelMaximoEpoca: nivelMaximoEpoca, normalizar: normalizar, indiceClasificacion: indiceClasificacion, clasificar: clasificar,
         describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, nivelEfectos: nivelEfectos, validar: validar,
@@ -8059,6 +8083,54 @@ ART.rodaje = (function () {
     function metodo(id) { return porId(METODOS, id) || METODOS[0]; }
     function terreno(id) { return porId(TERRENOS, id) || TERRENOS[0]; }
     function estilo(id) { return porId(ESTILOS, id) || ESTILOS[0]; }
+    const NEUTROS = ['clasico', 'estandar'];
+    const INCOMPATIBLES = [['espectaculo', 'independiente'], ['espectaculo', 'neorrealista'], ['espectaculo', 'found'], ['espectaculo', 'contemplativo'], ['mas16', 'adultos'], ['mas16', 'estandar'], ['adultos', 'estandar'],
+        ['caricatura', 'adultos'], ['caricatura', 'neorrealista'], ['videoclip', 'plano'], ['videoclip', 'contemplativo'], ['teatral', 'mano'], ['found', 'glamour'], ['stopmotion', 'found']];
+    function estilosDe(o) { const l = [o.pst || 'clasico']; (o.psE || []).forEach(function (x) { if (x && l.indexOf(x) < 0 && l.length < 3)
+        l.push(x); }); return l; }
+    function choca(a, b) { return INCOMPATIBLES.some(function (x) { return (x[0] === a && x[1] === b) || (x[0] === b && x[1] === a); }); }
+    function estiloCombinado(o) {
+        const l = estilosDe(o).map(estilo);
+        if (l.length === 1)
+            return l[0];
+        const r = { id: l.map(function (e) { return e.id; }).join('+'), nombre: l.map(function (e) { return e.nombre; }).join(' + '), desde: 0, costo: 1, crit: 0, pub: 0, ama: [], rechaza: [], dep: {}, min: 0, familias: null,
+            texto: l.map(function (e) { return e.nombre + ': ' + e.texto; }).join(' ') };
+        const voto = [0, 0, 0, 0, 0];
+        l.forEach(function (e, i) {
+            r.costo *= e.costo;
+            r.crit += i ? e.crit * 0.5 : e.crit;
+            r.pub += i ? e.pub * 0.5 : e.pub;
+            r.desde = Math.max(r.desde, e.desde);
+            r.min = Math.max(r.min, e.min || 0);
+            e.ama.forEach(function (k) { voto[k]++; });
+            e.rechaza.forEach(function (k) { voto[k]--; });
+            Object.keys(e.dep || {}).forEach(function (k) { r.dep[k] = N.limitar((r.dep[k] || 0) + e.dep[k], -3, 3); });
+            if (e.familias)
+                r.familias = (r.familias || []).concat(e.familias);
+        });
+        r.costo = Math.max(0.45, r.costo * Math.pow(1.04, l.length - 1));
+        r.crit = Math.round(r.crit);
+        r.pub = Math.round(r.pub);
+        voto.forEach(function (v, k) { if (v > 0)
+            r.ama.push(k);
+        else if (v < 0)
+            r.rechaza.push(k); });
+        if (!r.min)
+            delete r.min;
+        return r;
+    }
+    function terrenosDe(o) { const l = o.ter ? [o.ter] : []; (o.terX || []).forEach(function (x) { if (x && l.indexOf(x) < 0 && l.length < 3)
+        l.push(x); }); return l; }
+    function paisesExtra(o) { return (o.rodX || []).filter(function (x, i, a) { return x && x !== o.rod && a.indexOf(x) === i; }).slice(0, 3); }
+    function costoPais(o, id, a, conIncentivo) {
+        const est = N.S && N.S.estudios[o.est || 0], casa = est ? D.pais(est.pais) : null, p = id ? D.pais(id) : casa;
+        if (!p || !casa)
+            return 1;
+        let c = p.id === casa.id ? 1 : N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8);
+        if (conIncentivo)
+            c *= 1 - incentivo({ rod: p.id }, a);
+        return c;
+    }
     function externo(r, id) { return EXTERNOS[r] ? porId(EXTERNOS[r], id) : null; }
     function letra(v) { for (let i = 0; i < LETRAS.length; i++)
         if (v >= LETRAS[i][0])
@@ -8176,7 +8248,7 @@ ART.rodaje = (function () {
         const m = metodo(o.met);
         if (m.dep && m.dep[dep])
             b += m.dep[dep];
-        const es = estilo(o.pst);
+        const es = estiloCombinado(o);
         if (es.dep && es.dep[dep])
             b += es.dep[dep];
         if (dep === 'direccion' && es.min) {
@@ -8203,7 +8275,8 @@ ART.rodaje = (function () {
         const est = N.S && N.S.estudios[o.est || 0];
         if (!est || !est.terrenos || !o.ter)
             return false;
-        return est.terrenos.some(function (id) { const t = D.terrenos.filter(function (x) { return x.id === id; })[0]; return t && t.terreno === o.ter; });
+        const ts = terrenosDe(o);
+        return est.terrenos.some(function (id) { const t = D.terrenos.filter(function (x) { return x.id === id; })[0]; return t && ts.indexOf(t.terreno) >= 0; });
     }
     function costoCGI(a) { return a < 1993 ? 1.25 : a < 2006 ? 1.12 : a < 2020 ? 1 : 0.95; }
     function incentivo(o, a) {
@@ -8211,24 +8284,24 @@ ART.rodaje = (function () {
         return i && a >= i[0] ? i[1] : 0;
     }
     function viaje(o) {
-        if (!o.rod)
+        const est = N.S && N.S.estudios[o.est || 0], casa = est ? D.pais(est.pais) : null;
+        if (!casa)
             return false;
-        const est = N.S && N.S.estudios[o.est || 0];
-        const p = D.pais(o.rod), casa = est ? D.pais(est.pais) : null;
-        return !!(p && casa && p.region !== casa.region);
+        return [o.rod].concat(paisesExtra(o)).some(function (id) { const p = id && D.pais(id); return !!(p && p.region !== casa.region); });
     }
     function factorCosto(o, a) {
         let f = 1;
         const m = metodo(o.met);
         f *= o.met === 'cgi' ? m.costo * costoCGI(a) : m.costo;
         if (usaLocacion(o) && o.ter) {
-            const tr = terreno(o.ter);
-            let x = o.met === 'locacion' ? tr.costo : 1 + (tr.costo - 1) / 2;
+            const ts = terrenosDe(o);
+            let x = ts.reduce(function (s, id) { const tr = terreno(id); return s + (o.met === 'locacion' ? tr.costo : 1 + (tr.costo - 1) / 2); }, 0) / ts.length;
+            x *= 1 + 0.04 * (ts.length - 1);
             if (terrenoPropio(o))
                 x *= o.met === 'locacion' ? 0.9 : 0.95;
             f *= x;
         }
-        f *= estilo(o.pst).costo;
+        f *= estiloCombinado(o).costo;
         if (usaSet(o) && o.met)
             f *= setDe(o) ? 0.93 : 1;
         if (viaje(o))
@@ -8248,23 +8321,26 @@ ART.rodaje = (function () {
         }
         if (viaje(o))
             r.pre += 1;
-        if (o.pst === 'plano')
+        r.pre += paisesExtra(o).length;
+        if (usaLocacion(o))
+            r.rodaje += Math.max(0, terrenosDe(o).length - 1);
+        if (estilosDe(o).indexOf('plano') >= 0)
             r.rodaje += 1;
         if (o.met === 'practicos')
             r.rodaje += 1;
         if (o.met === 'locacion' && terrenoPropio(o))
             r.rodaje -= 1;
-        if (o.met === 'locacion' && (o.ter === 'artico' || o.ter === 'mar'))
+        if (o.met === 'locacion' && terrenosDe(o).some(function (x) { return x === 'artico' || x === 'mar'; }))
             r.rodaje += 1;
         if (o.met === 'cgi')
             r.pos += 1;
-        if (o.pst === 'virtual')
+        if (estilosDe(o).indexOf('virtual') >= 0)
             r.pos -= 1;
         return r;
     }
     function ajusteNotas(o, a) {
         let crit = 0, pub = 0;
-        const es = estilo(o.pst);
+        const es = estiloCombinado(o);
         crit += es.crit;
         pub += es.pub;
         if (es.familias)
@@ -8278,15 +8354,21 @@ ART.rodaje = (function () {
             pub -= 2;
         if (o.met === 'cgi' && a >= 2015 && ART.ideas.nivelEfectos(o) >= 3)
             crit -= 1;
-        if (usaLocacion(o) && o.ter && terreno(o.ter).generos.some(function (g) { return o.gen.indexOf(g) >= 0; }))
+        if (usaLocacion(o) && o.ter && terrenosDe(o).some(function (id) { return terreno(id).generos.some(function (g) { return o.gen.indexOf(g) >= 0; }); }))
             pub += 1;
+        const viajera = f === 'AA' || f === 'IM' || ['Aventura', 'Bélico', 'Épico'].some(function (g) { return o.gen.indexOf(g) >= 0; });
+        if (usaLocacion(o) && terrenosDe(o).length >= 2 && viajera)
+            pub += 1;
+        const nx = paisesExtra(o).length;
+        if (nx && viajera)
+            pub += nx >= 3 ? 2 : 1;
         const s = setDe(o);
         if (s && s.usos >= 3)
             pub -= 1;
         return { crit: crit, pub: pub };
     }
     function edades(o) {
-        const es = estilo(o.pst);
+        const es = estiloCombinado(o);
         if (!es.ama.length && !es.rechaza.length)
             return null;
         const r = [1, 1, 1, 1, 1];
@@ -8376,8 +8458,10 @@ ART.rodaje = (function () {
     }
     function riesgo(o) {
         let r = metodo(o.met).riesgo;
-        if (usaLocacion(o) && o.ter)
-            r *= o.met === 'locacion' ? terreno(o.ter).riesgo : 1 + (terreno(o.ter).riesgo - 1) / 2;
+        if (usaLocacion(o) && o.ter) {
+            const tr = terrenosDe(o).reduce(function (m, id) { return Math.max(m, terreno(id).riesgo); }, 0);
+            r *= o.met === 'locacion' ? tr : 1 + (tr - 1) / 2;
+        }
         if (terrenoPropio(o))
             r *= 0.7;
         const p = ART.talentos.porId(o.eq.produccion);
@@ -8602,8 +8686,9 @@ ART.rodaje = (function () {
     function validar(o, a) {
         if (o.met && metodo(o.met).desde > a)
             return metodo(o.met).nombre + ' llega en ' + metodo(o.met).desde + '.';
-        if (o.pst && estilo(o.pst).desde > a)
-            return 'El estilo «' + estilo(o.pst).nombre + '» llega en ' + estilo(o.pst).desde + '.';
+        const tarde = estilosDe(o).map(estilo).filter(function (e) { return e.desde > a; })[0];
+        if (tarde)
+            return 'El estilo «' + tarde.nombre + '» llega en ' + tarde.desde + '.';
         if (o.setR && !setDe(o))
             return 'Ese set ya no está en tu almacén: elige otro o construye uno nuevo.';
         ['efectos', 'animacion'].forEach(function (r) { if (o.ext && o.ext[r] && !externo(r, o.ext[r]))
@@ -8625,7 +8710,7 @@ ART.rodaje = (function () {
         } });
         return mejor;
     }
-    return {
+    return { estilosDe: estilosDe, estiloCombinado: estiloCombinado, choca: choca, NEUTROS: NEUTROS, terrenosDe: terrenosDe, paisesExtra: paisesExtra, costoPais: costoPais,
         DEPS: DEPS, METODOS: METODOS, TERRENOS: TERRENOS, ESTILOS: ESTILOS, EXTERNOS: EXTERNOS, INCENTIVOS: INCENTIVOS, SETS: SETS,
         DILEMAS: DILEMAS, INCIDENTES: INCIDENTES, OPCIONES_PRUEBA: OPCIONES_PRUEBA,
         metodo: metodo, terreno: terreno, estilo: estilo, externo: externo, letra: letra, necesita: necesita, esExterno: esExterno,
@@ -8684,6 +8769,8 @@ ART.estreno = (function () {
             return false;
         const idi = ART.taxonomia.idioma(o.idio);
         if (!idi || idi.universal)
+            return false;
+        if (ART.ideas.idiomasExtra(o).some(function (x) { return ART.ideas.idiomaLocal(x, reg); }))
             return false;
         return !(idi.regiones.indexOf(reg) >= 0 || idi.paises.some(function (p) { const x = D.pais(p); return x && x.region === reg; }));
     }
@@ -26306,6 +26393,7 @@ ART.creacion = (function () {
         b.eq.cam = con('cameo');
         ajustar(b);
     }
+    function textoCosto(c) { const x = Math.round((c - 1) * 100); return x === 0 ? 'sin costo' : (x > 0 ? '+' : '−') + Math.abs(x) + ' %'; }
     const PEND_DE = { crGen: 'gen', crNat: 'his', crTema: 'his', crProb: 'his', crArco: 'his', crSubarco: 'his', crPre: 'his', crMet: 'rod', crTer: 'rod', crPst: 'rod', crSet: 'rod', crMus: 'mus' };
     function pendiente(k) { return !!(cr.b && cr.b.pend && cr.b.pend[k]); }
     function chip(txt, accion, valor, on, deshab, extra) {
@@ -26647,7 +26735,12 @@ ART.creacion = (function () {
         h += '<label class="campo"><span>Estilo artístico</span>' + sel('estilo', est, b.estilo) + '</label>';
         h += '<h4>Prioridad</h4><div class="chips">' + X.prioridades.map(function (p) { return chip(p.nombre, 'crPrio', p.id, b.prio === p.id); }).join('') + '</div><p class="nota">' + esc(X.prioridad(b.prio).efecto) + '.</p>';
         const fmt = function (k, nombre) {
-            return '<label class="campo crece"><span>' + nombre + '</span>' + sel('fmt.' + k, X.formatos[k].map(function (f) { return [f.id, f.id + (f.desde > a ? ' · ' + f.desde : ''), f.desde > a]; }), b.fmt[k]) + '</label>';
+            return '<label class="campo crece"><span>' + nombre + '</span>' + sel('fmt.' + k, X.formatos[k].map(function (f) {
+                const prueba = Object.assign({}, b.fmt);
+                prueba[k] = f.id;
+                const c = X.efectoFormato(prueba, a, fam).costo / Math.max(0.01, X.efectoFormato(Object.assign({}, b.fmt, (function () { const z = {}; z[k] = X.formatoEstandar(a)[k]; return z; })()), a, fam).costo);
+                return [f.id, (f.nombre || f.id) + ' · ' + textoCosto(c) + (f.desde > a ? ' · ' + f.desde : ''), f.desde > a];
+            }), b.fmt[k]) + '</label>';
         };
         const ef = X.efectoFormato(b.fmt, a, fam);
         h += '<h4>Formato de la época</h4><div class="fila envolver">' + fmt('color', 'Color') + fmt('visual', 'Imagen') + fmt('sonido', 'Sonido') + '</div><p class="nota">Lo normal en ' + a + ': ' + esc(X.formatoEstandar(a).color + ', ' + X.formatoEstandar(a).visual + ', ' + X.formatoEstandar(a).sonido) + '.' +
@@ -26664,6 +26757,12 @@ ART.creacion = (function () {
         const lugares = [['', 'Sin lugar fijo']].concat(D.paises.slice().sort(function (x, y) { return x.nombre.localeCompare(y.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre + ' (' + D.region(p.region).nombre + ')']; }), X.lugaresExtra.map(function (l) { return [l.id, l.nombre]; }));
         h += '<label class="campo"><span>Dónde pasa la historia</span>' + sel('lug', lugares, b.lug) + '</label>';
         h += '<label class="campo"><span>Idioma de la obra</span>' + sel('idio', X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; }), b.idio) + '</label>';
+        h += '<div class="chips">' + chip('Un solo idioma', 'crIdiV', '0', !Array.isArray(b.idiX)) + chip('Varios idiomas · +3 % por idioma', 'crIdiV', '1', Array.isArray(b.idiX)) + '</div>';
+        if (Array.isArray(b.idiX)) {
+            const ops = [['', '— ninguno —']].concat(X.idiomas.filter(function (x) { return x.id !== b.idio && !x.universal; }).map(function (x) { return [x.id, x.id]; }));
+            h += '<div class="fila envolver">' + [0, 1, 2].map(function (i) { return '<label class="campo crece"><span>Otro idioma ' + (i + 1) + '</span><select data-c="crIdiX" data-k="' + i + '">' + ops.map(function (o) { return '<option value="' + esc(o[0]) + '"' + ((b.idiX[i] || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }).join('') + '</div>' +
+                '<p class="nota info">Cada idioma extra cuesta 3 % más de producción; en las regiones donde se habla, la obra no necesita doblaje y gana público.</p>';
+        }
         return h;
     }
     function bloquePublico(b) {
@@ -26920,7 +27019,6 @@ ART.creacion = (function () {
             (lista.length ? lista.map(fila).join('') + (total > tope ? '<button class="btn bloque" data-a="crCandMas">Ver 20 más</button>' : '') : '<p class="tenue">No hay nadie disponible con estos filtros.</p>') +
             '<button class="btn bloque" data-a="crCandCerrar" style="margin-top:8px">Cerrar</button>';
     }
-    function signo(v) { return (v > 0 ? '+' : '') + v; }
     function abrirCand() { if (cr.b && cr.rol)
         U.modal(listaCandidatos(cr.rol)); }
     function redibujarCand(foco) {
@@ -27039,7 +27137,9 @@ ART.creacion = (function () {
             const inc = Rr.incentivo({ rod: p.id }, a);
             return [p.id, p.nombre + ' · costo ×' + U.decimal(N.limitar(Math.pow(p.costo / casa.costo, 0.6), 0.5, 1.8), 2) + (inc ? ' · incentivo −' + Math.round(inc * 100) + ' %' : '') + (Rr.INDUSTRIA.indexOf(p.id) < 0 ? ' · equipo local chico' : '')];
         }));
-        return '<label class="campo"><span>País de rodaje</span>' + sel('rod', rodaje, b.rod || '') + '</label><p class="nota info">Cada país tiene su costo local; algunos devuelven una parte del gasto (incentivos). Rodar en otra región suma una semana de viaje y 3 %; donde la industria es chica, la producción y la imagen rinden un poco menos.</p>';
+        const varios = Array.isArray(b.rodX);
+        const extra = varios ? '<div class="fila envolver">' + [0, 1, 2].map(function (i) { return '<label class="campo crece"><span>Otro país ' + (i + 1) + '</span><select data-c="crRodX" data-k="' + i + '"><option value="">— ninguno —</option>' + rodaje.slice(1).filter(function (o) { return o[0] !== b.rod; }).map(function (o) { return '<option value="' + esc(o[0]) + '"' + ((b.rodX[i] || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }).join('') + '</div><p class="nota info">Rodar en varios países: el costo mezcla el del país principal con el de los otros (más 4 % por país extra) y suma una semana de preproducción por cada uno; en acción, aventura y épicas gana público.</p>' : '';
+        return '<label class="campo"><span>País de rodaje</span>' + sel('rod', rodaje, b.rod || '') + '</label><div class="chips">' + chip('Un país', 'crRodV', '0', !varios) + chip('Varios países (hasta 4)', 'crRodV', '1', varios) + '</div>' + extra + '<p class="nota info">Cada país tiene su costo local; algunos devuelven una parte del gasto (incentivos). Rodar en otra región suma una semana de viaje y 3 %; donde la industria es chica, la producción y la imagen rinden un poco menos.</p>';
     }
     function bloqueRodaje(b) {
         const Rr = ART.rodaje, a = anio();
@@ -27048,11 +27148,12 @@ ART.creacion = (function () {
             return chip(m.nombre + (m.desde > a ? ' · ' + m.desde : '') + (m.id === rec ? ' ★' : ''), 'crMet', m.id, b.met === m.id, m.desde > a);
         }).join('') + '</div><p class="nota">' + esc(Rr.metodo(b.met).texto) + (b.met === 'cgi' ? ' Costo del CGI en ' + a + ': ×' + U.decimal(Rr.costoCGI(a), 2) + '.' : '') + ' ★ = recomendado para esta idea.</p>';
         if (Rr.usaLocacion(b)) {
-            h += '<h4>Terreno de la locación</h4><div class="chips">' + Rr.TERRENOS.map(function (tr) {
+            const varios = Array.isArray(b.terX), ts = Rr.terrenosDe(b);
+            h += '<h4>Terreno de la locación</h4><div class="chips">' + chip('Un lugar', 'crTerV', '0', !varios) + chip('Varios lugares (hasta 3)', 'crTerV', '1', varios) + '</div><div class="chips">' + Rr.TERRENOS.map(function (tr) {
                 const luce = tr.generos.some(function (g) { return b.gen.indexOf(g) >= 0; });
-                const propio = Rr.terrenoPropio(Object.assign({}, b, { ter: tr.id }));
-                return chip(tr.nombre + (luce ? ' · luce' : '') + (propio ? ' · tuyo' : ''), 'crTer', tr.id, b.ter === tr.id);
-            }).join('') + '</div>';
+                const propio = Rr.terrenoPropio(Object.assign({}, b, { ter: tr.id, terX: [] }));
+                return chip(tr.nombre + ' · ' + textoCosto(b.met === 'locacion' ? tr.costo : 1 + (tr.costo - 1) / 2) + (luce ? ' · luce' : '') + (propio ? ' · tuyo' : ''), 'crTer', tr.id, varios ? ts.indexOf(tr.id) >= 0 : b.ter === tr.id);
+            }).join('') + '</div>' + (varios ? '<p class="nota info">Cada lugar extra suma una semana de rodaje y 4 % de costo; en acción, aventura, bélicas y épicas gana público.</p>' : '');
             const tr = Rr.terreno(b.ter);
             h += '<p class="nota">' + esc(tr.nombre) + ': costo ×' + U.decimal(tr.costo, 2) + ', incidentes ×' + U.decimal(tr.riesgo, 1) + (tr.generos.some(function (g) { return b.gen.indexOf(g) >= 0; }) ? '; el paisaje luce en este género (+1 al público)' : '') + (Rr.terrenoPropio(b) ? '; es tierra tuya: más barato, más seguro y una semana menos' : '') + '. Las tierras propias se compran en Negocio › Construcciones.</p>';
         }
@@ -27063,8 +27164,11 @@ ART.creacion = (function () {
             h += sets.length ? '<div class="chips">' + chip('Construir uno nuevo', 'crSet', '', !b.setR) + sets.map(function (x) { return chip('Reusar el de «' + x.obra + '» (' + x.anio + ', calidad ' + x.q + ', ' + x.usos + ' usos)', 'crSet', String(x.id), b.setR === x.id); }).join('') + '</div><p class="nota info">Reusar ahorra 7 % y una semana de preproducción; la calidad del set suma o resta al arte; si el público ya lo vio 3 veces, resta 1.</p>' :
                 '<p class="nota">Se construye nuevo y queda en tu almacén para otras obras (caben ' + Rr.capacidadSets(0) + '; más con platós y backlots).</p>';
         }
-        h += '<h4>Estilo de producción</h4><div class="chips">' + Rr.ESTILOS.map(function (e) { return chip(e.nombre + (e.desde > a ? ' · ' + e.desde : ''), 'crPst', e.id, b.pst === e.id, e.desde > a); }).join('') + '</div>';
-        const es = Rr.estilo(b.pst);
+        const eles = Rr.estilosDe(b);
+        h += '<h4>Estilo de producción (hasta 3)</h4><div class="chips">' + Rr.ESTILOS.map(function (e) { const on = eles.indexOf(e.id) >= 0, choque = !on && eles.some(function (x) { return Rr.choca(x, e.id); }); return chip(e.nombre + ' · ' + textoCosto(e.costo) + (e.desde > a ? ' · ' + e.desde : '') + (choque ? ' · no combina' : ''), 'crPst', e.id, on, e.desde > a || choque); }).join('') + '</div>';
+        const es = Rr.estiloCombinado(b);
+        if (eles.length > 1)
+            h += '<p class="nota">Combinación: costo ' + textoCosto(es.costo) + ' · crítica ' + signo(es.crit) + ' · público ' + signo(es.pub) + '.</p>';
         h += '<p class="nota">' + esc(es.texto) + (es.ama.length ? ' Lo aman los ' + es.ama.map(function (i) { return EDADES_N[i]; }).join(' y los ') + '.' : '') + (es.rechaza.length ? ' Lo rechazan los ' + es.rechaza.map(function (i) { return EDADES_N[i]; }).join(' y los ') + '.' : '') + '</p>';
         return h;
     }
@@ -27746,10 +27850,75 @@ ART.creacion = (function () {
     });
     ac('crMet', function (v) { if (!cr.b)
         return; cr.b.met = v; cr.b.metTocado = 1; ajustar(cr.b); refrescar(); });
-    ac('crTer', function (v) { if (!cr.b)
-        return; cr.b.ter = v; cr.b.terTocado = 1; ajustar(cr.b); refrescar(); });
-    ac('crPst', function (v) { if (!cr.b)
-        return; cr.b.pst = v; ajustar(cr.b); refrescar(); });
+    ac('crTer', function (v) {
+        const b = cr.b;
+        if (!b)
+            return;
+        b.terTocado = 1;
+        if (Array.isArray(b.terX) && b.ter && v !== b.ter) {
+            const i = b.terX.indexOf(v);
+            if (i >= 0)
+                b.terX.splice(i, 1);
+            else if (b.terX.length < 2)
+                b.terX.push(v);
+            else
+                U.aviso('Hasta 3 lugares: quita uno primero.', 'mal');
+        }
+        else if (Array.isArray(b.terX) && v === b.ter && b.terX.length) {
+            b.ter = b.terX.shift();
+        }
+        else
+            b.ter = v;
+        ajustar(b);
+        refrescar();
+    });
+    ac('crTerV', function (v) { const b = cr.b; if (!b)
+        return; if (v === '1')
+        b.terX = b.terX || [];
+    else
+        delete b.terX; ajustar(b); refrescar(); });
+    ac('crRodV', function (v) { const b = cr.b; if (!b)
+        return; if (v === '1')
+        b.rodX = b.rodX || [];
+    else
+        delete b.rodX; ajustar(b); refrescar(); });
+    ac('crRodX', function (v, el) { const b = cr.b; if (!b || !Array.isArray(b.rodX))
+        return; b.rodX[+el.getAttribute('data-k')] = v || ''; b.rodX = b.rodX.slice(0, 3); ajustar(b); refrescar(); });
+    ac('crIdiV', function (v) { const b = cr.b; if (!b)
+        return; if (v === '1')
+        b.idiX = b.idiX || [];
+    else
+        delete b.idiX; ajustar(b); refrescar(); });
+    ac('crIdiX', function (v, el) { const b = cr.b; if (!b || !Array.isArray(b.idiX))
+        return; b.idiX[+el.getAttribute('data-k')] = v || ''; b.idiX = b.idiX.slice(0, 3); ajustar(b); refrescar(); });
+    ac('crPst', function (v) {
+        const b = cr.b, Rr = ART.rodaje;
+        if (!b)
+            return;
+        const l = Rr.estilosDe(b), i = l.indexOf(v);
+        if (i >= 0) {
+            if (l.length > 1)
+                l.splice(i, 1);
+        }
+        else if (l.some(function (x) { return Rr.choca(x, v); })) {
+            U.aviso('Ese estilo no combina con los que ya elegiste.', 'mal');
+            return;
+        }
+        else if (l.length === 1 && Rr.NEUTROS.indexOf(l[0]) >= 0)
+            l[0] = v;
+        else if (l.length < 3)
+            l.push(v);
+        else {
+            U.aviso('Hasta 3 estilos: quita uno primero.', 'mal');
+            return;
+        }
+        b.pst = l[0];
+        b.psE = l.slice(1);
+        if (!b.psE.length)
+            delete b.psE;
+        ajustar(b);
+        refrescar();
+    });
     ac('crSet', function (v) { if (!cr.b)
         return; if (v)
         cr.b.setR = +v;
