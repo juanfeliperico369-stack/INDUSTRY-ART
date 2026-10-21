@@ -161,6 +161,13 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 
   Cada una baja 7 % el costo de producción de ese medio, hasta 21 %.
 
+## Rodajes por todo el mundo
+- **Idiomas según la nacionalidad del reparto:** cada actor habla su idioma y la obra se dobla después, como en el western italiano. Cada idioma suma 3 % y gana público donde se habla.
+- **Todos los terrenos:** la megaproducción rueda en los ocho terrenos reales, con una semana y 4 % más por cada lugar extra.
+- **Terreno inventado (por set):** el paisaje se construye entero en sets. Es más seguro que viajar y luce en fantasía y ciencia ficción.
+- **Todo el mundo** como país de rodaje: el costo mezcla el de todos los países, suma hasta 6 semanas de preproducción y en aventura, acción y épicas gana público en todas partes.
+- Las opciones de antes («Un lugar», «Varios lugares», «Un país», «Varios países», «Varios idiomas») siguen igual.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
