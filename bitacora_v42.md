@@ -75,6 +75,13 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 
 - **Informe de resultados:** el informe «Por qué funcionó o fracasó» ahora también dice si la calidad fue alta o baja y cuándo influyó la suerte.
 
+## Pruebas de juego y correcciones de balance
+- **Presupuesto de producción:** una película de $500 de producción llegaba a ×4,5 de retorno con calidad baja, mejor que la recomendada (×2,1). Ahora el tamaño de la producción pesa en el éxito comercial: las obras muy baratas rinden menos en total y las grandes rinden algo más.
+- **Jingles:** pagaban 1,6 veces su costo al instante y sin riesgo. Ahora pagan 1,25 y los clientes piden hasta 4 al año.
+- **Acciones de rivales:** rendían +62 % al año de media (con casos de +653 %). Ahora rinden cerca de +11 % al año, como las acciones de las compañías.
+- **Monopolio:** las filiales no contaban en tu cuota de mercado, así que se podía comprar a todos los rivales sin que los reguladores intervinieran. Ahora la cuota incluye a las filiales y no se puede comprar un estudio si el grupo pasaría del 45 % del tamaño del sector.
+- **Probado y sin cambios:** las ganancias escalan con la época y la población; los 24 negocios se pagan en 3 a 5 años; el canal de TV se paga en 5 a 8 años; el streaming sin gestión no da ganancia; el editor valida números y no deja pasar código en los nombres; las secuelas y la cronología de las franquicias funcionan.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
