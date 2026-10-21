@@ -168,6 +168,11 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Todo el mundo** como país de rodaje: el costo mezcla el de todos los países, suma hasta 6 semanas de preproducción y en aventura, acción y épicas gana público en todas partes.
 - Las opciones de antes («Un lugar», «Varios lugares», «Un país», «Varios países», «Varios idiomas») siguen igual.
 
+## Minijuego «Caza piratas»
+- Está en Negocio › Distribución. Durante 20 segundos se tocan las copias piratas sin tocar las legales. Los dibujos cambian con la época: imprentas, rollos, casetes y descargas.
+- Cada error resta dos aciertos. El resultado recupera hasta el 80 % de lo que la piratería le roba a tus obras durante 26 semanas, y los piratas pagan una multa.
+- Se puede jugar una vez cada 4 semanas.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
