@@ -110,6 +110,8 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Tarjetas para compartir:** dato histórico, resultado de una obra, resumen del año y logros. En el celular se comparten; en la web y en PC se descargan.
 - **Comunidad y enlaces:** en Ajustes y en la pausa. Los enlaces están listos para completarse (ver `docs/enlaces.md`, con las plataformas de donación recomendadas).
 
+- **Paquetes de realidad (mods de datos):** se cargan desde la partida nueva o desde Estudio › Editor. Traen compañías reales con su historia, hitos, franquicias, catálogo y valor, además de talentos, material e hitos con consecuencias. También se puede exportar la realidad de tu partida para compartirla y descargar una plantilla. Son solo datos y el juego valida todo. El formato está en `docs/paquetes.md`.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
