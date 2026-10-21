@@ -609,6 +609,7 @@ canvas[data-grafica] { touch-action: pan-y; cursor: crosshair; }
 .sl-n { min-width: 2.2em; text-align: center; font-variant-numeric: tabular-nums; }
 .sl-tuyo { border-color: var(--sec) !important; box-shadow: inset 3px 0 0 var(--sec); }
 .sl-ret { width: 34px; height: 34px; border-radius: 50%; flex: none; }
+.sl-ini { width: 34px; height: 34px; border-radius: 50%; flex: none; display: inline-flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--dorado); color: var(--dorado); font-weight: 700; font-size: .8em; }
 .sl-der { text-align: right; max-width: 42%; }
 .sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-bottom: 8px; }
 .sl-leyenda { display: flex; flex-direction: column; gap: 4px; margin: 0; }
@@ -31084,10 +31085,21 @@ ART.salonUI = (function () {
     function estrenadas() { return N.S.obras.filter(function (o) { return o.pub !== undefined && o.et !== 'lista' && o.tit; }); }
     function premiosObra(o) { return (o.galas || []).length; }
     const CRIT_OBRAS = { bruto: hoy, crit: function (o) { return o.crit || 0; }, pub: function (o) { return o.pub || 0; }, premios: premiosObra, mult: function (o) { return ART.obras.multiplicador(o) || 0; } };
+    function obrasReales(crit) {
+        if (crit !== 'crit' && crit !== 'pub')
+            return [];
+        const HA = ART.hitosArte;
+        return HA.obrasHasta(N.anio()).map(function (x) {
+            const dt = HA.detalle(x.o.tit), fama = dt && dt.fama ? dt.fama : 80;
+            return { real: x, v: crit === 'crit' ? Math.min(99, 70 + 0.28 * fama) : Math.min(99, 62 + 0.33 * fama) };
+        });
+    }
     function rankingObras(crit, quien) {
         const f = CRIT_OBRAS[crit] || hoy;
-        return estrenadas().filter(function (o) { return quien === 'mias' ? o.est === 0 : quien === 'rivales' ? o.est !== 0 : true; })
-            .map(function (o) { return { o: o, v: f(o) }; }).filter(function (x) { return isFinite(x.v) && x.v > 0; }).sort(function (a, b) { return b.v - a.v; });
+        const juego = quien === 'historia' ? [] : estrenadas().filter(function (o) { return quien === 'mias' ? o.est === 0 : quien === 'rivales' ? o.est !== 0 : true; })
+            .map(function (o) { return { o: o, v: f(o) }; });
+        const reales = quien === 'todos' || quien === 'historia' ? obrasReales(crit) : [];
+        return juego.concat(reales).filter(function (x) { return isFinite(x.v) && x.v > 0; }).sort(function (a, b) { return b.v - a.v; });
     }
     function valorObra(crit, x) {
         const o = x.o;
@@ -31102,6 +31114,10 @@ ART.salonUI = (function () {
         return x.v + (x.v === 1 ? ' premio' : ' premios');
     }
     function filaObra(x, i, crit) {
+        if (x.real) {
+            const r = x.real;
+            return '<button class="cal-ev toque sl-fila" data-a="hsHito" data-v="' + r.i + '">' + puesto(i) + '<div class="col crece"><span>«' + esc(r.o.tit) + '» <span class="etiqueta">histórica</span></span><span class="tenue chico">' + esc(r.o.autor || '') + ' · ' + r.h[0] + ' · ' + esc(r.o.tipo || '') + '</span></div><b class="chico">' + Math.round(x.v) + (crit === 'crit' ? ' de crítica' : ' de público') + '</b></button>';
+        }
         const o = x.o;
         return '<button class="cal-ev toque sl-fila' + (o.est === 0 ? ' sl-tuyo' : '') + '" data-a="verObra" data-v="' + o.id + '">' + puesto(i) + '<div class="col crece"><span>«' + esc(o.tit) + '»' + (o.tv ? ' <span class="tenue chico">· serie</span>' : '') + '</span><span class="tenue chico">' + esc(nomEst(o.est)) + ' · ' + (o.anio || '') + '</span></div><b class="chico">' + esc(valorObra(crit, x)) + '</b></button>';
     }
@@ -31109,19 +31125,36 @@ ART.salonUI = (function () {
         const l = rankingObras(st.obras, st.quien);
         return '<p class="nota">Las obras que hicieron historia, tuyas y de los rivales. La recaudación se compara en dinero de hoy.</p>' +
             chips('obras', [['bruto', 'Recaudación'], ['crit', 'Crítica'], ['pub', 'Público'], ['premios', 'Premios'], ['mult', 'Mejor negocio']]) +
-            chips('quien', [['todos', 'Todas'], ['mias', 'Tuyas'], ['rivales', 'Rivales']]) +
+            chips('quien', [['todos', 'Todas'], ['mias', 'Tuyas'], ['rivales', 'Rivales'], ['historia', 'Historia real']]) + (st.quien === 'historia' && st.obras !== 'crit' && st.obras !== 'pub' ? '<p class="nota">Las obras reales de la historia se comparan por crítica y público: elige uno de esos dos criterios.</p>' : '') +
             (l.length ? '<div class="col">' + corte('obras', l).map(function (x, i) { return filaObra(x, i, st.obras); }).join('') + '</div>' + mas('obras', l.length) : '<p class="tenue">Todavía no hay estrenos.</p>');
     }
     function vidaDe(t) { const fin = t.mu || null; return (t.nac || '?') + (fin ? '–' + fin : ''); }
     function puntaje(t) { return (t.premios || 0) * 10 + (t.exitos || 0) * 2 + (t.obras || 0) * 0.25 + (t.fama || 0) * 12 + (t.hab || 0) * 0.05; }
     const CRIT_FIG = { leyenda: puntaje, premios: function (t) { return t.premios || 0; }, exitos: function (t) { return t.exitos || 0; }, obras: function (t) { return t.obras || 0; }, hab: function (t) { return t.hab || 0; } };
+    function figurasReales(crit, of) {
+        if (crit !== 'leyenda' && crit !== 'obras')
+            return [];
+        const HA = ART.hitosArte, a = N.anio(), cuenta = {}, obrasN = {};
+        HA.HITOS.forEach(function (h) { if (h[5] && h[0] <= a) {
+            cuenta[h[5]] = (cuenta[h[5]] || 0) + 1;
+            if (h[1] === 'o')
+                obrasN[h[5]] = (obrasN[h[5]] || 0) + 1;
+        } });
+        return Object.keys(cuenta).filter(function (k) { const p = HA.PERSONAS[k]; return p && (of === 'todos' || p[1] === of); }).map(function (k) {
+            return { real: { k: k, p: HA.PERSONAS[k], n: cuenta[k], ob: obrasN[k] || 0 }, v: crit === 'obras' ? obrasN[k] || 0 : 15 * cuenta[k] + 30 };
+        }).filter(function (x) { return x.v > 0; });
+    }
     function rankingFiguras(crit, of) {
         const f = CRIT_FIG[crit] || puntaje;
         return N.S.talentos.filter(function (t) { return (t.obras || 0) > 0 && (of === 'todos' || t.of === of); })
-            .map(function (t) { return { t: t, v: f(t) }; }).filter(function (x) { return x.v > 0; }).sort(function (a, b) { return b.v - a.v; });
+            .map(function (t) { return { t: t, v: f(t) }; }).concat(figurasReales(crit, of)).filter(function (x) { return x.v > 0; }).sort(function (a, b) { return b.v - a.v; });
     }
     function estadoT(t) { return t.mu ? '✝ ' + vidaDe(t) : t.ret ? 'retirado · ' + vidaDe(t) : 'activo · ' + (t.nac || '?') + '–'; }
     function filaFigura(x, i) {
+        if (x.real) {
+            const r = x.real, p = r.p, a = N.anio();
+            return '<button class="cal-ev toque sl-fila" data-a="hsPersona" data-v="' + esc(r.k) + '">' + puesto(i) + '<span class="sl-ini">' + esc(p[0].split(' ').map(function (w) { return w.charAt(0); }).slice(0, 2).join('')) + '</span><div class="col crece"><span>' + esc(p[0]) + ' <span class="etiqueta oro">histórico</span></span><span class="tenue chico">' + esc(OFICIOS[p[1]] || p[1]) + ' · ' + esc(p[3] || '') + ' · ' + (p[4] || '?') + '–' + (p[5] && p[5] <= a ? p[5] : '') + '</span></div><span class="tenue chico sl-der">' + r.n + (r.n === 1 ? ' hito' : ' hitos') + (r.ob ? ' · ' + r.ob + (r.ob === 1 ? ' obra' : ' obras') : '') + '</span></button>';
+        }
         const t = x.t, of = OFICIOS[t.of] || ART.talentos.nombreOficio(t);
         return '<button class="cal-ev toque sl-fila" data-a="verTalento" data-v="' + t.id + '">' + puesto(i) + (i < 10 ? '<canvas class="retrato sl-ret" data-retrato="' + t.id + '"></canvas>' : '') + '<div class="col crece"><span>' + esc(t.nom) + '</span><span class="tenue chico">' + esc(of) + ' · ' + esc(estadoT(t)) + '</span></div><span class="tenue chico sl-der">' +
             (t.premios || 0) + ' premios · ' + (t.exitos || 0) + ' éxitos · ' + (t.obras || 0) + ' obras</span></button>';
@@ -31130,7 +31163,7 @@ ART.salonUI = (function () {
         if (st.of === 'reales')
             return '<p class="nota">Los artistas reales de la historia que ya pasaron por tu partida.</p>' + chips('of', [['todos', 'Todos']].concat(Object.keys(OFICIOS).map(function (k) { return [k, OFICIOS[k]]; })).concat([['reales', 'Artistas reales']])) + ART.imperioUI.listaArtistas();
         const l = rankingFiguras(st.figuras, st.of);
-        return '<p class="nota">Las grandes figuras de la historia del arte en esta partida: directores, guionistas, intérpretes y más, en activo, retirados y ya fallecidos.</p>' +
+        return '<p class="nota">Las grandes figuras de la historia del arte: los talentos de tu partida (en activo, retirados y fallecidos) y los artistas reales de la historia, marcados como «histórico».</p>' +
             chips('figuras', [['leyenda', 'Leyendas'], ['premios', 'Premios'], ['exitos', 'Éxitos'], ['obras', 'Obras'], ['hab', 'Talento']]) +
             chips('of', [['todos', 'Todos']].concat(Object.keys(OFICIOS).map(function (k) { return [k, OFICIOS[k]]; })).concat([['reales', 'Artistas reales']])) +
             (l.length ? '<div class="col">' + corte('figuras', l).map(filaFigura).join('') + '</div>' + mas('figuras', l.length) : '<p class="tenue">Nadie con ese oficio tiene obras todavía.</p>');
@@ -31156,13 +31189,34 @@ ART.salonUI = (function () {
                 out.push({ n: p.n, de: '«' + o.tit + '» (' + (o.anio || '') + ')', est: o.est, ap: 1, pop: Math.round((o.pub || 50) * 0.8), tn: t ? t.nom : '', tid: p.t, obra: o.id });
             });
         });
+        const HA = ART.hitosArte, a = N.anio();
+        HA.obrasHasta(a).forEach(function (x) {
+            const dt = HA.detalle(x.o.tit);
+            if (!dt || (dt.fama || 0) < 75 || !dt.pjs)
+                return;
+            dt.pjs.split('\n').slice(0, 2).forEach(function (z) { const n = z.split(':')[0]; if (n && !vistos['h' + x.i + n]) {
+                vistos['h' + x.i + n] = 1;
+                out.push({ n: n, de: '«' + x.o.tit + '» (' + x.h[0] + ')', autor: x.o.autor, ap: 1, pop: Math.round(dt.fama * 0.85), hito: x.i, historico: 1 });
+            } });
+        });
+        ART.taxonomia.dominio.forEach(function (m) {
+            if ((m.fama || 0) < 0.8)
+                return;
+            const c = ART.taxonomia.canon(m);
+            (c && c.pj ? c.pj : []).filter(function (p) { return p.i === 'protagonista'; }).slice(0, 2).forEach(function (p) { if (!vistos['d' + m.id + p.n]) {
+                vistos['d' + m.id + p.n] = 1;
+                out.push({ n: p.n, de: '«' + m.tit + '» (' + m.anio + ')', autor: m.autor, ap: 1, pop: Math.round(m.fama * 85), dp: m.id, historico: 1 });
+            } });
+        });
         out.forEach(function (x) { x.v = x.pop * (1 + 0.3 * (x.ap - 1)); });
         return out.sort(function (a, b) { return b.v - a.v; });
     }
     function personajes() {
         const l = rankingPersonajes();
-        return '<p class="nota">Los personajes que el público no olvida: los de las sagas y los protagonistas de las obras más queridas.</p>' +
+        return '<p class="nota">Los personajes que el público no olvida: los de tus sagas y las de los rivales, los protagonistas de las obras más queridas y los clásicos de la historia.</p>' +
             (l.length ? '<div class="col">' + corte('personajes', l).map(function (x, i) {
+                if (x.historico)
+                    return '<button class="cal-ev toque sl-fila" data-a="' + (x.dp ? 'dpVer' : 'hsHito') + '" data-v="' + esc(x.dp || x.hito) + '">' + puesto(i) + '<div class="col crece"><span>' + esc(x.n) + ' <span class="etiqueta">clásico</span></span><span class="tenue chico">' + esc(x.de) + (x.autor ? ' · ' + esc(x.autor) : '') + '</span></div><span class="tenue chico sl-der">popularidad ' + Math.round(x.pop) + '</span></button>';
                 return '<button class="cal-ev toque sl-fila' + (x.est === 0 ? ' sl-tuyo' : '') + '" data-a="verObra" data-v="' + x.obra + '">' + puesto(i) + '<div class="col crece"><span>' + esc(x.n) + '</span><span class="tenue chico">' + esc(x.de) + ' · ' + esc(nomEst(x.est)) + (x.tn ? ' · lo interpreta ' + esc(x.tn) : '') + '</span></div><span class="tenue chico sl-der">' + (x.ap > 1 ? x.ap + ' obras · ' : '') + 'popularidad ' + Math.round(x.pop) + '</span></button>';
             }).join('') + '</div>' + mas('personajes', l.length) : '<p class="tenue">Aún no hay personajes memorables. Estrena obras con buen público o arma una saga.</p>');
     }
@@ -31210,9 +31264,11 @@ ART.salonUI = (function () {
         const link = function (a, v, txt, sub) { return '<button class="sl-link" data-a="' + a + '" data-v="' + v + '"><b>' + esc(txt) + '</b></button><span class="tenue chico">' + esc(sub) + '</span>'; };
         let h = '<p class="nota">Lo más grande de la historia del arte en tu mundo, de todos los estudios. Toca cualquier nombre para ver su ficha.</p><div class="sl-grid">';
         h += tarjetaLeyenda('La más taquillera de la historia', ob[0] ? link('verObra', ob[0].o.id, '«' + ob[0].o.tit + '»', nomEst(ob[0].o.est) + ' · ' + ob[0].o.anio + ' · ' + dinero(ob[0].o.bruto || 0, ob[0].o.anio)) : '<b>—</b>');
-        h += tarjetaLeyenda('La favorita de la crítica', cr[0] ? link('verObra', cr[0].o.id, '«' + cr[0].o.tit + '»', nomEst(cr[0].o.est) + ' · ' + Math.round(cr[0].v) + ' de crítica') : '<b>—</b>');
-        h += tarjetaLeyenda('La figura más grande', fi[0] ? link('verTalento', fi[0].t.id, fi[0].t.nom, (OFICIOS[fi[0].t.of] || '') + ' · ' + (fi[0].t.premios || 0) + ' premios') : '<b>—</b>');
-        h += tarjetaLeyenda('El personaje más querido', pe[0] ? link('verObra', pe[0].obra, pe[0].n, pe[0].de) : '<b>—</b>');
+        const cr0 = cr.filter(function (x) { return !x.real; })[0], fiJ = fi.filter(function (x) { return !x.real; })[0], fiR = fi.filter(function (x) { return x.real; })[0];
+        h += tarjetaLeyenda('La favorita de la crítica', cr0 ? link('verObra', cr0.o.id, '«' + cr0.o.tit + '»', nomEst(cr0.o.est) + ' · ' + Math.round(cr0.v) + ' de crítica') : '<b>—</b>');
+        h += tarjetaLeyenda('La figura más grande de tu mundo', fiJ ? link('verTalento', fiJ.t.id, fiJ.t.nom, (OFICIOS[fiJ.t.of] || '') + ' · ' + (fiJ.t.premios || 0) + ' premios') : '<b>—</b>');
+        h += tarjetaLeyenda('La gran figura histórica', fiR ? link('hsPersona', fiR.real.k, fiR.real.p[0], (OFICIOS[fiR.real.p[1]] || '') + ' · ' + fiR.real.n + ' hitos') : '<b>—</b>');
+        h += tarjetaLeyenda('El personaje más querido', pe[0] ? link(pe[0].historico ? (pe[0].dp ? 'dpVer' : 'hsHito') : 'verObra', pe[0].historico ? (pe[0].dp || pe[0].hito) : pe[0].obra, pe[0].n, pe[0].de) : '<b>—</b>');
         h += tarjetaLeyenda('El estudio más grande', es[0] ? '<b>' + esc(es[0].e.nombre) + '</b><span class="tenue chico">' + es[0].obras + ' obras · ' + dinero(deHoy(es[0].hoy)) + '</span>' : '<b>—</b>');
         const mia = ob.findIndex ? ob.findIndex(function (x) { return x.o.est === 0; }) : -1;
         h += tarjetaLeyenda('Tu lugar en la historia', mia >= 0 ? link('verObra', ob[mia].o.id, 'Puesto ' + (mia + 1) + ' de ' + ob.length, 'tu mejor obra: «' + ob[mia].o.tit + '»') : '<b>Aún sin estrenos</b>');
