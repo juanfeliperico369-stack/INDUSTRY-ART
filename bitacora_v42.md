@@ -172,6 +172,14 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - Está en Negocio › Distribución. Durante 20 segundos se tocan las copias piratas sin tocar las legales. Los dibujos cambian con la época: imprentas, rollos, casetes y descargas.
 - Cada error resta dos aciertos. El resultado recupera hasta el 80 % de lo que la piratería le roba a tus obras durante 26 semanas, y los piratas pagan una multa.
 - Se puede jugar una vez cada 4 semanas.
+- **El lado oscuro: provocar la piratería.** En la misma tarjeta eliges una obra rival en cartelera y juegas a subir sus copias piratas esquivando a la policía (🚔). La obra pierde hasta el 60 % de su público durante 10 semanas. Hay riesgo de que te descubran (más con cada descuido): pagas una multa y pierdes fama.
+- **Piratear como alternativa en los dilemas:**
+  - «Un rival anuncia una obra parecida a la tuya» suma la opción «Filtrar una copia pirata de la suya».
+  - «Un rival quiere llevarse a tu mejor talento» suma «Piratear su próximo estreno en venganza».
+  - Hay un dilema nuevo: un contacto ofrece filtrar el gran estreno de un rival.
+
+  Cada una tiene su riesgo de escándalo.
+- **Tema nuevo: «Asesino serial»** (familia Sociedad y poder), para todas las obras, también para la música.
 
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
