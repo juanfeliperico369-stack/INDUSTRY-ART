@@ -151,6 +151,16 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **El fallo de 1948** ya no obliga a vender los cines: cobra una multa y los conservas.
 - **Nueva gran meta y logro: «El monopolio total».** Se cumple con todos los estudios rivales como filiales y todas las cadenas de cines del mundo. Tiene su reto con medallas (plazo de 80 años, desde 1910).
 
+## Megaproducciones que dejan obra construida
+- **Cine y series:** una superproducción (3 veces el presupuesto típico o más) deja construido su terreno de rodaje (rancho en el desierto, bosque propio, costa y muelle…) y su set queda en pie para siempre, sin ocupar lugar. Los próximos rodajes ahí son más baratos, más seguros y una semana más cortos.
+- **Música, teatro, videojuegos y libros:** una megaproducción (×2,4 o más) deja infraestructura:
+  - en música, salas de grabación;
+  - en teatro, maquinaria escénica;
+  - en videojuegos, herramientas y servidores;
+  - en libros, talleres de diseño.
+
+  Cada una baja 7 % el costo de producción de ese medio, hasta 21 %.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
