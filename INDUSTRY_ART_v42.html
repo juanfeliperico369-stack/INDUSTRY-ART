@@ -1115,6 +1115,15 @@ ART.datos = (function () {
         { id: 'Rockstar', valor: 90, rasgos: sp('Eficiente,Perfeccionista,Obsesivo,Visionario,Ambicioso,Diva') },
     ];
     const tiposEstudio = sp('Corporación,Compañía,Productora,Estudio,Independiente,Colectivo');
+    const EFECTO_TIPO = {
+        'Corporación': { efecto: 'campañas +8 %, producción +1, más fama al empezar; la crítica desconfía (−1)', marketing: 0.08, bono: { produccion: 1 }, crit: -1, fama: 0.03, costo: 1.03 },
+        'Compañía': { efecto: 'campañas +4 % y producción +1', marketing: 0.04, bono: { produccion: 1 } },
+        'Productora': { efecto: 'producción +1 y edición +1; produce 3 % más barato', bono: { produccion: 1, edicion: 1 }, costo: 0.97 },
+        'Estudio': { efecto: 'arte +1 y fotografía +1: el oficio clásico del cine', bono: { arte: 1, fotografia: 1 } },
+        'Independiente': { efecto: 'crítica +1, guion +1 y dirección +1; 6 % más barato, campañas −5 %', crit: 1, bono: { guion: 1, direccion: 1 }, costo: 0.94, marketing: -0.05 },
+        'Colectivo': { efecto: 'guion +1 e interpretación +1; crítica +1 y público −1', crit: 1, pub: -1, bono: { guion: 1, interprete: 1 } },
+    };
+    function efectoTipo(id) { return EFECTO_TIPO[id] || { efecto: 'sin efecto especial' }; }
     const visiones = [
         { id: 'Boutique de Culto', efecto: '+2 a la crítica, −1 al público', crit: 2, pub: -1 },
         { id: 'Prestigio de Industria', efecto: '+1 a la crítica y más fama al empezar', crit: 1, fama: 0.04 },
@@ -1124,9 +1133,9 @@ ART.datos = (function () {
     ];
     const publicos = [
         { id: 'General', efecto: 'Sin preferencia', familias: [] },
-        { id: 'Familiar', efecto: '+1 al público en familia y humor', familias: ['FJ', 'HM'], pub: 1 },
-        { id: 'Joven', efecto: '+1 al público en acción, imaginación y suspenso', familias: ['AA', 'IM', 'SM'], pub: 1 },
-        { id: 'Adulto', efecto: '+1 a la crítica en drama, suspenso y romance', familias: ['DR', 'SM', 'RD'], crit: 1 },
+        { id: 'Familiar', efecto: '+2 al público en familia y humor, campañas +5 % en ellas', familias: ['FJ', 'HM'], pub: 2, marketing: 0.05 },
+        { id: 'Joven', efecto: '+2 al público en acción, imaginación y suspenso, campañas +5 % en ellas', familias: ['AA', 'IM', 'SM'], pub: 2, marketing: 0.05 },
+        { id: 'Adulto', efecto: '+1 a la crítica y +1 al público en drama, suspenso y romance', familias: ['DR', 'SM', 'RD'], crit: 1, pub: 1 },
         { id: 'Cultos', efecto: '+2 a la crítica en arte e imaginación', familias: ['AV', 'IM'], crit: 2 },
     ];
     const industrias = [
@@ -1391,7 +1400,7 @@ ART.datos = (function () {
         familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
         clasificaciones: clasificaciones, ANIO_CLASIFICACION_POR_EDADES: ANIO_CLASIFICACION_POR_EDADES,
         tonos: tonos, rasgos: rasgos, personalidades: personalidades,
-        tiposEstudio: tiposEstudio, visiones: visiones, publicos: publicos, industrias: industrias, industria: industria, CINE_DESDE: CINE_DESDE, rivales: rivales,
+        tiposEstudio: tiposEstudio, EFECTO_TIPO: EFECTO_TIPO, efectoTipo: efectoTipo, visiones: visiones, publicos: publicos, industrias: industrias, industria: industria, CINE_DESDE: CINE_DESDE, rivales: rivales,
         temas: temas,
         canales: canales, nivelesMarketing: nivelesMarketing, escalas: escalas,
         pisos: pisos, terrenos: terrenos, MAX_PISOS: MAX_PISOS, MAX_TERRENOS: MAX_TERRENOS,
@@ -5661,9 +5670,9 @@ ART.talentos = (function () {
             return { estado: 'rechaza', texto: (t.act || 0) >= MAX_PROYECTOS ? 'Ya está en ' + MAX_PROYECTOS + ' proyectos' : 'Sin energía (recupera 10 al mes)' };
         const e = N.anio() - t.nac;
         if (t.jugador && (c.est || 0) === 0)
-            return e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2) ? { estado: 'rechaza', texto: 'Eres menor de edad: solo obras hasta PG-13' } : { estado: 'acepta', texto: 'Eres tú: trabajas gratis en tu propia obra' };
-        if (e < 18 && ((c.amor || 0) >= 2 || (c.clas || 0) > 2))
-            return { estado: 'rechaza', texto: 'Es menor de edad: solo obras hasta PG-13' };
+            return e < 18 && (c.amor || 0) >= 2 ? { estado: 'rechaza', texto: 'Eres menor de edad: nunca en obras con contenido sexual ni eróticas' } : { estado: 'acepta', texto: 'Eres tú: trabajas gratis en tu propia obra' };
+        if (e < 18 && (c.amor || 0) >= 2)
+            return { estado: 'rechaza', texto: 'Es menor de edad: nunca en obras con contenido sexual ni eróticas' };
         const m = moral(t);
         if (m < 22)
             return { estado: 'rechaza', texto: 'Está desmotivado' };
@@ -6276,6 +6285,8 @@ ART.ideas = (function () {
     function hayMenores(o) {
         return (o.pj || []).some(function (p) { return p.e < 18 && (p.i === 'protagonista' || p.i === 'secundario'); });
     }
+    function esErotica(o) { return ['gen', 'sub'].some(function (k) { return (o[k] || []).indexOf('Erótico') >= 0; }); }
+    function esInfantil(o) { return ['gen', 'sub'].some(function (k) { return (o[k] || []).indexOf('Infantil') >= 0; }); }
     function hayNinos(o) {
         return (o.pj || []).some(function (p) { return p.e < 16 && (p.i === 'protagonista' || p.i === 'secundario'); });
     }
@@ -6298,7 +6309,7 @@ ART.ideas = (function () {
         });
         if (hayMenores(b) && cont.amor > 1)
             cont.amor = 1;
-        if (hayNinos(b))
+        if (esInfantil(b))
             X.contenido.forEach(function (c) { while (cont[c.id] > 0 && c.niveles[cont[c.id]][1] > 2)
                 cont[c.id]--; });
         b.clas = clasificar(b, anio);
@@ -6331,13 +6342,13 @@ ART.ideas = (function () {
         const err = ART.obras.validarGeneros(gen, anio);
         if (err)
             return err;
-        const erotico = gen.indexOf('Erótico') >= 0;
+        const erotico = esErotica(b);
         if (erotico && (b.pubs || []).some(function (p) { const x = X.publico(p); return x && x.infantil; }))
             return 'Lo erótico nunca va con públicos infantiles, familiares o adolescentes.';
         if (erotico && (b.pj || []).some(function (p) { return p.e < 18; }))
             return 'En una obra erótica todos los personajes son mayores de edad.';
-        if (hayNinos(b) && indiceClasificacion(b) > 2)
-            return 'Con niños en el elenco la obra no pasa de PG-13 (los niños actores solo hacen obras hasta PG-13): baja el contenido o sube la edad del personaje.';
+        if (esInfantil(b) && indiceClasificacion(b) > 2)
+            return 'Una obra infantil no puede tener una clasificación fuerte: baja el contenido o quita el género infantil.';
         if (b.nat === 'r' && gen.some(function (g) { return D.familiaDe[g] === 'IM'; }))
             return 'Una obra de realidad no puede ser de imaginación: elige ficción o cambia el género.';
         if (b.nat === 'f' && b.tipo === 'documental')
@@ -6440,6 +6451,9 @@ ART.ideas = (function () {
             f *= X.efectoCorriente(o.corr, anio, fam).costo;
         f *= X.estilo(o.estilo).costo || 1;
         f *= ART.imperio.ahorroRodaje(o);
+        if (o.est === 0 && N.S && N.S.estudios[0])
+            f *= D.efectoTipo(N.S.estudios[0].tipo).costo || 1;
+        f *= costoTramas(o);
         f *= N.limitar(Math.pow(v(o, 'min', duracionTipica(anio)) / duracionTipica(anio), 0.55), 0.35, 2.2);
         const R = ART.rodaje, extra = R.paisesExtra ? R.paisesExtra(o) : [];
         if (o.rod || extra.length) {
@@ -6968,6 +6982,7 @@ ART.ideas = (function () {
             pub += x.pub || 0;
         } };
         add(X.tipoCine(o.tipo || 'real'));
+        add(efectoTramas(o));
         if (o.nat !== 'r') {
             if (o.fic && o.fic !== 'Estándar')
                 add(X.familiasFiccion.filter(function (f) { return f.id === X.famFiccion[o.fic]; })[0]);
@@ -7227,10 +7242,65 @@ ART.ideas = (function () {
         X.modaSub(o.sub, o.anioPlan || N.anio()).notas.forEach(function (n) { r.push(n[1] + '.'); });
         return r;
     }
-    return { idiomasExtra: idiomasExtra, idiomaLocal: idiomaLocal, PAQUETES_MUSICA: PAQUETES_MUSICA, paqueteMusica: paqueteMusica, MORALEJAS: MORALEJAS, moraleja: moraleja, bonoMoraleja: bonoMoraleja, GIROS: GIROS, giro: giro, bonoGiro: bonoGiro, NEEDLE_DROPS: NEEDLE_DROPS, needleDrop: needleDrop, needleDisponible: needleDisponible, contextoNeedle: contextoNeedle, bonoNeedle: bonoNeedle,
+    const TIPOS_TRAMA = [
+        { id: 'romance', nombre: 'Romántica', fam: ['RD', 'DR'], pub: 1 }, { id: 'misterio', nombre: 'Misterio o secreto', fam: ['SM'], crit: 1 },
+        { id: 'rivalidad', nombre: 'Rivalidad', fam: ['AA', 'DR'] }, { id: 'venganza', nombre: 'Venganza', fam: ['AA', 'SM'] },
+        { id: 'familia', nombre: 'Familiar', fam: ['DR', 'FJ'] }, { id: 'comica', nombre: 'Alivio cómico', fam: ['HM', 'FJ'], pub: 1 },
+        { id: 'politica', nombre: 'Política o poder', fam: ['DR', 'AV'], crit: 1 }, { id: 'villano', nombre: 'La del villano', fam: ['AA', 'SM', 'IM'] },
+        { id: 'pasado', nombre: 'En otro tiempo (flashback)', crit: 1 }, { id: 'paralela', nombre: 'Paralela', fam: ['IM', 'AV'] },
+        { id: 'coral', nombre: 'Coral (varios personajes)', fam: ['DR', 'HM'] }, { id: 'aventura', nombre: 'Viaje o búsqueda', fam: ['AA', 'IM', 'FJ'], pub: 1 },
+    ];
+    const NARRADORES = [
+        { id: '', nombre: 'Sin definir', texto: 'El guion decide.' },
+        { id: 'omnisciente', nombre: 'Tercera persona omnisciente', texto: 'Lo ve todo: claro y clásico.' },
+        { id: 'limitado', nombre: 'Tercera persona limitada', texto: 'Sigue de cerca a un personaje: +1 a la crítica en drama y suspenso.', fam: ['DR', 'SM'], critFam: 1 },
+        { id: 'primera', nombre: 'Primera persona', texto: 'Cercana e íntima: +1 al público en romance, drama y juventud.', fam: ['RD', 'DR', 'FJ'], pubFam: 1 },
+        { id: 'segunda', nombre: 'Segunda persona', texto: 'Experimental: +2 a la crítica, −2 al público.', crit: 2, pub: -2 },
+        { id: 'noconfiable', nombre: 'Narrador no confiable', texto: 'Engaña al público: +2 a la crítica en suspenso y drama, −1 al público.', fam: ['SM', 'DR'], critFam: 2, pub: -1 },
+        { id: 'coral', nombre: 'Coral (varios narradores)', texto: 'Varias voces: +1 a la crítica, −1 al público.', crit: 1, pub: -1 },
+        { id: 'off', nombre: 'Voz en off', texto: 'Un narrador que comenta: +1 a la crítica en crimen y misterio.', fam: ['SM'], critFam: 1 },
+        { id: 'objetivo', nombre: 'Sin narrador (cámara objetiva)', texto: 'Solo lo que se ve: +1 al público en acción.', fam: ['AA'], pubFam: 1 },
+        { id: 'epistolar', nombre: 'Epistolar o documental', texto: 'Cartas, diarios o grabaciones: +1 a la crítica en terror y suspenso.', fam: ['SM', 'AV'], critFam: 1 },
+    ];
+    function tramasDe(o) {
+        const n = N.limitar(Math.round(+(o.tv ? o.tv.tramas : o.trN) || 1), 1, 6);
+        return { n: n, tipos: (o.trT || []).slice(0, n - 1).filter(Boolean) };
+    }
+    function costoTramas(o) { return o.tv ? 1 : 1 + 0.03 * (tramasDe(o).n - 1); }
+    function semanasTramas(o) { return Math.floor((tramasDe(o).n - 1) / 2); }
+    function efectoTramas(o, hGuion) {
+        const fam = familia(o), tr = tramasDe(o), r = { crit: 0, pub: 0 };
+        let h = hGuion;
+        if (h === undefined) {
+            const t = o.eq && o.eq.guion !== undefined && ART.talentos.porId(o.eq.guion);
+            h = t ? ART.talentos.habRol(t, 'guion') : 50;
+        }
+        if (tr.n >= 2)
+            r.crit += Math.min(2, (tr.n - 1) * 0.5) * (h >= 70 ? 1 : h >= 55 ? 0.5 : -0.6);
+        if (tr.n >= 5 && (fam === 'FJ' || fam === 'HM'))
+            r.pub -= 1;
+        let bon = 0;
+        tr.tipos.forEach(function (id) { const x = TIPOS_TRAMA.filter(function (y) { return y.id === id; })[0]; if (!x)
+            return; if (x.fam && x.fam.indexOf(fam) >= 0)
+            bon += 0.5; r.crit += (x.crit || 0) * 0.4; r.pub += (x.pub || 0) * 0.4; });
+        r.pub += Math.min(1.5, bon);
+        const na = NARRADORES.filter(function (y) { return y.id === (o.narr || ''); })[0];
+        if (na) {
+            r.crit += na.crit || 0;
+            r.pub += na.pub || 0;
+            if (na.fam && na.fam.indexOf(fam) >= 0) {
+                r.crit += na.critFam || 0;
+                r.pub += na.pubFam || 0;
+            }
+        }
+        r.crit = Math.round(r.crit);
+        r.pub = Math.round(r.pub);
+        return r;
+    }
+    return { TIPOS_TRAMA: TIPOS_TRAMA, NARRADORES: NARRADORES, tramasDe: tramasDe, efectoTramas: efectoTramas, costoTramas: costoTramas, semanasTramas: semanasTramas, idiomasExtra: idiomasExtra, idiomaLocal: idiomaLocal, PAQUETES_MUSICA: PAQUETES_MUSICA, paqueteMusica: paqueteMusica, MORALEJAS: MORALEJAS, moraleja: moraleja, bonoMoraleja: bonoMoraleja, GIROS: GIROS, giro: giro, bonoGiro: bonoGiro, NEEDLE_DROPS: NEEDLE_DROPS, needleDrop: needleDrop, needleDisponible: needleDisponible, contextoNeedle: contextoNeedle, bonoNeedle: bonoNeedle,
         LIMITES: LIMITES, ANIO_IA: ANIO_IA, duracionTipica: duracionTipica, familia: familia, completar: completar,
         nivelMaximoEpoca: nivelMaximoEpoca, normalizar: normalizar, indiceClasificacion: indiceClasificacion, clasificar: clasificar,
-        describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, nivelEfectos: nivelEfectos, validar: validar,
+        describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, esErotica: esErotica, esInfantil: esInfantil, nivelEfectos: nivelEfectos, validar: validar,
         encajeIdea: encajeIdea, clavesEncaje: clavesEncaje, marcarEncaje: marcarEncaje, estrellas: estrellas,
         factorCosto: factorCosto, costoProduccion: costoProduccion, costoUnidad: costoUnidad, pisoPresupuesto: pisoPresupuesto, pisoDeCosto: pisoDeCosto, presMinimo: presMinimo, PRES_MIN: PRES_MIN, PRES_TOPE: PRES_TOPE, ajusteSemanas: ajusteSemanas, clase: clase, perfil: perfil,
         reglaDominio: reglaDominio, anioLibre: anioLibre, esLibre: esLibre, costoDerechos: costoDerechos, materialesDisponibles: materialesDisponibles, anioMaterial: anioMaterial,
@@ -7335,7 +7405,7 @@ ART.obras = (function () {
     function recalcular(b) {
         const anio = N.anio();
         b.fam = D.familiaDe[b.gen[0]] || 'DR';
-        if (b.cont || ART.ideas.hayNinos(b))
+        if (b.cont || ART.ideas.esInfantil(b))
             ART.ideas.normalizar(b, anio);
         else
             b.clas = ART.ideas.clasificar(b, anio);
@@ -7658,7 +7728,7 @@ ART.obras = (function () {
     function paraPoster(o) {
         const est = N.S.estudios[o.est];
         return {
-            id: o.id, titulo: o.tit, generos: o.gen, temas: o.tem || [], anio: o.anio || o.anioPlan, etapa: o.et,
+            id: o.id, titulo: o.tit, generos: o.gen, temas: o.tem || [], anio: o.anio || o.anioPlan, etapa: o.et, dis: o.dis,
             crit: o.et === 'cartelera' || o.et === 'terminada' ? o.crit : null,
             pub: o.et === 'cartelera' || o.et === 'terminada' ? o.pub : null,
             clas: o.clas, premiosGanados: (o.aw || []).length, creditos: o.cr || {},
@@ -8321,7 +8391,7 @@ ART.rodaje = (function () {
         }
         if (viaje(o))
             r.pre += 1;
-        r.pre += paisesExtra(o).length;
+        r.pre += paisesExtra(o).length + ART.ideas.semanasTramas(o);
         if (usaLocacion(o))
             r.rodaje += Math.max(0, terrenosDe(o).length - 1);
         if (estilosDe(o).indexOf('plano') >= 0)
@@ -12663,9 +12733,9 @@ ART.medios = (function () {
             return '';
         const k = indiceMd(b), am = contenido(b).amor || 0, e = N.anio() - t.nac;
         if (t.jugador)
-            return e < 18 && (am >= 2 || k > 2) ? 'Eres menor de edad: solo obras hasta PG-13' : '';
-        if (e < 18 && (am >= 2 || k > 2))
-            return t.nom + ' es menor de edad: solo obras hasta PG-13';
+            return e < 18 && am >= 2 ? 'Eres menor de edad: nunca en obras con contenido sexual ni eróticas' : '';
+        if (e < 18 && am >= 2)
+            return t.nom + ' es menor de edad: nunca en obras con contenido sexual ni eróticas';
         return '';
     }
     function pjNuevo(b, imp, arq) { return ART.ideas.personajeNuevo({ gen: generosDe(b), lug: b.lug, est: 0 }, imp, arq); }
@@ -13224,6 +13294,10 @@ ART.medios = (function () {
         const ts = p.eq.map(T.porId).filter(Boolean);
         let q = ts.length ? ts.reduce(function (s, t, i) { return s + habEnObra(t, p) * (i === 0 ? 1.5 : 1); }, 0) / (ts.length + 0.5) : 40;
         q += p.esc * 3 + presBono(p) + (p.dq || 0) + pulido(p).q + bonoReparto(p).q + depBono(p).q + guionBono(p);
+        if (p.trN || p.narr) {
+            const et = ART.ideas.efectoTramas(Object.assign({ gen: generosDe(p) }, p, { eq: null }), ts[0] ? habEnObra(ts[0], p) : 50);
+            q += (et.crit + et.pub) * 0.8;
+        }
         const bd = p.cfg.banda ? banda(p.cfg.banda) : null;
         if (bd)
             q += bd.prac / 6 + (bd.rel - 50) / 25;
@@ -14087,6 +14161,11 @@ ART.negocio = (function () {
             b._crit = (b._crit || 0) + (vis.crit || 0);
             b._pub = (b._pub || 0) + (vis.pub || 0);
         }
+        const tp = D.efectoTipo(est.tipo);
+        if (tp.bono)
+            sumar(tp.bono);
+        b._crit = (b._crit || 0) + (tp.crit || 0);
+        b._pub = (b._pub || 0) + (tp.pub || 0);
         const pub = D.publicos.filter(function (v) { return v.id === est.publico; })[0];
         if (pub && pub.familias.indexOf(famId) >= 0) {
             b._crit = (b._crit || 0) + (pub.crit || 0);
@@ -14127,7 +14206,7 @@ ART.negocio = (function () {
         let a = 0;
         N.S.estudios[0].pisos.forEach(function (id) { a += infoPiso(id).marketing || 0; });
         const vis = D.visiones.filter(function (v) { return v.id === N.S.estudios[0].vision; })[0];
-        return a + (vis && vis.marketing ? vis.marketing : 0) + ART.sede.bonoMarketing() + ART.carrera.bonoMarketing();
+        return a + (vis && vis.marketing ? vis.marketing : 0) + (D.efectoTipo(N.S.estudios[0].tipo).marketing || 0) + ART.sede.bonoMarketing() + ART.carrera.bonoMarketing();
     }
     function costoConstruccion(info) {
         const est = N.S.estudios[0];
@@ -14982,7 +15061,7 @@ ART.tv = (function () {
         const f = formato(b.tv.fmt);
         b.tv.eps = Math.round(N.limitar(+b.tv.eps || f.def, Math.max(2, f.eps[0]), Math.min(300, f.eps[1])));
         b.tv.sala = Math.round(N.limitar(+b.tv.sala || 1, 1, 12));
-        b.tv.tramas = +b.tv.tramas === 3 ? 3 : 2;
+        b.tv.tramas = N.limitar(Math.round(+b.tv.tramas || 2), 1, 6);
         if (f.vivo) {
             b.nat = 'r';
             b.tv.sub = b.tv.sub || 'variedades';
@@ -14998,7 +15077,7 @@ ART.tv = (function () {
         if (!o.tv)
             return 1;
         const f = formato(o.tv.fmt);
-        return f.k * 0.42 * Math.pow(o.tv.eps, 0.78) * (1 + (o.tv.sala || 1) * 0.02) * (o.tv.tramas === 3 ? 1.06 : 1);
+        return f.k * 0.42 * Math.pow(o.tv.eps, 0.78) * (1 + (o.tv.sala || 1) * 0.02) * (1 + 0.03 * ((o.tv.tramas || 2) - 2));
     }
     function factorSemanas(o) { return o.tv ? N.limitar(o.tv.eps * (o.min || 45) / 300, 0.6, 3.5) * (formato(o.tv.fmt).vivo ? 0.5 : 1) : 1; }
     function costoEpisodio(o) { return Math.round((o.pp || 0) / Math.max(1, o.tv.eps)); }
@@ -15011,7 +15090,7 @@ ART.tv = (function () {
         const sala = o.tv.sala || 1, serial = o.tv.modo === 'serial';
         o.tv.tr = [];
         for (let i = 0; i < o.tv.tramas; i++)
-            o.tv.tr.push({ n: ['Trama A', 'Trama B', 'Trama C'][i], v: Math.round(N.limitar(o.pub + N.normal(0, 6) + (sala - 4) - (serial && sala < 4 ? 5 : 0) - i * 2, 1, 99)) });
+            o.tv.tr.push({ n: 'Trama ' + 'ABCDEF'.charAt(i), v: Math.round(N.limitar(o.pub + N.normal(0, 6) + (sala - 4) - (serial && sala < 4 ? 5 : 0) - i * 2, 1, 99)) });
         o.tv.q = Math.round(o.tv.tr.reduce(function (a, x) { return a + x.v; }, 0) / o.tv.tr.length);
     }
     function costoPiloto(b) { return Math.round(((b.pp || 0) + O.costoTalento(b)) * 0.1); }
@@ -16229,6 +16308,8 @@ ART.arte = (function () {
         ['#13052e', '#5b0f4f'], ['#0a2533', '#3b1d0c'], ['#0b0d12', '#1b2130']];
     const FUENTE_EPOCA = ['Georgia,serif', 'Copperplate,Futura,fantasy', 'Impact,sans-serif',
         '"Arial Black",sans-serif', 'Impact,"Trebuchet MS",sans-serif', 'Futura,"Gill Sans",Optima,sans-serif'];
+    const PALETAS_DIS = [['#1a0f2e', '#4a1d5c'], ['#0b1d3a', '#1f5f8b'], ['#3a0b0b', '#a8322d'], ['#0d2b1d', '#2f7d4f'], ['#2b2210', '#c89b3c'], ['#101010', '#4a4a4a'], ['#2e0b2b', '#e0579b'], ['#0b2b2e', '#35c6c9'], ['#f2e8d5', '#c9b48a'], ['#000814', '#ffd60a']];
+    const ACENTOS_DIS = ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#f8f9fa', '#ff6b35', '#9b5de5', '#00f5d4', '#fee440', '#e63946'];
     const epocaPoster = (a) => (a < 1915 ? 0 : a < 1946 ? 1 : a < 1970 ? 2 : a < 1990 ? 3 : a < 2010 ? 4 : 5);
     function motivoGenero(g) {
         const k = String(g || '').toLowerCase();
@@ -16752,13 +16833,15 @@ ART.arte = (function () {
         c.save();
         try {
             const q = azar(hash((o.titulo || '') + '|' + o.id));
-            const era = epocaPoster(o.anio || 1950);
-            const mo = motivoGenero(o.generos && o.generos[0]);
-            const acento = ACENTO_MOTIVO[mo];
+            const dis = o.dis && o.dis.m === 'propio' ? o.dis : null;
+            const era = dis && dis.e >= 0 && dis.e <= 5 ? dis.e : epocaPoster(o.anio || 1950);
+            const mo = dis && dis.mo >= 0 && dis.mo <= 10 ? dis.mo : motivoGenero(o.generos && o.generos[0]);
+            const acento = dis && dis.a >= 0 && dis.a < ACENTOS_DIS.length ? ACENTOS_DIS[dis.a] : ACENTO_MOTIVO[mo];
             const tinta = era === 0 ? 'rgba(70,42,18,.82)' : 'rgba(6,7,14,.82)';
             const g = c.createLinearGradient(0, 0, 0, h);
-            g.addColorStop(0, PALETA_EPOCA[era][0]);
-            g.addColorStop(1, PALETA_EPOCA[era][1]);
+            const pal = dis && dis.f >= 0 && dis.f < PALETAS_DIS.length ? PALETAS_DIS[dis.f] : PALETA_EPOCA[era];
+            g.addColorStop(0, pal[0]);
+            g.addColorStop(1, pal[1]);
             c.fillStyle = g;
             c.fillRect(0, 0, w, h);
             if (era >= 2) {
@@ -16791,7 +16874,7 @@ ART.arte = (function () {
         const est = o.estudio || {};
         return [o.id, o.titulo, w, h, d, estadoObra(o), o.crit, o.pub, o.premiosGanados | 0, o.clas, o.anio,
             (o.generos || []).join(','), (o.temas || [])[0], JSON.stringify(o.creditos || {}), est.nombre,
-            JSON.stringify(est.logo || 0)].join('|');
+            JSON.stringify(est.logo || 0), JSON.stringify(o.dis || 0)].join('|');
     }
     function posterEn(canvas, o) {
         const L = prepararLienzo(canvas, 80, 120);
@@ -19316,6 +19399,7 @@ ART.arte = (function () {
         menosMovimiento: false,
         PANELES: PANELES, TEXTURAS: TEXTURAS, POSICIONES: POSICIONES,
     };
+    api.motivoGenero = motivoGenero;
     return api;
 })();
 ART.carrera = (function () {
@@ -20189,11 +20273,16 @@ ART.juego = (function () {
         S.avatar = { nom: (av.nombre || 'Alex Rivera').slice(0, 30), sx: av.sexo || 'M', nac: anio - (av.edad || 30), id: 999999, esp: esp };
         S.avatar.pais = av.pais && D.pais(av.pais) && D.pais(av.pais).id === av.pais ? av.pais : pais.id;
         S.avatar.estu = ART.carrera.ESTUDIOS[av.estu] ? av.estu : '';
+        if (av.cumple && av.cumple.m >= 1 && av.cumple.m <= 12)
+            S.avatar.cum = { d: N.limitar(Math.round(av.cumple.d) || 1, 1, 31), m: Math.round(av.cumple.m) };
         if (av.aspecto)
             S.avatar.asp = aspectoValido(av.aspecto);
         const vis = D.visiones.filter(function (v) { return v.id === S.estudios[0].vision; })[0];
         if (vis && vis.fama)
             S.estudios[0].fama = N.redondear(S.estudios[0].fama + vis.fama, 3);
+        const tpE = D.efectoTipo(S.estudios[0].tipo);
+        if (tpE.fama)
+            S.estudios[0].fama = N.redondear(S.estudios[0].fama + tpE.fama, 3);
         const e0 = S.estudios[0];
         const ajusteDif = { facil: 3, normal: 0, dificil: -2, experto: -3, pesadilla: -4 }[S.dificultad] || 0;
         if (tarjeta)
@@ -20865,6 +20954,7 @@ ART.metas = (function () {
         ['misiones10', 'Siempre cumplo', 'Cumple 10 misiones.', function (S) { return (st().misOk || 0) >= 10; }],
         ['legado100', 'Huella imborrable', 'Junta 100 puntos de legado.', function (S) { return st().legado >= 100; }],
         ['valiente', 'Sin miedo', 'Juega diez años en Experto o Pesadilla.', function (S) { return (S.dificultad === 'experto' || S.dificultad === 'pesadilla') && S.t >= 520; }],
+        ['cumple', 'El mejor jugador de INDUSTRY ART', 'Juega el día de tu cumpleaños.', function (S) { return !!(S.metas && S.metas.cumple); }],
         ['medalla', 'Oro puro', 'Cumple un reto con medalla de oro.', function (S) { return st().medalla === 'oro'; }],
     ];
     let cacheMias = null;
@@ -22976,7 +23066,12 @@ ART.ui = (function () {
         const v = cv.getAttribute('data-poster');
         if (v === 'x') {
             const tit = cv.getAttribute('data-tit') || '';
-            ART.arte.posterEn(cv, { id: N.hash(tit), titulo: tit, generos: [cv.getAttribute('data-gen') || 'Drama'], temas: [], anio: +cv.getAttribute('data-anio') || N.anio(), etapa: 'terminada', crit: null, pub: null, clas: cv.getAttribute('data-clas') || 'PG', premiosGanados: 0, creditos: {}, estudio: { nombre: cv.getAttribute('data-est') || '', logo: null } });
+            let dis = null;
+            try {
+                dis = JSON.parse(cv.getAttribute('data-dis') || 'null');
+            }
+            catch (e) { }
+            ART.arte.posterEn(cv, { id: N.hash(tit), dis: dis, titulo: tit, generos: [cv.getAttribute('data-gen') || 'Drama'], temas: [], anio: +cv.getAttribute('data-anio') || N.anio(), etapa: 'terminada', crit: null, pub: null, clas: cv.getAttribute('data-clas') || 'PG', premiosGanados: 0, creditos: {}, estudio: { nombre: cv.getAttribute('data-est') || '', logo: null } });
             return;
         }
         if (!N.S)
@@ -23949,7 +24044,7 @@ ART.pantallas = (function () {
             op('abrirGuardado', 'carpeta', t('cargar')) +
             '<label class="btn">' + icono('subir') + '<span>' + t('importar') + '</span><input type="file" accept=".iasave,.json,application/json" data-c="importarArchivo" class="oculto"></label>' +
             op('abrirAjustes', 'ajustes', t('ajustes')) +
-            '</div><p class="creditos">' + t('creditos') + '</p></div>';
+            '</div><p class="creditos">' + t('creditos') + '</p><p class="creditos tenue" style="margin-top:2px">Hoy es ' + esc(fechaReal(new Date())) + '</p></div>';
     }
     const NOMS_AV = { F: ['Lucía', 'Marta', 'Elena', 'Sofía', 'Valeria', 'Inés', 'Aiko', 'Amara', 'Priya', 'Chloe', 'Renata', 'Julia', 'Nadia', 'Mei'], M: ['Mateo', 'Andrés', 'Tomás', 'Kenji', 'Kwame', 'Ravi', 'Lucas', 'Hugo', 'Omar', 'Diego', 'Bruno', 'Iván', 'Samuel', 'León'] };
     const APS_AV = ['Rojas', 'Valdés', 'Moreau', 'Tanaka', 'Okafor', 'Sharma', 'Blake', 'Ferrari', 'Novak', 'Duarte', 'Castell', 'Ibarra', 'Lindgren', 'Quiroga'];
@@ -24028,7 +24123,7 @@ ART.pantallas = (function () {
                     '<div class="tarjeta">' + opcionesLetrero(L, 'np') + num('s') + num('c') + num('b') + num('t') + num('f') + '</div></div>' +
                     '<canvas id="lienzoEstudio" class="estudio-lienzo" style="height:170px" role="img" aria-label="Vista previa de la fachada"></canvas>' +
                     '<label class="campo"><span>Tipo de industria</span><select data-c="npInd">' + ops(D.industrias.filter(function (x) { return x.desde <= np.anio; }).map(function (x) { return [x.id, x.id]; }), indNp().id) + '</select><span class="nota">' + esc(indNp().efecto) + '</span></label>' +
-                    '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x]; }), np.tipo) + '</select></label>' +
+                    '<label class="campo"><span>Tipo de estudio</span><select data-c="np" data-k="tipo">' + ops(D.tiposEstudio.map(function (x) { return [x, x + ' · ' + D.efectoTipo(x).efecto]; }), np.tipo) + '</select></label>' +
                     '<label class="campo"><span>Visión de la industria</span><select data-c="np" data-k="vision">' + ops(D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.vision) + '</select></label>' +
                     '<label class="campo"><span>Público objetivo</span><select data-c="np" data-k="publico">' + ops(D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), np.publico) + '</select></label>' +
                     '<h3>Enfoque del estudio</h3><p class="nota info">Hasta 3 géneros y 3 temas: tus obras con ellos ganan público y crítica, y cada 5 obras del enfoque suman experiencia.</p>' +
@@ -24042,6 +24137,10 @@ ART.pantallas = (function () {
                 return '<label class="campo"><span>' + t('np_tu_nombre') + '</span><input type="text" maxlength="30" value="' + esc(np.avNombre) + '" data-i="np" data-k="avNombre"></label>' +
                     '<div class="fila"><label class="campo crece"><span>' + t('np_sexo') + '</span><select data-c="npSexo">' + ops([['F', t('mujer')], ['M', t('hombre')]], np.avSexo) + '</select></label>' +
                     '<label class="campo crece"><span>' + t('np_edad') + '</span><input type="number" min="16" max="90" value="' + np.avEdad + '" data-c="npEdad"></label></div>' +
+                    '<div class="fila"><label class="campo crece"><span>Día de nacimiento</span><input type="number" min="1" max="31" value="' + (np.avNacD || 1) + '" data-c="npNac" data-k="d"></label>' +
+                    '<label class="campo crece"><span>Mes</span><select data-c="npNac" data-k="m">' + ops(MESES_NAC.map(function (x, i) { return [String(i + 1), x]; }), String(np.avNacM || 1)) + '</select></label>' +
+                    '<label class="campo crece"><span>Año</span><input type="number" min="' + (np.anio - 90) + '" max="' + (np.anio - 16) + '" value="' + (np.anio - np.avEdad) + '" data-c="npNac" data-k="y"></label></div>' +
+                    '<p class="nota info">Naciste el ' + (np.avNacD || 1) + ' de ' + MESES_NAC[(np.avNacM || 1) - 1].toLowerCase() + ' de ' + (np.anio - np.avEdad) + '. Tu avatar cumple años ese día en el calendario del juego y, si coincide con tu cumpleaños de verdad, INDUSTRY ART te tiene una sorpresa.</p>' +
                     '<label class="campo"><span>País</span><select data-c="np" data-k="avPais">' + ops(paises, np.avPais || np.pais) + '</select></label>' +
                     '<button class="btn" data-a="npDadoAvatar">' + icono('dado') + ' Otro nombre para tu avatar</button>' +
                     '<h3>Tu aspecto</h3><div class="fila" id="npAvatarVista" style="align-items:flex-start"><canvas class="retrato grande" data-retrato="nuevo" role="img" aria-label="Tu avatar" style="position:sticky;top:70px"></canvas>' +
@@ -24131,6 +24230,21 @@ ART.pantallas = (function () {
     ac('npEra', function (v) { np.anio = N.limitar(+v, J.ANIO_MIN, J.ANIO_MAX); np.capital = 0; cacheT = -1; redibujarNP(); });
     ac('npSexo', function (v) { np.avSexo = v === 'F' ? 'F' : 'M'; if (np.asp && v === 'F')
         np.asp.barba = 0; redibujarNP(); });
+    const MESES_NAC = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    ac('npNac', function (v, el) {
+        const k = el.getAttribute('data-k');
+        if (k === 'd')
+            np.avNacD = N.limitar(Math.round(+v) || 1, 1, 31);
+        else if (k === 'm')
+            np.avNacM = N.limitar(Math.round(+v) || 1, 1, 12);
+        else
+            np.avEdad = N.limitar(np.anio - (Math.round(+v) || (np.anio - 30)), 16, 90);
+        const dm = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][(np.avNacM || 1) - 1];
+        np.avNacD = Math.min(np.avNacD || 1, dm);
+        if (U.estado.avatarNuevo)
+            U.estado.avatarNuevo.edad = np.avEdad;
+        redibujarNP();
+    });
     ac('npEdad', function (v) { np.avEdad = N.limitar(Math.round(+v) || 30, 16, 90); U.estado.avatarNuevo.edad = np.avEdad; U.dibujar(document.getElementById('npAvatarVista')); });
     ac('npAsp', function (v, el) {
         const k = el.getAttribute('data-k'), a = aspectoNp();
@@ -24269,7 +24383,7 @@ ART.pantallas = (function () {
             logo: U.estado.logoNuevo, pais: np.pais, capital: np.capital || J.capitalRecomendado(np.anio), dificultad: np.dificultad,
             escenario: np.escenario, personalidad: String(np.personalidad).split('|')[0], rasgo: String(np.personalidad).split('|')[1] || '', creado: new Date().toISOString(),
             tipo: np.tipo, vision: np.vision, publico: np.publico, industria: indNp().id,
-            avatar: { nombre: (np.avNombre || '').trim() || nombreAvatarAzar(np.avSexo), sexo: np.avSexo, edad: edad, especialidades: np.esp, aspecto: aspectoNp(), pais: np.avPais || np.pais, estu: np.avEst },
+            avatar: { nombre: (np.avNombre || '').trim() || nombreAvatarAzar(np.avSexo), sexo: np.avSexo, edad: edad, especialidades: np.esp, aspecto: aspectoNp(), pais: np.avPais || np.pais, estu: np.avEst, cumple: { d: np.avNacD || 1, m: np.avNacM || 1 } },
             modoJuego: np.modoJuego, reto: np.reto === undefined ? undefined : np.reto || null, tutorial: !!np.tutorial, perso: np.perso,
             region: np.region, sufijo: np.sufijo, trasfondo: np.tf, arquetipo: np.arq, modo: np.modo, oficio: np.oficio,
             enfoque: { gen: np.enfG.filter(function (x, i, a) { return x && a.indexOf(x) === i; }), tem: np.enfT.filter(function (x, i, a) { return x && a.indexOf(x) === i; }) },
@@ -24914,7 +25028,7 @@ ART.pantallas = (function () {
             '<p class="nota info">La imagen propia se guarda solo en este dispositivo: no viaja en la partida, en el archivo .iasave ni en los pósters.</p>' +
             '<label class="campo"><span>Público objetivo</span>' + opsSel('publico', D.publicos.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.publico) + '</label>' +
             '<label class="campo"><span>Visión de la industria</span>' + opsSel('vision', D.visiones.map(function (x) { return [x.id, x.id + ' · ' + x.efecto]; }), est.vision) + '</label>' +
-            '<label class="campo"><span>Tipo de estudio</span>' + opsSel('tipo', D.tiposEstudio.map(function (x) { return [x, x]; }), est.tipo) + '</label>' +
+            '<label class="campo"><span>Tipo de estudio</span>' + opsSel('tipo', D.tiposEstudio.map(function (x) { return [x, x + ' · ' + D.efectoTipo(x).efecto]; }), est.tipo) + '</label>' +
             '<p class="nota">Industria de origen: <b>' + esc(D.industria(est.industria).id) + '</b> · ' + esc(D.industria(est.industria).efecto) + '. Cambiar la visión o el público cambia sus efectos en tus próximas obras.</p></div>';
         return h;
     }
@@ -25211,6 +25325,73 @@ ART.pantallas = (function () {
         U.renderBarra();
         mostrarResumen(r);
     });
+    function edadAvatar() {
+        const S = N.S, a = S && S.avatar;
+        if (!a)
+            return null;
+        const h = ART.cal.hoy(), c = a.cum;
+        return h.y - a.nac - (c && (h.m < c.m || (h.m === c.m && h.d < c.d)) ? 1 : 0);
+    }
+    N.on('semana', function () {
+        const S = N.S, a = S && S.avatar;
+        if (!a || !a.cum || S.bot || S.taller)
+            return;
+        const h = ART.cal.hoy();
+        if (a.cumA === h.y)
+            return;
+        if (h.m > a.cum.m || (h.m === a.cum.m && h.d >= a.cum.d)) {
+            a.cumA = h.y;
+            ART.juego.noticia({ tipo: 'estudio', texto: '🎂 ¡Feliz cumpleaños, ' + a.nom + '! Hoy cumples ' + (h.y - a.nac) + ' años. El equipo del estudio te canta y la moral sube.', importante: true });
+            const t = ART.carrera.asegurarTalento && ART.carrera.asegurarTalento();
+            if (t)
+                t.mo = Math.min(100, (t.mo || 60) + 5);
+        }
+    });
+    let sorpresa = null;
+    function cumpleReal() {
+        const S = N.S, a = S && S.avatar;
+        if (!a || !a.cum || S.bot || S.taller)
+            return false;
+        const hoy = new Date();
+        if (hoy.getDate() !== a.cum.d || hoy.getMonth() + 1 !== a.cum.m)
+            return false;
+        let ya = '';
+        try {
+            ya = localStorage.getItem('ia_cumple') || '';
+        }
+        catch (e) { }
+        return ya !== hoy.getFullYear() + '|' + a.nom;
+    }
+    function felicitar() {
+        sorpresa = null;
+        if (!cumpleReal())
+            return;
+        if (U.modalAbierto()) {
+            sorpresa = setTimeout(felicitar, 20000);
+            return;
+        }
+        const S = N.S, a = S.avatar, hoy = new Date(), regalo = Math.round(E.presupuestoTipico(N.anio()) * 0.5);
+        try {
+            localStorage.setItem('ia_cumple', hoy.getFullYear() + '|' + a.nom);
+        }
+        catch (e) { }
+        NG.cobrarEn(0, 'eventos', regalo);
+        S.metas = S.metas || {};
+        S.metas.cumple = hoy.getFullYear();
+        ART.metas.revisarLogros();
+        detenerAuto();
+        U.renderBarra();
+        U.modal('<h2>🎉 ¡Feliz cumpleaños, ' + esc(a.nom) + '!</h2><p>Hoy, ' + esc(fechaReal(hoy)) + ', es tu día de verdad. Todo el equipo de INDUSTRY ART lo celebra contigo.</p>' +
+            '<div class="tarjeta"><b>🏆 Premio: El mejor jugador de INDUSTRY ART</b><p class="chico">Y un regalo para tu estudio: ' + esc(dinero(regalo)) + '.</p></div>' +
+            '<p class="nota">Gracias por jugar. Que este año esté lleno de estrenos.</p><button class="btn primario bloque" data-a="cerrarModal">¡Gracias!</button>');
+        ART.arte.sonido && ART.arte.sonido('exito');
+    }
+    function fechaReal(d) { return ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][d.getDay()] + ' ' + d.getDate() + ' de ' + ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][d.getMonth()] + ' de ' + d.getFullYear(); }
+    ['partidaNueva', 'partidaCargada'].forEach(function (ev) { N.on(ev, function () {
+        if (sorpresa)
+            clearTimeout(sorpresa);
+        sorpresa = cumpleReal() ? setTimeout(felicitar, Math.round(45000 + Math.random() * 150000)) : null;
+    }); });
     ac('resumenNo', function () { U.ajuste('resumenAnual', false); U.cerrarModal(); U.aviso('Puedes volver a activarlo en Ajustes.'); });
     ac('verResumen', function (v) { const r = (N.S.resumenes || [])[+v]; if (r)
         mostrarResumen(r); });
@@ -25411,7 +25592,7 @@ ART.pantallas = (function () {
         else if (p[0] === 'talento')
             U.refrescarFicha(fichaTalento(+p[1]));
     }
-    return {
+    return { edadAvatar: edadAvatar, felicitar: felicitar, cumpleReal: cumpleReal, fechaReal: fechaReal,
         portada: portada, nuevaPartida: nuevaPartida, estudio: estudio, salon: salon, obras: obras, talento: talento, mundo: mundo, negocio: negocio,
         fichaObra: fichaObra, fichaTalento: fichaTalento, alMostrar: alMostrar, refrescarFicha: refrescarFicha, detenerAuto: detenerAuto,
         datosEstudio: datosEstudio, tareas: tareas, avanzarHasta: avanzarHasta, mostrarResumen: mostrarResumen,
@@ -26462,7 +26643,7 @@ ART.creacion = (function () {
             k = i; });
         if (c.id === 'amor' && I.hayMenores(b))
             k = Math.min(k, 1);
-        if (I.hayNinos(b)) {
+        if (I.esInfantil(b)) {
             let m = 0;
             c.niveles.forEach(function (n, i) { if (n[1] <= 2)
                 m = i; });
@@ -26772,7 +26953,7 @@ ART.creacion = (function () {
         h += '<h4>Contenido</h4><p class="nota info">La clasificación sale de lo más fuerte del contenido. Nada es gráfico: lo de adultos siempre es sugerido.</p>';
         X.contenido.forEach(function (c) { h += rango('c:' + c.id, 0, maxNivel(b, c), Math.min(b.cont[c.id] || 0, maxNivel(b, c)), c.nombre, textoNivel(c, b.cont[c.id] || 0)); });
         if (I.hayMenores(b))
-            h += '<p class="nota info">Hay personajes menores de edad: el amor no pasa de romántico' + (I.hayNinos(b) ? ', y con niños en el elenco la obra no pasa de PG-13 (los niños actores solo hacen obras hasta PG-13)' : '') + '.</p>';
+            h += '<p class="nota info">Hay personajes menores de edad: el amor no pasa de romántico y la obra no puede ser erótica; sí puede tener otra clasificación fuerte (violencia, lenguaje, miedo).' + (I.esInfantil(b) ? ' Por ser infantil, no pasa de PG-13.' : '') + '</p>';
         h += '<p id="crClas">' + textoClas(b) + '</p>';
         const permiteN = I.indiceClasificacion(b) <= 2 && b.gen.indexOf('Erótico') < 0;
         h += '<label class="interruptor"><span>Clasificación N (general, con contenido moderado y controlado; rinde la mitad)</span><input type="checkbox" data-c="crClasN"' + (b.clasN ? ' checked' : '') + (permiteN ? '' : ' disabled') + '></label>';
@@ -27335,6 +27516,50 @@ ART.creacion = (function () {
         h += '<p class="nota info">Es orientativo: la competencia de esa semana, las críticas y el boca a boca deciden el estreno real.</p><div class="fila"><button class="btn" data-a="crDocIdea">' + icono('bajar') + 'Descargar la idea</button></div></div>';
         return h;
     }
+    const NOM_FONDO = ['Violeta noche', 'Azul océano', 'Rojo sangre', 'Verde selva', 'Oro viejo', 'Gris carbón', 'Rosa neón', 'Turquesa', 'Papel antiguo', 'Negro y amarillo'];
+    const NOM_ACENTO = ['Dorado', 'Carmesí', 'Esmeralda', 'Azul', 'Blanco', 'Naranja', 'Violeta', 'Aguamarina', 'Amarillo', 'Rojo'];
+    const NOM_MOTIVO = ['Terror: sombras y luna', 'Ciencia ficción: planetas', 'Fantasía: castillo', 'Romance: corazones', 'Western: desierto', 'Historia y guerra', 'Comedia y familia', 'Acción y aventura', 'Crimen y misterio', 'Deportes', 'Drama: retrato'];
+    const NOM_LETRA = ['Cartel antiguo', 'Art déco', 'Clásico de estudio', 'Pop de los setenta', 'Neón ochentero', 'Moderno'];
+    function bloquePoster(b) {
+        const d = b.dis || { m: 'auto' }, propio = d.m === 'propio';
+        let h = '<h4>Póster de la obra</h4><div class="fila" style="gap:12px;align-items:flex-start"><canvas class="poster" data-poster="x" data-tit="' + esc(b.tit || 'Sin título') + '" data-gen="' + esc(b.gen[0] || 'Drama') + '" data-anio="' + anio() + '" data-clas="' + esc(b.clas || 'PG') + '" data-dis="' + esc(JSON.stringify(propio ? d : null)) + '" style="width:96px;height:144px;border-radius:6px;flex:none"></canvas><div class="col crece">' +
+            '<div class="chips">' + chip('Automático', 'crPosM', 'auto', !propio) + chip('Diseñarlo yo', 'crPosM', 'propio', propio) + '</div>';
+        if (!propio)
+            return h + '<p class="nota">Se arma solo con el título, el género y la época de la obra.</p></div></div>';
+        const opsP = function (k, nombres, val) { return '<label class="campo"><span>' + { f: 'Fondo', a: 'Color de acento', mo: 'Imagen', e: 'Tipografía' }[k] + '</span><select data-c="crPos" data-k="' + k + '">' + nombres.map(function (x, i) { return '<option value="' + i + '"' + (+val === i ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></label>'; };
+        h += opsP('f', NOM_FONDO, d.f) + opsP('a', NOM_ACENTO, d.a) + opsP('mo', NOM_MOTIVO, d.mo) + opsP('e', NOM_LETRA, d.e) + '<div class="fila">' + '<button class="btn" data-a="crPosAzar">Otro diseño al azar</button></div>';
+        return h + '</div></div>';
+    }
+    function disNuevo(b) { const r = N.hash((b.tit || 'x') + '|' + Date.now()); return { m: 'propio', f: r % 10, a: (r >> 4) % 10, mo: (r >> 8) % 11, e: (r >> 12) % 6 }; }
+    ac('crPosM', function (v) { const b = cr.b; if (!b)
+        return; if (v === 'propio')
+        b.dis = b.dis && b.dis.m === 'propio' ? b.dis : Object.assign(disNuevo(b), { mo: ART.arte.motivoGenero ? ART.arte.motivoGenero(b.gen[0]) : 10 });
+    else
+        delete b.dis; refrescar(); });
+    ac('crPos', function (v, el) { const b = cr.b; if (!b || !b.dis)
+        return; b.dis[el.getAttribute('data-k')] = +v; refrescar(); });
+    ac('crPosAzar', function () { const b = cr.b; if (!b)
+        return; b.dis = disNuevo(b); refrescar(); });
+    function bloqueTramas(b) {
+        const tr = I.tramasDe(b), ef = I.efectoTramas(b);
+        let h = '<h4>Tramas (' + tr.n + ' de 6)</h4><div class="chips">' + [1, 2, 3, 4, 5, 6].map(function (n) { return chip(n === 1 ? '1 · solo la principal' : String(n), 'crTrN', String(n), tr.n === n); }).join('') + '</div>';
+        if (tr.n > 1)
+            h += '<div class="fila envolver">' + Array.apply(null, { length: tr.n - 1 }).map(function (x, i) {
+                return '<label class="campo crece"><span>Trama ' + 'BCDEF'.charAt(i) + '</span><select data-c="crTrT" data-k="' + i + '"><option value="">— elige el tipo —</option>' + I.TIPOS_TRAMA.map(function (y) { return '<option value="' + y.id + '"' + ((b.trT || [])[i] === y.id ? ' selected' : '') + '>' + esc(y.nombre) + '</option>'; }).join('') + '</select></label>';
+            }).join('') + '</div>';
+        const na = I.NARRADORES.filter(function (y) { return y.id === (b.narr || ''); })[0] || I.NARRADORES[0];
+        h += '<label class="campo"><span>Tipo de narrador</span><select data-c="crNarr">' + I.NARRADORES.map(function (y) { return '<option value="' + y.id + '"' + ((b.narr || '') === y.id ? ' selected' : '') + '>' + esc(y.nombre) + '</option>'; }).join('') + '</select></label>';
+        h += '<p class="nota">' + esc(na.texto) + ' Más tramas: más riqueza (sube la crítica si tu guionista tiene experiencia, baja si no), 3 % más de costo por trama' + (b.tv ? ' por episodio' : '') + ' y una semana más de preparación cada dos. Ahora: crítica ' + signo(ef.crit) + ', público ' + signo(ef.pub) + '.</p>';
+        return h;
+    }
+    ac('crTrN', function (v) { const b = cr.b; if (!b)
+        return; const n = N.limitar(+v || 1, 1, 6); if (b.tv)
+        b.tv.tramas = n; b.trN = n; b.trT = (b.trT || []).slice(0, n - 1); ajustar(b); refrescar(); });
+    ac('crTrT', function (v, el) { const b = cr.b; if (!b)
+        return; b.trT = b.trT || []; b.trT[+el.getAttribute('data-k')] = v || ''; ajustar(b); refrescar(); });
+    ac('crNarr', function (v) { const b = cr.b; if (!b)
+        return; b.narr = v || ''; if (!b.narr)
+        delete b.narr; ajustar(b); refrescar(); });
     function bloqueMusica(b) {
         let h = '<p class="nota info">La música suma calidad y puede sumar crítica o público. Elige un paquete o una canción famosa con licencia.</p><h4>Paquete de música</h4><div class="chips">' + I.PAQUETES_MUSICA.map(function (x) { return chip(x.nombre + (x.k ? ' · ' + (x.k > 0 ? '+' : '') + Math.round(x.k * 100) + ' %' : ''), 'crMus', x.id, (b.mus || '') === x.id); }).join('') + '</div><p class="nota info">' + esc(I.paqueteMusica(b.mus).texto) + '</p>';
         const medNd = b.tv ? 'tv' : 'cine';
@@ -27366,12 +27591,12 @@ ART.creacion = (function () {
     }
     function kpiCr(n, v, c) { return '<div class="kpi"><span>' + esc(n) + '</span><b class="cifra ' + (c || '') + '">' + esc(v) + '</b></div>'; }
     const SECCIONES = [
-        ['obra', 'La obra', bloqueObra], ['generos', 'Géneros', bloqueGeneros], ['historia', 'Historia', function (b) { return bloqueHistoria(b, true); }],
+        ['obra', 'La obra', bloqueObra], ['generos', 'Géneros', bloqueGeneros], ['historia', 'Historia', function (b) { return bloqueHistoria(b, true) + bloqueTramas(b); }],
         ['musica', 'Música de la obra', bloqueMusica], ['estilo', 'Corriente, tono, estilo y formato', bloqueEstilo], ['mundo', 'Época, lugar e idioma', bloqueMundo],
         ['publico', 'Público y contenido', bloquePublico], ['personajes', 'Personajes', bloquePersonajes], ['equipo', 'Equipo', function (b) { return bloqueEquipo(b, false); }],
         ['forma', 'Duración, complejidad, ritmo, efectos y presupuesto', bloqueForma], ['rodaje', 'Cómo y dónde se filma', bloqueRodaje],
         ['presupuesto', 'Presupuesto, departamentos y personal de apoyo', bloquePresupuesto], ['financiacion', 'Financiación', bloqueFinanciacion],
-        ['proyeccion', 'Proyección: título, sinopsis y predicción', function (b) { return bloqueTitulo(b) + bloqueResumen(b); }],
+        ['proyeccion', 'Proyección: título, póster, sinopsis y predicción', function (b) { return bloqueTitulo(b) + bloquePoster(b) + bloqueResumen(b); }],
     ];
     const PEND_TAB = { generos: 'gen', historia: 'his', musica: 'mus', personajes: 'pj', equipo: 'eq', rodaje: 'rod' };
     const CORTO = { musica: 'Música', financiacion: 'Financiación', proyeccion: 'Proyección', obra: 'La obra', generos: 'Géneros', historia: 'Historia', estilo: 'Estilo', mundo: 'Mundo', publico: 'Público', forma: 'Forma', rodaje: 'Rodaje', presupuesto: 'Presupuesto', personajes: 'Personajes', equipo: 'Equipo', titulo: 'Título', resumen: 'Resumen' };
@@ -27415,7 +27640,7 @@ ART.creacion = (function () {
         h += sec(4, 'Géneros principales (hasta 3)', bloqueGeneros(b));
         h += sec(5, 'Subgéneros', bloqueHistoria(b, true, ['sub']));
         h += sec(6, 'Temas y tópicos', bloqueHistoria(b, true, ['rec', 'tem', 'prob', 'pre']) + bloqueMundo(b));
-        h += sec(7, 'Arco de la historia y moraleja', bloqueHistoria(b, true, ['arco', 'mor']));
+        h += sec(7, 'Arco de la historia, tramas y narrador', bloqueHistoria(b, true, ['arco', 'mor']) + bloqueTramas(b));
         h += sec(8, 'Estilo y tono', bloqueEstilo(b) + rango('rit', 0, 4, b.rit, 'Ritmo', textoRango(b, 'rit')));
         h += sec(9, 'Clasificación por edades', '<p>' + textoClas(b) + '</p>' + bloquePublico(b));
         h += sec(10, 'Duración', (b.tv ? '' : chipsDuracion(b)) + rango('min', 1, 300, b.min, 'Duración', textoRango(b, 'min')));
@@ -29786,6 +30011,13 @@ ART.mediosUI = (function () {
             return chipMd(x + (af >= 3 ? ' ★' : ''), 'mdTem', x, on, !on && b.tem.length >= 3);
         }).join('') + '</div><p class="nota">★ = le va muy bien al género principal. Los temas que encajan suben la crítica.</p>';
         h += '<h4>Tono</h4><div class="chips">' + D.tonos.map(function (x) { return chipMd(x.id, 'mdTono', x.id, b.tono === x.id); }).join('') + '</div>';
+        if (narr || b.med === 'juegos') {
+            const I = ART.ideas, tr = I.tramasDe(b);
+            h += '<h4>Tramas (' + tr.n + ' de 6)</h4><div class="chips">' + [1, 2, 3, 4, 5, 6].map(function (n) { return chipMd(String(n), 'mdTrN', String(n), tr.n === n); }).join('') + '</div>';
+            if (tr.n > 1)
+                h += '<div class="fila envolver">' + Array.apply(null, { length: tr.n - 1 }).map(function (x, i) { return '<label class="campo crece"><span>Trama ' + 'BCDEF'.charAt(i) + '</span><select data-c="mdTrT" data-k="' + i + '"><option value="">— elige el tipo —</option>' + I.TIPOS_TRAMA.map(function (y) { return '<option value="' + y.id + '"' + ((b.trT || [])[i] === y.id ? ' selected' : '') + '>' + esc(y.nombre) + '</option>'; }).join('') + '</select></label>'; }).join('') + '</div>';
+            h += '<label class="campo"><span>Tipo de narrador</span><select data-c="mdNarr">' + I.NARRADORES.map(function (y) { return '<option value="' + y.id + '"' + ((b.narr || '') === y.id ? ' selected' : '') + '>' + esc(y.nombre) + '</option>'; }).join('') + '</select></label>';
+        }
         const to = D.tonos.filter(function (x) { return x.id === b.tono; })[0];
         if (to)
             h += '<p class="nota">Crítica ' + (to.crit > 0 ? '+' : '') + to.crit + ' · público ' + (to.pub > 0 ? '+' : '') + to.pub + '</p>';
@@ -29811,8 +30043,15 @@ ART.mediosUI = (function () {
         return h;
     }
     function tabArte(b) {
+        if (b.portAuto) {
+            const pa = Md.portada({ port: N.hash((b.tit || 'x') + '|' + (Md.generosDe(b)[0] || '')) % 100000, med: b.med });
+            b.portSel = { c1: pa.c1, c2: pa.c2, forma: pa.forma, mo: pa.mo };
+        }
         const ps = b.portSel, M2 = Md.MOTIVOS[b.med];
-        let h = '<div class="md-portada">' + caja(b, true) + '<p class="chico tenue">' + esc(Md.portada(b).texto) + '</p></div>';
+        let h = '<div class="chips">' + chipMd('Portada automática', 'mdPortAuto', '1', !!b.portAuto) + chipMd('Diseñarla yo', 'mdPortAuto', '0', !b.portAuto) + '</div>';
+        h += '<div class="md-portada">' + caja(b, true) + '<p class="chico tenue">' + esc(Md.portada(b).texto) + (b.portAuto ? ' Se arma sola con el título y el género.' : '') + '</p></div>';
+        if (b.portAuto)
+            return h;
         h += rangoMd('c1', 0, 9, ps.c1, 'Color de fondo', Md.COLORES[ps.c1]) + rangoMd('c2', 0, 9, ps.c2, 'Color del título', Md.COLORES[ps.c2]) +
             rangoMd('forma', 0, 4, ps.forma, 'Composición', ['Círculo', 'Franjas', 'Triángulo', 'Mosaico', 'Ondas'][ps.forma]) + rangoMd('mo', 0, M2.length - 1, ps.mo % M2.length, 'Imagen', M2[ps.mo % M2.length]);
         h += '<div class="fila">' + btn('Portada al azar', 'mdPortAzar') + '</div>';
@@ -30143,6 +30382,14 @@ ART.mediosUI = (function () {
         dibujar();
     });
     ac('mdPortFin', function () { refrescarNuevo(); });
+    ac('mdTrN', function (v) { const b = st.b; if (!b)
+        return; b.trN = N.limitar(+v || 1, 1, 6); b.trT = (b.trT || []).slice(0, b.trN - 1); refrescarNuevo(); });
+    ac('mdTrT', function (v, el) { const b = st.b; if (!b)
+        return; b.trT = b.trT || []; b.trT[+el.getAttribute('data-k')] = v || ''; refrescarNuevo(); });
+    ac('mdNarr', function (v) { const b = st.b; if (!b)
+        return; b.narr = v || ''; refrescarNuevo(); });
+    ac('mdPortAuto', function (v) { const b = st.b; if (!b)
+        return; b.portAuto = v === '1' ? 1 : 0; refrescarNuevo(); });
     ac('mdPortAzar', function () { const b = st.b; if (!b)
         return; const r = N.hash(b.tit + Date.now()); b.portSel = { c1: r % 10, c2: (r >> 4) % 10, forma: (r >> 8) % 5, mo: (r >> 12) % Md.MOTIVOS[b.med].length }; refrescarNuevo(); });
     ac('mdTit', function (v) { st.b.tit = v.slice(0, 48); if (!st.b.sinEditada)
@@ -32301,7 +32548,7 @@ ART.teleUI = (function () {
                 (f.vivo ? sel('tvSub', TV.SUBVIVO.filter(function (x) { return x.desde <= a; }).map(function (x) { return [x.id, x.nombre]; }), b.tv.sub) : sel('tvModo', [['episodica', 'Episódica'], ['serial', 'Serializada']], b.tv.modo)) + '</div>' +
                 '<div class="fila"><label class="campo"><span>Episodios (' + Math.max(2, f.eps[0]) + '–' + Math.min(300, f.eps[1]) + ')</span><input type="number" data-c="tvEps" value="' + b.tv.eps + '"></label>' +
                 '<label class="campo"><span>Minutos (' + f.rmin[0] + '–' + f.rmin[1] + ')</span><input type="number" data-c="tvMin" value="' + b.min + '"></label></div>' +
-                '<div class="fila"><label class="campo"><span>Sala de guionistas</span><input type="number" min="1" max="12" data-c="tvSala" value="' + b.tv.sala + '"></label>' + sel('tvTramas', [[2, '2 tramas por episodio'], [3, '3 tramas por episodio']], b.tv.tramas) + '</div>' +
+                '<div class="fila"><label class="campo"><span>Sala de guionistas</span><input type="number" min="1" max="12" data-c="tvSala" value="' + b.tv.sala + '"></label>' + sel('tvTramas', [1, 2, 3, 4, 5, 6].map(function (n) { return [n, n + (n === 1 ? ' trama por episodio' : ' tramas por episodio')]; }), b.tv.tramas) + '</div>' +
                 '<p class="chico">Costo por episodio: ' + dinero(TV.costoEpisodio(b)) + ' · sala: ' + dinero(TV.costoSala(b)) + ' por episodio · temporada ' + (b.tv.temp || 1) + '</p>';
             if (b.pitch)
                 h += '<p class="bien">Idea vendida a ' + esc(TV.DONDE[b.pitch.c].nombre.toLowerCase()) + ': te pagan ' + dinero(b.pitch.monto) + ' al empezar.</p>';
@@ -33565,8 +33812,10 @@ ART.pruebas = (function () {
                 errores.push('Prueba de público sin resolver en «' + o.tit + '»');
             if (o.lp && !isFinite(ART.rodaje.linea(o).real))
                 errores.push('Costo real no finito en «' + o.tit + '»');
-            if (ART.ideas.hayNinos(o) && ART.taxonomia.ORDEN_CLAS.indexOf(o.clas) > 2)
-                errores.push('Obra de más de PG-13 con niños en el elenco: «' + o.tit + '»');
+            if (ART.ideas.esInfantil(o) && ART.taxonomia.ORDEN_CLAS.indexOf(o.clas) > 2)
+                errores.push('Obra infantil de más de PG-13: «' + o.tit + '»');
+            if (ART.ideas.esErotica(o) && (o.pj || []).some(function (x) { return x.e < 18; }))
+                errores.push('Obra erótica con personajes menores: «' + o.tit + '»');
         });
         if (errores.length > 50)
             errores.length = 50;
