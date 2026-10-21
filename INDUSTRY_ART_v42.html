@@ -29716,8 +29716,9 @@ ART.imperioUI = (function () {
     function candidatosTaquilla() {
         const sem = function (o) { return o.hs && o.hs.length ? o.hs[o.hs.length - 1] : 0; };
         const L = O.enCartelera().slice().sort(function (p, q) { return sem(q) - sem(p); }).slice(0, 4);
-        const tot = L.reduce(function (s, o) { return s + Math.max(1, sem(o)); }, 0);
-        return L.map(function (o) { return { o: o, cuota: N.redondear(N.limitar(0.9 * tot / Math.max(1, sem(o)), 1.2, 12), 1) }; });
+        const peso = function (o) { return Math.pow(Math.max(1, sem(o)), 16); };
+        const tot = L.reduce(function (s, o) { return s + peso(o); }, 0);
+        return L.map(function (o) { return { o: o, cuota: N.redondear(N.limitar(0.9 * tot / peso(o), 1, 12), 2) }; });
     }
     function casino() {
         const c = cas(), tope = topeApuesta(), S = N.S;
@@ -29737,7 +29738,7 @@ ART.imperioUI = (function () {
         const cand = candidatosTaquilla(), pend = c.apuestas.length;
         h += '<div class="tarjeta"><h3>Apuesta a la taquilla</h3><p class="nota">¿Cuál de estas será la más vista esta semana? Se resuelve al cerrar la semana; la cuota sale de cómo van ahora.</p>' +
             (pend ? '<p class="bien chico">Tienes ' + N.cuenta(pend, 'apuesta pendiente', 'apuestas pendientes') + '.</p>' : '') +
-            (cand.length >= 2 ? '<div class="col">' + cand.map(function (x) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(x.o.tit) + '</b><span class="tenue chico">' + esc(S.estudios[x.o.est] ? S.estudios[x.o.est].nombre : '') + ' · paga ' + U.decimal(x.cuota, 1) + ' veces</span></div>' + btn('Apostar', 'csTaquilla', x.o.id) + '</div>'; }).join('') + '</div>' : '<p class="tenue">Hacen falta al menos dos obras en cartelera.</p>') + '</div>';
+            (cand.length >= 2 ? '<div class="col">' + cand.map(function (x) { return '<div class="cal-ev"><div class="col crece"><b>' + esc(x.o.tit) + '</b><span class="tenue chico">' + esc(S.estudios[x.o.est] ? S.estudios[x.o.est].nombre : '') + ' · paga ' + U.decimal(x.cuota, 2) + ' veces</span></div>' + btn('Apostar', 'csTaquilla', x.o.id) + '</div>'; }).join('') + '</div>' : '<p class="tenue">Hacen falta al menos dos obras en cartelera.</p>') + '</div>';
         return h;
     }
     ac('csRuleta', function (v) {
@@ -29771,9 +29772,12 @@ ART.imperioUI = (function () {
         const cand = candidatosTaquilla(), x = cand.filter(function (y) { return y.o.id === +v; })[0];
         if (!x)
             return;
+        const abierto = cas().apuestas.reduce(function (s, y) { return s + y.monto; }, 0);
+        if (abierto + m > topeApuesta())
+            return U.aviso('Tienes ' + dinero(abierto) + ' apostados a la taquilla: espera a que se resuelvan o apuesta menos (tope ' + dinero(topeApuesta()) + ').', 'mal');
         ART.negocio.pagar(0, 'casino', m);
         cas().apuestas.push({ t: N.S.t, ids: cand.map(function (y) { return y.o.id; }), elegido: x.o.id, monto: m, cuota: x.cuota });
-        U.aviso('Apuestas ' + dinero(m) + ' a «' + x.o.tit + '» (paga ' + U.decimal(x.cuota, 1) + ' veces)');
+        U.aviso('Apuestas ' + dinero(m) + ' a «' + x.o.tit + '» (paga ' + U.decimal(x.cuota, 2) + ' veces)');
         U.refrescar();
     });
     function inventosPorAnio() { return ART.historia.INVENTOS.slice().sort(function (x, y) { return x.anio - y.anio; }); }
