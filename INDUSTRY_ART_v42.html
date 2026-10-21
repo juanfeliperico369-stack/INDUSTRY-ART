@@ -641,6 +641,9 @@ label:focus-within { outline: 3px solid var(--dorado); outline-offset: 2px; }
 .cand-mas { grid-area: mas; padding-top: 4px; border-top: 1px dashed var(--borde); }
 .cand-filtros summary { cursor: pointer; margin: 6px 0; color: var(--tenue); }
 @media (max-width: 560px) { .cand-fila { grid-template-columns: 40px minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "foto nom nom btn" "foto exp costo costo" "mas mas mas mas"; } }
+.nm-conts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 8px 0; }
+.nm-conts .chip { justify-content: center; }
+.nm-barra { margin: 10px 0; padding: 14px; border-radius: 12px; background: var(--panel2); border: 1px solid var(--borde); text-align: center; font-size: 1.25em; min-height: 1.6em; }
 kbd { display: inline-block; min-width: 1.6em; padding: 2px 7px; border: 1px solid var(--borde); border-bottom-width: 3px; border-radius: 6px; background: var(--panel2); font: inherit; font-size: .9em; text-align: center; }
 </style>
 </head>
@@ -926,7 +929,7 @@ ART.datos = (function () {
     const sp = function (s) { return s.split(','); };
     const regiones = [
         { id: 'nam', nombre: 'Norteamérica', hemisferio: 'N' },
-        { id: 'lat', nombre: 'Latinoamérica', hemisferio: 'M' },
+        { id: 'lat', nombre: 'Sudamérica', hemisferio: 'M' },
         { id: 'eur', nombre: 'Europa', hemisferio: 'N' },
         { id: 'afr', nombre: 'África', hemisferio: 'M' },
         { id: 'asi', nombre: 'Asia', hemisferio: 'N' },
@@ -1006,6 +1009,214 @@ ART.datos = (function () {
             a: sp('Wilson,Taylor,Brown,Walker,White,Thompson,Ngata,Tui,Kelly,Harris,Martin,Anderson,Clarke,Young,Fonoti,Tamatea,Leota,Kauri'),
         },
     };
+const CULTURAS = {
+    anglo: {
+        f: ['Emily', 'Olivia', 'Grace', 'Hannah', 'Sarah', 'Emma', 'Charlotte', 'Abigail', 'Madison', 'Elizabeth', 'Margaret', 'Rachel', 'Megan', 'Lauren', 'Chloe', 'Sophie', 'Amelia', 'Harper', 'Ruth', 'Evelyn'],
+        m: ['James', 'John', 'Michael', 'William', 'David', 'Thomas', 'Daniel', 'Matthew', 'Andrew', 'Joseph', 'Benjamin', 'Henry', 'Samuel', 'Jack', 'Ethan', 'Noah', 'Oliver', 'Harry', 'Christopher', 'Walter'],
+        a: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Wilson', 'Taylor', 'Anderson', 'Moore', 'Clark', 'Walker', 'Wright', 'Hughes', 'Evans', 'Roberts', 'Turner', 'Parker', 'Bennett', 'Cooper', 'Murphy', 'Campbell', 'Fletcher'],
+    },
+    hispano: {
+        f: ['María', 'Lucía', 'Sofía', 'Valentina', 'Camila', 'Isabella', 'Daniela', 'Mariana', 'Gabriela', 'Paula', 'Carmen', 'Ana', 'Laura', 'Elena', 'Ximena', 'Catalina', 'Renata', 'Fernanda', 'Natalia', 'Rosa'],
+        m: ['José', 'Juan', 'Carlos', 'Luis', 'Javier', 'Miguel', 'Alejandro', 'Santiago', 'Mateo', 'Sebastián', 'Diego', 'Andrés', 'Felipe', 'Pablo', 'Jorge', 'Manuel', 'Antonio', 'Rafael', 'Emiliano', 'Tomás'],
+        a: ['García', 'Rodríguez', 'Martínez', 'López', 'González', 'Hernández', 'Pérez', 'Sánchez', 'Ramírez', 'Torres', 'Flores', 'Rivera', 'Gómez', 'Díaz', 'Morales', 'Jiménez', 'Ruiz', 'Álvarez', 'Castro', 'Vargas', 'Romero', 'Navarro', 'Ortiz', 'Herrera'],
+    },
+    luso: {
+        f: ['Ana', 'Maria', 'Beatriz', 'Juliana', 'Larissa', 'Fernanda', 'Gabriela', 'Mariana', 'Camila', 'Letícia', 'Inês', 'Joana', 'Rafaela', 'Luana', 'Thaís', 'Bruna', 'Carolina', 'Isadora', 'Raquel', 'Francisca'],
+        m: ['João', 'Pedro', 'Lucas', 'Gabriel', 'Rafael', 'Thiago', 'Matheus', 'Guilherme', 'Bruno', 'Felipe', 'Gustavo', 'Rodrigo', 'Tiago', 'Diogo', 'Vinícius', 'Caio', 'André', 'Paulo', 'Henrique', 'Duarte'],
+        a: ['Silva', 'Santos', 'Oliveira', 'Souza', 'Pereira', 'Costa', 'Ferreira', 'Rodrigues', 'Almeida', 'Carvalho', 'Lima', 'Gomes', 'Ribeiro', 'Martins', 'Araújo', 'Barbosa', 'Rocha', 'Moreira', 'Cardoso', 'Teixeira', 'Nascimento', 'Correia', 'Mendes', 'Lopes'],
+    },
+    andino: {
+        f: ['Killa', 'Sisa', 'Wayra', 'Nina', 'Illari', 'Kusi', 'Rayén', 'Millaray', 'Ayelén', 'Sumaq', 'Rosa', 'Juana', 'Maribel', 'Yesenia', 'Lizbeth', 'Flor', 'Marisol', 'Nilda', 'Gladys', 'Edith'],
+        m: ['Inti', 'Amaru', 'Rumi', 'Wayna', 'Túpac', 'Atoq', 'Lautaro', 'Nahuel', 'Antu', 'Wilber', 'Edwin', 'Percy', 'Fredy', 'Rubén', 'Néstor', 'Eusebio', 'Teodoro', 'Florencio', 'Hilario', 'Juvenal'],
+        a: ['Quispe', 'Mamani', 'Condori', 'Huamán', 'Choque', 'Apaza', 'Ticona', 'Huanca', 'Yupanqui', 'Poma', 'Chambi', 'Coaquira', 'Layme', 'Machaca', 'Paucar', 'Ccama', 'Huaraca', 'Cutipa', 'Huenchullán', 'Painemal', 'Catrileo', 'Ñancupil', 'Llanquileo', 'Calfucura'],
+    },
+    franco: {
+        f: ['Camille', 'Léa', 'Manon', 'Chloé', 'Inès', 'Juliette', 'Louise', 'Clémence', 'Élodie', 'Margaux', 'Amélie', 'Sophie', 'Céline', 'Mathilde', 'Pauline', 'Agathe', 'Hélène', 'Brigitte', 'Océane', 'Geneviève'],
+        m: ['Louis', 'Gabriel', 'Hugo', 'Lucas', 'Jules', 'Arthur', 'Théo', 'Mathis', 'Antoine', 'Pierre', 'Julien', 'Nicolas', 'Thomas', 'Baptiste', 'Étienne', 'Raphaël', 'Maxime', 'Clément', 'François', 'Olivier'],
+        a: ['Martin', 'Bernard', 'Dubois', 'Robert', 'Richard', 'Petit', 'Durand', 'Leroy', 'Moreau', 'Simon', 'Laurent', 'Lefebvre', 'Michel', 'Mercier', 'Fournier', 'Girard', 'Bonnet', 'Dupont', 'Lambert', 'Fontaine', 'Rousseau', 'Tremblay', 'Gagnon', 'Roy'],
+    },
+    germano: {
+        f: ['Anna', 'Lena', 'Hannah', 'Leonie', 'Mia', 'Emilia', 'Clara', 'Greta', 'Johanna', 'Katharina', 'Laura', 'Julia', 'Marie', 'Charlotte', 'Ingrid', 'Ursula', 'Sabine', 'Petra', 'Heike', 'Frieda'],
+        m: ['Lukas', 'Leon', 'Paul', 'Jonas', 'Felix', 'Maximilian', 'Elias', 'Finn', 'Moritz', 'Niklas', 'Tobias', 'Jan', 'Florian', 'Sebastian', 'Matthias', 'Stefan', 'Klaus', 'Jürgen', 'Wolfgang', 'Dieter'],
+        a: ['Müller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner', 'Becker', 'Schulz', 'Hoffmann', 'Koch', 'Richter', 'Bauer', 'Klein', 'Wolf', 'Schröder', 'Neumann', 'Schwarz', 'Zimmermann', 'Braun', 'Krüger', 'Hofmann', 'Hartmann', 'Lange'],
+    },
+    italiano: {
+        f: ['Giulia', 'Sofia', 'Aurora', 'Alice', 'Ginevra', 'Emma', 'Giorgia', 'Beatrice', 'Chiara', 'Francesca', 'Martina', 'Alessia', 'Federica', 'Valentina', 'Elena', 'Silvia', 'Paola', 'Lucia', 'Rosa', 'Anna'],
+        m: ['Leonardo', 'Francesco', 'Alessandro', 'Lorenzo', 'Mattia', 'Andrea', 'Gabriele', 'Riccardo', 'Tommaso', 'Matteo', 'Marco', 'Luca', 'Giuseppe', 'Giovanni', 'Antonio', 'Davide', 'Simone', 'Stefano', 'Paolo', 'Salvatore'],
+        a: ['Rossi', 'Russo', 'Ferrari', 'Esposito', 'Bianchi', 'Romano', 'Colombo', 'Ricci', 'Marino', 'Greco', 'Bruno', 'Gallo', 'Conti', 'De Luca', 'Mancini', 'Costa', 'Giordano', 'Rizzo', 'Lombardi', 'Moretti', 'Barbieri', 'Fontana', 'Santoro', 'Caruso'],
+    },
+    eslavo: {
+        f: ['Anastasia', 'Natalia', 'Olga', 'Irina', 'Tatiana', 'Svetlana', 'Yekaterina', 'Daria', 'Ksenia', 'Yulia', 'Vera', 'Ludmila', 'Nadezhda', 'Galina', 'Alina', 'Polina', 'Oksana', 'Valentina', 'Sofía', 'Elena'],
+        m: ['Iván', 'Dmitri', 'Serguéi', 'Alekséi', 'Andréi', 'Mijaíl', 'Nikolái', 'Yuri', 'Vladímir', 'Oleg', 'Pável', 'Borís', 'Ígor', 'Konstantín', 'Maxim', 'Artiom', 'Román', 'Fiódor', 'Leonid', 'Víktor'],
+        a: ['Ivanov', 'Smirnov', 'Kuznetsov', 'Popov', 'Sokolov', 'Lebedev', 'Kozlov', 'Novikov', 'Morozov', 'Petrov', 'Volkov', 'Soloviov', 'Vasiliev', 'Zaitsev', 'Pavlov', 'Semionov', 'Golubev', 'Vinogradov', 'Bogdanov', 'Fiodorov', 'Kovalenko', 'Shevchenko', 'Bondarenko', 'Tkachuk'],
+        af: ['Ivanova', 'Smirnova', 'Kuznetsova', 'Popova', 'Sokolova', 'Lebedeva', 'Kozlova', 'Novikova', 'Morozova', 'Petrova', 'Volkova', 'Soloviova', 'Vasilieva', 'Zaitseva', 'Pavlova', 'Semionova', 'Golubeva', 'Vinogradova', 'Bogdanova', 'Fiodorova', 'Kovalenko', 'Shevchenko', 'Bondarenko', 'Tkachuk'],
+    },
+    rumano: {
+        f: ['Ioana', 'Andreea', 'Elena', 'Maria', 'Alexandra', 'Ana', 'Cristina', 'Mihaela', 'Gabriela', 'Daniela', 'Raluca', 'Irina', 'Bianca', 'Roxana', 'Corina', 'Simona', 'Adriana', 'Oana', 'Ileana', 'Larisa'],
+        m: ['Andrei', 'Alexandru', 'Mihai', 'Ion', 'Constantin', 'Gheorghe', 'Florin', 'Cristian', 'Ștefan', 'Vlad', 'Radu', 'Bogdan', 'Dan', 'Ionuț', 'Marius', 'Adrian', 'Sorin', 'Lucian', 'Cătălin', 'Tudor'],
+        a: ['Popescu', 'Ionescu', 'Popa', 'Dumitru', 'Stoica', 'Stan', 'Georgescu', 'Rusu', 'Munteanu', 'Matei', 'Constantinescu', 'Șerban', 'Moldovan', 'Lazăr', 'Ciobanu', 'Dobre', 'Barbu', 'Nistor', 'Florea', 'Neagu', 'Dinu', 'Marin', 'Toma', 'Ene'],
+    },
+    nordico: {
+        f: ['Astrid', 'Ingrid', 'Freja', 'Sigrid', 'Elin', 'Maja', 'Saga', 'Linnea', 'Ebba', 'Alma', 'Ida', 'Nora', 'Sofie', 'Liv', 'Solveig', 'Karin', 'Hanne', 'Aino', 'Helmi', 'Signe'],
+        m: ['Erik', 'Lars', 'Anders', 'Magnus', 'Nils', 'Olof', 'Henrik', 'Johan', 'Mikkel', 'Søren', 'Bjørn', 'Sven', 'Gustav', 'Axel', 'Leif', 'Rasmus', 'Oskar', 'Emil', 'Eero', 'Mats'],
+        a: ['Andersson', 'Johansson', 'Karlsson', 'Nilsson', 'Eriksson', 'Larsson', 'Olsen', 'Hansen', 'Jensen', 'Nielsen', 'Pedersen', 'Johansen', 'Berg', 'Lindqvist', 'Lindström', 'Bergström', 'Dahl', 'Holm', 'Virtanen', 'Korhonen', 'Nieminen', 'Strand', 'Haugen', 'Lund'],
+    },
+    griego: {
+        f: ['Eleni', 'Katerina', 'Dimitra', 'Ioanna', 'Vasiliki', 'Christina', 'Despina', 'Eirini', 'Athina', 'Konstantina', 'Nikoleta', 'Panagiota', 'Evangelia', 'Theodora', 'Kalliopi', 'Zoi', 'Chrysa', 'Melina', 'Ariadni', 'Danai'],
+        m: ['Georgios', 'Dimitris', 'Konstantinos', 'Ioannis', 'Nikos', 'Giannis', 'Christos', 'Panagiotis', 'Vasilis', 'Kostas', 'Spyros', 'Alexandros', 'Thanasis', 'Stavros', 'Manolis', 'Michalis', 'Petros', 'Andreas', 'Theodoros', 'Angelos'],
+        a: ['Georgiou', 'Ioannou', 'Nikolaou', 'Dimitriou', 'Papageorgiou', 'Konstantinou', 'Christou', 'Antoniou', 'Pavlou', 'Vasileiou', 'Athanasiou', 'Panagiotou', 'Theodorou', 'Petrou', 'Stavrou', 'Anastasiou', 'Kyriakou', 'Charalambous', 'Oikonomou', 'Papadimitriou', 'Andreou', 'Loizou', 'Spyrou', 'Alexiou'],
+    },
+    arabe: {
+        f: ['Fátima', 'Aisha', 'Mariam', 'Layla', 'Nour', 'Yasmin', 'Salma', 'Hana', 'Zainab', 'Amira', 'Rania', 'Dina', 'Samira', 'Huda', 'Lina', 'Sara', 'Malak', 'Nadia', 'Farah', 'Rim'],
+        m: ['Mohamed', 'Ahmed', 'Omar', 'Youssef', 'Ali', 'Hassan', 'Hussein', 'Karim', 'Khaled', 'Mahmoud', 'Mustafa', 'Ibrahim', 'Tarek', 'Amr', 'Hamza', 'Bilal', 'Rachid', 'Samir', 'Nabil', 'Walid'],
+        a: ['El Amrani', 'Benali', 'Haddad', 'Mansour', 'Khalil', 'Saleh', 'Nasser', 'Hamdi', 'Farouk', 'Abdallah', 'Ibrahim', 'Hassan', 'El Masri', 'Bennani', 'Alaoui', 'Tazi', 'Chraibi', 'Saadi', 'Darwish', 'Khoury', 'Najjar', 'Aziz', 'Fahmy', 'Shaheen'],
+    },
+    persa: {
+        f: ['Maryam', 'Zahra', 'Fatemeh', 'Sara', 'Narges', 'Parisa', 'Shirin', 'Leila', 'Golnar', 'Mahsa', 'Niloufar', 'Roya', 'Setareh', 'Azadeh', 'Shabnam', 'Yasaman', 'Taraneh', 'Mina', 'Ladan', 'Forough'],
+        m: ['Ali', 'Reza', 'Mohammad', 'Amir', 'Hossein', 'Mehdi', 'Saeed', 'Dariush', 'Kourosh', 'Babak', 'Arash', 'Kaveh', 'Farhad', 'Bahram', 'Omid', 'Navid', 'Payam', 'Sina', 'Behrouz', 'Jafar'],
+        a: ['Hosseini', 'Mohammadi', 'Rezaei', 'Ahmadi', 'Karimi', 'Rahimi', 'Moradi', 'Jafari', 'Sadeghi', 'Ebrahimi', 'Tehrani', 'Kazemi', 'Farahani', 'Shirazi', 'Esfahani', 'Rostami', 'Nouri', 'Bagheri', 'Zand', 'Panahi', 'Ghorbani', 'Heidari', 'Asadi', 'Abbasi'],
+    },
+    turco: {
+        f: ['Zeynep', 'Elif', 'Ayşe', 'Fatma', 'Emine', 'Merve', 'Esra', 'Defne', 'Ecem', 'Selin', 'Büşra', 'Derya', 'Gül', 'Hülya', 'Leyla', 'Melis', 'Nazlı', 'Özge', 'Sibel', 'Yasemin'],
+        m: ['Mehmet', 'Mustafa', 'Ahmet', 'Ali', 'Hüseyin', 'Hasan', 'İbrahim', 'Emre', 'Burak', 'Can', 'Cem', 'Deniz', 'Murat', 'Oğuz', 'Serkan', 'Kemal', 'Yusuf', 'Ömer', 'Eren', 'Volkan'],
+        a: ['Yılmaz', 'Kaya', 'Demir', 'Şahin', 'Çelik', 'Yıldız', 'Yıldırım', 'Öztürk', 'Aydın', 'Özdemir', 'Arslan', 'Doğan', 'Kılıç', 'Aslan', 'Çetin', 'Kara', 'Koç', 'Kurt', 'Özkan', 'Şimşek', 'Polat', 'Erdem', 'Aksoy', 'Güneş'],
+    },
+    yoruba: {
+        f: ['Folake', 'Funmilayo', 'Yetunde', 'Bisola', 'Titilayo', 'Adunni', 'Morenike', 'Omolara', 'Ifeoluwa', 'Abimbola', 'Adeola', 'Ayomide', 'Damilola', 'Eniola', 'Modupe', 'Simisola', 'Tolani', 'Bukola', 'Iyabo', 'Olamide'],
+        m: ['Tunde', 'Ayodele', 'Oluwaseun', 'Babatunde', 'Adewale', 'Femi', 'Segun', 'Kayode', 'Olumide', 'Biodun', 'Gbenga', 'Dapo', 'Kunle', 'Tayo', 'Wale', 'Bayo', 'Akin', 'Lanre', 'Niyi', 'Yinka'],
+        a: ['Adeyemi', 'Adebayo', 'Ogunleye', 'Ogunbiyi', 'Olaniyan', 'Adeleke', 'Akinola', 'Oyelaran', 'Afolabi', 'Ajayi', 'Balogun', 'Oyewole', 'Olatunji', 'Fashola', 'Ogundipe', 'Adesina', 'Akande', 'Ayinde', 'Babalola', 'Ojo', 'Odunsi', 'Oladipo', 'Oyebanji', 'Adeniyi'],
+    },
+    igbo: {
+        f: ['Chiamaka', 'Adaeze', 'Ngozi', 'Chioma', 'Nneka', 'Ifeoma', 'Amarachi', 'Chinwe', 'Obiageli', 'Nkechi', 'Ebere', 'Chidinma', 'Ogechi', 'Onyinye', 'Adanna', 'Ijeoma', 'Chinyere', 'Ozioma', 'Ukamaka', 'Nkiru'],
+        m: ['Chinedu', 'Emeka', 'Obinna', 'Chukwuemeka', 'Ikenna', 'Nnamdi', 'Chibuike', 'Kelechi', 'Uchenna', 'Ifeanyi', 'Chidi', 'Ebuka', 'Okechukwu', 'Somto', 'Tochukwu', 'Nonso', 'Kenechukwu', 'Chima', 'Obiora', 'Ikechukwu'],
+        a: ['Okafor', 'Okonkwo', 'Nwosu', 'Eze', 'Okeke', 'Nwankwo', 'Obi', 'Okoro', 'Chukwu', 'Nnaji', 'Ugwu', 'Ibe', 'Anyanwu', 'Nwachukwu', 'Okpara', 'Agu', 'Onwuka', 'Mbah', 'Nwafor', 'Okoye', 'Udeh', 'Uzor', 'Ndukwe', 'Okonjo'],
+    },
+    hausa: {
+        f: ['Aisha', 'Fatima', 'Hauwa', 'Zainab', 'Amina', 'Hadiza', 'Maryam', 'Safiya', 'Halima', 'Rakiya', 'Binta', 'Jamila', 'Asabe', 'Ladi', 'Hafsat', 'Bilkisu', 'Saratu', 'Rahma', 'Khadija', 'Yelwa'],
+        m: ['Abubakar', 'Musa', 'Ibrahim', 'Usman', 'Abdullahi', 'Aliyu', 'Sani', 'Yusuf', 'Bello', 'Danjuma', 'Garba', 'Lawal', 'Shehu', 'Umar', 'Haruna', 'Kabiru', 'Nasiru', 'Bashir', 'Tijjani', 'Idris'],
+        a: ['Bello', 'Abubakar', 'Mohammed', 'Ibrahim', 'Musa', 'Sani', 'Yusuf', 'Aliyu', 'Usman', 'Garba', 'Lawal', 'Danladi', 'Dantata', 'Shehu', 'Abdullahi', 'Suleiman', 'Umar', 'Adamu', 'Ahmed', 'Isa', 'Yakubu', 'Gwarzo', 'Dikko', 'Tukur'],
+    },
+    swahili: {
+        f: ['Neema', 'Zawadi', 'Imani', 'Rehema', 'Wanjiru', 'Akinyi', 'Achieng', 'Nyambura', 'Wambui', 'Makena', 'Njeri', 'Atieno', 'Mwanaisha', 'Halima', 'Zuhura', 'Saida', 'Tumaini', 'Furaha', 'Subira', 'Nafula'],
+        m: ['Baraka', 'Juma', 'Jabari', 'Bakari', 'Hamisi', 'Rashidi', 'Omari', 'Kibet', 'Kiprono', 'Amani', 'Daudi', 'Salim', 'Issa', 'Musa', 'Ali', 'Mosi', 'Kitwana', 'Shabani', 'Zuberi', 'Mbaraka'],
+        a: ['Kamau', 'Mwangi', 'Otieno', 'Ochieng', 'Odhiambo', 'Kiprotich', 'Njoroge', 'Mutua', 'Wafula', 'Wekesa', 'Kimani', 'Karanja', 'Mbugua', 'Omondi', 'Onyango', 'Kariuki', 'Ndungu', 'Msuya', 'Mollel', 'Massawe', 'Shirima', 'Mushi', 'Chege', 'Nyamweya'],
+    },
+    zulu: {
+        f: ['Thandiwe', 'Nomvula', 'Zanele', 'Lindiwe', 'Nandi', 'Thandeka', 'Nokuthula', 'Zodwa', 'Busisiwe', 'Nosipho', 'Khanyisile', 'Nompumelelo', 'Sibongile', 'Zinhle', 'Lerato', 'Palesa', 'Naledi', 'Thuli', 'Ntombi', 'Nomsa'],
+        m: ['Sipho', 'Themba', 'Thabo', 'Bongani', 'Sibusiso', 'Mandla', 'Lwazi', 'Sizwe', 'Mthunzi', 'Jabulani', 'Andile', 'Lungelo', 'Siyabonga', 'Thulani', 'Musa', 'Vusi', 'Kagiso', 'Tshepo', 'Bheki', 'Nkosinathi'],
+        a: ['Ndlovu', 'Dlamini', 'Zulu', 'Khumalo', 'Mkhize', 'Ngcobo', 'Nkosi', 'Mthembu', 'Shabalala', 'Buthelezi', 'Cele', 'Zungu', 'Mahlangu', 'Sithole', 'Ntuli', 'Hadebe', 'Gumede', 'Mabaso', 'Mokoena', 'Molefe', 'Nkabinde', 'Msimang', 'Radebe', 'Ngubane'],
+    },
+    amhara: {
+        f: ['Selam', 'Hiwot', 'Meron', 'Tigist', 'Bethlehem', 'Liya', 'Mahlet', 'Saba', 'Rahel', 'Hanna', 'Yodit', 'Tsion', 'Eden', 'Kidist', 'Feven', 'Almaz', 'Aster', 'Meseret', 'Genet', 'Senait'],
+        m: ['Dawit', 'Abebe', 'Tesfaye', 'Yonas', 'Bereket', 'Mulugeta', 'Getachew', 'Haile', 'Tewodros', 'Samuel', 'Fikru', 'Solomon', 'Amanuel', 'Yared', 'Biniam', 'Elias', 'Henok', 'Natnael', 'Girma', 'Alemayehu'],
+        a: ['Tadesse', 'Bekele', 'Kebede', 'Haile', 'Tesfaye', 'Alemu', 'Gebre', 'Girma', 'Wolde', 'Mengistu', 'Abera', 'Desta', 'Tefera', 'Assefa', 'Ayele', 'Negash', 'Lemma', 'Demissie', 'Worku', 'Yohannes', 'Shiferaw', 'Mekonnen', 'Asfaw', 'Berhanu'],
+    },
+    chino: {
+        f: ['Mei', 'Lin', 'Fang', 'Jing', 'Xiaoling', 'Yan', 'Hui', 'Ying', 'Xinyi', 'Yuxuan', 'Zihan', 'Wenjing', 'Ling', 'Na', 'Qian', 'Yue', 'Shu', 'Lan', 'Hong', 'Ruoxi'],
+        m: ['Wei', 'Hao', 'Jun', 'Lei', 'Ming', 'Tao', 'Bo', 'Jian', 'Yong', 'Qiang', 'Bin', 'Zhiwei', 'Haoran', 'Zihao', 'Jiahao', 'Yifan', 'Kai', 'Long', 'Feng', 'Peng'],
+        a: ['Wang', 'Li', 'Zhang', 'Liu', 'Chen', 'Yang', 'Huang', 'Zhao', 'Wu', 'Zhou', 'Xu', 'Sun', 'Ma', 'Zhu', 'Hu', 'Guo', 'He', 'Lin', 'Gao', 'Luo', 'Zheng', 'Liang', 'Xie', 'Song'],
+    },
+    cantones: {
+        f: ['Ka Yan', 'Wing Yee', 'Hoi Yan', 'Mei Ling', 'Suk Yee', 'Pui Shan', 'Sze Wing', 'Hiu Tung', 'Man Yee', 'Wai Ling', 'Karen', 'Ada', 'Cherry', 'Winnie', 'Vivian', 'Jessica', 'Joyce', 'Florence', 'Agnes', 'Michelle'],
+        m: ['Ka Ho', 'Chun Kit', 'Chi Ming', 'Siu Ming', 'Wai Lun', 'Ho Yin', 'Kwok Wing', 'Tsz Hin', 'Chun Hei', 'Man Kit', 'Kelvin', 'Ivan', 'Kenneth', 'Raymond', 'Eric', 'Samuel', 'Dickson', 'Alan', 'Edmond', 'Vincent'],
+        a: ['Chan', 'Wong', 'Leung', 'Cheung', 'Lau', 'Lee', 'Ho', 'Ng', 'Lam', 'Tang', 'Tsang', 'Chow', 'Yip', 'Kwok', 'Mak', 'Fung', 'Lo', 'Tse', 'Choi', 'Yeung', 'Chu', 'Poon', 'Cheng', 'Siu'],
+    },
+    japones: {
+        f: ['Yui', 'Aoi', 'Hana', 'Sakura', 'Yuna', 'Rin', 'Mei', 'Haruka', 'Misaki', 'Ayaka', 'Nanami', 'Yuki', 'Akiko', 'Keiko', 'Naomi', 'Emi', 'Mai', 'Kaori', 'Noriko', 'Satsuki'],
+        m: ['Haruto', 'Ren', 'Sota', 'Yuto', 'Riku', 'Takumi', 'Kenta', 'Daiki', 'Shota', 'Hiroshi', 'Takashi', 'Kenji', 'Kazuki', 'Yusuke', 'Ryota', 'Naoki', 'Akira', 'Satoshi', 'Makoto', 'Ichiro'],
+        a: ['Sato', 'Suzuki', 'Takahashi', 'Tanaka', 'Watanabe', 'Ito', 'Yamamoto', 'Nakamura', 'Kobayashi', 'Kato', 'Yoshida', 'Yamada', 'Sasaki', 'Yamaguchi', 'Matsumoto', 'Inoue', 'Kimura', 'Hayashi', 'Shimizu', 'Yamazaki', 'Mori', 'Ikeda', 'Hashimoto', 'Ishikawa'],
+    },
+    coreano: {
+        f: ['Ji-woo', 'Seo-yeon', 'Min-seo', 'Ha-eun', 'Seo-yun', 'Ji-yoo', 'Su-bin', 'Ye-jin', 'Ji-min', 'Yuna', 'Hye-jin', 'Eun-ji', 'Soo-ah', 'Da-eun', 'Min-ji', 'Na-yeon', 'Hyun-jung', 'Mi-kyung', 'Young-hee', 'Sun-hee'],
+        m: ['Min-jun', 'Seo-jun', 'Do-yun', 'Ha-jun', 'Ji-ho', 'Jun-seo', 'Si-woo', 'Ye-jun', 'Hyun-woo', 'Ji-hoon', 'Sung-min', 'Dong-hyun', 'Jae-won', 'Joon-ho', 'Tae-yang', 'Woo-jin', 'Sang-woo', 'Young-soo', 'Kyung-ho', 'Jin-woo'],
+        a: ['Kim', 'Lee', 'Park', 'Choi', 'Jung', 'Kang', 'Cho', 'Yoon', 'Jang', 'Lim', 'Han', 'Oh', 'Seo', 'Shin', 'Kwon', 'Hwang', 'Ahn', 'Song', 'Yoo', 'Hong', 'Jeon', 'Ko', 'Moon', 'Baek'],
+    },
+    indio: {
+        f: ['Priya', 'Ananya', 'Aanya', 'Diya', 'Saanvi', 'Ishita', 'Kavya', 'Meera', 'Nisha', 'Pooja', 'Riya', 'Shreya', 'Sunita', 'Lakshmi', 'Divya', 'Anjali', 'Deepika', 'Neha', 'Aishwarya', 'Ayesha'],
+        m: ['Arjun', 'Aarav', 'Vivaan', 'Aditya', 'Rohan', 'Rahul', 'Vikram', 'Ravi', 'Sanjay', 'Amit', 'Anil', 'Karan', 'Nikhil', 'Rajesh', 'Suresh', 'Imran', 'Farhan', 'Manish', 'Siddharth', 'Vijay'],
+        a: ['Sharma', 'Patel', 'Singh', 'Kumar', 'Gupta', 'Reddy', 'Iyer', 'Nair', 'Rao', 'Mehta', 'Shah', 'Joshi', 'Desai', 'Banerjee', 'Chatterjee', 'Mukherjee', 'Das', 'Khan', 'Verma', 'Kapoor', 'Malhotra', 'Pillai', 'Menon', 'Chopra'],
+    },
+    tailandes: {
+        f: ['Malee', 'Siriporn', 'Kanya', 'Pimchanok', 'Ploy', 'Naree', 'Suda', 'Ratana', 'Wanida', 'Arunee', 'Kulap', 'Nattaya', 'Jintana', 'Pornpimol', 'Chanya', 'Supaporn', 'Kannika', 'Duangjai', 'Achara', 'Busaba'],
+        m: ['Somchai', 'Somsak', 'Prasert', 'Anan', 'Kittisak', 'Chai', 'Narong', 'Surachai', 'Thanawat', 'Wichai', 'Arthit', 'Chatchai', 'Pongsak', 'Sombat', 'Weerapong', 'Nattapong', 'Krit', 'Tanakorn', 'Sakda', 'Boonmee'],
+        a: ['Saetang', 'Srisuk', 'Wongsawat', 'Chaiyaporn', 'Rattanakul', 'Suwannarat', 'Kaewkla', 'Boonyarat', 'Phrommin', 'Thongdee', 'Sukprasert', 'Chanthavong', 'Jaidee', 'Siripong', 'Meesuk', 'Pattanapong', 'Kongsuk', 'Ruangsri', 'Nakprasert', 'Sombatsiri', 'Wongsuwan', 'Chaiyasit', 'Petchsri', 'Saelim'],
+    },
+    vietnamita: {
+        f: ['Linh', 'Lan', 'Mai', 'Hoa', 'Huong', 'Trang', 'Thao', 'Ngoc', 'Thu', 'Ha', 'Phuong', 'Nga', 'Hanh', 'Tuyet', 'Diep', 'My', 'Vy', 'Nhung', 'Yen', 'Quynh'],
+        m: ['Minh', 'Duc', 'Hung', 'Tuan', 'Nam', 'Long', 'Quang', 'Huy', 'Khoa', 'Phong', 'Dung', 'Thanh', 'Hieu', 'Bao', 'Hai', 'Son', 'Vinh', 'Trung', 'Dat', 'Khanh'],
+        a: ['Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Huynh', 'Phan', 'Vu', 'Vo', 'Dang', 'Bui', 'Do', 'Ho', 'Ngo', 'Duong', 'Ly', 'Truong', 'Dinh', 'Mai', 'Lam', 'Ha', 'Trinh', 'Luong', 'Cao'],
+    },
+    filipino: {
+        f: ['Maria', 'Angelica', 'Kristine', 'Jasmine', 'Mary Grace', 'Rosario', 'Liza', 'Joy', 'Andrea', 'Bea', 'Camille', 'Danica', 'Erlinda', 'Lorna', 'Marites', 'Nicole', 'Rhea', 'Teresita', 'Ligaya', 'Tala'],
+        m: ['Jose', 'Juan', 'Mark', 'John Paul', 'Christian', 'Angelo', 'Carlo', 'Rafael', 'Miguel', 'Paolo', 'Jericho', 'Ramon', 'Emilio', 'Rodel', 'Jun', 'Dante', 'Efren', 'Bayani', 'Ronaldo', 'Marlon'],
+        a: ['Santos', 'Reyes', 'Cruz', 'Bautista', 'Ocampo', 'Garcia', 'Mendoza', 'Villanueva', 'Ramos', 'Aquino', 'Castillo', 'Dela Cruz', 'Fernandez', 'Gonzales', 'Lopez', 'Mercado', 'Navarro', 'Pascual', 'Salazar', 'Soriano', 'Tolentino', 'Dimaculangan', 'Macaraeg', 'Manalo'],
+    },
+    maori: {
+        f: ['Aroha', 'Mere', 'Hine', 'Ngaio', 'Kiri', 'Moana', 'Anahera', 'Huia', 'Marama', 'Ngaire', 'Tia', 'Ariana', 'Hinemoa', 'Mihi', 'Awhina', 'Tui', 'Atawhai', 'Kahurangi', 'Pania', 'Ataahua'],
+        m: ['Tane', 'Wiremu', 'Rawiri', 'Nikau', 'Hemi', 'Mikaere', 'Tamati', 'Hone', 'Rangi', 'Ari', 'Tama', 'Kauri', 'Manaia', 'Maaka', 'Pita', 'Tipene', 'Hohepa', 'Matiu', 'Te Ariki', 'Rewi'],
+        a: ['Ngata', 'Parata', 'Tamihana', 'Te Kanawa', 'Paora', 'Wihongi', 'Tawhiri', 'Hohaia', 'Ruatapu', 'Rangihuna', 'Kereama', 'Tuhiwai', 'Te Rangi', 'Poutama', 'Tomoana', 'Herewini', 'Mahuika', 'Pohatu', 'Ihaia', 'Takerei', 'Whaanga', 'Huata', 'Tapsell', 'Kingi'],
+    },
+    polinesio: {
+        f: ['Sina', 'Mele', 'Losa', 'Leilani', 'Malia', 'Salote', 'Fetu', 'Lupe', 'Talia', 'Ofa', 'Seini', 'Litia', 'Mereani', 'Vika', 'Teuila', 'Alofa', 'Fiso', 'Kalena', 'Noelani', 'Akanesi'],
+        m: ['Sione', 'Tavita', 'Ioane', 'Mikaele', 'Tevita', 'Viliami', 'Semisi', 'Iosefa', 'Tomasi', 'Iliesa', 'Josefa', 'Peni', 'Vaea', 'Malakai', 'Lagi', 'Keanu', 'Kawika', 'Makoa', 'Pita', 'Aleki'],
+        a: ['Leota', 'Fonoti', 'Tuilagi', 'Faleolo', 'Sapolu', 'Aumua', 'Seumalo', 'Matagi', 'Fifita', 'Taufa', 'Vainikolo', 'Havili', 'Naufahu', 'Tupou', 'Waqa', 'Naivalu', 'Ratuvou', 'Kamakau', 'Kealoha', 'Akana', 'Toleafoa', 'Soliai', 'Masoe', 'Tuitama'],
+    },
+    melanesio: {
+        f: ['Grace', 'Mary', 'Ruth', 'Esther', 'Joy', 'Rose', 'Agnes', 'Margaret', 'Elizabeth', 'Dorothy', 'Hanna', 'Lucy', 'Martha', 'Judith', 'Christine', 'Monica', 'Theresa', 'Bernadette', 'Regina', 'Cecilia'],
+        m: ['John', 'Peter', 'Paul', 'Michael', 'James', 'Joseph', 'Moses', 'Samuel', 'Simon', 'Thomas', 'David', 'Philip', 'Benjamin', 'Gabriel', 'Patrick', 'Francis', 'Albert', 'Andrew', 'Steven', 'Timothy'],
+        a: ['Somare', 'Namaliu', 'Wingti', 'Morauta', 'Pundari', 'Kaputin', 'Temu', 'Kila', 'Tau', 'Morea', 'Kapi', 'Aisi', 'Puka', 'Marape', 'Polye', 'Siaguru', 'Waiko', 'Narokobi', 'Lini', 'Kalsakau', 'Natapei', 'Sogavare', 'Kenilorea', 'Mamaloni'],
+    },
+};
+const CONTINENTES = {
+    nam: { nombre: 'Norteamérica', cult: [['anglo', 0.55], ['hispano', 0.3], ['franco', 0.04], ['chino', 0.03], ['indio', 0.02], ['filipino', 0.02], ['vietnamita', 0.01], ['coreano', 0.01], ['italiano', 0.01], ['germano', 0.01]] },
+    sud: { nombre: 'Sudamérica', cult: [['hispano', 0.5], ['luso', 0.3], ['andino', 0.12], ['italiano', 0.04], ['germano', 0.02], ['japones', 0.02]] },
+    eur: { nombre: 'Europa', cult: [['anglo', 0.12], ['franco', 0.13], ['germano', 0.16], ['hispano', 0.09], ['italiano', 0.11], ['eslavo', 0.17], ['rumano', 0.04], ['nordico', 0.06], ['griego', 0.03], ['luso', 0.02], ['turco', 0.04], ['arabe', 0.03]] },
+    afr: { nombre: 'África', cult: [['arabe', 0.25], ['hausa', 0.13], ['yoruba', 0.12], ['igbo', 0.1], ['swahili', 0.15], ['zulu', 0.13], ['amhara', 0.08], ['anglo', 0.02], ['franco', 0.02]] },
+    asi: { nombre: 'Asia', cult: [['chino', 0.28], ['cantones', 0.02], ['indio', 0.25], ['japones', 0.1], ['coreano', 0.06], ['vietnamita', 0.06], ['tailandes', 0.05], ['filipino', 0.06], ['persa', 0.04], ['turco', 0.04], ['arabe', 0.04]] },
+    oce: { nombre: 'Oceanía', cult: [['anglo', 0.62], ['melanesio', 0.12], ['polinesio', 0.12], ['maori', 0.06], ['chino', 0.04], ['indio', 0.04]] },
+};
+const PAIS_CULT = {
+    us: [['anglo', 0.68], ['hispano', 0.2], ['chino', 0.03], ['indio', 0.02], ['filipino', 0.02], ['italiano', 0.02], ['germano', 0.01], ['coreano', 0.01], ['vietnamita', 0.01]],
+    ca: [['anglo', 0.6], ['franco', 0.25], ['chino', 0.05], ['indio', 0.05], ['filipino', 0.03], ['italiano', 0.02]],
+    mx: [['hispano', 0.95], ['anglo', 0.02], ['arabe', 0.01], ['italiano', 0.01], ['germano', 0.01]],
+    br: [['luso', 0.88], ['italiano', 0.05], ['germano', 0.03], ['japones', 0.02], ['arabe', 0.02]],
+    ar: [['hispano', 0.65], ['italiano', 0.28], ['germano', 0.03], ['arabe', 0.02], ['eslavo', 0.02]],
+    co: [['hispano', 0.97], ['arabe', 0.02], ['italiano', 0.01]],
+    cl: [['hispano', 0.85], ['andino', 0.06], ['germano', 0.04], ['arabe', 0.03], ['anglo', 0.02]],
+    pe: [['hispano', 0.7], ['andino', 0.25], ['chino', 0.03], ['japones', 0.02]],
+    cu: [['hispano', 0.98], ['chino', 0.02]],
+    pa: [['hispano', 0.9], ['anglo', 0.05], ['chino', 0.05]],
+    gb: [['anglo', 0.88], ['indio', 0.06], ['chino', 0.02], ['eslavo', 0.02], ['italiano', 0.02]],
+    fr: [['franco', 0.86], ['arabe', 0.08], ['hispano', 0.02], ['luso', 0.02], ['italiano', 0.02]],
+    de: [['germano', 0.86], ['turco', 0.07], ['eslavo', 0.04], ['italiano', 0.02], ['griego', 0.01]],
+    es: [['hispano', 0.92], ['arabe', 0.03], ['rumano', 0.03], ['anglo', 0.02]],
+    it: [['italiano', 0.93], ['rumano', 0.03], ['arabe', 0.02], ['eslavo', 0.02]],
+    ru: [['eslavo', 0.92], ['turco', 0.06], ['germano', 0.02]],
+    ng: [['hausa', 0.34], ['yoruba', 0.33], ['igbo', 0.33]],
+    eg: [['arabe', 1]],
+    za: [['zulu', 0.75], ['anglo', 0.2], ['indio', 0.05]],
+    ma: [['arabe', 1]],
+    ke: [['swahili', 0.95], ['indio', 0.03], ['anglo', 0.02]],
+    in: [['indio', 1]],
+    cn: [['chino', 1]],
+    jp: [['japones', 1]],
+    kr: [['coreano', 1]],
+    th: [['tailandes', 0.95], ['chino', 0.05]],
+    hk: [['cantones', 0.9], ['anglo', 0.04], ['filipino', 0.04], ['indio', 0.02]],
+    au: [['anglo', 0.75], ['chino', 0.06], ['italiano', 0.04], ['indio', 0.04], ['griego', 0.03], ['vietnamita', 0.03], ['filipino', 0.02], ['arabe', 0.02], ['maori', 0.01]],
+    nz: [['anglo', 0.68], ['maori', 0.17], ['polinesio', 0.07], ['chino', 0.04], ['indio', 0.04]],
+    fj: [['polinesio', 0.55], ['indio', 0.38], ['anglo', 0.04], ['chino', 0.03]],
+    ws: [['polinesio', 0.96], ['chino', 0.02], ['anglo', 0.02]],
+    pg: [['melanesio', 0.92], ['anglo', 0.04], ['chino', 0.02], ['filipino', 0.02]],
+};
+const PAIS_CONT = {
+    us: 'nam', ca: 'nam', mx: 'nam', cu: 'nam', pa: 'nam',
+    br: 'sud', ar: 'sud', co: 'sud', cl: 'sud', pe: 'sud',
+    gb: 'eur', fr: 'eur', de: 'eur', es: 'eur', it: 'eur', ru: 'eur',
+    ng: 'afr', eg: 'afr', za: 'afr', ma: 'afr', ke: 'afr',
+    in: 'asi', cn: 'asi', jp: 'asi', kr: 'asi', th: 'asi', hk: 'asi',
+    au: 'oce', nz: 'oce', fj: 'oce', ws: 'oce', pg: 'oce',
+};
     const oficios = [
         { id: 'guion', nombre: 'Escritor', dep: 'Guion', base: 0.015 },
         { id: 'direccion', nombre: 'Director', dep: 'Dirección', base: 0.025 },
@@ -1395,7 +1606,37 @@ ART.datos = (function () {
     const sufijosLogo = sp('Pictures,Studios,Films,Entertainment,Media,Producciones,Games,Records,Ediciones,Teatro,Animation,Grupo de medios,Estudio de cine,Cine y televisión,Productora,Compañía,Corporación,Casa productora,Estudios,Discográfica,Casa editorial,Compañía de teatro,Estudio de videojuegos,Colectivo,Independiente,Entretenimiento');
     const motorMercado = [[1850, 'El teatro y las ferias'], [1895, 'Las novedades del cinematógrafo'], [1927, 'El cine sonoro y las estrellas'], [1948, 'La pelea contra la televisión'],
         [1967, 'Los autores y la libertad'], [1975, 'El taquillazo de verano'], [1980, 'El video casero'], [2000, 'El DVD y los efectos digitales'], [2012, 'Las franquicias y el streaming'], [2030, 'Las plataformas globales'], [2060, 'La experiencia inmersiva'], [2085, 'Las obras que se sienten'], [2100, 'Los públicos orbitales'], [2150, 'Las colonias de Marte'], [2200, 'La red de tres mundos'], [2250, 'El archivo y lo nuevo'], [2284, 'La vuelta a lo analógico']];
-    return {
+    const REG_CONT = { nam: 'nam', lat: 'sud', eur: 'eur', afr: 'afr', asi: 'asi', oce: 'oce' };
+    function pesoAzar(l, r) { let t = 0; l.forEach(function (x) { t += x[1]; }); let v = r() * t; for (let k = 0; k < l.length; k++) {
+        v -= l[k][1];
+        if (v <= 0)
+            return l[k][0];
+    } return l[l.length - 1][0]; }
+    function deLista(l, r) { return l[Math.floor(r() * l.length) % l.length]; }
+    function hayCulturas() { return typeof CULTURAS !== 'undefined'; }
+    function nombreCultura(c, sx, r) {
+        const L = hayCulturas() && CULTURAS[c];
+        if (!L)
+            return '';
+        const k = Math.floor(r() * L.a.length) % L.a.length;
+        return deLista(sx === 'F' ? L.f : L.m, r) + ' ' + (sx === 'F' && L.af ? L.af[k] : L.a[k]);
+    }
+    function nombreContinente(cont, sx, r) {
+        if (!hayCulturas() || !CONTINENTES[cont])
+            return '';
+        return nombreCultura(pesoAzar(CONTINENTES[cont].cult, r), sx, r);
+    }
+    function nombrePais(pais, sx, r, reg) {
+        if (!hayCulturas())
+            return '';
+        if (pais && PAIS_CULT[pais])
+            return nombreCultura(pesoAzar(PAIS_CULT[pais], r), sx, r);
+        const p = pais && buscarPais(pais), c = (p && PAIS_CONT && PAIS_CONT[p.id]) || REG_CONT[reg || (p && p.region) || 'nam'];
+        return nombreContinente(c || 'nam', sx, r);
+    }
+    function buscarPais(id) { return paises.filter(function (x) { return x.id === id; })[0] || null; }
+    function contNombres() { return hayCulturas() ? Object.keys(CONTINENTES).map(function (k) { return [k, CONTINENTES[k].nombre]; }) : []; }
+    return { nombreCultura: nombreCultura, nombreContinente: nombreContinente, nombrePais: nombrePais, contNombres: contNombres, REG_CONT: REG_CONT,
         regionesInicio: regionesInicio, erasInicio: erasInicio, sufijosLogo: sufijosLogo, motorMercado: motorMercado,
         regiones: regiones, paises: paises, continentes: continentes, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
         familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
@@ -5303,8 +5544,11 @@ ART.talentos = (function () {
         const ps = D.paises.filter(function (p) { return p.region === reg; });
         return ps[N.ponderado(ps.map(function (p) { return p.peso; }))].id;
     }
-    function nombreNuevo(reg, sx) {
-        const L = D.nombres[reg];
+    function nombreNuevo(reg, sx, pais) {
+        const n = D.nombrePais(pais, sx, N.azar, reg);
+        if (n)
+            return n;
+        const L = D.nombres[reg] || D.nombres.nam;
         return N.elegir(sx === 'F' ? L.f : L.m) + ' ' + N.elegir(L.a);
     }
     const CURVA = {
@@ -5397,9 +5641,10 @@ ART.talentos = (function () {
         const hab = Math.round(N.limitar(habilidadPorEdad(pot, edad, of) + N.normal(0, 3), 10, 99));
         const famaBase = Math.pow(N.limitar((hab - 38) / 60, 0, 1), 2) * (edad > 25 ? 1 : 0.5) * (0.3 + N.azar() * 0.9) * (of === 'interprete' ? 1.2 : 0.9);
         const rasgos = Object.keys(D.rasgos);
+        const paisT = elegirPais(reg);
         const t = {
-            id: N.sigId(), nom: nombreNuevo(reg, sx), sx: sx, nac: anio - edad, of: of, hab: hab, pot: pot,
-            fama: N.redondear(N.limitar(famaBase, 0, 1), 3), reg: reg, pais: elegirPais(reg),
+            id: N.sigId(), nom: nombreNuevo(reg, sx, paisT), sx: sx, nac: anio - edad, of: of, hab: hab, pot: pot,
+            fama: N.redondear(N.limitar(famaBase, 0, 1), 3), reg: reg, pais: paisT,
             rasgo: N.probabilidad(0.55) ? N.elegir(rasgos) : '', ocup: -1, obras: 0, exitos: 0, premios: 0, ret: 0,
         };
         if (N.probabilidad(0.15)) {
@@ -6797,7 +7042,10 @@ ART.ideas = (function () {
         const e = N.S && N.S.estudios[b.est || 0];
         return e ? e.reg : 'nam';
     }
-    function nombrePersonaje(reg, sx) {
+    function nombrePersonaje(reg, sx, pais) {
+        const n = pais ? D.nombrePais(pais, sx, N.azar, reg) : D.nombreContinente(D.REG_CONT[reg] || 'nam', sx, N.azar);
+        if (n)
+            return n;
         const L = D.nombres[reg] || D.nombres.nam;
         return N.elegir(sx === 'F' ? L.f : L.m) + ' ' + N.elegir(L.a);
     }
@@ -24385,6 +24633,10 @@ ART.pantallas = (function () {
     ac('npDadoNombre', function () { np.nombre = nombreDado(); cacheT = -1; redibujarNP(); });
     ac('npDadoAvatar', function () {
         dadoN = (dadoN * 17 + 3) % 9973;
+        if (ART.datos.contNombres().length) {
+            ART.nombresUI.abrir({ sx: np.avSexo, alAceptar: function (n) { np.avNombre = n.slice(0, 30); np.asp = null; redibujarNP(); } });
+            return;
+        }
         np.avNombre = nombreAvatarAzar(np.avSexo, dadoN);
         redibujarNP();
     });
@@ -28278,7 +28530,10 @@ ART.creacion = (function () {
             cr.b.sin = I.sinopsis(cr.b);
     } });
     ac('crPjDado', function (v) { const p = pjDe(v); if (!p)
-        return; p.n = conAzarUI(function () { return I.nombrePersonaje(I.regionDe(cr.b), p.s); }); ajustar(cr.b); refrescar(); });
+        return; ART.nombresUI.abrir({ sx: p.s, alAceptar: function (n) { const q = pjDe(v); if (q) {
+            q.n = n.slice(0, 30);
+            ajustar(cr.b);
+        } refrescar(); } }); });
     ac('crPjImp', function (v) {
         const x = v.split('|'), p = pjDe(x[0]);
         if (!p || p.i === x[1])
@@ -30509,7 +30764,7 @@ ART.mediosUI = (function () {
     ac('mdPjNom', function (v, el) { const p = pjSel(el); if (p)
         p.n = String(v).slice(0, 30); });
     ac('mdPjDado', function (v) { const b = st.b, p = b.pj[+v]; if (p)
-        p.n = ART.creacion.conAzarUI(function () { return ART.ideas.nombrePersonaje(ART.ideas.regionDe({ lug: b.lug, est: 0 }), p.s); }); trasPj(b); });
+        ART.nombresUI.abrir({ sx: p.s, alAceptar: function (n) { p.n = n.slice(0, 30); trasPj(b); } }); });
     ac('mdPjImp', function (v) { const q = v.split('|'), b = st.b, p = b.pj[+q[0]]; if (p)
         p.i = q[1]; trasPj(b); });
     ac('mdPjEdad', function (v, el) { const p = pjSel(el); if (p)
@@ -31121,6 +31376,40 @@ ART.metasUI = (function () {
         document.removeEventListener('click', primerToque, true);
     }, true);
     return { opcionesNueva: opcionesNueva, dificultades: dificultades, tarjetas: tarjetas, metas: metas, editor: editor, creditos: creditos, musica: musica, piezaActual: piezaActual, PIEZAS: PIEZAS, abrirMusica: abrirMusica, infoPieza: infoPieza, desbloquear: desbloquear };
+})();
+ART.nombresUI = (function () {
+    'use strict';
+    const N = ART.n, D = ART.datos, U = ART.ui, esc = N.esc;
+    const st = { sx: 'F', cont: '', nom: '', cb: null };
+    function tirar() { st.nom = st.cont ? D.nombreContinente(st.cont, st.sx, Math.random) : ''; }
+    function vista() {
+        const conts = D.contNombres();
+        const chipN = function (txt, a, v, on) { return '<button class="chip' + (on ? ' on' : '') + '" data-a="' + a + '" data-v="' + v + '" aria-pressed="' + !!on + '">' + esc(txt) + '</button>'; };
+        return '<div class="fila entre"><h2>Nombre al azar</h2><button class="ico" data-a="nmSalir" aria-label="Salir">' + U.icono('cerrar') + '</button></div>' +
+            '<p class="nota">Elige un continente y los dados sacan un nombre de sus países y culturas.</p>' +
+            '<div class="chips">' + chipN('Mujer', 'nmSexo', 'F', st.sx === 'F') + chipN('Hombre', 'nmSexo', 'M', st.sx === 'M') + '</div>' +
+            '<div class="nm-conts">' + conts.map(function (c) { return chipN(c[1], 'nmCont', c[0], st.cont === c[0]); }).join('') + '</div>' +
+            '<div class="nm-barra" aria-live="polite">' + (st.nom ? '<b>' + esc(st.nom) + '</b>' : '<span class="tenue">Elige un continente</span>') + '</div>' +
+            '<div class="fila" style="gap:8px"><button class="btn crece" data-a="nmTirar"' + (st.cont ? '' : ' disabled') + '>🎲 Otro</button><button class="btn primario crece" data-a="nmAceptar"' + (st.nom ? '' : ' disabled') + '>Aceptar</button><button class="btn" data-a="nmSalir">Salir</button></div>';
+    }
+    function abrir(op) {
+        st.sx = op && op.sx === 'M' ? 'M' : op && op.sx === 'F' ? 'F' : st.sx;
+        st.cb = op && op.alAceptar;
+        st.vuelta = op && op.alSalir;
+        if (st.cont)
+            tirar();
+        U.modal(vista());
+    }
+    function redibujar() { U.modal(vista()); }
+    U.accion('nmSexo', function (v) { st.sx = v === 'M' ? 'M' : 'F'; if (st.cont)
+        tirar(); redibujar(); });
+    U.accion('nmCont', function (v) { st.cont = v; tirar(); redibujar(); });
+    U.accion('nmTirar', function () { tirar(); redibujar(); });
+    U.accion('nmAceptar', function () { const n = st.nom, cb = st.cb; U.cerrarModal(); if (n && cb)
+        cb(n, st.sx); });
+    U.accion('nmSalir', function () { const v = st.vuelta; U.cerrarModal(); if (v)
+        v(); });
+    return { abrir: abrir };
 })();
 ART.salonUI = (function () {
     'use strict';
@@ -31905,7 +32194,7 @@ ART.talentoNuevo = (function () {
     function desdeHito(k) { abrir(); cargarHist(k); }
     ac('tnPot', function (v) { const b = document.getElementById('tnPot'); if (b)
         b.textContent = v; });
-    ac('tnNombreDado', function () { f.nom = conAzar(function () { return T.nombreNuevo(pais().region, f.sx); }); f.nomAuto = 1; redibujar(); });
+    ac('tnNombreDado', function () { ART.nombresUI.abrir({ sx: f.sx, alAceptar: function (n) { f.nom = n.slice(0, 30); f.nomAuto = 0; redibujar(); }, alSalir: redibujar }); });
     ac('tnAsp', function (v, el) {
         const k = el.getAttribute('data-k'), a = aspecto();
         a[k] = ['gafas', 'aretes', 'pecas'].indexOf(k) >= 0 ? +v === 1 : +v;
@@ -34198,7 +34487,7 @@ ART.negocios = (function () {
         N.emit('noticia', { tipo: 'estudio', texto: 'Vendes tu ' + x[1].toLowerCase() + ' por {$}.', monto: v });
         return '';
     }
-    const REG_PQ = { nam: 'Norteamérica', eur: 'Europa', asi: 'Asia', lat: 'Latinoamérica', afr: 'África', oce: 'Oceanía' };
+    const REG_PQ = { nam: 'Norteamérica', eur: 'Europa', asi: 'Asia', lat: 'Sudamérica', afr: 'África', oce: 'Oceanía' };
     function costoParque(l) { return Math.round(tip() * 4 * Math.pow(2, l)); }
     function visitas(p) {
         const peso = ART.estreno.pesoRegiones(N.anio())[p.r] || 0.1;
