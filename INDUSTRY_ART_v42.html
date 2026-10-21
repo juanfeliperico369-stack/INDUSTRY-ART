@@ -7298,7 +7298,51 @@ ART.ideas = (function () {
         r.pub = Math.round(r.pub);
         return r;
     }
-    return { TIPOS_TRAMA: TIPOS_TRAMA, NARRADORES: NARRADORES, tramasDe: tramasDe, efectoTramas: efectoTramas, costoTramas: costoTramas, semanasTramas: semanasTramas, idiomasExtra: idiomasExtra, idiomaLocal: idiomaLocal, PAQUETES_MUSICA: PAQUETES_MUSICA, paqueteMusica: paqueteMusica, MORALEJAS: MORALEJAS, moraleja: moraleja, bonoMoraleja: bonoMoraleja, GIROS: GIROS, giro: giro, bonoGiro: bonoGiro, NEEDLE_DROPS: NEEDLE_DROPS, needleDrop: needleDrop, needleDisponible: needleDisponible, contextoNeedle: contextoNeedle, bonoNeedle: bonoNeedle,
+    const ERAS_MAT = [[500, 'Antigüedad'], [1450, 'Edad Media'], [1700, 'Renacimiento y Barroco'], [1800, 'Siglo XVIII'], [1900, 'Siglo XIX'], [2000, 'Siglo XX'], [99999, 'Siglo XXI']];
+    function anioMat(m) {
+        const t = String(m.anio || '');
+        const rom = t.match(/[Ss]iglo ([IVXL]+)/);
+        if (rom) {
+            const v = { I: 1, V: 5, X: 10, L: 50 };
+            let n = 0;
+            rom[1].split('').forEach(function (c, k, a) { const x = v[c], y = v[a[k + 1]] || 0; n += x < y ? -x : x; });
+            return (n - 1) * 100 + 50;
+        }
+        const d = t.match(/-?\d+/);
+        if (!d)
+            return null;
+        return /a\.\s*C/.test(t) ? -Math.abs(+d[0]) : +d[0];
+    }
+    function eraMat(m) {
+        const y = anioMat(m);
+        if (y === null)
+            return 'Tradiciones y leyendas';
+        for (let k = 0; k < ERAS_MAT.length; k++)
+            if (y < ERAS_MAT[k][0])
+                return ERAS_MAT[k][1];
+        return 'Siglo XXI';
+    }
+    function ordenarMat(lista, orden) {
+        const k = function (m) { const y = anioMat(m); return y === null ? -99999 : y; };
+        const f = { fama: function (a, b) { return (b.fama || 0) - (a.fama || 0); }, anio: function (a, b) { return k(a) - k(b) || (b.fama || 0) - (a.fama || 0); },
+            autor: function (a, b) { return String(a.autor).localeCompare(String(b.autor), 'es'); }, titulo: function (a, b) { return String(a.tit).localeCompare(String(b.tit), 'es'); } }[orden || 'anio'];
+        return lista.slice().sort(f);
+    }
+    function conEras(lista, orden, fila) {
+        let era = null;
+        return lista.map(function (m) {
+            let h = '';
+            if (orden === 'anio' || !orden) {
+                const e = eraMat(m);
+                if (e !== era) {
+                    era = e;
+                    h += '<h4 class="hs-dec">' + e + '</h4>';
+                }
+            }
+            return h + fila(m);
+        }).join('');
+    }
+    return { anioMat: anioMat, eraMat: eraMat, ordenarMat: ordenarMat, conEras: conEras, TIPOS_TRAMA: TIPOS_TRAMA, NARRADORES: NARRADORES, tramasDe: tramasDe, efectoTramas: efectoTramas, costoTramas: costoTramas, semanasTramas: semanasTramas, idiomasExtra: idiomasExtra, idiomaLocal: idiomaLocal, PAQUETES_MUSICA: PAQUETES_MUSICA, paqueteMusica: paqueteMusica, MORALEJAS: MORALEJAS, moraleja: moraleja, bonoMoraleja: bonoMoraleja, GIROS: GIROS, giro: giro, bonoGiro: bonoGiro, NEEDLE_DROPS: NEEDLE_DROPS, needleDrop: needleDrop, needleDisponible: needleDisponible, contextoNeedle: contextoNeedle, bonoNeedle: bonoNeedle,
         LIMITES: LIMITES, ANIO_IA: ANIO_IA, duracionTipica: duracionTipica, familia: familia, completar: completar,
         nivelMaximoEpoca: nivelMaximoEpoca, normalizar: normalizar, indiceClasificacion: indiceClasificacion, clasificar: clasificar,
         describirContenido: describirContenido, contenidoDe: contenidoDe, hayMenores: hayMenores, hayNinos: hayNinos, esErotica: esErotica, esInfantil: esInfantil, nivelEfectos: nivelEfectos, validar: validar,
@@ -26780,17 +26824,19 @@ ART.creacion = (function () {
                 (margen > 4 ? '<button class="chip" data-a="crInforme" data-v="' + g.id + '">Informe de lectura · ' + dinero(I.costoInforme(g)) + '</button>' : '') +
                 (g.reg ? '' : '<button class="chip" data-a="crRegatear" data-v="' + g.id + '">Regatear</button>') + '</div>') + '</div>';
     }
-    const GRUPOS_MAT = [['todos', 'Todas'], ['clasico', 'Clásicos'], ['tono', 'Subidas de tono'], ['tradicion', 'Tradiciones del mundo'], ['editor', 'Tuyos y con licencia']];
+    const GRUPOS_MAT = [['todos', 'Todas'], ['clasico', 'Clásicos'], ['culto', 'De culto'], ['tono', 'Subidas de tono'], ['tradicion', 'Tradiciones del mundo'], ['editor', 'Tuyos y con licencia']];
     function mini(v) { return '<span class="mini"><i style="width:' + Math.round(N.limitar(v / 1.5, 0, 1) * 100) + '%"></i></span>'; }
     function listaMaterial() {
         const a = anio(), q = cr.qMat.toLowerCase();
-        const lista = I.materialesDisponibles(a).filter(function (m) {
+        const ord = cr.ordMat || 'anio';
+        const lista = I.ordenarMat(I.materialesDisponibles(a).filter(function (m) {
             return (cr.grupoMat === 'todos' || m.grupo === cr.grupoMat) && (!q || (m.tit + ' ' + m.autor + ' ' + m.gen.join(' ')).toLowerCase().indexOf(q) >= 0);
-        }).sort(function (x, y) { return y.fama - x.fama; });
+        }), ord);
+        const orden = '<div class="chips">' + [['anio', 'Por época'], ['fama', 'Más famosas'], ['autor', 'Por autor'], ['titulo', 'Por título']].map(function (x) { return chip(x[1], 'crMatOrden', x[0], ord === x[0]); }).join('') + '</div><p class="chico tenue">' + lista.length + ' obras</p>';
         if (!lista.length)
-            return '<p class="tenue">Nada coincide con la búsqueda.</p>';
+            return orden + '<p class="tenue">Nada coincide con la búsqueda.</p>';
         const EDADES = ['Niños', 'Adolesc.', 'Jóvenes', 'Adultos', 'Mayores'];
-        return lista.map(function (m) {
+        return orden + I.conEras(lista, ord, function (m) {
             const libre = I.esLibre(m, a), der = I.costoDerechos(m, a), at = I.atractivo(m), usos = I.usosRecientes(m.id, a);
             return '<div class="tarjeta"><div class="fila entre"><b>' + esc(m.tit) + '</b>' + (libre ? '<span class="etiqueta bien">Libre</span>' : '<span class="etiqueta">Derechos ' + dinero(der) + '</span>') + '</div>' +
                 '<span class="chico">' + esc(m.autor) + ' · ' + esc(m.anio) + ' · ' + esc(m.gen.join(', ')) + '</span>' +
@@ -26800,7 +26846,7 @@ ART.creacion = (function () {
                 (usos ? '<span class="mal chico">Adaptada ' + usos + ' ' + (usos > 1 ? 'veces' : 'vez') + ' en los últimos 15 años: el público está cansado.</span><br>' : '') +
                 (m.grupo === 'tono' ? '<span class="nota info">Subida de tono: se adapta con guiños, la clasificación sube y nada es explícito.</span><br>' : '') +
                 '<div class="fila"><button class="btn primario" data-a="crAdaptar" data-v="' + m.id + '">Adaptar</button><button class="btn" data-a="mtEditar" data-v="' + esc(m.id) + '">' + icono('pincel') + 'Editar</button></div></div>';
-        }).join('');
+        });
     }
     function vistaMaterial() {
         let h = cabecera('Usar material', 'Obras de dominio público: quedan libres el 1 de enero del año 71 tras la muerte del autor; las antiguas y las tradiciones, siempre. Antes de liberarse, sus derechos se compran.');
@@ -27774,6 +27820,12 @@ ART.creacion = (function () {
         empezarIdea(b);
     });
     ac('crMatGrupo', function (v) { cr.grupoMat = v; refrescar(); });
+    ac('crMatOrden', function (v) { cr.ordMat = v; const l = document.getElementById('crMatLista'); if (l) {
+        l.innerHTML = listaMaterial();
+        U.dibujar(l);
+    }
+    else
+        refrescar(); });
     ac('crMatBuscar', function (v) { cr.qMat = v; const l = document.getElementById('crMatLista'); if (l)
         l.innerHTML = listaMaterial(); });
     ac('crAdaptar', function (v) {
@@ -29572,8 +29624,8 @@ ART.materialUI = (function () {
         U.aviso(e, 'mal');
         return;
     } U.cerrarModal(); U.aviso('Material borrado'); refrescarDespues(); });
-    const bib = { q: '', grupo: 'todos', estado: 'todos', n: 30 };
-    const GRUPO_DP = { clasico: 'Clásico', tradicion: 'Tradición', moderno: 'Moderno', editor: 'Propio' };
+    const bib = { q: '', grupo: 'todos', estado: 'todos', n: 30, orden: 'anio' };
+    const GRUPO_DP = { clasico: 'Clásico', tradicion: 'Tradición', moderno: 'Moderno', editor: 'Propio', culto: 'De culto', tono: 'Subida de tono' };
     function nombreGrupo(g) { return GRUPO_DP[g] || (g ? g.charAt(0).toUpperCase() + g.slice(1) : 'Clásico'); }
     function estadoDp(m) {
         const a = N.anio(), I = ART.ideas;
@@ -29585,7 +29637,7 @@ ART.materialUI = (function () {
     function biblioteca() {
         const q = bib.q.toLowerCase(), grupos = {};
         X.dominio.forEach(function (m) { grupos[m.grupo] = 1; });
-        const l = X.dominio.filter(function (m) {
+        const l0 = X.dominio.filter(function (m) {
             if (bib.grupo !== 'todos' && m.grupo !== bib.grupo)
                 return false;
             const e = estadoDp(m);
@@ -29593,14 +29645,16 @@ ART.materialUI = (function () {
                 return false;
             return !q || (m.tit + ' ' + m.autor + ' ' + (m.gen || []).join(' ') + ' ' + (m.tipo || '')).toLowerCase().indexOf(q) >= 0;
         });
+        const l = ART.ideas.ordenarMat(l0, bib.orden);
         let h = '<div class="tarjeta"><h3>' + icono('libro') + ' Biblioteca de clásicos</h3><p class="nota info">' + X.dominio.length + ' obras de dominio público y tradiciones del mundo, con su autor, su historia, sus personajes y las adaptaciones que ya se hicieron en tu mundo. Toca una para ver su ficha.</p>' +
             '<input type="search" data-c="dpBuscar" value="' + esc(bib.q) + '" placeholder="Buscar por título, autor o género" aria-label="Buscar en la biblioteca">' +
             '<div class="chips" style="margin-top:6px">' + [['todos', 'Todas']].concat(Object.keys(grupos).map(function (g) { return [g, nombreGrupo(g)]; })).map(function (x) { return chip(x[1], 'dpGrupo', x[0], bib.grupo === x[0]); }).join('') + '</div>' +
             '<div class="chips">' + [['todos', 'Todas'], ['libres', 'Ya libres'], ['derechos', 'Con derechos']].map(function (x) { return chip(x[1], 'dpEstado', x[0], bib.estado === x[0]); }).join('') + '</div>' +
-            '<div class="col" style="margin-top:6px">' + l.slice(0, bib.n).map(function (m) {
+            '<div class="chips">' + [['anio', 'Por época'], ['fama', 'Más famosas'], ['autor', 'Por autor'], ['titulo', 'Por título']].map(function (x) { return chip(x[1], 'dpOrden', x[0], bib.orden === x[0]); }).join('') + '</div>' +
+            '<div class="col" style="margin-top:6px">' + ART.ideas.conEras(l.slice(0, bib.n), bib.orden, function (m) {
                 const e = estadoDp(m), n = adaptacionesDe(m.id).length;
                 return '<button class="cal-ev toque sl-fila" data-a="dpVer" data-v="' + esc(m.id) + '"><b class="sl-n chico">' + esc(String(m.anio).replace('c. ', '')) + '</b><div class="col crece"><span>' + esc(m.tit) + '</span><span class="tenue chico">' + esc(m.autor) + ' · ' + esc(m.tipo || nombreGrupo(m.grupo)) + ' · ' + esc((m.gen || []).slice(0, 2).join(', ')) + (n ? ' · ' + n + (n === 1 ? ' adaptación' : ' adaptaciones') : '') + '</span></div><span class="etiqueta' + (e.libre ? ' oro' : '') + '">' + (e.libre ? 'Libre' : 'Derechos') + '</span></button>';
-            }).join('') + '</div>' + (l.length > bib.n ? '<button class="btn bloque" data-a="dpMas">Ver más (' + (l.length - bib.n) + ')</button>' : '') + (l.length ? '' : '<p class="tenue">No hay obras con ese filtro.</p>') + '</div>';
+            }) + '</div>' + (l.length > bib.n ? '<button class="btn bloque" data-a="dpMas">Ver más (' + (l.length - bib.n) + ')</button>' : '') + (l.length ? '' : '<p class="tenue">No hay obras con ese filtro.</p>') + '</div>';
         return h;
     }
     function fichaDp(id) {
@@ -29635,6 +29689,7 @@ ART.materialUI = (function () {
     ac('dpGrupo', function (v) { bib.grupo = v; bib.n = 30; U.refrescar(); });
     ac('dpEstado', function (v) { bib.estado = v; bib.n = 30; U.refrescar(); });
     ac('dpMas', function () { bib.n += 30; U.refrescar(); });
+    ac('dpOrden', function (v) { bib.orden = v; bib.n = 30; U.refrescar(); });
     ac('dpVer', fichaDp);
     ac('dpAdaptar', function (v) { U.cerrarModal(); const A = U.acciones; A.crearObra(); A.crCamino('material'); if (A.crAdaptar)
         A.crAdaptar(v); });
