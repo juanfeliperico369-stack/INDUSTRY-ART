@@ -65,7 +65,8 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Inglés:** unas 330 frases nuevas.
 
 ## Correcciones tras la prueba en el celular
-- **Menores:** ahora sí pueden actuar en obras de clasificación fuerte (por ejemplo, un musical para mayores de 16 con un personaje de 16 años). Solo se bloquean si la obra es erótica (género Erótico o Erótica en cualquier parte) o si tiene contenido sexual explícito.
+- **Menores:** pueden actuar en obras de cualquier clasificación, también con contenido explícito (como en «Boyz n the Hood»); esas escenas son de los adultos. Solo se bloquean en obras eróticas (género Erótico o Erótica en cualquier parte). Una obra infantil sigue sin pasar de PG-13, también en música, videojuegos, teatro y libros.
+- **Cumpleaños real:** la felicitación llega entre 15 segundos y 1 minuto después de abrir o crear la partida en el día de tu cumpleaños. Si sales de la app y vuelves, o si pasa una semana del juego, vuelve a intentarlo, así no se pierde.
 - **Energía:** todos los talentos tienen hasta 100 % de energía. Cada rubro gasta 10 % y se recupera 10 % al mes. Una misma persona, también tu personaje, puede tomar varios rubros, incluso en la misma obra (por ejemplo, dirección y fotografía), mientras le alcance la energía. La lista de candidatos muestra la energía de cada uno.
 - **Contratación:** abre con todos los candidatos y muestra 50 por página, con «Ver 50 más». Ya no se queda solo en los que tienen experiencia.
 - **Personal de apoyo:** hasta 100 en producción y 100 en posproducción. El tope depende del presupuesto: con $500 está bloqueado, y se habilita cuando el presupuesto alcanza.
