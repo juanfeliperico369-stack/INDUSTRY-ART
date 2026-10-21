@@ -5,17 +5,19 @@ programado junto a Lumen. El plan completo está en `docs/` (Plan Maestro en Wor
 
 ## Cómo jugar
 
-Abre **`INDUSTRY_ART_v41.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
-Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34, la V35, la V36 y la V40 se abren en la V41 (se migran solas).
+Abre **`INDUSTRY_ART_v42.html`** en cualquier navegador (celular o PC). Es un solo archivo y funciona sin internet.
+Las partidas guardadas de la V16, la V17, la V18, la V19, la V20, la V21, la V22, la V23, la V24, la V25, la V26, la V27, la V28, la V29, la V30, la V31, la V32, la V33, la V34, la V35, la V36, la V40 y la V41 se abren en la V42 (se migran solas).
 
 ## Qué hay en este repositorio
 
 | Ruta | Qué es |
 |---|---|
-| `INDUSTRY_ART_v41.html` | El juego, versión **1.0** (V41) |
+| `INDUSTRY_ART_v42.html` | El juego, versión **1.0** (V42, guardado 42) |
+| `INDUSTRY_ART_v41.html` | La primera entrega de la 1.0 (V41) |
 | `INDUSTRY_ART_v40.html` | La versión 5.0 (V40), base de la 1.0 |
 | `INDUSTRY_ART_v36.html` | La versión 2.1 (V36, armada desde `src/`) |
 | `INDUSTRY_ART_v20.html`, `INDUSTRY_ART_v19.html`, `INDUSTRY_ART_v18.html`, `INDUSTRY_ART_v17.html`, `INDUSTRY_ART_v16.html` | Las versiones anteriores, para comparar |
+| `bitacora_v42.md` | La bitácora de la V42: avatar completo, contratación nueva, rodaje con varias opciones, tramas, portadas e historia real |
 | `bitacora_v41.md` | La bitácora de la versión 1.0 (V41) |
 | `bitacora_v36.md` | La bitácora corta de la V36 · 2.1, inicio por pasos, tu avatar en tus obras y clásicos con sus personajes (las de la V21 a la V35 también están) |
 | `app/` | Las apps: Android e iPhone (Capacitor 8: gratis con un anuncio al abrir y la compra «Versión completa» que lo quita) y PC en `app/escritorio/` (Electron, sin anuncios) |
