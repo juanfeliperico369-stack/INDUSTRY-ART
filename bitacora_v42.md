@@ -239,6 +239,7 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Plataformas sin límite:** cada plataforma de más cuesta un 6 % de adaptación (y un 5 % más si no tienes su kit).
 - **Motor desde el creador:** en Desarrollo puedes crear un motor nuevo (eliges las funciones y queda elegido para la obra) o mejorar el tuyo con las funciones nuevas de la época, pagando su costo.
 - **Idiomas de traducción (videojuegos y libros):** una lista para elegir hasta 10 idiomas, o «Todos los idiomas», que cuesta más. Con «Según la nacionalidad del talento» también puedes sumar hasta 3 idiomas que elijas tú.
+- **Teatro como el cine, sin lo técnico:** funciones por semana, semanas de temporada y semanas de ensayo ahora se eligen con deslizadores, junto a la duración. Teatro, libros y videojuegos tienen además los deslizadores de complejidad (de Ninguna a Compleja) y de ritmo (de Reflexivo a Frenético), como el cine.
 - **Videojuegos con hasta 3 tipos:** el primero manda; cada tipo de más suma 2 % de público y 4 % de costo.
 
 ## Vida, alertas y Encargos

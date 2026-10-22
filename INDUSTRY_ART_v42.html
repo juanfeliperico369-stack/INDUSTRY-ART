@@ -13948,7 +13948,8 @@ ART.medios = (function () {
             s += w * fo * D.factorClas(cl, g);
             s0 += w * D.factorClas(c0, g);
         }
-        return N.limitar(s / Math.max(1e-9, s0), 0.2, 1.3) * (b.cfg && b.cfg.bsoAlbum ? 1.03 : 1) * (bsoDe(b) && bsoDe(b).pub ? 1.02 : 1) * (b.med === 'juegos' && b.tipos && b.tipos.length > 1 ? 1 + 0.02 * (b.tipos.length - 1) : 1);
+        const rtA = NARRATIVOS.indexOf(b.med) >= 0 ? X.ritmo[b.rit === undefined ? 2 : b.rit] || X.ritmo[2] : null;
+        return N.limitar(s / Math.max(1e-9, s0), 0.2, 1.3) * (rtA ? (1 - ((b.cx === undefined ? 2 : b.cx) - 2) * 0.03) * (1 + rtA.pub * 0.01) : 1) * (b.cfg && b.cfg.bsoAlbum ? 1.03 : 1) * (bsoDe(b) && bsoDe(b).pub ? 1.02 : 1) * (b.med === 'juegos' && b.tipos && b.tipos.length > 1 ? 1 + 0.02 * (b.tipos.length - 1) : 1);
     }
     function ajusteContenido(b) {
         const r = { crit: 0, pub: 0, notas: [] }, c = contenido(b), base = contenidoBase(b), nom = function (x) { return x.nombre.split(' ')[0].toLowerCase(); };
@@ -14445,6 +14446,10 @@ ART.medios = (function () {
         if (b.med === 'musica')
             q += de(ESTUDIOS_GRAB, b.cfg.estudio, 'pro').q;
         const ab = arteBono(b), es = estiloMedio(b.cfg.pst);
+        if (NARRATIVOS.indexOf(b.med) >= 0) {
+            const rt = X.ritmo[b.rit === undefined ? 2 : b.rit] || X.ritmo[2];
+            q += ((b.cx === undefined ? 2 : b.cx) - 2) * 0.6 + (rt.crit + rt.pub) / 2;
+        }
         q = comprimir(N.limitar(q + (ab.crit + ab.pub) / 2 + es.crit + es.pub + pulido(b).q + bonoReparto(b).q + depBono(b).q + guionBono(b), 5, 98));
         return { q: Math.round(q), arte: ab, acc: accesoMd(b) };
     }
@@ -32751,15 +32756,28 @@ ART.mediosUI = (function () {
         let h = selTamano(b);
         if (b.med === 'libros')
             h += '<label class="campo"><span>Extensión</span>' + sel('mdCfg', Md.EXTENSIONES.map(function (x) { return [x.id, x.nombre]; }), c.ext || 'novela', 'ext') + '</label>';
+        const rg = function (k, min, max, val, etq, suf) { return '<label class="campo rango"><span>' + esc(etq) + ': <b id="md-n-' + k + '">' + val + '</b>' + esc(suf || '') + '</span><input type="range" min="' + min + '" max="' + max + '" step="1" value="' + val + '" data-i="mdDurV" data-l="md-n-' + k + '" data-f="n" data-c="mdCfg" data-v="' + k + '" aria-label="' + esc(etq) + '"></label>'; };
         if (b.med === 'teatro')
-            h += '<div class="fila"><label class="campo"><span>Funciones por semana</span><input type="number" min="3" max="10" data-c="mdCfg" data-v="funciones" value="' + c.funciones + '"></label><label class="campo"><span>Semanas de temporada</span><input type="number" min="4" max="52" data-c="mdCfg" data-v="semanas" value="' + c.semanas + '"></label></div>' +
-                '<label class="campo"><span>Semanas de ensayo</span><input type="number" min="3" max="16" data-c="mdCfg" data-v="ensayo" value="' + c.ensayo + '"></label>';
+            h += rg('funciones', 3, 10, c.funciones, 'Funciones por semana') + rg('semanas', 4, 52, c.semanas, 'Semanas de temporada') + rg('ensayo', 3, 16, c.ensayo, 'Semanas de ensayo') +
+                '<p class="chico tenue">Más ensayo sube la calidad; más funciones y semanas llenan más butacas si la obra gusta.</p>';
+        if (Md.NARRATIVOS.indexOf(b.med) >= 0) {
+            const X = ART.taxonomia, cx = b.cx === undefined ? 2 : b.cx, rt = b.rit === undefined ? 2 : b.rit;
+            h += '<label class="campo rango"><span>Complejidad: <b id="md-cx">' + esc(X.complejidad[cx]) + '</b></span><input type="range" min="0" max="5" step="1" value="' + cx + '" data-i="mdCxV" data-c="mdCx" aria-label="Complejidad"></label>' +
+                '<label class="campo rango"><span>Ritmo: <b id="md-rit">' + esc(X.ritmo[rt].id) + '</b></span><input type="range" min="0" max="4" step="1" value="' + rt + '" data-i="mdRitV" data-c="mdRit" aria-label="Ritmo"></label>' +
+                '<p class="chico tenue">Una obra compleja gusta a la crítica y aleja a parte del público; un ritmo rápido atrae público y uno reflexivo, crítica.</p>';
+        }
         if (b.med === 'musica')
             h += bloqueDuracionMus(b);
         h += bloquePulido(b);
         h += '<p class="tenue chico">' + esc(b.med === 'teatro' ? 'Efectos especiales: en el teatro los dan la escenografía y la maquinaria (Presupuesto).' : 'Efectos especiales: solo en cine, series y teatro.') + '</p>';
         return h;
     }
+    ac('mdCxV', function (v) { const l = document.getElementById('md-cx'); if (l)
+        l.textContent = ART.taxonomia.complejidad[+v] || ''; });
+    ac('mdRitV', function (v) { const l = document.getElementById('md-rit'), x = ART.taxonomia.ritmo[+v]; if (l && x)
+        l.textContent = x.id; });
+    ac('mdCx', function (v) { st.b.cx = N.limitar(Math.round(+v), 0, 5); Md.recalcular(st.b); refrescarNuevo(); });
+    ac('mdRit', function (v) { st.b.rit = N.limitar(Math.round(+v), 0, 4); Md.recalcular(st.b); refrescarNuevo(); });
     const NOM_RODAJE = { musica: 'Grabación', juegos: 'Desarrollo', teatro: 'Montaje', libros: 'Edición' };
     const LARGO_RODAJE = { musica: 'Cómo se graba y quién la firma', juegos: 'Cómo se desarrolla y en qué plataformas', teatro: 'Dónde y cómo se monta', libros: 'Cómo se edita e imprime' };
     function secRodaje(b) {
