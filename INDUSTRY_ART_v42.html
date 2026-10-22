@@ -1816,6 +1816,7 @@ ART.taxonomia = (function () {
     const D = ART.datos;
     const sp = function (s) { return s.split(','); };
     const alfa = function (a) { return a.slice().sort(function (x, y) { return x.localeCompare(y, 'es'); }); };
+    const alfaPor = function (a) { return a.slice().sort(function (x, y) { return x.id.localeCompare(y.id, 'es'); }); };
     const medios = [
         { id: 'cine', nombre: 'Cine', desde: 1895, activo: true },
         { id: 'tv', nombre: 'Televisión', desde: 1936 },
@@ -3283,7 +3284,7 @@ ART.taxonomia = (function () {
         estilos: estilos, prioridades: prioridades, formatos: formatos, formatoEstandar: formatoEstandar, efectoFormato: efectoFormato,
         ORDEN_CLAS: ORDEN_CLAS, contenido: contenido, contenidoFamilia: contenidoFamilia,
         DURACION_TIPICA: DURACION_TIPICA, categoriaDuracion: categoriaDuracion, complejidad: complejidad, ritmo: ritmo, efectos: efectos,
-        epocas: epocas, epocasDisponibles: epocasDisponibles, lugaresExtra: lugaresExtra, idiomas: idiomas, soloFiccion: soloFiccion, esFiccionEn: esFiccionEn, filtrarReal: filtrarReal,
+        epocas: epocas, epocasDisponibles: epocasDisponibles, lugaresExtra: lugaresExtra, idiomas: idiomas, idiomasAZ: alfaPor(idiomas), soloFiccion: soloFiccion, esFiccionEn: esFiccionEn, filtrarReal: filtrarReal,
         epocaReal: epocaReal, lugaresPara: lugaresPara, RELATOS_REALES: RELATOS_REALES, depurarReal: depurarReal,
         publicos: publicos, sexoFamilia: sexoFamilia, importancias: importancias, MAX_EXTRAS: MAX_EXTRAS, MAX_TERCEROS: MAX_TERCEROS, arquetipos: arquetipos, nombreArquetipo: nombreArquetipo, oficiosGenero: oficiosGenero,
         dominio: dominio, generosDeCine: generosDeCine, REGLA_DOMINIO: REGLA_DOMINIO,
@@ -28605,14 +28606,14 @@ ART.creacion = (function () {
         h += '<p class="nota">Vestuario y sets: costo ×' + U.decimal(ep.costo, 2) + (ep.afines.length ? ' · encaja con ' + ep.afines.map(function (f) { return D.familia(f).nombre.toLowerCase(); }).join(', ') : '') + '.</p>';
         const lugares = [['', 'Sin lugar fijo']].concat(D.paises.slice().sort(function (x, y) { return x.nombre.localeCompare(y.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre + ' (' + D.continenteDePais(p.id) + ')']; }), X.lugaresPara(b).map(function (l) { return [l.id, l.nombre]; }));
         h += '<label class="campo"><span>Dónde pasa la historia</span>' + sel('lug', lugares, b.lug) + '</label>';
-        h += '<label class="campo"><span>' + (Array.isArray(b.idiX) ? 'Idioma principal (varios idiomas activado)' : 'Idioma de la obra') + '</span>' + sel('idio', [['*varios', Array.isArray(b.idiX) ? '✓ Varios idiomas (activado)' : 'Varios idiomas']].concat(X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; })), b.idio) + '</label>';
+        h += '<label class="campo"><span>' + (Array.isArray(b.idiX) || b.idiN ? 'Idioma principal' : 'Idioma de la obra') + '</span>' + sel('idio', [['*varios', Array.isArray(b.idiX) ? '✓ Varios idiomas (activado)' : 'Varios idiomas'], ['*nac', b.idiN ? '✓ Idiomas según la nacionalidad (activado)' : 'Idiomas según la nacionalidad del reparto']].concat(X.idiomasAZ.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; })), b.idio) + '</label>';
         h += '<div class="chips">' + chip('Un solo idioma', 'crIdiV', '0', !Array.isArray(b.idiX) && !b.idiN) + chip('Varios idiomas · +3 % por idioma', 'crIdiV', '1', Array.isArray(b.idiX) && !b.idiN) + chip('Idiomas según la nacionalidad del reparto', 'crIdiV', '2', !!b.idiN) + '</div>';
         if (b.idiN) {
             const lr = I.idiomasReparto(b);
             h += '<p class="nota info">Cada actor habla su propio idioma y la obra se dobla después, como en el western italiano. ' + (lr.length ? 'Idiomas del reparto: ' + esc(lr.join(', ')) + '. ' : 'Elige el reparto para ver sus idiomas. ') + 'Cada idioma suma 3 % de producción; en las regiones donde se habla, la obra gana público.</p>';
         }
         if (Array.isArray(b.idiX)) {
-            const ops = [['', '— ninguno —']].concat(X.idiomas.filter(function (x) { return x.id !== b.idio && !x.universal; }).map(function (x) { return [x.id, x.id]; }));
+            const ops = [['', '— ninguno —']].concat(X.idiomasAZ.filter(function (x) { return x.id !== b.idio && !x.universal; }).map(function (x) { return [x.id, x.id]; }));
             h += '<div class="fila envolver">' + [0, 1, 2].map(function (i) { return '<label class="campo crece"><span>Otro idioma ' + (i + 1) + '</span><select data-c="crIdiX" data-k="' + i + '">' + ops.map(function (o) { return '<option value="' + esc(o[0]) + '"' + ((b.idiX[i] || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }).join('') + '</div>' +
                 '<p class="nota info">Cada idioma extra cuesta 3 % más de producción; en las regiones donde se habla, la obra no necesita doblaje y gana público.</p>';
         }
@@ -29733,6 +29734,8 @@ ART.creacion = (function () {
         const k = el.getAttribute('data-k');
         if (k === 'idio' && v === '*varios')
             return U.acciones.crIdiV('1');
+        if (k === 'idio' && v === '*nac')
+            return U.acciones.crIdiV('2');
         if (k.indexOf('fmt.') === 0) {
             b.fmt = Object.assign({}, b.fmt);
             b.fmt[k.slice(4)] = v;
@@ -30154,7 +30157,7 @@ ART.creacion = (function () {
             h += '<h3>Tipos de ficción (' + cnt.ficcion + ')</h3>' + X.familiasFiccion.map(function (f) { return '<p class="chico"><b>' + esc(f.nombre) + ':</b> ' + esc(f.items.join(', ')) + '</p>'; }).join('');
             h += '<h3>Corrientes del cine</h3><p class="chico">' + esc(X.ESTANDAR) + ' · ' + esc(X.corrientesCine.map(function (c) { return c.id + ' (' + c.desde + ')'; }).join(' · ')) + '</p>';
             h += '<h3>Estilos, tonos y prioridades</h3><p class="chico">Estilos: ' + esc(X.estilos.map(function (s) { return s.id; }).join(', ')) + '<br>Tonos: ' + esc(D.tonos.map(function (x) { return x.id; }).join(', ')) + '<br>Prioridades: ' + esc(X.prioridades.map(function (p) { return p.nombre; }).join(', ')) + '</p>';
-            h += '<h3>Épocas, idiomas y públicos</h3><p class="chico">Épocas: ' + esc(X.epocas.map(function (e) { return e.nombre; }).join(', ')) + '<br>Idiomas: ' + esc(X.idiomas.map(function (x) { return x.id; }).join(', ')) + '<br>Públicos: ' + esc(X.publicos.map(function (p) { return p.id; }).join(', ')) + '</p>';
+            h += '<h3>Épocas, idiomas y públicos</h3><p class="chico">Épocas: ' + esc(X.epocas.map(function (e) { return e.nombre; }).join(', ')) + '<br>Idiomas: ' + esc(X.idiomasAZ.map(function (x) { return x.id; }).join(', ')) + '<br>Públicos: ' + esc(X.publicos.map(function (p) { return p.id; }).join(', ')) + '</p>';
             h += '<h3>Estilos de producción</h3><p class="chico">' + esc(ART.rodaje.ESTILOS.map(function (e) { return e.nombre + ' (' + e.desde + ')'; }).join(' · ')) + '</p>';
             h += '<h3>Arquetipos de personajes</h3><p class="chico">' + esc(X.arquetipos.map(function (a) { return a.id + (a.fem !== a.id ? ' / ' + a.fem : ''); }).join(', ')) + '</p>';
             h += '<h3>Dominio público (' + cnt.dominio + ' obras)</h3><p class="chico">' + esc(X.dominio.map(function (d) { return d.tit; }).join(' · ')) + '</p>';
@@ -32113,10 +32116,10 @@ ART.mediosUI = (function () {
         const X = ART.taxonomia, a = N.anio(), eps = X.epocasDisponibles(a, b);
         const lugares = [['', 'Sin lugar fijo']].concat(D.paises.slice().sort(function (x, y) { return x.nombre.localeCompare(y.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre]; }), X.lugaresPara(b).map(function (l) { return [l.id, l.nombre]; }));
         const ep = X.epoca(b.epo || 'actualidad'), mb = Md.mundoBono(b), varios = Array.isArray(b.idiX);
-        const idis = '<div class="chips">' + chipMd('Un solo idioma', 'mdIdiV', '0', !varios) + chipMd('Varios idiomas · +3 % por idioma', 'mdIdiV', '1', varios) + '</div>' + (varios ? '<div class="fila envolver">' + [0, 1, 2].map(function (i) { return '<label class="campo crece"><span>Otro idioma ' + (i + 1) + '</span>' + sel('mdIdiX', [['', '— ninguno —']].concat(X.idiomas.filter(function (x) { return x.id !== b.idio && !x.universal; }).map(function (x) { return [x.id, x.id]; })), (b.idiX[i] || ''), String(i)) + '</label>'; }).join('') + '</div><p class="nota info">' + esc(b.med === 'musica' ? 'Canciones en varios idiomas: cada uno suma 3 % al costo y abre más países.' : 'Cada idioma extra suma 3 % al costo y abre más países donde se entiende sin traducir.') + '</p>' : '');
+        const idis = '<div class="chips">' + chipMd('Un solo idioma', 'mdIdiV', '0', !varios) + chipMd('Varios idiomas · +3 % por idioma', 'mdIdiV', '1', varios) + '</div>' + (varios ? '<div class="fila envolver">' + [0, 1, 2].map(function (i) { return '<label class="campo crece"><span>Otro idioma ' + (i + 1) + '</span>' + sel('mdIdiX', [['', '— ninguno —']].concat(X.idiomasAZ.filter(function (x) { return x.id !== b.idio && !x.universal; }).map(function (x) { return [x.id, x.id]; })), (b.idiX[i] || ''), String(i)) + '</label>'; }).join('') + '</div><p class="nota info">' + esc(b.med === 'musica' ? 'Canciones en varios idiomas: cada uno suma 3 % al costo y abre más países.' : 'Cada idioma extra suma 3 % al costo y abre más países donde se entiende sin traducir.') + '</p>' : '');
         return '<h4>' + (b.med === 'musica' ? 'Época, lugar e idioma de las canciones' : 'Mundo de la historia') + '</h4><div class="fila envolver"><label class="campo crece"><span>Época</span>' + sel('mdMundo', eps.map(function (e) { return [e.id, e.nombre]; }), b.epo || 'actualidad', 'epo') + '</label>' +
             '<label class="campo crece"><span>Dónde pasa</span>' + sel('mdMundo', lugares, b.lug || '', 'lug') + '</label>' +
-            '<label class="campo crece"><span>' + (varios ? 'Idioma principal' : 'Idioma') + '</span>' + sel('mdMundo', [['*varios', varios ? '✓ Varios idiomas (activado)' : 'Varios idiomas']].concat(X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; })), b.idio || 'Inglés', 'idio') + '</label></div>' +
+            '<label class="campo crece"><span>' + (varios ? 'Idioma principal' : 'Idioma') + '</span>' + sel('mdMundo', [['*varios', varios ? '✓ Varios idiomas (activado)' : 'Varios idiomas']].concat(X.idiomasAZ.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; })), b.idio || 'Inglés', 'idio') + '</label></div>' +
             '<p class="nota">' + (ep && ep.afines && ep.afines.length ? 'Encaja con ' + ep.afines.map(function (f) { return D.familia(f).nombre.toLowerCase(); }).join(', ') + '. ' : '') + (mb.k !== 1 ? 'Vestuario y decorados: costo ×' + U.decimal(mb.k, 2) + '.' : '') + '</p>' + idis;
     }
     function bloqueDepsMd(b) {
