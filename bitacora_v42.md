@@ -229,7 +229,7 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Anuncio de la producción:** el interruptor queda ordenado, y las casillas largas y las tarjetas impares ya no dejan huecos.
 
 - **Botones de tiempo a la vista:** bajo la fecha y el dinero hay una fila con «+1 semana», «+1 mes», «Evento» y «Auto». Un toque elige el ritmo y avanza; en Auto el botón pasa a «Pausa». En pantallas anchas los botones van en la misma barra.
-- **Selector de semanas en la barra:** debajo de los botones de tiempo hay un deslizador de 1 a 52 semanas con su botón «Avanzar».
+- **Selector de semanas en la barra:** en la misma fila compacta de los botones de tiempo hay un deslizador de 1 a 52 semanas y el botón «▶ N sem».
 - **Banda sonora en videojuegos y teatro:** en el paso Música se elige el paquete. En videojuegos hay 7: a tu medida, chiptune, banda sonora original, música adaptativa, orquestal con coro, canciones con licencia y compositor estrella; algunos llegan según el año. En teatro hay 5: a tu medida, música grabada, músicos en vivo, canciones originales y orquesta en el foso. Cada paquete cambia la calidad y el costo, y la banda sonora se puede lanzar como álbum (+3 % de alcance). La canción conocida (needle drop) queda como opción aparte.
 - **Videojuegos con 2 formatos y 2 modos:** se pueden mezclar dos formatos (por ejemplo 2D con partes en 3D) y dos modos de juego (por ejemplo un jugador y en línea). El primero manda; la mezcla suma público y algo de costo. Si uno de los modos es masivo, cobra los servidores.
 - **Época con deslizador en todos los medios:** música, videojuegos, teatro y libros eligen la época con el mismo deslizador que el cine.
@@ -238,6 +238,7 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Duración ligada al tamaño (videojuegos, teatro y libros):** un deslizador con las clases del documento. Videojuegos: Indie 5–59 min, B, B+, A, AA, AAA y AAAA hasta 10.000 h. Teatro: micro teatro, un acto, estándar y épica (10 a 300 min). Libros: microrrelato, cuento o ensayo, relato largo, libro, novela corta, novela y épico u ómnibus (1 a 3.000 páginas). La duración decide el tamaño, y más larga de lo normal cuesta y tarda más.
 - **Plataformas sin límite:** cada plataforma de más cuesta un 6 % de adaptación (y un 5 % más si no tienes su kit).
 - **Motor desde el creador:** en Desarrollo puedes crear un motor nuevo (eliges las funciones y queda elegido para la obra) o mejorar el tuyo con las funciones nuevas de la época, pagando su costo.
+- **Idiomas de traducción (videojuegos y libros):** una lista para elegir hasta 10 idiomas, o «Todos los idiomas», que cuesta más. Con «Según la nacionalidad del talento» también puedes sumar hasta 3 idiomas que elijas tú.
 - **Videojuegos con hasta 3 tipos:** el primero manda; cada tipo de más suma 2 % de público y 4 % de costo.
 
 ## Vida, alertas y Encargos
