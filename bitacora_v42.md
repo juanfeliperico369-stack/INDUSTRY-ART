@@ -201,6 +201,15 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **«Otro mejor»:** cada vez que lo tocas elige al siguiente mejor talento (el segundo, el tercero…), sin repetir. Tampoco pone al mismo actor en dos personajes ni a alguien que ya está en otro rubro.
 - **Tarjetas del equipo más legibles en el celular:** el nombre y los datos ya no se parten letra por letra, y los botones pasan abajo cuando no caben.
 
+## Un solo creador y encargos detallados
+- **Un único creador de obras** (`ART.creador`) para cine, televisión, música, videojuegos, teatro y libros. Todos comparten:
+  - el encabezado «Crear obra · Medio»;
+  - las mismas pestañas numeradas, la misma navegación y las mismas tarjetas del modo rápido.
+
+  Cada medio solo pone su contenido en cada paso.
+- **El título va primero en todas las obras:** el paso 1 es «La obra: título, medio y tipo» y la tarjeta 1 del modo rápido es «Título». La sinopsis queda en Proyección.
+- **Encargo detallado:** en Negocio › Colaboraciones, además del encargo automático, puedes diseñar toda la obra en el creador. La produce el estudio colaborador, y tú pagas el costo con 15 % más y te quedas con el 75 % de lo que gane.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
