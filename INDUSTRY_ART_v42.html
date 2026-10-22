@@ -28837,7 +28837,7 @@ ART.creacion = (function () {
         let maxFx = 0;
         X.efectos.forEach(function (e, i) { if (e.desde <= a)
             maxFx = i; });
-        let h = (b.tv ? '' : chipsDuracion(b)) + rango('min', 1, 300, b.min, 'Duración', textoRango(b, 'min'));
+        let h = b.tv ? ART.teleUI.bloqueSerie(b) : chipsDuracion(b) + rango('min', 1, 300, b.min, 'Duración', textoRango(b, 'min'));
         h += rango('cx', 0, 5, b.cx, 'Complejidad e inteligencia', textoRango(b, 'cx')) + '<p class="nota info">La complejidad gusta a la crítica y cansa al público.</p>';
         h += rango('rit', 0, 4, b.rit, 'Ritmo', textoRango(b, 'rit'));
         h += rango('fx', 0, maxFx, Math.min(b.fx, maxFx), 'Efectos especiales', textoRango(b, 'fx')) + '<p class="nota info">Desde «Bastantes», el director y el diseñador de arte deciden si los efectos se aplauden o se repudian.</p>';
@@ -29548,11 +29548,11 @@ ART.creacion = (function () {
             titulo: function () { return bloqueTitulo(b, 'titulo'); }, tipo: function () { return bloqueObra(b) + bloqueHistoria(b, true, ['nat']); }, franquicia: function () { return fr; },
             generos: function () { return bloqueGeneros(b); }, sub: function () { return bloqueHistoria(b, true, ['sub']); }, temas: function () { return bloqueHistoria(b, true, ['rec', 'tem', 'prob', 'pre']) + bloqueMundo(b); },
             arco: function () { return bloqueHistoria(b, true, ['arco', 'mor']) + bloqueTramas(b); }, estilo: function () { return bloqueEstilo(b) + rango('rit', 0, 4, b.rit, 'Ritmo', textoRango(b, 'rit')); },
-            clas: function () { return '<p>' + textoClas(b) + '</p>' + bloquePublico(b); }, duracion: function () { return (b.tv ? '' : chipsDuracion(b)) + rango('min', 1, 300, b.min, 'Duración', textoRango(b, 'min')); },
+            clas: function () { return '<p>' + textoClas(b) + '</p>' + bloquePublico(b); }, duracion: function () { return b.tv ? ART.teleUI.bloqueSerie(b) : chipsDuracion(b) + rango('min', 1, 300, b.min, 'Duración', textoRango(b, 'min')); },
             personajes: function () { return bloquePersonajes(b); }, presupuesto: function () { return bloqueEscala(b); }, musica: function () { return bloqueMusica(b); },
             equipo: function () { return bloqueEquipo(b, false); }, financiacion: function () { return bloqueFinanciacion(b); }, proyeccion: function () { return avisoPendiente('proyeccion') + bloqueTitulo(b, 'sin') + bloqueResumen(b); }
         };
-        return { med: b.tv ? 'tv' : 'cine', nombre: b.tv ? 'Televisión' : 'Cine', modo: modo, tab: SECCIONES[tabActual()][0], acTab: 'crTabId', acModo: 'crModo', acVolver: 'crVolverCamino', extra: bannerEncargo(b),
+        return { med: b.tv ? 'tv' : 'cine', nombre: b.tv ? 'Televisión' : 'Cine', modo: modo, tab: SECCIONES[tabActual()][0], acTab: 'crTabId', acModo: 'crModo', acVolver: 'crVolverCamino', extra: ART.teleUI.bannerCrear(b) + bannerEncargo(b),
             tiene: function (id) { return SECCIONES.some(function (x) { return x[0] === id; }); },
             paso: function (id) { const sx = SECCIONES.filter(function (x) { return x[0] === id; })[0]; return avisoPendiente(id) + sx[2](b); },
             rapido: function (id) { return RAP[id] ? RAP[id]() : null; },
@@ -29561,7 +29561,7 @@ ART.creacion = (function () {
     ac('crTabId', function (v) { const i = SECCIONES.map(function (x) { return x[0]; }).indexOf(v); U.acciones.crTab(String(i >= 0 ? i : 0)); });
     function fichaCrear() {
         if (cr.b && (cr.b.tv || cr.b.fr) && cr.etapa === 'idea')
-            return ART.teleUI.bannerCrear(cr.b) + vistaModo();
+            return vistaModo();
         if (cr.etapa === 'camino' || !cr.b && cr.etapa === 'idea')
             return vistaCamino();
         if (cr.etapa === 'guiones')
@@ -35543,33 +35543,42 @@ ART.teleUI = (function () {
     }
     ac('tvNuevaSerie', nuevaSerie);
     function bannerCrear(b) {
-        if (!b || (!b.tv && !b.fr))
+        if (!b || !b.fr)
             return '';
-        const a = N.anio();
-        let h = '<div class="tarjeta">';
-        if (b.fr) {
-            const f = F.porId(b.fr);
-            h += '<p><b>' + esc(F.camino(b.cam).nombre) + '</b> de «' + esc(f ? f.nom : '') + '» · entrega ' + b.frN + (b.fr2 ? ' · crossover' : '') + '</p>';
-        }
+        let h = '<div class="tarjeta" style="padding:8px 10px">';
+        const f = F.porId(b.fr);
+        h += '<p style="margin:0"><b>' + esc(F.camino(b.cam).nombre) + '</b> de «' + esc(f ? f.nom : '') + '» · entrega ' + b.frN + (b.fr2 ? ' · crossover' : '') + '</p>';
         (b.pj || []).forEach(function (p) { if (p.rech)
             h += '<p class="chico">' + esc(p.rech) + ' rechazó volver como ' + esc(p.n) + ': elige a alguien en el reparto.</p>'; });
-        if (b.tv) {
-            const f = TV.formato(b.tv.fmt);
-            h += '<h3>Serie de televisión</h3><div class="fila">' + sel('tvFmt', TV.formatosDe(a).map(function (x) { return [x.id, x.nombre]; }), b.tv.fmt) +
-                (f.vivo ? sel('tvSub', TV.SUBVIVO.filter(function (x) { return x.desde <= a; }).map(function (x) { return [x.id, x.nombre]; }), b.tv.sub) : sel('tvModo', [['episodica', 'Episódica'], ['serial', 'Serializada']], b.tv.modo)) + '</div>' +
-                '<div class="fila"><label class="campo"><span>Episodios (' + Math.max(2, f.eps[0]) + '–' + Math.min(300, f.eps[1]) + ')</span><input type="number" data-c="tvEps" value="' + b.tv.eps + '"></label>' +
-                '<label class="campo"><span>Minutos (' + f.rmin[0] + '–' + f.rmin[1] + ')</span><input type="number" data-c="tvMin" value="' + b.min + '"></label></div>' +
-                '<div class="fila"><label class="campo"><span>Sala de guionistas</span><input type="number" min="1" max="12" data-c="tvSala" value="' + b.tv.sala + '"></label>' + sel('tvTramas', [1, 2, 3, 4, 5, 6].map(function (n) { return [n, n + (n === 1 ? ' trama por episodio' : ' tramas por episodio')]; }), b.tv.tramas) + '</div>' +
-                '<p class="chico">Costo por episodio: ' + dinero(TV.costoEpisodio(b)) + ' · sala: ' + dinero(TV.costoSala(b)) + ' por episodio · temporada ' + (b.tv.temp || 1) + '</p>';
-            if (b.pitch)
-                h += '<p class="bien">Idea vendida a ' + esc(TV.DONDE[b.pitch.c].nombre.toLowerCase()) + ': te pagan ' + dinero(b.pitch.monto) + ' al empezar.</p>';
-            else
-                h += '<div class="fila">' + TV.compradores(a).map(function (c) { return btn('Presentar la idea a ' + c.nombre.toLowerCase(), 'tvPitch', c.id); }).join('') + '</div>';
-            if (!b.tv.pil && b.tv.temp === 1)
-                h += btn('Rodar un piloto primero · ' + dinero(TV.costoPiloto(b)), 'tvPiloto', '', 'bloque');
-        }
         return h + '</div>';
     }
+    // La serie dentro del creador (paso Forma): episodios, minutos y sala de guionistas con deslizadores, como en el documento.
+    function claseEps(n) { return n <= 15 ? 'miniserie' : n <= 50 ? 'serie tradicional' : n <= 100 ? 'serie extendida' : 'telenovela'; }
+    function bloqueSerie(b) {
+        if (!b || !b.tv)
+            return '';
+        const a = N.anio();
+        let h = '';
+        const f = TV.formato(b.tv.fmt), e0 = Math.max(2, f.eps[0]), e1 = Math.min(300, f.eps[1]);
+        const rg = function (dc, min, max, val, etq, txt, id) { return '<label class="campo rango"><span>' + esc(etq) + ': <b id="' + id + '">' + esc(txt) + '</b></span><input type="range" min="' + min + '" max="' + max + '" step="1" value="' + val + '" data-i="tvRangoV" data-l="' + id + '" data-c="' + dc + '" aria-label="' + esc(etq) + '"></label>'; };
+        h += '<h4>Serie de televisión</h4><div class="fila envolver">' + sel('tvFmt', TV.formatosDe(a).map(function (x) { return [x.id, x.nombre]; }), b.tv.fmt) +
+            (f.vivo ? sel('tvSub', TV.SUBVIVO.filter(function (x) { return x.desde <= a; }).map(function (x) { return [x.id, x.nombre]; }), b.tv.sub) : sel('tvModo', [['episodica', 'Episódica'], ['serial', 'Serializada']], b.tv.modo)) + '</div>' +
+            rg('tvEps', e0, e1, N.limitar(b.tv.eps, e0, e1), 'Episodios por temporada', b.tv.eps + ' · ' + claseEps(b.tv.eps), 'tv-eps') +
+            rg('tvMin', f.rmin[0], f.rmin[1], N.limitar(b.min, f.rmin[0], f.rmin[1]), 'Minutos por episodio', b.min + ' min' + (b.min > 60 ? ' · encarece la producción' : ''), 'tv-min') +
+            rg('tvSala', 1, 12, b.tv.sala, 'Sala de guionistas', b.tv.sala + (b.tv.sala === 1 ? ' guionista' : ' guionistas'), 'tv-sala') +
+            '<label class="campo"><span>Tramas por episodio</span>' + sel('tvTramas', [1, 2, 3, 4, 5, 6].map(function (n) { return [n, n + (n === 1 ? ' trama por episodio' : ' tramas por episodio')]; }), b.tv.tramas) + '</label>' +
+            '<p class="chico tenue">De 2 a 15 episodios es una miniserie; de 16 a 50, una serie tradicional; de 51 a 100, una extendida; de 101 a 300, una telenovela. Más de 60 minutos por episodio encarece mucho.</p>' +
+            '<p class="chico">Costo por episodio: ' + dinero(TV.costoEpisodio(b)) + ' · sala: ' + dinero(TV.costoSala(b)) + ' por episodio · temporada ' + (b.tv.temp || 1) + '</p>';
+        if (b.pitch)
+            h += '<p class="bien">Idea vendida a ' + esc(TV.DONDE[b.pitch.c].nombre.toLowerCase()) + ': te pagan ' + dinero(b.pitch.monto) + ' al empezar.</p>';
+        else
+            h += '<div class="fila envolver">' + TV.compradores(a).map(function (c) { return btn('Vender la idea a ' + c.nombre.toLowerCase(), 'tvPitch', c.id); }).join('') + '</div>';
+        if (!b.tv.pil && b.tv.temp === 1)
+            h += '<div class="fila envolver" style="margin-top:6px">' + btn('Rodar un piloto primero · ' + dinero(TV.costoPiloto(b)), 'tvPiloto', '') + '</div>';
+        return h;
+    }
+    ac('tvRangoV', function (v, el) { const l = document.getElementById(el.getAttribute('data-l')), k = el.getAttribute('data-c'); if (!l)
+        return; v = +v; l.textContent = k === 'tvEps' ? v + ' · ' + claseEps(v) : k === 'tvMin' ? v + ' min' + (v > 60 ? ' · encarece la producción' : '') : v + (v === 1 ? ' guionista' : ' guionistas'); });
     function cb() { return ART.creacion.estado.b; }
     function reaplicar(c) { const b = cb(); if (!b)
         return; TV.aplicar(b, c); O.recalcular(b); ART.creacion.refrescar(); }
@@ -36122,7 +36131,7 @@ ART.teleUI = (function () {
     ac('tvOfrecer', function (v) { const el = document.getElementById('tvOferta' + v); avisar(ST.licenciar(+v, 'temporal', +(el && el.value) || 0), 'Aceptaron tu oferta'); U.refrescar(); });
     ac('tvLinea', function (v) { avisar(ST.contratarLinea(v), 'Línea contratada'); U.refrescar(); });
     ac('tvNegro', function () { avisar(ST.comprarNegro(), 'Lote pirata en tu catálogo'); U.refrescar(); });
-    return { franquicias: franquicias, fichaFranquicia: fichaFranquicia, adquisicion: adquisicion, nuevaSerie: nuevaSerie, bannerCrear: bannerCrear, pilotos: pilotos,
+    return { franquicias: franquicias, fichaFranquicia: fichaFranquicia, adquisicion: adquisicion, nuevaSerie: nuevaSerie, bannerCrear: bannerCrear, bloqueSerie: bloqueSerie, pilotos: pilotos,
         bloqueObra: bloqueObra, canal: canal, streaming: streaming };
 })();
 ART.buscarUI = (function () {

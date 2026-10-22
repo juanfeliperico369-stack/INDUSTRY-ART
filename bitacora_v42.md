@@ -240,6 +240,7 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Motor desde el creador:** en Desarrollo puedes crear un motor nuevo (eliges las funciones y queda elegido para la obra) o mejorar el tuyo con las funciones nuevas de la época, pagando su costo.
 - **Idiomas de traducción (videojuegos y libros):** una lista para elegir hasta 10 idiomas, o «Todos los idiomas», que cuesta más. Con «Según la nacionalidad del talento» también puedes sumar hasta 3 idiomas que elijas tú.
 - **Teatro como el cine, sin lo técnico:** funciones por semana, semanas de temporada y semanas de ensayo ahora se eligen con deslizadores, junto a la duración. Teatro, libros y videojuegos tienen además los deslizadores de complejidad (de Ninguna a Compleja) y de ritmo (de Reflexivo a Frenético), como el cine.
+- **Televisión dentro del creador:** el formato, los episodios, los minutos y la sala de guionistas ya no van en un recuadro aparte encima del creador; están en el paso Forma (y en la tarjeta de Duración del modo rápido), con deslizadores. Los episodios muestran su clase (miniserie, serie tradicional, extendida o telenovela) y los minutos avisan cuando pasan de 60. Arriba solo queda una línea si la obra continúa una franquicia.
 - **Hasta 3 tipos en todas las obras:** cine, TV, música, videojuegos, teatro y libros permiten mezclar hasta 3 tipos. El primero manda (en música decide cuántas canciones lleva); en los medios, cada tipo de más suma 2 % de público y 4 % de costo.
 
 ## Vida, alertas y Encargos
