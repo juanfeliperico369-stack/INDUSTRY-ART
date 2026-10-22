@@ -210,6 +210,13 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **El título va primero en todas las obras:** el paso 1 es «La obra: título, medio y tipo» y la tarjeta 1 del modo rápido es «Título». La sinopsis queda en Proyección.
 - **Encargo detallado:** en Negocio › Colaboraciones, además del encargo automático, puedes diseñar toda la obra en el creador. La produce el estudio colaborador, y tú pagas el costo con 15 % más y te quedas con el 75 % de lo que gane.
 
+- **Un solo motor de creación:** cine, TV, música, videojuegos, teatro y libros pasan por el mismo `ART.creador.ficha`: la misma lista de pasos, el mismo modo rápido de 12 decisiones y el mismo pie. Cada medio solo aporta sus bloques; los pasos que no le corresponden desaparecen (la música no tiene Personajes y llama «Grabación» a la producción).
+- **Tema «Moda»:** aparece entre los temas sugeridos de dramas, comedias, romances, musicales, biografías y de toda la música, y se encuentra en el buscador de temas.
+
+## Inversiones por porcentaje
+- En Negocio › Inversiones eliges cuánto invertir en cada compra: un monto fijo o el 1, 5, 10, 25, 50 o 100 % de tu caja libre.
+- Al vender puedes sacar el 25 %, la mitad o todo.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
