@@ -258,6 +258,12 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 .cal-ev.inv-fila > .col { flex: 1 1 100%; min-width: 0; }
 .inv-acc { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
 .inv-acc .btn { flex: 1 1 auto; }
+.clas-escala { padding: 8px 10px; margin: 8px 0; }
+label.chip { display: inline-flex; align-items: center; gap: 8px; white-space: normal; max-width: 100%; text-align: left; line-height: 1.3; }
+label.chip > input[type=checkbox] { flex: none; margin: 0; }
+@media (max-width: 600px) { .kpis > :last-child:nth-child(odd) { grid-column: 1 / -1; } }
+.clas-grupo { margin-top: 6px; }
+.clas-grupo .chips { margin-top: 2px; }
 .enc-sel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0 8px; }
 .enc-sel select { width: 100%; }
 .enc-acc { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
@@ -1448,17 +1454,20 @@ const PAIS_CONT = {
         return ENCAJE[i][j];
     }
     const clasificaciones = [
-        { id: 'G', desc: 'De 0 a 6 años: lenguaje normal, sin violencia, amor amistoso; apto para familias, ideal para todo público', acceso: [1, 1, 1, 1, 1], gusto: [1.1, 0.7, 0.8, 0.9, 1.0], adultos: false, desde: 1850 },
-        { id: 'PG', desc: 'De 7 a 12 años: lenguaje normal, violencia leve, amor amistoso y romántico; ideal para niños', acceso: [0.9, 1, 1, 1, 1], gusto: [1.0, 0.85, 0.9, 1, 1], adultos: false, desde: 1850 },
-        { id: 'PG-13', desc: 'De 13 a 15 años: lenguaje leve, violencia moderada, amor romántico; ideal para preadolescentes y adolescentes', acceso: [0.45, 1, 1, 1, 1], gusto: [1, 1, 1, 1, 1], adultos: false, desde: 1850 },
-        { id: '16', desc: 'De 16 a 17 años: lenguaje rudo, violencia intensa, amor apasionado; ideal para adolescentes', acceso: [0, 0.4, 1, 1, 1], gusto: [1, 1, 1, 1, 0.95], adultos: false, desde: 1850 },
-        { id: 'NC-17', desc: '17 años: lenguaje crudo, violencia intensa, amor candente; ideal para adolescentes mayores', acceso: [0, 0.2, 1, 1, 1], gusto: [1, 1, 1, 0.97, 0.9], adultos: false, desde: 1968 },
-        { id: '18', desc: 'Solo mayores de 18: lenguaje ofensivo, violencia gráfica, amor candente, siempre sugerido; ideal para nuevos adultos', acceso: [0, 0, 1, 1, 1], gusto: [1, 1, 0.95, 0.95, 0.85], adultos: true, desde: 1968 },
-        { id: 'R', desc: 'Restringido, solo para adultos: lenguaje explícito, violencia sangrienta, amor candente, siempre sugerido; ideal para adultos', acceso: [0, 0, 0.9, 0.9, 0.85], gusto: [1, 1, 0.92, 0.9, 0.8], adultos: true, desde: 1968 },
-        { id: 'X', desc: 'Solo para mayores: lenguaje explícito, violencia explícita, amor explícito, siempre sugerido; ideal para mayores', acceso: [0, 0, 0.5, 0.45, 0.3], gusto: [1, 1, 0.8, 0.75, 0.6], adultos: true, desde: 1968 },
-        { id: 'N', desc: 'General: apto para todo público, en especial para personas ya desarrolladas; lenguaje, violencia y amor moderados y controlados', acceso: [1, 1, 1, 1, 1], gusto: [0.35, 0.45, 0.55, 0.6, 0.6], adultos: false, desde: 1850 },
+        { id: 'G', ingreso: 0.6, grupo: 'Niños (0 a 12)', desc: 'De 0 a 6 años: lenguaje normal, sin violencia, amor amistoso; apto para familias, ideal para todo público', acceso: [1, 1, 1, 1, 1], gusto: [1.1, 0.7, 0.8, 0.9, 1.0], adultos: false, desde: 1850 },
+        { id: 'PG', ingreso: 0.7, grupo: 'Niños (0 a 12)', desc: 'De 7 a 12 años: lenguaje normal, violencia leve, amor amistoso y romántico; ideal para niños', acceso: [0.9, 1, 1, 1, 1], gusto: [1.0, 0.85, 0.9, 1, 1], adultos: false, desde: 1850 },
+        { id: 'PG-13', ingreso: 1, grupo: 'Adolescentes (13 a 17)', desc: 'De 13 a 15 años: lenguaje leve, violencia moderada, amor romántico; ideal para preadolescentes y adolescentes', acceso: [0.45, 1, 1, 1, 1], gusto: [1, 1, 1, 1, 1], adultos: false, desde: 1850 },
+        { id: '16', ingreso: 0.9, grupo: 'Adolescentes (13 a 17)', desc: 'De 16 a 17 años: lenguaje rudo, violencia intensa, amor apasionado; ideal para adolescentes', acceso: [0, 0.4, 1, 1, 1], gusto: [1, 1, 1, 1, 0.95], adultos: false, desde: 1850 },
+        { id: 'NC-17', ingreso: 0.8, grupo: 'Adolescentes (13 a 17)', desc: '17 años: lenguaje crudo, violencia intensa, amor candente; ideal para adolescentes mayores', acceso: [0, 0.2, 1, 1, 1], gusto: [1, 1, 1, 0.97, 0.9], adultos: false, desde: 1968 },
+        { id: '18', ingreso: 0.5, grupo: 'Adultos (18 en adelante)', desc: 'Solo mayores de 18: lenguaje ofensivo, violencia gráfica, amor candente, siempre sugerido; ideal para nuevos adultos', acceso: [0, 0, 1, 1, 1], gusto: [1, 1, 0.95, 0.95, 0.85], adultos: true, desde: 1968 },
+        { id: 'R', ingreso: 0.4, grupo: 'Adultos (18 en adelante)', desc: 'Restringido, solo para adultos: lenguaje explícito, violencia sangrienta, amor candente, siempre sugerido; ideal para adultos', acceso: [0, 0, 0.9, 0.9, 0.85], gusto: [1, 1, 0.92, 0.9, 0.8], adultos: true, desde: 1968 },
+        { id: 'X', ingreso: 0.3, grupo: 'Adultos (18 en adelante)', desc: 'Solo para mayores: lenguaje explícito, violencia explícita, amor explícito, siempre sugerido; ideal para mayores', acceso: [0, 0, 0.5, 0.45, 0.3], gusto: [1, 1, 0.8, 0.75, 0.6], adultos: true, desde: 1968 },
+        { id: 'N', ingreso: 0.5, grupo: 'General', desc: 'General: apto para todo público, en especial para personas ya desarrolladas; lenguaje, violencia y amor moderados y controlados', acceso: [1, 1, 1, 1, 1], gusto: [0.35, 0.45, 0.55, 0.6, 0.6], adultos: false, desde: 1850 },
     ];
     const ANIO_CLASIFICACION_POR_EDADES = 1968;
+    // Cuánto rinde cada grupo de edad con una clasificación: el total sigue el documento (G 60 %, PG 70 %, PG-13 100 %, 16 90 %,
+    // NC-17 80 %, 18 50 %, R 40 %, X 30 %, N 50 %) y el reparto entre edades sale de quién puede entrar.
+    function factorClas(cl, g) { const m = cl.acceso.reduce(function (t, x) { return t + x; }, 0) / cl.acceso.length; return (cl.ingreso || 1) * cl.acceso[g] / Math.max(0.05, m); }
     const tonos = [
         { id: 'Surrealista', crit: 3, pub: -2 }, { id: 'Oscuro', crit: 3, pub: -2 }, { id: 'Caótico', crit: 0, pub: 0 },
         { id: 'Reflexivo', crit: 3, pub: -3 }, { id: 'Realista', crit: 1, pub: 0 }, { id: 'Poético', crit: 3, pub: -3 },
@@ -1791,7 +1800,7 @@ const PAIS_CONT = {
     function contNombres() { return hayCulturas() ? Object.keys(CONTINENTES).map(function (k) { return [k, CONTINENTES[k].nombre]; }) : []; }
     function continenteDePais(id) { const c = hayCulturas() && PAIS_CONT[id]; if (c && CONTINENTES[c])
         return CONTINENTES[c].nombre; const p = buscarPais(id), r = p && regiones.filter(function (x) { return x.id === p.region; })[0]; return r ? r.nombre : ''; }
-    return { continenteDePais: continenteDePais, nombreCultura: nombreCultura, nombreContinente: nombreContinente, nombrePais: nombrePais, contNombres: contNombres, REG_CONT: REG_CONT,
+    return { factorClas: factorClas, continenteDePais: continenteDePais, nombreCultura: nombreCultura, nombreContinente: nombreContinente, nombrePais: nombrePais, contNombres: contNombres, REG_CONT: REG_CONT,
         regionesInicio: regionesInicio, erasInicio: erasInicio, sufijosLogo: sufijosLogo, motorMercado: motorMercado,
         regiones: regiones, paises: paises, continentes: continentes, nombres: nombres, oficios: oficios, poblacionTalentos: poblacionTalentos,
         familias: familias, familiaDe: familiaDe, ORDEN_FAM: ORDEN_FAM, encaje: encaje,
@@ -6135,7 +6144,7 @@ ART.economia = (function () {
         const ex = ART.ideas.edadesExtra(obra);
         let s = 0;
         for (let g = 0; g < 5; g++)
-            s += d.edades[g] * PROPENSION[g] * fam.edades[g] * cl.acceso[g] * cl.gusto[g] * (ex ? ex[g] : 1);
+            s += d.edades[g] * PROPENSION[g] * fam.edades[g] * D.factorClas(cl, g) * (ex ? ex[g] : 1);
         return Math.max(0.02, s / d.baseEdad * ART.ideas.regionExtra(obra, reg, anio));
     }
     function iniciarCartelera(obra, ctx) {
@@ -6546,7 +6555,15 @@ ART.talentos = (function () {
     function perfilExtra(t) {
         const h = function (k, base, rango) { return Math.round(N.limitar(base + (N.hash(t.id + '|' + k) % (rango * 2 + 1)) - rango, 1, 99)); };
         const medios = {};
-        MEDIOS.forEach(function (m) { medios[m] = m === t.med ? Math.min(99, Math.round(t.hab + 4)) : h(m, t.hab - 18, 15); });
+        // Si su oficio (o una especialidad) existe en ese medio, su habilidad ahí sale de ese oficio: una intérprete canta y actúa.
+        const ofsAv = t.jugador && N.S && N.S.avatar ? N.S.avatar.esp || [] : [];
+        MEDIOS.forEach(function (m) {
+            if (m === t.med)
+                return medios[m] = Math.min(99, Math.round(t.hab + 4));
+            const ofs = m === 'cine' || m === 'tv' ? ['interprete', 'direccion', 'guion', 'produccion', 'fotografia', 'musica', 'edicion', 'arte'] : ((ART.medios && ART.medios.MED && ART.medios.MED[m]) || { of: [] }).of;
+            const base = ofs.reduce(function (mx, of) { return of === t.of || (t.h2 && t.h2[of]) || ofsAv.indexOf(of) >= 0 ? Math.max(mx, habRol(t, of)) : mx; }, 0);
+            medios[m] = base ? Math.min(99, h(m, base, 3)) : h(m, t.hab - 18, 15);
+        });
         const cp = capacidades(t);
         return {
             medios: medios,
@@ -13797,7 +13814,9 @@ ART.medios = (function () {
         }
         k *= estiloMedio(b.cfg.pst).k;
         const pu = pulido(b);
-        k *= pu.k * mundoBono(b).k;
+        k *= pu.k * mundoBono(b).k * duracionK(b);
+        if (b.med === 'musica' && cancionesDe(b).length)
+            sem = Math.round(sem * N.limitar(Math.pow(duracionK(b), 0.7), 0.8, 1.5));
         normalizarCont(b);
         k *= 1 + ART.ideas.bonoNeedle({ nd: b.nd, fam: b.fam, epo: b.epo }).k;
         k *= (1 - 0.07 * infra(b.med)) * (b.anun ? 1.02 : 1);
@@ -13891,8 +13910,8 @@ ART.medios = (function () {
         let s = 0, s0 = 0;
         for (let g = 0; g < 5; g++) {
             const w = (ed[g] || 0.2) * fe[g] * pm[g], fo = foc.length ? 1 + (foc.reduce(function (t, f) { return t + f.edades[g]; }, 0) / foc.length - 1) * 0.6 : 1;
-            s += w * fo * cl.acceso[g] * cl.gusto[g];
-            s0 += w * c0.acceso[g] * c0.gusto[g];
+            s += w * fo * D.factorClas(cl, g);
+            s0 += w * D.factorClas(c0, g);
         }
         return N.limitar(s / Math.max(1e-9, s0), 0.2, 1.3);
     }
@@ -15013,6 +15032,21 @@ ART.medios = (function () {
     }
     const CANCIONES_TIPO = { sencillo: 2, ep: 5, album: 10, banda: 12, concierto: 14 };
     function maxCanciones(b) { return b.tipo === 'sencillo' ? 3 : b.tipo === 'ep' ? 8 : 24; }
+    // Duración de la música: sale de cuántas canciones hay y de cuánto dura cada una (límites por tipo, como en el documento).
+    const MIN_TIPO = { sencillo: [2, 15, 8], ep: [5, 30, 22], album: [5, 120, 45], banda: [5, 120, 50], concierto: [5, 300, 70] };
+    function limitesMin(b) { const x = MIN_TIPO[b.tipo] || [5, 120, 45]; return b.tipo === 'album' && N.anio() >= 2005 ? [x[0], 300, x[2]] : x; }
+    function segCancion(c, i) { if (!c.s)
+        c.s = 150 + N.hash((c.n || '') + '|' + i) % 151; return c.s; }
+    function minutosMusica(b) { return cancionesDe(b).reduce(function (t, c, i) { return t + segCancion(c, i); }, 0) / 60; }
+    function duracionK(b) { if (b.med !== 'musica' || !cancionesDe(b).length)
+        return 1; return N.limitar(Math.pow(minutosMusica(b) / limitesMin(b)[2], 0.5), 0.6, 1.8); }
+    function ajustarMinutos(b, objetivo) {
+        const L = cancionesDe(b), lim = limitesMin(b), act = minutosMusica(b);
+        if (!L.length || !act)
+            return;
+        const f = N.limitar(objetivo, lim[0], lim[1]) / act;
+        L.forEach(function (c, i) { c.s = Math.round(N.limitar(segCancion(c, i) * f, 40, 900) / 5) * 5; });
+    }
     function cancionesDe(b) {
         if (b.med !== 'musica' || ['partitura', 'jingle'].indexOf(b.tipo) >= 0)
             return [];
@@ -15403,7 +15437,7 @@ ART.medios = (function () {
             return { med: med, nombre: MED[med].nombre, disponible: disponible(med), proyectos: ps.length, enMarcha: enMarcha(med), ing: st().ing[med] || 0, premios: st().premios.filter(function (r) { return r.med === med; }).reduce(function (s, r) { return s + r.cats.filter(function (c) { return c.est === 0; }).length; }, 0) };
         });
     }
-    return { artistaEq: artistaEq, artista: artista, cancionesDe: cancionesDe, nomCancion: nomCancion, infra: infra, MK_MD: MK_MD, maxCanciones: maxCanciones, idsFt: idsFt, costoFt: costoFt, bonoFt: bonoFt, presMaximo: presMaximo, costoLanzamiento: costoLanzamiento, lanzarPlan: lanzarPlan, ESTILOS_MED: ESTILOS_MED, estilosMedio: estilosMedio, estiloMedio: estiloMedio, estiloAfin: estiloAfin, DIMENSIONES: DIMENSIONES, MODOS_J: MODOS_J, ESTUDIOS_GRAB: ESTUDIOS_GRAB, PROMOS_M: PROMOS_M, PLAT_MUSICA: PLAT_MUSICA, EXTENSIONES: EXTENSIONES, TIRADAS: TIRADAS, PRECIOS_T: PRECIOS_T, dimensionesDe: dimensionesDe, gustoDim: gustoDim, partesMusica: partesMusica, bonoTV: bonoTV, concierto: concierto, de: de, MED: MED, FMT_MUSICA: FMT_MUSICA, PLAT: PLAT, FUNCIONES: FUNCIONES, ESCALAS_J: ESCALAS_J, MODELOS: MODELOS, SALAS: SALAS, TAPAS: TAPAS, TAMANOS: TAMANOS, GIRAS: GIRAS, CERT: CERT,
+    return { limitesMin: limitesMin, segCancion: segCancion, minutosMusica: minutosMusica, ajustarMinutos: ajustarMinutos, duracionK: duracionK, artistaEq: artistaEq, artista: artista, cancionesDe: cancionesDe, nomCancion: nomCancion, infra: infra, MK_MD: MK_MD, maxCanciones: maxCanciones, idsFt: idsFt, costoFt: costoFt, bonoFt: bonoFt, presMaximo: presMaximo, costoLanzamiento: costoLanzamiento, lanzarPlan: lanzarPlan, ESTILOS_MED: ESTILOS_MED, estilosMedio: estilosMedio, estiloMedio: estiloMedio, estiloAfin: estiloAfin, DIMENSIONES: DIMENSIONES, MODOS_J: MODOS_J, ESTUDIOS_GRAB: ESTUDIOS_GRAB, PROMOS_M: PROMOS_M, PLAT_MUSICA: PLAT_MUSICA, EXTENSIONES: EXTENSIONES, TIRADAS: TIRADAS, PRECIOS_T: PRECIOS_T, dimensionesDe: dimensionesDe, gustoDim: gustoDim, partesMusica: partesMusica, bonoTV: bonoTV, concierto: concierto, de: de, MED: MED, FMT_MUSICA: FMT_MUSICA, PLAT: PLAT, FUNCIONES: FUNCIONES, ESCALAS_J: ESCALAS_J, MODELOS: MODELOS, SALAS: SALAS, TAPAS: TAPAS, TAMANOS: TAMANOS, GIRAS: GIRAS, CERT: CERT,
         disponible: disponible, tipos: tipos, familias: familias, porId: porId, proyectos: proyectos, capacidad: capacidad, enMarcha: enMarcha, habMedio: habMedio, equipoRecomendado: equipoRecomendado, presBono: presBono, presMinimo: presMinimo, presDe: presDe, PRES_MD_MAX: PRES_MD_MAX, costoEquipo: costoEquipo, kEquipo: kEquipo, CONTRATOS: CONTRATOS, contrato: contrato,
         borrador: borrador, recalcular: recalcular, validar: validar, iniciar: iniciar, potencial: potencial, PULIDO: PULIDO, pulido: pulido, LIM_PJ: LIM_PJ, IMP_K: IMP_K,
         conPersonajes: conPersonajes, conActores: conActores, limitesPj: limitesPj, contenido: contenido, contenidoBase: contenidoBase, censuraMd: censuraMd, maxNivelMd: maxNivelMd, indiceMd: indiceMd,
@@ -28346,10 +28380,22 @@ ART.creacion = (function () {
         return '';
     }
     function signo(x) { return (x > 0 ? '+' : '') + x; }
+    // La escala completa del documento, ordenada por grupos de edad, con lo que rinde cada clasificación.
+    function escalaClas(actual, a) {
+        const grupos = [];
+        D.clasificaciones.forEach(function (c) { let g = grupos.filter(function (x) { return x.n === c.grupo; })[0]; if (!g)
+            grupos.push(g = { n: c.grupo, l: [] }); g.l.push(c); });
+        return '<div class="tarjeta clas-escala"><b>Escala de clasificaciones</b>' + grupos.map(function (g) {
+            return '<div class="clas-grupo"><span class="chico tenue">' + esc(g.n) + '</span><div class="chips">' + g.l.map(function (c) {
+                const ok = !c.desde || c.desde <= a;
+                return '<span class="chip' + (c.id === actual ? ' on' : '') + '"' + (ok ? '' : ' style="opacity:.45"') + ' title="' + esc(c.desc) + '">' + esc(c.id) + ' · ' + Math.round(c.ingreso * 100) + ' %' + (ok ? '' : ' · desde ' + c.desde) + '</span>';
+            }).join('') + '</div></div>';
+        }).join('') + '<p class="chico tenue" style="margin:4px 0 0">El porcentaje es lo que rinde la obra en taquilla y ventas frente a una PG-13. La clasificación sale del contenido; la N es opcional.</p></div>';
+    }
     function textoClas(b) {
         const cl = D.clasificacion(b.clas) || D.clasificacion('PG-13');
         const acc = E.accesoClasificacion(Object.assign({}, b), N.S.estudios[0].reg, anio());
-        return '<b>' + t('clasificacion') + ': ' + esc(b.clas) + '</b> · ' + esc(cl.desc) + '<br><span class="nota">' + esc(I.describirContenido(b)) + ' · público que puede verla en tu región: ' + Math.round(Math.min(1.5, acc) * 100) + ' % de lo normal' +
+        return '<b>' + t('clasificacion') + ': ' + esc(b.clas) + '</b> · ' + esc(cl.desc) + '<br><span class="nota">' + esc(I.describirContenido(b)) + ' · rinde ' + Math.round((cl.ingreso || 1) * 100) + ' % por su clasificación · público que puede verla en tu región: ' + Math.round(Math.min(1.5, acc) * 100) + ' % de lo normal' +
             (anio() < D.ANIO_CLASIFICACION_POR_EDADES ? '. Antes de 1968 la censura de la época no deja estrenar NC-17, 18, R ni X: lo más fuerte se vuelve guiño' : '') + '.</span>';
     }
     function piezaPie(b) {
@@ -28627,7 +28673,7 @@ ART.creacion = (function () {
         X.contenido.forEach(function (c) { h += rango('c:' + c.id, 0, maxNivel(b, c), Math.min(b.cont[c.id] || 0, maxNivel(b, c)), c.nombre, textoNivel(c, b.cont[c.id] || 0)); });
         if (I.hayMenores(b))
             h += '<p class="nota info">Hay personajes menores de edad: la obra no puede ser erótica, pero sí puede tener contenido fuerte (romance, violencia, lenguaje, miedo); esas escenas son de los adultos.' + (I.esInfantil(b) ? ' Por ser infantil, no pasa de PG-13.' : '') + '</p>';
-        h += '<p id="crClas">' + textoClas(b) + '</p>';
+        h += escalaClas(b.clas, anio()) + '<p id="crClas">' + textoClas(b) + '</p>';
         const permiteN = I.indiceClasificacion(b) <= 2 && b.gen.indexOf('Erótico') < 0;
         h += '<label class="interruptor"><span>Clasificación N (general, con contenido moderado y controlado; rinde la mitad)</span><input type="checkbox" data-c="crClasN"' + (b.clasN ? ' checked' : '') + (permiteN ? '' : ' disabled') + '></label>';
         return h;
@@ -30357,7 +30403,7 @@ ART.creacion = (function () {
         });
     })();
     function borrador() { return cr.b; }
-    return { bloqueFiccion: bloqueFiccion, modoCrear: function () { return modo; }, ponerModo: function (v) { modo = v === 'rapido12' ? 'rapido12' : 'detallado'; try {
+    return { bloqueFiccion: bloqueFiccion, escalaClas: escalaClas, modoCrear: function () { return modo; }, ponerModo: function (v) { modo = v === 'rapido12' ? 'rapido12' : 'detallado'; try {
             localStorage.setItem('ia.modoCrear', modo);
         }
         catch (e) { } }, crNumTabs: function () { return SECCIONES.length; }, completarPendiente: completarPendiente, chipsMedio: chipsMedio, abrirCon: abrirCon, borrador: borrador, prediccion: prediccion, razones: razones, refrescar: refrescar, fichaCrear: fichaCrear, bloqueIdea: bloqueIdea, taxonomia: taxonomia, conAzarUI: conAzarUI, estado: cr, crearCon: crearCon, listaCandidatos: listaCandidatos,
@@ -31746,18 +31792,163 @@ ART.mediosUI = (function () {
     function sel(c, ops, val, dv) { return '<select data-c="' + c + '"' + (dv !== undefined ? ' data-v="' + esc(dv) + '"' : '') + '>' + ops.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(val) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
     function avisar(e, ok) { U.aviso(e || ok, e ? 'mal' : ''); }
     function grande(x) { return U.grande(Math.round(x || 0)); }
+    // Dibuja la imagen elegida de la portada (MOTIVOS de cada medio) sobre la composición.
+    function dibujarMotivo(c, med, mo, w, h, col, fondo) {
+        const k = w / 100, y0 = (h - w) / 2 + w * 0.02;
+        const X = function (x) { return x * k; }, Y = function (y) { return y0 + y * k; };
+        const poly = function (pts, color) { c.fillStyle = color; c.beginPath(); pts.forEach(function (p, i) { if (i)
+            c.lineTo(X(p[0]), Y(p[1]));
+        else
+            c.moveTo(X(p[0]), Y(p[1])); }); c.closePath(); c.fill(); };
+        const rect = function (x, y, a, b, color) { c.fillStyle = color; c.fillRect(X(x), Y(y), a * k, b * k); };
+        const circ = function (x, y, r, color, linea) { c.beginPath(); c.arc(X(x), Y(y), r * k, 0, Math.PI * 2); if (linea) {
+            c.strokeStyle = color; c.lineWidth = linea * k; c.stroke();
+        }
+        else {
+            c.fillStyle = color; c.fill();
+        } };
+        const raya = function (x1, y1, x2, y2, color, g) { c.strokeStyle = color; c.lineWidth = (g || 1.5) * k; c.beginPath(); c.moveTo(X(x1), Y(y1)); c.lineTo(X(x2), Y(y2)); c.stroke(); };
+        const oscuro = fondo === '#111111' || fondo === '#1b2a4a' ? '#000' : '#111', luz = '#ffd54a';
+        c.save();
+        c.globalAlpha = 1;
+        const m = { musica: ['guitarra', 'micro', 'ciudad', 'vinilo', 'faro'], juegos: ['pixel', 'nave', 'castillo', 'robot', 'laberinto'], teatro: ['telon', 'mascara', 'silla', 'corona'], libros: ['llave', 'bosque', 'mar', 'reloj', 'puerta'] }[med] || [];
+        const id = m[mo % Math.max(1, m.length)];
+        if (id === 'guitarra') {
+            poly([[30, 78], [26, 50], [36, 58], [38, 30], [48, 50], [54, 22], [62, 48], [70, 34], [74, 60], [70, 78]], '#ff6d00');
+            poly([[38, 78], [36, 58], [44, 64], [50, 42], [56, 62], [64, 52], [62, 78]], luz);
+            circ(50, 72, 13, col); circ(50, 58, 10, col); circ(50, 70, 4, oscuro); rect(47.5, 18, 5, 40, col); rect(45, 12, 10, 8, col);
+        }
+        else if (id === 'micro') {
+            rect(40, 18, 20, 30, col); circ(50, 18, 10, col); circ(50, 48, 10, col);
+            for (let i = 0; i < 4; i++)
+                raya(41, 24 + i * 7, 59, 24 + i * 7, oscuro, 1.2);
+            rect(48.5, 58, 3, 22, col); rect(36, 80, 28, 4, col);
+        }
+        else if (id === 'ciudad') {
+            const ed = [[8, 40, 12], [20, 26, 10], [31, 48, 14], [46, 18, 11], [58, 34, 13], [72, 24, 10], [83, 44, 12]];
+            c.shadowColor = col; c.shadowBlur = 8 * k;
+            ed.forEach(function (e) { rect(e[0], e[1] + 20, e[2], 80 - e[1], oscuro); c.strokeStyle = col; c.lineWidth = 1.2 * k; c.strokeRect(X(e[0]), Y(e[1] + 20), e[2] * k, (80 - e[1]) * k); });
+            c.shadowBlur = 0;
+            ed.forEach(function (e, i) { for (let f = e[1] + 26; f < 96; f += 7)
+                for (let x = e[0] + 2; x < e[0] + e[2] - 2; x += 4)
+                    if ((i * 7 + f + x) % 3)
+                        rect(x, f, 2, 2.5, (f + x) % 2 ? luz : col); });
+            raya(0, 100, 100, 100, col, 2);
+        }
+        else if (id === 'vinilo') {
+            circ(50, 50, 34, '#0a0a0a');
+            for (let r = 14; r < 34; r += 4)
+                circ(50, 50, r, '#2a2a2a', 0.6);
+            const cz = function (x, y, s) { poly([[x, y + s * 0.9], [x - s, y], [x - s * 0.9, y - s * 0.6], [x - s * 0.45, y - s * 0.8], [x, y - s * 0.4], [x + s * 0.45, y - s * 0.8], [x + s * 0.9, y - s * 0.6], [x + s, y]], col); };
+            cz(50, 52, 12); circ(50, 50, 1.6, '#0a0a0a');
+        }
+        else if (id === 'faro') {
+            poly([[50, 22], [78, 8], [78, 36]], 'rgba(255,213,74,.55)'); poly([[50, 22], [22, 8], [22, 36]], 'rgba(255,213,74,.35)');
+            poly([[42, 86], [45, 30], [55, 30], [58, 86]], '#f4f1ea');
+            rect(44, 44, 12, 7, col); rect(43, 62, 14, 7, col); rect(44, 22, 12, 9, luz); poly([[42, 22], [50, 14], [58, 22]], col);
+            for (let i = 0; i < 18; i++) {
+                const x = (i * 37) % 100, y = (i * 53) % 90;
+                raya(x, y, x - 3, y + 8, 'rgba(200,220,255,.7)', 0.8);
+            }
+            rect(0, 86, 100, 14, '#1b3a5a');
+        }
+        else if (id === 'pixel') {
+            const g = ['..XXX..', '.XXXXX.', '.X.X.X.', '.XXXXX.', '..XXX..', 'XXXXXXX', 'X.XXX.X', '..X.X..', '.XX.XX.'];
+            g.forEach(function (fila, j) { fila.split('').forEach(function (ch, i) { if (ch === 'X')
+                rect(22 + i * 8, 14 + j * 8, 8, 8, col); }); });
+        }
+        else if (id === 'nave') {
+            circ(22, 26, 12, '#e67e22'); circ(80, 74, 16, '#1abc9c'); circ(80, 74, 22, 'rgba(255,255,255,.5)', 1);
+            poly([[48, 30], [62, 66], [48, 58], [34, 66]], col); poly([[44, 62], [48, 76], [52, 62]], luz);
+            for (let i = 0; i < 14; i++)
+                circ((i * 41) % 100, (i * 29) % 100, 0.8, '#fff');
+        }
+        else if (id === 'castillo') {
+            poly([[20, 62], [80, 62], [58, 92], [50, 98], [42, 92]], '#6b4f2a'); rect(20, 58, 60, 6, '#1e6b3a');
+            rect(30, 34, 40, 24, col); rect(26, 22, 10, 36, col); rect(64, 22, 10, 36, col); rect(45, 14, 10, 20, col);
+            poly([[24, 22], [31, 10], [38, 22]], col); poly([[62, 22], [69, 10], [76, 22]], col); poly([[43, 14], [50, 2], [57, 14]], col); rect(46, 46, 8, 12, oscuro);
+        }
+        else if (id === 'robot') {
+            rect(36, 12, 28, 20, col); rect(48.5, 6, 3, 6, col); circ(50, 5, 2.5, luz); circ(44, 22, 3.5, luz); circ(56, 22, 3.5, luz);
+            rect(30, 34, 40, 34, col); rect(40, 42, 20, 10, oscuro); rect(18, 36, 10, 28, col); rect(72, 36, 10, 28, col); rect(34, 70, 12, 22, col); rect(54, 70, 12, 22, col);
+        }
+        else if (id === 'laberinto') {
+            [36, 28, 20, 12].forEach(function (r, i) { c.strokeStyle = col; c.lineWidth = 3 * k; c.beginPath(); c.rect(X(50 - r), Y(50 - r), 2 * r * k, 2 * r * k); c.stroke();
+                rect(i % 2 ? 50 - r - 2 : 46, i % 2 ? 46 : 50 - r - 2, i % 2 ? 4 : 8, i % 2 ? 8 : 4, fondo); });
+            circ(50, 50, 3, luz);
+        }
+        else if (id === 'telon') {
+            rect(0, 0, 100, 8, '#7b1010');
+            poly([[0, 8], [44, 8], [30, 50], [20, 100], [0, 100]], '#c0392b'); poly([[100, 8], [56, 8], [70, 50], [80, 100], [100, 100]], '#c0392b');
+            for (let i = 0; i < 4; i++) {
+                raya(8 + i * 8, 8, 4 + i * 5, 100, '#8e2a20', 1); raya(92 - i * 8, 8, 96 - i * 5, 100, '#8e2a20', 1);
+            }
+            poly([[44, 8], [56, 8], [70, 50], [80, 100], [20, 100], [30, 50]], 'rgba(255,213,74,.25)');
+        }
+        else if (id === 'mascara') {
+            c.beginPath(); c.arc(X(50), Y(46), 30 * k, Math.PI / 2, Math.PI * 1.5); c.fillStyle = col; c.fill();
+            c.beginPath(); c.arc(X(50), Y(46), 30 * k, -Math.PI / 2, Math.PI / 2); c.fillStyle = '#f4f1ea'; c.fill();
+            poly([[34, 36], [44, 34], [44, 40], [34, 41]], oscuro); poly([[56, 34], [66, 36], [66, 41], [56, 40]], oscuro);
+            c.strokeStyle = oscuro; c.lineWidth = 2 * k; c.beginPath(); c.arc(X(42), Y(64), 8 * k, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); c.beginPath(); c.arc(X(58), Y(56), 8 * k, Math.PI * 0.1, Math.PI * 0.9); c.stroke();
+            raya(50, 14, 50, 78, oscuro, 1);
+        }
+        else if (id === 'silla') {
+            poly([[46, 0], [54, 0], [82, 92], [18, 92]], 'rgba(255,243,200,.35)'); c.beginPath(); c.ellipse(X(50), Y(92), 32 * k, 5 * k, 0, 0, Math.PI * 2); c.fillStyle = 'rgba(255,243,200,.45)'; c.fill();
+            rect(40, 40, 4, 50, col); rect(40, 64, 22, 4, col); rect(58, 64, 4, 26, col); rect(40, 40, 4, 4, col); raya(42, 46, 42, 64, col, 4);
+        }
+        else if (id === 'corona') {
+            poly([[22, 70], [22, 34], [36, 50], [50, 26], [64, 50], [78, 34], [78, 70]], luz);
+            [[22, 34], [50, 26], [78, 34]].forEach(function (p) { circ(p[0], p[1], 3.5, col); });
+            rect(22, 66, 56, 6, col); raya(52, 26, 46, 48, oscuro, 2); raya(46, 48, 56, 58, oscuro, 2); raya(56, 58, 50, 72, oscuro, 2);
+        }
+        else if (id === 'llave') {
+            poly([[10, 18], [90, 12], [86, 88], [14, 84]], '#e8d9b0');
+            c.setLineDash([3 * k, 3 * k]); raya(20, 74, 40, 50, '#a0522d', 1.2); raya(40, 50, 70, 38, '#a0522d', 1.2); c.setLineDash([]);
+            raya(64, 32, 76, 44, '#c0392b', 2); raya(76, 32, 64, 44, '#c0392b', 2);
+            circ(30, 40, 8, col, 3); rect(37, 38.5, 34, 3.5, col); rect(62, 42, 3, 7, col); rect(68, 42, 3, 5, col);
+        }
+        else if (id === 'bosque') {
+            [[16, 70, 14], [32, 60, 18], [50, 66, 22], [68, 58, 18], [84, 70, 14]].forEach(function (t) { poly([[t[0], t[1] - t[2] * 2.2], [t[0] + t[2] * 0.7, t[1]], [t[0] - t[2] * 0.7, t[1]]], col); rect(t[0] - 1.5, t[1], 3, 8, col); });
+            rect(0, 86, 100, 14, col);
+        }
+        else if (id === 'mar') {
+            circ(74, 26, 10, luz);
+            for (let i = 0; i < 5; i++) {
+                c.strokeStyle = col; c.lineWidth = 2 * k; c.beginPath();
+                for (let x = 0; x <= 100; x += 5)
+                    c.lineTo(X(x), Y(58 + i * 8 + Math.sin(x / 8 + i) * 2));
+                c.stroke();
+            }
+            circ(30, 34, 4.5, oscuro); poly([[30, 38], [37, 58], [23, 58]], oscuro);
+        }
+        else if (id === 'reloj') {
+            circ(50, 50, 32, '#f4f1ea'); circ(50, 50, 32, col, 4);
+            for (let i = 0; i < 12; i++) {
+                const a = i * Math.PI / 6;
+                raya(50 + Math.cos(a) * 25, 50 + Math.sin(a) * 25, 50 + Math.cos(a) * 29, 50 + Math.sin(a) * 29, oscuro, i % 3 ? 1 : 2.5);
+            }
+            circ(50, 50, 2.5, oscuro);
+        }
+        else if (id === 'puerta') {
+            rect(36, 30, 28, 58, col); c.beginPath(); c.arc(X(50), Y(30), 14 * k, Math.PI, 0); c.fillStyle = col; c.fill();
+            rect(40, 34, 20, 50, luz); circ(56, 60, 1.6, oscuro);
+            for (let i = 0; i < 5; i++)
+                rect(0, 50 + i * 9, 100, 5, 'rgba(230,230,240,' + (0.18 + i * 0.07) + ')');
+        }
+        c.restore();
+    }
     function dibujar() {
         setTimeout(function () {
             document.querySelectorAll('canvas[data-port]').forEach(function (cv) {
                 const id = cv.getAttribute('data-port'), p = id === 'b' ? st.b : Md.porId(id);
                 if (!p || !cv.getContext)
                     return;
-                const po = Md.portada(p.port || p.portSel ? p : Object.assign({ port: N.hash(p.tit || 'x') % 100000 }, p)), w = cv.width = 120, h = cv.height = p.med === 'teatro' || p.med === 'libros' ? 170 : 120;
+                const po = Md.portada(p.port || p.portSel ? p : Object.assign({ port: N.hash(p.tit || 'x') % 100000 }, p)), w = cv.width = 240, h = cv.height = p.med === 'teatro' || p.med === 'libros' ? 340 : 240;
                 const c = cv.getContext('2d');
                 c.fillStyle = PALETA[po.c1];
                 c.fillRect(0, 0, w, h);
                 c.fillStyle = PALETA[po.c2];
-                c.globalAlpha = 0.85;
+                c.globalAlpha = 0.28;
                 const s = p.port || 7;
                 if (po.forma === 0) {
                     c.beginPath();
@@ -31778,25 +31969,31 @@ ART.mediosUI = (function () {
                 }
                 else if (po.forma === 3) {
                     for (let i = 0; i < 9; i++) {
-                        c.fillRect((i % 3) * w / 3 + 6, Math.floor(i / 3) * h / 4 + 10, w / 3 - 12, h / 4 - 12);
-                        c.globalAlpha = 0.3 + ((s >> i) & 1) * 0.5;
+                        c.fillRect((i % 3) * w / 3 + 12, Math.floor(i / 3) * h / 4 + 20, w / 3 - 24, h / 4 - 24);
+                        c.globalAlpha = 0.12 + ((s >> i) & 1) * 0.2;
                     }
                 }
                 else {
-                    c.lineWidth = 6;
+                    c.lineWidth = 12;
                     c.strokeStyle = PALETA[po.c2];
                     for (let i = 0; i < 4; i++) {
                         c.beginPath();
-                        c.arc(w / 2, h / 2, 12 + i * 12, 0, Math.PI * 2);
+                        c.arc(w / 2, h / 2, 24 + i * 24, 0, Math.PI * 2);
                         c.stroke();
                     }
                 }
                 c.globalAlpha = 1;
-                c.fillStyle = po.c1 === 7 ? '#111' : '#fff';
-                c.font = 'bold 12px sans-serif';
+                dibujarMotivo(c, p.med, po.mo, w, h * 0.82, po.c2 === po.c1 ? (po.c1 === 7 ? '#111111' : '#f4f1ea') : PALETA[po.c2], PALETA[po.c1]);
+                const tc = po.c2 === po.c1 ? (po.c1 === 7 ? '#111' : '#fff') : PALETA[po.c2];
+                c.fillStyle = 'rgba(0,0,0,.45)';
+                c.fillRect(0, h - 66, w, 66);
+                c.fillStyle = tc;
+                c.font = 'bold 24px sans-serif';
                 c.textAlign = 'center';
+                c.lineWidth = 4;
+                c.strokeStyle = tc === '#111' || tc === '#111111' ? '#fff' : 'rgba(0,0,0,.75)';
                 const tit = (p.tit || '').toUpperCase(), pal = tit.split(' ');
-                let linea = '', y = h - 26;
+                let linea = '', y = h - 22;
                 const lineas = [];
                 pal.forEach(function (x) { if ((linea + ' ' + x).trim().length > 14) {
                     lineas.push(linea);
@@ -31805,7 +32002,7 @@ ART.mediosUI = (function () {
                 else
                     linea = (linea + ' ' + x).trim(); });
                 lineas.push(linea);
-                lineas.slice(-2).forEach(function (l, i, a) { c.fillText(l, w / 2, y - (a.length - 1 - i) * 14); });
+                lineas.slice(-2).forEach(function (l, i, a) { c.strokeText(l, w / 2, y - (a.length - 1 - i) * 28); c.fillText(l, w / 2, y - (a.length - 1 - i) * 28); });
             });
         }, 0);
     }
@@ -32061,7 +32258,9 @@ ART.mediosUI = (function () {
         });
         if (Md.hayMenoresMd(b))
             h += '<p class="nota info">Hay personajes menores de edad: la obra no puede ser erótica, pero sí puede tener contenido fuerte; esas escenas son de los adultos.</p>';
-        h += '<div class="tarjeta" style="padding:8px 10px"><b>' + esc(Md.nombreClas(b)) + ': ' + esc(b.clas) + '</b><p class="chico" style="margin:4px 0">' + esc(cl.desc) + '</p><p class="chico tenue" style="margin:0">' + esc(ART.ideas.describirContenido({ cont: c, gen: [] })) + ' · público que puede llegarle: ' + Math.round(Md.accesoMd(b) * 100) + ' % de lo normal' + (b.explicito ? ' · lleva el aviso de letras explícitas' : '') + '.</p></div>';
+        const cTope = {};
+        X.contenido.forEach(function (x) { cTope[x.id] = Math.min(c[x.id] || 0, Md.maxNivelMd(b, x)); });
+        h += ART.creacion.escalaClas(b.clas, a) + '<div class="tarjeta" style="padding:8px 10px"><b>' + esc(Md.nombreClas(b)) + ': ' + esc(b.clas) + '</b><p class="chico" style="margin:4px 0">' + esc(cl.desc) + '</p><p class="chico tenue" style="margin:0">' + esc(ART.ideas.describirContenido({ cont: cTope, gen: [] })) + ' · rinde ' + Math.round((cl.ingreso || 1) * 100) + ' % por su clasificación · público que puede llegarle: ' + Math.round(Md.accesoMd(b) * 100) + ' % de lo normal' + (b.explicito ? ' · lleva el aviso de letras explícitas' : '') + '.</p></div>';
         const permiteN = Md.indiceMd(b) <= 2 && !Md.esErotico(b);
         h += '<label class="interruptor"><span>Clasificación N (general, con contenido moderado y controlado; rinde menos)</span><input type="checkbox" data-c="mdClasN"' + (b.clasN ? ' checked' : '') + (permiteN ? '' : ' disabled') + '></label>';
         const ac2 = Md.ajusteContenido(b);
@@ -32228,14 +32427,35 @@ ART.mediosUI = (function () {
             if (ft && ops.indexOf(ft) < 0)
                 ops.unshift(ft);
             return '<div class="tarjeta" style="padding:8px"><div class="fila"><b class="cifra">' + (i + 1) + '</b><input type="text" maxlength="40" value="' + esc(c.n) + '" data-i="mdCanNom" data-k="' + i + '" class="crece" aria-label="Nombre de la canción"><button class="ico" data-a="mdCanDado" data-v="' + i + '" aria-label="Nombre al azar">' + U.icono('dado') + '</button><button class="ico" data-a="mdCanDel" data-v="' + i + '" aria-label="Quitar canción"' + (L.length <= 1 ? ' disabled' : '') + '>' + U.icono('cerrar') + '</button></div>' +
-                '<label class="campo"><span>Colaboración (ft.)</span><select data-c="mdCanFt" data-k="' + i + '"><option value="">— sin colaboración —</option>' + ops.map(function (t) { return '<option value="' + t.id + '"' + (ft && t.id === ft.id ? ' selected' : '') + '>' + esc(t.nom + ' · fama ' + Math.round((t.fama || 0) * 100) + ' · ' + dinero(Math.round(T.tarifaPara(t, 0) * 0.3))) + '</option>'; }).join('') + '</select></label></div>';
+                '<label class="campo"><span>Colaboración (ft.)</span><select data-c="mdCanFt" data-k="' + i + '"><option value="">— sin colaboración —</option>' + ops.map(function (t) { return '<option value="' + t.id + '"' + (ft && t.id === ft.id ? ' selected' : '') + '>' + esc(t.nom + ' · fama ' + Math.round((t.fama || 0) * 100) + ' · ' + dinero(Math.round(T.tarifaPara(t, 0) * 0.3))) + '</option>'; }).join('') + '</select></label>' +
+                '<label class="campo rango"><span>Duración: <b id="md-cs-' + i + '">' + mmss(Md.segCancion(c, i)) + '</b></span><input type="range" min="40" max="900" step="5" value="' + Md.segCancion(c, i) + '" data-i="mdDurV" data-l="md-cs-' + i + '" data-c="mdCanSeg" data-k="' + i + '" aria-label="Duración de la canción"></label></div>';
         }).join('');
         h += '<div class="fila">' + btn('Agregar otra canción', 'mdCanAdd', '', '', L.length >= mx ? 'Llegaste al máximo de canciones' : '') + '</div>';
         return h + resumenFt(b);
     }
+    function mmss(sg) { sg = Math.round(sg); return Math.floor(sg / 60) + ':' + ('0' + sg % 60).slice(-2); }
+    function bloqueDuracionMus(b) {
+        const L = Md.cancionesDe(b);
+        if (!L.length)
+            return '';
+        const lim = Md.limitesMin(b), tot = Md.minutosMusica(b), mx = Md.maxCanciones(b), tipo = (Md.tipos('musica').filter(function (x) { return x.id === b.tipo; })[0] || {}).nombre || '';
+        return '<h4>Duración</h4><p class="nota info">La duración sale de cuántas canciones tiene y de cuánto dura cada una. Un ' + esc(tipo.toLowerCase()) + ' va de ' + lim[0] + ' a ' + lim[1] + ' minutos; más minutos cuestan más y tardan más en grabarse.</p>' +
+            '<label class="campo rango"><span>Canciones: <b id="md-nc">' + L.length + '</b></span><input type="range" min="1" max="' + mx + '" step="1" value="' + L.length + '" data-i="mdDurV" data-l="md-nc" data-f="n" data-c="mdNCan" aria-label="Cantidad de canciones"></label>' +
+            '<label class="campo rango"><span>Duración total: <b id="md-mt">' + mmss(tot * 60) + '</b></span><input type="range" min="' + lim[0] + '" max="' + lim[1] + '" step="1" value="' + Math.round(N.limitar(tot, lim[0], lim[1])) + '" data-i="mdDurV" data-l="md-mt" data-f="min" data-c="mdMinTot" aria-label="Duración total en minutos"></label>' +
+            '<p class="chico">' + L.length + ' canciones · ' + mmss(tot * 60) + ' en total · costo ×' + U.decimal(Md.duracionK(b), 2) + (tot > lim[1] ? ' · <span class="mal">pasa del máximo de ' + lim[1] + ' min</span>' : '') + '. Ajusta cada canción en Canciones.</p>';
+    }
+    ac('mdDurV', function (v, el) { const l = document.getElementById(el.getAttribute('data-l')), f = el.getAttribute('data-f'); if (l)
+        l.textContent = f === 'n' ? v : f === 'min' ? mmss(+v * 60) : mmss(+v); });
+    ac('mdNCan', function (v) { const b = st.b, L = Md.cancionesDe(b), n = Math.max(1, Math.min(Md.maxCanciones(b), +v || 1));
+        while (L.length < n)
+            L.push({ n: Md.nomCancion(N.hash(b.tit + '|' + L.length + '|' + N.S.t)), ft: null });
+        L.length = n; Md.recalcular(b); refrescarNuevo(); });
+    ac('mdMinTot', function (v) { Md.ajustarMinutos(st.b, +v); Md.recalcular(st.b); refrescarNuevo(); });
+    ac('mdCanSeg', function (v, el) { const c = (st.b.can || [])[+el.getAttribute('data-k')]; if (c)
+        c.s = Math.round(N.limitar(+v, 40, 900)); Md.recalcular(st.b); refrescarNuevo(); });
     function resumenFt(b) {
         const nf = Md.idsFt(b).length;
-        return '<p class="chico">' + Md.cancionesDe(b).length + ' canciones · ' + nf + ' colaboraciones' + (nf ? ' · costo ' + dinero(Math.round(Md.costoFt(b))) + ' · ventas +' + Math.round(Md.bonoFt(b) * 100) + ' %' : '') + '</p>';
+        return '<p class="chico">' + Md.cancionesDe(b).length + ' canciones · ' + mmss(Md.minutosMusica(b) * 60) + ' · ' + nf + ' colaboraciones' + (nf ? ' · costo ' + dinero(Math.round(Md.costoFt(b))) + ' · ventas +' + Math.round(Md.bonoFt(b) * 100) + ' %' : '') + '</p>';
     }
     function resumenCanciones(b) {
         return '<p class="chico">' + Md.cancionesDe(b).map(function (c, i) { const ft = c.ft !== null && c.ft !== undefined ? T.porId(c.ft) : null; return (i + 1) + '. ' + esc(c.n) + (ft ? ' (ft. ' + esc(ft.nom) + ')' : ''); }).join('<br>') + '</p>' + resumenFt(b) + '<p class="chico tenue">Los nombres y las colaboraciones se eligen en el modo detallado.</p>';
@@ -32295,6 +32515,8 @@ ART.mediosUI = (function () {
         if (b.med === 'teatro')
             h += '<div class="fila"><label class="campo"><span>Funciones por semana</span><input type="number" min="3" max="10" data-c="mdCfg" data-v="funciones" value="' + c.funciones + '"></label><label class="campo"><span>Semanas de temporada</span><input type="number" min="4" max="52" data-c="mdCfg" data-v="semanas" value="' + c.semanas + '"></label></div>' +
                 '<label class="campo"><span>Semanas de ensayo</span><input type="number" min="3" max="16" data-c="mdCfg" data-v="ensayo" value="' + c.ensayo + '"></label>';
+        if (b.med === 'musica')
+            h += bloqueDuracionMus(b);
         h += bloquePulido(b);
         h += '<p class="tenue chico">' + esc(b.med === 'teatro' ? 'Efectos especiales: en el teatro los dan la escenografía y la maquinaria (Presupuesto).' : 'Efectos especiales: solo en cine, series y teatro.') + '</p>';
         return h;
@@ -32322,7 +32544,7 @@ ART.mediosUI = (function () {
     function secFinanciacion(b) { return U.bloqueFin(b, b.costo, 'mdFin', 'mdPrest'); }
     function secProyeccion(b) {
         return tabArte(b) + '<label class="campo"><span>' + (b.med === 'musica' ? 'Concepto' : 'Sinopsis') + '</span><textarea rows="4" maxlength="600" data-i="mdSin">' + esc(b.sin || Md.sinopsis(b)) + '</textarea></label>' + btn('Escribirla de nuevo', 'mdSinNueva') +
-            '<h4>Anuncio de la producción</h4><label class="chip"><input type="checkbox" data-c="mdAnun"' + (b.anun ? ' checked' : '') + '> Anunciar la obra al empezar (2 % del costo · +5 % de expectativa al salir)</label>' +
+            '<h4>Anuncio de la producción</h4><label class="interruptor"><span>Anunciar la obra al empezar<br><small class="tenue">Cuesta el 2 % del costo y da +5 % de expectativa al salir.</small></span><input type="checkbox" data-c="mdAnun"' + (b.anun ? ' checked' : '') + '></label>' +
             '<p class="nota info">Es el único marketing que va mientras se produce. La campaña y el lanzamiento se eligen cuando la obra está lista, en Obras › Proyectos.</p>' + resumenMd(b);
     }
     function bloqueMarketing(b) {
@@ -32527,7 +32749,7 @@ ART.mediosUI = (function () {
             musica: function () { return !mus && b.med !== 'libros' ? secMusicaObra(b) : null; },
             equipo: function () { return '<div class="fila" style="gap:6px;flex-wrap:wrap">' + btn('Equipo recomendado', 'mdEqRec') + btn('Otro equipo al azar', 'mdOtroEq') + '</div><p class="chico">' + of.map(function (o, i) { const tt = T.porId(b.eqS[i]); return esc((ART.datos.oficio(o) || { nombre: o }).nombre) + ': <b>' + (tt ? esc(tt.nom + (tt.jugador ? ' (tú)' : '')) : '— nadie —') + '</b>'; }).join('<br>') + '</p><p class="chico tenue">Cada puesto se elige a mano en el modo detallado.</p>'; },
             financiacion: function () { return secFinanciacion(b); },
-            proyeccion: function () { return '<label class="chip"><input type="checkbox" data-c="mdAnun"' + (b.anun ? ' checked' : '') + '> Anunciar la obra al empezar (2 % del costo · +5 % de expectativa)</label>' + resumenMd(b); }
+            proyeccion: function () { return '<label class="interruptor"><span>Anunciar la obra al empezar<br><small class="tenue">Cuesta el 2 % del costo y da +5 % de expectativa al salir.</small></span><input type="checkbox" data-c="mdAnun"' + (b.anun ? ' checked' : '') + '></label>' + resumenMd(b); }
         };
         return { med: b.med, nombre: Md.MED[b.med].nombre, modo: modo, tab: st.tab, acTab: 'mdTab', acModo: 'mdModo', acVolver: 'mdVolver', extra: '',
             tiene: function (id) { return TB.indexOf(id) >= 0; }, paso: function (id) { return (PASO[id] || secObra)(b); },

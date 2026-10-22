@@ -221,6 +221,13 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Idiomas en orden alfabético:** todas las listas de idiomas (la principal y las de «Otro idioma») van de la A a la Z en todos los medios; arriba quedan «Varios idiomas» y, en cine y TV, «Idiomas según la nacionalidad del reparto».
 - **Varios idiomas en la lista de idiomas:** la primera opción de la lista de idiomas es «Varios idiomas», en música y en todos los medios; al elegirla aparecen los otros idiomas y la lista pasa a ser el idioma principal.
 
+## Música, clasificaciones, habilidades y portadas
+- **Duración de la música:** en Forma hay un deslizador de canciones y otro de duración total; la duración sale de cuántas canciones hay y de cuánto dura cada una. Cada canción tiene su propio deslizador de duración (0:40 a 15:00), junto a su colaboración. Los límites siguen el documento: sencillo de 2 a 15 min, EP de 5 a 30, álbum de 5 a 120 (300 en la era digital). Más minutos cuestan más y tardan más en grabarse.
+- **Clasificaciones como en el documento:** una escala ordenada por grupos (niños G y PG, adolescentes PG-13, 16 y NC-17, adultos 18, R y X, y la N general), con lo que rinde cada una: G 60 %, PG 70 %, PG-13 100 %, 16 90 %, NC-17 80 %, 18 50 %, R 40 %, X 30 % y N 50 %. La taquilla y las ventas usan esos porcentajes. La descripción del contenido coincide con los deslizadores.
+- **Habilidades en proporción:** la habilidad de un talento en otro medio sale de su oficio si ese oficio existe allí (una intérprete rinde casi lo mismo en cine, música y teatro). Antes caía unos 18 puntos.
+- **Portadas:** la imagen elegida (ciudad de neón, guitarra en llamas, faro bajo la lluvia y las otras 16) ahora se dibuja de verdad, a doble resolución, y el título sale en el color elegido.
+- **Anuncio de la producción:** el interruptor queda ordenado, y las casillas largas y las tarjetas impares ya no dejan huecos.
+
 ## Vida, alertas y Encargos
 - El premio a la trayectoria solo llega con 10 obras terminadas y 15 años desde tu primer estreno, y como mucho una vez cada 10 años. Los eventos de vida salen la mitad de seguido y no se repiten en dos años.
 - Alertas nuevas: una pastilla pequeña que dura 1,8 s (2,6 s si es un error). Las repetidas se juntan («×3»), se ven 2 como máximo y se cierran al tocarlas.
