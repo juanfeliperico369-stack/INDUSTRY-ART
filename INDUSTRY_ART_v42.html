@@ -133,6 +133,8 @@ body.ad-web #app { bottom: 60px; }
 .cal-dia .ics { font-size: 14px; line-height: 1; letter-spacing: 1px; white-space: nowrap; }
 .cal-ev { display: flex; gap: 8px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid var(--borde); }
 .cal-ev:last-child { border-bottom: 0; }
+.cal-ev { flex-wrap: wrap; }
+.cal-ev > .col.crece { flex: 1 1 9em; min-width: 9em; }
 .cal-ev .ic { min-width: 20px; text-align: center; }
 .cal-anio { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .dos-cal { display: grid; gap: 10px; }
@@ -252,6 +254,10 @@ input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--acento); }
 .aviso.mal::before { content: '!'; background: var(--mal); color: #fff; }
 .aviso.sale { opacity: 0; transform: translateY(6px); }
 @keyframes avisoSube { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.cal-ev.inv-fila { flex-wrap: wrap; align-items: flex-start; }
+.cal-ev.inv-fila > .col { flex: 1 1 100%; min-width: 0; }
+.inv-acc { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+.inv-acc .btn { flex: 1 1 auto; }
 .enc-sel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0 8px; }
 .enc-sel select { width: 100%; }
 .enc-acc { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
@@ -31081,14 +31087,14 @@ ART.imperioUI = (function () {
         let h = '<p class="nota info">Compra acciones y véndelas cuando quieras. Las compañías nuevas crecen más, pero también caen más; el índice de un rival sube con sus utilidades y baja con sus pérdidas. Nada es seguro.</p>';
         h += '<h3>Compañías</h3><div class="col">' + B.companias().map(function (c) {
             const a = b.acc[c.id];
-            return '<div class="cal-ev"><div class="col crece"><b>' + esc(c.nombre) + '</b><span class="tenue chico">Índice ' + B.precio(c.id) + (a ? ' · tienes ' + dinero(B.valorAccion(c.id)) + ' (pagaste ' + dinero(a.costo) + ')' : '') + '</span></div>' +
-                (a ? btn('Vender 25 %', 'bnVenderP', c.id + '|0.25') + btn('Vender la mitad', 'bnVenderP', c.id + '|0.5') + btn('Vender todo', 'bnVender', c.id) : '') + btn('Comprar', 'bnComprar', c.id, 'primario') + '</div>';
+            return '<div class="cal-ev inv-fila"><div class="col crece"><b>' + esc(c.nombre) + '</b><span class="tenue chico">Índice ' + B.precio(c.id) + (a ? ' · tienes ' + dinero(B.valorAccion(c.id)) + ' (pagaste ' + dinero(a.costo) + ')' : '') + '</span></div><div class="inv-acc">' +
+                (a ? btn('Vender 25 %', 'bnVenderP', c.id + '|0.25') + btn('Vender la mitad', 'bnVenderP', c.id + '|0.5') + btn('Vender todo', 'bnVender', c.id) : '') + btn('Comprar', 'bnComprar', c.id, 'primario') + '</div></div>';
         }).join('') + '</div>' + bloqueMontoInv();
         const rv = B.rivalesCotizan();
         h += '<h3>Acciones de los rivales</h3><div class="col">' + (rv.length ? rv.map(function (c) {
             const x = b.acc[c.id];
-            return '<div class="cal-ev"><div class="col crece"><b>' + esc(c.nombre) + '</b><span class="tenue chico">Índice ' + B.precio(c.id) + (x ? ' · tienes ' + dinero(B.valorAccion(c.id)) + ' (pagaste ' + dinero(x.costo) + ')' : '') + '</span></div>' +
-                (x ? btn('Vender 25 %', 'bnVenderP', c.id + '|0.25') + btn('Vender la mitad', 'bnVenderP', c.id + '|0.5') + btn('Vender todo', 'bnVender', c.id) : '') + btn('Comprar', 'bnComprar', c.id, 'primario') + '</div>';
+            return '<div class="cal-ev inv-fila"><div class="col crece"><b>' + esc(c.nombre) + '</b><span class="tenue chico">Índice ' + B.precio(c.id) + (x ? ' · tienes ' + dinero(B.valorAccion(c.id)) + ' (pagaste ' + dinero(x.costo) + ')' : '') + '</span></div><div class="inv-acc">' +
+                (x ? btn('Vender 25 %', 'bnVenderP', c.id + '|0.25') + btn('Vender la mitad', 'bnVenderP', c.id + '|0.5') + btn('Vender todo', 'bnVender', c.id) : '') + btn('Comprar', 'bnComprar', c.id, 'primario') + '</div></div>';
         }).join('') : '<p class="tenue">No hay rivales que coticen.</p>') + '</div>';
         return h;
     }
