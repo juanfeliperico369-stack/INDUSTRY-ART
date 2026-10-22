@@ -13847,6 +13847,12 @@ ART.medios = (function () {
         }
         k *= estiloMedio(b.cfg.pst).k;
         const pu = pulido(b);
+        if (b.cfg) {
+            if (b.cfg.trad !== undefined)
+                b.cfg.trad = N.limitar(Math.round(+b.cfg.trad || 1), 1, 14);
+            if (b.cfg.idiomas !== undefined)
+                b.cfg.idiomas = N.limitar(Math.round(+b.cfg.idiomas || 1), 1, 14);
+        }
         k *= pu.k * mundoBono(b).k * duracionK(b) * bsoK(b) * durK(b) * (b.tipos && b.tipos.length > 1 ? 1 + 0.04 * (b.tipos.length - 1) : 1);
         if (b.med === 'musica' && cancionesDe(b).length)
             sem = Math.round(sem * N.limitar(Math.pow(duracionK(b), 0.7), 0.8, 1.5));
@@ -32761,8 +32767,6 @@ ART.mediosUI = (function () {
     function secForma(b) {
         const c = b.cfg;
         let h = selTamano(b);
-        if (b.med === 'libros')
-            h += '<label class="campo"><span>Extensión</span>' + sel('mdCfg', Md.EXTENSIONES.map(function (x) { return [x.id, x.nombre]; }), c.ext || 'novela', 'ext') + '</label>';
         const rg = function (k, min, max, val, etq, suf) { return '<label class="campo rango"><span>' + esc(etq) + ': <b id="md-n-' + k + '">' + val + '</b>' + esc(suf || '') + '</span><input type="range" min="' + min + '" max="' + max + '" step="1" value="' + val + '" data-i="mdDurV" data-l="md-n-' + k + '" data-f="n" data-c="mdCfg" data-v="' + k + '" aria-label="' + esc(etq) + '"></label>'; };
         if (b.med === 'teatro')
             h += rg('funciones', 3, 10, c.funciones, 'Funciones por semana') + rg('semanas', 4, 52, c.semanas, 'Semanas de temporada') + rg('ensayo', 3, 16, c.ensayo, 'Semanas de ensayo') +
@@ -33007,7 +33011,7 @@ ART.mediosUI = (function () {
             franquicia: function () { return b.med === 'libros' ? '<label class="campo"><span>De una franquicia tuya</span>' + sel('mdCfg', [['', '— obra original —']].concat(ART.franquicias.lista().filter(function (f) { return f.est === 0; }).map(function (f) { return [f.id, f.nom]; })), b.cfg.fr || '', 'fr') + '</label>' : '<p class="nota">Para continuar una franquicia tuya usa «Continuar» en Obras › Franquicias.</p>'; },
             generos: function () { return secGeneros(b); }, sub: function () { return bloqueSubMd(b); }, temas: function () { return bloqueTemasMd(b) + bloqueMundoMd(b); }, arco: function () { return bloqueArcoMd(b); },
             estilo: function () { return bloqueTonoMd(b) + bloqueEstiloProd(b); }, clas: function () { return tabPublico(b, true); },
-            duracion: function () { return selTamano(b) + (b.med === 'libros' ? '<label class="campo"><span>Extensión</span>' + sel('mdCfg', Md.EXTENSIONES.map(function (x) { return [x.id, x.nombre]; }), b.cfg.ext || 'novela', 'ext') + '</label>' : ''); },
+            duracion: function () { return selTamano(b); },
             personajes: function () { return mus ? (Md.cancionesDe(b).length ? resumenCanciones(b) : '<p class="tenue">Este tipo no lleva lista de canciones.</p>') : Md.conPersonajes(b.med) ? '<p class="chico">' + ((b.pj || []).map(function (p) { return esc(p.n) + ' · ' + esc(p.a || '') + ' · ' + p.e; }).join('<br>') || '—') + '</p>' + btn('Otro reparto', 'mdPjGen') : null; },
             presupuesto: function () { return bloquePres(b); }, rodaje: function () { return secRodaje(b); },
             musica: function () { return !mus && b.med !== 'libros' ? secMusicaObra(b) : null; },
