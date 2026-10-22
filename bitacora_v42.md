@@ -195,6 +195,12 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **El plan de lanzamiento tiene dos pasos, después de producir:** primero el marketing, que trae campañas de cinco niveles para videojuegos, teatro y libros, y luego el lanzamiento y la distribución.
 - **«Asesino serial»** aparece entre los temas sugeridos de terror, thriller, crimen, misterio, rap y metal, y como argumento («Cazar a un asesino serial»).
 
+## Distribución en los dos sentidos y contratación
+- **Un rival distribuye tus obras:** en Negocio › Colaboraciones le ofreces el contrato a un rival. Te paga un adelanto, lleva tus películas a 8 % más salas y se queda con el 8 % de su taquilla. Sigue la opción de siempre, en la que tú distribuyes a un rival.
+- **Filtro por sexo a la vista** al contratar protagonistas, reparto y equipo: «Hombres y mujeres», «Solo mujeres» o «Solo hombres».
+- **«Otro mejor»:** cada vez que lo tocas elige al siguiente mejor talento (el segundo, el tercero…), sin repetir. Tampoco pone al mismo actor en dos personajes ni a alguien que ya está en otro rubro.
+- **Tarjetas del equipo más legibles en el celular:** el nombre y los datos ya no se parten letra por letra, y los botones pasan abajo cuando no caben.
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
