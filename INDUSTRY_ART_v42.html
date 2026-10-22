@@ -28605,7 +28605,7 @@ ART.creacion = (function () {
         h += '<p class="nota">Vestuario y sets: costo ×' + U.decimal(ep.costo, 2) + (ep.afines.length ? ' · encaja con ' + ep.afines.map(function (f) { return D.familia(f).nombre.toLowerCase(); }).join(', ') : '') + '.</p>';
         const lugares = [['', 'Sin lugar fijo']].concat(D.paises.slice().sort(function (x, y) { return x.nombre.localeCompare(y.nombre, 'es'); }).map(function (p) { return [p.id, p.nombre + ' (' + D.continenteDePais(p.id) + ')']; }), X.lugaresPara(b).map(function (l) { return [l.id, l.nombre]; }));
         h += '<label class="campo"><span>Dónde pasa la historia</span>' + sel('lug', lugares, b.lug) + '</label>';
-        h += '<label class="campo"><span>Idioma de la obra</span>' + sel('idio', X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; }), b.idio) + '</label>';
+        h += '<label class="campo"><span>' + (Array.isArray(b.idiX) ? 'Idioma principal (varios idiomas activado)' : 'Idioma de la obra') + '</span>' + sel('idio', [['*varios', Array.isArray(b.idiX) ? '✓ Varios idiomas (activado)' : 'Varios idiomas']].concat(X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; })), b.idio) + '</label>';
         h += '<div class="chips">' + chip('Un solo idioma', 'crIdiV', '0', !Array.isArray(b.idiX) && !b.idiN) + chip('Varios idiomas · +3 % por idioma', 'crIdiV', '1', Array.isArray(b.idiX) && !b.idiN) + chip('Idiomas según la nacionalidad del reparto', 'crIdiV', '2', !!b.idiN) + '</div>';
         if (b.idiN) {
             const lr = I.idiomasReparto(b);
@@ -29731,6 +29731,8 @@ ART.creacion = (function () {
         if (!b)
             return;
         const k = el.getAttribute('data-k');
+        if (k === 'idio' && v === '*varios')
+            return U.acciones.crIdiV('1');
         if (k.indexOf('fmt.') === 0) {
             b.fmt = Object.assign({}, b.fmt);
             b.fmt[k.slice(4)] = v;
@@ -32114,7 +32116,7 @@ ART.mediosUI = (function () {
         const idis = '<div class="chips">' + chipMd('Un solo idioma', 'mdIdiV', '0', !varios) + chipMd('Varios idiomas · +3 % por idioma', 'mdIdiV', '1', varios) + '</div>' + (varios ? '<div class="fila envolver">' + [0, 1, 2].map(function (i) { return '<label class="campo crece"><span>Otro idioma ' + (i + 1) + '</span>' + sel('mdIdiX', [['', '— ninguno —']].concat(X.idiomas.filter(function (x) { return x.id !== b.idio && !x.universal; }).map(function (x) { return [x.id, x.id]; })), (b.idiX[i] || ''), String(i)) + '</label>'; }).join('') + '</div><p class="nota info">' + esc(b.med === 'musica' ? 'Canciones en varios idiomas: cada uno suma 3 % al costo y abre más países.' : 'Cada idioma extra suma 3 % al costo y abre más países donde se entiende sin traducir.') + '</p>' : '');
         return '<h4>' + (b.med === 'musica' ? 'Época, lugar e idioma de las canciones' : 'Mundo de la historia') + '</h4><div class="fila envolver"><label class="campo crece"><span>Época</span>' + sel('mdMundo', eps.map(function (e) { return [e.id, e.nombre]; }), b.epo || 'actualidad', 'epo') + '</label>' +
             '<label class="campo crece"><span>Dónde pasa</span>' + sel('mdMundo', lugares, b.lug || '', 'lug') + '</label>' +
-            '<label class="campo crece"><span>Idioma</span>' + sel('mdMundo', X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; }), b.idio || 'Inglés', 'idio') + '</label></div>' +
+            '<label class="campo crece"><span>' + (varios ? 'Idioma principal' : 'Idioma') + '</span>' + sel('mdMundo', [['*varios', varios ? '✓ Varios idiomas (activado)' : 'Varios idiomas']].concat(X.idiomas.map(function (x) { return [x.id, x.id + (x.universal ? ' (viaja a todas partes)' : '')]; })), b.idio || 'Inglés', 'idio') + '</label></div>' +
             '<p class="nota">' + (ep && ep.afines && ep.afines.length ? 'Encaja con ' + ep.afines.map(function (f) { return D.familia(f).nombre.toLowerCase(); }).join(', ') + '. ' : '') + (mb.k !== 1 ? 'Vestuario y decorados: costo ×' + U.decimal(mb.k, 2) + '.' : '') + '</p>' + idis;
     }
     function bloqueDepsMd(b) {
@@ -32796,7 +32798,8 @@ ART.mediosUI = (function () {
         return; const id = v === '' ? null : +v; if (id !== null && b.med === 'teatro')
         b.pj.forEach(function (x) { if (x !== p && x.t === id)
             x.t = null; }); p.t = id; const t = id !== null ? T.porId(id) : null; ART.creacion.conAzarUI(function () { Md.sexoActor(b, p, t); }); trasPj(b); });
-    ac('mdMundo', function (v, el) { const b = st.b; b[el.getAttribute('data-v')] = v; if (!b.sinEditada)
+    ac('mdMundo', function (v, el) { const b = st.b; if (el.getAttribute('data-v') === 'idio' && v === '*varios')
+        return U.acciones.mdIdiV('1'); b[el.getAttribute('data-v')] = v; if (!b.sinEditada)
         b.sin = Md.sinopsis(b); refrescarNuevo(); });
     ac('mdPul', function (v) { st.b.pul = +v; refrescarNuevo(); });
     ac('mdDep', function (v, el) { Md.depFijar(st.b, +el.getAttribute('data-k'), +v); refrescarNuevo(); });
