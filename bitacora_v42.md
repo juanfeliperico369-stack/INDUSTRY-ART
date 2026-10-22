@@ -181,6 +181,20 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
   Cada una tiene su riesgo de escándalo.
 - **Tema nuevo: «Asesino serial»** (familia Sociedad y poder), para todas las obras, también para la música.
 
+## Creador de obras universal
+- **Las mismas secciones y el mismo orden del cine para todas las obras:** La obra, Géneros, Historia, Música, Estilo, Mundo, Público, Personajes, Equipo, Forma, Producción, Presupuesto, Financiación y Proyección.
+  - Cada medio oculta lo que no tiene cabida: la música no tiene Personajes, y un libro no tiene Música.
+  - Algunas secciones cambian de nombre según el medio:
+    - en música, Historia se llama «Concepto» y Música se llama «Canciones»;
+    - Producción se llama «Grabación», «Desarrollo», «Montaje» o «Edición».
+  - Lo que no aplica se avisa; por ejemplo, las tramas en la música o los efectos especiales fuera del cine, las series y el teatro.
+- **El modo rápido tiene las mismas 12 decisiones del cine** en todos los medios, más el equipo, la financiación y la proyección.
+- Los géneros principales son los de cada medio. Los de otros medios (por ejemplo, la electrónica en una película) se eligen como subgéneros.
+- **Varios idiomas** también en música, videojuegos, teatro y libros (+3 % al costo por idioma y más países).
+- **Anuncio de la producción:** es el único marketing posible mientras se produce (2 % del costo y +5 % de expectativa al salir). El cine ya no elige la campaña al crear la obra.
+- **El plan de lanzamiento tiene dos pasos, después de producir:** primero el marketing, que trae campañas de cinco niveles para videojuegos, teatro y libros, y luego el lanzamiento y la distribución.
+- **«Asesino serial»** aparece entre los temas sugeridos de terror, thriller, crimen, misterio, rap y metal, y como argumento («Cazar a un asesino serial»).
+
 ## Guardado
 - Versión del guardado: 42, con migración desde la 41. Añade la sexta capacidad (Audacia) y los valores por defecto del avatar. Los campos nuevos de las obras son opcionales.
 - La felicitación de cumpleaños se anota en este dispositivo (`ia_cumple`) para salir una sola vez al año.
