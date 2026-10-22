@@ -233,6 +233,8 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Banda sonora en videojuegos y teatro:** en el paso Música se elige el paquete. En videojuegos hay 7: a tu medida, chiptune, banda sonora original, música adaptativa, orquestal con coro, canciones con licencia y compositor estrella; algunos llegan según el año. En teatro hay 5: a tu medida, música grabada, músicos en vivo, canciones originales y orquesta en el foso. Cada paquete cambia la calidad y el costo, y la banda sonora se puede lanzar como álbum (+3 % de alcance). La canción conocida (needle drop) queda como opción aparte.
 - **Videojuegos con 2 formatos y 2 modos:** se pueden mezclar dos formatos (por ejemplo 2D con partes en 3D) y dos modos de juego (por ejemplo un jugador y en línea). El primero manda; la mezcla suma público y algo de costo. Si uno de los modos es masivo, cobra los servidores.
 - **Época con deslizador en todos los medios:** música, videojuegos, teatro y libros eligen la época con el mismo deslizador que el cine.
+- **Idiomas en todas las obras:** música, videojuegos, teatro y libros también tienen «Según la nacionalidad del talento»: suma los idiomas del equipo, el reparto y las colaboraciones, y se actualiza al cambiar el equipo.
+- **Público objetivo:** hasta 5 en todas las obras, igual que en el cine.
 - **Videojuegos con hasta 3 tipos:** el primero manda; cada tipo de más suma 2 % de público y 4 % de costo.
 
 ## Vida, alertas y Encargos
