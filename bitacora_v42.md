@@ -213,6 +213,17 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Un solo motor de creación:** cine, TV, música, videojuegos, teatro y libros pasan por el mismo `ART.creador.ficha`: la misma lista de pasos, el mismo modo rápido de 12 decisiones y el mismo pie. Cada medio solo aporta sus bloques; los pasos que no le corresponden desaparecen (la música no tiene Personajes y llama «Grabación» a la producción).
 - **Tema «Moda»:** aparece entre los temas sugeridos de dramas, comedias, romances, musicales, biografías y de toda la música, y se encuentra en el buscador de temas.
 
+## Ficción y Realidad
+- **Tipo de ficción, siempre a la vista:** ahora va justo debajo de Naturaleza, en el modo detallado y en el rápido, en cine, TV, videojuegos, teatro y libros.
+- **Modo Realidad de verdad:** al elegir Realidad solo quedan los conceptos que pueden pasar de verdad. Se bloquean los géneros de imaginación y se quitan los subgéneros, temas, problemáticas, premisas, giros y subarcos de fantasía, criaturas o futuro. También desaparecen las épocas futuras y los mundos inventados. Si ya los tenías elegidos, se quitan solos.
+- **Tipo de relato real:** en Realidad, el Tipo de ficción se cambia por 12 tipos de relato real (basada en hechos reales, biografía, documental, docudrama, crimen real, memorias y más).
+- Videojuegos, teatro y libros también tienen Naturaleza.
+
+## Vida, alertas y Encargos
+- El premio a la trayectoria solo llega con 10 obras terminadas y 15 años desde tu primer estreno, y como mucho una vez cada 10 años. Los eventos de vida salen la mitad de seguido y no se repiten en dos años.
+- Alertas nuevas: una pastilla pequeña que dura 1,8 s (2,6 s si es un error). Las repetidas se juntan («×3»), se ven 2 como máximo y se cierran al tocarlas.
+- Encargos: los selectores y los dos botones quedan en una cuadrícula ordenada, sin espacios raros.
+
 ## Inversiones por porcentaje
 - En Negocio › Inversiones eliges cuánto invertir en cada compra: un monto fijo o el 1, 5, 10, 25, 50 o 100 % de tu caja libre.
 - Al vender puedes sacar el 25 %, la mitad o todo.
