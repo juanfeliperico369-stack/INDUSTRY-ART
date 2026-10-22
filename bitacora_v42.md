@@ -228,6 +228,9 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Portadas:** la imagen elegida (ciudad de neón, guitarra en llamas, faro bajo la lluvia y las otras 16) ahora se dibuja de verdad, a doble resolución, y el título sale en el color elegido.
 - **Anuncio de la producción:** el interruptor queda ordenado, y las casillas largas y las tarjetas impares ya no dejan huecos.
 
+- **Botones de tiempo a la vista:** bajo la fecha y el dinero hay una fila con «+1 semana», «+1 mes», «Evento» y «Auto». Un toque elige el ritmo y avanza; en Auto el botón pasa a «Pausa». En pantallas anchas los botones van en la misma barra.
+- **Videojuegos con hasta 3 tipos:** el primero manda; cada tipo de más suma 2 % de público y 4 % de costo.
+
 ## Vida, alertas y Encargos
 - El premio a la trayectoria solo llega con 10 obras terminadas y 15 años desde tu primer estreno, y como mucho una vez cada 10 años. Los eventos de vida salen la mitad de seguido y no se repiten en dos años.
 - Alertas nuevas: una pastilla pequeña que dura 1,8 s (2,6 s si es un error). Las repetidas se juntan («×3»), se ven 2 como máximo y se cierran al tocarlas.
