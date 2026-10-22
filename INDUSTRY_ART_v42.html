@@ -14327,7 +14327,7 @@ ART.medios = (function () {
                 r.crit += 1;
             r.notas.push([1, b.med === 'musica' ? 'Las letras cuentan algo claro' : 'Un conflicto claro mueve la historia']);
         }
-        const ffi = b.fic && NARRATIVOS.indexOf(b.med) >= 0 ? X.familiasFiccion.filter(function (f) { return f.items.indexOf(b.fic) >= 0; })[0] : null;
+        const ffi = b.fic && (NARRATIVOS.indexOf(b.med) >= 0 || b.med === 'musica') ? X.familiasFiccion.filter(function (f) { return f.items.indexOf(b.fic) >= 0; })[0] : null;
         if (ffi && (ffi.crit || ffi.pub)) {
             r.crit += ffi.crit * 0.5;
             r.pub += ffi.pub * 0.5;
@@ -31999,7 +31999,7 @@ ART.mediosUI = (function () {
     }
     function bloqueSubMd(b) { return '<h4>Subgéneros (' + (b.sub || []).length + '/' + ART.ideas.LIMITES.sub + ', opcional)</h4><p class="chico">' + esc((b.sub || []).join(' · ') || '—') + '</p>' + btn('Elegir subgéneros', 'mdPk', 'sub') + '<p class="tenue chico">Aquí entran también los géneros de otros medios.</p>'; }
     function bloqueNatMd(b) {
-        if (Md.NARRATIVOS.indexOf(b.med) < 0)
+        if (Md.NARRATIVOS.indexOf(b.med) < 0 && b.med !== 'musica')
             return '';
         return '<h4>Naturaleza</h4><div class="chips">' + chipMd('Ficción', 'mdNat', 'f', b.nat !== 'r') + chipMd('Realidad', 'mdNat', 'r', b.nat === 'r') + '</div>' + ART.creacion.bloqueFiccion(b, chipMd, 'md', false);
     }

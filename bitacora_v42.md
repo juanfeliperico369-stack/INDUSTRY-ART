@@ -217,7 +217,7 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Tipo de ficción, siempre a la vista:** ahora va justo debajo de Naturaleza, en el modo detallado y en el rápido, en cine, TV, videojuegos, teatro y libros.
 - **Modo Realidad de verdad:** al elegir Realidad solo quedan los conceptos que pueden pasar de verdad. Se bloquean los géneros de imaginación y se quitan los subgéneros, temas, problemáticas, premisas, giros y subarcos de fantasía, criaturas o futuro. También desaparecen las épocas futuras y los mundos inventados. Si ya los tenías elegidos, se quitan solos.
 - **Tipo de relato real:** en Realidad, el Tipo de ficción se cambia por 12 tipos de relato real (basada en hechos reales, biografía, documental, docudrama, crimen real, memorias y más).
-- Videojuegos, teatro y libros también tienen Naturaleza.
+- Música, videojuegos, teatro y libros también tienen Naturaleza y Tipo de ficción (en música está en el paso Concepto y suma a la crítica o al público como en los demás medios).
 
 ## Vida, alertas y Encargos
 - El premio a la trayectoria solo llega con 10 obras terminadas y 15 años desde tu primer estreno, y como mucho una vez cada 10 años. Los eventos de vida salen la mitad de seguido y no se repiten en dos años.
