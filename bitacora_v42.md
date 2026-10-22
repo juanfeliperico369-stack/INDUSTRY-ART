@@ -235,6 +235,9 @@ Fecha: 21 de octubre de 2026 · base: la V41 (1.0)
 - **Época con deslizador en todos los medios:** música, videojuegos, teatro y libros eligen la época con el mismo deslizador que el cine.
 - **Idiomas en todas las obras:** música, videojuegos, teatro y libros también tienen «Según la nacionalidad del talento»: suma los idiomas del equipo, el reparto y las colaboraciones, y se actualiza al cambiar el equipo.
 - **Público objetivo:** hasta 5 en todas las obras, igual que en el cine.
+- **Duración ligada al tamaño (videojuegos, teatro y libros):** un deslizador con las clases del documento. Videojuegos: Indie 5–59 min, B, B+, A, AA, AAA y AAAA hasta 10.000 h. Teatro: micro teatro, un acto, estándar y épica (10 a 300 min). Libros: microrrelato, cuento o ensayo, relato largo, libro, novela corta, novela y épico u ómnibus (1 a 3.000 páginas). La duración decide el tamaño, y más larga de lo normal cuesta y tarda más.
+- **Plataformas sin límite:** cada plataforma de más cuesta un 6 % de adaptación (y un 5 % más si no tienes su kit).
+- **Motor desde el creador:** en Desarrollo puedes crear un motor nuevo (eliges las funciones y queda elegido para la obra) o mejorar el tuyo con las funciones nuevas de la época, pagando su costo.
 - **Videojuegos con hasta 3 tipos:** el primero manda; cada tipo de más suma 2 % de público y 4 % de costo.
 
 ## Vida, alertas y Encargos
