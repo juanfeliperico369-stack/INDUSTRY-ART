@@ -13847,7 +13847,7 @@ ART.medios = (function () {
         }
         k *= estiloMedio(b.cfg.pst).k;
         const pu = pulido(b);
-        k *= pu.k * mundoBono(b).k * duracionK(b) * bsoK(b) * durK(b) * (b.med === 'juegos' && b.tipos && b.tipos.length > 1 ? 1 + 0.04 * (b.tipos.length - 1) : 1);
+        k *= pu.k * mundoBono(b).k * duracionK(b) * bsoK(b) * durK(b) * (b.tipos && b.tipos.length > 1 ? 1 + 0.04 * (b.tipos.length - 1) : 1);
         if (b.med === 'musica' && cancionesDe(b).length)
             sem = Math.round(sem * N.limitar(Math.pow(duracionK(b), 0.7), 0.8, 1.5));
         if (DUR_MED[b.med])
@@ -13949,7 +13949,7 @@ ART.medios = (function () {
             s0 += w * D.factorClas(c0, g);
         }
         const rtA = NARRATIVOS.indexOf(b.med) >= 0 ? X.ritmo[b.rit === undefined ? 2 : b.rit] || X.ritmo[2] : null;
-        return N.limitar(s / Math.max(1e-9, s0), 0.2, 1.3) * (rtA ? (1 - ((b.cx === undefined ? 2 : b.cx) - 2) * 0.03) * (1 + rtA.pub * 0.01) : 1) * (b.cfg && b.cfg.bsoAlbum ? 1.03 : 1) * (bsoDe(b) && bsoDe(b).pub ? 1.02 : 1) * (b.med === 'juegos' && b.tipos && b.tipos.length > 1 ? 1 + 0.02 * (b.tipos.length - 1) : 1);
+        return N.limitar(s / Math.max(1e-9, s0), 0.2, 1.3) * (rtA ? (1 - ((b.cx === undefined ? 2 : b.cx) - 2) * 0.03) * (1 + rtA.pub * 0.01) : 1) * (b.cfg && b.cfg.bsoAlbum ? 1.03 : 1) * (bsoDe(b) && bsoDe(b).pub ? 1.02 : 1) * (b.tipos && b.tipos.length > 1 ? 1 + 0.02 * (b.tipos.length - 1) : 1);
     }
     function ajusteContenido(b) {
         const r = { crit: 0, pub: 0, notas: [] }, c = contenido(b), base = contenidoBase(b), nom = function (x) { return x.nombre.split(' ')[0].toLowerCase(); };
@@ -28881,9 +28881,10 @@ ART.creacion = (function () {
     });
     function bloqueObra(b) {
         const a = anio();
-        let h = chipsMedio(b.tv ? 'tv' : 'cine', 'cr') + '<h4>' + (b.tv ? 'Tipo de serie' : 'Tipo de película') + '</h4><div class="chips">' + X.tiposCine.map(function (x) {
-            return chip(x.nombre + (x.desde > a ? ' · ' + x.desde : ''), 'crTipo', x.id, b.tipo === x.id, x.desde > a);
-        }).join('') + '</div><p class="nota">' + esc(X.tipoCine(b.tipo).efecto) + '.</p>';
+        let h = chipsMedio(b.tv ? 'tv' : 'cine', 'cr') + '<h4>' + (b.tv ? 'Tipo de serie' : 'Tipo de película') + ' (hasta 3)</h4><div class="chips">' + X.tiposCine.map(function (x) {
+            const tps = b.tipos || [b.tipo], on = tps.indexOf(x.id) >= 0;
+            return chip(x.nombre + (on && tps.length > 1 && tps[0] === x.id ? ' ★' : '') + (x.desde > a ? ' · ' + x.desde : ''), 'crTipo', x.id, on, x.desde > a || (!on && tps.length >= 3));
+        }).join('') + '</div><p class="nota">' + esc(X.tipoCine(b.tipo).efecto) + '.' + ((b.tipos || []).length > 1 ? ' Mezcla: ' + esc(b.tipos.map(function (id) { return X.tipoCine(id).nombre; }).join(' + ')) + ' (hasta 3; el primero manda).' : ' Puedes sumar hasta 2 tipos más; el primero manda.') + '</p>';
         h += '<p class="nota">Clase ' + I.clase(b) + ' · obra ' + I.perfil(b) + (b.mat ? ' · basada en «' + esc(X.material(b.mat).tit) + '»' : '') + (b.guionC ? ' · guion comprado (' + b.guionC + ')' : '') + (b.ideaIA ? ' · idea de la IA' : '') + '</p>';
         return h;
     }
@@ -29882,8 +29883,14 @@ ART.creacion = (function () {
         const b = cr.b;
         if (!b)
             return;
-        b.tipo = v;
-        if (X.tipoCine(v).realidad)
+        const L = (b.tipos || [b.tipo]).slice(), i = L.indexOf(v);
+        if (i >= 0 && L.length > 1)
+            L.splice(i, 1);
+        else if (i < 0 && L.length < 3)
+            L.push(v);
+        b.tipos = L;
+        b.tipo = L[0];
+        if (X.tipoCine(b.tipo).realidad)
             b.nat = 'r';
         ajustar(b);
         refrescar();
@@ -32515,10 +32522,10 @@ ART.mediosUI = (function () {
         let h = ART.creacion.chipsMedio(b.med, 'md');
         if (pd.tipo || pd.gen)
             h += '<p class="nota oro">Nada viene marcado: elige ' + (pd.tipo && pd.gen ? 'el tipo y los géneros' : pd.tipo ? 'el tipo' : 'los géneros') + ' de tu obra.</p>';
-        if (b.med === 'juegos') {
+        if (b.med) {
             const tps = pd.tipo ? [] : (b.tipos || (b.tipo ? [b.tipo] : []));
             h += '<h4>Tipo (hasta 3; el primero manda)</h4><div class="chips">' + Md.tipos(b.med).map(function (x) { const on = tps.indexOf(x.id) >= 0; return chipMd(x.nombre + (on && tps[0] === x.id ? ' ★' : ''), 'mdTipo', x.id, on, !on && tps.length >= 3); }).join('') + '</div>' +
-                (tps.length > 1 ? '<p class="nota">Mezcla de tipos: ' + esc(tps.map(function (id) { return (Md.tipos(b.med).filter(function (x) { return x.id === id; })[0] || { nombre: id }).nombre; }).join(' + ')) + '. Cada tipo de más suma variedad al público (+2 % cada uno) y un poco de costo (+4 %).</p>' : '');
+                (tps.length > 1 ? '<p class="nota">Mezcla de tipos: ' + esc(tps.map(function (id) { return (Md.tipos(b.med).filter(function (x) { return x.id === id; })[0] || { nombre: id }).nombre; }).join(' + ')) + '. El primero manda' + (b.med === 'musica' ? ' (decide cuántas canciones lleva)' : '') + '; cada tipo de más suma variedad al público (+2 % cada uno) y un poco de costo (+4 %).</p>' : '');
         }
         else
             h += '<h4>Tipo</h4><div class="chips">' + Md.tipos(b.med).map(function (x) { return chipMd(x.nombre, 'mdTipo', x.id, !pd.tipo && b.tipo === x.id); }).join('') + '</div>';
@@ -33221,7 +33228,7 @@ ART.mediosUI = (function () {
         st.b.sin = Md.sinopsis(st.b); });
     ac('mdOtroTit', function () { st.b.tit = ART.creacion.conAzarUI(function () { return ART.obras.tituloNuevo(['Drama']); }); refrescarNuevo(); });
     ac('mdTipo', function (v) { if (!Md.tipos(st.b.med).some(function (x) { return x.id === v; }))
-        return; if (st.b.med === 'juegos') {
+        return; const tipo0 = st.b.tipo; {
         const pend = st.b.pend && st.b.pend.tipo, L = pend ? [] : (st.b.tipos || (st.b.tipo ? [st.b.tipo] : [])).slice(), i = L.indexOf(v);
         if (i >= 0 && L.length > 1)
             L.splice(i, 1);
@@ -33229,7 +33236,7 @@ ART.mediosUI = (function () {
             L.push(v);
         st.b.tipos = L;
         v = L[0] || v;
-    } st.b.tipo = v; if (st.b.med === 'musica')
+    } st.b.tipo = v; if (st.b.med === 'musica' && v !== tipo0)
         delete st.b.can; if (st.b.pend)
         delete st.b.pend.tipo; if (!st.b.eq.length) {
         st.b.eq = Md.equipoRecomendado(st.b.med, st.b.esc, st.b);
